@@ -7,7 +7,7 @@
   },
   "item": [
     {
-      "name": "Auth — Client",
+      "name": "Auth \u2014 Client",
       "description": "Full lifecycle for CLIENT account: Registration, Email Verification, Login, Me inspection, Token Refresh, Password Mutation, and Logout.",
       "item": [
         {
@@ -257,7 +257,7 @@
           "response": []
         },
         {
-          "name": "PATCH Me — Omitted Fields Untouched (Client)",
+          "name": "PATCH Me \u2014 Omitted Fields Untouched (Client)",
           "event": [
             {
               "listen": "prerequest",
@@ -337,7 +337,7 @@
           "response": []
         },
         {
-          "name": "PATCH Me — Explicit Null Clears Field (Client)",
+          "name": "PATCH Me \u2014 Explicit Null Clears Field (Client)",
           "event": [
             {
               "listen": "test",
@@ -397,7 +397,7 @@
           "response": []
         },
         {
-          "name": "PATCH Me — Unpatchable Fields Silently Ignored (Client)",
+          "name": "PATCH Me \u2014 Unpatchable Fields Silently Ignored (Client)",
           "event": [
             {
               "listen": "test",
@@ -513,7 +513,7 @@
       ]
     },
     {
-      "name": "Auth — Artisan",
+      "name": "Auth \u2014 Artisan",
       "description": "Full onboarding lifecycle for ARTISAN account: Registration, Verification, Login, Complete Profile with craft specialties, and Token Refresh.",
       "item": [
         {
@@ -743,7 +743,7 @@
           "response": []
         },
         {
-          "name": "Complete Profile — Empty Body Allowed (200 OK)",
+          "name": "Complete Profile \u2014 Empty Body Allowed (200 OK)",
           "event": [
             {
               "listen": "test",
@@ -800,7 +800,7 @@
           "response": []
         },
         {
-          "name": "Complete Profile — Repeated Invocation (Additive & Idempotent)",
+          "name": "Complete Profile \u2014 Repeated Invocation (Additive & Idempotent)",
           "event": [
             {
               "listen": "test",
@@ -856,7 +856,7 @@
           "response": []
         },
         {
-          "name": "Complete Profile — Malformed Payload (400)",
+          "name": "Complete Profile \u2014 Malformed Payload (400)",
           "event": [
             {
               "listen": "test",
@@ -1097,7 +1097,7 @@
       ]
     },
     {
-      "name": "Auth — Admin",
+      "name": "Auth \u2014 Admin",
       "description": "Administrator authentication using config-driven seed credentials (seeded via DataSeeder and bound to APP_ADMIN_DEFAULT_EMAIL / APP_ADMIN_DEFAULT_PASSWORD), followed by initial artisan account validation.",
       "item": [
         {
@@ -1210,11 +1210,11 @@
       ]
     },
     {
-      "name": "Artisan — Profile View",
+      "name": "Artisan \u2014 Profile View",
       "description": "Public and authenticated profile inspection for Artisans, with premium-gated contact privacy.",
       "item": [
         {
-          "name": "Get Artisan Profile — Non-Premium Client View (Locked)",
+          "name": "Get Artisan Profile \u2014 Non-Premium Client View (Locked)",
           "event": [
             {
               "listen": "test",
@@ -1272,7 +1272,7 @@
           "response": []
         },
         {
-          "name": "Get Artisan Profile — Self / Unlocked View",
+          "name": "Get Artisan Profile \u2014 Self / Unlocked View",
           "event": [
             {
               "listen": "test",
@@ -1323,7 +1323,7 @@
           "response": []
         },
         {
-          "name": "Get Artisan Profile — Non-Existent ID (404)",
+          "name": "Get Artisan Profile \u2014 Non-Existent ID (404)",
           "event": [
             {
               "listen": "test",
@@ -1368,7 +1368,7 @@
           "response": []
         },
         {
-          "name": "Get Artisan Profile — Non-Premium Client View (Deduplicated Reload)",
+          "name": "Get Artisan Profile \u2014 Non-Premium Client View (Deduplicated Reload)",
           "event": [
             {
               "listen": "test",
@@ -1413,10 +1413,10 @@
       ]
     },
     {
-      "name": "Auth — Security & Lifecycle",
+      "name": "Auth \u2014 Security & Lifecycle",
       "item": [
         {
-          "name": "Lockout Setup — Register Throwaway User",
+          "name": "Lockout Setup \u2014 Register Throwaway User",
           "event": [
             {
               "listen": "prerequest",
@@ -1473,7 +1473,7 @@
           "response": []
         },
         {
-          "name": "Login — Invalid Password (401)",
+          "name": "Login \u2014 Invalid Password (401)",
           "event": [
             {
               "listen": "test",
@@ -1529,7 +1529,7 @@
           "response": []
         },
         {
-          "name": "Lockout — Failed Attempt 2 (401)",
+          "name": "Lockout \u2014 Failed Attempt 2 (401)",
           "event": [
             {
               "listen": "test",
@@ -1575,7 +1575,7 @@
           "response": []
         },
         {
-          "name": "Lockout — Failed Attempt 3 (401)",
+          "name": "Lockout \u2014 Failed Attempt 3 (401)",
           "event": [
             {
               "listen": "test",
@@ -1621,7 +1621,7 @@
           "response": []
         },
         {
-          "name": "Lockout — Failed Attempt 4 (401)",
+          "name": "Lockout \u2014 Failed Attempt 4 (401)",
           "event": [
             {
               "listen": "test",
@@ -1667,7 +1667,7 @@
           "response": []
         },
         {
-          "name": "Lockout — Failed Attempt 5 Triggers Account Lockout (401)",
+          "name": "Lockout \u2014 Failed Attempt 5 Triggers Account Lockout (401)",
           "event": [
             {
               "listen": "test",
@@ -1718,7 +1718,7 @@
           "response": []
         },
         {
-          "name": "Lockout — 6th Attempt with CORRECT Password Fails While Locked (403)",
+          "name": "Lockout \u2014 6th Attempt with CORRECT Password Fails While Locked (403)",
           "event": [
             {
               "listen": "test",
@@ -1774,7 +1774,7 @@
           "response": []
         },
         {
-          "name": "Refresh Setup — Register Rotation Test User",
+          "name": "Refresh Setup \u2014 Register Rotation Test User",
           "event": [
             {
               "listen": "prerequest",
@@ -1830,7 +1830,7 @@
           "response": []
         },
         {
-          "name": "Refresh Setup — Initial Login for Tokens",
+          "name": "Refresh Setup \u2014 Initial Login for Tokens",
           "event": [
             {
               "listen": "test",
@@ -1878,7 +1878,7 @@
           "response": []
         },
         {
-          "name": "Refresh — Rotate Refresh Token (Happy Path)",
+          "name": "Refresh \u2014 Rotate Refresh Token (Happy Path)",
           "event": [
             {
               "listen": "test",
@@ -1931,7 +1931,7 @@
           "response": []
         },
         {
-          "name": "Refresh — Attempt Reuse of Rotated Refresh Token (401)",
+          "name": "Refresh \u2014 Attempt Reuse of Rotated Refresh Token (401)",
           "event": [
             {
               "listen": "test",
@@ -1986,7 +1986,7 @@
           "response": []
         },
         {
-          "name": "Refresh — Tampered / Garbage Refresh Token (401)",
+          "name": "Refresh \u2014 Tampered / Garbage Refresh Token (401)",
           "event": [
             {
               "listen": "test",
@@ -2038,7 +2038,7 @@
           "response": []
         },
         {
-          "name": "Logout Setup — Register Throwaway User",
+          "name": "Logout Setup \u2014 Register Throwaway User",
           "event": [
             {
               "listen": "prerequest",
@@ -2094,7 +2094,7 @@
           "response": []
         },
         {
-          "name": "Logout Setup — Login Throwaway User",
+          "name": "Logout Setup \u2014 Login Throwaway User",
           "event": [
             {
               "listen": "test",
@@ -2143,7 +2143,7 @@
           "response": []
         },
         {
-          "name": "Logout — Revoke Session Tokens (POST /logout)",
+          "name": "Logout \u2014 Revoke Session Tokens (POST /logout)",
           "event": [
             {
               "listen": "test",
@@ -2199,7 +2199,7 @@
           "response": []
         },
         {
-          "name": "Logout — Attempt Refresh with Revoked Token Proves Invalidation (401)",
+          "name": "Logout \u2014 Attempt Refresh with Revoked Token Proves Invalidation (401)",
           "event": [
             {
               "listen": "test",
@@ -2251,7 +2251,7 @@
           "response": []
         },
         {
-          "name": "Change Password Setup — Register Dedicated Account",
+          "name": "Change Password Setup \u2014 Register Dedicated Account",
           "event": [
             {
               "listen": "prerequest",
@@ -2309,7 +2309,7 @@
           "response": []
         },
         {
-          "name": "Change Password Setup — Login Dedicated Account",
+          "name": "Change Password Setup \u2014 Login Dedicated Account",
           "event": [
             {
               "listen": "test",
@@ -2358,7 +2358,7 @@
           "response": []
         },
         {
-          "name": "Change Password — Wrong Current Password (401)",
+          "name": "Change Password \u2014 Wrong Current Password (401)",
           "event": [
             {
               "listen": "test",
@@ -2416,7 +2416,7 @@
           "response": []
         },
         {
-          "name": "Change Password — New Password Same as Old Password (422)",
+          "name": "Change Password \u2014 New Password Same as Old Password (422)",
           "event": [
             {
               "listen": "test",
@@ -2475,7 +2475,7 @@
           "response": []
         },
         {
-          "name": "Change Password — Successful Password Change",
+          "name": "Change Password \u2014 Successful Password Change",
           "event": [
             {
               "listen": "test",
@@ -2531,7 +2531,7 @@
           "response": []
         },
         {
-          "name": "Change Password — Prove Old Password No Longer Logs In (401)",
+          "name": "Change Password \u2014 Prove Old Password No Longer Logs In (401)",
           "event": [
             {
               "listen": "test",
@@ -2582,7 +2582,7 @@
           "response": []
         },
         {
-          "name": "Change Password — Prove New Password Successfully Logs In (200)",
+          "name": "Change Password \u2014 Prove New Password Successfully Logs In (200)",
           "event": [
             {
               "listen": "test",
@@ -2633,7 +2633,7 @@
           "response": []
         },
         {
-          "name": "Change Password — Prove Pre-Change Refresh Token Invalidated (401)",
+          "name": "Change Password \u2014 Prove Pre-Change Refresh Token Invalidated (401)",
           "event": [
             {
               "listen": "test",
@@ -2687,7 +2687,7 @@
       ]
     },
     {
-      "name": "Auth — Password Reset & Misc",
+      "name": "Auth \u2014 Password Reset & Misc",
       "description": "Public recovery endpoints: Forgot Password initiation, Password Reset with code, and Resend Verification OTP.",
       "item": [
         {
@@ -2842,7 +2842,7 @@
       "name": "Email-Dependent Flows (Manual)",
       "item": [
         {
-          "name": "01. Client — Register Throwaway Account",
+          "name": "01. Client \u2014 Register Throwaway Account",
           "event": [
             {
               "listen": "prerequest",
@@ -2909,7 +2909,7 @@
           "response": []
         },
         {
-          "name": "02. Client — Verify Email with Wrong Code (400)",
+          "name": "02. Client \u2014 Verify Email with Wrong Code (400)",
           "event": [
             {
               "listen": "test",
@@ -2961,7 +2961,7 @@
           "response": []
         },
         {
-          "name": "03. Client — Verify Email (Manual Checkpoint)",
+          "name": "03. Client \u2014 Verify Email (Manual Checkpoint)",
           "event": [
             {
               "listen": "prerequest",
@@ -3027,7 +3027,7 @@
           "response": []
         },
         {
-          "name": "04. Client — Login to Inspect Me",
+          "name": "04. Client \u2014 Login to Inspect Me",
           "event": [
             {
               "listen": "test",
@@ -3080,7 +3080,7 @@
           "response": []
         },
         {
-          "name": "05. Client — Get Me Confirms Verified & ACTIVE",
+          "name": "05. Client \u2014 Get Me Confirms Verified & ACTIVE",
           "event": [
             {
               "listen": "test",
@@ -3128,7 +3128,7 @@
           "response": []
         },
         {
-          "name": "06. Artisan — Register Throwaway Account",
+          "name": "06. Artisan \u2014 Register Throwaway Account",
           "event": [
             {
               "listen": "prerequest",
@@ -3195,7 +3195,7 @@
           "response": []
         },
         {
-          "name": "07. Artisan — Verify Email with Wrong Code (400)",
+          "name": "07. Artisan \u2014 Verify Email with Wrong Code (400)",
           "event": [
             {
               "listen": "test",
@@ -3247,7 +3247,7 @@
           "response": []
         },
         {
-          "name": "08. Artisan — Verify Email (Manual Checkpoint)",
+          "name": "08. Artisan \u2014 Verify Email (Manual Checkpoint)",
           "event": [
             {
               "listen": "prerequest",
@@ -3313,7 +3313,7 @@
           "response": []
         },
         {
-          "name": "09. Artisan — Login to Inspect Me",
+          "name": "09. Artisan \u2014 Login to Inspect Me",
           "event": [
             {
               "listen": "test",
@@ -3361,7 +3361,7 @@
           "response": []
         },
         {
-          "name": "10. Artisan — Get Me Confirms Verified & PENDING",
+          "name": "10. Artisan \u2014 Get Me Confirms Verified & PENDING",
           "event": [
             {
               "listen": "test",
@@ -3409,7 +3409,7 @@
           "response": []
         },
         {
-          "name": "11. Lockout — Register Dedicated User",
+          "name": "11. Lockout \u2014 Register Dedicated User",
           "event": [
             {
               "listen": "prerequest",
@@ -3465,7 +3465,7 @@
           "response": []
         },
         {
-          "name": "12. Lockout — Attempt 1 with Wrong Code (400 Invalid)",
+          "name": "12. Lockout \u2014 Attempt 1 with Wrong Code (400 Invalid)",
           "event": [
             {
               "listen": "test",
@@ -3517,7 +3517,7 @@
           "response": []
         },
         {
-          "name": "13. Lockout — Attempt 2 with Wrong Code (400 Invalid)",
+          "name": "13. Lockout \u2014 Attempt 2 with Wrong Code (400 Invalid)",
           "event": [
             {
               "listen": "test",
@@ -3569,7 +3569,7 @@
           "response": []
         },
         {
-          "name": "14. Lockout — Attempt 3 with Wrong Code (400 Invalid)",
+          "name": "14. Lockout \u2014 Attempt 3 with Wrong Code (400 Invalid)",
           "event": [
             {
               "listen": "test",
@@ -3621,7 +3621,7 @@
           "response": []
         },
         {
-          "name": "15. Lockout — Attempt 4 with Wrong Code (400 Invalid)",
+          "name": "15. Lockout \u2014 Attempt 4 with Wrong Code (400 Invalid)",
           "event": [
             {
               "listen": "test",
@@ -3673,7 +3673,7 @@
           "response": []
         },
         {
-          "name": "16. Lockout — Attempt 5 Triggers Lockout (400 Max Attempts)",
+          "name": "16. Lockout \u2014 Attempt 5 Triggers Lockout (400 Max Attempts)",
           "event": [
             {
               "listen": "test",
@@ -3725,7 +3725,7 @@
           "response": []
         },
         {
-          "name": "17. Lockout — Attempt 6 Proves Token Remains Locked (400 Max Attempts)",
+          "name": "17. Lockout \u2014 Attempt 6 Proves Token Remains Locked (400 Max Attempts)",
           "event": [
             {
               "listen": "test",
@@ -3777,7 +3777,7 @@
           "response": []
         },
         {
-          "name": "18. Resend — Request New Code on Locked Account",
+          "name": "18. Resend \u2014 Request New Code on Locked Account",
           "event": [
             {
               "listen": "test",
@@ -3829,7 +3829,7 @@
           "response": []
         },
         {
-          "name": "19. Resend — Submit Previously Locked Code Proves Invalidation (400 Invalid)",
+          "name": "19. Resend \u2014 Submit Previously Locked Code Proves Invalidation (400 Invalid)",
           "event": [
             {
               "listen": "test",
@@ -3881,7 +3881,7 @@
           "response": []
         },
         {
-          "name": "20. Resend — Verify with New Code (Manual Checkpoint)",
+          "name": "20. Resend \u2014 Verify with New Code (Manual Checkpoint)",
           "event": [
             {
               "listen": "prerequest",
@@ -3947,7 +3947,7 @@
           "response": []
         },
         {
-          "name": "21. Resend — Enumeration Safety for Non-Existent Email",
+          "name": "21. Resend \u2014 Enumeration Safety for Non-Existent Email",
           "event": [
             {
               "listen": "test",
@@ -3999,7 +3999,7 @@
           "response": []
         },
         {
-          "name": "22. Resend — Enumeration Safety for Already-Verified Email",
+          "name": "22. Resend \u2014 Enumeration Safety for Already-Verified Email",
           "event": [
             {
               "listen": "test",
@@ -4051,7 +4051,7 @@
           "response": []
         },
         {
-          "name": "23. Password Reset — Capture Active Refresh Token Pre-Reset",
+          "name": "23. Password Reset \u2014 Capture Active Refresh Token Pre-Reset",
           "event": [
             {
               "listen": "test",
@@ -4100,7 +4100,7 @@
           "response": []
         },
         {
-          "name": "24. Password Reset — Request Reset Code (Forgot Password)",
+          "name": "24. Password Reset \u2014 Request Reset Code (Forgot Password)",
           "event": [
             {
               "listen": "test",
@@ -4152,7 +4152,7 @@
           "response": []
         },
         {
-          "name": "25. Password Reset — Enumeration Safety for Non-Existent Email",
+          "name": "25. Password Reset \u2014 Enumeration Safety for Non-Existent Email",
           "event": [
             {
               "listen": "test",
@@ -4204,7 +4204,7 @@
           "response": []
         },
         {
-          "name": "26. Password Reset — Submit Wrong Code (400 Invalid)",
+          "name": "26. Password Reset \u2014 Submit Wrong Code (400 Invalid)",
           "event": [
             {
               "listen": "prerequest",
@@ -4265,7 +4265,7 @@
           "response": []
         },
         {
-          "name": "27. Password Reset — Reset with Valid Code (Manual Checkpoint)",
+          "name": "27. Password Reset \u2014 Reset with Valid Code (Manual Checkpoint)",
           "event": [
             {
               "listen": "prerequest",
@@ -4331,7 +4331,7 @@
           "response": []
         },
         {
-          "name": "28. Password Reset — Prove Pre-Reset Refresh Token Revoked (401)",
+          "name": "28. Password Reset \u2014 Prove Pre-Reset Refresh Token Revoked (401)",
           "event": [
             {
               "listen": "test",
@@ -4386,7 +4386,7 @@
           "response": []
         },
         {
-          "name": "29. Password Reset — Login with Old Password Fails (401)",
+          "name": "29. Password Reset \u2014 Login with Old Password Fails (401)",
           "event": [
             {
               "listen": "test",
@@ -4438,7 +4438,7 @@
           "response": []
         },
         {
-          "name": "30. Password Reset — Login with New Password Succeeds (200 OK)",
+          "name": "30. Password Reset \u2014 Login with New Password Succeeds (200 OK)",
           "event": [
             {
               "listen": "test",
@@ -4744,7 +4744,7 @@
       "description": "Batch 4 deep state validation: end-to-end multi-notification lifecycle chaining (ACCOUNT_VALIDATED, FORMATEUR_GRANTED, FORMATEUR_REVOKED), pagination with boundary metadata, newest-first ordering proof, unread-count decrement without prior mark-read on soft-delete, bulk mark-all-read scope, zero floor stability, and cross-user ownership isolation.",
       "item": [
         {
-          "name": "00a. Setup — Authenticate Admin",
+          "name": "00a. Setup \u2014 Authenticate Admin",
           "event": [
             {
               "listen": "test",
@@ -4798,7 +4798,7 @@
           "response": []
         },
         {
-          "name": "00b. Setup — Register Foreign Client for Cross-User Tests",
+          "name": "00b. Setup \u2014 Register Foreign Client for Cross-User Tests",
           "event": [
             {
               "listen": "prerequest",
@@ -4861,7 +4861,7 @@
           "response": []
         },
         {
-          "name": "00c. Setup — Login Foreign Client",
+          "name": "00c. Setup \u2014 Login Foreign Client",
           "event": [
             {
               "listen": "test",
@@ -4915,7 +4915,7 @@
           "response": []
         },
         {
-          "name": "01. Setup — Register Dedicated Throwaway Artisan",
+          "name": "01. Setup \u2014 Register Dedicated Throwaway Artisan",
           "event": [
             {
               "listen": "prerequest",
@@ -4981,7 +4981,7 @@
           "response": []
         },
         {
-          "name": "02. Setup — Admin Approves Artisan Account (Generates Notification 1: ACCOUNT_VALIDATED)",
+          "name": "02. Setup \u2014 Admin Approves Artisan Account (Generates Notification 1: ACCOUNT_VALIDATED)",
           "event": [
             {
               "listen": "test",
@@ -5030,7 +5030,7 @@
           "response": []
         },
         {
-          "name": "03. Setup — Throwaway Artisan Login",
+          "name": "03. Setup \u2014 Throwaway Artisan Login",
           "event": [
             {
               "listen": "test",
@@ -5084,7 +5084,7 @@
           "response": []
         },
         {
-          "name": "04. Setup — Complete Artisan Profile",
+          "name": "04. Setup \u2014 Complete Artisan Profile",
           "event": [
             {
               "listen": "test",
@@ -5139,7 +5139,7 @@
           "response": []
         },
         {
-          "name": "05. Setup — Admin Grants Formateur Status (Generates Notification 2: FORMATEUR_GRANTED)",
+          "name": "05. Setup \u2014 Admin Grants Formateur Status (Generates Notification 2: FORMATEUR_GRANTED)",
           "event": [
             {
               "listen": "test",
@@ -5198,7 +5198,7 @@
           "response": []
         },
         {
-          "name": "06. Setup — Admin Revokes Formateur Status (Generates Notification 3: FORMATEUR_REVOKED)",
+          "name": "06. Setup \u2014 Admin Revokes Formateur Status (Generates Notification 3: FORMATEUR_REVOKED)",
           "event": [
             {
               "listen": "test",
@@ -5301,7 +5301,7 @@
           "response": []
         },
         {
-          "name": "08. Pagination & Ordering — Page 0 (size=2) Newest-First Proof",
+          "name": "08. Pagination & Ordering \u2014 Page 0 (size=2) Newest-First Proof",
           "event": [
             {
               "listen": "test",
@@ -5371,7 +5371,7 @@
           "response": []
         },
         {
-          "name": "09. Pagination & Ordering — Page 1 (size=2) Oldest Item Last Page Proof",
+          "name": "09. Pagination & Ordering \u2014 Page 1 (size=2) Oldest Item Last Page Proof",
           "event": [
             {
               "listen": "test",
@@ -5525,7 +5525,7 @@
           "response": []
         },
         {
-          "name": "12. Cross-User Mark-Read Attempt (Foreign Client Token — Expected 404)",
+          "name": "12. Cross-User Mark-Read Attempt (Foreign Client Token \u2014 Expected 404)",
           "event": [
             {
               "listen": "test",
@@ -5570,7 +5570,7 @@
           "response": []
         },
         {
-          "name": "13. Cross-User Delete Attempt (Foreign Client Token — Expected 404)",
+          "name": "13. Cross-User Delete Attempt (Foreign Client Token \u2014 Expected 404)",
           "event": [
             {
               "listen": "test",
@@ -5881,7 +5881,7 @@
           "response": []
         },
         {
-          "name": "20. Verify Unread Count Stays 0 (Floor Stability Proof — No Negative Drift)",
+          "name": "20. Verify Unread Count Stays 0 (Floor Stability Proof \u2014 No Negative Drift)",
           "event": [
             {
               "listen": "test",
@@ -5966,7 +5966,7 @@
           "response": []
         },
         {
-          "name": "22. Final List Check (GET /notifications — All Soft-Deleted Excluded)",
+          "name": "22. Final List Check (GET /notifications \u2014 All Soft-Deleted Excluded)",
           "event": [
             {
               "listen": "test",
@@ -6095,7 +6095,2306 @@
       ]
     },
     {
-      "name": "Formateur — Artisan Actions",
+      "name": "Formateur Governance",
+      "item": [
+        {
+          "name": "01. Setup \u2014 Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Admin access token captured\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b5AdminAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02. Setup \u2014 Register Client User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"b5ClientEmail\", \"client.b5.\" + ts + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Client registered successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ClientId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ClientEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Client\",\n  \"lastName\": \"BatchFive\",\n  \"role\": \"CLIENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03. Setup \u2014 Login Client User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Client access token captured\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b5ClientAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ClientEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04. Role Boundary \u2014 Client Attempt Formateur Request (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden (RBAC gate)\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Response indicates forbidden access\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ClientAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"I am a client attempting to submit a formateur accreditation request.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05. Setup \u2014 Register Artisan A",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"b5ArtisanAEmail\", \"artisan.b5a.\" + ts + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan A registered with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accountStatus).to.eql(\"PENDING\");",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ArtisanAId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ArtisanAEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Karim\",\n  \"lastName\": \"Bensaid\",\n  \"role\": \"ARTISAN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06. Setup \u2014 Admin Approve Artisan A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan A approved by admin\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.message).to.eql(\"User approved successfully\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b5ArtisanAId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b5ArtisanAId}}",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07. Setup \u2014 Login Artisan A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan A access token captured\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b5ArtisanAAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ArtisanAEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08. Setup \u2014 Complete Profile Artisan A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan A profile completed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanAAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/complete-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "complete-profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Master potter specializing in traditional Algerian terracotta craft.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09. Submit Formateur Request (Artisan A)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formateur request created with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(201);",
+                  "    pm.expect(json.message).to.eql(\"Formateur request submitted successfully.\");",
+                  "    pm.expect(json.data.status).to.eql(\"PENDING\");",
+                  "    pm.expect(json.data.canReapply).to.be.true;",
+                  "    pm.expect(json.data.cooldownUntil).to.be.null;",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ArtisanARequestId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanAAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"15+ years experience teaching traditional pottery masterclasses.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Duplicate Pending Request (Expected 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Conflict error for existing pending request\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(409);",
+                  "    pm.expect(json.errorCode).to.eql(\"CONFLICT\");",
+                  "    pm.expect(json.message).to.eql(\"You already have a pending Formateur request.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanAAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Attempting duplicate pending submission.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. Admin List Pending Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Pending requests listing contains Artisan A request\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "    const targetId = pm.environment.get(\"b5ArtisanARequestId\");",
+                  "    const found = json.data.content.some(item => item.id === targetId && item.status === \"PENDING\");",
+                  "    pm.expect(found).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. Admin Reject Request with Default Cooldown",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Request rejected with default 14-day cooldown\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Formateur request rejected successfully.\");",
+                  "    pm.expect(json.data.status).to.eql(\"REJECTED\");",
+                  "    pm.expect(json.data.canReapply).to.be.true;",
+                  "    pm.expect(json.data.cooldownUntil).to.not.be.null;",
+                  "    pm.expect(json.data.adminNote).to.eql(\"Please provide master artisan accreditation certificate before reapplying.\");",
+                  "});",
+                  "if (json.data && json.data.cooldownUntil) {",
+                  "    pm.environment.set(\"b5ArtisanACooldownUntil\", json.data.cooldownUntil);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests/{{b5ArtisanARequestId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests",
+                "{{b5ArtisanARequestId}}",
+                "reject"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Please provide master artisan accreditation certificate before reapplying.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13. Attempt Resubmit During Cooldown (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Submission blocked by active cooldown period\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(403);",
+                  "    pm.expect(json.errorCode).to.eql(\"FORBIDDEN\");",
+                  "    pm.expect(json.message).to.include(\"You cannot submit a request during the cooldown period\");",
+                  "    pm.expect(json.message).to.include(\"Cooldown expires on:\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanAAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Attempting early resubmit during active cooldown.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14. Admin Lift Cooldown for Artisan A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Cooldown lifted successfully by administrator\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Cooldown configuration updated successfully.\");",
+                  "    pm.expect(json.data.canReapply).to.be.true;",
+                  "    pm.expect(json.data.cooldownUntil).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests/{{b5ArtisanAId}}/lift-cooldown",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests",
+                "{{b5ArtisanAId}}",
+                "lift-cooldown"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"canReapply\": true,\n  \"cooldownUntil\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "15. Resubmit After Cooldown Lifted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Re-submission accepted following cooldown lift\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(201);",
+                  "    pm.expect(json.data.status).to.eql(\"PENDING\");",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ArtisanARequestId2\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanAAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Reapplying with attached master accreditation certificates.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "16. Admin Approve Formateur Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formateur request successfully approved\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Formateur request approved successfully.\");",
+                  "    pm.expect(json.data.status).to.eql(\"APPROVED\");",
+                  "    pm.expect(json.data.adminNote).to.eql(\"Accreditation certificates verified. Formateur status granted.\");",
+                  "    pm.expect(json.data.decidedByAdminEmail).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests/{{b5ArtisanARequestId2}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests",
+                "{{b5ArtisanARequestId2}}",
+                "approve"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Accreditation certificates verified. Formateur status granted.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17. Resubmit While Already Approved (Expected 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Blocked with conflict because already approved\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(409);",
+                  "    pm.expect(json.errorCode).to.eql(\"CONFLICT\");",
+                  "    pm.expect(json.message).to.eql(\"You are already an approved Formateur.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanAAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Attempting submission while already approved formateur.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "18. Setup \u2014 Register Artisan B",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"b5ArtisanBEmail\", \"artisan.b5b.\" + ts + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan B registered with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ArtisanBId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ArtisanBEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Samir\",\n  \"lastName\": \"Hadji\",\n  \"role\": \"ARTISAN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "19. Setup \u2014 Admin Approve Artisan B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan B approved by admin\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b5ArtisanBId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b5ArtisanBId}}",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "20. Setup \u2014 Login Artisan B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan B access token captured\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b5ArtisanBAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ArtisanBEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "21. Setup \u2014 Complete Profile Artisan B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan B profile completed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanBAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/complete-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "complete-profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Master woodcarver creating traditional Algerian cedar woodwork.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "22. Revoke Non-Teacher (Expected 400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Revocation fails when artisan is not a formateur\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(400);",
+                  "    pm.expect(json.errorCode).to.eql(\"BAD_REQUEST\");",
+                  "    pm.expect(json.message).to.eql(\"Artisan is not currently an approved Formateur.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "artisans",
+                "{{b5ArtisanBId}}",
+                "formateur-revoke"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Attempting revocation on artisan who is not currently a formateur.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "23. B0 \u2014 Artisan B Submits Normal Request Before Direct Grant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan B pre-grant request created with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(201);",
+                  "    pm.expect(json.data.status).to.eql(\"PENDING\");",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ArtisanBRequestId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanBAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Woodcarving apprenticeship workshops for local youths.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "24. Direct Grant Formateur Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Direct grant creates APPROVED audit record and enables isTeacher\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Formateur status granted successfully.\");",
+                  "    pm.expect(json.data.status).to.eql(\"APPROVED\");",
+                  "    pm.expect(json.data.artisanId).to.eql(pm.environment.get(\"b5ArtisanBId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-grant",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "artisans",
+                "{{b5ArtisanBId}}",
+                "formateur-grant"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Recognized national master woodcarver. Direct formateur grant.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "25. Duplicate Direct Grant (Expected 400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Duplicate grant rejected because artisan is already a formateur\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(400);",
+                  "    pm.expect(json.errorCode).to.eql(\"BAD_REQUEST\");",
+                  "    pm.expect(json.message).to.eql(\"Artisan is already an approved Formateur.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-grant",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "artisans",
+                "{{b5ArtisanBId}}",
+                "formateur-grant"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Attempting duplicate direct grant on active formateur.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "26. Artisan B Submit While Granted (Expected 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan blocked from submitting while formateur status is active\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(409);",
+                  "    pm.expect(json.errorCode).to.eql(\"CONFLICT\");",
+                  "    pm.expect(json.message).to.eql(\"You are already an approved Formateur.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanBAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Submitting while already an approved formateur via direct grant.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "27. Direct Revoke Formateur Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Direct revocation succeeds and clears isTeacher\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Formateur status revoked successfully.\");",
+                  "    pm.expect(json.data).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "artisans",
+                "{{b5ArtisanBId}}",
+                "formateur-revoke"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Teaching program hiatus requested.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "28. Duplicate Direct Revoke (Expected 400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Duplicate revocation rejected\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(400);",
+                  "    pm.expect(json.errorCode).to.eql(\"BAD_REQUEST\");",
+                  "    pm.expect(json.message).to.eql(\"Artisan is not currently an approved Formateur.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "artisans",
+                "{{b5ArtisanBId}}",
+                "formateur-revoke"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Attempting duplicate revocation on already revoked artisan.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "29. B-extra1 \u2014 Confirm Orphaned Request Still Listed",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Orphaned pre-grant request still listed with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    const targetId = pm.environment.get(\"b5ArtisanBRequestId\");",
+                  "    const found = json.data.content.some(item => item.id === targetId && item.status === \"PENDING\");",
+                  "    pm.expect(found).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "30. B-extra2 \u2014 Artisan B Blocked by Orphaned Request (Expected 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan B blocked by orphaned PENDING request from before grant\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(409);",
+                  "    pm.expect(json.errorCode).to.eql(\"CONFLICT\");",
+                  "    pm.expect(json.message).to.eql(\"You already have a pending Formateur request.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanBAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Attempting fresh submission now that isTeacher is false.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "31. B-extra3 \u2014 Admin Clears Orphaned Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Orphaned request successfully approved and resolved\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Formateur request approved successfully.\");",
+                  "    pm.expect(json.data.status).to.eql(\"APPROVED\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests/{{b5ArtisanBRequestId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests",
+                "{{b5ArtisanBRequestId}}",
+                "approve"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Resolving orphaned request to restore system state.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "32. Setup \u2014 Register Artisan C",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"b5ArtisanCEmail\", \"artisan.b5c.\" + ts + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan C registered with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ArtisanCId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ArtisanCEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Yacine\",\n  \"lastName\": \"Meziane\",\n  \"role\": \"ARTISAN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "33. Setup \u2014 Admin Approve Artisan C",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan C approved by admin\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b5ArtisanCId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b5ArtisanCId}}",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "34. Setup \u2014 Login Artisan C",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan C access token captured\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b5ArtisanCAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b5ArtisanCEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "35. Setup \u2014 Complete Profile Artisan C",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan C profile completed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanCAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/complete-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "complete-profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Traditional leathercraft workshop instructor.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "36. Submit Formateur Request (Artisan C)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan C formateur request created with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(201);",
+                  "    pm.expect(json.data.status).to.eql(\"PENDING\");",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b5ArtisanCRequestId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanCAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Traditional leatherworking and tooling workshops.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "37. Admin Rejects with Permanent Block",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Request rejected with canReapply false and cooldownUntil null\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Formateur request rejected successfully.\");",
+                  "    pm.expect(json.data.status).to.eql(\"REJECTED\");",
+                  "    pm.expect(json.data.canReapply).to.be.false;",
+                  "    pm.expect(json.data.cooldownUntil).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests/{{b5ArtisanCRequestId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests",
+                "{{b5ArtisanCRequestId}}",
+                "reject"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Severe terms violation. Permanent restriction applied.\",\n  \"canReapply\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "38. Attempt Resubmit While Permanently Blocked (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Blocked with permanent restriction message\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(403);",
+                  "    pm.expect(json.errorCode).to.eql(\"FORBIDDEN\");",
+                  "    pm.expect(json.message).to.eql(\"You are permanently blocked from submitting new Formateur requests.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanCAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Attempting resubmit while permanently blocked.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "39. Admin Lifts Permanent Block",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Permanent block lifted with canReapply restored to true\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.message).to.eql(\"Cooldown configuration updated successfully.\");",
+                  "    pm.expect(json.data.canReapply).to.be.true;",
+                  "    pm.expect(json.data.cooldownUntil).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formateur-requests/{{b5ArtisanCId}}/lift-cooldown",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formateur-requests",
+                "{{b5ArtisanCId}}",
+                "lift-cooldown"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"canReapply\": true,\n  \"cooldownUntil\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "40. Resubmit After Permanent Block Lifted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan C request accepted after permanent block lifted\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(201);",
+                  "    pm.expect(json.data.status).to.eql(\"PENDING\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b5ArtisanCAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formateur-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formateur-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": \"Reapplying after administrative permanent restriction was lifted.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Exhaustive deep state testing of the Formateur governance lifecycle: accreditation submission, dual 409 conflict boundaries, cooldown enforcement, administrative cooldown overrides, direct grants, direct revocations, orphaned pending request behavior, and permanent blocks."
+    },
+    {
+      "name": "Formateur \u2014 Artisan Actions",
       "description": "Artisan self-submission of Formateur status request and duplicate prevention assertions.",
       "item": [
         {
@@ -6217,7 +8516,7 @@
       ]
     },
     {
-      "name": "Formateur — Admin Actions",
+      "name": "Formateur \u2014 Admin Actions",
       "description": "Admin review, approval, cooldown rejection & waiver, direct granting, revocation, and permanent blocking workflows using independent test artisans.",
       "item": [
         {
@@ -7530,7 +9829,7 @@
       ]
     },
     {
-      "name": "Admin — User Moderation",
+      "name": "Admin \u2014 User Moderation",
       "description": "Administrative operations for listing, filtering, bulk approving, timing out, and banning platform users.",
       "item": [
         {
@@ -8014,11 +10313,11 @@
       ]
     },
     {
-      "name": "User — Avatar Management",
+      "name": "User \u2014 Avatar Management",
       "description": "Comprehensive avatar lifecycle management endpoints for authenticated users including multipart upload, tier URL generation, quota capping, gallery listing, active switching, and safe deletion.",
       "item": [
         {
-          "name": "Setup — Authenticate Avatar User",
+          "name": "Setup \u2014 Authenticate Avatar User",
           "event": [
             {
               "listen": "test",
@@ -8071,7 +10370,7 @@
           "response": []
         },
         {
-          "name": "Setup — Clean Existing Avatars (Idempotency Guard)",
+          "name": "Setup \u2014 Clean Existing Avatars (Idempotency Guard)",
           "event": [
             {
               "listen": "test",
@@ -8122,7 +10421,7 @@
           "response": []
         },
         {
-          "name": "Upload Avatar 1 — PNG (Happy Path)",
+          "name": "Upload Avatar 1 \u2014 PNG (Happy Path)",
           "event": [
             {
               "listen": "test",
@@ -8424,7 +10723,7 @@
           "response": []
         },
         {
-          "name": "Upload Avatar 2 — JPEG",
+          "name": "Upload Avatar 2 \u2014 JPEG",
           "event": [
             {
               "listen": "test",
@@ -9034,7 +11333,7 @@
           "response": []
         },
         {
-          "name": "Upload Avatar — Invalid MIME Type (400)",
+          "name": "Upload Avatar \u2014 Invalid MIME Type (400)",
           "event": [
             {
               "listen": "test",
@@ -9088,7 +11387,7 @@
           "response": []
         },
         {
-          "name": "Upload Avatar — Disguised Text File (400 Spoofed MIME)",
+          "name": "Upload Avatar \u2014 Disguised Text File (400 Spoofed MIME)",
           "event": [
             {
               "listen": "test",
@@ -9142,7 +11441,7 @@
           "response": []
         },
         {
-          "name": "Upload Avatar — Oversized File (413 FILE_TOO_LARGE)",
+          "name": "Upload Avatar \u2014 Oversized File (413 FILE_TOO_LARGE)",
           "event": [
             {
               "listen": "test",
@@ -9196,7 +11495,7 @@
           "response": []
         },
         {
-          "name": "Quota — Upload Avatar Fill Cap (Loop to 10)",
+          "name": "Quota \u2014 Upload Avatar Fill Cap (Loop to 10)",
           "event": [
             {
               "listen": "prerequest",
@@ -9218,9 +11517,9 @@
                   "});",
                   "let count = Number(pm.environment.get(\"quotaUploadCount\"));",
                   "if (count < 10) {",
-                  "    pm.execution.setNextRequest(\"Quota — Upload Avatar Fill Cap (Loop to 10)\");",
+                  "    pm.execution.setNextRequest(\"Quota \u2014 Upload Avatar Fill Cap (Loop to 10)\");",
                   "} else {",
-                  "    pm.execution.setNextRequest(\"Quota — Exceed Cap 11th Upload (409)\");",
+                  "    pm.execution.setNextRequest(\"Quota \u2014 Exceed Cap 11th Upload (409)\");",
                   "}"
                 ]
               }
@@ -9261,7 +11560,7 @@
           "response": []
         },
         {
-          "name": "Quota — Exceed Cap 11th Upload (409)",
+          "name": "Quota \u2014 Exceed Cap 11th Upload (409)",
           "event": [
             {
               "listen": "test",
@@ -9316,7 +11615,7 @@
           "response": []
         },
         {
-          "name": "Teardown — Clean Quota Avatars",
+          "name": "Teardown \u2014 Clean Quota Avatars",
           "event": [
             {
               "listen": "test",
@@ -9368,7 +11667,7 @@
           "response": []
         },
         {
-          "name": "Rate Limit Setup — Register Burst User",
+          "name": "Rate Limit Setup \u2014 Register Burst User",
           "event": [
             {
               "listen": "prerequest",
@@ -9425,7 +11724,7 @@
           "response": []
         },
         {
-          "name": "Rate Limit Setup — Login Burst User",
+          "name": "Rate Limit Setup \u2014 Login Burst User",
           "event": [
             {
               "listen": "test",
@@ -9478,7 +11777,7 @@
           "response": []
         },
         {
-          "name": "Rate Limit — Burst Exceeding Capacity (429)",
+          "name": "Rate Limit \u2014 Burst Exceeding Capacity (429)",
           "event": [
             {
               "listen": "test",
@@ -9486,7 +11785,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "if (pm.response.code !== 429) {",
-                  "    pm.execution.setNextRequest(\"Rate Limit — Burst Exceeding Capacity (429)\");",
+                  "    pm.execution.setNextRequest(\"Rate Limit \u2014 Burst Exceeding Capacity (429)\");",
                   "} else {",
                   "    pm.test(\"Status code is 429 Too Many Requests\", function () {",
                   "        pm.response.to.have.status(429);",
@@ -9543,7 +11842,7 @@
       "description": "Endpoints for retrieving stored files and media with dedicated rate limiting, MIME verification, and immutable caching.",
       "item": [
         {
-          "name": "Setup — Authenticate File Storage User",
+          "name": "Setup \u2014 Authenticate File Storage User",
           "event": [
             {
               "listen": "test",
@@ -9596,7 +11895,7 @@
           "response": []
         },
         {
-          "name": "Setup — Upload File for Storage Serving",
+          "name": "Setup \u2014 Upload File for Storage Serving",
           "event": [
             {
               "listen": "test",
@@ -9719,7 +12018,7 @@
           "response": []
         },
         {
-          "name": "Get File — Non-Existent Key (404)",
+          "name": "Get File \u2014 Non-Existent Key (404)",
           "event": [
             {
               "listen": "prerequest",
@@ -9778,7 +12077,7 @@
           "response": []
         },
         {
-          "name": "Get File — Unauthenticated Request (401)",
+          "name": "Get File \u2014 Unauthenticated Request (401)",
           "event": [
             {
               "listen": "prerequest",
@@ -9831,7 +12130,7 @@
           "response": []
         },
         {
-          "name": "Teardown — Delete Storage Test File",
+          "name": "Teardown \u2014 Delete Storage Test File",
           "event": [
             {
               "listen": "prerequest",

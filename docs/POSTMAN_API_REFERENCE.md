@@ -1116,8 +1116,8 @@ This document provides the exhaustive specification for all requests, headers, r
   "success": false,
   "code": 409,
   "errorCode": "CONFLICT",
-  "message": "An active formateur request already exists for this artisan.",
-  "timestamp": "2026-09-03T20:25:00"
+  "message": "You already have a pending Formateur request.",
+  "data": null
 }
 ```
 
@@ -1152,13 +1152,21 @@ This document provides the exhaustive specification for all requests, headers, r
       {
         "id": "ca118845-92b6-4d57-ad67-a395975d9ced",
         "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "artisanName": "Karim Ziani",
+        "artisanEmail": "artisan@souklab.dz",
         "status": "PENDING",
         "motivation": "Master craftsman in traditional metalwork.",
+        "adminNote": null,
+        "canReapply": true,
+        "cooldownUntil": null,
+        "decidedByAdminId": null,
+        "decidedByAdminEmail": null,
+        "decidedAt": null,
         "createdAt": "2026-09-03T20:22:00"
       }
     ],
-    "page": 0,
-    "size": 20,
+    "pageNumber": 0,
+    "pageSize": 20,
     "totalElements": 1,
     "totalPages": 1,
     "last": true
@@ -1186,22 +1194,25 @@ This document provides the exhaustive specification for all requests, headers, r
 ```
 
 #### Response Examples
-##### Success Response (`201 Created`)
+##### Success Response (`200 OK`)
 ```json
 {
   "success": true,
-  "code": 201,
-  "message": "Formateur request submitted successfully.",
+  "code": 200,
+  "message": "Formateur request approved successfully.",
   "data": {
     "id": "ca118845-92b6-4d57-ad67-a395975d9ced",
     "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
     "artisanName": "Karim Ziani",
     "artisanEmail": "artisan@souklab.dz",
-    "status": "PENDING",
+    "status": "APPROVED",
     "motivation": "15+ years experience teaching traditional pottery.",
-    "adminNote": null,
+    "adminNote": "Impressive portfolio and master certification verified.",
     "canReapply": true,
     "cooldownUntil": null,
+    "decidedByAdminId": "admin-user-id",
+    "decidedByAdminEmail": "admin@souklab.dz",
+    "decidedAt": "2026-09-03T20:25:00",
     "createdAt": "2026-09-03T20:22:00"
   }
 }
@@ -1419,14 +1430,27 @@ This document provides the exhaustive specification for all requests, headers, r
 ```
 
 #### Response Examples
-##### Error Response (`403 Forbidden`)
+##### Success Response (`200 OK`)
 ```json
 {
-  "success": false,
-  "code": 403,
-  "errorCode": "FORBIDDEN",
-  "message": "You cannot submit a request during the cooldown period.",
-  "timestamp": "2026-09-03T20:25:00"
+  "success": true,
+  "code": 200,
+  "message": "Formateur request rejected successfully.",
+  "data": {
+    "id": "ca118845-92b6-4d57-ad67-a395975d9ced",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "artisanName": "Amina Mansouri",
+    "artisanEmail": "amina@souklab.dz",
+    "status": "REJECTED",
+    "motivation": "Leathercraft workshops and tooling masterclasses.",
+    "adminNote": "Please provide your master artisan certification before reapplying.",
+    "canReapply": true,
+    "cooldownUntil": "2026-09-17T20:25:00",
+    "decidedByAdminId": "admin-user-id",
+    "decidedByAdminEmail": "admin@souklab.dz",
+    "decidedAt": "2026-09-03T20:25:00",
+    "createdAt": "2026-09-03T20:22:00"
+  }
 }
 ```
 
@@ -1456,8 +1480,8 @@ This document provides the exhaustive specification for all requests, headers, r
   "success": false,
   "code": 403,
   "errorCode": "FORBIDDEN",
-  "message": "You cannot submit a request during the cooldown period.",
-  "timestamp": "2026-09-03T20:25:00"
+  "message": "You cannot submit a request during the cooldown period. Cooldown expires on: 2026-09-17T20:25:00",
+  "data": null
 }
 ```
 
@@ -1482,14 +1506,27 @@ This document provides the exhaustive specification for all requests, headers, r
 ```
 
 #### Response Examples
-##### Error Response (`403 Forbidden`)
+##### Success Response (`200 OK`)
 ```json
 {
-  "success": false,
-  "code": 403,
-  "errorCode": "FORBIDDEN",
-  "message": "You cannot submit a request during the cooldown period.",
-  "timestamp": "2026-09-03T20:25:00"
+  "success": true,
+  "code": 200,
+  "message": "Cooldown configuration updated successfully.",
+  "data": {
+    "id": "ca118845-92b6-4d57-ad67-a395975d9ced",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "artisanName": "Amina Mansouri",
+    "artisanEmail": "amina@souklab.dz",
+    "status": "REJECTED",
+    "motivation": "Leathercraft workshops and tooling masterclasses.",
+    "adminNote": "Please provide your master artisan certification before reapplying.",
+    "canReapply": true,
+    "cooldownUntil": null,
+    "decidedByAdminId": "admin-user-id",
+    "decidedByAdminEmail": "admin@souklab.dz",
+    "decidedAt": "2026-09-03T20:25:00",
+    "createdAt": "2026-09-03T20:22:00"
+  }
 }
 ```
 
@@ -1952,14 +1989,27 @@ This document provides the exhaustive specification for all requests, headers, r
 ```
 
 #### Response Examples
-##### Error Response (`403 Forbidden`)
+##### Success Response (`200 OK`)
 ```json
 {
-  "success": false,
-  "code": 403,
-  "errorCode": "FORBIDDEN",
-  "message": "You are permanently blocked from submitting new Formateur requests.",
-  "timestamp": "2026-09-03T20:25:00"
+  "success": true,
+  "code": 200,
+  "message": "Formateur request rejected successfully.",
+  "data": {
+    "id": "ca118845-92b6-4d57-ad67-a395975d9ced",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "artisanName": "Samia Benali",
+    "artisanEmail": "samia@souklab.dz",
+    "status": "REJECTED",
+    "motivation": "Leathercraft workshops and tooling masterclasses.",
+    "adminNote": "Permanent disqualification due to fraudulent credential submission.",
+    "canReapply": false,
+    "cooldownUntil": null,
+    "decidedByAdminId": "admin-user-id",
+    "decidedByAdminEmail": "admin@souklab.dz",
+    "decidedAt": "2026-09-03T20:25:00",
+    "createdAt": "2026-09-03T20:22:00"
+  }
 }
 ```
 
@@ -1990,7 +2040,7 @@ This document provides the exhaustive specification for all requests, headers, r
   "code": 403,
   "errorCode": "FORBIDDEN",
   "message": "You are permanently blocked from submitting new Formateur requests.",
-  "timestamp": "2026-09-03T20:25:00"
+  "data": null
 }
 ```
 

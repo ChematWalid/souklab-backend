@@ -10,7 +10,6 @@ Manages the dual-sided Formateur accreditation lifecycle: artisan applications a
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/artisan/formateur-request` | `ROLE_ARTISAN` | Submits accreditation application with motivation. Enforces 14-day cooldown. |
-| `GET` | `/api/v1/artisan/formateur-request/status` | `ROLE_ARTISAN` | Retrieves current status of the artisan's latest application and reapply eligibility. |
 
 ### Administrator Endpoints (`AdminFormateurController`)
 | Method | Endpoint | Access | Description |
@@ -20,7 +19,9 @@ Manages the dual-sided Formateur accreditation lifecycle: artisan applications a
 | `POST` | `/api/v1/admin/formateur-requests/{id}/reject` | `ROLE_ADMIN` | Rejects request with admin note and configurable cooldown (default 14 days). |
 | `POST` | `/api/v1/admin/artisans/{id}/formateur-grant` | `ROLE_ADMIN` | Directly grants formateur status to an artisan without prior request. |
 | `POST` | `/api/v1/admin/artisans/{id}/formateur-revoke` | `ROLE_ADMIN` | Revokes formateur status from an artisan (`isTeacher=false`). |
-| `POST` | `/api/v1/admin/artisans/{id}/formateur-cooldown-override` | `ROLE_ADMIN` | Overrides cooldown or reapply restrictions on an artisan request. |
+| `POST` | `/api/v1/admin/formateur-requests/{artisanId}/lift-cooldown` | `ROLE_ADMIN` | Overrides cooldown or reapply restrictions on an artisan request. |
+
+> **Architecture Note on Single Request Inspection**: SoukLab intentionally does not expose an individual request inspection endpoint (`GET /formateur-requests/{id}`) for either artisans or administrators. Request state is communicated directly through decision action payloads, the administrative pending listing, and lifecycle notification dispatches.
 
 ---
 
@@ -29,4 +30,4 @@ Manages the dual-sided Formateur accreditation lifecycle: artisan applications a
 | Class | Responsibility |
 | :--- | :--- |
 | [`AdminFormateurController`](AdminFormateurController.java) | Administrator review and direct accreditation moderation. |
-| [`ArtisanFormateurController`](ArtisanFormateurController.java) | Artisan application submission and status retrieval. |
+| [`ArtisanFormateurController`](ArtisanFormateurController.java) | Artisan application submission. |
