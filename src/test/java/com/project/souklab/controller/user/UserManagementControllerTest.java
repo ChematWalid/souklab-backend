@@ -4,6 +4,7 @@ import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.auth.UserResponseDTO;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.service.user.UserManagementService;
@@ -669,6 +670,99 @@ class UserManagementControllerTest {
             mockMvc.perform(post("/api/v1/admin/users/u-30/timeout")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"minutes\":60,\"reason\":\"Testing\"}"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.code").value(401));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/v1/admin/users/{id}/unban")
+    class UnbanUserTests {
+
+        /**
+         * Verifies that an admin user can reinstate a suspended user and receive 200 OK.
+         */
+        @Test
+        @DisplayName("ROLE_ADMIN unbans user and returns 200 OK")
+        void unbanUser_withAdminRole_shouldReturn200Ok() throws Exception {
+            doNothing().when(userManagementService).unbanUser("u-40");
+
+            mockMvc.perform(post("/api/v1/admin/users/u-40/unban")
+                            .with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.message").value("User unbanned successfully"))
+                    .andExpect(jsonPath("$.data").value(nullValue()));
+
+            verify(userManagementService).unbanUser("u-40");
+        }
+
+        /**
+         * Verifies that unbanning a user who is not suspended throws ConflictException and returns 409 Conflict.
+         */
+        @Test
+        @DisplayName("unbanning an already active user returns 409 Conflict")
+        void unbanUser_whenUserNotSuspended_shouldReturn409Conflict() throws Exception {
+            doThrow(new ConflictException("User is not suspended. Current status: ACTIVE"))
+                    .when(userManagementService).unbanUser("u-40");
+
+            mockMvc.perform(post("/api/v1/admin/users/u-40/unban")
+                            .with(admin()))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.code").value(409))
+                    .andExpect(jsonPath("$.errorCode").value("CONFLICT"))
+                    .andExpect(jsonPath("$.message").value("User is not suspended. Current status: ACTIVE"));
+        }
+
+        /**
+         * Verifies that ResourceNotFoundException maps to 404 Not Found.
+         */
+        @Test
+        @DisplayName("user not found maps to 404 Not Found")
+        void unbanUser_whenUserNotFound_shouldReturn404NotFound() throws Exception {
+            doThrow(new ResourceNotFoundException("User not found with id: u-999"))
+                    .when(userManagementService).unbanUser("u-999");
+
+            mockMvc.perform(post("/api/v1/admin/users/u-999/unban")
+                            .with(admin()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.code").value(404));
+        }
+
+        /**
+         * Verifies that ROLE_CLIENT receives 403 Forbidden.
+         */
+        @Test
+        @DisplayName("ROLE_CLIENT receives 403 Forbidden")
+        void unbanUser_withClientRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(post("/api/v1/admin/users/u-40/unban")
+                            .with(client()))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value(403));
+        }
+
+        /**
+         * Verifies that ROLE_ARTISAN receives 403 Forbidden.
+         */
+        @Test
+        @DisplayName("ROLE_ARTISAN receives 403 Forbidden")
+        void unbanUser_withArtisanRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(post("/api/v1/admin/users/u-40/unban")
+                            .with(artisan()))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value(403));
+        }
+
+        /**
+         * Verifies that unauthenticated request receives 401 Unauthorized.
+         */
+        @Test
+        @DisplayName("unauthenticated request receives 401 Unauthorized")
+        void unbanUser_unauthenticated_shouldReturn401Unauthorized() throws Exception {
+            mockMvc.perform(post("/api/v1/admin/users/u-40/unban"))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value(401));
         }

@@ -5,6 +5,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.auth.UserResponseDTO;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
@@ -322,11 +323,9 @@ class UserManagementServiceTest {
 
         userManagementService.banUser("u-bad", "Repeated fraudulent transactions");
 
-        LocalDateTime expectedBannedUntil = LocalDateTime.ofInstant(FIXED_INSTANT, ZONE).plusYears(100);
-
         assertThat(user.getStatus()).isEqualTo(AccountStatus.SUSPENDED);
         assertThat(user.getBanReason()).isEqualTo("Repeated fraudulent transactions");
-        assertThat(user.getBannedUntil()).isEqualTo(expectedBannedUntil);
+        assertThat(user.getBannedUntil()).isNull();
 
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
@@ -352,7 +351,7 @@ class UserManagementServiceTest {
 
         assertThat(user.getStatus()).isEqualTo(AccountStatus.SUSPENDED);
         assertThat(user.getBanReason()).isEqualTo("Account banned by administrator");
-        assertThat(user.getBannedUntil()).isEqualTo(LocalDateTime.ofInstant(FIXED_INSTANT, ZONE).plusYears(100));
+        assertThat(user.getBannedUntil()).isNull();
 
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
@@ -469,6 +468,66 @@ class UserManagementServiceTest {
                 NotificationType.ACCOUNT_SUSPENDED,
                 "u-timeout2"
         );
+    }
+
+    /**
+     * Verifies that unbanUser restores ACTIVE status, clears bannedUntil and banReason, logs audit, and sends notification.
+     */
+    @Test
+    @DisplayName("unbanUser: reinstates suspended user to ACTIVE and clears timeout restrictions")
+    void unbanUser_whenUserIsSuspended_shouldRestoreActiveAndClearRestrictions() {
+        User user = createUser("u-unban", "unban@example.com", "Suspended", "User", AccountStatus.SUSPENDED);
+        user.setBannedUntil(LocalDateTime.ofInstant(FIXED_INSTANT, ZONE).plusDays(5));
+        user.setBanReason("Terms violation");
+        when(userRepository.findById("u-unban")).thenReturn(Optional.of(user));
+
+        userManagementService.unbanUser("u-unban");
+
+        assertThat(user.getStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(user.getBannedUntil()).isNull();
+        assertThat(user.getBanReason()).isNull();
+
+        verify(userRepository).save(user);
+        verify(auditLogService).logAction(AuditLogAction.UNBAN_USER, "Reinstated user ID: u-unban");
+        verify(notificationService).createForUser(
+                user,
+                "Your account suspension has been lifted and your access has been restored.",
+                NotificationType.ACCOUNT_REINSTATED,
+                "u-unban"
+        );
+    }
+
+    /**
+     * Verifies that unbanUser throws ConflictException when user is not in SUSPENDED status.
+     */
+    @Test
+    @DisplayName("unbanUser: throws ConflictException when target user is not suspended")
+    void unbanUser_whenUserIsNotSuspended_shouldThrowConflictException() {
+        User user = createUser("u-active", "active@example.com", "Active", "User", AccountStatus.ACTIVE);
+        when(userRepository.findById("u-active")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> userManagementService.unbanUser("u-active"))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("User is not suspended. Current status: ACTIVE");
+
+        verify(userRepository, never()).save(any());
+        verify(auditLogService, never()).logAction(any(), any());
+        verify(notificationService, never()).createForUser(any(), any(), any(), any());
+    }
+
+    /**
+     * Verifies that unbanUser throws ResourceNotFoundException when user does not exist.
+     */
+    @Test
+    @DisplayName("unbanUser: throws ResourceNotFoundException when user id is not found")
+    void unbanUser_whenUserNotFound_shouldThrowResourceNotFoundException() {
+        when(userRepository.findById("u-missing")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userManagementService.unbanUser("u-missing"))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found with id: u-missing");
+
+        verify(userRepository, never()).save(any());
     }
 
     /**
@@ -652,6 +711,63 @@ class UserManagementServiceTest {
         assertThat(dto.getLastLoginAt()).isEqualTo(lastLogin);
         assertThat(dto.getCreatedAt()).isEqualTo(createdAt);
         assertThat(dto.getUpdatedAt()).isEqualTo(updatedAt);
+    }
+
+    /**
+     * Verifies that getAllUsers returns effective ACTIVE status and null ban fields for an expired-timeout user
+     * without triggering any database write.
+     */
+    @Test
+    @DisplayName("getAllUsers: returns effective ACTIVE status with null ban fields when timeout has expired, without saving")
+    void getAllUsers_whenTimeoutExpired_returnsEffectiveActiveStatusWithoutDbWrite() {
+        Pageable pageable = PageRequest.of(0, 10);
+        LocalDateTime expiredBannedUntil = LocalDateTime.ofInstant(FIXED_INSTANT, ZONE).minusMinutes(15);
+
+        User user = createUser("u-expired", "expired@example.com", "Expired", "Timeout", AccountStatus.SUSPENDED);
+        user.setBannedUntil(expiredBannedUntil);
+        user.setBanReason("Spam activity");
+
+        when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(user), pageable, 1));
+
+        PaginatedResponse<UserResponseDTO> response = userManagementService.getAllUsers(null, pageable);
+
+        UserResponseDTO dto = response.getContent().get(0);
+        assertThat(dto.getStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(dto.getBannedUntil()).isNull();
+        assertThat(dto.getBanReason()).isNull();
+
+        assertThat(user.getStatus()).isEqualTo(AccountStatus.SUSPENDED);
+        assertThat(user.getBannedUntil()).isEqualTo(expiredBannedUntil);
+        assertThat(user.getBanReason()).isEqualTo("Spam activity");
+
+        verify(userRepository, never()).save(any());
+    }
+
+    /**
+     * Verifies that searchUsers also returns effective ACTIVE status and null ban fields for an expired-timeout user
+     * without triggering any database write.
+     */
+    @Test
+    @DisplayName("getAllUsers with search: returns effective ACTIVE status with null ban fields when timeout has expired, without saving")
+    void getAllUsers_withSearchWhenTimeoutExpired_returnsEffectiveActiveStatusWithoutDbWrite() {
+        Pageable pageable = PageRequest.of(0, 10);
+        LocalDateTime expiredBannedUntil = LocalDateTime.ofInstant(FIXED_INSTANT, ZONE).minusMinutes(5);
+
+        User user = createUser("u-search-exp", "search.exp@example.com", "Search", "Expired", AccountStatus.SUSPENDED);
+        user.setBannedUntil(expiredBannedUntil);
+        user.setBanReason("Automated flag");
+
+        when(userRepository.searchUsers("search", pageable)).thenReturn(new PageImpl<>(List.of(user), pageable, 1));
+
+        PaginatedResponse<UserResponseDTO> response = userManagementService.getAllUsers("search", pageable);
+
+        UserResponseDTO dto = response.getContent().get(0);
+        assertThat(dto.getStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(dto.getBannedUntil()).isNull();
+        assertThat(dto.getBanReason()).isNull();
+
+        assertThat(user.getStatus()).isEqualTo(AccountStatus.SUSPENDED);
+        verify(userRepository, never()).save(any());
     }
 
     private User createUser(String id, String email, String firstName, String lastName, AccountStatus status) {

@@ -11,6 +11,7 @@ public enum AuditLogAction {
     APPROVE_USER,
     BAN_USER,
     TIMEOUT_USER,
+    UNBAN_USER,
 
     APPROVE_ARTISAN,
     REJECT_ARTISAN,

@@ -42,8 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority(roleName));
         }
 
-        boolean isAccountLocked = user.getStatus() == AccountStatus.SUSPENDED 
-                || (user.getBannedUntil() != null && user.getBannedUntil().isAfter(LocalDateTime.now(clock)));
+        boolean isAccountLocked = user.isSuspensionActive(LocalDateTime.now(clock));
         boolean isAccountDisabled = user.getStatus() == AccountStatus.REJECTED;
 
         String password = user.getPassword() != null ? user.getPassword() : "";

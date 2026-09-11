@@ -775,7 +775,7 @@ class AuthServiceTest {
         User user = User.builder()
                 .email("banned@example.com")
                 .password("hashedPassword")
-                .status(AccountStatus.ACTIVE)
+                .status(AccountStatus.SUSPENDED)
                 .bannedUntil(fixedNow.plusDays(2))
                 .banReason("Suspicious login activity")
                 .build();
@@ -802,7 +802,7 @@ class AuthServiceTest {
         User user = User.builder()
                 .email("banned@example.com")
                 .password("hashedPassword")
-                .status(AccountStatus.ACTIVE)
+                .status(AccountStatus.SUSPENDED)
                 .bannedUntil(fixedNow.plusDays(2))
                 .banReason(null)
                 .build();
@@ -816,10 +816,11 @@ class AuthServiceTest {
     }
 
     /**
-     * Verifies login allows sign-in when bannedUntil timestamp is in the past.
+     * Verifies login allows sign-in when account is SUSPENDED and bannedUntil timestamp is in the past,
+     * lazily auto-reinstating the user to ACTIVE and clearing timeout fields.
      */
     @Test
-    @DisplayName("login: allows sign-in when bannedUntil is in the past")
+    @DisplayName("login: allows sign-in when bannedUntil is in the past and auto-reinstates account")
     void login_whenAccountBannedUntilInPast_allowsLogin() {
         LoginDTO dto = LoginDTO.builder()
                 .email("unbanned@example.com")
@@ -829,8 +830,9 @@ class AuthServiceTest {
         User user = User.builder()
                 .email("unbanned@example.com")
                 .password("hashedPassword")
-                .status(AccountStatus.ACTIVE)
+                .status(AccountStatus.SUSPENDED)
                 .bannedUntil(fixedNow.minusDays(1))
+                .banReason("Prior timeout")
                 .roles(new HashSet<>(Set.of(clientRole)))
                 .build();
 
@@ -843,7 +845,11 @@ class AuthServiceTest {
         JwtResponseDTO response = authService.login(dto, null);
 
         assertThat(response).isNotNull();
+        assertThat(user.getStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(user.getBannedUntil()).isNull();
+        assertThat(user.getBanReason()).isNull();
         assertThat(user.getLastLoginAt()).isEqualTo(fixedNow);
+        verify(userRepository).save(user);
     }
 
     /**

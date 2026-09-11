@@ -5,6 +5,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.auth.UserResponseDTO;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AuditLogAction;
@@ -114,7 +115,7 @@ public class UserManagementService {
 
         user.setStatus(AccountStatus.SUSPENDED);
         user.setBanReason(reason != null ? reason : "Account banned by administrator");
-        user.setBannedUntil(LocalDateTime.now(clock).plusYears(100));
+        user.setBannedUntil(null);
 
         userRepository.save(user);
 
@@ -154,6 +155,31 @@ public class UserManagementService {
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.ACCOUNT_SUSPENDED, user.getId());
     }
 
+    /**
+     * Reinstates a suspended user, restoring their status to ACTIVE and clearing timeout restrictions.
+     *
+     * @param userId the unique identifier of the user to unban
+     * @throws ResourceNotFoundException if the user is not found
+     * @throws ConflictException if the user is not currently suspended
+     */
+    @Transactional
+    public void unbanUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
+
+        if (user.getStatus() != AccountStatus.SUSPENDED) {
+            throw new ConflictException("User is not suspended. Current status: " + user.getStatus());
+        }
+
+        user.setStatus(AccountStatus.ACTIVE);
+        user.setBannedUntil(null);
+        user.setBanReason(null);
+        userRepository.save(user);
+
+        auditLogService.logAction(AuditLogAction.UNBAN_USER, "Reinstated user ID: " + userId);
+        notificationService.createForUser(user, "Your account suspension has been lifted and your access has been restored.", NotificationType.ACCOUNT_REINSTATED, user.getId());
+    }
+
     private UserResponseDTO mapToDTO(User user) {
         Set<String> roleNames = user.getRoles().stream()
                 .map(Role::getName)
@@ -166,6 +192,10 @@ public class UserManagementService {
             name = user.getEmail();
         }
 
+        LocalDateTime now = LocalDateTime.now(clock);
+        AccountStatus effectiveStatus = user.getEffectiveStatus(now);
+        boolean isExpiredTimeout = user.getStatus() != effectiveStatus;
+
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -174,13 +204,13 @@ public class UserManagementService {
                 .name(name)
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
-                .status(user.getStatus())
+                .status(effectiveStatus)
                 .emailVerified(user.isEmailVerified())
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .primaryRole(primaryRole)
                 .roles(roleNames)
-                .bannedUntil(user.getBannedUntil())
-                .banReason(user.getBanReason())
+                .bannedUntil(isExpiredTimeout ? null : user.getBannedUntil())
+                .banReason(isExpiredTimeout ? null : user.getBanReason())
                 .lastLoginAt(user.getLastLoginAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())

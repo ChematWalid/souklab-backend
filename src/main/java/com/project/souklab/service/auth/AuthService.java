@@ -173,9 +173,14 @@ public class AuthService {
             throw new UnauthorizedException("Invalid email or password.");
         }
 
-        if (user.getStatus() == AccountStatus.SUSPENDED 
-                || (user.getBannedUntil() != null && user.getBannedUntil().isAfter(LocalDateTime.now(clock)))) {
-            throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
+        if (user.getStatus() == AccountStatus.SUSPENDED) {
+            if (!user.isSuspensionActive(LocalDateTime.now(clock))) {
+                user.setStatus(AccountStatus.ACTIVE);
+                user.setBannedUntil(null);
+                user.setBanReason(null);
+            } else {
+                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
+            }
         }
 
         if (user.getStatus() == AccountStatus.REJECTED) {

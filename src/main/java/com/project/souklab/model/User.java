@@ -100,4 +100,32 @@ public class User extends BaseEntity {
         }
         return email;
     }
+
+    /**
+     * Determines whether this user has an active suspension as of the specified point in time.
+     * A suspension is considered active if the status is {@link AccountStatus#SUSPENDED}
+     * and the ban is either permanent (bannedUntil is null) or the timeout expiration timestamp
+     * is strictly in the future.
+     *
+     * @param now the reference point in time
+     * @return true if the user is actively suspended, false otherwise
+     */
+    public boolean isSuspensionActive(LocalDateTime now) {
+        return status == AccountStatus.SUSPENDED && (bannedUntil == null || bannedUntil.isAfter(now));
+    }
+
+    /**
+     * Computes the effective account status as of the specified point in time.
+     * If the persisted status is {@link AccountStatus#SUSPENDED} but the timeout has expired,
+     * this returns {@link AccountStatus#ACTIVE}. Otherwise, returns the persisted status.
+     *
+     * @param now the reference point in time
+     * @return the effective {@link AccountStatus}
+     */
+    public AccountStatus getEffectiveStatus(LocalDateTime now) {
+        if (status == AccountStatus.SUSPENDED && !isSuspensionActive(now)) {
+            return AccountStatus.ACTIVE;
+        }
+        return status;
+    }
 }

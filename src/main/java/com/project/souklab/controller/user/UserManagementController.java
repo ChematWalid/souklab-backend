@@ -63,4 +63,10 @@ public class UserManagementController {
         userManagementService.timeoutUser(id, request.getMinutes(), request.getReason());
         return ResponseEntity.ok(ApiResponse.success(null, "User timed out successfully"));
     }
+
+    @PostMapping("/{id}/unban")
+    public ResponseEntity<ApiResponse<Void>> unbanUser(@PathVariable String id) {
+        userManagementService.unbanUser(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "User unbanned successfully"));
+    }
 }
