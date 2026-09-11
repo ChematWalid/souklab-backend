@@ -2046,110 +2046,33 @@ This document provides the exhaustive specification for all requests, headers, r
 
 ---
 
-## 9. Admin — User Moderation
+## 9. Admin — User Moderation & Discovery
 
-> Administrative operations for listing, filtering, bulk approving, timing out, and banning platform users.
-
-### 9.1 Setup Artisan 5 (Register for Bulk Approval Test 1)
-- **Method**: `POST`
-- **Endpoint**: `{{baseUrl}}/auth/register`
-
-#### Headers
-| Header | Value | Description |
-| :--- | :--- | :--- |
-| `Content-Type` | `application/json` | Header requirement |
-
-#### Request Body (`application/json`)
-```json
-{
-  "email": "{{moderationArtisan1Email}}",
-  "password": "Password123!",
-  "firstName": "BulkOne",
-  "lastName": "Moderation",
-  "role": "ARTISAN"
-}
-```
-
-#### Response Examples
-##### Success Response (`201 Created`)
-```json
-{
-  "success": true,
-  "code": 201,
-  "message": "Registration successful. Your artisan account has been created and is pending administrator verification.",
-  "data": {
-    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
-    "email": "user@souklab.dz",
-    "firstName": "Karim",
-    "lastName": "Ziani",
-    "roles": [
-      "ROLE_ARTISAN"
-    ],
-    "accountStatus": "PENDING",
-    "emailVerified": false,
-    "createdAt": "2026-09-03T20:00:00"
-  }
-}
-```
+> Comprehensive administrative operations for user discovery, pagination, filtering/search, registration approvals, permanent suspension (ban), temporary suspension (timeout with auto-expiry lapse), effective-status resolution, and manual reinstatement (unban) with dedicated notifications.
 
 ---
 
-### 9.2 Setup Artisan 6 (Register for Bulk Approval Test 2)
-- **Method**: `POST`
-- **Endpoint**: `{{baseUrl}}/auth/register`
-
-#### Headers
-| Header | Value | Description |
-| :--- | :--- | :--- |
-| `Content-Type` | `application/json` | Header requirement |
-
-#### Request Body (`application/json`)
-```json
-{
-  "email": "{{moderationArtisan2Email}}",
-  "password": "Password123!",
-  "firstName": "BulkTwo",
-  "lastName": "Moderation",
-  "role": "ARTISAN"
-}
-```
-
-#### Response Examples
-##### Success Response (`201 Created`)
-```json
-{
-  "success": true,
-  "code": 201,
-  "message": "Registration successful. Your artisan account has been created and is pending administrator verification.",
-  "data": {
-    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
-    "email": "user@souklab.dz",
-    "firstName": "Karim",
-    "lastName": "Ziani",
-    "roles": [
-      "ROLE_ARTISAN"
-    ],
-    "accountStatus": "PENDING",
-    "emailVerified": false,
-    "createdAt": "2026-09-03T20:00:00"
-  }
-}
-```
-
----
-
-### 9.3 Get All Users (Paginated)
+### 9.1 List All Users (Default Pagination & Effective Status)
 - **Method**: `GET`
-- **Endpoint**: `{{baseUrl}}/admin/users?page=0&size=20`
+- **Endpoint**: `{{baseUrl}}/admin/users`
+- **Access**: `ROLE_ADMIN` only (`403 Forbidden` for other roles)
+
+#### Query Parameters
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `search` | String | *Optional* | Substring query matched against user email and name |
+| `page` | Integer | `0` | Zero-indexed page number |
+| `size` | Integer | `20` | Page size limit |
+| `sort` | String | `createdAt,desc` | Sort field and direction |
 
 #### Headers
 | Header | Value | Description |
 | :--- | :--- | :--- |
-| `Content-Type` | `application/json` | Header requirement |
+| `Content-Type` | `application/json` | Request format |
 | `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
 
-#### Request Body
-*None (No request payload)*
+#### Effective Status Resolution
+If a user's database status is `SUSPENDED` but their `bannedUntil` timestamp is in the past (an expired timeout), the mapping layer automatically computes their effective status as `ACTIVE` and nulls out `bannedUntil` and `banReason` in the response DTO. This ensures administrators immediately see the user's live operational state without waiting for the user to trigger a login write.
 
 #### Response Examples
 ##### Success Response (`200 OK`)
@@ -2157,7 +2080,7 @@ This document provides the exhaustive specification for all requests, headers, r
 {
   "success": true,
   "code": 200,
-  "message": "Success",
+  "message": "Operation completed successfully",
   "data": {
     "content": [
       {
@@ -2172,11 +2095,14 @@ This document provides the exhaustive specification for all requests, headers, r
         "primaryRole": "ROLE_CLIENT",
         "status": "ACTIVE",
         "emailVerified": true,
+        "bannedUntil": null,
+        "banReason": null,
+        "lastLoginAt": "2026-09-11T16:00:00",
         "createdAt": "2026-09-03T20:00:00"
       }
     ],
-    "page": 0,
-    "size": 20,
+    "pageNumber": 0,
+    "pageSize": 20,
     "totalElements": 25,
     "totalPages": 2,
     "last": false
@@ -2186,18 +2112,14 @@ This document provides the exhaustive specification for all requests, headers, r
 
 ---
 
-### 9.4 Get Pending Users (Paginated)
+### 9.2 List Users (Custom Pagination & Sorting)
 - **Method**: `GET`
-- **Endpoint**: `{{baseUrl}}/admin/users/pending?page=0&size=20`
+- **Endpoint**: `{{baseUrl}}/admin/users?page=0&size=5&sort=email,asc`
 
 #### Headers
 | Header | Value | Description |
 | :--- | :--- | :--- |
-| `Content-Type` | `application/json` | Header requirement |
 | `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
-
-#### Request Body
-*None (No request payload)*
 
 #### Response Examples
 ##### Success Response (`200 OK`)
@@ -2205,26 +2127,58 @@ This document provides the exhaustive specification for all requests, headers, r
 {
   "success": true,
   "code": 200,
-  "message": "Success",
+  "message": "Operation completed successfully",
   "data": {
     "content": [
       {
-        "id": "8be23e0b-515a-46b4-8b88-5a01bb90ebc6",
-        "email": "artisan.pending@souklab.dz",
-        "name": "BulkOne Moderation",
-        "phone": "+213 555 98 76 54",
-        "avatarUrl": null,
-        "roles": [
-          "ROLE_ARTISAN"
-        ],
-        "primaryRole": "ROLE_ARTISAN",
-        "status": "PENDING",
-        "emailVerified": false,
-        "createdAt": "2026-09-03T20:20:00"
+        "id": "11aa22bb-33cc-44dd-55ee-66ff77aa88bb",
+        "email": "a.artisan@souklab.dz",
+        "name": "Ahmed Artisan",
+        "status": "ACTIVE",
+        "roles": ["ROLE_ARTISAN"]
       }
     ],
-    "page": 0,
-    "size": 20,
+    "pageNumber": 0,
+    "pageSize": 5,
+    "totalElements": 25,
+    "totalPages": 5,
+    "last": false
+  }
+}
+```
+
+---
+
+### 9.3 Search Users by Email Substring
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search={{userEmailPrefix}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully",
+  "data": {
+    "content": [
+      {
+        "id": "62b9a719-a2e7-4356-8d06-df0eef43171a",
+        "email": "b6.timeout.1789147285409@souklab.dz",
+        "name": "Timeout User",
+        "status": "ACTIVE",
+        "bannedUntil": null,
+        "banReason": null,
+        "roles": ["ROLE_CLIENT"]
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
     "totalElements": 1,
     "totalPages": 1,
     "last": true
@@ -2234,9 +2188,106 @@ This document provides the exhaustive specification for all requests, headers, r
 
 ---
 
-### 9.5 Approve Users Bulk
+### 9.4 Search Users No Match (Expected Empty Page)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search=NonExistentQueryZzz999X`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully",
+  "data": {
+    "content": [],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 0,
+    "totalPages": 0,
+    "last": true
+  }
+}
+```
+
+---
+
+### 9.5 List Pending Users
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users/pending?page=0&size=20`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully",
+  "data": {
+    "content": [
+      {
+        "id": "324b7834-edea-4a16-a5d6-5dae62779ebb",
+        "email": "b6.artisan.a.1789147283940@souklab.dz",
+        "name": "Karim Ziani",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "primaryRole": "ROLE_ARTISAN",
+        "status": "PENDING",
+        "emailVerified": true,
+        "createdAt": "2026-09-11T17:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 9.6 Approve User Registration (Single)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/:id/approve`
+- **Access**: `ROLE_ADMIN` only
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User approved successfully",
+  "data": null
+}
+```
+
+> **Side Effects**: Sets `accountStatus = ACTIVE` and sends an `ACCOUNT_VALIDATED` notification to the user.
+
+---
+
+### 9.7 Approve Users Bulk
 - **Method**: `POST`
 - **Endpoint**: `{{baseUrl}}/admin/users/approve-bulk`
+- **Access**: `ROLE_ADMIN` only
 
 #### Headers
 | Header | Value | Description |
@@ -2247,8 +2298,8 @@ This document provides the exhaustive specification for all requests, headers, r
 #### Request Body (`application/json`)
 ```json
 [
-  "{{moderationArtisan1Id}}",
-  "{{moderationArtisan2Id}}"
+  "324b7834-edea-4a16-a5d6-5dae62779ebb",
+  "a45235c6-cbc2-4061-a68b-95b09eef9863"
 ]
 ```
 
@@ -2265,88 +2316,10 @@ This document provides the exhaustive specification for all requests, headers, r
 
 ---
 
-### 9.6 Verify Bulk Approved Users are ACTIVE
-- **Method**: `GET`
-- **Endpoint**: `{{baseUrl}}/admin/users?page=0&size=50`
-
-#### Headers
-| Header | Value | Description |
-| :--- | :--- | :--- |
-| `Content-Type` | `application/json` | Header requirement |
-| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
-
-#### Request Body
-*None (No request payload)*
-
-#### Response Examples
-##### Success Response (`200 OK`)
-```json
-{
-  "success": true,
-  "code": 200,
-  "message": "Success",
-  "data": {
-    "content": [
-      {
-        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
-        "email": "user@souklab.dz",
-        "name": "Yacine Brahimi",
-        "phone": "+213 555 12 34 56",
-        "avatarUrl": null,
-        "roles": [
-          "ROLE_CLIENT"
-        ],
-        "primaryRole": "ROLE_CLIENT",
-        "status": "ACTIVE",
-        "emailVerified": true,
-        "createdAt": "2026-09-03T20:00:00"
-      }
-    ],
-    "page": 0,
-    "size": 20,
-    "totalElements": 25,
-    "totalPages": 2,
-    "last": false
-  }
-}
-```
-
----
-
-### 9.7 Timeout User
+### 9.8 Permanently Ban User
 - **Method**: `POST`
-- **Endpoint**: `{{baseUrl}}/admin/users/{{moderationArtisan1Id}}/timeout`
-
-#### Headers
-| Header | Value | Description |
-| :--- | :--- | :--- |
-| `Content-Type` | `application/json` | Header requirement |
-| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
-
-#### Request Body (`application/json`)
-```json
-{
-  "minutes": 30,
-  "reason": "Temporary timeout for administrative review"
-}
-```
-
-#### Response Examples
-##### Success Response (`200 OK`)
-```json
-{
-  "success": true,
-  "code": 200,
-  "message": "User timed out successfully",
-  "data": null
-}
-```
-
----
-
-### 9.8 Ban User
-- **Method**: `POST`
-- **Endpoint**: `{{baseUrl}}/admin/users/{{moderationArtisan2Id}}/ban`
+- **Endpoint**: `{{baseUrl}}/admin/users/:id/ban`
+- **Access**: `ROLE_ADMIN` only
 
 #### Headers
 | Header | Value | Description |
@@ -2371,6 +2344,153 @@ This document provides the exhaustive specification for all requests, headers, r
   "data": null
 }
 ```
+
+> **Representation**: Sets `status = SUSPENDED`, `bannedUntil = null` (representing indefinite/permanent ban), `banReason = reason`, revokes active refresh tokens, and sends an `ACCOUNT_SUSPENDED` notification.
+
+---
+
+### 9.9 Timeout User (Temporary Suspension)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/:id/timeout`
+- **Access**: `ROLE_ADMIN` only
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Header requirement |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "minutes": 60,
+  "reason": "Temporary cooldown for administrative investigation"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User timed out successfully",
+  "data": null
+}
+```
+
+> **Representation**: Sets `status = SUSPENDED`, `bannedUntil = now + minutes`, `banReason = reason`, revokes active refresh tokens, and sends an `ACCOUNT_SUSPENDED` notification.
+
+---
+
+### 9.10 Login Lockout on Suspended User (Expected 403 Forbidden)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Header requirement |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "suspended.user@souklab.dz",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Account suspended: Repeated violations of terms of service",
+  "data": null
+}
+```
+
+---
+
+### 9.11 Unban User (Reinstatement)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/:id/unban`
+- **Access**: `ROLE_ADMIN` only
+
+#### URL Parameters
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `id` | String | Unique user UUID to reinstate |
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User unbanned successfully",
+  "data": null
+}
+```
+
+> **Side Effects**: Sets `status = ACTIVE`, clears `bannedUntil = null` and `banReason = null`, logs an `UNBAN_USER` audit record, and delivers an `ACCOUNT_REINSTATED` notification to the user.
+
+##### Error Response: User Not Suspended (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "User is not suspended. Current status: ACTIVE",
+  "data": null
+}
+```
+
+##### Error Response: Non-Existent User (`404 Not Found`)
+```json
+{
+  "success": false,
+  "code": 404,
+  "errorCode": "RESOURCE_NOT_FOUND",
+  "message": "User not found with id: 00000000-0000-0000-0000-000000000000",
+  "data": null
+}
+```
+
+##### Error Response: Non-Admin Access (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "You do not have permission to perform this action.",
+  "data": null
+}
+```
+
+---
+
+### 9.12 Role Boundary Enforcement
+All admin user moderation routes are guarded at the controller level with `@PreAuthorize("hasRole('ADMIN')")`. Any unauthenticated request receives `401 Unauthorized`, and any non-admin request (e.g., `ROLE_CLIENT` or `ROLE_ARTISAN`) receives `403 Forbidden`:
+
+- `GET /api/v1/admin/users` ➔ `403 Forbidden`
+- `GET /api/v1/admin/users?search=test` ➔ `403 Forbidden`
+- `GET /api/v1/admin/users/pending` ➔ `403 Forbidden`
+- `POST /api/v1/admin/users/:id/approve` ➔ `403 Forbidden`
+- `POST /api/v1/admin/users/approve-bulk` ➔ `403 Forbidden`
+- `POST /api/v1/admin/users/:id/ban` ➔ `403 Forbidden`
+- `POST /api/v1/admin/users/:id/timeout` ➔ `403 Forbidden`
+- `POST /api/v1/admin/users/:id/unban` ➔ `403 Forbidden`
 
 ---
 
