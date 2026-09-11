@@ -8394,6 +8394,1727 @@
       "description": "Exhaustive deep state testing of the Formateur governance lifecycle: accreditation submission, dual 409 conflict boundaries, cooldown enforcement, administrative cooldown overrides, direct grants, direct revocations, orphaned pending request behavior, and permanent blocks."
     },
     {
+      "name": "Admin Moderation & Search",
+      "item": [
+        {
+          "name": "01. Setup \u2014 Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Admin authenticated successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b6AdminAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02. Setup \u2014 Register Client User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"b6ClientEmail\", \"b6.client.\" + ts + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Client registered with ACTIVE status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.id).to.be.a(\"string\");",
+                  "    pm.expect(json.data.accountStatus).to.eql(\"ACTIVE\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b6ClientId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6ClientEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Client\",\n  \"lastName\": \"BatchSix\",\n  \"role\": \"CLIENT\",\n  \"phoneNumber\": \"0555600001\",\n  \"address\": \"123 Client St\",\n  \"wilaya\": \"ALGER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03. Setup \u2014 Login Client User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Client token captured\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b6ClientAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6ClientEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04. Role Boundary \u2014 Client Attempt User Listing (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Forbidden response format\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6ClientAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05. Role Boundary \u2014 Client Attempt User Search (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6ClientAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?search=test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "test"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06. Role Boundary \u2014 Client Attempt Pending Listing (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6ClientAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "pending"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07. Admin \u2014 List All Users Default Pagination",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Paginated envelope structure is valid\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data).to.be.an(\"object\");",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "    pm.expect(json.data.pageNumber).to.eql(0);",
+                  "    pm.expect(json.data.pageSize).to.eql(20);",
+                  "    pm.expect(json.data.totalElements).to.be.at.least(1);",
+                  "    pm.expect(json.data.totalPages).to.be.at.least(1);",
+                  "});",
+                  "pm.test(\"UserResponseDTO fields present in content items\", function () {",
+                  "    const user = json.data.content[0];",
+                  "    pm.expect(user).to.have.property(\"id\");",
+                  "    pm.expect(user).to.have.property(\"email\");",
+                  "    pm.expect(user).to.have.property(\"status\");",
+                  "    pm.expect(user).to.have.property(\"roles\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08. Admin \u2014 List Users Custom Pagination & Sorting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Custom page size of 5 respected\", function () {",
+                  "    pm.expect(json.data.pageSize).to.eql(5);",
+                  "    pm.expect(json.data.content.length).to.be.at.most(5);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?page=0&size=5&sort=email,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "email,asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09. Setup \u2014 Register Artisan A for Discovery",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "const prefix = \"b6.artisan.a.\" + ts;",
+                  "pm.environment.set(\"b6ArtisanAPrefix\", prefix);",
+                  "pm.environment.set(\"b6ArtisanAEmail\", prefix + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan A registered with PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.accountStatus).to.eql(\"PENDING\");",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b6ArtisanAId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6ArtisanAEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"ArtisanA\",\n  \"lastName\": \"Discovery\",\n  \"role\": \"ROLE_ARTISAN\",\n  \"phoneNumber\": \"0555600002\",\n  \"address\": \"456 Artisan Way\",\n  \"wilaya\": \"ORAN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Admin \u2014 List Pending Users (Confirm Artisan A Present)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"All returned users have status PENDING\", function () {",
+                  "    const list = json.data.content;",
+                  "    pm.expect(list.length).to.be.at.least(1);",
+                  "    list.forEach(u => {",
+                  "        pm.expect(u.status).to.eql(\"PENDING\");",
+                  "    });",
+                  "});",
+                  "pm.test(\"Artisan A is present in pending list\", function () {",
+                  "    const targetId = pm.environment.get(\"b6ArtisanAId\");",
+                  "    const found = json.data.content.find(u => u.id === targetId);",
+                  "    pm.expect(found).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "pending"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. Admin \u2014 Search Users by Email Prefix",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Search matches Artisan A by email substring\", function () {",
+                  "    const targetId = pm.environment.get(\"b6ArtisanAId\");",
+                  "    const found = json.data.content.find(u => u.id === targetId);",
+                  "    pm.expect(found).to.not.be.undefined;",
+                  "    pm.expect(found.email).to.include(pm.environment.get(\"b6ArtisanAPrefix\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?search={{b6ArtisanAPrefix}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{b6ArtisanAPrefix}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. Admin \u2014 Search Users No Match (Expected Empty Page)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Empty page returned when query matches nothing\", function () {",
+                  "    pm.expect(json.data.content.length).to.eql(0);",
+                  "    pm.expect(json.data.totalElements).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?search=NonExistentQueryZzz999X",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "NonExistentQueryZzz999X"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13. Admin \u2014 Approve Artisan A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Artisan A approved message confirmed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.message).to.eql(\"User approved successfully\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6ArtisanAId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6ArtisanAId}}",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14. Setup \u2014 Register User B for Permanent Ban Lifecycle",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"b6UserBEmail\", \"b6.permban.\" + ts + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b6UserBId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6UserBEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"UserB\",\n  \"lastName\": \"PermBan\",\n  \"role\": \"ROLE_ARTISAN\",\n  \"phoneNumber\": \"0555600003\",\n  \"address\": \"789 Ban Blvd\",\n  \"wilaya\": \"CONSTANTINE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "15. Admin \u2014 Approve User B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserBId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserBId}}",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "16. Admin \u2014 Permanently Ban User B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"User B banned response confirmed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.message).to.eql(\"User banned successfully\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserBId}}/ban",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserBId}}",
+                "ban"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Permanent ban test for Batch 6\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17. User B \u2014 Login Lockout Check (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Ban reason present in lockout message\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.errorCode).to.eql(\"FORBIDDEN\");",
+                  "    pm.expect(json.message).to.include(\"Account is suspended: Permanent ban test for Batch 6\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6UserBEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "18. Admin \u2014 Verify Effective Display is SUSPENDED for Permanent Ban",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Permanent ban correctly displays SUSPENDED with null bannedUntil\", function () {",
+                  "    const targetId = pm.environment.get(\"b6UserBId\");",
+                  "    const u = json.data.content.find(user => user.id === targetId);",
+                  "    pm.expect(u).to.not.be.undefined;",
+                  "    pm.expect(u.status).to.eql(\"SUSPENDED\");",
+                  "    pm.expect(u.bannedUntil).to.be.null;",
+                  "    pm.expect(u.banReason).to.eql(\"Permanent ban test for Batch 6\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?search={{b6UserBEmail}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{b6UserBEmail}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "19. Role Boundary \u2014 Non-Admin Attempt Unban (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Role boundary error code confirmed\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.errorCode).to.eql(\"FORBIDDEN\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6ClientAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserBId}}/unban",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserBId}}",
+                "unban"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "20. Admin \u2014 Unban Non-Existent User (Expected 404 Not Found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Not found error code confirmed\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.errorCode).to.eql(\"RESOURCE_NOT_FOUND\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/00000000-0000-0000-0000-000000000000/unban",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "00000000-0000-0000-0000-000000000000",
+                "unban"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "21. Admin \u2014 Successfully Unban User B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"User unbanned message confirmed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.message).to.eql(\"User unbanned successfully\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserBId}}/unban",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserBId}}",
+                "unban"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "22. Admin \u2014 Conflict Guard: Unban Already Active User (Expected 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Conflict guard message confirms user not suspended\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.errorCode).to.eql(\"CONFLICT\");",
+                  "    pm.expect(json.message).to.include(\"User is not suspended. Current status: ACTIVE\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserBId}}/unban",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserBId}}",
+                "unban"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "23. User B \u2014 Successful Login Post-Unban",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"User B authenticated with ACTIVE status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.user.accountStatus).to.eql(\"ACTIVE\");",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set(\"b6UserBAccessToken\", json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6UserBEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "24. User B \u2014 Verify ACCOUNT_REINSTATED Notification",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Notification of type ACCOUNT_REINSTATED received\", function () {",
+                  "    const list = json.data.content;",
+                  "    const targetId = pm.environment.get(\"b6UserBId\");",
+                  "    const reinstatedNotif = list.find(n => n.type === \"ACCOUNT_REINSTATED\" && n.targetId === targetId);",
+                  "    pm.expect(reinstatedNotif).to.not.be.undefined;",
+                  "    pm.expect(reinstatedNotif.message).to.include(\"Your account suspension has been lifted\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6UserBAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "25. Setup \u2014 Register User C for Timeout Lifecycle",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"b6UserCEmail\", \"b6.timeout.\" + ts + \"@souklab.dz\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"b6UserCId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6UserCEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"UserC\",\n  \"lastName\": \"Timeout\",\n  \"role\": \"ROLE_ARTISAN\",\n  \"phoneNumber\": \"0555600004\",\n  \"address\": \"321 Timer Way\",\n  \"wilaya\": \"ANNABA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "26. Admin \u2014 Approve User C",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserCId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserCId}}",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "27. Admin \u2014 Timeout User C for 1 Minute",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"User C timed out response confirmed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.message).to.eql(\"User timed out successfully\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserCId}}/timeout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserCId}}",
+                "timeout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minutes\": 1,\n  \"reason\": \"1-minute auto-expiry test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "28. User C \u2014 Login Lockout Check During Timeout (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Timeout reason present in lockout response\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.errorCode).to.eql(\"FORBIDDEN\");",
+                  "    pm.expect(json.message).to.include(\"Account is suspended: 1-minute auto-expiry test\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6UserCEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "29. Admin \u2014 Verify Active Timeout Display in Admin Search",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Active timeout displays SUSPENDED with future bannedUntil\", function () {",
+                  "    const targetId = pm.environment.get(\"b6UserCId\");",
+                  "    const u = json.data.content.find(user => user.id === targetId);",
+                  "    pm.expect(u).to.not.be.undefined;",
+                  "    pm.expect(u.status).to.eql(\"SUSPENDED\");",
+                  "    pm.expect(u.bannedUntil).to.be.a(\"string\");",
+                  "    pm.expect(u.banReason).to.eql(\"1-minute auto-expiry test\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?search={{b6UserCEmail}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{b6UserCEmail}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "30. Timeout Lapse Delay \u2014 Wait 65 Seconds",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Delay execution by 65,000 milliseconds so the 1-minute timeout cleanly lapses */",
+                  "const waitMs = 65000;",
+                  "const start = Date.now();",
+                  "while (Date.now() - start < waitMs) {}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK after delay\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?search={{b6UserCEmail}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{b6UserCEmail}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "31. Admin \u2014 Search Shows Effective ACTIVE BEFORE User C Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Effective status evaluates to ACTIVE with cleared ban fields BEFORE login\", function () {",
+                  "    const targetId = pm.environment.get(\"b6UserCId\");",
+                  "    const u = json.data.content.find(user => user.id === targetId);",
+                  "    pm.expect(u).to.not.be.undefined;",
+                  "    pm.expect(u.status).to.eql(\"ACTIVE\");",
+                  "    pm.expect(u.bannedUntil).to.be.null;",
+                  "    pm.expect(u.banReason).to.be.null;",
+                  "    pm.expect(u.lastLoginAt).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?search={{b6UserCEmail}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{b6UserCEmail}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "32. Admin \u2014 Unfiltered Listing Also Shows Effective ACTIVE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Unfiltered listing confirms effective ACTIVE for User C\", function () {",
+                  "    const targetId = pm.environment.get(\"b6UserCId\");",
+                  "    const u = json.data.content.find(user => user.id === targetId);",
+                  "    if (u) {",
+                  "        pm.expect(u.status).to.eql(\"ACTIVE\");",
+                  "        pm.expect(u.bannedUntil).to.be.null;",
+                  "        pm.expect(u.banReason).to.be.null;",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "33. User C \u2014 Subsequent Login Triggers Lazy-Write",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"User C login succeeds and returns ACTIVE accountStatus\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.user.accountStatus).to.eql(\"ACTIVE\");",
+                  "    pm.expect(json.data.accessToken).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b6UserCEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "34. Admin \u2014 Conflict Guard on Auto-Expired User (Expected 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Conflict guard message confirms user is already active\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.errorCode).to.eql(\"CONFLICT\");",
+                  "    pm.expect(json.message).to.include(\"User is not suspended. Current status: ACTIVE\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{b6AdminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{b6UserCId}}/unban",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{b6UserCId}}",
+                "unban"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Batch 6: Admin Moderation, Discovery, Search Filtering, Permanent Ban & Manual Unban Lifecycle, and Timeout Auto-Expiry with Read-Only Effective Status Verification."
+    },
+    {
       "name": "Formateur \u2014 Artisan Actions",
       "description": "Artisan self-submission of Formateur status request and duplicate prevention assertions.",
       "item": [
