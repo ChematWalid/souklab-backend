@@ -3,6 +3,7 @@ package com.project.souklab.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.unit.DataSize;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ public class AppProperties {
     private OAuth oauth = new OAuth();
     private Relay relay = new Relay();
     private RateLimit rateLimit = new RateLimit();
+    private AuthConfig auth = new AuthConfig();
+    private ArtisanConfig artisan = new ArtisanConfig();
+
 
     @Data
     public static class Relay {
@@ -113,4 +117,59 @@ public class AppProperties {
             private Duration expireAfterAccess;
         }
     }
+
+    /**
+     * Authentication and security policy configuration bound to {@code app.auth.*}.
+     */
+    @Data
+    public static class AuthConfig {
+        private LockoutConfig lockout = new LockoutConfig();
+
+        /**
+         * Account lockout policy configuration bound to {@code app.auth.lockout.*}.
+         */
+        @Data
+        public static class LockoutConfig {
+            private int maxAttempts = 5;
+            private int durationMinutes = 15;
+        }
+    }
+
+    /**
+     * Artisan showcase and certification configuration bound to {@code app.artisan.*}.
+     */
+    @Data
+    public static class ArtisanConfig {
+        private GalleryConfig gallery = new GalleryConfig();
+        private CertificationConfig certification = new CertificationConfig();
+
+        /**
+         * Gallery showcase portfolio configuration bound to {@code app.artisan.gallery.*}.
+         */
+        @Data
+        public static class GalleryConfig {
+            private int maxImages = 20;
+            private DataSize maxFileSize = DataSize.ofMegabytes(10);
+            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+            ));
+        }
+
+        /**
+         * Official certification and accreditation configuration bound to {@code app.artisan.certification.*}.
+         */
+        @Data
+        public static class CertificationConfig {
+            private int maxCount = 10;
+            private DataSize maxFileSize = DataSize.ofMegabytes(15);
+            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
+                    "application/pdf",
+                    "image/jpeg",
+                    "image/png"
+            ));
+        }
+    }
 }
+

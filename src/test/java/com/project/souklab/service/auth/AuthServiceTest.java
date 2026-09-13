@@ -684,6 +684,38 @@ class AuthServiceTest {
     }
 
     /**
+     * Verifies login locks account using custom configured max attempts and lockout duration from AppProperties.
+     */
+    @Test
+    @DisplayName("login: locks account using custom configured max attempts and lockout duration")
+    void login_whenCustomLockoutConfigured_locksAccountWithCustomAttemptsAndDuration() {
+        appProperties.getAuth().getLockout().setMaxAttempts(3);
+        appProperties.getAuth().getLockout().setDurationMinutes(30);
+
+        LoginDTO dto = LoginDTO.builder()
+                .email("user@example.com")
+                .password("wrongPassword")
+                .build();
+
+        User user = User.builder()
+                .email("user@example.com")
+                .password("hashedPassword")
+                .failedLoginAttempts(2)
+                .build();
+
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPassword", "hashedPassword")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(dto, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Invalid email or password.");
+
+        assertThat(user.getFailedLoginAttempts()).isEqualTo(3);
+        assertThat(user.getLockedUntil()).isEqualTo(fixedNow.plusMinutes(30));
+        verify(userRepository).save(user);
+    }
+
+    /**
      * Verifies login throws ForbiddenException with custom reason when account status is SUSPENDED.
      */
     @Test

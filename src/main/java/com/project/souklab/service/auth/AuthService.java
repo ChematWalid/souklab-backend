@@ -491,8 +491,8 @@ public class AuthService {
     }
 
     /**
-     * Increments the user's failed login attempt counter, applies a 15-minute lockout
-     * when the threshold reaches five, persists the updated state, and throws
+     * Increments the user's failed login attempt counter, applies an account lockout
+     * when the threshold reaches the configured maximum attempts, persists the updated state, and throws
      * {@link UnauthorizedException} to terminate the login flow.
      *
      * @param user the user entity whose counter should be incremented
@@ -501,8 +501,10 @@ public class AuthService {
     private void handleFailedLogin(User user) {
         int attempts = user.getFailedLoginAttempts() + 1;
         user.setFailedLoginAttempts(attempts);
-        if (attempts >= 5) {
-            user.setLockedUntil(LocalDateTime.now(clock).plusMinutes(15));
+        int maxAttempts = appProperties.getAuth().getLockout().getMaxAttempts();
+        int lockoutMinutes = appProperties.getAuth().getLockout().getDurationMinutes();
+        if (attempts >= maxAttempts) {
+            user.setLockedUntil(LocalDateTime.now(clock).plusMinutes(lockoutMinutes));
         }
         userRepository.save(user);
         throw new UnauthorizedException("Invalid email or password.");

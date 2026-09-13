@@ -33,6 +33,23 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    /**
+     * Factory method creating a successful 201 Created response envelope.
+     *
+     * @param data the payload
+     * @param message human-readable status message
+     * @param <T> payload type
+     * @return ApiResponse instance
+     */
+    public static <T> ApiResponse<T> created(T data, String message) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .code(201)
+                .message(message)
+                .data(data)
+                .build();
+    }
+
     public static <T> ApiResponse<T> success(T data) {
         return success(data, "Success");
     }

@@ -1,0 +1,261 @@
+package com.project.souklab.service.artisan;
+
+import com.project.souklab.config.AppProperties;
+import com.project.souklab.dao.ArtisanCertificationRepository;
+import com.project.souklab.dao.ArtisanRepository;
+import com.project.souklab.dto.artisan.CertificationResponseDTO;
+import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ForbiddenException;
+import com.project.souklab.exception.ResourceNotFoundException;
+import com.project.souklab.exception.UnauthorizedException;
+import com.project.souklab.filestorage.StorageResult;
+import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.filestorage.exception.FileTooLargeException;
+import com.project.souklab.filestorage.exception.StorageException;
+import com.project.souklab.filestorage.scan.VirusScanService;
+import com.project.souklab.filestorage.validation.FileValidator;
+import com.project.souklab.filestorage.validation.ValidatedFile;
+import com.project.souklab.model.Artisan;
+import com.project.souklab.model.ArtisanCertification;
+import com.project.souklab.util.SecurityUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Service managing official artisan credentials, diplomas, and CAM certifications.
+ * Handles document validation, antivirus scanning, file storage with rollback compensation,
+ * certification quotas, and soft-delete lifecycle operations.
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class ArtisanCertificationService {
+
+    private static final String FILE_SERVING_PREFIX = "/api/v1/files/";
+
+    private final ArtisanRepository artisanRepository;
+    private final ArtisanCertificationRepository certificationRepository;
+    private final StorageService storageService;
+    private final FileValidator fileValidator;
+    private final VirusScanService virusScanService;
+    private final AppProperties appProperties;
+
+    /**
+     * Uploads and persists an official professional certification or accreditation card for the authenticated artisan.
+     * Enforces the configured certification quota, validates MIME type and file size, executes antivirus scanning,
+     * persists document in storage, and records entity with isVerified=false and storage rollback on failure.
+     *
+     * @param file the document or scan payload
+     * @param title accreditation title (e.g. Carte d'Artisan Professionnel)
+     * @param issuer issuing authority (e.g. CAM Alger)
+     * @param issuedAt date of official issuance
+     * @param expiresAt date of expiration if applicable
+     * @return response DTO representing the persisted certification
+     * @throws BadRequestException if quota is exceeded, file is missing, or required fields are blank
+     * @throws FileTooLargeException if file size exceeds the configured limit
+     * @throws ForbiddenException if authenticated user is not a registered artisan
+     * @throws UnauthorizedException if no authenticated user is present
+     */
+    @Transactional
+    public CertificationResponseDTO uploadCertification(
+            MultipartFile file,
+            String title,
+            String issuer,
+            LocalDate issuedAt,
+            LocalDate expiresAt
+    ) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+
+        int maxCount = appProperties.getArtisan().getCertification().getMaxCount();
+        long activeCount = certificationRepository.countByArtisanIdAndDeletedAtIsNull(artisan.getId());
+        if (activeCount >= maxCount) {
+            throw new BadRequestException("Certification quota exceeded. Maximum " + maxCount + " records allowed.");
+        }
+
+        validateCertificationParameters(file, title, issuer, issuedAt, expiresAt);
+
+        ValidatedFile validatedFile = validateAndSanitizeFile(file);
+        ValidatedFile scannedFile = virusScanService.scan(validatedFile);
+
+        return storeAndPersistCertification(artisan, scannedFile, title, issuer, issuedAt, expiresAt);
+    }
+
+    /**
+     * Retrieves all active professional certifications for the authenticated artisan sorted newest to oldest.
+     *
+     * @return list of active certifications
+     */
+    @Transactional(readOnly = true)
+    public List<CertificationResponseDTO> getMyCertifications() {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        return certificationRepository
+                .findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc(artisan.getId())
+                .stream()
+                .map(CertificationResponseDTO::from)
+                .toList();
+    }
+
+    /**
+     * Soft-deletes a professional certification belonging to the authenticated artisan.
+     *
+     * @param certificationId unique identifier of the certification
+     * @throws ResourceNotFoundException if the certification is missing, soft-deleted, or owned by another artisan
+     */
+    @Transactional
+    public void deleteCertification(String certificationId) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        ArtisanCertification cert = certificationRepository
+                .findByIdAndArtisanIdAndDeletedAtIsNull(certificationId, artisan.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found."));
+
+        cert.setDeletedAt(LocalDateTime.now());
+        certificationRepository.save(cert);
+    }
+
+    /**
+     * Validates input parameters for a certification upload.
+     *
+     * @param file multipart upload payload
+     * @param title credential title
+     * @param issuer issuing authority
+     * @param issuedAt date of issuance
+     * @param expiresAt date of expiration
+     */
+    private void validateCertificationParameters(
+            MultipartFile file,
+            String title,
+            String issuer,
+            LocalDate issuedAt,
+            LocalDate expiresAt
+    ) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Certification document file is required and cannot be empty.");
+        }
+        if (title == null || title.isBlank()) {
+            throw new BadRequestException("Certification title is required.");
+        }
+        if (issuer == null || issuer.isBlank()) {
+            throw new BadRequestException("Certification issuer is required.");
+        }
+        if (issuedAt != null && expiresAt != null && expiresAt.isBefore(issuedAt)) {
+            throw new BadRequestException("Expiration date cannot be earlier than issuance date.");
+        }
+        long maxFileSizeBytes = appProperties.getArtisan().getCertification().getMaxFileSize().toBytes();
+        if (file.getSize() > maxFileSizeBytes) {
+            throw new FileTooLargeException(file.getSize(), maxFileSizeBytes);
+        }
+    }
+
+    /**
+     * Executes file validation and MIME sanitization against allowed certification formats.
+     *
+     * @param file multipart upload payload
+     * @return validated file descriptor
+     */
+    private ValidatedFile validateAndSanitizeFile(MultipartFile file) {
+        try {
+            return fileValidator.validateAndSanitize(
+                    file.getInputStream(),
+                    file.getOriginalFilename(),
+                    file.getContentType(),
+                    file.getSize(),
+                    appProperties.getArtisan().getCertification().getAllowedMimeTypes()
+            );
+        } catch (IOException e) {
+            log.error("Failed to read certification upload stream", e);
+            throw new StorageException("Failed to read uploaded certification stream: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Stores document in storage provider and persists entity, rolling back storage file on failure.
+     *
+     * @param artisan owning artisan
+     * @param scannedFile validated and scanned file descriptor
+     * @param title credential title
+     * @param issuer issuing authority
+     * @param issuedAt issuance date
+     * @param expiresAt expiration date
+     * @return response DTO
+     */
+    private CertificationResponseDTO storeAndPersistCertification(
+            Artisan artisan,
+            ValidatedFile scannedFile,
+            String title,
+            String issuer,
+            LocalDate issuedAt,
+            LocalDate expiresAt
+    ) {
+        String storageKey = null;
+        try {
+            StorageResult storageResult = storageService.store(
+                    scannedFile.content(),
+                    scannedFile.sanitizedFilename(),
+                    scannedFile.detectedMimeType(),
+                    scannedFile.size()
+            );
+            storageKey = storageResult.key();
+
+            ArtisanCertification certification = ArtisanCertification.builder()
+                    .artisan(artisan)
+                    .title(title)
+                    .issuer(issuer)
+                    .issuedAt(issuedAt)
+                    .expiresAt(expiresAt)
+                    .documentUrl(FILE_SERVING_PREFIX + storageKey)
+                    .isVerified(false)
+                    .build();
+
+            ArtisanCertification savedEntity = certificationRepository.save(certification);
+            return CertificationResponseDTO.from(savedEntity);
+        } catch (Exception ex) {
+            if (storageKey != null) {
+                try {
+                    storageService.delete(storageKey);
+                } catch (Exception deleteEx) {
+                    log.error("Compensating delete failed for storage key '{}': {}", storageKey, deleteEx.getMessage(), deleteEx);
+                }
+            }
+            throw ex;
+        }
+    }
+
+    /**
+     * Resolves authenticated artisan profile from security context and asserts ROLE_ARTISAN authority.
+     *
+     * @return resolved Artisan entity
+     * @throws UnauthorizedException if authentication is missing or anonymous
+     * @throws ForbiddenException if role or artisan profile is missing
+     */
+    private Artisan resolveAuthenticatedArtisan() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new UnauthorizedException("User is not authenticated");
+        }
+
+        boolean hasArtisanRole = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ARTISAN".equals(authority.getAuthority()));
+        if (!hasArtisanRole) {
+            throw new ForbiddenException("Access denied: artisan role required.");
+        }
+
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new UnauthorizedException("User is not authenticated");
+        }
+
+        return artisanRepository.findByUserEmailIgnoreCase(username)
+                .or(() -> artisanRepository.findById(username))
+                .orElseThrow(() -> new ForbiddenException("Only registered artisans can access this resource."));
+    }
+}
