@@ -56,6 +56,11 @@ public class AppProperties {
         private String uploadDir;
         private String thumbnails;
         private String indexes;
+
+        /**
+         * Route prefix for public or authenticated file streaming endpoints (default: /api/v1/files/).
+         */
+        private String fileServingPrefix = "/api/v1/files/";
     }
 
     @Data
@@ -218,6 +223,11 @@ public class AppProperties {
         private CancellationConfig cancellation = new CancellationConfig();
 
         /**
+         * Default ISO currency code for formations (default: DZD).
+         */
+        private String defaultCurrency = "DZD";
+
+        /**
          * Configuration for formation thumbnail images.
          */
         @Data
@@ -227,6 +237,15 @@ public class AppProperties {
              * Maximum allowable file size for formation thumbnails (default: 10MB).
              */
             private DataSize maxFileSize = DataSize.ofMegabytes(10);
+
+            /**
+             * Permitted MIME types for formation showcase thumbnails.
+             */
+            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+            ));
         }
 
         /**
@@ -244,6 +263,15 @@ public class AppProperties {
              * Maximum allowable file size for individual course files (default: 25MB).
              */
             private DataSize maxFileSize = DataSize.ofMegabytes(25);
+
+            /**
+             * Permitted MIME types for formation course files and syllabus attachments.
+             */
+            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
+                    "application/pdf",
+                    "image/jpeg",
+                    "image/png"
+            ));
         }
 
         /**

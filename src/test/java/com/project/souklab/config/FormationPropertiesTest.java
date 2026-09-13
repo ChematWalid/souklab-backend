@@ -28,28 +28,38 @@ class FormationPropertiesTest {
 
         assertThat(config.getThumbnail()).isNotNull();
         assertThat(config.getThumbnail().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(10));
+        assertThat(config.getThumbnail().getAllowedMimeTypes()).containsExactly("image/jpeg", "image/png", "image/webp");
 
         assertThat(config.getFile()).isNotNull();
         assertThat(config.getFile().getMaxCount()).isEqualTo(10);
         assertThat(config.getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(25));
+        assertThat(config.getFile().getAllowedMimeTypes()).containsExactly("application/pdf", "image/jpeg", "image/png");
 
         assertThat(config.getCancellation()).isNotNull();
         assertThat(config.getCancellation().getDeadlineHours()).isEqualTo(24);
+
+        assertThat(config.getDefaultCurrency()).isEqualTo("DZD");
     }
 
     /**
-     * Verifies that AppProperties exposes FormationConfig defaults at the root level.
+     * Verifies that AppProperties exposes FormationConfig defaults and storage file-serving prefix at the root level.
      */
     @Test
-    @DisplayName("AppProperties root exposes FormationConfig with expected defaults")
+    @DisplayName("AppProperties root exposes FormationConfig and Storage with expected defaults")
     void appPropertiesRootExposesFormationDefaults() {
         AppProperties appProperties = new AppProperties();
 
+        assertThat(appProperties.getStorage()).isNotNull();
+        assertThat(appProperties.getStorage().getFileServingPrefix()).isEqualTo("/api/v1/files/");
+
         assertThat(appProperties.getFormation()).isNotNull();
         assertThat(appProperties.getFormation().getThumbnail().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(10));
+        assertThat(appProperties.getFormation().getThumbnail().getAllowedMimeTypes()).containsExactly("image/jpeg", "image/png", "image/webp");
         assertThat(appProperties.getFormation().getFile().getMaxCount()).isEqualTo(10);
         assertThat(appProperties.getFormation().getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(25));
+        assertThat(appProperties.getFormation().getFile().getAllowedMimeTypes()).containsExactly("application/pdf", "image/jpeg", "image/png");
         assertThat(appProperties.getFormation().getCancellation().getDeadlineHours()).isEqualTo(24);
+        assertThat(appProperties.getFormation().getDefaultCurrency()).isEqualTo("DZD");
     }
 
     /**
@@ -61,41 +71,57 @@ class FormationPropertiesTest {
         StandardEnvironment environment = new StandardEnvironment();
         environment.getPropertySources().addLast(new MapPropertySource("test-formation", Map.of(
                 "app.formation.thumbnail.max-file-size", "15MB",
+                "app.formation.thumbnail.allowed-mime-types", "image/png,image/webp",
                 "app.formation.file.max-count", "20",
                 "app.formation.file.max-file-size", "50MB",
-                "app.formation.cancellation.deadline-hours", "48"
+                "app.formation.file.allowed-mime-types", "application/pdf",
+                "app.formation.cancellation.deadline-hours", "48",
+                "app.formation.default-currency", "EUR"
         )));
 
         Binder binder = new Binder(ConfigurationPropertySources.from(environment.getPropertySources()));
         AppProperties.FormationConfig config = binder.bind("app.formation", AppProperties.FormationConfig.class).get();
 
         assertThat(config.getThumbnail().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(15));
+        assertThat(config.getThumbnail().getAllowedMimeTypes()).containsExactly("image/png", "image/webp");
         assertThat(config.getFile().getMaxCount()).isEqualTo(20);
         assertThat(config.getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(50));
+        assertThat(config.getFile().getAllowedMimeTypes()).containsExactly("application/pdf");
         assertThat(config.getCancellation().getDeadlineHours()).isEqualTo(48);
+        assertThat(config.getDefaultCurrency()).isEqualTo("EUR");
     }
 
     /**
-     * Verifies that root AppProperties binds full nested app.formation properties tree.
+     * Verifies that root AppProperties binds full nested app properties tree including storage and formation.
      */
     @Test
-    @DisplayName("AppProperties root correctly binds nested formation tree from property sources")
+    @DisplayName("AppProperties root correctly binds nested storage and formation tree from property sources")
     void bindsRootAppPropertiesFormationTree() {
         StandardEnvironment environment = new StandardEnvironment();
         environment.getPropertySources().addLast(new MapPropertySource("test-app-formation", Map.of(
+                "app.storage.file-serving-prefix", "/custom/files/",
                 "app.formation.thumbnail.max-file-size", "8MB",
+                "app.formation.thumbnail.allowed-mime-types", "image/jpeg",
                 "app.formation.file.max-count", "5",
                 "app.formation.file.max-file-size", "12MB",
-                "app.formation.cancellation.deadline-hours", "12"
+                "app.formation.file.allowed-mime-types", "application/pdf,image/png",
+                "app.formation.cancellation.deadline-hours", "12",
+                "app.formation.default-currency", "USD"
         )));
 
         Binder binder = new Binder(ConfigurationPropertySources.from(environment.getPropertySources()));
         AppProperties appProperties = binder.bind("app", AppProperties.class).get();
 
+        assertThat(appProperties.getStorage()).isNotNull();
+        assertThat(appProperties.getStorage().getFileServingPrefix()).isEqualTo("/custom/files/");
+
         assertThat(appProperties.getFormation()).isNotNull();
         assertThat(appProperties.getFormation().getThumbnail().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(8));
+        assertThat(appProperties.getFormation().getThumbnail().getAllowedMimeTypes()).containsExactly("image/jpeg");
         assertThat(appProperties.getFormation().getFile().getMaxCount()).isEqualTo(5);
         assertThat(appProperties.getFormation().getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(12));
+        assertThat(appProperties.getFormation().getFile().getAllowedMimeTypes()).containsExactly("application/pdf", "image/png");
         assertThat(appProperties.getFormation().getCancellation().getDeadlineHours()).isEqualTo(12);
+        assertThat(appProperties.getFormation().getDefaultCurrency()).isEqualTo("USD");
     }
 }

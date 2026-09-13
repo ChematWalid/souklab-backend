@@ -44,8 +44,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ArtisanGalleryService {
 
-    private static final String FILE_SERVING_PREFIX = "/api/v1/files/";
-
     private final ArtisanRepository artisanRepository;
     private final ArtisanGalleryImageRepository galleryImageRepository;
     private final StorageService storageService;
@@ -213,7 +211,7 @@ public class ArtisanGalleryService {
 
             ArtisanGalleryImage galleryImage = ArtisanGalleryImage.builder()
                     .artisan(artisan)
-                    .imageUrl(FILE_SERVING_PREFIX + storageKey)
+                    .imageUrl(getFileServingPrefix() + storageKey)
                     .title(title)
                     .caption(caption)
                     .displayOrder(displayOrder)
@@ -300,5 +298,18 @@ public class ArtisanGalleryService {
         return artisanRepository.findByUserEmailIgnoreCase(username)
                 .or(() -> artisanRepository.findById(username))
                 .orElseThrow(() -> new ForbiddenException("Only registered artisans can access this resource."));
+    }
+
+    /**
+     * Resolves the configured file-serving route prefix with a guaranteed trailing slash.
+     *
+     * @return normalized route prefix
+     */
+    private String getFileServingPrefix() {
+        String prefix = appProperties.getStorage().getFileServingPrefix();
+        if (prefix == null || prefix.isBlank()) {
+            return "/api/v1/files/";
+        }
+        return prefix.endsWith("/") ? prefix : prefix + "/";
     }
 }

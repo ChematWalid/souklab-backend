@@ -51,4 +51,15 @@ public interface FormationRepository extends JpaRepository<Formation, String>, J
      * @return optional containing the active formation if found
      */
     Optional<Formation> findByIdAndDeletedAtIsNull(String id);
+
+    /**
+     * Retrieves active formations authored by a specific artisan filtered by status, excluding soft-deleted entities.
+     *
+     * @param authorId the unique identifier of the authoring artisan
+     * @param status the formation status to filter by
+     * @param pageable pagination and sorting parameters
+     * @return page of matching formations authored by the artisan
+     */
+    Page<Formation> findByAuthorIdAndStatusAndDeletedAtIsNull(String authorId, FormationStatus status, Pageable pageable);
 }
+

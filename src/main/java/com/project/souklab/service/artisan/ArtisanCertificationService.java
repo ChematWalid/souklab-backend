@@ -41,8 +41,6 @@ import java.util.List;
 @Slf4j
 public class ArtisanCertificationService {
 
-    private static final String FILE_SERVING_PREFIX = "/api/v1/files/";
-
     private final ArtisanRepository artisanRepository;
     private final ArtisanCertificationRepository certificationRepository;
     private final StorageService storageService;
@@ -212,7 +210,7 @@ public class ArtisanCertificationService {
                     .issuer(issuer)
                     .issuedAt(issuedAt)
                     .expiresAt(expiresAt)
-                    .documentUrl(FILE_SERVING_PREFIX + storageKey)
+                    .documentUrl(getFileServingPrefix() + storageKey)
                     .isVerified(false)
                     .build();
 
@@ -257,5 +255,18 @@ public class ArtisanCertificationService {
         return artisanRepository.findByUserEmailIgnoreCase(username)
                 .or(() -> artisanRepository.findById(username))
                 .orElseThrow(() -> new ForbiddenException("Only registered artisans can access this resource."));
+    }
+
+    /**
+     * Resolves the configured file-serving route prefix with a guaranteed trailing slash.
+     *
+     * @return normalized route prefix
+     */
+    private String getFileServingPrefix() {
+        String prefix = appProperties.getStorage().getFileServingPrefix();
+        if (prefix == null || prefix.isBlank()) {
+            return "/api/v1/files/";
+        }
+        return prefix.endsWith("/") ? prefix : prefix + "/";
     }
 }
