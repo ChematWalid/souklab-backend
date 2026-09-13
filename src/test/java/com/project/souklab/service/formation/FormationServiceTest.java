@@ -15,8 +15,6 @@ import com.project.souklab.dto.formation.FormationUpdateDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
-import com.project.souklab.exception.ResourceNotFoundException;
-import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
@@ -50,7 +48,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayInputStream;
 import java.time.Instant;

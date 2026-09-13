@@ -16,7 +16,6 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
-import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
@@ -31,13 +30,11 @@ import com.project.souklab.model.FormationFile;
 import com.project.souklab.model.FormationReview;
 import com.project.souklab.model.FormationStatus;
 import com.project.souklab.service.notification.NotificationService;
-import com.project.souklab.util.SecurityUtils;
+import com.project.souklab.util.ArtisanSecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,6 +63,7 @@ public class FormationService {
     private final VirusScanService virusScanService;
     private final AppProperties appProperties;
     private final NotificationService notificationService;
+
 
     /**
      * Creates a new formation masterclass in draft state for the authenticated accredited instructor artisan.
@@ -173,7 +171,7 @@ public class FormationService {
                     scannedFile.size()
             );
             storageKey = result.key();
-            formation.setThumbnailUrl(getFileServingPrefix() + storageKey);
+            formation.setThumbnailUrl(appProperties.getStorage().toUrl(storageKey));
             Formation saved = formationRepository.save(formation);
             return mapToResponseDTO(saved);
         } catch (Exception ex) {
@@ -231,7 +229,7 @@ public class FormationService {
                     .build();
 
             FormationFile savedFile = formationFileRepository.save(courseFile);
-            return FormationFileResponseDTO.from(savedFile, getFileServingPrefix());
+            return FormationFileResponseDTO.from(savedFile, appProperties.getStorage().resolveFileServingPrefix());
         } catch (Exception ex) {
             compensateStorageDelete(storageKey);
             throw ex;
@@ -398,30 +396,12 @@ public class FormationService {
     }
 
     /**
-     * Resolves authenticated artisan from security context.
+     * Delegates artisan identity resolution to the shared {@link ArtisanSecurityUtils} component.
      *
-     * @return authenticated Artisan entity
+     * @return resolved Artisan entity for the current authenticated principal
      */
     private Artisan resolveAuthenticatedArtisan() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            throw new UnauthorizedException("User is not authenticated");
-        }
-
-        boolean hasArtisanRole = authentication.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_ARTISAN".equals(authority.getAuthority()));
-        if (!hasArtisanRole) {
-            throw new ForbiddenException("Access denied: artisan role required.");
-        }
-
-        String username = SecurityUtils.getCurrentUsername();
-        if (username == null) {
-            throw new UnauthorizedException("User is not authenticated");
-        }
-
-        return artisanRepository.findByUserEmailIgnoreCase(username)
-                .or(() -> artisanRepository.findById(username))
-                .orElseThrow(() -> new ForbiddenException("Only registered artisans can access this resource."));
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository);
     }
 
     /**
@@ -434,20 +414,7 @@ public class FormationService {
         List<FormationFile> activeFiles = formationFileRepository.findByFormationIdAndDeletedAtIsNull(formation.getId());
         List<FormationReview> reviews = formationReviewRepository.findByFormationIdOrderByReviewedAtDesc(formation.getId());
         long activeEnrollments = formationEnrollmentRepository.countByFormationIdAndStatus(formation.getId(), EnrollmentStatus.CONFIRMED);
-        return FormationResponseDTO.from(formation, activeFiles, reviews, activeEnrollments, getFileServingPrefix());
-    }
-
-    /**
-     * Resolves the configured file-serving route prefix with a guaranteed trailing slash.
-     *
-     * @return normalized route prefix
-     */
-    private String getFileServingPrefix() {
-        String prefix = appProperties.getStorage().getFileServingPrefix();
-        if (prefix == null || prefix.isBlank()) {
-            return "/api/v1/files/";
-        }
-        return prefix.endsWith("/") ? prefix : prefix + "/";
+        return FormationResponseDTO.from(formation, activeFiles, reviews, activeEnrollments, appProperties.getStorage().resolveFileServingPrefix());
     }
 
     /**

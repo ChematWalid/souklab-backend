@@ -5,7 +5,6 @@ import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.formation.FormationResponseDTO;
 import com.project.souklab.dto.formation.FormationReviewRequestDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
-import com.project.souklab.model.FormationReviewDecision;
 import com.project.souklab.model.FormationStatus;
 import com.project.souklab.service.formation.AdminFormationService;
 import org.junit.jupiter.api.DisplayName;

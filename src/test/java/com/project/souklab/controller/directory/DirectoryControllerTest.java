@@ -161,7 +161,7 @@ class DirectoryControllerTest {
         mockMvc.perform(get("/api/v1/public/directory")
                         .param("page", "-1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors.page").exists());
     }
@@ -175,7 +175,7 @@ class DirectoryControllerTest {
         mockMvc.perform(get("/api/v1/public/directory")
                         .param("size", "150")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors.size").exists());
     }
@@ -189,7 +189,7 @@ class DirectoryControllerTest {
         mockMvc.perform(get("/api/v1/public/directory")
                         .param("size", "0")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors.size").exists());
     }
@@ -203,7 +203,7 @@ class DirectoryControllerTest {
         mockMvc.perform(get("/api/v1/public/directory")
                         .param("minRating", "5.5")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors.minRating").exists());
     }
@@ -218,7 +218,7 @@ class DirectoryControllerTest {
         mockMvc.perform(get("/api/v1/public/directory")
                         .param("q", oversizedKeyword)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors.keyword").exists());
     }

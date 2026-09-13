@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -252,7 +251,7 @@ class AvatarControllerTest {
             mockMvc.perform(multipart(AVATAR_URL)
                             .file(validFile)
                             .with(client()))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.errorCode").value("VIRUS_DETECTED"));
         }

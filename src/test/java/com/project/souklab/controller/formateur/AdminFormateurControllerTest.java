@@ -191,7 +191,7 @@ class AdminFormateurControllerTest {
                             .with(admin())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"adminNote\":\"   \"}"))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.message").value("Validation failed"))
@@ -208,7 +208,7 @@ class AdminFormateurControllerTest {
                             .with(admin())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.errors.adminNote").value("Admin note is required"));
         }
 
@@ -323,7 +323,7 @@ class AdminFormateurControllerTest {
                             .with(admin())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"adminNote\":\"\"}"))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.adminNote").value("Admin note is required"));
         }
@@ -432,7 +432,7 @@ class AdminFormateurControllerTest {
                             .with(admin())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"adminNote\":\"\"}"))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.adminNote").value("Admin note is required"));
         }
@@ -534,7 +534,7 @@ class AdminFormateurControllerTest {
                             .with(admin())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"reason\":\"   \"}"))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.reason").value("Reason is required"));
         }

@@ -525,7 +525,7 @@ class UserManagementControllerTest {
                             .with(admin())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.reason").exists());
@@ -621,7 +621,7 @@ class UserManagementControllerTest {
                             .with(admin())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"minutes\":0,\"reason\":\"Invalid duration\"}"))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.minutes").exists());

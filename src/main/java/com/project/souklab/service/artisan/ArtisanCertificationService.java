@@ -5,9 +5,7 @@ import com.project.souklab.dao.ArtisanCertificationRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dto.artisan.CertificationResponseDTO;
 import com.project.souklab.exception.BadRequestException;
-import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
-import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
@@ -17,11 +15,9 @@ import com.project.souklab.filestorage.validation.FileValidator;
 import com.project.souklab.filestorage.validation.ValidatedFile;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanCertification;
-import com.project.souklab.util.SecurityUtils;
+import com.project.souklab.util.ArtisanSecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,6 +43,7 @@ public class ArtisanCertificationService {
     private final FileValidator fileValidator;
     private final VirusScanService virusScanService;
     private final AppProperties appProperties;
+
 
     /**
      * Uploads and persists an official professional certification or accreditation card for the authenticated artisan.
@@ -210,7 +207,7 @@ public class ArtisanCertificationService {
                     .issuer(issuer)
                     .issuedAt(issuedAt)
                     .expiresAt(expiresAt)
-                    .documentUrl(getFileServingPrefix() + storageKey)
+                    .documentUrl(appProperties.getStorage().toUrl(storageKey))
                     .isVerified(false)
                     .build();
 
@@ -229,44 +226,11 @@ public class ArtisanCertificationService {
     }
 
     /**
-     * Resolves authenticated artisan profile from security context and asserts ROLE_ARTISAN authority.
+     * Delegates artisan identity resolution to the shared {@link ArtisanSecurityUtils} component.
      *
-     * @return resolved Artisan entity
-     * @throws UnauthorizedException if authentication is missing or anonymous
-     * @throws ForbiddenException if role or artisan profile is missing
+     * @return resolved Artisan entity for the current authenticated principal
      */
     private Artisan resolveAuthenticatedArtisan() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            throw new UnauthorizedException("User is not authenticated");
-        }
-
-        boolean hasArtisanRole = authentication.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_ARTISAN".equals(authority.getAuthority()));
-        if (!hasArtisanRole) {
-            throw new ForbiddenException("Access denied: artisan role required.");
-        }
-
-        String username = SecurityUtils.getCurrentUsername();
-        if (username == null) {
-            throw new UnauthorizedException("User is not authenticated");
-        }
-
-        return artisanRepository.findByUserEmailIgnoreCase(username)
-                .or(() -> artisanRepository.findById(username))
-                .orElseThrow(() -> new ForbiddenException("Only registered artisans can access this resource."));
-    }
-
-    /**
-     * Resolves the configured file-serving route prefix with a guaranteed trailing slash.
-     *
-     * @return normalized route prefix
-     */
-    private String getFileServingPrefix() {
-        String prefix = appProperties.getStorage().getFileServingPrefix();
-        if (prefix == null || prefix.isBlank()) {
-            return "/api/v1/files/";
-        }
-        return prefix.endsWith("/") ? prefix : prefix + "/";
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository);
     }
 }

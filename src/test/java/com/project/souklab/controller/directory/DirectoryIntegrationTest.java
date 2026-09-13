@@ -303,12 +303,12 @@ class DirectoryIntegrationTest {
     @DisplayName("Directory: validation guards reject invalid pagination parameters with HTTP 422")
     void validation_negativePageAndExcessiveSizeAreRejected() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory").param("page", "-1"))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.code").value(422))
                 .andExpect(jsonPath("$.success").value(false));
 
         mockMvc.perform(get("/api/v1/public/directory").param("size", "101"))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.code").value(422))
                 .andExpect(jsonPath("$.success").value(false));
     }

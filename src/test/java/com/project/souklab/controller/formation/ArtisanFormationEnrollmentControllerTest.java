@@ -1,7 +1,6 @@
 package com.project.souklab.controller.formation;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
-import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
 import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
 import com.project.souklab.dto.formation.FormationFileDescriptorDTO;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 

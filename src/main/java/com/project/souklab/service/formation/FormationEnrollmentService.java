@@ -13,7 +13,6 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
-import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.model.Artisan;
@@ -22,15 +21,13 @@ import com.project.souklab.model.Formation;
 import com.project.souklab.model.FormationEnrollment;
 import com.project.souklab.model.FormationFile;
 import com.project.souklab.model.FormationStatus;
-import com.project.souklab.util.SecurityUtils;
+import com.project.souklab.util.ArtisanSecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +50,7 @@ public class FormationEnrollmentService {
     private final FormationFileRepository formationFileRepository;
     private final StorageService storageService;
     private final AppProperties appProperties;
+
 
     /**
      * Retrieves paginated published masterclasses for peer artisan catalog discovery.
@@ -256,31 +254,11 @@ public class FormationEnrollmentService {
     }
 
     /**
-     * Resolves the authenticated artisan entity from Spring Security context.
+     * Delegates artisan identity resolution to the shared {@link ArtisanSecurityUtils} component.
      *
-     * @return authenticated Artisan entity
-     * @throws UnauthorizedException if user is not authenticated
-     * @throws ForbiddenException if user lacks artisan role or profile
+     * @return resolved Artisan entity for the current authenticated principal
      */
     private Artisan resolveAuthenticatedArtisan() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            throw new UnauthorizedException("User is not authenticated");
-        }
-
-        boolean hasArtisanRole = authentication.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_ARTISAN".equals(authority.getAuthority()));
-        if (!hasArtisanRole) {
-            throw new ForbiddenException("Access denied: artisan role required.");
-        }
-
-        String username = SecurityUtils.getCurrentUsername();
-        if (username == null) {
-            throw new UnauthorizedException("User is not authenticated");
-        }
-
-        return artisanRepository.findByUserEmailIgnoreCase(username)
-                .or(() -> artisanRepository.findById(username))
-                .orElseThrow(() -> new ForbiddenException("Only registered artisans can access this resource."));
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository);
     }
 }

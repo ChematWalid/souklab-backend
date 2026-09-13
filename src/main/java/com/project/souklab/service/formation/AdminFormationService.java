@@ -191,20 +191,7 @@ public class AdminFormationService {
         List<FormationFile> activeFiles = formationFileRepository.findByFormationIdAndDeletedAtIsNull(formation.getId());
         List<FormationReview> reviews = formationReviewRepository.findByFormationIdOrderByReviewedAtDesc(formation.getId());
         long activeEnrollments = formationEnrollmentRepository.countByFormationIdAndStatus(formation.getId(), EnrollmentStatus.CONFIRMED);
-        return FormationResponseDTO.from(formation, activeFiles, reviews, activeEnrollments, getFileServingPrefix());
-    }
-
-    /**
-     * Resolves the configured file-serving route prefix with a guaranteed trailing slash.
-     *
-     * @return normalized route prefix
-     */
-    private String getFileServingPrefix() {
-        String prefix = appProperties.getStorage().getFileServingPrefix();
-        if (prefix == null || prefix.isBlank()) {
-            return "/api/v1/files/";
-        }
-        return prefix.endsWith("/") ? prefix : prefix + "/";
+        return FormationResponseDTO.from(formation, activeFiles, reviews, activeEnrollments, appProperties.getStorage().resolveFileServingPrefix());
     }
 
     /**

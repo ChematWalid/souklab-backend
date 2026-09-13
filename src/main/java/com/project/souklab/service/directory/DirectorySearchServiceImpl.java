@@ -85,7 +85,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
         int offset = page * size;
 
         SearchResult<Artisan> result = searchSession.search(Artisan.class)
-                .where(f -> f.bool(b -> {
+                .where(f -> f.bool().with(b -> {
                     b.must(buildFullTextQuery(f, filter));
                     for (SearchPredicate filterClause : buildFilterClauses(f, filter)) {
                         b.filter(filterClause);

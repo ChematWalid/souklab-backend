@@ -61,6 +61,32 @@ public class AppProperties {
          * Route prefix for public or authenticated file streaming endpoints (default: /api/v1/files/).
          */
         private String fileServingPrefix = "/api/v1/files/";
+
+        /**
+         * Returns the configured file-serving route prefix normalised with a guaranteed trailing slash.
+         * Callers should use this instead of rolling their own prefix resolution.
+         *
+         * @return normalised route prefix ending with {@code /}
+         */
+        public String resolveFileServingPrefix() {
+            if (fileServingPrefix == null || fileServingPrefix.isBlank()) {
+                return "/api/v1/files/";
+            }
+            return fileServingPrefix.endsWith("/") ? fileServingPrefix : fileServingPrefix + "/";
+        }
+
+        /**
+         * Resolves an internal storage key to its public or CDN accessible URL representation.
+         *
+         * @param storageKey the raw storage key (e.g. UUID filename)
+         * @return the fully qualified or relative public file serving URL, or null if key is null or blank
+         */
+        public String toUrl(String storageKey) {
+            if (storageKey == null || storageKey.isBlank()) {
+                return null;
+            }
+            return resolveFileServingPrefix() + storageKey;
+        }
     }
 
     @Data

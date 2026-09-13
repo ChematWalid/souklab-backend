@@ -18,6 +18,7 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
+import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.ArtisanProfileView;
 import com.project.souklab.model.User;
 import com.project.souklab.util.SecurityUtils;
@@ -66,76 +67,23 @@ public class ArtisanProfileService {
         boolean isAdmin = viewer.getRoles().stream()
                 .anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
 
-        if (!isAdmin) {
-            if (viewer.getStatus() != AccountStatus.ACTIVE) {
-                throw new ForbiddenException("Your account is not active.");
-            }
-            if (!viewer.isEmailVerified()) {
-                throw new ForbiddenException("Please verify your email address to access artisan profiles.");
-            }
-        }
+        verifyViewerAccess(viewer, isAdmin);
 
         Artisan artisan = artisanRepository.findById(artisanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Artisan not found with id: " + artisanId));
 
         boolean isSelf = viewer.getId().equals(artisan.getId());
 
-        if (!isSelf && !isAdmin) {
-            boolean alreadyViewed = artisanProfileViewRepository.existsByViewerIdAndArtisanId(viewer.getId(), artisan.getId());
-            if (!alreadyViewed) {
-                ArtisanProfileView view = ArtisanProfileView.builder()
-                        .viewer(viewer)
-                        .artisan(artisan)
-                        .build();
-                artisanProfileViewRepository.save(view);
+        recordProfileViewIfEligible(viewer, artisan, isSelf, isAdmin);
 
-                artisan.setViewsCount(artisan.getViewsCount() + 1);
-                artisanRepository.save(artisan);
-            }
-        }
-
-        boolean contactInfoLocked;
-        if (isSelf || isAdmin) {
-            contactInfoLocked = false;
-        } else {
-            boolean isPremium = false;
-            if (viewer.getClient() != null) {
-                isPremium = viewer.getClient().isPremium();
-            } else if (viewer.getArtisan() != null) {
-                isPremium = viewer.getArtisan().isPremium();
-            }
-            contactInfoLocked = !isPremium;
-        }
+        boolean contactInfoLocked = resolveContactInfoLocked(viewer, isSelf, isAdmin);
 
         User targetUser = artisan.getUser();
-        String name;
-        String phone;
-        String contactEmail;
-        String website;
-        String address;
-
-        if (contactInfoLocked) {
-            name = "Artisan #" + (artisan.getId().length() >= 5
-                    ? artisan.getId().substring(artisan.getId().length() - 5).toUpperCase()
-                    : artisan.getId().toUpperCase());
-            phone = null;
-            contactEmail = null;
-            website = null;
-            address = null;
-        } else {
-            String resolvedName = targetUser != null ? targetUser.getName() : null;
-            if (resolvedName == null || resolvedName.isBlank()) {
-                if (targetUser != null && (targetUser.getFirstName() != null || targetUser.getLastName() != null)) {
-                    resolvedName = ((targetUser.getFirstName() != null ? targetUser.getFirstName() : "") + " " +
-                            (targetUser.getLastName() != null ? targetUser.getLastName() : "")).trim();
-                }
-            }
-            name = resolvedName;
-            phone = targetUser != null ? targetUser.getPhone() : null;
-            contactEmail = targetUser != null ? targetUser.getEmail() : null;
-            website = artisan.getWebsite();
-            address = artisan.getAddress();
-        }
+        String name = resolveName(artisan, targetUser, contactInfoLocked);
+        String phone = contactInfoLocked ? null : (targetUser != null ? targetUser.getPhone() : null);
+        String contactEmail = contactInfoLocked ? null : (targetUser != null ? targetUser.getEmail() : null);
+        String website = contactInfoLocked ? null : artisan.getWebsite();
+        String address = contactInfoLocked ? null : artisan.getAddress();
 
         RegionSummaryDTO regionSummary = RegionSummaryDTO.from(artisan.getRegion());
         JobSubCategorySummaryDTO subCategorySummary = JobSubCategorySummaryDTO.from(artisan.getSubCategory());
@@ -161,20 +109,7 @@ public class ArtisanProfileService {
         List<CertificationResponseDTO> certificationDTOs = artisanCertificationRepository
                 .findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc(artisan.getId())
                 .stream()
-                .map(cert -> {
-                    if (contactInfoLocked) {
-                        return CertificationResponseDTO.builder()
-                                .id(cert.getId())
-                                .title(cert.getTitle())
-                                .issuer(cert.getIssuer())
-                                .issuedAt(cert.getIssuedAt())
-                                .expiresAt(cert.getExpiresAt())
-                                .isVerified(cert.isVerified())
-                                .documentUrl(null)
-                                .build();
-                    }
-                    return CertificationResponseDTO.from(cert);
-                })
+                .map(cert -> mapCertification(cert, contactInfoLocked))
                 .toList();
 
         return ArtisanPublicViewDTO.builder()
@@ -203,5 +138,117 @@ public class ArtisanProfileService {
                 .website(website)
                 .address(address)
                 .build();
+    }
+
+    /**
+     * Verifies the viewer is allowed to browse public artisan profiles.
+     * Non-admin viewers must hold an ACTIVE account with a verified email address.
+     *
+     * @param viewer  the authenticated user performing the request
+     * @param isAdmin {@code true} if the viewer holds the ROLE_ADMIN authority
+     * @throws ForbiddenException if the non-admin viewer's account or email is not verified
+     */
+    private void verifyViewerAccess(User viewer, boolean isAdmin) {
+        if (isAdmin) {
+            return;
+        }
+        if (viewer.getStatus() != AccountStatus.ACTIVE) {
+            throw new ForbiddenException("Your account is not active.");
+        }
+        if (!viewer.isEmailVerified()) {
+            throw new ForbiddenException("Please verify your email address to access artisan profiles.");
+        }
+    }
+
+    /**
+     * Records a deduplicated profile view for the viewer when eligible.
+     * Views are only recorded when the viewer is neither the profile owner nor an administrator,
+     * and no prior view record exists for this viewer–artisan pair.
+     *
+     * @param viewer  the authenticated user performing the request
+     * @param artisan the target artisan whose profile is being viewed
+     * @param isSelf  {@code true} if the viewer is viewing their own profile
+     * @param isAdmin {@code true} if the viewer holds the ROLE_ADMIN authority
+     */
+    private void recordProfileViewIfEligible(User viewer, Artisan artisan, boolean isSelf, boolean isAdmin) {
+        if (!isSelf && !isAdmin && !artisanProfileViewRepository.existsByViewerIdAndArtisanId(viewer.getId(), artisan.getId())) {
+            ArtisanProfileView view = ArtisanProfileView.builder()
+                    .viewer(viewer)
+                    .artisan(artisan)
+                    .build();
+            artisanProfileViewRepository.save(view);
+            artisan.setViewsCount(artisan.getViewsCount() + 1);
+            artisanRepository.save(artisan);
+        }
+    }
+
+    /**
+     * Resolves whether contact information should be hidden from the viewer.
+     * Owners and admins always see contact info. Third-party viewers must hold a premium subscription.
+     *
+     * @param viewer  the authenticated user performing the request
+     * @param isSelf  {@code true} if the viewer owns the profile
+     * @param isAdmin {@code true} if the viewer holds the ROLE_ADMIN authority
+     * @return {@code true} if contact fields must be masked; {@code false} otherwise
+     */
+    private boolean resolveContactInfoLocked(User viewer, boolean isSelf, boolean isAdmin) {
+        if (isSelf || isAdmin) {
+            return false;
+        }
+        boolean isPremium = false;
+        if (viewer.getClient() != null) {
+            isPremium = viewer.getClient().isPremium();
+        } else if (viewer.getArtisan() != null) {
+            isPremium = viewer.getArtisan().isPremium();
+        }
+        return !isPremium;
+    }
+
+    /**
+     * Resolves the display name for the artisan profile.
+     * When contact info is locked, returns an anonymised identifier; otherwise resolves the real name.
+     *
+     * @param artisan           the target artisan
+     * @param targetUser        the user entity linked to the artisan
+     * @param contactInfoLocked {@code true} if contact fields are masked
+     * @return the display name to expose
+     */
+    private String resolveName(Artisan artisan, User targetUser, boolean contactInfoLocked) {
+        if (contactInfoLocked) {
+            String id = artisan.getId();
+            return "Artisan #" + (id.length() >= 5 ? id.substring(id.length() - 5).toUpperCase() : id.toUpperCase());
+        }
+        String resolvedName = targetUser != null ? targetUser.getName() : null;
+        if ((resolvedName == null || resolvedName.isBlank())
+                && targetUser != null
+                && (targetUser.getFirstName() != null || targetUser.getLastName() != null)) {
+            String first = targetUser.getFirstName() != null ? targetUser.getFirstName() : "";
+            String last = targetUser.getLastName() != null ? targetUser.getLastName() : "";
+            resolvedName = (first + " " + last).trim();
+        }
+        return resolvedName;
+    }
+
+    /**
+     * Maps a single certification entity to its response DTO, masking the document URL
+     * when contact information is locked for the requesting viewer.
+     *
+     * @param cert              the certification entity to map
+     * @param contactInfoLocked {@code true} if the document URL should be suppressed
+     * @return the mapped response DTO
+     */
+    private CertificationResponseDTO mapCertification(ArtisanCertification cert, boolean contactInfoLocked) {
+        if (contactInfoLocked) {
+            return CertificationResponseDTO.builder()
+                    .id(cert.getId())
+                    .title(cert.getTitle())
+                    .issuer(cert.getIssuer())
+                    .issuedAt(cert.getIssuedAt())
+                    .expiresAt(cert.getExpiresAt())
+                    .isVerified(cert.isVerified())
+                    .documentUrl(null)
+                    .build();
+        }
+        return CertificationResponseDTO.from(cert);
     }
 }

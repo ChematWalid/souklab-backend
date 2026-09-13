@@ -189,7 +189,7 @@ class AuthControllerTest {
                                       "role": ""
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.message").value("Validation failed"))
@@ -293,7 +293,7 @@ class AuthControllerTest {
                                       "email": "karim@souklab.dz"
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.password").value("Password is required"));
@@ -389,7 +389,7 @@ class AuthControllerTest {
                                       "refreshToken": ""
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.refreshToken").exists());
@@ -529,7 +529,7 @@ class AuthControllerTest {
                                       "code": "abc"
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.email").value("Invalid email format"))
@@ -598,7 +598,7 @@ class AuthControllerTest {
                                       "email": ""
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.email").value("Email is required"));
@@ -643,7 +643,7 @@ class AuthControllerTest {
                                       "email": "not-an-email"
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.email").value("Invalid email format"));
@@ -692,7 +692,7 @@ class AuthControllerTest {
                                       "newPassword": "short"
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.newPassword").value("Password must be at least 8 characters"));
@@ -784,7 +784,7 @@ class AuthControllerTest {
                                       "newPassword": "BrandNewPassword123!"
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.oldPassword").value("Current password is required"));
@@ -830,7 +830,7 @@ class AuthControllerTest {
                                       "newPassword": "SamePassword123!"
                                     }
                                     """))
-                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.code").value(422))
                     .andExpect(jsonPath("$.errors.newPassword").value("New password must be different from your current password."));
