@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.FormationReview;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -10,7 +9,6 @@ import java.util.List;
  * Data access repository for {@link FormationReview} entities.
  * Manages administrative moderation histories and decision logs.
  */
-@Repository
 public interface FormationReviewRepository extends JpaRepository<FormationReview, String> {
 
     /**

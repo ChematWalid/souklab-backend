@@ -45,6 +45,8 @@ import java.util.Map;
 @Slf4j
 public class AvatarService {
 
+    private static final String CURRENT_USER_CANNOT_BE_NULL = "Current user cannot be null";
+
     private final UserAvatarRepository userAvatarRepository;
     private final UserRepository userRepository;
     private final FileValidator fileValidator;
@@ -76,7 +78,7 @@ public class AvatarService {
      */
     public AvatarResponseDTO uploadAvatar(User currentUser, MultipartFile file) {
         if (currentUser == null) {
-            throw new IllegalArgumentException("Current user cannot be null");
+            throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
         }
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Avatar file is required and cannot be empty");
@@ -191,7 +193,7 @@ public class AvatarService {
      */
     public PaginatedResponse<AvatarResponseDTO> listAvatars(User currentUser, Pageable pageable) {
         if (currentUser == null) {
-            throw new IllegalArgumentException("Current user cannot be null");
+            throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
         }
         Page<UserAvatar> page = userAvatarRepository.findByUserId(currentUser.getId(), pageable);
         return PaginatedResponse.from(page.map(this::mapToResponseDTO));
@@ -208,7 +210,7 @@ public class AvatarService {
      */
     public void deleteAvatar(User currentUser, String avatarId) {
         if (currentUser == null) {
-            throw new IllegalArgumentException("Current user cannot be null");
+            throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
         }
         UserAvatar avatar = userAvatarRepository.findByIdAndUserId(avatarId, currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Avatar not found with id: " + avatarId));
@@ -219,9 +221,11 @@ public class AvatarService {
                 avatar.getStorageKeyThumbnail()
         );
 
+        boolean wasActive = avatar.isActive();
+
         transactionTemplate.execute(status -> {
             userAvatarRepository.delete(avatar);
-            if (avatar.isActive()) {
+            if (wasActive) {
                 currentUser.setAvatarUrl(null);
                 userRepository.save(currentUser);
             }
@@ -233,7 +237,7 @@ public class AvatarService {
                 storageService.delete(key);
                 log.debug("Deleted storage key '{}' for avatar '{}'", key, avatarId);
             } catch (Exception e) {
-                log.error("Failed to delete storage key '{}' for avatar '{}': {}", key, avatarId, e.getMessage(), e);
+                log.error("Failed to delete storage key '{}' for avatar '{}'", key, avatarId, e);
             }
         }
     }
@@ -251,7 +255,7 @@ public class AvatarService {
      */
     public AvatarResponseDTO activateAvatar(User currentUser, String avatarId) {
         if (currentUser == null) {
-            throw new IllegalArgumentException("Current user cannot be null");
+            throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
         }
         UserAvatar avatar = userAvatarRepository.findByIdAndUserId(avatarId, currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Avatar not found with id: " + avatarId));
@@ -287,7 +291,7 @@ public class AvatarService {
                 storageService.delete(key);
                 log.info("Rollback compensation: successfully deleted orphaned storage key '{}'", key);
             } catch (Exception e) {
-                log.error("Rollback compensation failed to delete storage key '{}': {}", key, e.getMessage(), e);
+                log.error("Rollback compensation failed to delete storage key '{}'", key, e);
             }
         }
     }

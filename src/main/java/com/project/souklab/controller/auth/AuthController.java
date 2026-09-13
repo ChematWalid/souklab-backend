@@ -1,6 +1,15 @@
 package com.project.souklab.controller.auth;
 
-import com.project.souklab.dto.auth.*;
+import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
+import com.project.souklab.dto.auth.CompleteProfileRequestDTO;
+import com.project.souklab.dto.auth.ForgotPasswordRequestDTO;
+import com.project.souklab.dto.auth.JwtResponseDTO;
+import com.project.souklab.dto.auth.LoginDTO;
+import com.project.souklab.dto.auth.ResendVerificationRequestDTO;
+import com.project.souklab.dto.auth.ResetPasswordRequestDTO;
+import com.project.souklab.dto.auth.TokenRefreshRequestDTO;
+import com.project.souklab.dto.auth.UserRegistrationDTO;
+import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.dto.profile.UserPatchDTO;
@@ -16,7 +25,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 

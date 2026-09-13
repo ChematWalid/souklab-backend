@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.JobSubCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import java.util.Optional;
  * Spring Data JPA repository for {@link JobSubCategory} entities.
  * Supports retrieval and filtering of specialized craftsmanship trades and disciplines.
  */
-@Repository
 public interface JobSubCategoryRepository extends JpaRepository<JobSubCategory, String> {
 
     /**

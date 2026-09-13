@@ -38,6 +38,7 @@ import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -83,6 +84,9 @@ class ArtisanCertificationServiceTest {
 
     @Spy
     private AppProperties appProperties = new AppProperties();
+
+    @Spy
+    private Clock clock = Clock.systemUTC();
 
     @InjectMocks
     private ArtisanCertificationService certificationService;

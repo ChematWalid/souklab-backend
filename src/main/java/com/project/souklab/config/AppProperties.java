@@ -14,6 +14,11 @@ import java.util.List;
 @Data
 public class AppProperties {
 
+    private static final String MIME_IMAGE_JPEG = "image/jpeg";
+    private static final String MIME_IMAGE_PNG = "image/png";
+    private static final String MIME_IMAGE_WEBP = "image/webp";
+    private static final String MIME_APPLICATION_PDF = "application/pdf";
+
     private Storage storage = new Storage();
     private Jwt jwt = new Jwt();
     private Cors cors = new Cors();
@@ -188,9 +193,9 @@ public class AppProperties {
             private int maxImages = 20;
             private DataSize maxFileSize = DataSize.ofMegabytes(10);
             private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    "image/jpeg",
-                    "image/png",
-                    "image/webp"
+                    MIME_IMAGE_JPEG,
+                    MIME_IMAGE_PNG,
+                    MIME_IMAGE_WEBP
             ));
         }
 
@@ -202,9 +207,9 @@ public class AppProperties {
             private int maxCount = 10;
             private DataSize maxFileSize = DataSize.ofMegabytes(15);
             private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    "application/pdf",
-                    "image/jpeg",
-                    "image/png"
+                    MIME_APPLICATION_PDF,
+                    MIME_IMAGE_JPEG,
+                    MIME_IMAGE_PNG
             ));
         }
     }
@@ -268,9 +273,9 @@ public class AppProperties {
              * Permitted MIME types for formation showcase thumbnails.
              */
             private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    "image/jpeg",
-                    "image/png",
-                    "image/webp"
+                    MIME_IMAGE_JPEG,
+                    MIME_IMAGE_PNG,
+                    MIME_IMAGE_WEBP
             ));
         }
 
@@ -294,9 +299,9 @@ public class AppProperties {
              * Permitted MIME types for formation course files and syllabus attachments.
              */
             private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    "application/pdf",
-                    "image/jpeg",
-                    "image/png"
+                    MIME_APPLICATION_PDF,
+                    MIME_IMAGE_JPEG,
+                    MIME_IMAGE_PNG
             ));
         }
 
@@ -313,5 +318,3 @@ public class AppProperties {
         }
     }
 }
-
-

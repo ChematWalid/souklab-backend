@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.Technique;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import java.util.Optional;
  * Spring Data JPA repository for {@link Technique} entities.
  * Supports catalog browsing and artisan portfolio queries by traditional handcrafting techniques.
  */
-@Repository
 public interface TechniqueRepository extends JpaRepository<Technique, String> {
 
     /**

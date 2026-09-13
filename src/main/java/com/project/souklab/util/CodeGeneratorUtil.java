@@ -20,9 +20,12 @@ public final class CodeGeneratorUtil {
         if (digits <= 0 || digits > 10) {
             throw new IllegalArgumentException("Digits must be between 1 and 10");
         }
-        int bound = (int) Math.pow(10, digits);
+        int bound = (int) Math.pow(10, (double) digits);
         int number = SECURE_RANDOM.nextInt(bound);
-        String format = "%0" + digits + "d";
-        return String.format(format, number);
+        String str = Integer.toString(number);
+        if (str.length() < digits) {
+            return "0".repeat(digits - str.length()) + str;
+        }
+        return str;
     }
 }

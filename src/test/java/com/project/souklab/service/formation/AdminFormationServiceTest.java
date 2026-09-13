@@ -35,6 +35,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.time.Clock;
+import java.time.Instant;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -83,6 +86,9 @@ class AdminFormationServiceTest {
 
     @Spy
     private AppProperties appProperties = new AppProperties();
+
+    @Spy
+    private Clock clock = Clock.systemUTC();
 
     @InjectMocks
     private AdminFormationService adminFormationService;

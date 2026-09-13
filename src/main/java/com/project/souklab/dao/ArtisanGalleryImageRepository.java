@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.ArtisanGalleryImage;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import java.util.Optional;
  * Data access operations for {@link ArtisanGalleryImage} entities.
  * Provides ordering, soft-delete filtering, and ownership-scoped queries.
  */
-@Repository
 public interface ArtisanGalleryImageRepository extends JpaRepository<ArtisanGalleryImage, String> {
 
     /**

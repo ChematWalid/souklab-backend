@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.FormationFile;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import java.util.Optional;
  * Data access repository for {@link FormationFile} entities.
  * Handles syllabus attachments, course materials, and soft-delete filtering.
  */
-@Repository
 public interface FormationFileRepository extends JpaRepository<FormationFile, String> {
 
     /**

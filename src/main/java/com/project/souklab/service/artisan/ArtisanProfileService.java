@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,11 +62,11 @@ public class ArtisanProfileService {
             throw new UnauthorizedException("Not authenticated.");
         }
 
-        User viewer = userRepository.findByEmail(email.toLowerCase())
+        User viewer = userRepository.findByEmail(email.toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
 
         boolean isAdmin = viewer.getRoles().stream()
-                .anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
+                .anyMatch(r -> "ROLE_ADMIN".equals(r.getName()));
 
         verifyViewerAccess(viewer, isAdmin);
 
@@ -80,10 +81,18 @@ public class ArtisanProfileService {
 
         User targetUser = artisan.getUser();
         String name = resolveName(artisan, targetUser, contactInfoLocked);
-        String phone = contactInfoLocked ? null : (targetUser != null ? targetUser.getPhone() : null);
-        String contactEmail = contactInfoLocked ? null : (targetUser != null ? targetUser.getEmail() : null);
-        String website = contactInfoLocked ? null : artisan.getWebsite();
-        String address = contactInfoLocked ? null : artisan.getAddress();
+        String phone = null;
+        String contactEmail = null;
+        String website = null;
+        String address = null;
+        if (!contactInfoLocked) {
+            website = artisan.getWebsite();
+            address = artisan.getAddress();
+            if (targetUser != null) {
+                phone = targetUser.getPhone();
+                contactEmail = targetUser.getEmail();
+            }
+        }
 
         RegionSummaryDTO regionSummary = RegionSummaryDTO.from(artisan.getRegion());
         JobSubCategorySummaryDTO subCategorySummary = JobSubCategorySummaryDTO.from(artisan.getSubCategory());
@@ -216,11 +225,13 @@ public class ArtisanProfileService {
     private String resolveName(Artisan artisan, User targetUser, boolean contactInfoLocked) {
         if (contactInfoLocked) {
             String id = artisan.getId();
-            return "Artisan #" + (id.length() >= 5 ? id.substring(id.length() - 5).toUpperCase() : id.toUpperCase());
+            return "Artisan #" + (id.length() >= 5 ? id.substring(id.length() - 5).toUpperCase(Locale.ROOT) : id.toUpperCase(Locale.ROOT));
         }
-        String resolvedName = targetUser != null ? targetUser.getName() : null;
+        if (targetUser == null) {
+            return null;
+        }
+        String resolvedName = targetUser.getName();
         if ((resolvedName == null || resolvedName.isBlank())
-                && targetUser != null
                 && (targetUser.getFirstName() != null || targetUser.getLastName() != null)) {
             String first = targetUser.getFirstName() != null ? targetUser.getFirstName() : "";
             String last = targetUser.getLastName() != null ? targetUser.getLastName() : "";

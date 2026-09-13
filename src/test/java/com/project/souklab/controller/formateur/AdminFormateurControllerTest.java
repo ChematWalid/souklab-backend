@@ -2,7 +2,12 @@ package com.project.souklab.controller.formateur;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.common.PaginatedResponse;
-import com.project.souklab.dto.formateur.*;
+import com.project.souklab.dto.formateur.FormateurApproveDTO;
+import com.project.souklab.dto.formateur.FormateurCooldownOverrideDTO;
+import com.project.souklab.dto.formateur.FormateurGrantDTO;
+import com.project.souklab.dto.formateur.FormateurRejectDTO;
+import com.project.souklab.dto.formateur.FormateurRequestResponseDTO;
+import com.project.souklab.dto.formateur.FormateurRevokeDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ResourceNotFoundException;

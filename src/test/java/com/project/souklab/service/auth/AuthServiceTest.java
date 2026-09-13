@@ -61,6 +61,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -1607,7 +1608,8 @@ class AuthServiceTest {
         doThrow(new RuntimeException("SMTP connection timeout"))
                 .when(emailUtil).sendVerificationCode(anyString(), anyString());
 
-        authService.resendVerification(dto);
+        assertDoesNotThrow(() -> authService.resendVerification(dto));
+        verify(emailUtil).sendVerificationCode(eq("unverified@example.com"), eq("888999"));
     }
 
     /**
@@ -1695,7 +1697,8 @@ class AuthServiceTest {
                 .thenReturn("777111");
         doThrow(new RuntimeException("Mail failure")).when(emailUtil).sendPasswordResetCode(anyString(), anyString());
 
-        authService.forgotPassword(dto);
+        assertDoesNotThrow(() -> authService.forgotPassword(dto));
+        verify(emailUtil).sendPasswordResetCode(eq("user@example.com"), eq("777111"));
     }
 
     /**
@@ -1716,7 +1719,8 @@ class AuthServiceTest {
         when(userRepository.findByEmail("oauthonly@example.com")).thenReturn(Optional.of(user));
         doThrow(new RuntimeException("Mail failure")).when(emailUtil).sendOAuthOnlyPasswordResetNotice(anyString());
 
-        authService.forgotPassword(dto);
+        assertDoesNotThrow(() -> authService.forgotPassword(dto));
+        verify(emailUtil).sendOAuthOnlyPasswordResetNotice(eq("oauthonly@example.com"));
     }
 
     /**

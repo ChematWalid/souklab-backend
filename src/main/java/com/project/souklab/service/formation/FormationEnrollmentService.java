@@ -31,6 +31,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,7 @@ public class FormationEnrollmentService {
     private final FormationFileRepository formationFileRepository;
     private final StorageService storageService;
     private final AppProperties appProperties;
+    private final Clock clock;
 
 
     /**
@@ -142,7 +144,7 @@ public class FormationEnrollmentService {
             if (existing.getStatus() == EnrollmentStatus.CANCELLED) {
                 existing.setStatus(EnrollmentStatus.CONFIRMED);
                 existing.setCancelledAt(null);
-                existing.setEnrolledAt(LocalDateTime.now());
+                existing.setEnrolledAt(LocalDateTime.now(clock));
                 enrollment = formationEnrollmentRepository.save(existing);
             } else {
                 throw new ConflictException("Cannot enroll in this formation with status: " + existing.getStatus());
@@ -152,7 +154,7 @@ public class FormationEnrollmentService {
                     .formation(formation)
                     .artisan(artisan)
                     .status(EnrollmentStatus.CONFIRMED)
-                    .enrolledAt(LocalDateTime.now())
+                    .enrolledAt(LocalDateTime.now(clock))
                     .build();
             enrollment = formationEnrollmentRepository.save(newEnrollment);
         }
@@ -181,13 +183,13 @@ public class FormationEnrollmentService {
         int deadlineHours = appProperties.getFormation().getCancellation().getDeadlineHours();
         if (formation.getScheduledAt() != null) {
             LocalDateTime cutoff = formation.getScheduledAt().minusHours(deadlineHours);
-            if (LocalDateTime.now().isAfter(cutoff)) {
+            if (LocalDateTime.now(clock).isAfter(cutoff)) {
                 throw new BadRequestException("Cancellations must be made at least " + deadlineHours + " hours before the scheduled start time.");
             }
         }
 
         enrollment.setStatus(EnrollmentStatus.CANCELLED);
-        enrollment.setCancelledAt(LocalDateTime.now());
+        enrollment.setCancelledAt(LocalDateTime.now(clock));
         FormationEnrollment saved = formationEnrollmentRepository.save(enrollment);
 
         return FormationEnrollmentResponseDTO.from(saved);

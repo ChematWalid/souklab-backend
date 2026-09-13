@@ -4,12 +4,23 @@ import com.project.souklab.dao.ArtisanFormateurRequestRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
-import com.project.souklab.dto.formateur.*;
+import com.project.souklab.dto.formateur.FormateurApproveDTO;
+import com.project.souklab.dto.formateur.FormateurCooldownOverrideDTO;
+import com.project.souklab.dto.formateur.FormateurGrantDTO;
+import com.project.souklab.dto.formateur.FormateurRejectDTO;
+import com.project.souklab.dto.formateur.FormateurRequestDTO;
+import com.project.souklab.dto.formateur.FormateurRequestResponseDTO;
+import com.project.souklab.dto.formateur.FormateurRevokeDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
-import com.project.souklab.model.*;
+import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.Artisan;
+import com.project.souklab.model.ArtisanFormateurRequest;
+import com.project.souklab.model.FormateurRequestStatus;
+import com.project.souklab.model.NotificationType;
+import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.EmailUtil;
 import com.project.souklab.util.SecurityUtils;
@@ -87,9 +98,9 @@ public class ArtisanFormateurService {
         ArtisanFormateurRequest saved = formateurRequestRepository.saveAndFlush(request);
 
         List<User> admins = userRepository.findByRoleName("ROLE_ADMIN");
-        String artisanName = ((user.getFirstName() != null ? user.getFirstName() + " " : "") + (user.getLastName() != null ? user.getLastName() : "")).trim();
+        String artisanName = resolveArtisanFullName(user);
         String notifMsg = "New artisan formateur request submitted by "
-                + (!artisanName.isBlank() ? artisanName + " (" + user.getEmail() + ")" : user.getEmail())
+                + (artisanName != null && !artisanName.isBlank() ? artisanName + " (" + user.getEmail() + ")" : user.getEmail())
                 + (dto != null && dto.getMotivation() != null && !dto.getMotivation().isBlank()
                         ? ": \"" + dto.getMotivation() + "\"" : "");
         for (User admin : admins) {
@@ -161,7 +172,7 @@ public class ArtisanFormateurService {
             throw new BadRequestException("Request is already " + request.getStatus() + ".");
         }
 
-        boolean canReapply = dto.getCanReapply() == null || dto.getCanReapply();
+        boolean canReapply = dto.getCanReapply() == null || Boolean.TRUE.equals(dto.getCanReapply());
         LocalDateTime cooldownUntil = null;
         if (canReapply) {
             cooldownUntil = dto.getCooldownUntil() != null ? dto.getCooldownUntil() : LocalDateTime.now(clock).plusDays(14);
@@ -276,9 +287,7 @@ public class ArtisanFormateurService {
 
     private FormateurRequestResponseDTO mapToDTO(ArtisanFormateurRequest req) {
         User user = req.getArtisan() != null ? req.getArtisan().getUser() : null;
-        String artisanName = user != null
-                ? ((user.getFirstName() != null ? user.getFirstName() + " " : "") + (user.getLastName() != null ? user.getLastName() : "")).trim()
-                : null;
+        String artisanName = resolveArtisanFullName(user);
 
         return FormateurRequestResponseDTO.builder()
                 .id(req.getId())
@@ -295,5 +304,19 @@ public class ArtisanFormateurService {
                 .decidedAt(req.getDecidedAt())
                 .createdAt(req.getCreatedAt())
                 .build();
+    }
+
+    private static String resolveArtisanFullName(User user) {
+        if (user == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        if (user.getFirstName() != null) {
+            sb.append(user.getFirstName()).append(" ");
+        }
+        if (user.getLastName() != null) {
+            sb.append(user.getLastName());
+        }
+        return sb.toString().trim();
     }
 }

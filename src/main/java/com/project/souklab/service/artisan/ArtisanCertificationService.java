@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,6 +44,7 @@ public class ArtisanCertificationService {
     private final FileValidator fileValidator;
     private final VirusScanService virusScanService;
     private final AppProperties appProperties;
+    private final Clock clock;
 
 
     /**
@@ -113,7 +115,7 @@ public class ArtisanCertificationService {
                 .findByIdAndArtisanIdAndDeletedAtIsNull(certificationId, artisan.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Certification not found."));
 
-        cert.setDeletedAt(LocalDateTime.now());
+        cert.setDeletedAt(LocalDateTime.now(clock));
         certificationRepository.save(cert);
     }
 
@@ -218,7 +220,7 @@ public class ArtisanCertificationService {
                 try {
                     storageService.delete(storageKey);
                 } catch (Exception deleteEx) {
-                    log.error("Compensating delete failed for storage key '{}': {}", storageKey, deleteEx.getMessage(), deleteEx);
+                    log.error("Compensating delete failed for storage key '{}'", storageKey, deleteEx);
                 }
             }
             throw ex;

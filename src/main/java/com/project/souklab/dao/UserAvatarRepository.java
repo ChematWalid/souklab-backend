@@ -4,7 +4,6 @@ import com.project.souklab.model.UserAvatar;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +12,6 @@ import java.util.Optional;
  * Data access operations for {@link UserAvatar} entities.
  * Provides gallery listing, quota checking, active avatar resolution, and ownership-scoped lookups.
  */
-@Repository
 public interface UserAvatarRepository extends JpaRepository<UserAvatar, String> {
 
     /**

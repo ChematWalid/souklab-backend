@@ -310,7 +310,9 @@ class FileStorageCoreVerificationTest {
             public StorageResource retrieve(String key) { return null; }
 
             @Override
-            public void delete(String key) {}
+            public void delete(String key) {
+                // No-op stub for storage decoupling test
+            }
 
             @Override
             public boolean exists(String key) { return true; }

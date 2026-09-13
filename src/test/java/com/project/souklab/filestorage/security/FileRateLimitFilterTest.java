@@ -115,9 +115,10 @@ class FileRateLimitFilterTest {
         assertThat(rejectedRes.getContentType()).contains("application/json");
 
         String responseJson = rejectedRes.getContentAsString();
-        assertThat(responseJson).contains("\"success\":false");
-        assertThat(responseJson).contains("\"code\":429");
-        assertThat(responseJson).contains("Too many requests. Please try again later.");
+        assertThat(responseJson)
+                .contains("\"success\":false")
+                .contains("\"code\":429")
+                .contains("Too many requests. Please try again later.");
     }
 
     /**

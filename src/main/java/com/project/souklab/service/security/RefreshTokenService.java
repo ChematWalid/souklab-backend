@@ -30,11 +30,15 @@ public class RefreshTokenService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        return createRefreshTokenForUser(user);
+        return internalCreateOrUpdateRefreshToken(user);
     }
 
     @Transactional
     public RefreshToken createRefreshTokenForUser(User user) {
+        return internalCreateOrUpdateRefreshToken(user);
+    }
+
+    private RefreshToken internalCreateOrUpdateRefreshToken(User user) {
         RefreshToken refreshToken = refreshTokenRepository.findByUser(user)
                 .orElse(RefreshToken.builder().user(user).build());
 

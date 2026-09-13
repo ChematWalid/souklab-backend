@@ -34,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -53,6 +54,7 @@ public class AdminFormationService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final AppProperties appProperties;
+    private final Clock clock;
 
     /**
      * Retrieves a paginated review queue of formations awaiting administrative moderation.
@@ -95,7 +97,7 @@ public class AdminFormationService {
                 .admin(admin)
                 .decision(dto.getDecision())
                 .comment(dto.getComment() != null ? dto.getComment().trim() : null)
-                .reviewedAt(LocalDateTime.now())
+                .reviewedAt(LocalDateTime.now(clock))
                 .build();
         formationReviewRepository.save(review);
 

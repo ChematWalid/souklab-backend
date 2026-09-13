@@ -1,6 +1,5 @@
 package com.project.souklab.filestorage.image;
 
-import com.project.souklab.filestorage.exception.UnsupportedImageFormatException;
 import com.project.souklab.filestorage.validation.ValidatedFile;
 
 import java.io.InputStream;

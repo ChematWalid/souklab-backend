@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,7 @@ public class ArtisanGalleryService {
     private final FileValidator fileValidator;
     private final VirusScanService virusScanService;
     private final AppProperties appProperties;
+    private final Clock clock;
 
 
     /**
@@ -140,7 +142,7 @@ public class ArtisanGalleryService {
                 .findByIdAndArtisanIdAndDeletedAtIsNull(imageId, artisan.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Gallery image not found."));
 
-        image.setDeletedAt(LocalDateTime.now());
+        image.setDeletedAt(LocalDateTime.now(clock));
         galleryImageRepository.save(image);
     }
 
@@ -222,7 +224,7 @@ public class ArtisanGalleryService {
                 try {
                     storageService.delete(storageKey);
                 } catch (Exception deleteEx) {
-                    log.error("Compensating delete failed for storage key '{}': {}", storageKey, deleteEx.getMessage(), deleteEx);
+                    log.error("Compensating delete failed for storage key '{}'", storageKey, deleteEx);
                 }
             }
             throw ex;

@@ -44,6 +44,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.ByteArrayInputStream;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -88,6 +89,9 @@ class FormationEnrollmentServiceTest {
 
     @Spy
     private AppProperties appProperties = new AppProperties();
+
+    @Spy
+    private Clock clock = Clock.systemDefaultZone();
 
     @InjectMocks
     private FormationEnrollmentService formationEnrollmentService;

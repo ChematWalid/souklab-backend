@@ -33,7 +33,7 @@ public class AuditLogService {
     public void logAction(AuditLogAction action, String details) {
         String username = SecurityUtils.getCurrentUsername();
         String effectiveUsername = (username != null && !username.equals(ANONYMOUS_USER)) ? username : ANONYMOUS_USER;
-        logAction(action, details, effectiveUsername);
+        recordAuditLog(action, details, effectiveUsername);
     }
 
     /**
@@ -46,6 +46,10 @@ public class AuditLogService {
     @Async("applicationTaskExecutor")
     @Transactional
     public void logAction(AuditLogAction action, String details, String username) {
+        recordAuditLog(action, details, username);
+    }
+
+    private void recordAuditLog(AuditLogAction action, String details, String username) {
         try {
             AuditLog auditLog = new AuditLog();
             auditLog.setAction(action);

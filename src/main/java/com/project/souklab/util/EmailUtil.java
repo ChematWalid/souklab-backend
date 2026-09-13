@@ -23,12 +23,13 @@ import java.util.Map;
 public class EmailUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailUtil.class);
     private static final String ADMINISTRATOR_NOTE_HEADER = "Administrator Note:\n";
+    private static final String APPLICATION_TASK_EXECUTOR = "applicationTaskExecutor";
 
     private final JavaMailSender mailSender;
     private final AppProperties appProperties;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendVerificationCode(String toEmail, String code) {
         String subject = "Account verification code";
         String htmlContent = "<p>Your verification code is: <strong>" + code + "</strong></p><p>This code expires soon.</p>";
@@ -55,7 +56,7 @@ public class EmailUtil {
         }
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendPasswordResetCode(String toEmail, String code) {
         String subject = "Password reset verification code";
         String htmlContent = "<p>Your Souklab verification code is: <strong>" + code + "</strong>.</p><p>It expires in 15 minutes.</p>";
@@ -82,7 +83,7 @@ public class EmailUtil {
         }
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendOAuthOnlyPasswordResetNotice(String toEmail) {
         String subject = "Password reset request for Souklab account";
         String htmlContent = "<p>Hello,</p>" +
@@ -116,7 +117,7 @@ public class EmailUtil {
         }
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendPasswordChangedNotice(String toEmail) {
         String subject = "Your Souklab password was changed";
         String htmlContent = "<p>Hello,</p>" +
@@ -146,7 +147,7 @@ public class EmailUtil {
         }
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendFormateurRequestSubmittedNoticeToAdmin(String adminEmail, String artisanEmail, String artisanName, String motivation) {
         String subject = "New Formateur Request Submitted";
         String motivationText = (motivation != null && !motivation.isBlank()) ? motivation : "No motivation message provided.";
@@ -161,7 +162,7 @@ public class EmailUtil {
         sendEmail(adminEmail, subject, textContent, htmlContent);
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendFormateurApprovedEmail(String toEmail, String adminNote) {
         String subject = "Artisan Formateur Status Approved";
         String htmlContent = "<p>Congratulations!</p>" +
@@ -174,7 +175,7 @@ public class EmailUtil {
         sendEmail(toEmail, subject, textContent, htmlContent);
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendFormateurGrantedEmail(String toEmail, String adminNote) {
         String subject = "Artisan Formateur Status Granted";
         String htmlContent = "<p>Hello,</p>" +
@@ -187,12 +188,17 @@ public class EmailUtil {
         sendEmail(toEmail, subject, textContent, htmlContent);
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendFormateurRejectedEmail(String toEmail, String adminNote, LocalDateTime cooldownUntil, boolean canReapply) {
         String subject = "Artisan Formateur Request Update";
-        String reapplyMessage = canReapply
-                ? (cooldownUntil != null ? "You may reapply after " + cooldownUntil + "." : "You may reapply at any time.")
-                : "You are permanently blocked from submitting new Formateur requests.";
+        String reapplyMessage;
+        if (!canReapply) {
+            reapplyMessage = "You are permanently blocked from submitting new Formateur requests.";
+        } else if (cooldownUntil != null) {
+            reapplyMessage = "You may reapply after " + cooldownUntil + ".";
+        } else {
+            reapplyMessage = "You may reapply at any time.";
+        }
         String htmlContent = "<p>Hello,</p>" +
                 "<p>Your request to become a Formateur on Souklab was not approved at this time.</p>" +
                 "<p><strong>Administrator Note:</strong></p>" +
@@ -203,7 +209,7 @@ public class EmailUtil {
         sendEmail(toEmail, subject, textContent, htmlContent);
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendFormateurRevokedEmail(String toEmail, String reason) {
         String subject = "Artisan Formateur Status Revoked";
         String htmlContent = "<p>Hello,</p>" +
@@ -216,7 +222,7 @@ public class EmailUtil {
         sendEmail(toEmail, subject, textContent, htmlContent);
     }
 
-    @Async("applicationTaskExecutor")
+    @Async(APPLICATION_TASK_EXECUTOR)
     public void sendAdminWelcomeEmail(String toEmail, String initialPassword) {
         String subject = "Welcome to Souklab - Administrator Account Initialized";
         String htmlContent = "<p>Hello Administrator,</p>" +

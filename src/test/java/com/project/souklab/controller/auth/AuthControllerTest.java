@@ -1,7 +1,16 @@
 package com.project.souklab.controller.auth;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
-import com.project.souklab.dto.auth.*;
+import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
+import com.project.souklab.dto.auth.CompleteProfileRequestDTO;
+import com.project.souklab.dto.auth.ForgotPasswordRequestDTO;
+import com.project.souklab.dto.auth.JwtResponseDTO;
+import com.project.souklab.dto.auth.LoginDTO;
+import com.project.souklab.dto.auth.ResendVerificationRequestDTO;
+import com.project.souklab.dto.auth.ResetPasswordRequestDTO;
+import com.project.souklab.dto.auth.TokenRefreshRequestDTO;
+import com.project.souklab.dto.auth.UserRegistrationDTO;
+import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
 import com.project.souklab.dto.profile.ArtisanResponseDTO;
 import com.project.souklab.dto.profile.ClientProfileResponseDTO;
 import com.project.souklab.dto.profile.ProfileResponse;

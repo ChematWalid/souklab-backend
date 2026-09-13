@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -63,6 +64,7 @@ public class FormationService {
     private final VirusScanService virusScanService;
     private final AppProperties appProperties;
     private final NotificationService notificationService;
+    private final Clock clock;
 
 
     /**
@@ -250,7 +252,7 @@ public class FormationService {
         FormationFile file = formationFileRepository.findByIdAndFormationIdAndDeletedAtIsNull(fileId, formation.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course file not found with id: " + fileId));
 
-        file.setDeletedAt(LocalDateTime.now());
+        file.setDeletedAt(LocalDateTime.now(clock));
         formationFileRepository.save(file);
     }
 
@@ -296,7 +298,7 @@ public class FormationService {
         Artisan artisan = resolveAuthenticatedArtisan();
         Formation formation = findFormationAndVerifyOwnership(id, artisan);
 
-        formation.setDeletedAt(LocalDateTime.now());
+        formation.setDeletedAt(LocalDateTime.now(clock));
         formationRepository.save(formation);
         log.info("Formation '{}' soft deleted by author '{}'", formation.getId(), artisan.getId());
     }
@@ -373,7 +375,7 @@ public class FormationService {
             try {
                 storageService.delete(storageKey);
             } catch (Exception deleteEx) {
-                log.error("Compensating storage delete failed for key '{}': {}", storageKey, deleteEx.getMessage(), deleteEx);
+                log.error("Compensating storage delete failed for key '{}'", storageKey, deleteEx);
             }
         }
     }

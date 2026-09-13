@@ -38,6 +38,7 @@ import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,6 +85,9 @@ class ArtisanGalleryServiceTest {
 
     @Spy
     private AppProperties appProperties = new AppProperties();
+
+    @Spy
+    private Clock clock = Clock.systemUTC();
 
     @InjectMocks
     private ArtisanGalleryService galleryService;

@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.Epoque;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import java.util.Optional;
  * Spring Data JPA repository for {@link Epoque} entities.
  * Supports heritage catalog filtering and cultural era discovery across Algerian craftsmanship history.
  */
-@Repository
 public interface EpoqueRepository extends JpaRepository<Epoque, String> {
 
     /**

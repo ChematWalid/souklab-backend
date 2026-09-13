@@ -282,7 +282,6 @@ class ImageProcessingVerificationTest {
     void extremeAspectRatio_roundingErrorNeverExceedsHalfPixel() {
         int srcWidth = 3000;
         int srcHeight = 400;
-        double srcRatio = (double) srcWidth / srcHeight;
 
         byte[] jpegBytes = createTestImageBytes(srcWidth, srcHeight, "jpeg", Color.DARK_GRAY, Color.YELLOW);
         Map<ResolutionTier, ImageVariant> variants = imageProcessingService.generateVariants(jpegBytes, "image/jpeg");

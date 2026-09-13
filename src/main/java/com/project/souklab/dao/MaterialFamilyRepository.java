@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.MaterialFamily;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import java.util.Optional;
  * Spring Data JPA repository for {@link MaterialFamily} entities.
  * Supports public reference queries and categorization of raw crafting materials.
  */
-@Repository
 public interface MaterialFamilyRepository extends JpaRepository<MaterialFamily, String> {
 
     /**

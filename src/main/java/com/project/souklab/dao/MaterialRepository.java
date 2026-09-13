@@ -2,7 +2,6 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.Material;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import java.util.Optional;
  * Spring Data JPA repository for {@link Material} entities.
  * Supports catalog discovery and artisan portfolio filtering based on authentic materials.
  */
-@Repository
 public interface MaterialRepository extends JpaRepository<Material, String> {
 
     /**

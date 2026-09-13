@@ -1,6 +1,5 @@
 package com.project.souklab.filestorage.validation;
 
-import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
 import com.project.souklab.filestorage.exception.InvalidFilenameException;
