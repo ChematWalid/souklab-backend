@@ -28,6 +28,11 @@ public class AppProperties {
     private ArtisanConfig artisan = new ArtisanConfig();
     private Search search = new Search();
 
+    /**
+     * Formations and masterclasses configuration bound to {@code app.formation.*}.
+     */
+    private FormationConfig formation = new FormationConfig();
+
 
     @Data
     public static class Relay {
@@ -190,5 +195,69 @@ public class AppProperties {
         private String schemaManagement;
         private boolean syncOnStartup;
     }
+
+    /**
+     * Formations and masterclasses configuration bound to {@code app.formation.*}.
+     */
+    @Data
+    public static class FormationConfig {
+
+        /**
+         * Formation thumbnail image configuration bound to {@code app.formation.thumbnail.*}.
+         */
+        private ThumbnailConfig thumbnail = new ThumbnailConfig();
+
+        /**
+         * Formation course attachments configuration bound to {@code app.formation.file.*}.
+         */
+        private FileConfig file = new FileConfig();
+
+        /**
+         * Formation cancellation policy configuration bound to {@code app.formation.cancellation.*}.
+         */
+        private CancellationConfig cancellation = new CancellationConfig();
+
+        /**
+         * Configuration for formation thumbnail images.
+         */
+        @Data
+        public static class ThumbnailConfig {
+
+            /**
+             * Maximum allowable file size for formation thumbnails (default: 10MB).
+             */
+            private DataSize maxFileSize = DataSize.ofMegabytes(10);
+        }
+
+        /**
+         * Configuration for formation downloadable course files and syllabus attachments.
+         */
+        @Data
+        public static class FileConfig {
+
+            /**
+             * Maximum number of course files allowed per formation (default: 10).
+             */
+            private int maxCount = 10;
+
+            /**
+             * Maximum allowable file size for individual course files (default: 25MB).
+             */
+            private DataSize maxFileSize = DataSize.ofMegabytes(25);
+        }
+
+        /**
+         * Configuration for formation enrollment cancellation rules.
+         */
+        @Data
+        public static class CancellationConfig {
+
+            /**
+             * Minimum cutoff deadline in hours prior to scheduled masterclass start time (default: 24).
+             */
+            private int deadlineHours = 24;
+        }
+    }
 }
+
 
