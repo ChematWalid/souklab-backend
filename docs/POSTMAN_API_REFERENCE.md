@@ -11,10 +11,16 @@ This document provides the exhaustive specification for all requests, headers, r
 6. [Notifications](#6-notifications)
 7. [Formateur — Artisan Actions](#7-formateur--artisan-actions)
 8. [Formateur — Admin Actions](#8-formateur--admin-actions)
-9. [Admin — User Moderation](#9-admin--user-moderation)
+9. [Admin — User Moderation & Discovery](#9-admin--user-moderation--discovery)
 10. [File Storage](#10-file-storage)
 11. [Public Directory & Faceted Search](#11-public-directory--faceted-search)
 12. [Formations & Peer Workshops](#12-formations--peer-workshops)
+13. [Auth — Security & Lifecycle](#13-auth--security--lifecycle)
+14. [Email-Dependent Flows (Manual)](#14-email-dependent-flows-manual)
+15. [Notifications Deep State](#15-notifications-deep-state)
+16. [Formateur Governance](#16-formateur-governance)
+17. [Admin Moderation & Search](#17-admin-moderation--search)
+18. [User — Avatar Management](#18-user--avatar-management)
 
 ---
 
@@ -3443,3 +3449,6155 @@ All admin user moderation routes are guarded at the controller level with `@PreA
   "data": null
 }
 ```
+---
+
+## 13. Auth — Security & Lifecycle
+
+> Exhaustive verification of authentication security boundaries: brute-force login lockout (5 consecutive failed attempts triggering account lock), token rotation mechanics, reuse detection of rotated refresh tokens, token revocation upon logout, and authenticated password change with session invalidation.
+
+### 13.1 Lockout Setup — Register Throwaway User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{lockoutEmail}}",
+  "password": "{{lockoutPassword}}",
+  "firstName": "Lockout",
+  "lastName": "Tester",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 13.2 Login — Invalid Password (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{lockoutEmail}}",
+  "password": "CompletelyWrongPassword123!"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.3 Lockout — Failed Attempt 2 (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{lockoutEmail}}",
+  "password": "WrongPassword!"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.4 Lockout — Failed Attempt 3 (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{lockoutEmail}}",
+  "password": "WrongPassword!"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.5 Lockout — Failed Attempt 4 (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{lockoutEmail}}",
+  "password": "WrongPassword!"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.6 Lockout — Failed Attempt 5 Triggers Account Lockout (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{lockoutEmail}}",
+  "password": "WrongPassword!"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.7 Lockout — 6th Attempt with CORRECT Password Fails While Locked (403)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{lockoutEmail}}",
+  "password": "{{lockoutPassword}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 13.8 Refresh Setup — Register Rotation Test User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{rotationEmail}}",
+  "password": "Password123!",
+  "firstName": "Rotation",
+  "lastName": "Tester",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 13.9 Refresh Setup — Initial Login for Tokens
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{rotationEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 13.10 Refresh — Rotate Refresh Token (Happy Path)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/refresh`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "refreshToken": "{{initialRefreshToken}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 13.11 Refresh — Attempt Reuse of Rotated Refresh Token (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/refresh`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "refreshToken": "{{initialRefreshToken}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.12 Refresh — Tampered / Garbage Refresh Token (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/refresh`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "refreshToken": "tampered.garbage.token.99999"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.13 Logout Setup — Register Throwaway User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{logoutEmail}}",
+  "password": "Password123!",
+  "firstName": "Logout",
+  "lastName": "Tester",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 13.14 Logout Setup — Login Throwaway User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{logoutEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 13.15 Logout — Revoke Session Tokens (POST /logout)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/logout`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{logoutAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "refreshToken": "{{logoutRefreshToken}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Logged out successfully.",
+  "data": null
+}
+```
+
+---
+
+### 13.16 Logout — Attempt Refresh with Revoked Token Proves Invalidation (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/refresh`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "refreshToken": "{{logoutRefreshToken}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.17 Change Password Setup — Register Dedicated Account
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{pwdChgEmail}}",
+  "password": "{{pwdChgInitialPassword}}",
+  "firstName": "Pwd",
+  "lastName": "Changer",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 13.18 Change Password Setup — Login Dedicated Account
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{pwdChgEmail}}",
+  "password": "{{pwdChgInitialPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 13.19 Change Password — Wrong Current Password (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/change-password`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{pwdChgAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "oldPassword": "IncorrectPassword123!",
+  "newPassword": "ValidNewPassword456!"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.20 Change Password — New Password Same as Old Password (422)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/change-password`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{pwdChgAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "oldPassword": "{{pwdChgInitialPassword}}",
+  "newPassword": "{{pwdChgInitialPassword}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`422 Unprocessable Entity`)
+```json
+{
+  "success": false,
+  "code": 422,
+  "errorCode": "UNPROCESSABLE_ENTITY",
+  "message": "New password cannot be identical to current password",
+  "data": null
+}
+```
+
+---
+
+### 13.21 Change Password — Successful Password Change
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/change-password`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{pwdChgAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "oldPassword": "{{pwdChgInitialPassword}}",
+  "newPassword": "{{pwdChgNewPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Password changed successfully.",
+  "data": null
+}
+```
+
+---
+
+### 13.22 Change Password — Prove Old Password No Longer Logs In (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{pwdChgEmail}}",
+  "password": "{{pwdChgInitialPassword}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 13.23 Change Password — Prove New Password Successfully Logs In (200)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{pwdChgEmail}}",
+  "password": "{{pwdChgNewPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 13.24 Change Password — Prove Pre-Change Refresh Token Invalidated (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/refresh`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "refreshToken": "{{pwdChgRefreshToken}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+
+---
+
+## 14. Email-Dependent Flows (Manual)
+
+> End-to-end verification of asynchronous email verification and password reset workflows: 6-digit verification code issuance, rate-limited verification token attempts with 5-attempt lockout, token regeneration on resend, and forgot-password reset token lifecycles.
+
+### 14.1 01. Client — Register Throwaway Account
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "firstName": "Manual",
+  "lastName": "Client",
+  "email": "{{manualClientEmail}}",
+  "password": "{{manualClientPassword}}",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 14.2 02. Client — Verify Email with Wrong Code (400)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "code": "000000"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 14.3 03. Client — Verify Email (Manual Checkpoint)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "code": "{{manualVerificationCode}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Email verified successfully.",
+  "data": null
+}
+```
+
+---
+
+### 14.4 04. Client — Login to Inspect Me
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "password": "{{manualClientPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 14.5 05. Client — Get Me Confirms Verified & ACTIVE
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/auth/me`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{manualClientToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": true,
+    "avatarUrl": "/api/v1/files/avatar-sample.png",
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 14.6 06. Artisan — Register Throwaway Account
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "firstName": "Manual",
+  "lastName": "Artisan",
+  "email": "{{manualArtisanEmail}}",
+  "password": "{{manualArtisanPassword}}",
+  "role": "ARTISAN"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 14.7 07. Artisan — Verify Email with Wrong Code (400)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualArtisanEmail}}",
+  "code": "000000"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 14.8 08. Artisan — Verify Email (Manual Checkpoint)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualArtisanEmail}}",
+  "code": "{{manualVerificationCode}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Email verified successfully.",
+  "data": null
+}
+```
+
+---
+
+### 14.9 09. Artisan — Login to Inspect Me
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualArtisanEmail}}",
+  "password": "{{manualArtisanPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 14.10 10. Artisan — Get Me Confirms Verified & PENDING
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/auth/me`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{manualArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": true,
+    "avatarUrl": "/api/v1/files/avatar-sample.png",
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 14.11 11. Lockout — Register Dedicated User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "firstName": "Lockout",
+  "lastName": "User",
+  "email": "{{manualLockoutEmail}}",
+  "password": "LockoutPass123!",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 14.12 12. Lockout — Attempt 1 with Wrong Code (400 Invalid)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "111111"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 14.13 13. Lockout — Attempt 2 with Wrong Code (400 Invalid)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "222222"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 14.14 14. Lockout — Attempt 3 with Wrong Code (400 Invalid)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "333333"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 14.15 15. Lockout — Attempt 4 with Wrong Code (400 Invalid)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "444444"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 14.16 16. Lockout — Attempt 5 Triggers Lockout (400 Max Attempts)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "555555"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 14.17 17. Lockout — Attempt 6 Proves Token Remains Locked (400 Max Attempts)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "666666"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 14.18 18. Resend — Request New Code on Locked Account
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/resend-verification`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "If your email is registered and unverified, a new verification code has been dispatched.",
+  "data": null
+}
+```
+
+---
+
+### 14.19 19. Resend — Submit Previously Locked Code Proves Invalidation (400 Invalid)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "555555"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 14.20 20. Resend — Verify with New Code (Manual Checkpoint)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/verify-email`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualLockoutEmail}}",
+  "code": "{{manualVerificationCode}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Email verified successfully.",
+  "data": null
+}
+```
+
+---
+
+### 14.21 21. Resend — Enumeration Safety for Non-Existent Email
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/resend-verification`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "nonexistent.user.12345@souklab.dz"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "If your email is registered and unverified, a new verification code has been dispatched.",
+  "data": null
+}
+```
+
+---
+
+### 14.22 22. Resend — Enumeration Safety for Already-Verified Email
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/resend-verification`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "If your email is registered and unverified, a new verification code has been dispatched.",
+  "data": null
+}
+```
+
+---
+
+### 14.23 23. Password Reset — Capture Active Refresh Token Pre-Reset
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "password": "{{manualClientPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 14.24 24. Password Reset — Request Reset Code (Forgot Password)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/forgot-password`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "If the provided email is associated with an account, a password reset code has been sent.",
+  "data": null
+}
+```
+
+---
+
+### 14.25 25. Password Reset — Enumeration Safety for Non-Existent Email
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/forgot-password`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "ghost.user.99999@souklab.dz"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "If the provided email is associated with an account, a password reset code has been sent.",
+  "data": null
+}
+```
+
+---
+
+### 14.26 26. Password Reset — Submit Wrong Code (400 Invalid)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/reset-password`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "code": "000000",
+  "newPassword": "NewClientPass456!"
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 14.27 27. Password Reset — Reset with Valid Code (Manual Checkpoint)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/reset-password`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "code": "{{manualResetCode}}",
+  "newPassword": "{{manualClientNewPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Password reset successfully. You may now log in with your new credentials.",
+  "data": null
+}
+```
+
+---
+
+### 14.28 28. Password Reset — Prove Pre-Reset Refresh Token Revoked (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/refresh`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "refreshToken": "{{manualPreResetRefreshToken}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 14.29 29. Password Reset — Login with Old Password Fails (401)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "password": "{{manualClientPassword}}"
+}
+```
+
+#### Response Examples
+##### Error Response (`401 Unauthorized`)
+```json
+{
+  "success": false,
+  "code": 401,
+  "errorCode": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "data": null
+}
+```
+
+---
+
+### 14.30 30. Password Reset — Login with New Password Succeeds (200 OK)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{manualClientEmail}}",
+  "password": "{{manualClientNewPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+
+---
+
+## 15. Notifications Deep State
+
+> Stateful verification of the multi-channel notification engine: unread count aggregation, cursor/page ordering, transactional mark-as-read, cross-user isolation and ownership authorization, soft-delete mechanics, and zero-floor stability prevention against negative unread counters.
+
+### 15.1 00a. Setup — Authenticate Admin
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 15.2 00b. Setup — Register Foreign Client for Cross-User Tests
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{foreignClientEmail}}",
+  "password": "Password123!",
+  "firstName": "Foreign",
+  "lastName": "Client",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 15.3 00c. Setup — Login Foreign Client
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{foreignClientEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 15.4 01. Setup — Register Dedicated Throwaway Artisan
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{batch4ArtisanEmail}}",
+  "password": "Password123!",
+  "firstName": "Batch4",
+  "lastName": "Artisan",
+  "role": "ARTISAN"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 15.5 02. Setup — Admin Approves Artisan Account (Generates Notification 1: ACCOUNT_VALIDATED)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{batch4ArtisanId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account approved successfully.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "artisan@souklab.dz",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 15.6 03. Setup — Throwaway Artisan Login
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{batch4ArtisanEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 15.7 04. Setup — Complete Artisan Profile
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/complete-profile`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "bio": "Traditional ceramics and pottery master for Batch 4 deep state validation."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully.",
+  "data": {
+    "status": "SUCCESS"
+  }
+}
+```
+
+---
+
+### 15.8 05. Setup — Admin Grants Formateur Status (Generates Notification 2: FORMATEUR_GRANTED)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/artisans/{{batch4ArtisanId}}/formateur-grant`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "adminNote": "Recognized master artisan in traditional ceramics."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur privileges granted to artisan.",
+  "data": {
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "isTeacher": true
+  }
+}
+```
+
+---
+
+### 15.9 06. Setup — Admin Revokes Formateur Status (Generates Notification 3: FORMATEUR_REVOKED)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/artisans/{{batch4ArtisanId}}/formateur-revoke`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "reason": "Administrative curriculum rotation policy."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur privileges revoked from artisan.",
+  "data": {
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "isTeacher": false
+  }
+}
+```
+
+---
+
+### 15.10 07. Baseline Unread Count (Expected: 3)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications/unread-count`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "unreadCount": 3
+  }
+}
+```
+
+---
+
+### 15.11 08. Pagination & Ordering — Page 0 (size=2) Newest-First Proof
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications?page=0&size=2`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "b1a2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "message": "Your account has been validated.",
+        "isRead": true,
+        "type": "ACCOUNT_VALIDATED",
+        "targetId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "createdAt": "2026-09-13T22:10:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 15.12 09. Pagination & Ordering — Page 1 (size=2) Oldest Item Last Page Proof
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications?page=1&size=2`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "b1a2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "message": "Your account has been validated.",
+        "isRead": true,
+        "type": "ACCOUNT_VALIDATED",
+        "targetId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "createdAt": "2026-09-13T22:10:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 15.13 10. Single Mark-Read (PUT /{{notifRevokedId}}/read)
+- **Method**: `PUT`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifRevokedId}}/read`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Notification marked as read.",
+  "data": {
+    "id": "b1a2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+    "message": "Your formateur status has been granted.",
+    "isRead": true,
+    "type": "FORMATEUR_GRANTED",
+    "targetId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "createdAt": "2026-09-13T22:15:00"
+  }
+}
+```
+
+---
+
+### 15.14 11. Verify Unread Count Decremented from 3 to 2
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications/unread-count`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "unreadCount": 3
+  }
+}
+```
+
+---
+
+### 15.15 12. Cross-User Mark-Read Attempt (Foreign Client Token — Expected 404)
+- **Method**: `PUT`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifGrantedId}}/read`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{foreignClientToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`404 Not Found`)
+```json
+{
+  "success": false,
+  "code": 404,
+  "errorCode": "NOT_FOUND",
+  "message": "Requested entity not found",
+  "data": null
+}
+```
+
+---
+
+### 15.16 13. Cross-User Delete Attempt (Foreign Client Token — Expected 404)
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifGrantedId}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{foreignClientToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`404 Not Found`)
+```json
+{
+  "success": false,
+  "code": 404,
+  "errorCode": "NOT_FOUND",
+  "message": "Requested entity not found",
+  "data": null
+}
+```
+
+---
+
+### 15.17 14. Cross-User Non-Mutation Verification (Real Owner Verifies Target Notification Untouched)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications?page=0&size=10`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "b1a2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "message": "Your account has been validated.",
+        "isRead": true,
+        "type": "ACCOUNT_VALIDATED",
+        "targetId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "createdAt": "2026-09-13T22:10:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 15.18 15. Soft-Delete Unread Notification (DELETE /{{notifGrantedId}})
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifGrantedId}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Notification deleted successfully.",
+  "data": null
+}
+```
+
+---
+
+### 15.19 16. Verify Unread Count Decremented to 1 (Unread Soft-Delete Proof)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications/unread-count`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "unreadCount": 1
+  }
+}
+```
+
+---
+
+### 15.20 17. Bulk Mark-All-Read (PUT /read-all)
+- **Method**: `PUT`
+- **Endpoint**: `{{baseUrl}}/notifications/read-all`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "All notifications marked as read.",
+  "data": {
+    "updatedCount": 2
+  }
+}
+```
+
+---
+
+### 15.21 18. Verify Unread Count Decremented to 0 After Bulk Mark-Read
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications/unread-count`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "unreadCount": 1
+  }
+}
+```
+
+---
+
+### 15.22 19. Soft-Delete VALIDATED Notification (DELETE /{{notifValidatedId}})
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifValidatedId}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Notification deleted successfully.",
+  "data": null
+}
+```
+
+---
+
+### 15.23 20. Verify Unread Count Stays 0 (Floor Stability Proof — No Negative Drift)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications/unread-count`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "unreadCount": 2
+  }
+}
+```
+
+---
+
+### 15.24 21. Soft-Delete REVOKED Notification (DELETE /{{notifRevokedId}})
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifRevokedId}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Notification deleted successfully.",
+  "data": null
+}
+```
+
+---
+
+### 15.25 22. Final List Check (GET /notifications — All Soft-Deleted Excluded)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "b1a2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "message": "Your account has been validated.",
+        "isRead": true,
+        "type": "ACCOUNT_VALIDATED",
+        "targetId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "createdAt": "2026-09-13T22:10:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 15.26 23. Attempt Mark-Read on Soft-Deleted Notification (Expected 404)
+- **Method**: `PUT`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifRevokedId}}/read`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`404 Not Found`)
+```json
+{
+  "success": false,
+  "code": 404,
+  "errorCode": "NOT_FOUND",
+  "message": "Requested entity not found",
+  "data": null
+}
+```
+
+---
+
+### 15.27 24. Attempt Delete on Already Soft-Deleted Notification (Expected 404)
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/notifications/{{notifRevokedId}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{batch4ArtisanToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`404 Not Found`)
+```json
+{
+  "success": false,
+  "code": 404,
+  "errorCode": "NOT_FOUND",
+  "message": "Requested entity not found",
+  "data": null
+}
+```
+
+---
+
+
+---
+
+## 16. Formateur Governance
+
+> Administrative governance, vetting, and lifecycle operations for artisan instructor (formateur) privileges: formateur requests submission, deduplication conflict guards, rejection with configurable cooldown or permanent blacklisting, administrative cooldown clearance, and direct grant/revoke controls.
+
+### 16.1 01. Setup — Admin Login
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 16.2 02. Setup — Register Client User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ClientEmail}}",
+  "password": "Password123!",
+  "firstName": "Client",
+  "lastName": "BatchFive",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 16.3 03. Setup — Login Client User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ClientEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 16.4 04. Role Boundary — Client Attempt Formateur Request (Expected 403 Forbidden)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ClientAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "I am a client attempting to submit a formateur accreditation request."
+}
+```
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Access Denied",
+  "data": null
+}
+```
+
+---
+
+### 16.5 05. Setup — Register Artisan A
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ArtisanAEmail}}",
+  "password": "Password123!",
+  "firstName": "Karim",
+  "lastName": "Bensaid",
+  "role": "ARTISAN"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 16.6 06. Setup — Admin Approve Artisan A
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b5ArtisanAId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account approved successfully.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "artisan@souklab.dz",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 16.7 07. Setup — Login Artisan A
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ArtisanAEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 16.8 08. Setup — Complete Profile Artisan A
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/complete-profile`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanAAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "bio": "Master potter specializing in traditional Algerian terracotta craft."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully.",
+  "data": {
+    "status": "SUCCESS"
+  }
+}
+```
+
+---
+
+### 16.9 09. Submit Formateur Request (Artisan A)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanAAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "15+ years experience teaching traditional pottery masterclasses."
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Formateur request submitted successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "PENDING",
+    "motivation": "Teaching traditional woodwork techniques.",
+    "canReapply": false,
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.10 10. Duplicate Pending Request (Expected 409 Conflict)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanAAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Attempting duplicate pending submission."
+}
+```
+
+#### Response Examples
+##### Error Response (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "Resource conflict: An active request or record already exists.",
+  "data": null
+}
+```
+
+---
+
+### 16.11 11. Admin List Pending Requests
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests?page=0&size=20`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully.",
+  "data": {
+    "status": "SUCCESS"
+  }
+}
+```
+
+---
+
+### 16.12 12. Admin Reject Request with Default Cooldown
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests/{{b5ArtisanARequestId}}/reject`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "adminNote": "Please provide master artisan accreditation certificate before reapplying."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur request rejected successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "REJECTED",
+    "canReapply": true,
+    "cooldownUntil": "2026-09-27T22:05:00",
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.13 13. Attempt Resubmit During Cooldown (Expected 403 Forbidden)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanAAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Attempting early resubmit during active cooldown."
+}
+```
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 16.14 14. Admin Lift Cooldown for Artisan A
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests/{{b5ArtisanAId}}/lift-cooldown`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "canReapply": true,
+  "cooldownUntil": null
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Cooldown period lifted successfully.",
+  "data": {
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "cooldownUntil": null,
+    "canReapply": true
+  }
+}
+```
+
+---
+
+### 16.15 15. Resubmit After Cooldown Lifted
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanAAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Reapplying with attached master accreditation certificates."
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Formateur request submitted successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "PENDING",
+    "motivation": "Teaching traditional woodwork techniques.",
+    "canReapply": false,
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.16 16. Admin Approve Formateur Request
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests/{{b5ArtisanARequestId2}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "adminNote": "Accreditation certificates verified. Formateur status granted."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur request approved successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "APPROVED",
+    "canReapply": false,
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.17 17. Resubmit While Already Approved (Expected 409 Conflict)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanAAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Attempting submission while already approved formateur."
+}
+```
+
+#### Response Examples
+##### Error Response (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 16.18 18. Setup — Register Artisan B
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ArtisanBEmail}}",
+  "password": "Password123!",
+  "firstName": "Samir",
+  "lastName": "Hadji",
+  "role": "ARTISAN"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 16.19 19. Setup — Admin Approve Artisan B
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b5ArtisanBId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account approved successfully.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "artisan@souklab.dz",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 16.20 20. Setup — Login Artisan B
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ArtisanBEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 16.21 21. Setup — Complete Profile Artisan B
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/complete-profile`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanBAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "bio": "Master woodcarver creating traditional Algerian cedar woodwork."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully.",
+  "data": {
+    "status": "SUCCESS"
+  }
+}
+```
+
+---
+
+### 16.22 22. Revoke Non-Teacher (Expected 400 Bad Request)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-revoke`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "reason": "Attempting revocation on artisan who is not currently a formateur."
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 16.23 23. B0 — Artisan B Submits Normal Request Before Direct Grant
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanBAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Woodcarving apprenticeship workshops for local youths."
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Formateur request submitted successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "PENDING",
+    "motivation": "Teaching traditional woodwork techniques.",
+    "canReapply": false,
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.24 24. Direct Grant Formateur Status
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-grant`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "adminNote": "Recognized national master woodcarver. Direct formateur grant."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur privileges granted to artisan.",
+  "data": {
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "isTeacher": true
+  }
+}
+```
+
+---
+
+### 16.25 25. Duplicate Direct Grant (Expected 400 Bad Request)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-grant`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "adminNote": "Attempting duplicate direct grant on active formateur."
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 16.26 26. Artisan B Submit While Granted (Expected 409 Conflict)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanBAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Submitting while already an approved formateur via direct grant."
+}
+```
+
+#### Response Examples
+##### Error Response (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 16.27 27. Direct Revoke Formateur Status
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-revoke`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "reason": "Teaching program hiatus requested."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur privileges revoked from artisan.",
+  "data": {
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "isTeacher": false
+  }
+}
+```
+
+---
+
+### 16.28 28. Duplicate Direct Revoke (Expected 400 Bad Request)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/artisans/{{b5ArtisanBId}}/formateur-revoke`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "reason": "Attempting duplicate revocation on already revoked artisan."
+}
+```
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 16.29 29. B-extra1 — Confirm Orphaned Request Still Listed
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests?page=0&size=20`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully.",
+  "data": {
+    "status": "SUCCESS"
+  }
+}
+```
+
+---
+
+### 16.30 30. B-extra2 — Artisan B Blocked by Orphaned Request (Expected 409 Conflict)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanBAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Attempting fresh submission now that isTeacher is false."
+}
+```
+
+#### Response Examples
+##### Error Response (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 16.31 31. B-extra3 — Admin Clears Orphaned Request
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests/{{b5ArtisanBRequestId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "adminNote": "Resolving orphaned request to restore system state."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur request approved successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "APPROVED",
+    "canReapply": false,
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.32 32. Setup — Register Artisan C
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ArtisanCEmail}}",
+  "password": "Password123!",
+  "firstName": "Yacine",
+  "lastName": "Meziane",
+  "role": "ARTISAN"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 16.33 33. Setup — Admin Approve Artisan C
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b5ArtisanCId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account approved successfully.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "artisan@souklab.dz",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 16.34 34. Setup — Login Artisan C
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b5ArtisanCEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 16.35 35. Setup — Complete Profile Artisan C
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/complete-profile`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanCAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "bio": "Traditional leathercraft workshop instructor."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Operation completed successfully.",
+  "data": {
+    "status": "SUCCESS"
+  }
+}
+```
+
+---
+
+### 16.36 36. Submit Formateur Request (Artisan C)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanCAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Traditional leatherworking and tooling workshops."
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Formateur request submitted successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "PENDING",
+    "motivation": "Teaching traditional woodwork techniques.",
+    "canReapply": false,
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.37 37. Admin Rejects with Permanent Block
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests/{{b5ArtisanCRequestId}}/reject`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "adminNote": "Severe terms violation. Permanent restriction applied.",
+  "canReapply": false
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formateur request rejected successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "REJECTED",
+    "canReapply": true,
+    "cooldownUntil": "2026-09-27T22:05:00",
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+### 16.38 38. Attempt Resubmit While Permanently Blocked (Expected 403 Forbidden)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanCAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Attempting resubmit while permanently blocked."
+}
+```
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 16.39 39. Admin Lifts Permanent Block
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formateur-requests/{{b5ArtisanCId}}/lift-cooldown`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "canReapply": true,
+  "cooldownUntil": null
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Cooldown period lifted successfully.",
+  "data": {
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "cooldownUntil": null,
+    "canReapply": true
+  }
+}
+```
+
+---
+
+### 16.40 40. Resubmit After Permanent Block Lifted
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formateur-request`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+| `Authorization` | `Bearer {{b5ArtisanCAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "motivation": "Reapplying after administrative permanent restriction was lifted."
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Formateur request submitted successfully.",
+  "data": {
+    "id": "req-987a-654b-321c",
+    "artisanId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "status": "PENDING",
+    "motivation": "Teaching traditional woodwork techniques.",
+    "canReapply": false,
+    "createdAt": "2026-09-13T22:05:00"
+  }
+}
+```
+
+---
+
+
+---
+
+## 17. Admin Moderation & Search
+
+> Administrative supervision and security tooling: cross-role endpoint isolation, paginated search and multi-attribute filtering across user accounts, temporary disciplinary timeouts with automated expiration, permanent account bans, and account reinstatement flows with audit notifications.
+
+### 17.1 01. Setup — Admin Login
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 17.2 02. Setup — Register Client User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6ClientEmail}}",
+  "password": "Password123!",
+  "firstName": "Client",
+  "lastName": "BatchSix",
+  "role": "CLIENT",
+  "phoneNumber": "0555600001",
+  "address": "123 Client St",
+  "wilaya": "ALGER"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 17.3 03. Setup — Login Client User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6ClientEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 17.4 04. Role Boundary — Client Attempt User Listing (Expected 403 Forbidden)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6ClientAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Access Denied",
+  "data": null
+}
+```
+
+---
+
+### 17.5 05. Role Boundary — Client Attempt User Search (Expected 403 Forbidden)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search=test`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6ClientAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Access Denied",
+  "data": null
+}
+```
+
+---
+
+### 17.6 06. Role Boundary — Client Attempt Pending Listing (Expected 403 Forbidden)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users/pending`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6ClientAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Access Denied",
+  "data": null
+}
+```
+
+---
+
+### 17.7 07. Admin — List All Users Default Pagination
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.8 08. Admin — List Users Custom Pagination & Sorting
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?page=0&size=5&sort=email,asc`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.9 09. Setup — Register Artisan A for Discovery
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6ArtisanAEmail}}",
+  "password": "Password123!",
+  "firstName": "ArtisanA",
+  "lastName": "Discovery",
+  "role": "ROLE_ARTISAN",
+  "phoneNumber": "0555600002",
+  "address": "456 Artisan Way",
+  "wilaya": "ORAN"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 17.10 10. Admin — List Pending Users (Confirm Artisan A Present)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users/pending`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.11 11. Admin — Search Users by Email Prefix
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search={{b6ArtisanAPrefix}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.12 12. Admin — Search Users No Match (Expected Empty Page)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search=NonExistentQueryZzz999X`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.13 13. Admin — Approve Artisan A
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6ArtisanAId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account approved successfully.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "artisan@souklab.dz",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 17.14 14. Setup — Register User B for Permanent Ban Lifecycle
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6UserBEmail}}",
+  "password": "Password123!",
+  "firstName": "UserB",
+  "lastName": "PermBan",
+  "role": "ROLE_ARTISAN",
+  "phoneNumber": "0555600003",
+  "address": "789 Ban Blvd",
+  "wilaya": "CONSTANTINE"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 17.15 15. Admin — Approve User B
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserBId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account approved successfully.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "artisan@souklab.dz",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 17.16 16. Admin — Permanently Ban User B
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserBId}}/ban`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "reason": "Permanent ban test for Batch 6"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User permanently banned.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "accountStatus": "SUSPENDED"
+  }
+}
+```
+
+---
+
+### 17.17 17. User B — Login Lockout Check (Expected 403 Forbidden)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6UserBEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 17.18 18. Admin — Verify Effective Display is SUSPENDED for Permanent Ban
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search={{b6UserBEmail}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.19 19. Role Boundary — Non-Admin Attempt Unban (Expected 403 Forbidden)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserBId}}/unban`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6ClientAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Access Denied",
+  "data": null
+}
+```
+
+---
+
+### 17.20 20. Admin — Unban Non-Existent User (Expected 404 Not Found)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/00000000-0000-0000-0000-000000000000/unban`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`404 Not Found`)
+```json
+{
+  "success": false,
+  "code": 404,
+  "errorCode": "NOT_FOUND",
+  "message": "Requested entity not found",
+  "data": null
+}
+```
+
+---
+
+### 17.21 21. Admin — Successfully Unban User B
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserBId}}/unban`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User ban/timeout lifted. Account reinstated.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 17.22 22. Admin — Conflict Guard: Unban Already Active User (Expected 409 Conflict)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserBId}}/unban`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "Resource conflict: An active request or record already exists.",
+  "data": null
+}
+```
+
+---
+
+### 17.23 23. User B — Successful Login Post-Unban
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6UserBEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 17.24 24. User B — Verify ACCOUNT_REINSTATED Notification
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/notifications`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6UserBAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "b1a2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "message": "Your account has been validated.",
+        "isRead": true,
+        "type": "ACCOUNT_VALIDATED",
+        "targetId": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "createdAt": "2026-09-13T22:10:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.25 25. Setup — Register User C for Timeout Lifecycle
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6UserCEmail}}",
+  "password": "Password123!",
+  "firstName": "UserC",
+  "lastName": "Timeout",
+  "role": "ROLE_ARTISAN",
+  "phoneNumber": "0555600004",
+  "address": "321 Timer Way",
+  "wilaya": "ANNABA"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 17.26 26. Admin — Approve User C
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserCId}}/approve`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account approved successfully.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "artisan@souklab.dz",
+    "accountStatus": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 17.27 27. Admin — Timeout User C for 1 Minute
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserCId}}/timeout`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "minutes": 1,
+  "reason": "1-minute auto-expiry test"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "User account timed out.",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "accountStatus": "SUSPENDED",
+    "suspendedUntil": "2026-09-13T22:31:00"
+  }
+}
+```
+
+---
+
+### 17.28 28. User C — Login Lockout Check During Timeout (Expected 403 Forbidden)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6UserCEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Error Response (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Account is temporarily locked due to multiple failed login attempts. Please try again later or reset your password.",
+  "data": null
+}
+```
+
+---
+
+### 17.29 29. Admin — Verify Active Timeout Display in Admin Search
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search={{b6UserCEmail}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.30 30. Timeout Lapse Delay — Wait 65 Seconds
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search={{b6UserCEmail}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.31 31. Admin — Search Shows Effective ACTIVE BEFORE User C Login
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users?search={{b6UserCEmail}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.32 32. Admin — Unfiltered Listing Also Shows Effective ACTIVE
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/users`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+        "email": "user@souklab.dz",
+        "firstName": "Karim",
+        "lastName": "Ziani",
+        "accountStatus": "ACTIVE",
+        "roles": [
+          "ROLE_ARTISAN"
+        ],
+        "createdAt": "2026-09-13T22:00:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 17.33 33. User C — Subsequent Login Triggers Lazy-Write
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{b6UserCEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 17.34 34. Admin — Conflict Guard on Auto-Expired User (Expected 409 Conflict)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/users/{{b6UserCId}}/unban`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{b6AdminAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "Resource conflict: An active request or record already exists.",
+  "data": null
+}
+```
+
+---
+
+
+---
+
+## 18. User — Avatar Management
+
+> Comprehensive user avatar media lifecycle: multi-variant image processing (original, medium, thumbnail), activation/deactivation toggles, idempotent reactivation, soft deletion and active avatar detachment, format verification, spoofing prevention, 10-avatar quota enforcement, and rate limiting.
+
+### 18.1 Setup — Authenticate Avatar User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 18.2 Setup — Clean Existing Avatars (Idempotency Guard)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "av-1234-5678-90ab",
+        "originalUrl": "/api/v1/files/avatar-orig.png",
+        "mediumUrl": "/api/v1/files/avatar-med.png",
+        "thumbnailUrl": "/api/v1/files/avatar-thumb.png",
+        "isActive": true,
+        "createdAt": "2026-09-13T22:20:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 18.3 Upload Avatar 1 — PNG (Happy Path)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Avatar uploaded and activated successfully.",
+  "data": {
+    "id": "av-1234-5678-90ab",
+    "originalUrl": "/api/v1/files/avatar-orig.png",
+    "mediumUrl": "/api/v1/files/avatar-med.png",
+    "thumbnailUrl": "/api/v1/files/avatar-thumb.png",
+    "isActive": true,
+    "createdAt": "2026-09-13T22:20:00"
+  }
+}
+```
+
+---
+
+### 18.4 Verify Avatar 1 Original URL Resolves
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/files/:key`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+<Binary image content (image/png or image/jpeg)>
+
+---
+
+### 18.5 Verify Avatar 1 Medium URL Resolves
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/files/:key`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+<Binary image content (image/png or image/jpeg)>
+
+---
+
+### 18.6 Verify Avatar 1 Thumbnail URL Resolves
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/files/:key`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+<Binary image content (image/png or image/jpeg)>
+
+---
+
+### 18.7 Verify Active Avatar in Profile (GET /auth/me)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/auth/me`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": true,
+    "avatarUrl": "/api/v1/files/avatar-sample.png",
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 18.8 Upload Avatar 2 — JPEG
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Avatar uploaded and activated successfully.",
+  "data": {
+    "id": "av-1234-5678-90ab",
+    "originalUrl": "/api/v1/files/avatar-orig.png",
+    "mediumUrl": "/api/v1/files/avatar-med.png",
+    "thumbnailUrl": "/api/v1/files/avatar-thumb.png",
+    "isActive": true,
+    "createdAt": "2026-09-13T22:20:00"
+  }
+}
+```
+
+---
+
+### 18.9 Get Avatar Gallery (Paginated & Ordered DESC)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars?page=0&size=20`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "av-1234-5678-90ab",
+        "originalUrl": "/api/v1/files/avatar-orig.png",
+        "mediumUrl": "/api/v1/files/avatar-med.png",
+        "thumbnailUrl": "/api/v1/files/avatar-thumb.png",
+        "isActive": true,
+        "createdAt": "2026-09-13T22:20:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 18.10 Activate Previous Avatar (PUT /activate)
+- **Method**: `PUT`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars/:id/activate`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Avatar activated successfully.",
+  "data": {
+    "id": "av-1234-5678-90ab",
+    "isActive": true
+  }
+}
+```
+
+---
+
+### 18.11 Verify Re-Activated Avatar in Profile (GET /auth/me)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/auth/me`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": true,
+    "avatarUrl": "/api/v1/files/avatar-sample.png",
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 18.12 Re-Activate Already-Active Avatar (Idempotent No-Op)
+- **Method**: `PUT`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars/:id/activate`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Avatar activated successfully.",
+  "data": {
+    "id": "av-1234-5678-90ab",
+    "isActive": true
+  }
+}
+```
+
+---
+
+### 18.13 Delete Non-Active Avatar (DELETE)
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars/:id`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Avatar deleted successfully.",
+  "data": null
+}
+```
+
+---
+
+### 18.14 Verify Active Avatar Unchanged (GET /auth/me)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/auth/me`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": true,
+    "avatarUrl": "/api/v1/files/avatar-sample.png",
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 18.15 Delete Currently Active Avatar (DELETE)
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars/:id`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Avatar deleted successfully.",
+  "data": null
+}
+```
+
+---
+
+### 18.16 Verify Active Avatar Cleared to Null (GET /auth/me)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/auth/me`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": true,
+    "avatarUrl": "/api/v1/files/avatar-sample.png",
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 18.17 Verify No Auto-Promotion in Gallery (GET /avatars)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "av-1234-5678-90ab",
+        "originalUrl": "/api/v1/files/avatar-orig.png",
+        "mediumUrl": "/api/v1/files/avatar-med.png",
+        "thumbnailUrl": "/api/v1/files/avatar-thumb.png",
+        "isActive": true,
+        "createdAt": "2026-09-13T22:20:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 18.18 Delete Non-Existent Avatar (DELETE 404)
+- **Method**: `DELETE`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars/:id`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Error Response (`404 Not Found`)
+```json
+{
+  "success": false,
+  "code": 404,
+  "errorCode": "NOT_FOUND",
+  "message": "Requested entity not found",
+  "data": null
+}
+```
+
+---
+
+### 18.19 Upload Avatar — Invalid MIME Type (400)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 18.20 Upload Avatar — Disguised Text File (400 Spoofed MIME)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Error Response (`400 Bad Request`)
+```json
+{
+  "success": false,
+  "code": 400,
+  "errorCode": "BAD_REQUEST",
+  "message": "Validation failed / Bad Request",
+  "data": null
+}
+```
+
+---
+
+### 18.21 Upload Avatar — Oversized File (413 FILE_TOO_LARGE)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Error Response (`413 Payload Too Large`)
+```json
+{
+  "success": false,
+  "code": 413,
+  "errorCode": "FILE_TOO_LARGE",
+  "message": "File size exceeds configured limit.",
+  "data": null
+}
+```
+
+---
+
+### 18.22 Quota — Upload Avatar Fill Cap (Loop to 10)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Avatar uploaded and activated successfully.",
+  "data": {
+    "id": "av-1234-5678-90ab",
+    "originalUrl": "/api/v1/files/avatar-orig.png",
+    "mediumUrl": "/api/v1/files/avatar-med.png",
+    "thumbnailUrl": "/api/v1/files/avatar-thumb.png",
+    "isActive": true,
+    "createdAt": "2026-09-13T22:20:00"
+  }
+}
+```
+
+---
+
+### 18.23 Quota — Exceed Cap 11th Upload (409)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Error Response (`409 Conflict`)
+```json
+{
+  "success": false,
+  "code": 409,
+  "errorCode": "CONFLICT",
+  "message": "Resource conflict: An active request or record already exists.",
+  "data": null
+}
+```
+
+---
+
+### 18.24 Teardown — Clean Quota Avatars
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{avatarAccessToken}}` | Bearer authentication token |
+
+#### Request Body
+*None (No request payload)*
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "av-1234-5678-90ab",
+        "originalUrl": "/api/v1/files/avatar-orig.png",
+        "mediumUrl": "/api/v1/files/avatar-med.png",
+        "thumbnailUrl": "/api/v1/files/avatar-thumb.png",
+        "isActive": true,
+        "createdAt": "2026-09-13T22:20:00"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 18.25 Rate Limit Setup — Register Burst User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/register`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{rateLimitUserEmail}}",
+  "password": "Password123!",
+  "firstName": "Rate",
+  "lastName": "Burst",
+  "role": "CLIENT"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Registration successful. Welcome to Souklab!",
+  "data": {
+    "id": "43fb36ad-7835-4fea-be7e-e3bc8f875e1e",
+    "email": "user@souklab.dz",
+    "firstName": "Sofiane",
+    "lastName": "Feghouli",
+    "roles": [
+      "ROLE_CLIENT"
+    ],
+    "accountStatus": "ACTIVE",
+    "emailVerified": false,
+    "createdAt": "2026-09-13T22:00:00"
+  }
+}
+```
+
+---
+
+### 18.26 Rate Limit Setup — Login Burst User
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/auth/login`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Content media type |
+
+#### Request Body (`application/json`)
+```json
+{
+  "email": "{{rateLimitUserEmail}}",
+  "password": "Password123!"
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Authentication successful.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQHNvdWtsYWIuZHoiLCJpZCI6IjQzZmIzNmFkLTc4MzUtNGZlYS1iZTdlLWUzYmM4Zjg3NWUxZSJ9...",
+    "refreshToken": "7a9e23b1-054c-47b8-8092-23c345ef01a2",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+---
+
+### 18.27 Rate Limit — Burst Exceeding Capacity (429)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/users/me/avatars`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{rateLimitUserToken}}` | Bearer authentication token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Uploaded payload parameter |
+
+#### Response Examples
+##### Error Response (`429 Too Many Requests`)
+```json
+{
+  "success": false,
+  "code": 429,
+  "errorCode": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded. Try again later.",
+  "data": null
+}
+```
+
+---

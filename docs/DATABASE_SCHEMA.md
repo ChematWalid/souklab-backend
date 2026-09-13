@@ -20,7 +20,7 @@ Every table representing a full domain entity includes standard auditing columns
 ### 1.3 Soft-Delete vs. Hard-Delete Policy
 | Classification | Soft-Delete (`deleted_at` present) | Hard-Delete / Immutable Append-Only | Rationale |
 | :--- | :--- | :--- | :--- |
-| **Domain Entities** | `users`, `artisans`, `clients`, `formations`, `feed_posts`, `artisan_gallery_images`, `artisan_certifications`, `artisan_achievements`, `artisan_social_links`, `conversations`, `messages`, `reviews` | — | User-facing assets that users or artisans can delete or archive, while preserving referential integrity and audit trails. |
+| **Domain Entities** | `users`, `artisans`, `clients`, `formations`, `formation_files`, `feed_posts`, `artisan_gallery_images`, `artisan_certifications`, `artisan_achievements`, `artisan_social_links`, `conversations`, `messages`, `reviews` | — | User-facing assets that users or artisans can delete or archive, while preserving referential integrity and audit trails. |
 | **Join / Link Tables, Auth Links & Avatars** | — | `user_roles`, `oauth_identities`, `verification_tokens`, `user_avatars`, `artisan_materials`, `artisan_techniques`, `artisan_epoques`, `conversation_participants` | Pure junction tables, third-party identity bindings, and user avatars. Associations, linked OAuth accounts, and gallery avatars are unlinked or hard-deleted directly to purge physical storage and enforce quotas. |
 | **Financial & Ledger** | — | `payments`, `client_subscriptions`, `artisan_subscriptions`, `subscription_pricing` | Financial transaction history must remain immutable. Subscriptions transition to `CANCELLED` or `EXPIRED` status rather than being deleted. |
 | **Auditing & Moderation** | — | `audit_logs`, `payment_webhook_logs`, `artisan_validations`, `formation_reviews`, `formation_enrollments`, `reports`, `notifications` | Append-only security and administrative decision records. Must never be altered or deleted. |
@@ -266,7 +266,6 @@ Extended profile for registered buyers, collectors, boutiques, and institutions.
 - **Relationships**:
   - `OneToOne` with `User` (owning side: `Client`, primary key joins on `users.id`).
   - `ManyToOne` with `Region` (fetch: `LAZY`).
-  - `OneToMany` with `FormationEnrollment` (mappedBy: `client`, fetch: `LAZY`).
   - `OneToMany` with `Review` (mappedBy: `client`, fetch: `LAZY`).
 - **Indexes**:
   - `idx_clients_region` (`region_id`): Indexed for regional client analytics.
@@ -568,8 +567,9 @@ Workshops, courses, and apprenticeship masterclasses authored by verified teache
 
 - **Relationships**:
   - `ManyToOne` with `Artisan` (owning side: `Formation`, fetch: `LAZY`).
-  - `OneToMany` with `FormationEnrollment` (mappedBy: `formation`, fetch: `LAZY`, cascade: `ALL`).
-  - `OneToMany` with `FormationReview` (mappedBy: `formation`, fetch: `LAZY`, cascade: `ALL`).
+  - `OneToMany` with `FormationFile` (mappedBy: `formation`, fetch: `LAZY`, cascade: `ALL`, orphanRemoval: true).
+  - `OneToMany` with `FormationEnrollment` (mappedBy: `formation`, fetch: `LAZY`, cascade: `ALL`, orphanRemoval: true).
+  - `OneToMany` with `FormationReview` (mappedBy: `formation`, fetch: `LAZY`, cascade: `ALL`, orphanRemoval: true).
   - `OneToMany` with `FeedPost` (mappedBy: `formation`, fetch: `LAZY`).
 - **Indexes**:
   - `idx_formations_browse` (`status`, `scheduled_at`, `deleted_at`): Public marketplace query for published upcoming formations.
@@ -578,26 +578,27 @@ Workshops, courses, and apprenticeship masterclasses authored by verified teache
 ---
 
 ### 6.2 `formation_enrollments`
-Client registrations and seat bookings for workshops.
+Peer artisan registrations and seat reservations for workshops and masterclasses.
 
 | Column Name | SQL Type | Nullable | Default | Constraints & Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `NO` | — | **PK** (UUID) |
+| `id` | `VARCHAR(36)` | `NO` | — | **PK** (UUID from `BaseEntity`) |
 | `formation_id` | `VARCHAR(36)` | `NO` | — | **FK** -> `formations.id` (`ON DELETE CASCADE`) |
-| `client_id` | `VARCHAR(36)` | `NO` | — | **FK** -> `clients.id` (`ON DELETE CASCADE`) |
-| `payment_id` | `VARCHAR(36)` | `YES` | `NULL` | **FK** -> `payments.id` (`ON DELETE SET NULL`) |
-| `status` | `VARCHAR(30)` | `NO` | `'CONFIRMED'` | Enum: `CONFIRMED`, `ATTENDED`, `CANCELLED`, `REFUNDED` |
-| `enrolled_at` | `DATETIME(6)` | `NO` | — | Enrollment registration timestamp |
-| `created_at` | `DATETIME(6)` | `NO` | — | Audit timestamp |
-| `updated_at` | `DATETIME(6)` | `NO` | — | Audit timestamp |
+| `artisan_id` | `VARCHAR(36)` | `NO` | — | **FK** -> `artisans.id` (`ON DELETE CASCADE`) |
+| `status` | `VARCHAR(30)` | `NO` | `'CONFIRMED'` | Enum: `CONFIRMED`, `ATTENDED`, `CANCELLED` |
+| `enrolled_at` | `DATETIME(6)` | `NO` | — | Enrollment reservation timestamp |
+| `cancelled_at` | `DATETIME(6)` | `YES` | `NULL` | Cancellation timestamp (when cancelled prior to cutoff) |
+| `created_at` | `DATETIME(6)` | `NO` | — | Audit creation timestamp |
+| `updated_at` | `DATETIME(6)` | `NO` | — | Audit update timestamp |
+| `deleted_at` | `DATETIME(6)` | `YES` | `NULL` | Soft-delete timestamp |
 
 - **Relationships**:
   - `ManyToOne` with `Formation` (fetch: `LAZY`).
-  - `ManyToOne` with `Client` (fetch: `LAZY`).
-  - `ManyToOne` with `Payment` (fetch: `LAZY`).
+  - `ManyToOne` with `Artisan` (fetch: `LAZY`).
 - **Indexes & Unique Constraints**:
-  - `uk_enrollment_client` (`formation_id`, `client_id`): Prevents duplicate enrollments by the same client for the same workshop.
-  - `idx_enrollment_client_list` (`client_id`, `status`): Fast lookup for a client's workshop history.
+  - `uk_enrollment_artisan` (`formation_id`, `artisan_id`): Prevents duplicate enrollments by the same peer artisan for the same workshop.
+  - `idx_formation_enrollments_lookup` (`formation_id`, `artisan_id`, `status`): Composite lookup for active reservation status.
+  - `idx_formation_enrollments_artisan` (`artisan_id`, `status`): Fast lookup for an artisan's workshop enrollment history.
 
 ---
 
@@ -606,7 +607,7 @@ Administrative curriculum reviews and compliance approvals.
 
 | Column Name | SQL Type | Nullable | Default | Constraints & Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `NO` | — | **PK** (UUID) |
+| `id` | `VARCHAR(36)` | `NO` | — | **PK** (UUID from `BaseEntity`) |
 | `formation_id` | `VARCHAR(36)` | `NO` | — | **FK** -> `formations.id` (`ON DELETE CASCADE`) |
 | `admin_id` | `VARCHAR(36)` | `NO` | — | **FK** -> `users.id` (`ON DELETE RESTRICT`) |
 | `decision` | `VARCHAR(30)` | `NO` | — | Enum: `APPROVED`, `REJECTED` |
@@ -614,11 +615,34 @@ Administrative curriculum reviews and compliance approvals.
 | `reviewed_at` | `DATETIME(6)` | `NO` | — | Decision timestamp |
 | `created_at` | `DATETIME(6)` | `NO` | — | Audit timestamp |
 | `updated_at` | `DATETIME(6)` | `NO` | — | Audit timestamp |
+| `deleted_at` | `DATETIME(6)` | `YES` | `NULL` | Soft-delete timestamp |
 
 - **Relationships**:
   - `ManyToOne` with `Formation` (fetch: `LAZY`).
   - `ManyToOne` with `User` (`admin`, fetch: `LAZY`).
-- **Indexes**: `idx_form_rev_formation` (`formation_id`, `reviewed_at` DESC).
+- **Indexes**: `idx_formation_reviews_formation` (`formation_id`, `reviewed_at` DESC).
+
+---
+
+### 6.4 `formation_files`
+Course attachments, syllabi, and supplemental training files accessible to the instructor and confirmed enrolled peer artisans.
+
+| Column Name | SQL Type | Nullable | Default | Constraints & Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `VARCHAR(36)` | `NO` | — | **PK** (UUID from `BaseEntity`) |
+| `formation_id` | `VARCHAR(36)` | `NO` | — | **FK** -> `formations.id` (`ON DELETE CASCADE`) |
+| `storage_key` | `VARCHAR(255)` | `NO` | — | Storage object key / physical file identifier |
+| `original_filename`| `VARCHAR(255)` | `NO` | — | Original file name as uploaded by author |
+| `content_type` | `VARCHAR(50)` | `NO` | — | MIME type (`application/pdf`, `image/jpeg`, `image/png`) |
+| `file_size` | `BIGINT` | `NO` | — | File size in bytes |
+| `created_at` | `DATETIME(6)` | `NO` | — | Audit creation timestamp |
+| `updated_at` | `DATETIME(6)` | `NO` | — | Audit update timestamp |
+| `deleted_at` | `DATETIME(6)` | `YES` | `NULL` | Soft-delete timestamp |
+
+- **Relationships**:
+  - `ManyToOne` with `Formation` (fetch: `LAZY`).
+- **Indexes**:
+  - `idx_formation_files_formation` (`formation_id`, `deleted_at`): Fast lookup for non-deleted files belonging to a formation.
 
 ---
 
@@ -973,7 +997,7 @@ The following architectural and design decisions were made to guarantee performa
        SELECT EXISTS(
          SELECT 1 FROM formation_enrollments fe
          JOIN formations f ON fe.formation_id = f.id
-         WHERE fe.client_id = :clientId AND f.author_id = :artisanId AND fe.status IN ('CONFIRMED', 'ATTENDED')
+         WHERE fe.artisan_id = :reviewerArtisanId AND f.author_id = :artisanId AND fe.status IN ('CONFIRMED', 'ATTENDED')
        );
        ```
 

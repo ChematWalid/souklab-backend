@@ -9,7 +9,9 @@ This document contains the complete database schema, JPA entity mappings, relati
 | Enum | Allowed Values | Description |
 | :--- | :--- | :--- |
 | **`AccountStatus`** | `PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED` | Lifecycle status of a user / artisan account |
-| **`FormationStatus`** | `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED` | Course / Workshop approval lifecycle |
+| **`FormationStatus`** | `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`, `CANCELLED`, `COMPLETED` | Course / Workshop approval lifecycle |
+| **`EnrollmentStatus`** | `CONFIRMED`, `ATTENDED`, `CANCELLED` | Peer artisan workshop registration status |
+| **`FormationReviewDecision`** | `APPROVED`, `REJECTED` | Administrative moderation verdict for formations |
 | **`PostType`** | `FORMATION`, `ACTUALITE`, `ANNONCE` | Community feed item classification |
 | **`PaymentStatus`** | `PENDING`, `SUCCEEDED`, `FAILED`, `REFUNDED`, `CANCELLED` | Transaction status |
 | **`PaymentProvider`** | `CHARGILY`, `CARD`, `OTHER` | Payment gateway |
@@ -17,7 +19,7 @@ This document contains the complete database schema, JPA entity mappings, relati
 | **`SubscriptionStatus`**| `ACTIVE`, `EXPIRED`, `CANCELLED` | Active status of paid plans |
 | **`SubscriptionPlan`** | `FREEMIUM`, `PREMIUM_MONTHLY`, `PREMIUM_YEARLY` | Tier of platform access |
 | **`AdminAction`** | `APPROVED`, `REJECTED`, `SUSPENDED`, `REACTIVATED` | Admin audit action log |
-| **`NotificationType`** | `ACCOUNT_VALIDATED`, `ACCOUNT_REJECTED`, `ACCOUNT_SUSPENDED`, `FORMATION_APPROVED`, `FORMATION_REJECTED`, `NEW_MESSAGE`, `SUBSCRIPTION_RENEWED`, `SUBSCRIPTION_EXPIRED`, `PAYMENT_SUCCESS`, `PAYMENT_FAILED`, `NEW_REPORT`, `NEW_REVIEW`, `NEW_FORMATION` | Notification dispatcher event types |
+| **`NotificationType`** | `ACCOUNT_VALIDATED`, `ACCOUNT_REJECTED`, `ACCOUNT_SUSPENDED`, `FORMATION_APPROVED`, `FORMATION_REJECTED`, `NEW_MESSAGE`, `SUBSCRIPTION_RENEWED`, `SUBSCRIPTION_EXPIRED`, `PAYMENT_SUCCESS`, `PAYMENT_FAILED`, `NEW_REPORT`, `NEW_REVIEW`, `NEW_FORMATION`, `FORMATEUR_REQUEST_SUBMITTED`, `FORMATEUR_APPROVED`, `FORMATEUR_GRANTED`, `FORMATEUR_REJECTED`, `FORMATEUR_REVOKED`, `ACCOUNT_REINSTATED` | Notification dispatcher event types |
 
 ---
 
@@ -145,16 +147,25 @@ All entity classes inherit from `BaseEntity`:
 - `description`: `TEXT` (Not Null)
 - `thumbnail_url`: `VARCHAR(500)`
 - `location`: `VARCHAR(255)` (Physical studio address or Online link)
-- `scheduled_at`: `TIMESTAMP`
-- `duration_hours`: `INT`
-- `max_participants`: `INT`
-- `price`: `INT` (in DZD)
+- `is_online`: `BOOLEAN` (Default false)
+- `scheduled_at`: `DATETIME(6)`
+- `duration_hours`: `INT` (Default 0)
+- `max_participants`: `INT` (Default 0)
+- `price`: `INT` (in DZD, Default 0)
 - `currency`: `VARCHAR(10)` (Default 'DZD')
-- `status`: `VARCHAR(30)` (`FormationStatus`: `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`)
+- `status`: `VARCHAR(30)` (`FormationStatus`: `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`, `CANCELLED`, `COMPLETED`)
+
+#### `formation_files`
+- `id`: `VARCHAR(36)` (PK)
+- `formation_id`: `VARCHAR(36)` (FK -> `formations.id`)
+- `storage_key`: `VARCHAR(255)` (Not Null)
+- `original_filename`: `VARCHAR(255)` (Not Null)
+- `content_type`: `VARCHAR(50)` (Not Null)
+- `file_size`: `BIGINT` (Not Null)
 
 #### `formation_enrollments` & `formation_reviews`
-- `formation_enrollments`: `formation_id`, `user_id`, `enrolled_at`, `payment_id`
-- `formation_reviews`: `id`, `formation_id`, `admin_id`, `decision` (`AdminAction`), `comment`, `reviewed_at`
+- `formation_enrollments`: `id`, `formation_id` (FK -> `formations.id`), `artisan_id` (FK -> `artisans.id`), `status` (`EnrollmentStatus`: `CONFIRMED`, `ATTENDED`, `CANCELLED`), `enrolled_at`, `cancelled_at`
+- `formation_reviews`: `id`, `formation_id` (FK -> `formations.id`), `admin_id` (FK -> `users.id`), `decision` (`FormationReviewDecision`: `APPROVED`, `REJECTED`), `comment`, `reviewed_at`
 
 ---
 
