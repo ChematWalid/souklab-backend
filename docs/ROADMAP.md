@@ -62,7 +62,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 
 ---
 
-## 📍 Phase 6: Formations (Workshops / Masterclasses)
+## 📍 Phase 6: Formations (Workshops / Masterclasses) (COMPLETED)
 - [x] **Step 6.0**: **Formateur Governance Subsystem (COMPLETED)**:
   - Artisan teacher eligibility (`isTeacher` flag, application submission `POST /api/v1/artisan/formateur-request`).
   - Formateur state machine (`PENDING`, `APPROVED`, `REJECTED`).
@@ -71,6 +71,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 - [x] **Step 6.1**: Implement `Formation`, `FormationFile`, `FormationEnrollment`, `FormationReview` entities, configuration pipeline, and repository layer.
 - [x] **Step 6.2**: Implement formation authoring pipeline, media uploads via `StorageService` with compensating rollback, admin review moderation, and dual notification integration.
 - [x] **Step 6.3**: Implement peer artisan workshop discovery, enrollment with capacity bounds, cancellation deadline cutoff (24h), protected course file downloads, and enrollment history.
+- [x] **Step 6.4**: End-to-end integration test suite (`FormationIntegrationTest`), Postman Batch 8 (16 requests covering authoring, review, enrollment, protected files, and client boundary guards), and comprehensive API reference documentation.
 
 ---
 

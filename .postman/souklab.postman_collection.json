@@ -14426,6 +14426,887 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "12. Formations & Peer Workshops",
+      "description": "Artisan-to-artisan masterclass ecosystem: draft authoring by accredited instructors (is_teacher=true), thumbnail and course file uploads, admin moderation workflow, catalog discovery, peer enrollment with capacity management, cancellation cutoff, and protected course document downloads.",
+      "item": [
+        {
+          "name": "12.1 Create Formation Draft (Master Artisan)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formation draft created successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(201);",
+                  "    pm.expect(json.data.status).to.eql(\"DRAFT\");",
+                  "    pm.expect(json.data.title).to.not.be.empty;",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"formationId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisanAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Masterclass Poterie Traditionnelle de Kabylie\",\n  \"description\": \"Apprentissage intensif des techniques de modelage d'argile, polissage aux galets de riviere et cuisson ancestrale au bois.\",\n  \"location\": \"Atelier Beni Yenni, Wilaya de Tizi Ouzou\",\n  \"isOnline\": false,\n  \"scheduledAt\": \"2030-10-15T09:00:00\",\n  \"durationHours\": 8,\n  \"maxParticipants\": 6,\n  \"price\": 12000,\n  \"currency\": \"DZD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations"
+              ]
+            },
+            "description": "Creates a new formation draft for an accredited instructor artisan (is_teacher == true). Status starts as DRAFT."
+          },
+          "response": []
+        },
+        {
+          "name": "12.2 Upload Formation Thumbnail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Thumbnail image uploaded successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.thumbnailUrl).to.not.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisanAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ".postman/fixtures/sample-thumbnail.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/{{formationId}}/thumbnail",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "{{formationId}}",
+                "thumbnail"
+              ]
+            },
+            "description": "Uploads a showcase cover thumbnail image (JPEG, PNG, WebP; max 10MB) stored via StorageService."
+          },
+          "response": []
+        },
+        {
+          "name": "12.3 Upload Course Syllabus File",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Course file uploaded successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(201);",
+                  "    pm.expect(json.data.id).to.not.be.empty;",
+                  "    pm.expect(json.data.originalFilename).to.not.be.empty;",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"courseFileId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisanAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ".postman/fixtures/sample-syllabus.pdf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/{{formationId}}/files",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "{{formationId}}",
+                "files"
+              ]
+            },
+            "description": "Uploads a course material or syllabus document (PDF, JPEG, PNG; max 25MB; up to 10 files per formation)."
+          },
+          "response": []
+        },
+        {
+          "name": "12.4 Submit Formation for Admin Review",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formation submitted for review\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.status).to.eql(\"PENDING_REVIEW\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisanAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/{{formationId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "{{formationId}}",
+                "submit"
+              ]
+            },
+            "description": "Transitions formation draft to PENDING_REVIEW and sends notification to platform administrators."
+          },
+          "response": []
+        },
+        {
+          "name": "12.5 Admin Get Pending Formations Queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Pending review queue retrieved\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formations/pending?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formations",
+                "pending"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Retrieves the administrative moderation triage queue of formations awaiting review."
+          },
+          "response": []
+        },
+        {
+          "name": "12.6 Admin Reject Formation (with Comment)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formation rejection recorded\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.status).to.eql(\"REJECTED\");",
+                  "    pm.expect(json.data.reviews).to.be.an(\"array\").that.is.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"REJECTED\",\n  \"comment\": \"Veuillez preciser les consignes de securite et l'equipement de protection individuel necessaire pour l'atelier.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/formations/{{formationId}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formations",
+                "{{formationId}}",
+                "review"
+              ]
+            },
+            "description": "Rejects a pending formation with mandatory moderation feedback. Status transitions to REJECTED."
+          },
+          "response": []
+        },
+        {
+          "name": "12.7 Admin Approve Formation",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Re-submit the formation from REJECTED state so status is PENDING_REVIEW",
+                  "pm.sendRequest({",
+                  "    url: pm.environment.get(\"baseUrl\") + \"/artisan/formations/\" + pm.environment.get(\"formationId\") + \"/submit\",",
+                  "    method: \"POST\",",
+                  "    header: {",
+                  "        \"Authorization\": \"Bearer \" + pm.environment.get(\"artisanAccessToken\")",
+                  "    }",
+                  "}, function (err, res) {});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formation approved successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.status).to.eql(\"APPROVED\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APPROVED\",\n  \"comment\": \"Masterclass validee et conforme aux standards d'excellence artisanale Souklab.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/formations/{{formationId}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formations",
+                "{{formationId}}",
+                "review"
+              ]
+            },
+            "description": "Approves a pending formation. Status transitions to APPROVED, making it eligible for publication."
+          },
+          "response": []
+        },
+        {
+          "name": "12.8 Admin Publish Formation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formation published to catalog\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.status).to.eql(\"PUBLISHED\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/formations/{{formationId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "formations",
+                "{{formationId}}",
+                "publish"
+              ]
+            },
+            "description": "Publishes an approved formation to the public catalog for peer discovery and enrollment."
+          },
+          "response": []
+        },
+        {
+          "name": "12.9 Artisan Browse Formation Catalog",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Published catalog retrieved successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisan2AccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/catalog?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "catalog"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Enables authenticated artisans to browse published formations sorted by scheduled date."
+          },
+          "response": []
+        },
+        {
+          "name": "12.10 Artisan View Formation Details (with Seat Calculation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Formation details retrieved with dynamic seats\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.id).to.eql(pm.environment.get(\"formationId\"));",
+                  "    pm.expect(json.data.availableSeats).to.be.a(\"number\");",
+                  "    pm.expect(json.data.files).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisan2AccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/catalog/{{formationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "catalog",
+                "{{formationId}}"
+              ]
+            },
+            "description": "Retrieves comprehensive formation public view including dynamic availableSeats calculation and locked syllabus file descriptors."
+          },
+          "response": []
+        },
+        {
+          "name": "12.11 Peer Artisan Enroll in Formation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Enrollment confirmed\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.status).to.eql(\"CONFIRMED\");",
+                  "    pm.expect(json.data.enrolledAt).to.not.be.null;",
+                  "});",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"enrollmentId\", json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisan2AccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/{{formationId}}/enroll",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "{{formationId}}",
+                "enroll"
+              ]
+            },
+            "description": "Enrolls an authenticated peer artisan into the published masterclass, reserving a seat and unlocking syllabus documents."
+          },
+          "response": []
+        },
+        {
+          "name": "12.12 Enrolled Artisan Download Course File",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Content-Disposition attachment header is present\", function () {",
+                  "    pm.expect(pm.response.headers.has(\"Content-Disposition\")).to.be.true;",
+                  "    pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"attachment\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisan2AccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/{{formationId}}/files/{{courseFileId}}/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "{{formationId}}",
+                "files",
+                "{{courseFileId}}",
+                "download"
+              ]
+            },
+            "description": "Streams protected course material file directly to the confirmed enrolled peer participant."
+          },
+          "response": []
+        },
+        {
+          "name": "12.13 Non-Enrolled Artisan Download Course File (Expected 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Forbidden error envelope returned\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(403);",
+                  "    pm.expect(json.errorCode).to.eql(\"FORBIDDEN\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisan3AccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/{{formationId}}/files/{{courseFileId}}/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "{{formationId}}",
+                "files",
+                "{{courseFileId}}",
+                "download"
+              ]
+            },
+            "description": "Verifies that an artisan who is NOT enrolled receives 403 Forbidden when attempting to download syllabus documents."
+          },
+          "response": []
+        },
+        {
+          "name": "12.14 Artisan Cancel Formation Enrollment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Enrollment cancelled successfully\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.status).to.eql(\"CANCELLED\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisan2AccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/{{formationId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "{{formationId}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels an active enrollment prior to the configured cancellation deadline cutoff (24 hours prior to scheduledAt), freeing the seat."
+          },
+          "response": []
+        },
+        {
+          "name": "12.15 Artisan View My Enrollments Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Enrollment history retrieved\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{artisan2AccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/my-enrollments?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "my-enrollments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Returns paginated list of all workshop masterclasses the artisan has enrolled in, including active and cancelled registrations."
+          },
+          "response": []
+        },
+        {
+          "name": "12.16 Client Access Formation Route (Expected 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Peer learning boundary enforces 403 for Client role\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clientAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/artisan/formations/catalog",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artisan",
+                "formations",
+                "catalog"
+              ]
+            },
+            "description": "Verifies that clients (ROLE_CLIENT) are strictly forbidden from participating in peer artisan masterclass routes."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

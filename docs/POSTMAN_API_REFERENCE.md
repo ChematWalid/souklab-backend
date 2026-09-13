@@ -14,6 +14,7 @@ This document provides the exhaustive specification for all requests, headers, r
 9. [Admin — User Moderation](#9-admin--user-moderation)
 10. [File Storage](#10-file-storage)
 11. [Public Directory & Faceted Search](#11-public-directory--faceted-search)
+12. [Formations & Peer Workshops](#12-formations--peer-workshops)
 
 ---
 
@@ -2894,3 +2895,551 @@ All admin user moderation routes are guarded at the controller level with `@PreA
 
 ---
 
+---
+## 12. Formations & Peer Workshops
+
+> Peer-to-peer masterclasses and workshop ecosystem exclusively for artisans. Enforces the instructor boundary (`is_teacher == true`), course document quotas with ClamAV stream inspection, administrative review lifecycle, seat capacity management, cancellation cutoff deadlines, and strict client role access rejection (`403 Forbidden`).
+
+### 12.1 Create Formation Draft (Master Artisan)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formations`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Request payload format |
+| `Authorization` | `Bearer {{artisanAccessToken}}` | Accredited master artisan instructor token (`is_teacher=true`) |
+
+#### Request Body (`application/json`)
+```json
+{
+  "title": "Masterclass Poterie Traditionnelle de Kabylie",
+  "description": "Apprentissage intensif des techniques de modelage d'argile, polissage aux galets de riviere et cuisson ancestrale au bois.",
+  "location": "Atelier Beni Yenni, Wilaya de Tizi Ouzou",
+  "isOnline": false,
+  "scheduledAt": "2030-10-15T09:00:00",
+  "durationHours": 8,
+  "maxParticipants": 6,
+  "price": 12000,
+  "currency": "DZD"
+}
+```
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Formation draft created successfully.",
+  "data": {
+    "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "author": {
+      "id": "5c1508bd-2918-42d9-8ce8-e25ba45af5d9",
+      "name": "Rabah Maitre",
+      "avatarUrl": null,
+      "city": "Tizi Ouzou",
+      "teacher": true
+    },
+    "title": "Masterclass Poterie Traditionnelle de Kabylie",
+    "description": "Apprentissage intensif des techniques de modelage d'argile, polissage aux galets de riviere et cuisson ancestrale au bois.",
+    "thumbnailUrl": null,
+    "location": "Atelier Beni Yenni, Wilaya de Tizi Ouzou",
+    "scheduledAt": "2030-10-15T09:00:00",
+    "durationHours": 8,
+    "maxParticipants": 6,
+    "price": 12000,
+    "currency": "DZD",
+    "status": "DRAFT",
+    "activeEnrollmentsCount": 0,
+    "files": [],
+    "reviews": [],
+    "online": false,
+    "createdAt": "2026-09-13T21:20:00"
+  }
+}
+```
+
+---
+
+### 12.2 Upload Formation Thumbnail
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/{{formationId}}/thumbnail`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `multipart/form-data` | Multipart file upload |
+| `Authorization` | `Bearer {{artisanAccessToken}}` | Formation author token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Showcase cover image (JPEG, PNG, WebP; max 10MB) |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Thumbnail uploaded successfully.",
+  "data": {
+    "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "thumbnailUrl": "/api/v1/files/4a621529-a73a-4398-a116-de1363a36d7a.jpg",
+    "status": "DRAFT"
+  }
+}
+```
+
+---
+
+### 12.3 Upload Course Syllabus File
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/{{formationId}}/files`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `multipart/form-data` | Multipart file upload |
+| `Authorization` | `Bearer {{artisanAccessToken}}` | Formation author token |
+
+#### Request Body (`multipart/form-data`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `file` | File | Course attachment document (PDF, JPEG, PNG; max 25MB) |
+
+#### Response Examples
+##### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Course material uploaded successfully.",
+  "data": {
+    "id": "03e2e118-efaa-4e74-9af8-cb8bd335012c",
+    "fileKey": "03e2e118-efaa-4e74-9af8-cb8bd335012c.pdf",
+    "originalFilename": "syllabus.pdf",
+    "contentType": "application/pdf",
+    "fileSize": 1048576,
+    "uploadedAt": "2026-09-13T21:20:05"
+  }
+}
+```
+
+---
+
+### 12.4 Submit Formation for Admin Review
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/{{formationId}}/submit`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{artisanAccessToken}}` | Formation author token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formation submitted for review successfully.",
+  "data": {
+    "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "status": "PENDING_REVIEW"
+  }
+}
+```
+
+---
+
+### 12.5 Admin Get Pending Formations Queue
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/admin/formations/pending?page=0&size=10`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Accept` | `application/json` | Response format |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Platform administrator token |
+
+#### URL Query Parameters
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `page` | Integer | `0` | Page index (zero-based) |
+| `size` | Integer | `10` | Number of records per page |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+        "title": "Masterclass Poterie Traditionnelle de Kabylie",
+        "authorName": "Rabah Maitre",
+        "scheduledAt": "2030-10-15T09:00:00",
+        "price": 12000,
+        "status": "PENDING_REVIEW"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 12.6 Admin Reject Formation (with Comment)
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formations/{{formationId}}/review`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Request format |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Administrator token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "decision": "REJECTED",
+  "comment": "Veuillez preciser les consignes de securite et l'equipement de protection individuel necessaire pour l'atelier."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formation review recorded successfully.",
+  "data": {
+    "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "status": "REJECTED",
+    "reviews": [
+      {
+        "id": "f5963a58-c97f-4b61-9d0b-2604bd41fd4b",
+        "decision": "REJECTED",
+        "comment": "Veuillez preciser les consignes de securite et l'equipement de protection individuel necessaire pour l'atelier.",
+        "reviewedAt": "2026-09-13T21:20:10"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 12.7 Admin Approve Formation
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formations/{{formationId}}/review`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Request format |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Administrator token |
+
+#### Request Body (`application/json`)
+```json
+{
+  "decision": "APPROVED",
+  "comment": "Masterclass validee et conforme aux standards d'excellence artisanale Souklab."
+}
+```
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formation review recorded successfully.",
+  "data": {
+    "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "status": "APPROVED"
+  }
+}
+```
+
+---
+
+### 12.8 Admin Publish Formation
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/admin/formations/{{formationId}}/publish`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{adminAccessToken}}` | Administrator token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Formation published successfully.",
+  "data": {
+    "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "status": "PUBLISHED"
+  }
+}
+```
+
+---
+
+### 12.9 Artisan Browse Formation Catalog
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/catalog?page=0&size=10`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Accept` | `application/json` | Response format |
+| `Authorization` | `Bearer {{artisanAccessToken}}` | Authenticated artisan token |
+
+#### URL Query Parameters
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `page` | Integer | `0` | Page index (zero-based) |
+| `size` | Integer | `10` | Page size |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+        "title": "Masterclass Poterie Traditionnelle de Kabylie",
+        "authorName": "Rabah Maitre",
+        "scheduledAt": "2030-10-15T09:00:00",
+        "price": 12000,
+        "status": "PUBLISHED"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 12.10 Artisan View Formation Details (with Seat Calculation)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/catalog/{{formationId}}`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Accept` | `application/json` | Response format |
+| `Authorization` | `Bearer {{artisanAccessToken}}` | Authenticated peer artisan token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "id": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "title": "Masterclass Poterie Traditionnelle de Kabylie",
+    "description": "Apprentissage intensif des techniques de modelage d'argile...",
+    "location": "Atelier Beni Yenni, Wilaya de Tizi Ouzou",
+    "scheduledAt": "2030-10-15T09:00:00",
+    "durationHours": 8,
+    "maxParticipants": 6,
+    "availableSeats": 6,
+    "enrolled": false,
+    "files": [
+      {
+        "id": "03e2e118-efaa-4e74-9af8-cb8bd335012c",
+        "originalFilename": "syllabus.pdf",
+        "fileSize": 1048576,
+        "contentType": "application/pdf"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 12.11 Peer Artisan Enroll in Formation
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/{{formationId}}/enroll`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{peerArtisanAccessToken}}` | Authenticated peer artisan token (distinct from author) |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Enrolled successfully.",
+  "data": {
+    "id": "78a1b2c3-d4e5-4f6a-8b9c-0d1e2f3a4b5c",
+    "formationId": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "formationTitle": "Masterclass Poterie Traditionnelle de Kabylie",
+    "status": "CONFIRMED",
+    "enrolledAt": "2026-09-13T21:20:15"
+  }
+}
+```
+
+---
+
+### 12.12 Enrolled Artisan Download Course File
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/{{formationId}}/files/{{courseFileId}}/download`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{peerArtisanAccessToken}}` | Confirmed enrolled artisan or author instructor token |
+
+#### Response Headers
+| Header | Value |
+| :--- | :--- |
+| `Content-Type` | `application/pdf` |
+| `Content-Disposition` | `attachment; filename="syllabus.pdf"; filename*=UTF-8''syllabus.pdf` |
+
+---
+
+### 12.13 Non-Enrolled Artisan Download Course File (Expected 403)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/{{formationId}}/files/{{courseFileId}}/download`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{nonEnrolledArtisanAccessToken}}` | Non-enrolled peer artisan token |
+
+#### Response Examples
+##### Error: Access Denied (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Access denied: Course syllabus files are available only to confirmed enrolled participants.",
+  "data": null
+}
+```
+
+---
+
+### 12.14 Artisan Cancel Formation Enrollment
+- **Method**: `POST`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/{{formationId}}/cancel`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Authorization` | `Bearer {{peerArtisanAccessToken}}` | Enrolled artisan token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Enrollment cancelled successfully.",
+  "data": {
+    "id": "78a1b2c3-d4e5-4f6a-8b9c-0d1e2f3a4b5c",
+    "formationId": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+    "status": "CANCELLED",
+    "cancelledAt": "2026-09-13T21:20:20"
+  }
+}
+```
+
+---
+
+### 12.15 Artisan View My Enrollments Dashboard
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/my-enrollments?page=0&size=10`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Accept` | `application/json` | Response format |
+| `Authorization` | `Bearer {{peerArtisanAccessToken}}` | Authenticated artisan token |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "78a1b2c3-d4e5-4f6a-8b9c-0d1e2f3a4b5c",
+        "formationId": "409f3054-c75f-4b01-9116-2203d6cc7e3b",
+        "formationTitle": "Masterclass Poterie Traditionnelle de Kabylie",
+        "instructorName": "Rabah Maitre",
+        "scheduledAt": "2030-10-15T09:00:00",
+        "status": "CANCELLED",
+        "enrolledAt": "2026-09-13T21:20:15",
+        "cancelledAt": "2026-09-13T21:20:20"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+---
+
+### 12.16 Client Access Formation Route (Expected 403 Forbidden)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/artisan/formations/catalog`
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Accept` | `application/json` | Response format |
+| `Authorization` | `Bearer {{clientAccessToken}}` | Authenticated client token (`ROLE_CLIENT`) |
+
+#### Response Examples
+##### Error: Access Denied (`403 Forbidden`)
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "FORBIDDEN",
+  "message": "Access Denied",
+  "data": null
+}
+```
