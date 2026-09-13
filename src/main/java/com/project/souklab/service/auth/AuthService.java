@@ -1,14 +1,8 @@
 package com.project.souklab.service.auth;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.*;
 import com.project.souklab.dto.auth.*;
-import com.project.souklab.dto.profile.ArtisanPatchDTO;
-import com.project.souklab.dto.profile.ArtisanResponseDTO;
-import com.project.souklab.dto.profile.ClientPatchDTO;
-import com.project.souklab.dto.profile.ClientProfileResponseDTO;
 import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
@@ -19,14 +13,12 @@ import com.project.souklab.model.*;
 import com.project.souklab.security.JwtUtils;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.service.profile.ProfileResponseMapper;
 import com.project.souklab.service.security.RefreshTokenService;
 import com.project.souklab.service.security.VerificationTokenService;
 import com.project.souklab.util.EmailUtil;
 import com.project.souklab.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,8 +30,16 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+/**
+ * Authentication and identity service.
+ * Owns credentials, token issuance/rotation, account lockout, email verification,
+ * password management, and Google OAuth2 flow.
+ * <p>
+ * Profile lifecycle (getCurrentUser, completeProfile, patchCurrentUser) lives in
+ * {@link com.project.souklab.service.profile.ProfileService}.
+ * Mapping logic lives in {@link ProfileResponseMapper}.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -48,16 +48,11 @@ public class AuthService {
     private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
     private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
-    private static final String PAYLOAD_KEY_REGION_ID = "regionId";
-    private static final String PAYLOAD_KEY_REGION = "region";
-    private static final String PAYLOAD_KEY_ADDRESS = "address";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final OAuthIdentityRepository oauthIdentityRepository;
-    private final ArtisanRepository artisanRepository;
-    private final ClientRepository clientRepository;
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
     private final JwtUtils jwtUtils;
@@ -66,15 +61,20 @@ public class AuthService {
     private final VerificationTokenService verificationTokenService;
     private final EmailUtil emailUtil;
     private final AuditLogService auditLogService;
-    private final JsonMapper jsonMapper;
-    private final Validator validator;
     private final Clock clock;
+    private final ProfileResponseMapper profileResponseMapper;
 
     /**
      * Registers a new user.
      * ARTISAN users start with status PENDING (requiring administrative review).
      * CLIENT users start with status ACTIVE (can immediately log in and participate).
      * Public registration strictly prohibits ADMIN accounts.
+     *
+     * @param dto the registration payload containing email, password, role, and name fields
+     * @return the profile response for the newly created user
+     * @throws ConflictException         if the email is already registered
+     * @throws BadRequestException       if the requested role is invalid or ADMIN
+     * @throws ResourceNotFoundException if the resolved role does not exist in the database
      */
     @Transactional
     public ProfileResponse registerUser(UserRegistrationDTO dto) {
@@ -83,44 +83,11 @@ public class AuthService {
             throw new ConflictException("Email is already registered: " + email);
         }
 
-        AccountStatus initialStatus = AccountStatus.ACTIVE;
-        String roleInput = dto.getRole() != null ? dto.getRole().trim().toUpperCase() : "";
-        if (roleInput.equals("ADMIN") || roleInput.equals("ROLE_ADMIN")) {
-            throw new BadRequestException("Administrator registration is not permitted via public registration.");
-        }
+        Role assignedRole = validateRegistrationRole(dto.getRole());
+        boolean isArtisan = assignedRole.getName().equals(ROLE_ARTISAN_NAME);
+        AccountStatus initialStatus = isArtisan ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
-        String roleName = roleInput.startsWith("ROLE_") ? roleInput : "ROLE_" + roleInput;
-        if (!roleName.equals(ROLE_ARTISAN_NAME) && !roleName.equals(ROLE_CLIENT_NAME)) {
-            throw new BadRequestException("Invalid registration role. Allowed roles are ARTISAN or CLIENT.");
-        }
-
-        Role assignedRole = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
-
-        String firstName = dto.getFirstName();
-        String lastName = dto.getLastName();
-        if ((firstName == null || firstName.isBlank()) && dto.getName() != null && !dto.getName().isBlank()) {
-            String[] parts = dto.getName().trim().split("\\s+", 2);
-            firstName = parts[0];
-            lastName = parts.length > 1 ? parts[1] : "";
-        }
-
-        boolean isArtisan = roleName.equals(ROLE_ARTISAN_NAME);
-        if (isArtisan) {
-            initialStatus = AccountStatus.PENDING;
-        }
-
-        User user = User.builder()
-                .email(email)
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .firstName(firstName)
-                .lastName(lastName)
-                .status(initialStatus)
-                .emailVerified(false)
-                .roles(new HashSet<>(Set.of(assignedRole)))
-                .build();
-
-        User savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(buildNewUser(dto, email, assignedRole, initialStatus));
 
         try {
             String rawCode = verificationTokenService.issueToken(savedUser, VerificationTokenType.EMAIL_VERIFICATION);
@@ -137,12 +104,19 @@ public class AuthService {
             }
         }
 
-        return mapToProfileResponse(savedUser);
+        return profileResponseMapper.mapToProfileResponse(savedUser);
     }
 
     /**
      * Authenticates a user by email and password, issuing access + refresh token pair.
      * Enforces a 15-minute temporary lockout after 5 consecutive failed login attempts.
+     *
+     * @param dto     the login credentials (identifier + password)
+     * @param request the incoming HTTP request, used to capture the client IP address
+     * @return a JWT response containing access token, refresh token, and user summary
+     * @throws BadRequestException   if the login identifier is blank
+     * @throws UnauthorizedException if credentials are invalid or the account uses social login
+     * @throws ForbiddenException    if the account is temporarily locked, suspended, or rejected
      */
     @Transactional(noRollbackFor = {UnauthorizedException.class, BadRequestException.class, ForbiddenException.class})
     public JwtResponseDTO login(LoginDTO dto, HttpServletRequest request) {
@@ -159,33 +133,13 @@ public class AuthService {
             throw new UnauthorizedException("This account was created via social login. Please sign in with Google.");
         }
 
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now(clock))) {
-            throw new ForbiddenException("Too many failed login attempts. Account is temporarily locked. Please try again later.");
-        }
+        verifyAccountNotLocked(user);
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            int attempts = user.getFailedLoginAttempts() + 1;
-            user.setFailedLoginAttempts(attempts);
-            if (attempts >= 5) {
-                user.setLockedUntil(LocalDateTime.now(clock).plusMinutes(15));
-            }
-            userRepository.save(user);
-            throw new UnauthorizedException("Invalid email or password.");
+            handleFailedLogin(user);
         }
 
-        if (user.getStatus() == AccountStatus.SUSPENDED) {
-            if (!user.isSuspensionActive(LocalDateTime.now(clock))) {
-                user.setStatus(AccountStatus.ACTIVE);
-                user.setBannedUntil(null);
-                user.setBanReason(null);
-            } else {
-                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
-            }
-        }
-
-        if (user.getStatus() == AccountStatus.REJECTED) {
-            throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
-        }
+        resolveExpiredSuspension(user);
 
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
@@ -200,6 +154,10 @@ public class AuthService {
 
     /**
      * Rotates refresh tokens (revokes old, issues new pair).
+     *
+     * @param request the token refresh payload containing the current refresh token string
+     * @return a new JWT response with rotated access and refresh tokens
+     * @throws UnauthorizedException if the provided refresh token is not found or already revoked
      */
     @Transactional
     public JwtResponseDTO refreshToken(TokenRefreshRequestDTO request) {
@@ -216,13 +174,16 @@ public class AuthService {
                 .refreshToken(newToken.getToken())
                 .tokenType("Bearer")
                 .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / 1000)
-                .user(mapToLoginSummary(user))
+                .user(profileResponseMapper.mapToProfileResponse(user))
                 .roles(user.getRoles().stream().map(Role::getName).toList())
                 .build();
     }
 
     /**
      * Revokes all refresh tokens for the given user.
+     *
+     * @param userEmail       the email address of the user whose tokens should be revoked, or {@code null}
+     * @param refreshTokenStr a specific refresh token to revoke immediately, or {@code null}
      */
     @Transactional
     public void logout(String userEmail, String refreshTokenStr) {
@@ -236,399 +197,11 @@ public class AuthService {
     }
 
     /**
-     * Returns the currently authenticated user's profile.
-     */
-    @Transactional(readOnly = true)
-    public ProfileResponse getCurrentUser() {
-        String email = SecurityUtils.getCurrentUsername();
-        if (email == null) {
-            throw new UnauthorizedException("Not authenticated.");
-        }
-
-        User user = userRepository.findByEmail(email.toLowerCase())
-                .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
-
-        return mapToProfileResponse(user);
-    }
-
-    /**
-     * Completes profile creation for Artisan or Client.
-     */
-    @Transactional
-    public ProfileResponse completeProfile(CompleteProfileRequestDTO dto) {
-        String email = SecurityUtils.getCurrentUsername();
-        if (email == null) {
-            throw new UnauthorizedException("Not authenticated.");
-        }
-
-        User user = userRepository.findByEmail(email.toLowerCase())
-                .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
-
-        boolean isArtisan = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_ARTISAN_NAME));
-        boolean isClient = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_CLIENT_NAME));
-
-        if (isArtisan) {
-            Artisan profile = artisanRepository.findById(user.getId())
-                    .orElse(Artisan.builder().user(user).build());
-
-            if (dto.getBio() != null) profile.setBio(dto.getBio());
-            if (dto.resolveRegionId() != null) profile.setRegionId(dto.resolveRegionId());
-            if (dto.getCity() != null) profile.setCity(dto.getCity());
-            if (dto.getAddress() != null) profile.setAddress(dto.getAddress());
-            if (dto.getWebsite() != null) profile.setWebsite(dto.getWebsite());
-            if (dto.getSubCategoryId() != null) profile.setSubCategoryId(dto.getSubCategoryId());
-
-            artisanRepository.save(profile);
-            user.setArtisan(profile);
-        } else if (isClient) {
-            Client client = clientRepository.findById(user.getId())
-                    .orElse(Client.builder().user(user).build());
-
-            if (dto.getClientType() != null) client.setClientType(dto.getClientType());
-            if (dto.getCompanyName() != null) client.setCompanyName(dto.getCompanyName());
-            if (dto.getBio() != null) client.setBio(dto.getBio());
-            if (dto.getAddress() != null) client.setAddress(dto.getAddress());
-            if (dto.resolveRegionId() != null) client.setRegionId(dto.resolveRegionId());
-            if (dto.getCity() != null) client.setCity(dto.getCity());
-
-            clientRepository.save(client);
-            user.setClient(client);
-        }
-
-        return mapToProfileResponse(user);
-    }
-
-    /**
-     * Partially updates (PATCH) the authenticated user's profile based on their role.
-     * Follows "omitted = unchanged, explicit null = clear" semantics.
-     * Unknown/unpatchable fields (like isTeacher, accountStatus, email) are silently ignored.
-     */
-    @Transactional
-    public ProfileResponse patchCurrentUser(JsonNode payload) {
-        String email = SecurityUtils.getCurrentUsername();
-        if (email == null) {
-            throw new UnauthorizedException("Not authenticated.");
-        }
-
-        User user = userRepository.findByEmail(email.toLowerCase())
-                .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
-
-        boolean isArtisan = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_ARTISAN_NAME));
-        boolean isClient = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_CLIENT_NAME));
-
-        if (!isArtisan && !isClient) {
-            throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");
-        }
-
-        if (payload == null || payload.isNull() || payload.isEmpty()) {
-            return mapToProfileResponse(user);
-        }
-
-        if (isArtisan) {
-            ArtisanPatchDTO patchDTO;
-            try {
-                patchDTO = jsonMapper.treeToValue(payload, ArtisanPatchDTO.class);
-            } catch (Exception e) {
-                throw new BadRequestException("Invalid JSON payload for artisan profile update: " + e.getMessage());
-            }
-
-            Set<ConstraintViolation<ArtisanPatchDTO>> violations = validator.validate(patchDTO);
-            if (!violations.isEmpty()) {
-                throw new ConstraintViolationException(violations);
-            }
-
-            Artisan artisan = artisanRepository.findById(user.getId())
-                    .orElse(Artisan.builder().user(user).build());
-
-            if (payload.has("bio")) {
-                artisan.setBio(payload.get("bio").isNull() ? null : patchDTO.getBio());
-            }
-            if (payload.has(PAYLOAD_KEY_REGION_ID)) {
-                artisan.setRegionId(payload.get(PAYLOAD_KEY_REGION_ID).isNull() ? null : patchDTO.getRegionId());
-            } else if (payload.has(PAYLOAD_KEY_REGION)) {
-                artisan.setRegionId(payload.get(PAYLOAD_KEY_REGION).isNull() ? null : patchDTO.resolveRegionId());
-            }
-            if (payload.has("city")) {
-                artisan.setCity(payload.get("city").isNull() ? null : patchDTO.getCity());
-            }
-            if (payload.has(PAYLOAD_KEY_ADDRESS)) {
-                artisan.setAddress(payload.get(PAYLOAD_KEY_ADDRESS).isNull() ? null : patchDTO.getAddress());
-            }
-            if (payload.has("website")) {
-                artisan.setWebsite(payload.get("website").isNull() ? null : patchDTO.getWebsite());
-            }
-            if (payload.has("subCategoryId")) {
-                artisan.setSubCategoryId(payload.get("subCategoryId").isNull() ? null : patchDTO.getSubCategoryId());
-            }
-
-            artisanRepository.save(artisan);
-            user.setArtisan(artisan);
-        } else {
-            ClientPatchDTO patchDTO;
-            try {
-                patchDTO = jsonMapper.treeToValue(payload, ClientPatchDTO.class);
-            } catch (Exception e) {
-                throw new BadRequestException("Invalid JSON payload for client profile update: " + e.getMessage());
-            }
-
-            Set<ConstraintViolation<ClientPatchDTO>> violations = validator.validate(patchDTO);
-            if (!violations.isEmpty()) {
-                throw new ConstraintViolationException(violations);
-            }
-
-            Client client = clientRepository.findById(user.getId())
-                    .orElse(Client.builder().user(user).build());
-
-            if (payload.has("bio")) {
-                client.setBio(payload.get("bio").isNull() ? null : patchDTO.getBio());
-            }
-            if (payload.has(PAYLOAD_KEY_ADDRESS)) {
-                client.setAddress(payload.get(PAYLOAD_KEY_ADDRESS).isNull() ? null : patchDTO.getAddress());
-            }
-            if (payload.has(PAYLOAD_KEY_REGION_ID)) {
-                client.setRegionId(payload.get(PAYLOAD_KEY_REGION_ID).isNull() ? null : patchDTO.getRegionId());
-            } else if (payload.has(PAYLOAD_KEY_REGION)) {
-                client.setRegionId(payload.get(PAYLOAD_KEY_REGION).isNull() ? null : patchDTO.resolveRegionId());
-            }
-            if (payload.has("city")) {
-                client.setCity(payload.get("city").isNull() ? null : patchDTO.getCity());
-            }
-            if (payload.has("companyName")) {
-                client.setCompanyName(payload.get("companyName").isNull() ? null : patchDTO.getCompanyName());
-            }
-            if (payload.has("clientType")) {
-                client.setClientType(payload.get("clientType").isNull() ? null : patchDTO.getClientType());
-            }
-
-            clientRepository.save(client);
-            user.setClient(client);
-        }
-
-        return mapToProfileResponse(user);
-    }
-
-    /**
-     * Processes Google OAuth2 authentication callback:
-     * 1. Matches existing OAuthIdentity (provider=GOOGLE, provider_user_id)
-     * 2. Otherwise matches existing User by verified email and auto-links
-     * 3. Otherwise creates new User + OAuthIdentity with requested role from intent
-     */
-    @Transactional
-    public JwtResponseDTO processOAuth2Success(OAuth2User oAuth2User, String intentRole, HttpServletRequest request) {
-        String provider = "GOOGLE";
-        String providerUserId = oAuth2User.getAttribute("sub");
-        if (providerUserId == null || providerUserId.isBlank()) {
-            providerUserId = oAuth2User.getName();
-        }
-
-        String email = oAuth2User.getAttribute("email");
-        if (email == null || email.isBlank()) {
-            throw new BadRequestException("OAuth provider did not return an email address.");
-        }
-        email = email.trim().toLowerCase();
-
-        String firstName = oAuth2User.getAttribute("given_name");
-        String lastName = oAuth2User.getAttribute("family_name");
-        String picture = oAuth2User.getAttribute("picture");
-
-        User user;
-        var existingIdentity = oauthIdentityRepository.findByProviderAndProviderUserId(provider, providerUserId);
-
-        if (existingIdentity.isPresent()) {
-            user = existingIdentity.get().getUser();
-        } else {
-            var existingUserByEmail = userRepository.findByEmail(email);
-            if (existingUserByEmail.isPresent()) {
-                user = existingUserByEmail.get();
-                OAuthIdentity identity = OAuthIdentity.builder()
-                        .user(user)
-                        .provider(provider)
-                        .providerUserId(providerUserId)
-                        .email(email)
-                        .build();
-                oauthIdentityRepository.save(identity);
-            } else {
-                if (intentRole == null || intentRole.isBlank()) {
-                    throw new BadRequestException("OAuth registration intent not found or expired. Please initiate registration from the artisan or client signup page.");
-                }
-
-                String normalizedIntent = intentRole.trim().toUpperCase();
-                String roleName;
-                AccountStatus initialStatus;
-                if (normalizedIntent.contains("ARTISAN")) {
-                    roleName = ROLE_ARTISAN_NAME;
-                    initialStatus = AccountStatus.PENDING;
-                } else if (normalizedIntent.contains("CLIENT")) {
-                    roleName = ROLE_CLIENT_NAME;
-                    initialStatus = AccountStatus.ACTIVE;
-                } else {
-                    throw new BadRequestException("Invalid OAuth registration role intent: " + intentRole);
-                }
-
-                Role role = roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
-
-                user = User.builder()
-                        .email(email)
-                        .password(null)
-                        .firstName(firstName)
-                        .lastName(lastName)
-                        .avatarUrl(picture)
-                        .status(initialStatus)
-                        .emailVerified(true)
-                        .emailVerifiedAt(LocalDateTime.now(clock))
-                        .roles(new HashSet<>(Set.of(role)))
-                        .build();
-
-                user = userRepository.save(user);
-
-                OAuthIdentity identity = OAuthIdentity.builder()
-                        .user(user)
-                        .provider(provider)
-                        .providerUserId(providerUserId)
-                        .email(email)
-                        .build();
-                oauthIdentityRepository.save(identity);
-            }
-        }
-
-        user.setLastLoginAt(LocalDateTime.now(clock));
-        if (request != null) {
-            user.setLastLoginIp(extractClientIp(request));
-        }
-        userRepository.save(user);
-
-        return generateJwtResponse(user);
-    }
-
-    private JwtResponseDTO generateJwtResponse(User user) {
-        String accessToken = jwtUtils.generateAccessToken(user.getEmail());
-        RefreshToken refreshToken = refreshTokenService.createRefreshTokenForUser(user);
-
-        return JwtResponseDTO.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
-                .tokenType("Bearer")
-                .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / 1000)
-                .user(mapToLoginSummary(user))
-                .roles(user.getRoles().stream().map(Role::getName).toList())
-                .build();
-    }
-
-    /**
-     * Produces a role-specific login user summary embedded in the JWT response.
-     * Clients receive ClientProfileResponseDTO; Artisans receive ArtisanResponseDTO.
-     * This replaces the old shared UserSummaryDTO that leaked artisan-specific fields to clients.
-     */
-    public ProfileResponse mapToLoginSummary(User user) {
-        return mapToProfileResponse(user);
-    }
-
-    /**
-     * Dispatches to the correct role-specific profile DTO.
-     * Clients → ClientProfileResponseDTO (no artisan fields)
-     * Artisans → ArtisanResponseDTO (full artisan fields)
-     * Admins/unknown → ArtisanResponseDTO as fallback (admin tooling uses UserResponseDTO separately)
-     */
-    public ProfileResponse mapToProfileResponse(User user) {
-        boolean isArtisan = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_ARTISAN_NAME));
-
-        Set<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-
-        if (isArtisan) {
-            Artisan profile = user.getArtisan();
-            return ArtisanResponseDTO.builder()
-                    .id(user.getId())
-                    .email(user.getEmail())
-                    .firstName(user.getFirstName())
-                    .lastName(user.getLastName())
-                    .name(user.getName())
-                    .phone(user.getPhone())
-                    .avatarUrl(user.getAvatarUrl())
-                    .accountStatus(user.getStatus())
-                    .roles(roleNames)
-                    .emailVerified(user.isEmailVerified())
-                    .emailVerifiedAt(user.getEmailVerifiedAt())
-                    .createdAt(user.getCreatedAt())
-                    .updatedAt(user.getUpdatedAt())
-                    .bio(profile != null ? profile.getBio() : null)
-                    .regionId(profile != null ? profile.getRegionId() : null)
-                    .city(profile != null ? profile.getCity() : null)
-                    .address(profile != null ? profile.getAddress() : null)
-                    .website(profile != null ? profile.getWebsite() : null)
-                    .subCategoryId(profile != null ? profile.getSubCategoryId() : null)
-                    .teacher(profile != null && profile.isTeacher())
-                    .verified(profile != null && profile.isVerified())
-                    .premium(profile != null && profile.isPremium())
-                    .rating(profile != null ? profile.getRating() : 0.0)
-                    .reviewsCount(profile != null ? profile.getReviewsCount() : 0)
-                    .build();
-        }
-
-        Client client = user.getClient();
-        return ClientProfileResponseDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .name(user.getName())
-                .phone(user.getPhone())
-                .avatarUrl(user.getAvatarUrl())
-                .accountStatus(user.getStatus())
-                .roles(roleNames)
-                .emailVerified(user.isEmailVerified())
-                .emailVerifiedAt(user.getEmailVerifiedAt())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .clientType(client != null ? client.getClientType() : "INDIVIDUAL")
-                .companyName(client != null ? client.getCompanyName() : null)
-                .bio(client != null ? client.getBio() : null)
-                .address(client != null ? client.getAddress() : null)
-                .regionId(client != null ? client.getRegionId() : null)
-                .city(client != null ? client.getCity() : null)
-                .build();
-    }
-
-    /**
-     * Kept for admin UserManagementService compatibility — returns the shared UserResponseDTO
-     * which is appropriate for admin views where all fields are intentionally visible.
-     */
-    public UserSummaryDTO mapToSummaryDTO(User user) {
-        String primaryRole = user.getRoles().stream()
-                .findFirst()
-                .map(Role::getName)
-                .orElse(ROLE_CLIENT_NAME);
-
-        boolean isTeacher = user.getArtisan() != null && user.getArtisan().isTeacher();
-        boolean isPremium = (user.getArtisan() != null && user.getArtisan().isPremium())
-                || (user.getClient() != null && user.getClient().isPremium());
-        boolean isValidated = (user.getArtisan() != null && user.getArtisan().isVerified())
-                || (user.getClient() != null && user.getClient().isVerified());
-
-        return UserSummaryDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .name(user.getName())
-                .role(primaryRole)
-                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
-                .accountStatus(user.getStatus())
-                .isPremium(isPremium)
-                .isValidated(isValidated)
-                .isTeacher(isTeacher)
-                .build();
-    }
-
-    /**
      * Verifies a user's email address using a submitted 6-digit verification code.
+     *
+     * @param dto the verification payload containing email and the 6-digit code
+     * @throws ResourceNotFoundException if no user exists with the provided email
+     * @throws BadRequestException       if the verification code is invalid or expired
      */
     @Transactional(noRollbackFor = BadRequestException.class)
     public void verifyEmail(VerifyEmailRequestDTO dto) {
@@ -647,7 +220,9 @@ public class AuthService {
 
     /**
      * Resends an email verification code if the user exists and is not yet verified.
-     * Always produces identical outward response behavior to prevent account enumeration.
+     * Always produces identical outward response behaviour to prevent account enumeration.
+     *
+     * @param dto the resend payload containing the user's email address
      */
     @Transactional
     public void resendVerification(ResendVerificationRequestDTO dto) {
@@ -665,10 +240,12 @@ public class AuthService {
     }
 
     /**
-     * Initiates password reset flow.
-     * If user exists with password, issues reset token and emails the 6-digit code.
-     * If user exists without password (OAuth-only), emails an informational notice.
-     * Always returns generic success outward.
+     * Initiates the password reset flow.
+     * If the user exists with a password, issues a reset token and emails the 6-digit code.
+     * If the user exists without a password (OAuth-only), emails an informational notice.
+     * Always returns a generic success response outward.
+     *
+     * @param dto the forgot-password payload containing the user's email address
      */
     @Transactional
     public void forgotPassword(ForgotPasswordRequestDTO dto) {
@@ -694,6 +271,9 @@ public class AuthService {
     /**
      * Resets a user's password using the submitted 6-digit code.
      * Invalidates all active refresh tokens for the user upon completion.
+     *
+     * @param dto the reset-password payload containing email, code, and new password
+     * @throws BadRequestException if the code is invalid or expired
      */
     @Transactional(noRollbackFor = BadRequestException.class)
     public void resetPassword(ResetPasswordRequestDTO dto) {
@@ -713,14 +293,21 @@ public class AuthService {
 
     /**
      * Changes an authenticated user's password.
-     * 1. Resolves current user from SecurityContext.
-     * 2. Rejects OAuth-only users (no password to change).
-     * 3. Verifies oldPassword matches current password.
-     * 4. Validates newPassword is not identical to oldPassword.
-     * 5. Encodes and saves new password.
-     * 6. Deletes active refresh tokens to force re-authentication across devices.
-     * 7. Sends password-changed email notification.
-     * 8. Logs PASSWORD_CHANGED audit log entry on success.
+     * <ol>
+     *   <li>Resolves current user from SecurityContext.</li>
+     *   <li>Rejects OAuth-only users (no password to change).</li>
+     *   <li>Verifies oldPassword matches current password.</li>
+     *   <li>Validates newPassword is not identical to oldPassword.</li>
+     *   <li>Encodes and saves new password.</li>
+     *   <li>Deletes active refresh tokens to force re-authentication across devices.</li>
+     *   <li>Sends password-changed email notification.</li>
+     *   <li>Logs PASSWORD_CHANGED audit log entry on success.</li>
+     * </ol>
+     *
+     * @param request the change-password payload containing old and new passwords
+     * @throws UnauthorizedException     if no user is authenticated, or the old password is incorrect
+     * @throws BadRequestException       if the account uses social login and has no password
+     * @throws ResourceNotFoundException if the authenticated email does not map to an existing user
      */
     @Transactional
     public void changePassword(ChangePasswordRequestDTO request) {
@@ -754,6 +341,320 @@ public class AuthService {
         auditLogService.logAction(AuditLogAction.PASSWORD_CHANGED, "Password changed for user: " + user.getEmail(), user.getEmail());
     }
 
+    /**
+     * Processes Google OAuth2 authentication callback:
+     * <ol>
+     *   <li>Matches existing OAuthIdentity (provider=GOOGLE, provider_user_id)</li>
+     *   <li>Otherwise matches existing User by verified email and auto-links</li>
+     *   <li>Otherwise creates new User + OAuthIdentity with requested role from intent</li>
+     * </ol>
+     *
+     * @param oAuth2User the principal returned by the OAuth2 provider
+     * @param intentRole the role string captured during OAuth2 registration intent (e.g., "ARTISAN")
+     * @param request    the incoming HTTP request used to capture the client IP address
+     * @return a JWT response for the authenticated or newly created user
+     * @throws BadRequestException       if the provider did not return an email, or the intent role is invalid
+     * @throws ResourceNotFoundException if the resolved role does not exist in the database
+     */
+    @Transactional
+    public JwtResponseDTO processOAuth2Success(OAuth2User oAuth2User, String intentRole, HttpServletRequest request) {
+        String provider = "GOOGLE";
+        String providerUserId = oAuth2User.getAttribute("sub");
+        if (providerUserId == null || providerUserId.isBlank()) {
+            providerUserId = oAuth2User.getName();
+        }
+
+        String email = oAuth2User.getAttribute("email");
+        if (email == null || email.isBlank()) {
+            throw new BadRequestException("OAuth provider did not return an email address.");
+        }
+        email = email.trim().toLowerCase();
+
+        String firstName = oAuth2User.getAttribute("given_name");
+        String lastName = oAuth2User.getAttribute("family_name");
+        String picture = oAuth2User.getAttribute("picture");
+
+        var existingIdentity = oauthIdentityRepository.findByProviderAndProviderUserId(provider, providerUserId);
+
+        User user;
+        if (existingIdentity.isPresent()) {
+            user = existingIdentity.get().getUser();
+        } else {
+            user = linkOrAuthenticateExistingIdentity(email, provider, providerUserId, firstName, lastName, picture, intentRole);
+        }
+
+        user.setLastLoginAt(LocalDateTime.now(clock));
+        if (request != null) {
+            user.setLastLoginIp(extractClientIp(request));
+        }
+        userRepository.save(user);
+
+        return generateJwtResponse(user);
+    }
+
+    /**
+     * Produces a role-specific login user summary embedded in the JWT response.
+     *
+     * @param user the authenticated user entity
+     * @return a role-specific {@link ProfileResponse} suitable for embedding in the JWT response body
+     */
+    public ProfileResponse mapToLoginSummary(User user) {
+        return profileResponseMapper.mapToProfileResponse(user);
+    }
+
+    /**
+     * Builds a JWT response DTO from the given user.
+     *
+     * @param user the authenticated user entity
+     * @return the assembled {@link JwtResponseDTO}
+     */
+    private JwtResponseDTO generateJwtResponse(User user) {
+        String accessToken = jwtUtils.generateAccessToken(user.getEmail());
+        RefreshToken refreshToken = refreshTokenService.createRefreshTokenForUser(user);
+
+        return JwtResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .tokenType("Bearer")
+                .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / 1000)
+                .user(profileResponseMapper.mapToProfileResponse(user))
+                .roles(user.getRoles().stream().map(Role::getName).toList())
+                .build();
+    }
+
+    /**
+     * Validates the registration role input string and returns the matching {@link Role} entity.
+     * Accepts bare role names (e.g., {@code "ARTISAN"}) or prefixed names (e.g., {@code "ROLE_ARTISAN"}).
+     * ADMIN registration via the public endpoint is always rejected.
+     *
+     * @param roleInput the raw role string from the registration request, may be {@code null}
+     * @return the resolved {@link Role} entity
+     * @throws BadRequestException       if the role is ADMIN or not one of ARTISAN / CLIENT
+     * @throws ResourceNotFoundException if the role does not exist in the database
+     */
+    private Role validateRegistrationRole(String roleInput) {
+        String normalized = roleInput != null ? roleInput.trim().toUpperCase() : "";
+        if (normalized.equals("ADMIN") || normalized.equals("ROLE_ADMIN")) {
+            throw new BadRequestException("Administrator registration is not permitted via public registration.");
+        }
+
+        String roleName = normalized.startsWith("ROLE_") ? normalized : "ROLE_" + normalized;
+        if (!roleName.equals(ROLE_ARTISAN_NAME) && !roleName.equals(ROLE_CLIENT_NAME)) {
+            throw new BadRequestException("Invalid registration role. Allowed roles are ARTISAN or CLIENT.");
+        }
+
+        return roleRepository.findByName(roleName)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
+    }
+
+    /**
+     * Constructs a new {@link User} entity from the registration DTO, resolved email, role, and initial status.
+     * Falls back to splitting the {@code name} field when {@code firstName} is not provided.
+     *
+     * @param dto           the registration payload
+     * @param email         the normalised (lowercase, trimmed) email address
+     * @param assignedRole  the role entity to assign to the new user
+     * @param initialStatus the initial {@link AccountStatus} derived from the role
+     * @return a fully constructed but not yet persisted {@link User} entity
+     */
+    private User buildNewUser(UserRegistrationDTO dto, String email, Role assignedRole, AccountStatus initialStatus) {
+        String firstName = dto.getFirstName();
+        String lastName = dto.getLastName();
+        if ((firstName == null || firstName.isBlank()) && dto.getName() != null && !dto.getName().isBlank()) {
+            String[] parts = dto.getName().trim().split("\\s+", 2);
+            firstName = parts[0];
+            lastName = parts.length > 1 ? parts[1] : "";
+        }
+
+        return User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .firstName(firstName)
+                .lastName(lastName)
+                .status(initialStatus)
+                .emailVerified(false)
+                .roles(new HashSet<>(Set.of(assignedRole)))
+                .build();
+    }
+
+    /**
+     * Throws {@link ForbiddenException} if the user's account is currently within
+     * its temporary lockout window due to repeated failed login attempts.
+     *
+     * @param user the user entity to check
+     * @throws ForbiddenException if the account is locked and the lockout period has not elapsed
+     */
+    private void verifyAccountNotLocked(User user) {
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now(clock))) {
+            throw new ForbiddenException("Too many failed login attempts. Account is temporarily locked. Please try again later.");
+        }
+    }
+
+    /**
+     * Increments the user's failed login attempt counter, applies a 15-minute lockout
+     * when the threshold reaches five, persists the updated state, and throws
+     * {@link UnauthorizedException} to terminate the login flow.
+     *
+     * @param user the user entity whose counter should be incremented
+     * @throws UnauthorizedException always, to signal the password mismatch to the caller
+     */
+    private void handleFailedLogin(User user) {
+        int attempts = user.getFailedLoginAttempts() + 1;
+        user.setFailedLoginAttempts(attempts);
+        if (attempts >= 5) {
+            user.setLockedUntil(LocalDateTime.now(clock).plusMinutes(15));
+        }
+        userRepository.save(user);
+        throw new UnauthorizedException("Invalid email or password.");
+    }
+
+    /**
+     * Lifts a temporary suspension if its end date has passed.
+     * If the suspension is still active, throws {@link ForbiddenException}.
+     * Accounts with status {@link AccountStatus#REJECTED} always throw.
+     *
+     * @param user the user entity to evaluate
+     * @throws ForbiddenException if the account is actively suspended or was rejected
+     */
+    private void resolveExpiredSuspension(User user) {
+        if (user.getStatus() == AccountStatus.SUSPENDED) {
+            if (!user.isSuspensionActive(LocalDateTime.now(clock))) {
+                user.setStatus(AccountStatus.ACTIVE);
+                user.setBannedUntil(null);
+                user.setBanReason(null);
+            } else {
+                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
+            }
+        }
+
+        if (user.getStatus() == AccountStatus.REJECTED) {
+            throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
+        }
+    }
+
+    /**
+     * Resolves or creates the {@link User} entity for a Google OAuth2 flow
+     * where no existing {@link OAuthIdentity} was found for the provider user ID.
+     * <ol>
+     *   <li>If a user with the same email already exists, auto-links a new {@link OAuthIdentity} to them.</li>
+     *   <li>Otherwise, creates a new user and identity using the registration intent role.</li>
+     * </ol>
+     *
+     * @param email           the normalised OAuth2 email address
+     * @param provider        the OAuth2 provider name (e.g., "GOOGLE")
+     * @param providerUserId  the provider-specific user identifier
+     * @param firstName       the given name returned by the provider
+     * @param lastName        the family name returned by the provider
+     * @param picture         the avatar URL returned by the provider
+     * @param intentRole      the role intent string set at the start of the OAuth2 flow (e.g., "ARTISAN")
+     * @return the resolved or newly created {@link User} entity
+     * @throws BadRequestException       if the intent role is missing or invalid
+     * @throws ResourceNotFoundException if the resolved role does not exist in the database
+     */
+    private User linkOrAuthenticateExistingIdentity(String email, String provider, String providerUserId,
+                                                    String firstName, String lastName, String picture,
+                                                    String intentRole) {
+        var existingUserByEmail = userRepository.findByEmail(email);
+        if (existingUserByEmail.isPresent()) {
+            return autoLinkByVerifiedEmail(existingUserByEmail.get(), provider, providerUserId, email);
+        }
+
+        return createOAuthUserAndProfile(email, provider, providerUserId, firstName, lastName, picture, intentRole);
+    }
+
+    /**
+     * Links a new {@link OAuthIdentity} to an existing {@link User} found by verified email.
+     * This covers the case where the user previously registered with a password and is now
+     * signing in with Google for the first time.
+     *
+     * @param user           the existing user to link the identity to
+     * @param provider       the OAuth2 provider name
+     * @param providerUserId the provider-specific user identifier
+     * @param email          the normalised email address
+     * @return the same {@link User} instance with the new identity persisted
+     */
+    private User autoLinkByVerifiedEmail(User user, String provider, String providerUserId, String email) {
+        OAuthIdentity identity = OAuthIdentity.builder()
+                .user(user)
+                .provider(provider)
+                .providerUserId(providerUserId)
+                .email(email)
+                .build();
+        oauthIdentityRepository.save(identity);
+        return user;
+    }
+
+    /**
+     * Creates a brand-new {@link User} and {@link OAuthIdentity} for a first-time OAuth2 registrant.
+     * Derives the account status and role from the intent string captured at registration start.
+     *
+     * @param email          the normalised email address
+     * @param provider       the OAuth2 provider name
+     * @param providerUserId the provider-specific user identifier
+     * @param firstName      the given name returned by the provider
+     * @param lastName       the family name returned by the provider
+     * @param picture        the avatar URL returned by the provider
+     * @param intentRole     the role intent string (e.g., "ARTISAN" or "CLIENT")
+     * @return the persisted {@link User} entity
+     * @throws BadRequestException       if the intent role is blank or does not match ARTISAN or CLIENT
+     * @throws ResourceNotFoundException if the resolved role does not exist in the database
+     */
+    private User createOAuthUserAndProfile(String email, String provider, String providerUserId,
+                                           String firstName, String lastName, String picture,
+                                           String intentRole) {
+        if (intentRole == null || intentRole.isBlank()) {
+            throw new BadRequestException("OAuth registration intent not found or expired. Please initiate registration from the artisan or client signup page.");
+        }
+
+        String normalizedIntent = intentRole.trim().toUpperCase();
+        String roleName;
+        AccountStatus initialStatus;
+        if (normalizedIntent.contains("ARTISAN")) {
+            roleName = ROLE_ARTISAN_NAME;
+            initialStatus = AccountStatus.PENDING;
+        } else if (normalizedIntent.contains("CLIENT")) {
+            roleName = ROLE_CLIENT_NAME;
+            initialStatus = AccountStatus.ACTIVE;
+        } else {
+            throw new BadRequestException("Invalid OAuth registration role intent: " + intentRole);
+        }
+
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
+
+        User user = User.builder()
+                .email(email)
+                .password(null)
+                .firstName(firstName)
+                .lastName(lastName)
+                .avatarUrl(picture)
+                .status(initialStatus)
+                .emailVerified(true)
+                .emailVerifiedAt(LocalDateTime.now(clock))
+                .roles(new HashSet<>(Set.of(role)))
+                .build();
+
+        user = userRepository.save(user);
+
+        OAuthIdentity identity = OAuthIdentity.builder()
+                .user(user)
+                .provider(provider)
+                .providerUserId(providerUserId)
+                .email(email)
+                .build();
+        oauthIdentityRepository.save(identity);
+
+        return user;
+    }
+
+    /**
+     * Extracts the originating client IP address from the request.
+     * Prefers the first entry in the {@code X-Forwarded-For} header when present,
+     * falling back to the direct {@code remoteAddr}.
+     *
+     * @param request the HTTP servlet request
+     * @return the resolved IP address string
+     */
     private String extractClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {

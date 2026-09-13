@@ -1,8 +1,17 @@
 package com.project.souklab.service.artisan;
 
+import com.project.souklab.dao.ArtisanCertificationRepository;
+import com.project.souklab.dao.ArtisanGalleryImageRepository;
 import com.project.souklab.dao.ArtisanProfileViewRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.dto.artisan.CertificationResponseDTO;
+import com.project.souklab.dto.artisan.GalleryImageResponseDTO;
+import com.project.souklab.dto.catalog.EpoqueSummaryDTO;
+import com.project.souklab.dto.catalog.JobSubCategorySummaryDTO;
+import com.project.souklab.dto.catalog.MaterialSummaryDTO;
+import com.project.souklab.dto.catalog.RegionSummaryDTO;
+import com.project.souklab.dto.catalog.TechniqueSummaryDTO;
 import com.project.souklab.dto.profile.ArtisanPublicViewDTO;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
@@ -16,6 +25,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Service managing artisan profile retrieval, contact privacy gating,
+ * view counts tracking, and taxonomy and portfolio assembly.
+ */
 @Service
 @RequiredArgsConstructor
 public class ArtisanProfileService {
@@ -23,11 +41,14 @@ public class ArtisanProfileService {
     private final UserRepository userRepository;
     private final ArtisanRepository artisanRepository;
     private final ArtisanProfileViewRepository artisanProfileViewRepository;
+    private final ArtisanGalleryImageRepository artisanGalleryImageRepository;
+    private final ArtisanCertificationRepository artisanCertificationRepository;
 
     /**
      * Retrieves an artisan's profile for authenticated viewers.
      * Applies account status and email verification gating on the viewer (bypassed for admins),
-     * records deduplicated profile views, and gates sensitive contact info based on viewer premium status.
+     * records deduplicated profile views, gates sensitive contact info based on viewer premium status,
+     * and compiles craft taxonomy, showcase images, and professional certifications.
      *
      * @param artisanId the ID of the target artisan to view
      * @return ArtisanPublicViewDTO containing the public/gated artisan profile
@@ -116,12 +137,59 @@ public class ArtisanProfileService {
             address = artisan.getAddress();
         }
 
+        RegionSummaryDTO regionSummary = RegionSummaryDTO.from(artisan.getRegion());
+        JobSubCategorySummaryDTO subCategorySummary = JobSubCategorySummaryDTO.from(artisan.getSubCategory());
+
+        Set<MaterialSummaryDTO> materialSummaries = artisan.getMaterials() != null
+                ? artisan.getMaterials().stream().map(MaterialSummaryDTO::from).collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        Set<TechniqueSummaryDTO> techniqueSummaries = artisan.getTechniques() != null
+                ? artisan.getTechniques().stream().map(TechniqueSummaryDTO::from).collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        Set<EpoqueSummaryDTO> epoqueSummaries = artisan.getEpoques() != null
+                ? artisan.getEpoques().stream().map(EpoqueSummaryDTO::from).collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        List<GalleryImageResponseDTO> galleryImageDTOs = artisanGalleryImageRepository
+                .findByArtisanIdAndDeletedAtIsNullOrderByDisplayOrderAsc(artisan.getId())
+                .stream()
+                .map(GalleryImageResponseDTO::from)
+                .toList();
+
+        List<CertificationResponseDTO> certificationDTOs = artisanCertificationRepository
+                .findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc(artisan.getId())
+                .stream()
+                .map(cert -> {
+                    if (contactInfoLocked) {
+                        return CertificationResponseDTO.builder()
+                                .id(cert.getId())
+                                .title(cert.getTitle())
+                                .issuer(cert.getIssuer())
+                                .issuedAt(cert.getIssuedAt())
+                                .expiresAt(cert.getExpiresAt())
+                                .isVerified(cert.isVerified())
+                                .documentUrl(null)
+                                .build();
+                    }
+                    return CertificationResponseDTO.from(cert);
+                })
+                .toList();
+
         return ArtisanPublicViewDTO.builder()
                 .id(artisan.getId())
                 .bio(artisan.getBio())
                 .city(artisan.getCity())
                 .regionId(artisan.getRegionId())
+                .region(regionSummary)
                 .subCategoryId(artisan.getSubCategoryId())
+                .subCategory(subCategorySummary)
+                .materials(materialSummaries)
+                .techniques(techniqueSummaries)
+                .epoques(epoqueSummaries)
+                .galleryImages(galleryImageDTOs)
+                .certifications(certificationDTOs)
                 .rating(artisan.getRating())
                 .reviewsCount(artisan.getReviewsCount())
                 .teacher(artisan.isTeacher())

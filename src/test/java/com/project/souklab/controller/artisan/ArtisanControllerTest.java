@@ -1,6 +1,13 @@
 package com.project.souklab.controller.artisan;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
+import com.project.souklab.dto.artisan.CertificationResponseDTO;
+import com.project.souklab.dto.artisan.GalleryImageResponseDTO;
+import com.project.souklab.dto.catalog.EpoqueSummaryDTO;
+import com.project.souklab.dto.catalog.JobSubCategorySummaryDTO;
+import com.project.souklab.dto.catalog.MaterialSummaryDTO;
+import com.project.souklab.dto.catalog.RegionSummaryDTO;
+import com.project.souklab.dto.catalog.TechniqueSummaryDTO;
 import com.project.souklab.dto.profile.ArtisanPublicViewDTO;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
@@ -8,6 +15,10 @@ import com.project.souklab.service.artisan.ArtisanProfileService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -56,7 +67,14 @@ class ArtisanControllerTest {
                     .bio("Handmade pottery specialist")
                     .city("Algiers")
                     .regionId("reg-16")
+                    .region(RegionSummaryDTO.builder().id("reg-16").name("Alger").slug("alger").code("16").build())
                     .subCategoryId("sub-4")
+                    .subCategory(JobSubCategorySummaryDTO.builder().id("sub-4").name("Poterie").slug("poterie").build())
+                    .materials(Set.of(MaterialSummaryDTO.builder().id("mat-1").name("Argile").slug("argile").build()))
+                    .techniques(Set.of(TechniqueSummaryDTO.builder().id("tech-1").name("Modelage").slug("modelage").build()))
+                    .epoques(Set.of(EpoqueSummaryDTO.builder().id("epo-1").name("Contemporain").slug("contemporain").build()))
+                    .galleryImages(List.of(GalleryImageResponseDTO.builder().id("gal-1").imageUrl("https://storage.souklab.dz/gal1.jpg").title("Vase").displayOrder(0).build()))
+                    .certifications(List.of(CertificationResponseDTO.builder().id("cert-1").title("Carte Artisan CAM").issuer("CAM Alger").issuedAt(LocalDate.of(2025, 1, 1)).isVerified(true).build()))
                     .rating(4.8)
                     .reviewsCount(24)
                     .teacher(true)
@@ -80,7 +98,14 @@ class ArtisanControllerTest {
                     .andExpect(jsonPath("$.data.bio").value("Handmade pottery specialist"))
                     .andExpect(jsonPath("$.data.city").value("Algiers"))
                     .andExpect(jsonPath("$.data.regionId").value("reg-16"))
+                    .andExpect(jsonPath("$.data.region.name").value("Alger"))
                     .andExpect(jsonPath("$.data.subCategoryId").value("sub-4"))
+                    .andExpect(jsonPath("$.data.subCategory.name").value("Poterie"))
+                    .andExpect(jsonPath("$.data.materials[0].name").value("Argile"))
+                    .andExpect(jsonPath("$.data.techniques[0].name").value("Modelage"))
+                    .andExpect(jsonPath("$.data.epoques[0].name").value("Contemporain"))
+                    .andExpect(jsonPath("$.data.galleryImages[0].title").value("Vase"))
+                    .andExpect(jsonPath("$.data.certifications[0].verified").value(true))
                     .andExpect(jsonPath("$.data.rating").value(4.8))
                     .andExpect(jsonPath("$.data.reviewsCount").value(24))
                     .andExpect(jsonPath("$.data.teacher").value(true))

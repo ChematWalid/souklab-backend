@@ -1,11 +1,11 @@
 package com.project.souklab.controller.auth;
 
-import tools.jackson.databind.JsonNode;
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.auth.*;
 import com.project.souklab.dto.profile.ArtisanResponseDTO;
 import com.project.souklab.dto.profile.ClientProfileResponseDTO;
 import com.project.souklab.dto.profile.ProfileResponse;
+import com.project.souklab.dto.profile.UserPatchDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
@@ -13,6 +13,7 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.service.auth.AuthService;
+import com.project.souklab.service.profile.ProfileService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private ProfileService profileService;
 
     private ClientProfileResponseDTO buildClientProfile(String id, String email, AccountStatus status) {
         return ClientProfileResponseDTO.builder()
@@ -844,7 +848,7 @@ class AuthControllerTest {
         @DisplayName("authenticated user retrieves current profile returning 200 OK")
         void getCurrentUser_whenAuthenticated_shouldReturnProfileAnd200Ok() throws Exception {
             ClientProfileResponseDTO user = buildClientProfile("user-1", "karim@souklab.dz", AccountStatus.ACTIVE);
-            when(authService.getCurrentUser()).thenReturn(user);
+            when(profileService.getCurrentUser()).thenReturn(user);
 
             mockMvc.perform(get("/api/v1/auth/me")
                             .with(client()))
@@ -855,7 +859,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.data.email").value("karim@souklab.dz"))
                     .andExpect(jsonPath("$.data.roles[0]").value("ROLE_CLIENT"));
 
-            verify(authService).getCurrentUser();
+            verify(profileService).getCurrentUser();
         }
 
         /**
@@ -876,7 +880,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("user not found maps to 404 Not Found")
         void getCurrentUser_whenUserNotFound_shouldReturn404NotFound() throws Exception {
-            when(authService.getCurrentUser())
+            when(profileService.getCurrentUser())
                     .thenThrow(new ResourceNotFoundException("User not found: client@souklab.dz"));
 
             mockMvc.perform(get("/api/v1/auth/me")
@@ -893,15 +897,15 @@ class AuthControllerTest {
     class PatchCurrentUserTests {
 
         /**
-         * Verifies that authenticated JSON Merge Patch passes raw JsonNode with explicit null to service.
+         * Verifies that authenticated JSON Merge Patch deserializes into UserPatchDTO with explicit null to service.
          */
         @Test
-        @DisplayName("JSON Merge Patch with explicit null passes JsonNode to service returning 200 OK")
-        void patchCurrentUser_whenAuthenticatedWithExplicitNull_shouldPassJsonNodeToServiceAndReturn200Ok() throws Exception {
+        @DisplayName("JSON Merge Patch with explicit null passes UserPatchDTO to service returning 200 OK")
+        void patchCurrentUser_whenAuthenticatedWithExplicitNull_shouldPassUserPatchDtoToServiceAndReturn200Ok() throws Exception {
             ClientProfileResponseDTO updated = buildClientProfile("user-1", "karim@souklab.dz", AccountStatus.ACTIVE);
             updated.setBio("Updated bio");
             updated.setCity(null);
-            when(authService.patchCurrentUser(any(JsonNode.class))).thenReturn(updated);
+            when(profileService.patchCurrentUser(any(UserPatchDTO.class))).thenReturn(updated);
 
             mockMvc.perform(patch("/api/v1/auth/me")
                             .with(client())
@@ -919,13 +923,15 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.data.bio").value("Updated bio"))
                     .andExpect(jsonPath("$.data.city").value(nullValue()));
 
-            ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
-            verify(authService).patchCurrentUser(captor.capture());
-            JsonNode captured = captor.getValue();
+            ArgumentCaptor<UserPatchDTO> captor = ArgumentCaptor.forClass(UserPatchDTO.class);
+            verify(profileService).patchCurrentUser(captor.capture());
+            UserPatchDTO captured = captor.getValue();
             assertThat(captured).isNotNull();
-            assertThat(captured.get("bio").asText()).isEqualTo("Updated bio");
-            assertThat(captured.has("city")).isTrue();
-            assertThat(captured.get("city").isNull()).isTrue();
+            assertThat(captured.getBio().isDefined()).isTrue();
+            assertThat(captured.getBio().getValue()).isEqualTo("Updated bio");
+            assertThat(captured.getCity().isDefined()).isTrue();
+            assertThat(captured.getCity().isNull()).isTrue();
+            assertThat(captured.getAddress().isDefined()).isFalse();
         }
 
         /**
@@ -935,7 +941,7 @@ class AuthControllerTest {
         @DisplayName("empty patch body is passed to service returning 200 OK")
         void patchCurrentUser_whenEmptyBody_shouldPassToService() throws Exception {
             ClientProfileResponseDTO current = buildClientProfile("user-1", "karim@souklab.dz", AccountStatus.ACTIVE);
-            when(authService.patchCurrentUser(any())).thenReturn(current);
+            when(profileService.patchCurrentUser(any())).thenReturn(current);
 
             mockMvc.perform(patch("/api/v1/auth/me")
                             .with(client()))
@@ -943,7 +949,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.code").value(200));
 
-            verify(authService).patchCurrentUser(any());
+            verify(profileService).patchCurrentUser(any());
         }
 
         /**
@@ -978,7 +984,7 @@ class AuthControllerTest {
             ClientProfileResponseDTO profile = buildClientProfile("user-1", "karim@souklab.dz", AccountStatus.ACTIVE);
             profile.setCity("Algiers");
             profile.setRegionId("reg-16");
-            when(authService.completeProfile(any(CompleteProfileRequestDTO.class))).thenReturn(profile);
+            when(profileService.completeProfile(any(CompleteProfileRequestDTO.class))).thenReturn(profile);
 
             mockMvc.perform(post("/api/v1/auth/complete-profile")
                             .with(client())
@@ -998,7 +1004,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.data.regionId").value("reg-16"));
 
             ArgumentCaptor<CompleteProfileRequestDTO> captor = ArgumentCaptor.forClass(CompleteProfileRequestDTO.class);
-            verify(authService).completeProfile(captor.capture());
+            verify(profileService).completeProfile(captor.capture());
             assertThat(captor.getValue().getCity()).isEqualTo("Algiers");
             assertThat(captor.getValue().getRegionId()).isEqualTo("reg-16");
             assertThat(captor.getValue().getBio()).isEqualTo("Handmade leather goods enthusiast");

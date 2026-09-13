@@ -12,5 +12,4 @@ Representations for artisan public showcases, client account views, and self-ser
 | [`ArtisanResponseDTO`](ArtisanResponseDTO.java) | Outbound | Detailed profile representation for authenticated artisans including bio, address, website, craft IDs, and verification status. |
 | [`ClientProfileResponseDTO`](ClientProfileResponseDTO.java) | Outbound | Client profile representation including company name, client type, and preferences. |
 | [`ArtisanPublicViewDTO`](ArtisanPublicViewDTO.java) | Outbound | Sanitized public view of an artisan profile. Includes contact information gating flags (`contactInfoLocked`). |
-| [`ArtisanPatchDTO`](ArtisanPatchDTO.java) | Inbound | Partial update payload for artisan bio, website, address, and craft specializations. |
-| [`ClientPatchDTO`](ClientPatchDTO.java) | Inbound | Partial update payload for client profile details. |
+| [`UserPatchDTO`](UserPatchDTO.java) | Inbound | Strongly-typed JSON Merge Patch payload using `PatchField<T>` for artisan and client profiles. |
