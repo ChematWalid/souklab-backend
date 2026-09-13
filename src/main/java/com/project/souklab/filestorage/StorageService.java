@@ -28,6 +28,16 @@ public interface StorageService {
     StorageResource retrieve(String key);
 
     /**
+     * Loads stored file resource by its unique key. Alias for {@link #retrieve(String)}.
+     *
+     * @param key the unique storage key
+     * @return storage resource containing readable stream and metadata
+     */
+    default StorageResource load(String key) {
+        return retrieve(key);
+    }
+
+    /**
      * Deletes a stored file by its key.
      *
      * @param key the unique storage key

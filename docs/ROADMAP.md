@@ -68,9 +68,9 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
   - Formateur state machine (`PENDING`, `APPROVED`, `REJECTED`).
   - 14-day reapplication cooldown enforcement and permanent block flag (`canReapply = false`).
   - Admin governance endpoints (`GET /api/v1/admin/formateur-requests`, approve, reject, lift cooldown, direct grant, direct revoke).
-- [ ] **Step 6.1**: Implement `Formation`, `FormationEnrollment`, `FormationReview` entities and repositories.
-- [ ] **Step 6.2**: Implement approval state machine: `DRAFT` → `PENDING_REVIEW` → `APPROVED`/`REJECTED` → `PUBLISHED`.
-- [ ] **Step 6.3**: Implement `FormationService` and `FormationController` (creation, curriculum update, review submission, client enrollment).
+- [x] **Step 6.1**: Implement `Formation`, `FormationFile`, `FormationEnrollment`, `FormationReview` entities, configuration pipeline, and repository layer.
+- [x] **Step 6.2**: Implement formation authoring pipeline, media uploads via `StorageService` with compensating rollback, admin review moderation, and dual notification integration.
+- [x] **Step 6.3**: Implement peer artisan workshop discovery, enrollment with capacity bounds, cancellation deadline cutoff (24h), protected course file downloads, and enrollment history.
 
 ---
 
