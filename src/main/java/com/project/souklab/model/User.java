@@ -2,6 +2,11 @@ package com.project.souklab.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -28,15 +33,18 @@ public class User extends BaseEntity {
 
     private String password;
 
+    @FullTextField(analyzer = "artisanal_name")
     @Column(name = "first_name", length = 100)
     private String firstName;
 
+    @FullTextField(analyzer = "artisanal_name")
     @Column(name = "last_name", length = 100)
     private String lastName;
 
     @Column(length = 30)
     private String phone;
 
+    @KeywordField
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
@@ -90,6 +98,13 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Client client;
 
+    @Transient
+    @FullTextField(analyzer = "artisanal_name")
+    @IndexingDependency(derivedFrom = {
+        @ObjectPath(@PropertyValue(propertyName = "firstName")),
+        @ObjectPath(@PropertyValue(propertyName = "lastName")),
+        @ObjectPath(@PropertyValue(propertyName = "email"))
+    })
     public String getName() {
         if (firstName != null && lastName != null) {
             return firstName.trim() + " " + lastName.trim();

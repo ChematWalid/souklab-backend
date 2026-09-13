@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 /**
  * Entity representing an ancestral crafting technique, method, or artisanal skill in Algeria.
  * Models traditional methods (e.g., Filigrane en argent, Ciselure au marteau, Émaillage traditionnel,
@@ -32,12 +35,14 @@ public class Technique extends BaseEntity {
     /**
      * Name of the artisanal crafting technique (e.g., "Filigrane en argent", "Ciselure au marteau").
      */
+    @FullTextField(analyzer = "artisanal_name")
     @Column(nullable = false, length = 100)
     private String name;
 
     /**
      * Unique URL-friendly slug for technique filtering and search indexing (e.g., "filigrane-en-argent").
      */
+    @KeywordField(normalizer = "artisanal_normalizer")
     @Column(nullable = false, length = 120)
     private String slug;
 

@@ -15,6 +15,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,18 +50,21 @@ public class Region extends BaseEntity {
     /**
      * Official name of the Wilaya or Commune in French/Arabic (e.g., "Tizi Ouzou", "Ghardaïa", "Alger").
      */
+    @FullTextField(analyzer = "artisanal_name")
     @Column(nullable = false, length = 100)
     private String name;
 
     /**
      * Unique URL-friendly slug used for SEO routing and directory filtering (e.g., "tizi-ouzou", "ghardaia").
      */
+    @KeywordField(normalizer = "artisanal_normalizer")
     @Column(nullable = false, length = 120)
     private String slug;
 
     /**
      * Official administrative Wilaya code (e.g., "15", "47", "16"). Nullable for sub-regional Communes.
      */
+    @KeywordField
     @Column(length = 10)
     private String code;
 
@@ -78,6 +87,8 @@ public class Region extends BaseEntity {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @IndexedEmbedded(includePaths = {"name", "slug", "code"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private Region parent;
 
     /**

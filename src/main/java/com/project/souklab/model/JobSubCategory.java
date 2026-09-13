@@ -14,6 +14,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 /**
  * Entity representing a specialized artisanal craft subcategory or trade in Algeria.
  * Models discrete craftsmanship specializations (e.g., Céramique & Poterie de Kabylie,
@@ -42,17 +48,21 @@ public class JobSubCategory extends BaseEntity {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
+    @IndexedEmbedded(includePaths = {"name", "slug"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private JobCategory category;
 
     /**
      * Specific trade or craft subcategory name (e.g., "Ébénisterie Traditionnelle", "Dinanderie").
      */
+    @FullTextField(analyzer = "artisanal_name")
     @Column(nullable = false, length = 100)
     private String name;
 
     /**
      * Unique URL-friendly slug used in directory route filtering (e.g., "ebenisterie-traditionnelle").
      */
+    @KeywordField(normalizer = "artisanal_normalizer")
     @Column(nullable = false, length = 120)
     private String slug;
 

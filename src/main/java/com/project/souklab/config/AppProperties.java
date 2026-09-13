@@ -26,6 +26,7 @@ public class AppProperties {
     private RateLimit rateLimit = new RateLimit();
     private AuthConfig auth = new AuthConfig();
     private ArtisanConfig artisan = new ArtisanConfig();
+    private Search search = new Search();
 
 
     @Data
@@ -170,6 +171,21 @@ public class AppProperties {
                     "image/png"
             ));
         }
+    }
+
+    /**
+     * Search and indexing configuration bound to {@code app.search.*}.
+     */
+    @Data
+    public static class Search {
+        private String uris = "http://localhost:9200";
+        private String username;
+        private String password;
+        private int connectionTimeout = 5000;
+        private int readTimeout = 30000;
+        private String indexPrefix = "souklab_";
+        private String schemaManagement = "create-or-update";
+        private boolean syncOnStartup = true;
     }
 }
 

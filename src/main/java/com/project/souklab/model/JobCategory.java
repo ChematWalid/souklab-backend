@@ -12,6 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,12 +40,14 @@ public class JobCategory extends BaseEntity {
     /**
      * Official display name of the craftsmanship domain (e.g., "Métiers du Bois", "Artisanat d'Art").
      */
+    @FullTextField(analyzer = "artisanal_name")
     @Column(nullable = false, length = 100)
     private String name;
 
     /**
      * Unique URL-friendly slug used for catalog routing and directory filtering (e.g., "metiers-du-bois").
      */
+    @KeywordField(normalizer = "artisanal_normalizer")
     @Column(nullable = false, length = 120)
     private String slug;
 

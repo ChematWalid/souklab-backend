@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 /**
  * Entity representing an Algerian historical epoch or cultural era in the heritage taxonomy.
  * Captures historical periods (e.g., Période Numide, Époque Rustumide, Fatimide, Zianide,
@@ -33,12 +36,14 @@ public class Epoque extends BaseEntity {
     /**
      * Name of the historical era or cultural epoch (e.g., "Période Zianide", "Époque Ottomane").
      */
+    @FullTextField(analyzer = "artisanal_name")
     @Column(nullable = false, length = 100)
     private String name;
 
     /**
      * Unique URL-friendly slug used for era-based heritage filtering and search indexing (e.g., "periode-zianide").
      */
+    @KeywordField(normalizer = "artisanal_normalizer")
     @Column(nullable = false, length = 120)
     private String slug;
 

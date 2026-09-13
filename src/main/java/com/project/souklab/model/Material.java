@@ -14,6 +14,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 /**
  * Entity representing an authentic crafting material, mineral, or organic substance in Algeria.
  * Models discrete materials utilized by artisans in handcrafted goods (e.g., Argile Rouge de Kabylie,
@@ -47,12 +50,14 @@ public class Material extends BaseEntity {
     /**
      * Name of the raw crafting material (e.g., "Argile Rouge de Kabylie", "Argent Massif 925").
      */
+    @FullTextField(analyzer = "artisanal_name")
     @Column(nullable = false, length = 100)
     private String name;
 
     /**
      * Unique URL-safe slug for filtering directory queries by material (e.g., "argile-rouge-de-kabylie").
      */
+    @KeywordField(normalizer = "artisanal_normalizer")
     @Column(nullable = false, length = 120)
     private String slug;
 

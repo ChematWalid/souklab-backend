@@ -5,11 +5,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -20,6 +24,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,7 +45,38 @@ import java.util.Set;
  * showcase portfolios, and official accreditations.
  */
 @Entity
-@Table(name = "artisans")
+@Table(
+    name = "artisans",
+    indexes = {
+        @Index(name = "idx_artisan_dir_search", columnList = "deleted_at, is_verified, is_premium, rating DESC, sub_category_id, region_id"),
+        @Index(name = "idx_artisan_region", columnList = "region_id"),
+        @Index(name = "idx_artisan_subcat", columnList = "sub_category_id"),
+        @Index(name = "idx_artisan_teacher", columnList = "is_teacher, deleted_at"),
+        @Index(name = "idx_artisan_rating", columnList = "rating DESC")
+    }
+)
+@NamedEntityGraph(
+    name = "artisan.directory",
+    attributeNodes = {
+        @NamedAttributeNode("user"),
+        @NamedAttributeNode(value = "region", subgraph = "region.parent"),
+        @NamedAttributeNode(value = "subCategory", subgraph = "subCategory.category"),
+        @NamedAttributeNode("materials"),
+        @NamedAttributeNode("techniques"),
+        @NamedAttributeNode("galleryImages")
+    },
+    subgraphs = {
+        @NamedSubgraph(
+            name = "region.parent",
+            attributeNodes = @NamedAttributeNode("parent")
+        ),
+        @NamedSubgraph(
+            name = "subCategory.category",
+            attributeNodes = @NamedAttributeNode("category")
+        )
+    }
+)
+@Indexed(index = "artisans")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,11 +97,14 @@ public class Artisan {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
+    @IndexedEmbedded(includePaths = {"name", "firstName", "lastName", "avatarUrl"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private User user;
 
     /**
      * Biography, artistic philosophy, and craft background narrative.
      */
+    @FullTextField(analyzer = "artisanal_text")
     @Column(columnDefinition = "TEXT")
     private String bio;
 
@@ -67,17 +113,22 @@ public class Artisan {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
+    @IndexedEmbedded(includePaths = {"name", "slug", "code", "parent.name", "parent.slug", "parent.code"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private Region region;
 
     /**
      * City, commune, or daïra where the artisan operates.
      */
+    @FullTextField(analyzer = "artisanal_name")
+    @KeywordField(name = "city_keyword", normalizer = "artisanal_normalizer")
     @Column(length = 100)
     private String city;
 
     /**
      * Workshop or studio physical street address.
      */
+    @FullTextField(analyzer = "artisanal_text")
     @Column(length = 255)
     private String address;
 
@@ -92,6 +143,8 @@ public class Artisan {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sub_category_id")
+    @IndexedEmbedded(includePaths = {"name", "slug", "category.name", "category.slug"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private JobSubCategory subCategory;
 
     /**
@@ -105,6 +158,8 @@ public class Artisan {
         inverseJoinColumns = @JoinColumn(name = "material_id")
     )
     @Builder.Default
+    @IndexedEmbedded(includePaths = {"name", "slug"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private Set<Material> materials = new HashSet<>();
 
     /**
@@ -118,6 +173,8 @@ public class Artisan {
         inverseJoinColumns = @JoinColumn(name = "technique_id")
     )
     @Builder.Default
+    @IndexedEmbedded(includePaths = {"name", "slug"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private Set<Technique> techniques = new HashSet<>();
 
     /**
@@ -131,6 +188,8 @@ public class Artisan {
         inverseJoinColumns = @JoinColumn(name = "epoque_id")
     )
     @Builder.Default
+    @IndexedEmbedded(includePaths = {"name", "slug"})
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     private Set<Epoque> epoques = new HashSet<>();
 
     /**
@@ -152,6 +211,7 @@ public class Artisan {
     /**
      * Flag indicating whether the artisan has been approved as an instructor (formateur).
      */
+    @GenericField
     @Column(name = "is_teacher", nullable = false)
     @Builder.Default
     private boolean isTeacher = false;
@@ -159,6 +219,7 @@ public class Artisan {
     /**
      * Flag indicating whether the artisan holds an active premium tier subscription.
      */
+    @GenericField
     @Column(name = "is_premium", nullable = false)
     @Builder.Default
     private boolean isPremium = false;
@@ -166,6 +227,7 @@ public class Artisan {
     /**
      * Flag indicating whether the artisan has been verified by platform administrators.
      */
+    @GenericField
     @Column(name = "is_verified", nullable = false)
     @Builder.Default
     private boolean isVerified = false;
@@ -173,6 +235,7 @@ public class Artisan {
     /**
      * Aggregate review rating score (0.00 to 5.00).
      */
+    @GenericField(sortable = Sortable.YES)
     @Column(nullable = false)
     @Builder.Default
     private double rating = 0.0;
@@ -180,6 +243,7 @@ public class Artisan {
     /**
      * Total number of verified client reviews received.
      */
+    @GenericField(sortable = Sortable.YES)
     @Column(name = "reviews_count", nullable = false)
     @Builder.Default
     private int reviewsCount = 0;
@@ -187,6 +251,7 @@ public class Artisan {
     /**
      * Cumulative total number of profile page views.
      */
+    @GenericField(sortable = Sortable.YES)
     @Column(name = "views_count", nullable = false)
     @Builder.Default
     private int viewsCount = 0;
@@ -201,6 +266,7 @@ public class Artisan {
     /**
      * Timestamp when the profile was initially created.
      */
+    @GenericField(sortable = Sortable.YES)
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -215,6 +281,7 @@ public class Artisan {
     /**
      * Soft-delete timestamp for archived artisan profiles.
      */
+    @GenericField
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
