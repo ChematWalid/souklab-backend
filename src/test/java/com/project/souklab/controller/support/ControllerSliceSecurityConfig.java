@@ -42,7 +42,8 @@ public class ControllerSliceSecurityConfig {
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/reset-password",
                                 "/api/v1/auth/oauth/**",
-                                "/api/v1/catalog/**"
+                                "/api/v1/catalog/**",
+                                "/api/v1/public/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

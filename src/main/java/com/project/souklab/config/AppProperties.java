@@ -175,17 +175,20 @@ public class AppProperties {
 
     /**
      * Search and indexing configuration bound to {@code app.search.*}.
+     * Defaults are supplied via environment variables in {@code application.properties};
+     * no Java-side defaults are declared here.
      */
     @Data
     public static class Search {
-        private String uris = "http://localhost:9200";
+        private boolean enabled;
+        private String uris;
         private String username;
         private String password;
-        private int connectionTimeout = 5000;
-        private int readTimeout = 30000;
-        private String indexPrefix = "souklab_";
-        private String schemaManagement = "create-or-update";
-        private boolean syncOnStartup = true;
+        private int connectionTimeout;
+        private int readTimeout;
+        private String indexPrefix;
+        private String schemaManagement;
+        private boolean syncOnStartup;
     }
 }
 

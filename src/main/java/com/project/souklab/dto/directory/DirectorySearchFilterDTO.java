@@ -175,6 +175,24 @@ public class DirectorySearchFilterDTO {
         return sortBy != null ? sortBy : DirectorySortOrder.RELEVANCE;
     }
 
+    /**
+     * Alias getter for keyword, matching query parameter 'q'.
+     *
+     * @return search keyword
+     */
+    public String getQ() {
+        return keyword;
+    }
+
+    /**
+     * Alias setter for keyword, binding query parameter 'q'.
+     *
+     * @param q search keyword
+     */
+    public void setQ(String q) {
+        this.keyword = q;
+    }
+
     private static boolean isNonBlank(String str) {
         return str != null && !str.isBlank();
     }

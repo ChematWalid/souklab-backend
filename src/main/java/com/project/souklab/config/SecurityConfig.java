@@ -127,7 +127,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/error",
                                 "/ws/**",
-                                "/api/v1/catalog/**"
+                                "/api/v1/catalog/**",
+                                "/api/v1/public/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
