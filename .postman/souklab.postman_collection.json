@@ -13911,6 +13911,521 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "11. Public Directory & Faceted Search",
+      "description": "Public directory browsing and faceted discovery engine powered by Hibernate Search 8 (Elasticsearch 8) with relational JPA fallback. Features full-text keyword matching, multi-facet taxonomy filtering (Wilaya, category, materials, techniques, historical eras), verification/premium badges, and rating/date sorting.",
+      "item": [
+        {
+          "name": "11.1 Directory \u2014 Default Listing (Page 0, Size 20)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Success envelope and pagination structure returned\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data).to.be.an(\"object\");",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "    pm.expect(json.data.pageNumber).to.eql(0);",
+                  "    pm.expect(json.data.pageSize).to.eql(20);",
+                  "});",
+                  "if (json.data.content.length > 0) {",
+                  "    pm.test(\"Artisan card contains directory fields\", function () {",
+                  "        const card = json.data.content[0];",
+                  "        pm.expect(card).to.have.property(\"id\");",
+                  "        pm.expect(card).to.have.property(\"artisanName\");",
+                  "        pm.expect(card).to.have.property(\"bioSnippet\");",
+                  "        pm.expect(card).to.have.property(\"rating\");",
+                  "        pm.expect(card).to.have.property(\"verified\");",
+                  "        pm.expect(card).to.have.property(\"premium\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page index (zero-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "description": "Page size (1-100)"
+                }
+              ]
+            },
+            "description": "Retrieves the default public directory listing of active artisans, strictly excluding soft-deleted accounts."
+          },
+          "response": []
+        },
+        {
+          "name": "11.2 Directory \u2014 Full-Text Keyword Search (?q=...)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Keyword search succeeds\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?q=kabyle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "kabyle",
+                  "description": "Full-text query across artisan name, bio, craft terms, and workshop city"
+                }
+              ]
+            },
+            "description": "Performs full-text keyword search using Hibernate Search 8 Elasticsearch analyzers with edge n-grams, ASCII folding, and adaptive fuzziness."
+          },
+          "response": []
+        },
+        {
+          "name": "11.3 Directory \u2014 Terroir Wilaya Filter (?regionSlug=...)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Wilaya terroir filter succeeds\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?regionSlug=tizi-ouzou",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "regionSlug",
+                  "value": "tizi-ouzou",
+                  "description": "Wilaya or terroir region slug"
+                }
+              ]
+            },
+            "description": "Filters artisans located in the specified Algerian Wilaya or commune using hierarchical terroir region slugs."
+          },
+          "response": []
+        },
+        {
+          "name": "11.4 Directory \u2014 Craft Subcategory Filter (?subCategorySlug=...)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Subcategory filter succeeds\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?subCategorySlug=poterie-de-kabylie",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "subCategorySlug",
+                  "value": "poterie-de-kabylie",
+                  "description": "Craft subcategory slug"
+                }
+              ]
+            },
+            "description": "Filters the directory by craft trade subcategory slug (e.g., Poterie de Kabylie, Dinanderie de Constantine)."
+          },
+          "response": []
+        },
+        {
+          "name": "11.5 Directory \u2014 Multi-Facet Filtering (Materials, Techniques, Epochs)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Multi-facet search succeeds\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?materials=argile-rouge-de-kabylie&techniques=ciselure-au-repousse&epoques=periode-numide",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "materials",
+                  "value": "argile-rouge-de-kabylie",
+                  "description": "Comma-separated material slugs"
+                },
+                {
+                  "key": "techniques",
+                  "value": "ciselure-au-repousse",
+                  "description": "Comma-separated technique slugs"
+                },
+                {
+                  "key": "epoques",
+                  "value": "periode-numide",
+                  "description": "Comma-separated historical period slugs"
+                }
+              ]
+            },
+            "description": "Executes multi-facet relational discovery intersecting ancestral materials, crafting techniques, and historical eras."
+          },
+          "response": []
+        },
+        {
+          "name": "11.6 Directory \u2014 Premium & Verified Badges Only (?verifiedOnly=true&premiumOnly=true)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Accreditation and badge filter succeeds\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});",
+                  "if (json.data.content.length > 0) {",
+                  "    pm.test(\"Returned artisans match verified and premium criteria\", function () {",
+                  "        json.data.content.forEach(function (card) {",
+                  "            pm.expect(card.verified).to.be.true;",
+                  "            pm.expect(card.premium).to.be.true;",
+                  "        });",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?verifiedOnly=true&premiumOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "verifiedOnly",
+                  "value": "true",
+                  "description": "Filter to platform-verified artisans only"
+                },
+                {
+                  "key": "premiumOnly",
+                  "value": "true",
+                  "description": "Filter to active premium tier subscribers only"
+                }
+              ]
+            },
+            "description": "Filters the directory to return only verified artisans holding active premium tier badges."
+          },
+          "response": []
+        },
+        {
+          "name": "11.7 Directory \u2014 Sorting Permutations (?sort=RATING_DESC)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Sorting succeeds\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an(\"array\");",
+                  "});",
+                  "if (json.data.content.length >= 2) {",
+                  "    pm.test(\"Content is ordered by rating descending\", function () {",
+                  "        for (let i = 0; i < json.data.content.length - 1; i++) {",
+                  "            pm.expect(json.data.content[i].rating).to.be.at.least(json.data.content[i + 1].rating);",
+                  "        }",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?sortBy=RATING_DESC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "sortBy",
+                  "value": "RATING_DESC",
+                  "description": "Sort order: RATING_DESC, REVIEWS_DESC, VIEWS_DESC, NEWEST, RELEVANCE"
+                }
+              ]
+            },
+            "description": "Applies rating descending sort order to rank top-rated artisans with verified customer feedback first."
+          },
+          "response": []
+        },
+        {
+          "name": "11.8 Directory \u2014 Empty Search Results Handling",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Empty result returns 200 with empty page structure\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data.content).to.be.an(\"array\").that.is.empty;",
+                  "    pm.expect(json.data.totalElements).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?q=nonexistenttermxyz987654321",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "nonexistenttermxyz987654321",
+                  "description": "Query designed to yield zero matches"
+                }
+              ]
+            },
+            "description": "Verifies that queries returning zero matches yield an HTTP 200 OK with empty content array rather than an error."
+          },
+          "response": []
+        },
+        {
+          "name": "11.9 Directory \u2014 Validation Guard (Invalid Page/Size -> 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Validation error envelope returned\", function () {",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.code).to.eql(422);",
+                  "    pm.expect(json.message).to.eql(\"Validation failed\");",
+                  "    pm.expect(json.errors).to.be.an(\"object\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/directory?page=-1&size=101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "directory"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "-1",
+                  "description": "Invalid negative page"
+                },
+                {
+                  "key": "size",
+                  "value": "101",
+                  "description": "Invalid size exceeding max bound (100)"
+                }
+              ]
+            },
+            "description": "Verifies that pagination validation bounds reject invalid page numbers and sizes exceeding 100 with HTTP 422."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

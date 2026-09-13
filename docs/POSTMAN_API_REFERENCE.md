@@ -13,6 +13,7 @@ This document provides the exhaustive specification for all requests, headers, r
 8. [Formateur — Admin Actions](#8-formateur--admin-actions)
 9. [Admin — User Moderation](#9-admin--user-moderation)
 10. [File Storage](#10-file-storage)
+11. [Public Directory & Faceted Search](#11-public-directory--faceted-search)
 
 ---
 
@@ -2556,3 +2557,340 @@ All admin user moderation routes are guarded at the controller level with `@PreA
 ```
 
 ---
+
+## 11. Public Directory & Faceted Search
+
+> High-performance public directory and faceted search engine powered by Hibernate Search 8.2 and Elasticsearch 8.15+ (with an automatic relational JPA Specification fallback). Provides full-text search across artisan identity, trade narratives, and workshop locations, alongside multi-facet filtering (terroir Wilayas, craft subcategories, ancestral materials, techniques, and historical eras), accreditation/tier badges, and multi-dimensional sorting.
+
+### 11.1 Directory — Default Listing (Page 0, Size 20)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?page=0&size=20`
+
+#### URL Query Parameters
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | Integer | No | `0` | Zero-based page index (`min = 0`). |
+| `size` | Integer | No | `20` | Results per page (`min = 1, max = 100`). |
+
+#### Headers
+| Header | Value | Description |
+| :--- | :--- | :--- |
+| `Accept` | `application/json` | Client representation |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "6651a6a9-b167-4eee-a6bf-afdb09195320",
+        "artisanName": "Ahmed Belkacem",
+        "avatarUrl": null,
+        "coverImageUrl": null,
+        "bioSnippet": "Maitre potier traditionnel kabyle faconnant des amphores et plats ancestraux en argile.",
+        "city": "Beni Yenni",
+        "wilayaName": "Tizi Ouzou",
+        "wilayaCode": "15",
+        "regionSlug": "beni-yenni",
+        "categoryName": "Métiers de la Terre & Céramique",
+        "categorySlug": "metiers-de-la-terre-ceramique",
+        "subCategoryName": "Poterie de Kabylie",
+        "subCategorySlug": "poterie-de-kabylie",
+        "rating": 4.9,
+        "reviewsCount": 50,
+        "viewsCount": 2000,
+        "verified": true,
+        "premium": true,
+        "teacher": true,
+        "primaryMaterials": [
+          "Argile Rouge de Kabylie"
+        ],
+        "primaryTechniques": [
+          "Ciselure au repoussé"
+        ],
+        "createdAt": "2026-09-13T18:50:43"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+### 11.2 Directory — Full-Text Keyword Search (?q=...)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?q=kabyle`
+
+#### URL Query Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `q` | String | No | Full-text keyword matching across artisan name (edge n-gram, weight 3.0), craft trade and bio (weight 2.0), and workshop city (weight 1.0) with ASCII folding and adaptive fuzziness. |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "6651a6a9-b167-4eee-a6bf-afdb09195320",
+        "artisanName": "Ahmed Belkacem",
+        "bioSnippet": "Maitre potier traditionnel kabyle faconnant des amphores et plats ancestraux en argile.",
+        "city": "Beni Yenni",
+        "wilayaName": "Tizi Ouzou",
+        "subCategoryName": "Poterie de Kabylie",
+        "rating": 4.9,
+        "verified": true,
+        "premium": true
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+### 11.3 Directory — Terroir Wilaya Filter (?regionSlug=...)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?regionSlug=tizi-ouzou`
+
+#### URL Query Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `regionSlug` | String | No | Hierarchical region or parent Wilaya slug (e.g., `tizi-ouzou`, `beni-yenni`). Matches both direct region assignment and parent terroir Wilaya. |
+| `wilayaCode` | String | No | Official Algerian Wilaya postal code (e.g., `15` for Tizi Ouzou, `47` for Ghardaïa). |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "6651a6a9-b167-4eee-a6bf-afdb09195320",
+        "artisanName": "Ahmed Belkacem",
+        "wilayaName": "Tizi Ouzou",
+        "wilayaCode": "15",
+        "regionSlug": "beni-yenni"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+### 11.4 Directory — Craft Subcategory Filter (?subCategorySlug=...)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?subCategorySlug=poterie-de-kabylie`
+
+#### URL Query Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `subCategorySlug` | String | No | Unique slug of the craft subcategory (e.g., `poterie-de-kabylie`, `bijoux-kabyles-en-argent`). |
+| `categorySlug` | String | No | Unique slug of the high-level craft category (e.g., `metiers-de-la-terre-ceramique`). |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "6651a6a9-b167-4eee-a6bf-afdb09195320",
+        "artisanName": "Ahmed Belkacem",
+        "categorySlug": "metiers-de-la-terre-ceramique",
+        "subCategorySlug": "poterie-de-kabylie"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+### 11.5 Directory — Multi-Facet Filtering (Materials, Techniques, Epochs)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?materials=argile-rouge-de-kabylie&techniques=ciselure-au-repousse&epoques=periode-numide`
+
+#### URL Query Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `materials` | Set<String> | No | Comma-separated ancestral raw material slugs (e.g., `argile-rouge-de-kabylie,argent-massif-925`). |
+| `techniques` | Set<String> | No | Comma-separated traditional fabrication technique slugs (e.g., `ciselure-au-repousse,filigrane-d-argent`). |
+| `epoques` | Set<String> | No | Comma-separated historical era / lineage slugs (e.g., `periode-numide,epoque-ottomane`). |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "6651a6a9-b167-4eee-a6bf-afdb09195320",
+        "artisanName": "Ahmed Belkacem",
+        "primaryMaterials": [
+          "Argile Rouge de Kabylie"
+        ],
+        "primaryTechniques": [
+          "Ciselure au repoussé"
+        ]
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+### 11.6 Directory — Premium & Verified Badges Only (?verifiedOnly=true&premiumOnly=true)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?verifiedOnly=true&premiumOnly=true`
+
+#### URL Query Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `verifiedOnly` | Boolean | No | Filter to artisans verified by platform administrators (`is_verified = true`). |
+| `premiumOnly` | Boolean | No | Filter to artisans holding an active premium subscription (`is_premium = true`). |
+| `teacherOnly` | Boolean | No | Filter to artisans accredited as workshop instructors (`is_teacher = true`). |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "6651a6a9-b167-4eee-a6bf-afdb09195320",
+        "artisanName": "Ahmed Belkacem",
+        "verified": true,
+        "premium": true,
+        "teacher": true
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+### 11.7 Directory — Sorting Permutations (?sort=RATING_DESC)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?sortBy=RATING_DESC`
+
+#### URL Query Parameters
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `sortBy` | String | No | `RELEVANCE` | Sort order options: `RATING_DESC` (highest rated first, reviewsCount tie-breaker), `REVIEWS_DESC` (most reviewed first), `VIEWS_DESC` (most popular profile visits), `NEWEST` (latest registered artisans), `RELEVANCE` (BM25 search score when `q` is present, rating otherwise). |
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": "6651a6a9-b167-4eee-a6bf-afdb09195320",
+        "artisanName": "Ahmed Belkacem",
+        "rating": 4.9,
+        "reviewsCount": 50
+      },
+      {
+        "id": "1b6781d0-d650-45c1-96e8-bb2403bda2b1",
+        "artisanName": "Yacine Mansouri",
+        "rating": 4.2,
+        "reviewsCount": 10
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 2,
+    "totalPages": 1,
+    "last": true
+  }
+}
+```
+
+### 11.8 Directory — Empty Search Results Handling
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?q=nonexistentqueryxyz987`
+
+#### Response Examples
+##### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 0,
+    "totalPages": 0,
+    "last": true
+  }
+}
+```
+
+### 11.9 Directory — Validation Guard (Invalid Page/Size -> 422)
+- **Method**: `GET`
+- **Endpoint**: `{{baseUrl}}/public/directory?page=-1&size=101`
+
+#### Response Examples
+##### Error: Validation Failed (`422 Unprocessable Entity`)
+```json
+{
+  "success": false,
+  "code": 422,
+  "message": "Validation failed",
+  "data": null,
+  "errors": {
+    "page": "Page index cannot be negative",
+    "size": "Page size cannot exceed 100"
+  }
+}
+```
+
+---
+

@@ -36,29 +36,29 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 
 ---
 
-## 📍 Phase 3: Catalog, Taxonomy & Heritage Reference Data (IN PROGRESS / ACTIVE TARGET)
-- [ ] **Step 3.1**: Create JPA entities: `Region` (hierarchical wilayas/communes with self-referencing parent-child), `JobCategory`, `JobSubCategory`, `MaterialFamily`, `Material`, `Epoque`, `Technique` with unique slug constraints and display order weights.
-- [ ] **Step 3.2**: Create Spring Data repositories with caching annotations for high-read, low-write taxonomy queries.
-- [ ] **Step 3.3**: Implement `CatalogService` & `CatalogController` (`/api/v1/catalog/**`) for public reference discovery.
-- [ ] **Step 3.4**: Extend `DataSeeder` with complete official 58 Algerian wilayas, traditional craft categories, material families, and historical periods.
+## 📍 Phase 3: Catalog, Taxonomy & Heritage Reference Data (COMPLETED)
+- [x] **Step 3.1**: Create JPA entities: `Region` (hierarchical wilayas/communes with self-referencing parent-child), `JobCategory`, `JobSubCategory`, `MaterialFamily`, `Material`, `Epoque`, `Technique` with unique slug constraints and display order weights.
+- [x] **Step 3.2**: Create Spring Data repositories with caching annotations for high-read, low-write taxonomy queries.
+- [x] **Step 3.3**: Implement `CatalogService` & `CatalogController` (`/api/v1/catalog/**`) for public reference discovery.
+- [x] **Step 3.4**: Extend `DataSeeder` with complete official 58 Algerian wilayas, traditional craft categories, material families, and historical periods.
 
 ---
 
-## 📍 Phase 4: Artisan & Client Profiles (PARTIALLY COMPLETED)
+## 📍 Phase 4: Artisan & Client Profiles (COMPLETED)
 - [x] **Step 4.1a**: Implement base `Artisan` and `Client` JPA entities linked to `User`.
 - [x] **Step 4.2a**: Implement `/api/v1/auth/complete-profile` for artisans (bio, city, address, website).
 - [x] **Step 4.3a**: Implement `ArtisanController` (`GET /api/v1/artisan/{id}`) with deduplicated profile view tracking and premium-gated contact info masking.
-- [ ] **Step 4.1b**: Implement `ArtisanGalleryImage`, `ArtisanCertification`, `ArtisanAchievement`, `ArtisanSocialLink`, and join tables (`artisan_materials`, `artisan_techniques`, `artisan_epoques`).
-- [ ] **Step 4.2b**: Implement multi-step `/api/v1/auth/complete-profile` for clients (client type, company name).
-- [ ] **Step 4.3b**: Implement `ArtisanService` portfolio and certification management endpoints.
+- [x] **Step 4.1b**: Implement `ArtisanGalleryImage`, `ArtisanCertification`, `ArtisanAchievement`, `ArtisanSocialLink`, and join tables (`artisan_materials`, `artisan_techniques`, `artisan_epoques`).
+- [x] **Step 4.2b**: Implement multi-step `/api/v1/auth/complete-profile` for clients (client type, company name).
+- [x] **Step 4.3b**: Implement `ArtisanService` portfolio and certification management endpoints.
 
 ---
 
-## 📍 Phase 5: Elasticsearch Indexing & Public Directory Search (PENDING PHASE 3 & 4)
-- [ ] **Step 5.1**: Add Hibernate Search annotations (`@Indexed`, `@FullTextField`, `@KeywordField`) on `Artisan` and linked taxonomy entities.
-- [ ] **Step 5.2**: Implement `DirectorySearchService` using Hibernate Search MassIndexer and boolean query builder.
-- [ ] **Step 5.3**: Implement `DirectoryController` (`/api/v1/public/directory`) supporting multi-criteria filtering (wilaya, category, material, era, technique, keyword, featured, rating).
-- [ ] **Step 5.4**: Add contact data masking logic for free vs. premium client access.
+## 📍 Phase 5: Elasticsearch Indexing & Public Directory Search (COMPLETED)
+- [x] **Step 5.1**: Add Hibernate Search annotations (`@Indexed`, `@FullTextField`, `@KeywordField`) on `Artisan` aggregate root and linked taxonomy entities; configure Elasticsearch 8 analyzers with edge n-grams and ASCII folding; configure asynchronous `SearchIndexInitializer` runner.
+- [x] **Step 5.2**: Implement `DirectorySearchService` using Hibernate Search 8 DSL with adaptive fuzziness, bitset-cached facet filters, and resilient relational JPA Criteria fallback; implement `DirectoryController` (`GET /api/v1/public/directory`).
+- [x] **Step 5.3**: Live database integration test suite (`DirectoryIntegrationTest`), Postman Batch 7 collection suite (requests 11.1 through 11.9), and complete API reference documentation.
+- [x] **Step 5.4**: Verified contact data masking logic for free vs. premium client access in profile and directory card contracts.
 
 ---
 
