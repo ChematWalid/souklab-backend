@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 public class UserManagementService {
 
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found with id: ";
+    private static final String DEFAULT_BAN_REASON = "Account banned by administrator";
+    private static final String DEFAULT_TIMEOUT_REASON = "Account timed out by administrator";
 
     private final UserRepository userRepository;
     private final ArtisanRepository artisanRepository;
@@ -114,7 +116,7 @@ public class UserManagementService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
 
         user.setStatus(AccountStatus.SUSPENDED);
-        user.setBanReason(reason != null ? reason : "Account banned by administrator");
+        user.setBanReason(reason != null ? reason : DEFAULT_BAN_REASON);
         user.setBannedUntil(null);
 
         userRepository.save(user);
@@ -145,7 +147,7 @@ public class UserManagementService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
 
         user.setStatus(AccountStatus.SUSPENDED);
-        user.setBanReason(reason != null ? reason : "Account timed out by administrator");
+        user.setBanReason(reason != null ? reason : DEFAULT_TIMEOUT_REASON);
         user.setBannedUntil(LocalDateTime.now(clock).plusMinutes(minutes));
         userRepository.save(user);
 

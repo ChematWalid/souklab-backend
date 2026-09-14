@@ -24,6 +24,8 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtUtils {
 
+    private static final String ERROR_UNEXPECTED_PRINCIPAL_TYPE_PREFIX = "Expected principal of type UserDetails, but found: ";
+
     private final AppProperties appProperties;
     private final Clock clock;
 
@@ -34,7 +36,7 @@ public class JwtUtils {
 
     public String generateAccessToken(Authentication authentication) {
         if (!(authentication.getPrincipal() instanceof UserDetails userPrincipal)) {
-            throw new IllegalArgumentException("Expected principal of type UserDetails, but found: "
+            throw new IllegalArgumentException(ERROR_UNEXPECTED_PRINCIPAL_TYPE_PREFIX
                     + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null"));
         }
         return generateTokenFromUsername(userPrincipal.getUsername(), appProperties.getJwt().getAccessTokenExpirationMs());
@@ -46,7 +48,7 @@ public class JwtUtils {
 
     public String generateRefreshToken(Authentication authentication) {
         if (!(authentication.getPrincipal() instanceof UserDetails userPrincipal)) {
-            throw new IllegalArgumentException("Expected principal of type UserDetails, but found: "
+            throw new IllegalArgumentException(ERROR_UNEXPECTED_PRINCIPAL_TYPE_PREFIX
                     + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null"));
         }
         return generateTokenFromUsername(userPrincipal.getUsername(), appProperties.getJwt().getRefreshTokenExpirationMs());

@@ -51,6 +51,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DirectorySearchServiceImpl implements DirectorySearchService {
 
+    private static final String FIELD_DELETED_AT = "deletedAt";
+    private static final String FIELD_RATING = "rating";
+    private static final String FIELD_REVIEWS_COUNT = "reviewsCount";
+    private static final String FIELD_VIEWS_COUNT = "viewsCount";
+    private static final String FIELD_CREATED_AT = "createdAt";
+    private static final String FIELD_IS_VERIFIED = "isVerified";
+    private static final String FIELD_IS_PREMIUM = "isPremium";
+    private static final String FIELD_IS_TEACHER = "isTeacher";
+    private static final String FIELD_BIO = "bio";
+    private static final String FIELD_CITY = "city";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_SLUG = "slug";
+
     private final EntityManager entityManager;
     private final ArtisanRepository artisanRepository;
     private final AppProperties appProperties;
@@ -165,7 +178,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     private List<SearchPredicate> buildFilterClauses(SearchPredicateFactory f, DirectorySearchFilterDTO filter) {
         List<SearchPredicate> predicates = new ArrayList<>();
 
-        predicates.add(f.not(f.exists().field("deletedAt")).toPredicate());
+        predicates.add(f.not(f.exists().field(FIELD_DELETED_AT)).toPredicate());
 
         if (filter.getRegionSlug() != null && !filter.getRegionSlug().isBlank()) {
             predicates.add(f.bool()
@@ -202,19 +215,19 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
         }
 
         if (filter.getMinRating() != null && filter.getMinRating() > 0.0) {
-            predicates.add(f.range().field("rating").atLeast(filter.getMinRating()).toPredicate());
+            predicates.add(f.range().field(FIELD_RATING).atLeast(filter.getMinRating()).toPredicate());
         }
 
         if (Boolean.TRUE.equals(filter.getVerifiedOnly())) {
-            predicates.add(f.match().field("isVerified").matching(true).toPredicate());
+            predicates.add(f.match().field(FIELD_IS_VERIFIED).matching(true).toPredicate());
         }
 
         if (Boolean.TRUE.equals(filter.getPremiumOnly())) {
-            predicates.add(f.match().field("isPremium").matching(true).toPredicate());
+            predicates.add(f.match().field(FIELD_IS_PREMIUM).matching(true).toPredicate());
         }
 
         if (Boolean.TRUE.equals(filter.getTeacherOnly())) {
-            predicates.add(f.match().field("isTeacher").matching(true).toPredicate());
+            predicates.add(f.match().field(FIELD_IS_TEACHER).matching(true).toPredicate());
         }
 
         return predicates;
@@ -230,18 +243,18 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     private SortFinalStep buildSort(SearchSortFactory f, DirectorySearchFilterDTO filter) {
         DirectorySortOrder sortOrder = filter.resolveSortBy();
         return switch (sortOrder) {
-            case RATING_DESC -> f.field("rating").desc()
-                    .then().field("reviewsCount").desc();
-            case REVIEWS_DESC -> f.field("reviewsCount").desc()
-                    .then().field("rating").desc();
-            case VIEWS_DESC -> f.field("viewsCount").desc();
-            case NEWEST -> f.field("createdAt").desc();
+            case RATING_DESC -> f.field(FIELD_RATING).desc()
+                    .then().field(FIELD_REVIEWS_COUNT).desc();
+            case REVIEWS_DESC -> f.field(FIELD_REVIEWS_COUNT).desc()
+                    .then().field(FIELD_RATING).desc();
+            case VIEWS_DESC -> f.field(FIELD_VIEWS_COUNT).desc();
+            case NEWEST -> f.field(FIELD_CREATED_AT).desc();
             case RELEVANCE -> {
                 if (filter.hasKeyword()) {
                     yield f.score()
-                            .then().field("rating").desc();
+                            .then().field(FIELD_RATING).desc();
                 } else {
-                    yield f.field("rating").desc();
+                    yield f.field(FIELD_RATING).desc();
                 }
             }
         };
@@ -278,7 +291,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
             }
 
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isNull(root.get("deletedAt")));
+            predicates.add(cb.isNull(root.get(FIELD_DELETED_AT)));
 
             appendRelationalKeyword(root, cb, filter, predicates);
             appendRelationalGeography(root, cb, filter, predicates);
@@ -310,14 +323,14 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
         Join<Artisan, Epoque> epoqueJoin = root.join("epoques", JoinType.LEFT);
 
         predicates.add(cb.or(
-                cb.like(cb.lower(root.get("bio")), pattern),
-                cb.like(cb.lower(root.get("city")), pattern),
+                cb.like(cb.lower(root.get(FIELD_BIO)), pattern),
+                cb.like(cb.lower(root.get(FIELD_CITY)), pattern),
                 cb.like(cb.lower(userJoin.get("firstName")), pattern),
                 cb.like(cb.lower(userJoin.get("lastName")), pattern),
-                cb.like(cb.lower(subCatJoin.get("name")), pattern),
-                cb.like(cb.lower(materialJoin.get("name")), pattern),
-                cb.like(cb.lower(techniqueJoin.get("name")), pattern),
-                cb.like(cb.lower(epoqueJoin.get("name")), pattern)
+                cb.like(cb.lower(subCatJoin.get(FIELD_NAME)), pattern),
+                cb.like(cb.lower(materialJoin.get(FIELD_NAME)), pattern),
+                cb.like(cb.lower(techniqueJoin.get(FIELD_NAME)), pattern),
+                cb.like(cb.lower(epoqueJoin.get(FIELD_NAME)), pattern)
         ));
     }
 
@@ -404,19 +417,19 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
             List<Predicate> predicates
     ) {
         if (filter.getMinRating() != null && filter.getMinRating() > 0.0) {
-            predicates.add(cb.greaterThanOrEqualTo(root.get("rating"), filter.getMinRating()));
+            predicates.add(cb.greaterThanOrEqualTo(root.get(FIELD_RATING), filter.getMinRating()));
         }
 
         if (Boolean.TRUE.equals(filter.getVerifiedOnly())) {
-            predicates.add(cb.isTrue(root.get("isVerified")));
+            predicates.add(cb.isTrue(root.get(FIELD_IS_VERIFIED)));
         }
 
         if (Boolean.TRUE.equals(filter.getPremiumOnly())) {
-            predicates.add(cb.isTrue(root.get("isPremium")));
+            predicates.add(cb.isTrue(root.get(FIELD_IS_PREMIUM)));
         }
 
         if (Boolean.TRUE.equals(filter.getTeacherOnly())) {
-            predicates.add(cb.isTrue(root.get("isTeacher")));
+            predicates.add(cb.isTrue(root.get(FIELD_IS_TEACHER)));
         }
     }
 
@@ -429,14 +442,14 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     private Sort buildRelationalSort(DirectorySearchFilterDTO filter) {
         DirectorySortOrder sortOrder = filter.resolveSortBy();
         return switch (sortOrder) {
-            case RATING_DESC -> Sort.by(Sort.Direction.DESC, "rating")
-                    .and(Sort.by(Sort.Direction.DESC, "reviewsCount"));
-            case REVIEWS_DESC -> Sort.by(Sort.Direction.DESC, "reviewsCount")
-                    .and(Sort.by(Sort.Direction.DESC, "rating"));
-            case VIEWS_DESC -> Sort.by(Sort.Direction.DESC, "viewsCount");
-            case NEWEST -> Sort.by(Sort.Direction.DESC, "createdAt");
-            case RELEVANCE -> Sort.by(Sort.Direction.DESC, "rating")
-                    .and(Sort.by(Sort.Direction.DESC, "reviewsCount"));
+            case RATING_DESC -> Sort.by(Sort.Direction.DESC, FIELD_RATING)
+                    .and(Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT));
+            case REVIEWS_DESC -> Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT)
+                    .and(Sort.by(Sort.Direction.DESC, FIELD_RATING));
+            case VIEWS_DESC -> Sort.by(Sort.Direction.DESC, FIELD_VIEWS_COUNT);
+            case NEWEST -> Sort.by(Sort.Direction.DESC, FIELD_CREATED_AT);
+            case RELEVANCE -> Sort.by(Sort.Direction.DESC, FIELD_RATING)
+                    .and(Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT));
         };
     }
 }

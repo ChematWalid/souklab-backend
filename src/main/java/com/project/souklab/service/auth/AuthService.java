@@ -65,6 +65,10 @@ public class AuthService {
     private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
     private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
+    private static final String ERROR_INVALID_CREDENTIALS = "Invalid email or password.";
+    private static final String ERROR_ROLE_NOT_FOUND_PREFIX = "Role not found: ";
+    private static final String DEFAULT_SUPPORT_CONTACT_MESSAGE = "Please contact support.";
+    private static final long MS_PER_SECOND = 1000L;
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -144,7 +148,7 @@ public class AuthService {
 
         String email = identifier.toLowerCase();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UnauthorizedException("Invalid email or password."));
+                .orElseThrow(() -> new UnauthorizedException(ERROR_INVALID_CREDENTIALS));
 
         if (user.getPassword() == null || user.getPassword().isBlank()) {
             throw new UnauthorizedException("This account was created via social login. Please sign in with Google.");
@@ -190,7 +194,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(newToken.getToken())
                 .tokenType("Bearer")
-                .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / 1000)
+                .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
                 .roles(user.getRoles().stream().map(Role::getName).toList())
                 .build();
@@ -433,7 +437,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
                 .tokenType("Bearer")
-                .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / 1000)
+                .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
                 .roles(user.getRoles().stream().map(Role::getName).toList())
                 .build();
@@ -461,7 +465,7 @@ public class AuthService {
         }
 
         return roleRepository.findByName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_ROLE_NOT_FOUND_PREFIX + roleName));
     }
 
     /**
@@ -524,7 +528,7 @@ public class AuthService {
             user.setLockedUntil(LocalDateTime.now(clock).plusMinutes(lockoutMinutes));
         }
         userRepository.save(user);
-        throw new UnauthorizedException("Invalid email or password.");
+        throw new UnauthorizedException(ERROR_INVALID_CREDENTIALS);
     }
 
     /**
@@ -542,12 +546,12 @@ public class AuthService {
                 user.setBannedUntil(null);
                 user.setBanReason(null);
             } else {
-                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
+                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : DEFAULT_SUPPORT_CONTACT_MESSAGE));
             }
         }
 
         if (user.getStatus() == AccountStatus.REJECTED) {
-            throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : "Please contact support."));
+            throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : DEFAULT_SUPPORT_CONTACT_MESSAGE));
         }
     }
 
@@ -639,7 +643,7 @@ public class AuthService {
         }
 
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_ROLE_NOT_FOUND_PREFIX + roleName));
 
         User user = User.builder()
                 .email(email)

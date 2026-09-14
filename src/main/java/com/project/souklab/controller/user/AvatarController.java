@@ -10,6 +10,7 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
 import com.project.souklab.model.User;
+import com.project.souklab.security.AvatarUploadSizeFilter;
 import com.project.souklab.service.user.AvatarService;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
  * Provides multipart avatar upload, quota enforcement, and tier URL resolution.
  */
 @RestController
-@RequestMapping("/api/v1/users/me/avatars")
+@RequestMapping(AvatarUploadSizeFilter.AVATAR_UPLOAD_URI)
 @RequiredArgsConstructor
 @Slf4j
 public class AvatarController {

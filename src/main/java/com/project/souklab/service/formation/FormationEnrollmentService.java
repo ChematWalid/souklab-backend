@@ -45,6 +45,12 @@ import java.util.Optional;
 @Slf4j
 public class FormationEnrollmentService {
 
+    private static final int DEFAULT_PAGE_NUMBER = 0;
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final String SORT_PROPERTY_SCHEDULED_AT = "scheduledAt";
+    private static final String SORT_PROPERTY_ENROLLED_AT = "enrolledAt";
+    private static final String ERROR_FORMATION_NOT_FOUND_PREFIX = "Formation not found with ID: ";
+
     private final FormationRepository formationRepository;
     private final FormationEnrollmentRepository formationEnrollmentRepository;
     private final ArtisanRepository artisanRepository;
@@ -65,8 +71,8 @@ public class FormationEnrollmentService {
         Pageable effectivePageable = (pageable != null && pageable.getSort().isSorted())
                 ? pageable
                 : (pageable != null)
-                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, "scheduledAt"))
-                : PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "scheduledAt"));
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT))
+                : PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT));
 
         Page<Formation> formations = formationRepository.findByStatusAndDeletedAtIsNull(FormationStatus.PUBLISHED, effectivePageable);
 
@@ -174,7 +180,7 @@ public class FormationEnrollmentService {
         Artisan artisan = resolveAuthenticatedArtisan();
 
         Formation formation = formationRepository.findByIdAndDeletedAtIsNull(formationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Formation not found with ID: " + formationId));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_FORMATION_NOT_FOUND_PREFIX + formationId));
 
         FormationEnrollment enrollment = formationEnrollmentRepository
                 .findByFormationIdAndArtisanIdAndStatus(formationId, artisan.getId(), EnrollmentStatus.CONFIRMED)
@@ -208,8 +214,8 @@ public class FormationEnrollmentService {
         Pageable effectivePageable = (pageable != null && pageable.getSort().isSorted())
                 ? pageable
                 : (pageable != null)
-                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "enrolledAt"))
-                : PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "enrolledAt"));
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, SORT_PROPERTY_ENROLLED_AT))
+                : PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Sort.by(Sort.Direction.DESC, SORT_PROPERTY_ENROLLED_AT));
 
         Page<FormationEnrollment> enrollments = formationEnrollmentRepository
                 .findByArtisanIdAndDeletedAtIsNull(artisan.getId(), effectivePageable);
@@ -236,7 +242,7 @@ public class FormationEnrollmentService {
         Artisan artisan = resolveAuthenticatedArtisan();
 
         Formation formation = formationRepository.findByIdAndDeletedAtIsNull(formationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Formation not found with ID: " + formationId));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_FORMATION_NOT_FOUND_PREFIX + formationId));
 
         FormationFile file = formationFileRepository.findByIdAndFormationIdAndDeletedAtIsNull(fileId, formationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course file not found with ID: " + fileId));

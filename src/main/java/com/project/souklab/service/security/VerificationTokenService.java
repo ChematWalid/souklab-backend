@@ -25,6 +25,9 @@ public class VerificationTokenService {
     private static final Logger LOGGER = LoggerFactory.getLogger(VerificationTokenService.class);
     private static final int MAX_ATTEMPTS = 5;
     private static final int CODE_EXPIRATION_MINUTES = 15;
+    private static final String ERROR_INVALID_OR_EXPIRED_CODE = "Invalid or expired code.";
+    private static final String ERROR_MAX_ATTEMPTS_EXCEEDED = "Maximum attempts exceeded. Please request a new code.";
+    private static final String HASH_ALGORITHM = "SHA-256";
 
     private final VerificationTokenRepository verificationTokenRepository;
     private final Clock clock;
@@ -78,12 +81,12 @@ public class VerificationTokenService {
         VerificationToken token = verificationTokenRepository.findActiveToken(user, type, now)
                 .orElseThrow(() -> {
                     LOGGER.warn("Verification failed: no active unexpired token found for user {} and type {}", user.getId(), type);
-                    return new BadRequestException("Invalid or expired code.");
+                    return new BadRequestException(ERROR_INVALID_OR_EXPIRED_CODE);
                 });
 
         if (token.getAttempts() >= MAX_ATTEMPTS) {
             LOGGER.warn("Verification failed: token for user {} and type {} is locked (attempts: {})", user.getId(), type, token.getAttempts());
-            throw new BadRequestException("Maximum attempts exceeded. Please request a new code.");
+            throw new BadRequestException(ERROR_MAX_ATTEMPTS_EXCEEDED);
         }
 
         String submittedHash = hashToken(submittedCode);
@@ -95,11 +98,11 @@ public class VerificationTokenService {
 
             if (newAttempts >= MAX_ATTEMPTS) {
                 LOGGER.warn("Token for user {} and type {} locked after reaching max attempts ({})", user.getId(), type, newAttempts);
-                throw new BadRequestException("Maximum attempts exceeded. Please request a new code.");
+                throw new BadRequestException(ERROR_MAX_ATTEMPTS_EXCEEDED);
             }
 
             LOGGER.warn("Verification code mismatch for user {} (attempt {}/{})", user.getId(), newAttempts, MAX_ATTEMPTS);
-            throw new BadRequestException("Invalid or expired code.");
+            throw new BadRequestException(ERROR_INVALID_OR_EXPIRED_CODE);
         }
 
         token.setUsedAt(now);
@@ -115,7 +118,7 @@ public class VerificationTokenService {
      */
     public String hashToken(String code) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
             byte[] encodedHash = digest.digest(code.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder(2 * encodedHash.length);
             for (byte b : encodedHash) {
@@ -127,7 +130,7 @@ public class VerificationTokenService {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 algorithm not available", e);
+            throw new IllegalStateException(HASH_ALGORITHM + " algorithm not available", e);
         }
     }
 }

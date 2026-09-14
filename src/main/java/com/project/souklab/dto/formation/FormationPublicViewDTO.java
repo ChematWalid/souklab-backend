@@ -23,6 +23,8 @@ import java.util.List;
 @AllArgsConstructor
 public class FormationPublicViewDTO {
 
+    public static final String FORMATION_FILE_DOWNLOAD_PATH_PREFIX = "/api/v1/artisan/formations/";
+
     /**
      * Unique identifier of the formation.
      */
@@ -150,7 +152,7 @@ public class FormationPublicViewDTO {
                 : activeFiles.stream()
                 .map(f -> {
                     String downloadUrl = canDownload
-                            ? "/api/v1/artisan/formations/" + formation.getId() + "/files/" + f.getId() + "/download"
+                            ? FORMATION_FILE_DOWNLOAD_PATH_PREFIX + formation.getId() + "/files/" + f.getId() + "/download"
                             : null;
                     return FormationFileDescriptorDTO.from(f, downloadUrl);
                 })

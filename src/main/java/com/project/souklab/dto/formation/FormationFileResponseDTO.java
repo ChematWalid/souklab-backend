@@ -1,5 +1,6 @@
 package com.project.souklab.dto.formation;
 
+import com.project.souklab.filestorage.controller.FileServingController;
 import com.project.souklab.model.FormationFile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,7 +61,7 @@ public class FormationFileResponseDTO {
         }
         String prefix = (fileServingPrefix != null && !fileServingPrefix.isBlank())
                 ? (fileServingPrefix.endsWith("/") ? fileServingPrefix : fileServingPrefix + "/")
-                : "/api/v1/files/";
+                : FileServingController.DEFAULT_FILE_SERVING_PREFIX;
         return FormationFileResponseDTO.builder()
                 .id(file.getId())
                 .originalFilename(file.getOriginalFilename())
@@ -78,6 +79,6 @@ public class FormationFileResponseDTO {
      * @return populated FormationFileResponseDTO
      */
     public static FormationFileResponseDTO from(FormationFile file) {
-        return from(file, "/api/v1/files/");
+        return from(file, FileServingController.DEFAULT_FILE_SERVING_PREFIX);
     }
 }

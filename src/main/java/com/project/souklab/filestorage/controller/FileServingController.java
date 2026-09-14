@@ -31,6 +31,8 @@ public class FileServingController {
      * Single source of truth for the file-serving route, referenced by AvatarService and FileRateLimitFilter to avoid drift.
      */
     public static final String BASE_PATH = "/api/v1/files";
+    public static final String DEFAULT_FILE_SERVING_PREFIX = BASE_PATH + "/";
+    private static final String IMMUTABLE_CACHE_CONTROL = "private, max-age=31536000, immutable";
 
     private final StorageService storageService;
 
@@ -78,7 +80,7 @@ public class FileServingController {
                 .contentType(mediaType)
                 .contentLength(resource.size())
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
-                .header(HttpHeaders.CACHE_CONTROL, "private, max-age=31536000, immutable")
+                .header(HttpHeaders.CACHE_CONTROL, IMMUTABLE_CACHE_CONTROL)
                 .body(responseBody);
     }
 }

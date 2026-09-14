@@ -16,51 +16,45 @@ public class CustomElasticsearchAnalysisConfigurer implements ElasticsearchAnaly
      * General full-text analyzer with lowercase and ASCII folding for craft descriptions and biographies.
      */
     public static final String ANALYZER_TEXT = "artisanal_text";
-
-    /**
-     * Name and location analyzer with lowercase and ASCII folding for names, cities, and addresses.
-     */
     public static final String ANALYZER_NAME = "artisanal_name";
-
-    /**
-     * Edge n-gram analyzer for live search autocomplete and prefix matching.
-     */
     public static final String ANALYZER_AUTOCOMPLETE = "artisanal_autocomplete";
-
-    /**
-     * Query analyzer paired with {@link #ANALYZER_AUTOCOMPLETE} to evaluate user prefix inputs without re-splitting.
-     */
     public static final String ANALYZER_AUTOCOMPLETE_QUERY = "artisanal_autocomplete_query";
-
-    /**
-     * Normalizer for exact keyword filtering on URL slugs and administrative codes with lowercase and accent folding.
-     */
     public static final String NORMALIZER_KEYWORD = "artisanal_normalizer";
+    public static final String FILTER_EDGE_NGRAM = "artisanal_edge_ngram";
+
+    private static final String TOKENIZER_STANDARD = "standard";
+    private static final String FILTER_LOWERCASE = "lowercase";
+    private static final String FILTER_ASCIIFOLDING = "asciifolding";
+    private static final String TYPE_EDGE_NGRAM = "edge_ngram";
+    private static final String PARAM_MIN_GRAM = "min_gram";
+    private static final String PARAM_MAX_GRAM = "max_gram";
+    private static final int MIN_GRAM_SIZE = 2;
+    private static final int MAX_GRAM_SIZE = 15;
 
     @Override
     public void configure(ElasticsearchAnalysisConfigurationContext context) {
-        context.tokenFilter("artisanal_edge_ngram")
-                .type("edge_ngram")
-                .param("min_gram", 2)
-                .param("max_gram", 15);
+        context.tokenFilter(FILTER_EDGE_NGRAM)
+                .type(TYPE_EDGE_NGRAM)
+                .param(PARAM_MIN_GRAM, MIN_GRAM_SIZE)
+                .param(PARAM_MAX_GRAM, MAX_GRAM_SIZE);
 
         context.analyzer(ANALYZER_TEXT).custom()
-                .tokenizer("standard")
-                .tokenFilters("lowercase", "asciifolding");
+                .tokenizer(TOKENIZER_STANDARD)
+                .tokenFilters(FILTER_LOWERCASE, FILTER_ASCIIFOLDING);
 
         context.analyzer(ANALYZER_NAME).custom()
-                .tokenizer("standard")
-                .tokenFilters("lowercase", "asciifolding");
+                .tokenizer(TOKENIZER_STANDARD)
+                .tokenFilters(FILTER_LOWERCASE, FILTER_ASCIIFOLDING);
 
         context.analyzer(ANALYZER_AUTOCOMPLETE).custom()
-                .tokenizer("standard")
-                .tokenFilters("lowercase", "asciifolding", "artisanal_edge_ngram");
+                .tokenizer(TOKENIZER_STANDARD)
+                .tokenFilters(FILTER_LOWERCASE, FILTER_ASCIIFOLDING, FILTER_EDGE_NGRAM);
 
         context.analyzer(ANALYZER_AUTOCOMPLETE_QUERY).custom()
-                .tokenizer("standard")
-                .tokenFilters("lowercase", "asciifolding");
+                .tokenizer(TOKENIZER_STANDARD)
+                .tokenFilters(FILTER_LOWERCASE, FILTER_ASCIIFOLDING);
 
         context.normalizer(NORMALIZER_KEYWORD).custom()
-                .tokenFilters("lowercase", "asciifolding");
+                .tokenFilters(FILTER_LOWERCASE, FILTER_ASCIIFOLDING);
     }
 }

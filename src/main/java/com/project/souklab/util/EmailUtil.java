@@ -24,6 +24,8 @@ public class EmailUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailUtil.class);
     private static final String ADMINISTRATOR_NOTE_HEADER = "Administrator Note:\n";
     private static final String APPLICATION_TASK_EXECUTOR = "applicationTaskExecutor";
+    private static final String SUBJECT_ACCOUNT_VERIFICATION = "Account verification code";
+    private static final String SUBJECT_PASSWORD_RESET = "Password reset verification code";
 
     private final JavaMailSender mailSender;
     private final AppProperties appProperties;
@@ -31,14 +33,14 @@ public class EmailUtil {
 
     @Async(APPLICATION_TASK_EXECUTOR)
     public void sendVerificationCode(String toEmail, String code) {
-        String subject = "Account verification code";
+        String subject = SUBJECT_ACCOUNT_VERIFICATION;
         String htmlContent = "<p>Your verification code is: <strong>" + code + "</strong></p><p>This code expires soon.</p>";
 
         if (appProperties.getEmail().isUseSmtp()) {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(toEmail);
-                message.setSubject("Account verification code");
+                message.setSubject(SUBJECT_ACCOUNT_VERIFICATION);
                 message.setText("Your verification code is: " + code + "\nThis code expires soon.");
                 mailSender.send(message);
             } catch (Exception ex) {
@@ -58,14 +60,14 @@ public class EmailUtil {
 
     @Async(APPLICATION_TASK_EXECUTOR)
     public void sendPasswordResetCode(String toEmail, String code) {
-        String subject = "Password reset verification code";
+        String subject = SUBJECT_PASSWORD_RESET;
         String htmlContent = "<p>Your Souklab verification code is: <strong>" + code + "</strong>.</p><p>It expires in 15 minutes.</p>";
 
         if (appProperties.getEmail().isUseSmtp()) {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(toEmail);
-                message.setSubject("Password reset verification code");
+                message.setSubject(SUBJECT_PASSWORD_RESET);
                 message.setText("Your Souklab verification code is: " + code + ". It expires in 15 minutes.");
                 mailSender.send(message);
             } catch (Exception ex) {

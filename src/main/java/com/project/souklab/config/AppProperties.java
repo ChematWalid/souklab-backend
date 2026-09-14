@@ -1,5 +1,6 @@
 package com.project.souklab.config;
 
+import com.project.souklab.filestorage.controller.FileServingController;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -65,7 +66,7 @@ public class AppProperties {
         /**
          * Route prefix for public or authenticated file streaming endpoints (default: /api/v1/files/).
          */
-        private String fileServingPrefix = "/api/v1/files/";
+        private String fileServingPrefix = FileServingController.DEFAULT_FILE_SERVING_PREFIX;
 
         /**
          * Returns the configured file-serving route prefix normalised with a guaranteed trailing slash.
@@ -75,7 +76,7 @@ public class AppProperties {
          */
         public String resolveFileServingPrefix() {
             if (fileServingPrefix == null || fileServingPrefix.isBlank()) {
-                return "/api/v1/files/";
+                return FileServingController.DEFAULT_FILE_SERVING_PREFIX;
             }
             return fileServingPrefix.endsWith("/") ? fileServingPrefix : fileServingPrefix + "/";
         }

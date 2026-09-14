@@ -25,8 +25,15 @@ public class ClamdInstreamScanner implements VirusScanner {
     private static final Logger log = LoggerFactory.getLogger(ClamdInstreamScanner.class);
 
     private static final int CHUNK_SIZE = 8192;
+    private static final int LENGTH_HEADER_BYTES = 4;
+    private static final int DEFAULT_CONNECT_TIMEOUT_MS = 2000;
+    private static final int DEFAULT_READ_TIMEOUT_MS = 10000;
     private static final byte[] INSTREAM_COMMAND = "zINSTREAM\0".getBytes(StandardCharsets.US_ASCII);
     private static final byte[] TERMINATION_CHUNK = new byte[]{0, 0, 0, 0};
+    private static final String RESPONSE_OK_SUFFIX = "OK";
+    private static final String RESPONSE_FOUND_SUFFIX = "FOUND";
+    private static final String RESPONSE_ERROR_SUFFIX = "ERROR";
+    private static final String STREAM_PREFIX = "stream:";
 
     private final StorageProperties.VirusScanProperties properties;
 
@@ -53,10 +60,10 @@ public class ClamdInstreamScanner implements VirusScanner {
         int port = properties.getPort();
         int connectTimeout = properties.getConnectionTimeout() != null
                 ? (int) properties.getConnectionTimeout().toMillis()
-                : 2000;
+                : DEFAULT_CONNECT_TIMEOUT_MS;
         int readTimeout = properties.getReadTimeout() != null
                 ? (int) properties.getReadTimeout().toMillis()
-                : 10000;
+                : DEFAULT_READ_TIMEOUT_MS;
 
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), connectTimeout);
@@ -72,7 +79,7 @@ public class ClamdInstreamScanner implements VirusScanner {
                 int bytesRead;
                 while ((bytesRead = content.read(buffer)) != -1) {
                     if (bytesRead > 0) {
-                        ByteBuffer lengthBuffer = ByteBuffer.allocate(4).putInt(bytesRead);
+                        ByteBuffer lengthBuffer = ByteBuffer.allocate(LENGTH_HEADER_BYTES).putInt(bytesRead);
                         out.write(lengthBuffer.array());
                         out.write(buffer, 0, bytesRead);
                     }
@@ -123,20 +130,20 @@ public class ClamdInstreamScanner implements VirusScanner {
             return ScanResult.error("Empty response from ClamAV daemon");
         }
 
-        if (response.endsWith("OK")) {
+        if (response.endsWith(RESPONSE_OK_SUFFIX)) {
             return ScanResult.clean();
         }
 
-        if (response.endsWith("FOUND")) {
-            String candidate = response.substring(0, response.length() - "FOUND".length()).trim();
-            if (candidate.startsWith("stream:")) {
-                candidate = candidate.substring("stream:".length()).trim();
+        if (response.endsWith(RESPONSE_FOUND_SUFFIX)) {
+            String candidate = response.substring(0, response.length() - RESPONSE_FOUND_SUFFIX.length()).trim();
+            if (candidate.startsWith(STREAM_PREFIX)) {
+                candidate = candidate.substring(STREAM_PREFIX.length()).trim();
             }
             String virusName = candidate.isEmpty() ? "UNKNOWN_VIRUS" : candidate;
             return ScanResult.infected(virusName);
         }
 
-        if (response.endsWith("ERROR")) {
+        if (response.endsWith(RESPONSE_ERROR_SUFFIX)) {
             return ScanResult.error("ClamAV reported error: " + response);
         }
 

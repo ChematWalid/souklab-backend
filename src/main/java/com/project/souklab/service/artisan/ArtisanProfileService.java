@@ -40,6 +40,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ArtisanProfileService {
 
+    private static final String ROLE_ADMIN_NAME = "ROLE_ADMIN";
+    private static final String ERROR_NOT_AUTHENTICATED = "Not authenticated.";
+    private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
+    private static final String ERROR_ARTISAN_NOT_FOUND_PREFIX = "Artisan not found with id: ";
+
     private final UserRepository userRepository;
     private final ArtisanRepository artisanRepository;
     private final ArtisanProfileViewRepository artisanProfileViewRepository;
@@ -59,19 +64,19 @@ public class ArtisanProfileService {
     public ArtisanPublicViewDTO getArtisanProfile(String artisanId) {
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
-            throw new UnauthorizedException("Not authenticated.");
+            throw new UnauthorizedException(ERROR_NOT_AUTHENTICATED);
         }
 
         User viewer = userRepository.findByEmail(email.toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
         boolean isAdmin = viewer.getRoles().stream()
-                .anyMatch(r -> "ROLE_ADMIN".equals(r.getName()));
+                .anyMatch(r -> ROLE_ADMIN_NAME.equals(r.getName()));
 
         verifyViewerAccess(viewer, isAdmin);
 
         Artisan artisan = artisanRepository.findById(artisanId)
-                .orElseThrow(() -> new ResourceNotFoundException("Artisan not found with id: " + artisanId));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_ARTISAN_NOT_FOUND_PREFIX + artisanId));
 
         boolean isSelf = viewer.getId().equals(artisan.getId());
 

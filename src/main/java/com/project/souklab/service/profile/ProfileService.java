@@ -46,6 +46,7 @@ public class ProfileService {
     private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
     private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
+    private static final String ERROR_NOT_AUTHENTICATED = "Not authenticated.";
 
     private final UserRepository userRepository;
     private final ArtisanRepository artisanRepository;
@@ -68,7 +69,7 @@ public class ProfileService {
     public ProfileResponse getCurrentUser() {
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
-            throw new UnauthorizedException("Not authenticated.");
+            throw new UnauthorizedException(ERROR_NOT_AUTHENTICATED);
         }
 
         User user = userRepository.findByEmail(email.toLowerCase())
@@ -92,7 +93,7 @@ public class ProfileService {
     public ProfileResponse completeProfile(CompleteProfileRequestDTO dto) {
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
-            throw new UnauthorizedException("Not authenticated.");
+            throw new UnauthorizedException(ERROR_NOT_AUTHENTICATED);
         }
 
         User user = userRepository.findByEmail(email.toLowerCase())
@@ -127,7 +128,7 @@ public class ProfileService {
     public ProfileResponse patchCurrentUser(UserPatchDTO dto) {
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
-            throw new UnauthorizedException("Not authenticated.");
+            throw new UnauthorizedException(ERROR_NOT_AUTHENTICATED);
         }
 
         User user = userRepository.findByEmail(email.toLowerCase())

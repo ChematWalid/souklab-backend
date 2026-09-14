@@ -1,5 +1,6 @@
 package com.project.souklab.dto.formation;
 
+import com.project.souklab.filestorage.controller.FileServingController;
 import com.project.souklab.model.Formation;
 import com.project.souklab.model.FormationFile;
 import com.project.souklab.model.FormationReview;
@@ -180,6 +181,6 @@ public class FormationResponseDTO {
             List<FormationReview> reviews,
             long activeEnrollmentsCount
     ) {
-        return from(formation, activeFiles, reviews, activeEnrollmentsCount, "/api/v1/files/");
+        return from(formation, activeFiles, reviews, activeEnrollmentsCount, FileServingController.DEFAULT_FILE_SERVING_PREFIX);
     }
 }

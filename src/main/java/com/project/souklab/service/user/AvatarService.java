@@ -46,6 +46,7 @@ import java.util.Map;
 public class AvatarService {
 
     private static final String CURRENT_USER_CANNOT_BE_NULL = "Current user cannot be null";
+    private static final String ERROR_AVATAR_NOT_FOUND_PREFIX = "Avatar not found with id: ";
 
     private final UserAvatarRepository userAvatarRepository;
     private final UserRepository userRepository;
@@ -213,7 +214,7 @@ public class AvatarService {
             throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
         }
         UserAvatar avatar = userAvatarRepository.findByIdAndUserId(avatarId, currentUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Avatar not found with id: " + avatarId));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_AVATAR_NOT_FOUND_PREFIX + avatarId));
 
         List<String> keysToDelete = List.of(
                 avatar.getStorageKeyOriginal(),
@@ -258,7 +259,7 @@ public class AvatarService {
             throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
         }
         UserAvatar avatar = userAvatarRepository.findByIdAndUserId(avatarId, currentUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Avatar not found with id: " + avatarId));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_AVATAR_NOT_FOUND_PREFIX + avatarId));
 
         if (avatar.isActive()) {
             return mapToResponseDTO(avatar);

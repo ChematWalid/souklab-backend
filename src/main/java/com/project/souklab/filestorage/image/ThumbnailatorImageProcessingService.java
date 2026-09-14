@@ -35,10 +35,16 @@ import java.util.Set;
 @Slf4j
 public class ThumbnailatorImageProcessingService implements ImageProcessingService {
 
+    private static final String MIME_IMAGE_JPEG = "image/jpeg";
+    private static final String MIME_IMAGE_JPG = "image/jpg";
+    private static final String MIME_IMAGE_PNG = "image/png";
+    private static final String FORMAT_JPEG = "jpeg";
+    private static final String FORMAT_PNG = "png";
+
     private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of(
-            "image/jpeg",
-            "image/jpg",
-            "image/png"
+            MIME_IMAGE_JPEG,
+            MIME_IMAGE_JPG,
+            MIME_IMAGE_PNG
     );
 
     @Override
@@ -122,20 +128,20 @@ public class ThumbnailatorImageProcessingService implements ImageProcessingServi
 
     private String normalizeFormat(String contentType) {
         String cleanType = contentType.split(";")[0].trim().toLowerCase();
-        if (cleanType.equals("image/jpeg") || cleanType.equals("image/jpg")) {
-            return "jpeg";
+        if (cleanType.equals(MIME_IMAGE_JPEG) || cleanType.equals(MIME_IMAGE_JPG)) {
+            return FORMAT_JPEG;
         }
-        if (cleanType.equals("image/png")) {
-            return "png";
+        if (cleanType.equals(MIME_IMAGE_PNG)) {
+            return FORMAT_PNG;
         }
         throw new UnsupportedImageFormatException(contentType);
     }
 
     private String normalizeContentType(String contentType) {
         String cleanType = contentType.split(";")[0].trim().toLowerCase();
-        if (cleanType.equals("image/jpeg") || cleanType.equals("image/jpg")) {
-            return "image/jpeg";
+        if (cleanType.equals(MIME_IMAGE_JPEG) || cleanType.equals(MIME_IMAGE_JPG)) {
+            return MIME_IMAGE_JPEG;
         }
-        return "image/png";
+        return MIME_IMAGE_PNG;
     }
 }

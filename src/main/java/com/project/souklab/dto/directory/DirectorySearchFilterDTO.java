@@ -24,6 +24,11 @@ import java.util.List;
 @AllArgsConstructor
 public class DirectorySearchFilterDTO {
 
+    public static final int DEFAULT_PAGE_INDEX = 0;
+    public static final int DEFAULT_PAGE_SIZE = 20;
+    public static final int MIN_PAGE_SIZE = 1;
+    public static final int MAX_PAGE_SIZE = 100;
+
     /**
      * Free-form search keywords matching against artisan names, craft narratives, cities, and addresses.
      */
@@ -105,7 +110,7 @@ public class DirectorySearchFilterDTO {
      */
     @Min(value = 0, message = "Page index cannot be negative")
     @Builder.Default
-    private Integer page = 0;
+    private Integer page = DEFAULT_PAGE_INDEX;
 
     /**
      * Maximum number of artisan summary cards per page (bounded between 1 and 100).
@@ -113,7 +118,7 @@ public class DirectorySearchFilterDTO {
     @Min(value = 1, message = "Page size must be at least 1")
     @Max(value = 100, message = "Page size cannot exceed 100")
     @Builder.Default
-    private Integer size = 20;
+    private Integer size = DEFAULT_PAGE_SIZE;
 
     /**
      * Checks if a non-empty full-text keyword query is specified.
@@ -151,7 +156,7 @@ public class DirectorySearchFilterDTO {
      * @return page index
      */
     public int resolvePage() {
-        return page != null ? page : 0;
+        return page != null ? page : DEFAULT_PAGE_INDEX;
     }
 
     /**
@@ -161,9 +166,9 @@ public class DirectorySearchFilterDTO {
      */
     public int resolveSize() {
         if (size == null) {
-            return 20;
+            return DEFAULT_PAGE_SIZE;
         }
-        return Math.max(1, Math.min(size, 100));
+        return Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
     }
 
     /**

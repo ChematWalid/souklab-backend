@@ -43,6 +43,9 @@ public class ArtisanFormateurService {
 
     private static final String ERROR_ADMIN_NOT_FOUND_PREFIX = "Admin not found: ";
     private static final String ERROR_ARTISAN_NOT_FOUND_PREFIX = "Artisan not found with id: ";
+    private static final String ERROR_REQUEST_NOT_FOUND_PREFIX = "Formateur request not found with id: ";
+    private static final String ERROR_REQUEST_ALREADY_PREFIX = "Request is already ";
+    private static final long DEFAULT_REAPPLY_COOLDOWN_DAYS = 14L;
 
     private final ArtisanFormateurRequestRepository formateurRequestRepository;
     private final ArtisanRepository artisanRepository;
@@ -131,10 +134,10 @@ public class ArtisanFormateurService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_ADMIN_NOT_FOUND_PREFIX + adminEmail));
 
         ArtisanFormateurRequest request = formateurRequestRepository.findByIdAndDeletedAtIsNull(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Formateur request not found with id: " + requestId));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_REQUEST_NOT_FOUND_PREFIX + requestId));
 
         if (request.getStatus() != FormateurRequestStatus.PENDING) {
-            throw new BadRequestException("Request is already " + request.getStatus() + ".");
+            throw new BadRequestException(ERROR_REQUEST_ALREADY_PREFIX + request.getStatus() + ".");
         }
 
         request.setStatus(FormateurRequestStatus.APPROVED);
@@ -166,16 +169,16 @@ public class ArtisanFormateurService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_ADMIN_NOT_FOUND_PREFIX + adminEmail));
 
         ArtisanFormateurRequest request = formateurRequestRepository.findByIdAndDeletedAtIsNull(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Formateur request not found with id: " + requestId));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_REQUEST_NOT_FOUND_PREFIX + requestId));
 
         if (request.getStatus() != FormateurRequestStatus.PENDING) {
-            throw new BadRequestException("Request is already " + request.getStatus() + ".");
+            throw new BadRequestException(ERROR_REQUEST_ALREADY_PREFIX + request.getStatus() + ".");
         }
 
         boolean canReapply = dto.getCanReapply() == null || Boolean.TRUE.equals(dto.getCanReapply());
         LocalDateTime cooldownUntil = null;
         if (canReapply) {
-            cooldownUntil = dto.getCooldownUntil() != null ? dto.getCooldownUntil() : LocalDateTime.now(clock).plusDays(14);
+            cooldownUntil = dto.getCooldownUntil() != null ? dto.getCooldownUntil() : LocalDateTime.now(clock).plusDays(DEFAULT_REAPPLY_COOLDOWN_DAYS);
         }
 
         request.setStatus(FormateurRequestStatus.REJECTED);

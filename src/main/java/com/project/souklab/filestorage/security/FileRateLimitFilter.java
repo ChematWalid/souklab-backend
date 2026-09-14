@@ -29,6 +29,13 @@ import java.time.Duration;
 @Component
 public class FileRateLimitFilter extends OncePerRequestFilter {
 
+    private static final int DEFAULT_CAPACITY = 120;
+    private static final Duration DEFAULT_REFILL_DURATION = Duration.ofMinutes(1);
+    private static final long TOKENS_PER_REQUEST = 1L;
+    private static final String USER_KEY_PREFIX = "user:";
+    private static final String IP_KEY_PREFIX = "ip:";
+    private static final String ERROR_TOO_MANY_REQUESTS = "Too many requests. Please try again later.";
+
     private final ServletResponseUtil servletResponseUtil;
     private final StorageProperties.RateLimitProperties rateLimitProperties;
     private final Cache<String, Bucket> cache;
@@ -83,13 +90,13 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
         String key = resolveKey(request);
         Bucket bucket = resolveBucket(key);
 
-        if (bucket.tryConsume(1)) {
+        if (bucket.tryConsume(TOKENS_PER_REQUEST)) {
             filterChain.doFilter(request, response);
         } else {
             servletResponseUtil.writeResponse(
                     response,
                     HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error("Too many requests. Please try again later.")
+                    ApiResponse.error(ERROR_TOO_MANY_REQUESTS)
             );
         }
     }
@@ -104,9 +111,9 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
     private String resolveKey(HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            return "user:" + auth.getName();
+            return USER_KEY_PREFIX + auth.getName();
         }
-        return "ip:" + request.getRemoteAddr();
+        return IP_KEY_PREFIX + request.getRemoteAddr();
     }
 
     /**
@@ -127,10 +134,10 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
     private Bucket createNewBucket() {
         int capacity = (rateLimitProperties != null && rateLimitProperties.getCapacity() > 0)
                 ? rateLimitProperties.getCapacity()
-                : 120;
+                : DEFAULT_CAPACITY;
         Duration refillDuration = (rateLimitProperties != null && rateLimitProperties.getRefillDuration() != null)
                 ? rateLimitProperties.getRefillDuration()
-                : Duration.ofMinutes(1);
+                : DEFAULT_REFILL_DURATION;
 
         Bandwidth limit = Bandwidth.builder()
                 .capacity(capacity)

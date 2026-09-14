@@ -14,6 +14,7 @@ import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.dto.profile.UserPatchDTO;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
 import com.project.souklab.util.SecurityUtils;
@@ -43,6 +44,11 @@ import java.io.IOException;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
+    private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
+    private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
+    private static final String OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI = "/oauth2/authorization/google";
+    private static final int OAUTH_INTENT_COOKIE_MAX_AGE_SECONDS = 300;
 
     private final AuthService authService;
     private final ProfileService profileService;
@@ -169,8 +175,8 @@ public class AuthController {
      */
     @GetMapping("/oauth/google/artisan")
     public void initiateGoogleOAuthArtisan(HttpServletResponse response) throws IOException {
-        setIntentCookie(response, "ROLE_ARTISAN");
-        response.sendRedirect("/oauth2/authorization/google");
+        setIntentCookie(response, ROLE_ARTISAN_NAME);
+        response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);
     }
 
     /**
@@ -178,8 +184,8 @@ public class AuthController {
      */
     @GetMapping("/oauth/google/client")
     public void initiateGoogleOAuthClient(HttpServletResponse response) throws IOException {
-        setIntentCookie(response, "ROLE_CLIENT");
-        response.sendRedirect("/oauth2/authorization/google");
+        setIntentCookie(response, ROLE_CLIENT_NAME);
+        response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);
     }
 
     /**
@@ -189,12 +195,11 @@ public class AuthController {
      * @param intentRole the role intent string (e.g., {@code "ROLE_ARTISAN"})
      */
     private void setIntentCookie(HttpServletResponse response, String intentRole) {
-        ResponseCookie cookie = ResponseCookie.from("SOUKLAB_OAUTH_INTENT", intentRole)
+        ResponseCookie cookie = ResponseCookie.from(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, intentRole)
                 .path("/")
                 .httpOnly(true)
                 .sameSite("Lax")
-                .maxAge(300)
-
+                .maxAge(OAUTH_INTENT_COOKIE_MAX_AGE_SECONDS)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
