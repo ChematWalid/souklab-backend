@@ -1,5 +1,6 @@
 package com.project.souklab.service.user;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.auth.UserResponseDTO;
@@ -82,7 +83,8 @@ class UserManagementServiceTest {
                 auditLogService,
                 refreshTokenService,
                 notificationService,
-                clock
+                clock,
+                new AppProperties()
         );
     }
 

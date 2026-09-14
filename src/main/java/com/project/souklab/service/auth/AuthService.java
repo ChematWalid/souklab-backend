@@ -67,7 +67,6 @@ public class AuthService {
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
     private static final String ERROR_INVALID_CREDENTIALS = "Invalid email or password.";
     private static final String ERROR_ROLE_NOT_FOUND_PREFIX = "Role not found: ";
-    private static final String DEFAULT_SUPPORT_CONTACT_MESSAGE = "Please contact support.";
     private static final long MS_PER_SECOND = 1000L;
 
     private final UserRepository userRepository;
@@ -546,12 +545,12 @@ public class AuthService {
                 user.setBannedUntil(null);
                 user.setBanReason(null);
             } else {
-                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : DEFAULT_SUPPORT_CONTACT_MESSAGE));
+                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : appProperties.getSupport().getContactMessage()));
             }
         }
 
         if (user.getStatus() == AccountStatus.REJECTED) {
-            throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : DEFAULT_SUPPORT_CONTACT_MESSAGE));
+            throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : appProperties.getSupport().getContactMessage()));
         }
     }
 

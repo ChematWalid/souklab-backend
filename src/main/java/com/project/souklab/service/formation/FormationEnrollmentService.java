@@ -46,7 +46,6 @@ import java.util.Optional;
 public class FormationEnrollmentService {
 
     private static final int DEFAULT_PAGE_NUMBER = 0;
-    private static final int DEFAULT_PAGE_SIZE = 10;
     private static final String SORT_PROPERTY_SCHEDULED_AT = "scheduledAt";
     private static final String SORT_PROPERTY_ENROLLED_AT = "enrolledAt";
     private static final String ERROR_FORMATION_NOT_FOUND_PREFIX = "Formation not found with ID: ";
@@ -72,7 +71,7 @@ public class FormationEnrollmentService {
                 ? pageable
                 : (pageable != null)
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT))
-                : PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT));
+                : PageRequest.of(DEFAULT_PAGE_NUMBER, appProperties.getFormation().getPagination().getDefaultPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT));
 
         Page<Formation> formations = formationRepository.findByStatusAndDeletedAtIsNull(FormationStatus.PUBLISHED, effectivePageable);
 
@@ -215,7 +214,7 @@ public class FormationEnrollmentService {
                 ? pageable
                 : (pageable != null)
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, SORT_PROPERTY_ENROLLED_AT))
-                : PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Sort.by(Sort.Direction.DESC, SORT_PROPERTY_ENROLLED_AT));
+                : PageRequest.of(DEFAULT_PAGE_NUMBER, appProperties.getFormation().getPagination().getDefaultPageSize(), Sort.by(Sort.Direction.DESC, SORT_PROPERTY_ENROLLED_AT));
 
         Page<FormationEnrollment> enrollments = formationEnrollmentRepository
                 .findByArtisanIdAndDeletedAtIsNull(artisan.getId(), effectivePageable);

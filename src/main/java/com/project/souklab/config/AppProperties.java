@@ -33,6 +33,7 @@ public class AppProperties {
     private AuthConfig auth = new AuthConfig();
     private ArtisanConfig artisan = new ArtisanConfig();
     private Search search = new Search();
+    private SupportConfig support = new SupportConfig();
 
     /**
      * Formations and masterclasses configuration bound to {@code app.formation.*}.
@@ -104,6 +105,8 @@ public class AppProperties {
     public static class Admin {
         private String defaultEmail;
         private String defaultPassword;
+        private String defaultBanReason = "Account banned by administrator";
+        private String defaultTimeoutReason = "Account timed out by administrator";
     }
 
     @Data
@@ -130,6 +133,7 @@ public class AppProperties {
     @Data
     public static class OAuth {
         private Google google = new Google();
+        private int intentCookieMaxAgeSeconds = 300;
 
         @Data
         public static class Google {
@@ -137,6 +141,12 @@ public class AppProperties {
             private String clientSecret;
             private String redirectUri;
         }
+    }
+
+    @Data
+    public static class SupportConfig {
+        private String email = "support@souklab.dz";
+        private String contactMessage = "Please contact support.";
     }
 
     /**
@@ -167,6 +177,7 @@ public class AppProperties {
     @Data
     public static class AuthConfig {
         private LockoutConfig lockout = new LockoutConfig();
+        private VerificationConfig verification = new VerificationConfig();
 
         /**
          * Account lockout policy configuration bound to {@code app.auth.lockout.*}.
@@ -175,6 +186,16 @@ public class AppProperties {
         public static class LockoutConfig {
             private int maxAttempts = 5;
             private int durationMinutes = 15;
+        }
+
+        /**
+         * One-time verification token (OTP) policy configuration bound to {@code app.auth.verification.*}.
+         */
+        @Data
+        public static class VerificationConfig {
+            private int maxAttempts = 5;
+            private int expirationMinutes = 15;
+            private int codeLength = 6;
         }
     }
 
@@ -185,6 +206,15 @@ public class AppProperties {
     public static class ArtisanConfig {
         private GalleryConfig gallery = new GalleryConfig();
         private CertificationConfig certification = new CertificationConfig();
+        private FormateurConfig formateur = new FormateurConfig();
+
+        /**
+         * Formateur status and reapplication configuration bound to {@code app.artisan.formateur.*}.
+         */
+        @Data
+        public static class FormateurConfig {
+            private long reapplyCooldownDays = 14L;
+        }
 
         /**
          * Gallery showcase portfolio configuration bound to {@code app.artisan.gallery.*}.
@@ -255,6 +285,11 @@ public class AppProperties {
         private CancellationConfig cancellation = new CancellationConfig();
 
         /**
+         * Formation discovery and enrollment pagination configuration bound to {@code app.formation.pagination.*}.
+         */
+        private PaginationConfig pagination = new PaginationConfig();
+
+        /**
          * Default ISO currency code for formations (default: DZD).
          */
         private String defaultCurrency = "DZD";
@@ -316,6 +351,18 @@ public class AppProperties {
              * Minimum cutoff deadline in hours prior to scheduled masterclass start time (default: 24).
              */
             private int deadlineHours = 24;
+        }
+
+        /**
+         * Configuration for formation catalog and enrollment pagination.
+         */
+        @Data
+        public static class PaginationConfig {
+
+            /**
+             * Default page size for catalog listings and enrollment history (default: 10).
+             */
+            private int defaultPageSize = 10;
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.project.souklab.controller.auth;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
 import com.project.souklab.dto.auth.CompleteProfileRequestDTO;
 import com.project.souklab.dto.auth.ForgotPasswordRequestDTO;
@@ -48,10 +49,10 @@ public class AuthController {
     private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
     private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
     private static final String OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI = "/oauth2/authorization/google";
-    private static final int OAUTH_INTENT_COOKIE_MAX_AGE_SECONDS = 300;
 
     private final AuthService authService;
     private final ProfileService profileService;
+    private final AppProperties appProperties;
 
     /**
      * Registers a new user and returns the role-specific profile response.
@@ -199,7 +200,7 @@ public class AuthController {
                 .path("/")
                 .httpOnly(true)
                 .sameSite("Lax")
-                .maxAge(OAUTH_INTENT_COOKIE_MAX_AGE_SECONDS)
+                .maxAge(appProperties.getOauth().getIntentCookieMaxAgeSeconds())
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }

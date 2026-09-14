@@ -1,5 +1,6 @@
 package com.project.souklab.service.formateur;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanFormateurRequestRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
@@ -56,6 +57,9 @@ class ArtisanFormateurServiceNotificationTest {
 
     @Spy
     private Clock clock = Clock.systemUTC();
+
+    @Spy
+    private AppProperties appProperties = new AppProperties();
 
     @InjectMocks
     private ArtisanFormateurService artisanFormateurService;

@@ -3,6 +3,8 @@ package com.project.souklab.controller.support;
 import tools.jackson.databind.json.JsonMapper;
 import com.project.souklab.dto.common.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
+import com.project.souklab.config.AppProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
@@ -21,6 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @TestConfiguration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableConfigurationProperties(AppProperties.class)
 public class ControllerSliceSecurityConfig {
 
     /**

@@ -38,6 +38,9 @@ class FormationPropertiesTest {
         assertThat(config.getCancellation()).isNotNull();
         assertThat(config.getCancellation().getDeadlineHours()).isEqualTo(24);
 
+        assertThat(config.getPagination()).isNotNull();
+        assertThat(config.getPagination().getDefaultPageSize()).isEqualTo(10);
+
         assertThat(config.getDefaultCurrency()).isEqualTo("DZD");
     }
 
@@ -59,6 +62,7 @@ class FormationPropertiesTest {
         assertThat(appProperties.getFormation().getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(25));
         assertThat(appProperties.getFormation().getFile().getAllowedMimeTypes()).containsExactly("application/pdf", "image/jpeg", "image/png");
         assertThat(appProperties.getFormation().getCancellation().getDeadlineHours()).isEqualTo(24);
+        assertThat(appProperties.getFormation().getPagination().getDefaultPageSize()).isEqualTo(10);
         assertThat(appProperties.getFormation().getDefaultCurrency()).isEqualTo("DZD");
     }
 
@@ -76,6 +80,7 @@ class FormationPropertiesTest {
                 "app.formation.file.max-file-size", "50MB",
                 "app.formation.file.allowed-mime-types", "application/pdf",
                 "app.formation.cancellation.deadline-hours", "48",
+                "app.formation.pagination.default-page-size", "25",
                 "app.formation.default-currency", "EUR"
         )));
 
@@ -88,6 +93,7 @@ class FormationPropertiesTest {
         assertThat(config.getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(50));
         assertThat(config.getFile().getAllowedMimeTypes()).containsExactly("application/pdf");
         assertThat(config.getCancellation().getDeadlineHours()).isEqualTo(48);
+        assertThat(config.getPagination().getDefaultPageSize()).isEqualTo(25);
         assertThat(config.getDefaultCurrency()).isEqualTo("EUR");
     }
 
@@ -106,6 +112,7 @@ class FormationPropertiesTest {
                 "app.formation.file.max-file-size", "12MB",
                 "app.formation.file.allowed-mime-types", "application/pdf,image/png",
                 "app.formation.cancellation.deadline-hours", "12",
+                "app.formation.pagination.default-page-size", "15",
                 "app.formation.default-currency", "USD"
         )));
 
@@ -122,6 +129,7 @@ class FormationPropertiesTest {
         assertThat(appProperties.getFormation().getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(12));
         assertThat(appProperties.getFormation().getFile().getAllowedMimeTypes()).containsExactly("application/pdf", "image/png");
         assertThat(appProperties.getFormation().getCancellation().getDeadlineHours()).isEqualTo(12);
+        assertThat(appProperties.getFormation().getPagination().getDefaultPageSize()).isEqualTo(15);
         assertThat(appProperties.getFormation().getDefaultCurrency()).isEqualTo("USD");
     }
 }

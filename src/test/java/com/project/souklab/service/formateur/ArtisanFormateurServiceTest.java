@@ -1,5 +1,6 @@
 package com.project.souklab.service.formateur;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanFormateurRequestRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
@@ -104,6 +105,7 @@ class ArtisanFormateurServiceTest {
                 userRepository,
                 notificationService,
                 emailUtil,
+                new AppProperties(),
                 clock
         );
 

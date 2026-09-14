@@ -1,5 +1,6 @@
 package com.project.souklab.service.formateur;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanFormateurRequestRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
@@ -20,6 +21,7 @@ import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanFormateurRequest;
 import com.project.souklab.model.FormateurRequestStatus;
 import com.project.souklab.model.NotificationType;
+import com.project.souklab.model.Role;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.EmailUtil;
@@ -45,13 +47,13 @@ public class ArtisanFormateurService {
     private static final String ERROR_ARTISAN_NOT_FOUND_PREFIX = "Artisan not found with id: ";
     private static final String ERROR_REQUEST_NOT_FOUND_PREFIX = "Formateur request not found with id: ";
     private static final String ERROR_REQUEST_ALREADY_PREFIX = "Request is already ";
-    private static final long DEFAULT_REAPPLY_COOLDOWN_DAYS = 14L;
 
     private final ArtisanFormateurRequestRepository formateurRequestRepository;
     private final ArtisanRepository artisanRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final EmailUtil emailUtil;
+    private final AppProperties appProperties;
     private final Clock clock;
 
     /**
@@ -178,7 +180,8 @@ public class ArtisanFormateurService {
         boolean canReapply = dto.getCanReapply() == null || Boolean.TRUE.equals(dto.getCanReapply());
         LocalDateTime cooldownUntil = null;
         if (canReapply) {
-            cooldownUntil = dto.getCooldownUntil() != null ? dto.getCooldownUntil() : LocalDateTime.now(clock).plusDays(DEFAULT_REAPPLY_COOLDOWN_DAYS);
+            long cooldownDays = appProperties.getArtisan().getFormateur().getReapplyCooldownDays();
+            cooldownUntil = dto.getCooldownUntil() != null ? dto.getCooldownUntil() : LocalDateTime.now(clock).plusDays(cooldownDays);
         }
 
         request.setStatus(FormateurRequestStatus.REJECTED);

@@ -1,5 +1,6 @@
 package com.project.souklab.service.security;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.VerificationTokenRepository;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.model.User;
@@ -25,11 +26,14 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests verifying VerificationTokenService token issuance, SHA-256 hashing,
- * expiration calculation, attempt lockout, and single-use consumption.
+ * code expiration, max attempts lockout, and atomic invalidation.
  */
 @ExtendWith(MockitoExtension.class)
 class VerificationTokenServiceTest {
@@ -50,7 +54,7 @@ class VerificationTokenServiceTest {
     void setUp() {
         fixedClock = Clock.fixed(FIXED_INSTANT, ZONE_ID);
         fixedNow = LocalDateTime.now(fixedClock);
-        verificationTokenService = new VerificationTokenService(verificationTokenRepository, fixedClock);
+        verificationTokenService = new VerificationTokenService(verificationTokenRepository, new AppProperties(), fixedClock);
 
         testUser = User.builder()
                 .email("artisan@example.com")

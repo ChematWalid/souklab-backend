@@ -1,5 +1,6 @@
 package com.project.souklab.service.security;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.VerificationTokenRepository;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.model.User;
@@ -23,23 +24,22 @@ import java.time.LocalDateTime;
 public class VerificationTokenService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VerificationTokenService.class);
-    private static final int MAX_ATTEMPTS = 5;
-    private static final int CODE_EXPIRATION_MINUTES = 15;
     private static final String ERROR_INVALID_OR_EXPIRED_CODE = "Invalid or expired code.";
     private static final String ERROR_MAX_ATTEMPTS_EXCEEDED = "Maximum attempts exceeded. Please request a new code.";
     private static final String HASH_ALGORITHM = "SHA-256";
 
     private final VerificationTokenRepository verificationTokenRepository;
+    private final AppProperties appProperties;
     private final Clock clock;
 
     /**
-     * Issues a new 6-digit numeric verification code for the specified user and token type.
+     * Issues a new numeric verification code for the specified user and token type.
      * Any existing active tokens of the same type for this user are invalidated first.
      * The token is stored as a SHA-256 hex digest, and the raw code is returned for email delivery.
      *
      * @param user the user requesting the token
      * @param type the type of verification token (EMAIL_VERIFICATION or PASSWORD_RESET)
-     * @return the raw 6-digit code to be delivered via email
+     * @return the raw numeric code to be delivered via email
      */
     @Transactional
     public String issueToken(User user, VerificationTokenType type) {
@@ -47,14 +47,17 @@ public class VerificationTokenService {
 
         verificationTokenRepository.invalidateActiveTokens(user, type, now);
 
-        String rawCode = CodeGeneratorUtil.generateNumericCode(6);
+        int codeLength = appProperties.getAuth().getVerification().getCodeLength();
+        int expirationMinutes = appProperties.getAuth().getVerification().getExpirationMinutes();
+
+        String rawCode = CodeGeneratorUtil.generateNumericCode(codeLength);
         String codeHash = hashToken(rawCode);
 
         VerificationToken token = VerificationToken.builder()
                 .user(user)
                 .type(type)
                 .codeHash(codeHash)
-                .expiresAt(now.plusMinutes(CODE_EXPIRATION_MINUTES))
+                .expiresAt(now.plusMinutes(expirationMinutes))
                 .attempts(0)
                 .build();
 
@@ -84,7 +87,9 @@ public class VerificationTokenService {
                     return new BadRequestException(ERROR_INVALID_OR_EXPIRED_CODE);
                 });
 
-        if (token.getAttempts() >= MAX_ATTEMPTS) {
+        int maxAttempts = appProperties.getAuth().getVerification().getMaxAttempts();
+
+        if (token.getAttempts() >= maxAttempts) {
             LOGGER.warn("Verification failed: token for user {} and type {} is locked (attempts: {})", user.getId(), type, token.getAttempts());
             throw new BadRequestException(ERROR_MAX_ATTEMPTS_EXCEEDED);
         }
@@ -96,12 +101,12 @@ public class VerificationTokenService {
             token.setAttempts(newAttempts);
             verificationTokenRepository.save(token);
 
-            if (newAttempts >= MAX_ATTEMPTS) {
+            if (newAttempts >= maxAttempts) {
                 LOGGER.warn("Token for user {} and type {} locked after reaching max attempts ({})", user.getId(), type, newAttempts);
                 throw new BadRequestException(ERROR_MAX_ATTEMPTS_EXCEEDED);
             }
 
-            LOGGER.warn("Verification code mismatch for user {} (attempt {}/{})", user.getId(), newAttempts, MAX_ATTEMPTS);
+            LOGGER.warn("Verification code mismatch for user {} (attempt {}/{})", user.getId(), newAttempts, maxAttempts);
             throw new BadRequestException(ERROR_INVALID_OR_EXPIRED_CODE);
         }
 

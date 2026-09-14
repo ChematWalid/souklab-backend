@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.souklab.config.AppProperties;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -31,8 +32,6 @@ import java.util.stream.Collectors;
 public class UserManagementService {
 
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found with id: ";
-    private static final String DEFAULT_BAN_REASON = "Account banned by administrator";
-    private static final String DEFAULT_TIMEOUT_REASON = "Account timed out by administrator";
 
     private final UserRepository userRepository;
     private final ArtisanRepository artisanRepository;
@@ -40,6 +39,7 @@ public class UserManagementService {
     private final RefreshTokenService refreshTokenService;
     private final NotificationService notificationService;
     private final Clock clock;
+    private final AppProperties appProperties;
 
     /**
      * Retrieves a paginated list of all users in the system.
@@ -116,7 +116,7 @@ public class UserManagementService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
 
         user.setStatus(AccountStatus.SUSPENDED);
-        user.setBanReason(reason != null ? reason : DEFAULT_BAN_REASON);
+        user.setBanReason(reason != null ? reason : appProperties.getAdmin().getDefaultBanReason());
         user.setBannedUntil(null);
 
         userRepository.save(user);
@@ -147,7 +147,7 @@ public class UserManagementService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
 
         user.setStatus(AccountStatus.SUSPENDED);
-        user.setBanReason(reason != null ? reason : DEFAULT_TIMEOUT_REASON);
+        user.setBanReason(reason != null ? reason : appProperties.getAdmin().getDefaultTimeoutReason());
         user.setBannedUntil(LocalDateTime.now(clock).plusMinutes(minutes));
         userRepository.save(user);
 
