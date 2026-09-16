@@ -19,9 +19,7 @@ public enum NotificationType {
     PAYMENT_SUCCESS,
     /** Reserved for Phase 9 (Chargily Pay V2 Payments). */
     PAYMENT_FAILED,
-    /** Reserved for Phase 7 (Social Feed & Moderation Reports). */
     NEW_REPORT,
-    /** Reserved for Phase 7 (Social Feed & Reviews). */
     NEW_REVIEW,
     /** Reserved for Phase 6 (Formations announcement). */
     NEW_FORMATION,

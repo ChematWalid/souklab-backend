@@ -22,4 +22,4 @@ All routes require authentication. Repository queries scope by recipient and exc
 
 `NotificationService` saves the notification first. When a transaction synchronization is active, the STOMP push is registered with `afterCommit`; broker failures are logged and do not roll back the database write. The destination is `/user/{username}/queue/notifications` through the configured external STOMP relay.
 
-The enum contains future-facing values for messaging, payments, and social features. Those values are reserved until their corresponding domain modules are implemented.
+The enum still contains future-facing values for messaging and payments. `NEW_REVIEW` and `NEW_REPORT` are active Phase 7 event types; messaging and payment values remain reserved until those modules are implemented.
