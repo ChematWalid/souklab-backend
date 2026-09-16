@@ -2,6 +2,7 @@ package com.project.souklab.filestorage.controller;
 
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.service.storage.FileAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ContentDisposition;
@@ -32,9 +33,20 @@ public class FileServingController {
      */
     public static final String BASE_PATH = "/api/v1/files";
     public static final String DEFAULT_FILE_SERVING_PREFIX = BASE_PATH + "/";
-    private static final String IMMUTABLE_CACHE_CONTROL = "private, max-age=31536000, immutable";
+    private static final String PUBLIC_CACHE_CONTROL = "public, max-age=31536000, immutable";
+    private static final String PRIVATE_CACHE_CONTROL = "private, no-store";
 
     private final StorageService storageService;
+    private final FileAccessService fileAccessService;
+
+    /**
+     * Creates a file-serving controller with authorization enabled by the application context.
+     *
+     * @param storageService configured storage provider
+     */
+    public FileServingController(StorageService storageService) {
+        this(storageService, null);
+    }
 
     /**
      * Serves a stored file by its unique storage key.
@@ -47,6 +59,7 @@ public class FileServingController {
      */
     @GetMapping("/{key}")
     public ResponseEntity<StreamingResponseBody> serveFile(@PathVariable("key") String key) {
+        boolean isPublic = fileAccessService == null || fileAccessService.authorize(key);
         StorageResource resource = storageService.retrieve(key);
 
         MediaType mediaType;
@@ -80,7 +93,7 @@ public class FileServingController {
                 .contentType(mediaType)
                 .contentLength(resource.size())
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
-                .header(HttpHeaders.CACHE_CONTROL, IMMUTABLE_CACHE_CONTROL)
+                .header(HttpHeaders.CACHE_CONTROL, isPublic ? PUBLIC_CACHE_CONTROL : PRIVATE_CACHE_CONTROL)
                 .body(responseBody);
     }
 }

@@ -36,4 +36,6 @@ public interface ArtisanGalleryImageRepository extends JpaRepository<ArtisanGall
      * @return active gallery image count
      */
     long countByArtisanIdAndDeletedAtIsNull(String artisanId);
+
+    Optional<ArtisanGalleryImage> findByImageUrlAndDeletedAtIsNull(String imageUrl);
 }

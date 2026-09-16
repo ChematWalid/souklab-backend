@@ -18,8 +18,10 @@ import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
 import com.project.souklab.filestorage.exception.StorageException;
+import com.project.souklab.filestorage.lifecycle.StorageObjectLifecycle;
 import com.project.souklab.filestorage.scan.VirusScanService;
 import com.project.souklab.filestorage.validation.FileValidator;
 import com.project.souklab.filestorage.validation.ValidatedFile;
@@ -60,6 +62,8 @@ public class FormationService {
     private final FormationEnrollmentRepository formationEnrollmentRepository;
     private final FormationReviewRepository formationReviewRepository;
     private final StorageService storageService;
+    private final StorageObjectLifecycle storageObjectLifecycle;
+    private final FileUrlResolver fileUrlResolver;
     private final FileValidator fileValidator;
     private final VirusScanService virusScanService;
     private final AppProperties appProperties;
@@ -254,6 +258,7 @@ public class FormationService {
 
         file.setDeletedAt(LocalDateTime.now(clock));
         formationFileRepository.save(file);
+        storageObjectLifecycle.deleteAfterCommit(file.getStorageKey());
     }
 
     /**
@@ -297,9 +302,17 @@ public class FormationService {
     public void deleteFormation(String id) {
         Artisan artisan = resolveAuthenticatedArtisan();
         Formation formation = findFormationAndVerifyOwnership(id, artisan);
+        LocalDateTime deletedAt = LocalDateTime.now(clock);
 
-        formation.setDeletedAt(LocalDateTime.now(clock));
+        for (FormationFile file : formationFileRepository.findByFormationIdAndDeletedAtIsNull(formation.getId())) {
+            file.setDeletedAt(deletedAt);
+            formationFileRepository.save(file);
+            storageObjectLifecycle.deleteAfterCommit(file.getStorageKey());
+        }
+
+        formation.setDeletedAt(deletedAt);
         formationRepository.save(formation);
+        storageObjectLifecycle.deleteAfterCommit(fileUrlResolver.toStorageKey(formation.getThumbnailUrl()));
         log.info("Formation '{}' soft deleted by author '{}'", formation.getId(), artisan.getId());
     }
 

@@ -28,4 +28,6 @@ public interface FormationFileRepository extends JpaRepository<FormationFile, St
      * @return optional containing the formation file if found and active
      */
     Optional<FormationFile> findByIdAndFormationIdAndDeletedAtIsNull(String id, String formationId);
+
+    Optional<FormationFile> findByStorageKeyAndDeletedAtIsNull(String storageKey);
 }

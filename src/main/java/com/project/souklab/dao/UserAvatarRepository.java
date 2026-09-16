@@ -55,4 +55,10 @@ public interface UserAvatarRepository extends JpaRepository<UserAvatar, String> 
      * @return optional containing the active avatar if one is currently active
      */
     Optional<UserAvatar> findByUserIdAndIsActiveTrue(String userId);
+
+    Optional<UserAvatar> findFirstByStorageKeyOriginalOrStorageKeyMediumOrStorageKeyThumbnail(
+            String originalKey,
+            String mediumKey,
+            String thumbnailKey
+    );
 }

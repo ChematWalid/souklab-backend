@@ -32,4 +32,22 @@ public class FileUrlResolver {
     public String getPrefix() {
         return appProperties.getStorage().resolveFileServingPrefix();
     }
+
+    /**
+     * Extracts an opaque storage key from a URL created by this resolver.
+     *
+     * @param fileUrl relative file-serving URL
+     * @return storage key, or {@code null} when the URL is not managed by this resolver
+     */
+    public String toStorageKey(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return null;
+        }
+        String prefix = getPrefix();
+        if (!fileUrl.startsWith(prefix)) {
+            return null;
+        }
+        String storageKey = fileUrl.substring(prefix.length());
+        return storageKey.isBlank() || storageKey.contains("/") ? null : storageKey;
+    }
 }

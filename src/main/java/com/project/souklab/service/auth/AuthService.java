@@ -159,7 +159,7 @@ public class AuthService {
             handleFailedLogin(user);
         }
 
-        resolveExpiredSuspension(user);
+        ensureAccountCanAuthenticate(user);
 
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
@@ -390,6 +390,11 @@ public class AuthService {
         }
         email = email.trim().toLowerCase();
 
+        Object emailVerified = oAuth2User.getAttribute("email_verified");
+        if (emailVerified instanceof Boolean verified && !verified) {
+            throw new BadRequestException("OAuth provider did not verify the email address.");
+        }
+
         String firstName = oAuth2User.getAttribute("given_name");
         String lastName = oAuth2User.getAttribute("family_name");
         String picture = oAuth2User.getAttribute("picture");
@@ -402,6 +407,8 @@ public class AuthService {
         } else {
             user = linkOrAuthenticateExistingIdentity(email, provider, providerUserId, firstName, lastName, picture, intentRole);
         }
+
+        ensureAccountCanAuthenticate(user);
 
         user.setLastLoginAt(LocalDateTime.now(clock));
         if (request != null) {
@@ -538,7 +545,7 @@ public class AuthService {
      * @param user the user entity to evaluate
      * @throws ForbiddenException if the account is actively suspended or was rejected
      */
-    private void resolveExpiredSuspension(User user) {
+    private void ensureAccountCanAuthenticate(User user) {
         if (user.getStatus() == AccountStatus.SUSPENDED) {
             if (!user.isSuspensionActive(LocalDateTime.now(clock))) {
                 user.setStatus(AccountStatus.ACTIVE);
@@ -551,6 +558,10 @@ public class AuthService {
 
         if (user.getStatus() == AccountStatus.REJECTED) {
             throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : appProperties.getSupport().getContactMessage()));
+        }
+
+        if (user.getStatus() == AccountStatus.PENDING) {
+            throw new ForbiddenException("Account registration is pending administrator approval.");
         }
     }
 
@@ -578,6 +589,9 @@ public class AuthService {
                                                     String intentRole) {
         var existingUserByEmail = userRepository.findByEmail(email);
         if (existingUserByEmail.isPresent()) {
+            if (!existingUserByEmail.get().isEmailVerified()) {
+                throw new BadRequestException("An existing account must verify its email before Google sign-in can be linked.");
+            }
             return autoLinkByVerifiedEmail(existingUserByEmail.get(), provider, providerUserId, email);
         }
 

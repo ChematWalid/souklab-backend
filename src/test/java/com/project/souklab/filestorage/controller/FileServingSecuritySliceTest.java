@@ -4,6 +4,7 @@ import com.project.souklab.config.AppProperties;
 import com.project.souklab.config.AvatarProperties;
 import com.project.souklab.config.SecurityConfig;
 import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.service.storage.FileAccessService;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.security.FileRateLimitFilter;
 import com.project.souklab.security.JwtAuthenticationFilter;
@@ -45,6 +46,9 @@ class FileServingSecuritySliceTest {
 
     @MockitoBean
     private StorageService storageService;
+
+    @MockitoBean
+    private FileAccessService fileAccessService;
 
     @MockitoBean
     private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;

@@ -125,7 +125,7 @@ public class FormationEnrollmentService {
     public FormationEnrollmentResponseDTO enrollInFormation(String formationId) {
         Artisan artisan = resolveAuthenticatedArtisan();
 
-        Formation formation = formationRepository.findByIdAndDeletedAtIsNull(formationId)
+        Formation formation = formationRepository.findWithLockByIdAndDeletedAtIsNull(formationId)
                 .filter(f -> f.getStatus() == FormationStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Published formation not found with ID: " + formationId));
 

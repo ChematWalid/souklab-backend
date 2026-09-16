@@ -6,6 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
+
+import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
 
@@ -50,6 +53,11 @@ public interface FormationRepository extends JpaRepository<Formation, String>, J
      */
     Optional<Formation> findByIdAndDeletedAtIsNull(String id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Formation> findWithLockByIdAndDeletedAtIsNull(String id);
+
+    Optional<Formation> findByThumbnailUrlAndDeletedAtIsNull(String thumbnailUrl);
+
     /**
      * Retrieves active formations authored by a specific artisan filtered by status, excluding soft-deleted entities.
      *
@@ -60,4 +68,3 @@ public interface FormationRepository extends JpaRepository<Formation, String>, J
      */
     Page<Formation> findByAuthorIdAndStatusAndDeletedAtIsNull(String authorId, FormationStatus status, Pageable pageable);
 }
-

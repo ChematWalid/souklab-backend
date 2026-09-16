@@ -8,5 +8,5 @@ Configuration properties and bean wiring for the object storage engine.
 
 | Class | Type | Description |
 | :--- | :---: | :--- |
-| [`StorageProperties`](StorageProperties.java) | `@ConfigurationProperties(prefix = "app.storage")` | Binds endpoint, bucket name, access key, secret key, region, and path style access configurations. |
+| [`StorageProperties`](StorageProperties.java) | `@ConfigurationProperties(prefix = "storage")` | Binds provider, validation, endpoint, bucket name, access key, secret key, region, and path style access configurations. |
 | [`StorageConfiguration`](StorageConfiguration.java) | `@Configuration` | Registers `S3Client`, `StorageService`, and `VirusScanner` beans based on active configuration profiles. |

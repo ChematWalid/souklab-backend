@@ -36,4 +36,6 @@ public interface ArtisanCertificationRepository extends JpaRepository<ArtisanCer
      * @return active certification count
      */
     long countByArtisanIdAndDeletedAtIsNull(String artisanId);
+
+    Optional<ArtisanCertification> findByDocumentUrlAndDeletedAtIsNull(String documentUrl);
 }

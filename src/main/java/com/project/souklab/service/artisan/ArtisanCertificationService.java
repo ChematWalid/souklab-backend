@@ -8,8 +8,10 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
 import com.project.souklab.filestorage.exception.StorageException;
+import com.project.souklab.filestorage.lifecycle.StorageObjectLifecycle;
 import com.project.souklab.filestorage.scan.VirusScanService;
 import com.project.souklab.filestorage.validation.FileValidator;
 import com.project.souklab.filestorage.validation.ValidatedFile;
@@ -41,6 +43,8 @@ public class ArtisanCertificationService {
     private final ArtisanRepository artisanRepository;
     private final ArtisanCertificationRepository certificationRepository;
     private final StorageService storageService;
+    private final StorageObjectLifecycle storageObjectLifecycle;
+    private final FileUrlResolver fileUrlResolver;
     private final FileValidator fileValidator;
     private final VirusScanService virusScanService;
     private final AppProperties appProperties;
@@ -117,6 +121,7 @@ public class ArtisanCertificationService {
 
         cert.setDeletedAt(LocalDateTime.now(clock));
         certificationRepository.save(cert);
+        storageObjectLifecycle.deleteAfterCommit(fileUrlResolver.toStorageKey(cert.getDocumentUrl()));
     }
 
     /**

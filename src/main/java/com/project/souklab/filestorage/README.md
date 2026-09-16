@@ -22,7 +22,7 @@ graph TD
 
 | Interface / Class | Type | Responsibility |
 | :--- | :---: | :--- |
-| [`StorageService`](StorageService.java) | Interface | Core contract defining `upload`, `download`, `delete`, `exists`, and `getUrl` operations. |
+| [`StorageService`](StorageService.java) | Interface | Provider-neutral contract defining stream upload, download, delete, and existence operations. |
 | [`StorageResource`](StorageResource.java) | Value Object | Encapsulates input stream, content length, and MIME type for streaming downloads. |
 | [`StorageResult`](StorageResult.java) | Value Object | Contains storage key, resolved access URL, file size, and bucket metadata. |
 | [`FileUrlResolver`](FileUrlResolver.java) | Utility Class | Resolves physical object keys to accessible HTTP URLs using configured public prefixes. |
@@ -42,3 +42,6 @@ graph TD
 | [`security`](security/README.md) | File retrieval rate limit filter. |
 | [`stub`](stub/README.md) | In-memory storage implementation for lightweight testing. |
 | [`validation`](validation/README.md) | Magic number verification, size-limiting input streams, and MIME checks. |
+| [`lifecycle`](lifecycle/StorageObjectLifecycle.java) | Transaction-aware post-commit object cleanup. |
+
+The storage engine deliberately contains no user, role, or domain authorization rules. Applications compose it with their own access-policy service before serving an object. This keeps the provider adapters reusable across projects.

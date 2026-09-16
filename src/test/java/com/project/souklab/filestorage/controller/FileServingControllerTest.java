@@ -3,6 +3,7 @@ package com.project.souklab.filestorage.controller;
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.service.storage.FileAccessService;
 import com.project.souklab.filestorage.exception.FileNotFoundStorageException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -55,6 +56,9 @@ class FileServingControllerTest {
 
     @MockitoBean
     private StorageService storageService;
+
+    @MockitoBean
+    private FileAccessService fileAccessService;
 
     @Nested
     @DisplayName("GET /api/v1/files/{key} - Authentication & Authorization")

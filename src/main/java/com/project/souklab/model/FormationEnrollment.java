@@ -9,6 +9,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +24,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
         name = "formation_enrollments",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_formation_enrollment_formation_artisan", columnNames = {"formation_id", "artisan_id"})
+        },
         indexes = {
                 @Index(name = "idx_formation_enrollments_lookup", columnList = "formation_id, artisan_id, status"),
                 @Index(name = "idx_formation_enrollments_artisan", columnList = "artisan_id, status")

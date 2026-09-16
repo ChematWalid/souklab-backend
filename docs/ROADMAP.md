@@ -88,8 +88,8 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
   - Unread badge counter with atomic decrement semantics (on read, soft-delete, bulk read) and floor-stability.
   - Soft-delete exclusion and query-scoped isolation (404 on cross-user manipulation).
   - Dual-channel delivery via Spring STOMP backed by RabbitMQ external broker relay with deferred push (`TransactionSynchronizationManager.afterCommit()`).
-- [ ] **Step 8.1**: Configure Spring STOMP WebSocket chat channels (`/ws`, `/topic`, `/queue`, `/app`, `/user`).
-- [ ] **Step 8.2**: Implement `WebSocketAuthInterceptor` for messaging channels.
+- [x] **Step 8.1**: Configure Spring STOMP WebSocket chat channels (`/ws`, `/topic`, `/queue`, `/app`, `/user`).
+- [x] **Step 8.2**: Implement `WebSocketAuthInterceptor` for messaging channels.
 - [ ] **Step 8.3**: Implement `Conversation`, `ConversationParticipant`, `Message` entities and repositories.
 - [ ] **Step 8.4**: Implement `MessageService` with read receipts and realtime STOMP dispatching.
 

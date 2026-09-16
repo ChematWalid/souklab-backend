@@ -42,7 +42,7 @@ graph TD
 
 ## Technology Stack
 
-- **Runtime & Language**: Java 17+, Spring Boot 3.2+
+- **Runtime & Language**: Java 17+, Spring Boot 4.0+
 - **Data Persistence**: Spring Data JPA + Hibernate 6 + MariaDB / MySQL 8.0
 - **Search Engine & Indexing**: Hibernate Search 8.2.2.Final (Elasticsearch 8.x backend)
 - **Caching**: Caffeine Cache (catalog taxonomies, rate limiting buckets)
@@ -197,6 +197,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`filestorage.security`](src/main/java/com/project/souklab/filestorage/security/README.md) — Download rate limiting
   - [`filestorage.stub`](src/main/java/com/project/souklab/filestorage/stub/README.md) — In-memory test stubs
   - [`filestorage.validation`](src/main/java/com/project/souklab/filestorage/validation/README.md) — File validation
+- [`com.project.souklab.service.storage`](src/main/java/com/project/souklab/service/storage/FileAccessService.java) — Application-specific storage access policy
 - [`com.project.souklab.model`](src/main/java/com/project/souklab/model/README.md) — Domain entities and enums (34 models)
 - [`com.project.souklab.security`](src/main/java/com/project/souklab/security/README.md) — Security filters and token parsing
 - [`com.project.souklab.service`](src/main/java/com/project/souklab/service/README.md) — Service layer architecture
