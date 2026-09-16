@@ -5,14 +5,25 @@ import com.project.souklab.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.LockModeType;
 
 public interface UserRepository extends JpaRepository<User, String> {
+
+    /**
+     * Loads a user with a write lock for serialized quota and profile mutations.
+     *
+     * @param id user identifier
+     * @return optional containing the locked user
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<User> findWithLockById(String id);
     
     @EntityGraph(attributePaths = {"roles"})
     Optional<User> findByEmail(String email);

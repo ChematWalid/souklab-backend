@@ -76,6 +76,7 @@ public class ArtisanCertificationService {
             LocalDate expiresAt
     ) {
         Artisan artisan = resolveAuthenticatedArtisan();
+        artisan = artisanRepository.findWithLockById(artisan.getId()).orElse(artisan);
 
         int maxCount = appProperties.getArtisan().getCertification().getMaxCount();
         long activeCount = certificationRepository.countByArtisanIdAndDeletedAtIsNull(artisan.getId());

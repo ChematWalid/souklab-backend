@@ -53,6 +53,12 @@ public interface FormationRepository extends JpaRepository<Formation, String>, J
      */
     Optional<Formation> findByIdAndDeletedAtIsNull(String id);
 
+    /**
+     * Finds an active formation while holding a write lock for serialized mutations.
+     *
+     * @param id formation identifier
+     * @return optional containing the locked formation
+     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Formation> findWithLockByIdAndDeletedAtIsNull(String id);
 

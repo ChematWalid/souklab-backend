@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,6 +78,7 @@ public class AvatarService {
      * @throws AvatarLimitExceededException if the user has reached the configured avatar limit
      * @throws StorageException if variant generation or storage operations fail
      */
+    @Transactional
     public AvatarResponseDTO uploadAvatar(User currentUser, MultipartFile file) {
         if (currentUser == null) {
             throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
@@ -85,10 +87,12 @@ public class AvatarService {
             throw new BadRequestException("Avatar file is required and cannot be empty");
         }
 
-        long existingCount = userAvatarRepository.countByUserId(currentUser.getId());
+        User authenticatedUser = userRepository.findWithLockById(currentUser.getId())
+                .orElseGet(() -> userRepository.findById(currentUser.getId()).orElse(currentUser));
+        long existingCount = userAvatarRepository.countByUserId(authenticatedUser.getId());
         if (existingCount >= avatarProperties.getMaxPerUser()) {
             log.warn("Avatar upload rejected for user {}: quota limit of {} avatars reached",
-                    currentUser.getId(), avatarProperties.getMaxPerUser());
+                    authenticatedUser.getId(), avatarProperties.getMaxPerUser());
             throw new AvatarLimitExceededException(
                     "Maximum avatar limit of " + avatarProperties.getMaxPerUser() + " reached. Please delete an existing avatar before uploading a new one."
             );
@@ -104,7 +108,7 @@ public class AvatarService {
                     avatarProperties.getAllowedMimeTypes()
             );
         } catch (IOException e) {
-            log.error("Failed to read avatar upload stream for user {}", currentUser.getId(), e);
+            log.error("Failed to read avatar upload stream for user {}", authenticatedUser.getId(), e);
             throw new StorageException("Failed to read uploaded avatar stream: " + e.getMessage(), e);
         }
 
@@ -153,14 +157,14 @@ public class AvatarService {
             storedKeys.add(thumbnailKey);
 
             return transactionTemplate.execute(status -> {
-                userAvatarRepository.findByUserIdAndIsActiveTrue(currentUser.getId())
+                userAvatarRepository.findByUserIdAndIsActiveTrue(authenticatedUser.getId())
                         .ifPresent(previousActive -> {
                             previousActive.setActive(false);
                             userAvatarRepository.save(previousActive);
                         });
 
                 UserAvatar newAvatar = UserAvatar.builder()
-                        .user(currentUser)
+                        .user(authenticatedUser)
                         .storageKeyOriginal(originalKey)
                         .storageKeyMedium(mediumKey)
                         .storageKeyThumbnail(thumbnailKey)
@@ -173,13 +177,13 @@ public class AvatarService {
 
                 UserAvatar savedAvatar = userAvatarRepository.save(newAvatar);
 
-                syncUserAvatar(currentUser, thumbnailKey);
+                syncUserAvatar(authenticatedUser, thumbnailKey);
 
                 return mapToResponseDTO(savedAvatar);
             });
         } catch (Exception ex) {
             log.error("Avatar upload pipeline failed for user {}. Initiating rollback compensation for {} stored keys: {}",
-                    currentUser.getId(), storedKeys.size(), storedKeys, ex);
+                    authenticatedUser.getId(), storedKeys.size(), storedKeys, ex);
             compensateStorageDeletions(storedKeys);
             throw ex;
         }

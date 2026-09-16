@@ -72,6 +72,7 @@ public class ArtisanGalleryService {
     @Transactional
     public GalleryImageResponseDTO uploadImage(MultipartFile file, String title, String caption) {
         Artisan artisan = resolveAuthenticatedArtisan();
+        artisan = artisanRepository.findWithLockById(artisan.getId()).orElse(artisan);
 
         int maxImages = appProperties.getArtisan().getGallery().getMaxImages();
         long activeCount = galleryImageRepository.countByArtisanIdAndDeletedAtIsNull(artisan.getId());

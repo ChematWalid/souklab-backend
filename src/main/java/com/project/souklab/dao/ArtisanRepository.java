@@ -7,6 +7,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
 
@@ -15,6 +17,15 @@ import java.util.Optional;
  * Supports relational queries, directory specifications, and multi-facet filtering.
  */
 public interface ArtisanRepository extends JpaRepository<Artisan, String>, JpaSpecificationExecutor<Artisan> {
+
+    /**
+     * Loads an artisan with a write lock for quota and other serialized mutations.
+     *
+     * @param id artisan identifier
+     * @return optional containing the locked artisan
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Artisan> findWithLockById(String id);
 
     /**
      * Finds an artisan by their associated user account email address, ignoring case.

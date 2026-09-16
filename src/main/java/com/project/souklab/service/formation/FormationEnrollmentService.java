@@ -90,7 +90,8 @@ public class FormationEnrollmentService {
      */
     @Transactional(readOnly = true)
     public FormationPublicViewDTO getPublishedFormationDetails(String formationId) {
-        Formation formation = formationRepository.findByIdAndDeletedAtIsNull(formationId)
+        Formation formation = formationRepository.findWithLockByIdAndDeletedAtIsNull(formationId)
+                .or(() -> formationRepository.findByIdAndDeletedAtIsNull(formationId))
                 .filter(f -> f.getStatus() == FormationStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Published formation not found with ID: " + formationId));
 
@@ -125,7 +126,7 @@ public class FormationEnrollmentService {
     public FormationEnrollmentResponseDTO enrollInFormation(String formationId) {
         Artisan artisan = resolveAuthenticatedArtisan();
 
-        Formation formation = formationRepository.findWithLockByIdAndDeletedAtIsNull(formationId)
+        Formation formation = formationRepository.findByIdAndDeletedAtIsNull(formationId)
                 .filter(f -> f.getStatus() == FormationStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Published formation not found with ID: " + formationId));
 
