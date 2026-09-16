@@ -38,7 +38,7 @@ build/
 !.env.example
 
 ### Custom ###
-storage/
+/storage/
 .postman/*.postman_environment.json
 !.postman/*.postman_environment.example.json
 postman/.dependencies/

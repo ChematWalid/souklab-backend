@@ -316,9 +316,15 @@ public class FeedPostService {
     }
 
     private void validateAuthor(User user) {
-        if (user.getStatus() != AccountStatus.ACTIVE || (!isAdmin() && !isVerifiedArtisan(user))) {
+        if (user.getStatus() != AccountStatus.ACTIVE
+                || (!isAdmin() && (!hasArtisanContentPermission() || !isVerifiedArtisan(user)))) {
             throw new ForbiddenException("Only active verified artisans or administrators may publish feed posts.");
         }
+    }
+
+    private boolean hasArtisanContentPermission() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return accessControlService.canManageArtisanContent(authentication);
     }
 
     private boolean isVerifiedArtisan(User user) {

@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.project.souklab.config.AppProperties;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.time.Clock;
 import java.time.Instant;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 
@@ -32,8 +34,24 @@ public class JwtUtils {
     private final AppProperties appProperties;
     private final Clock clock;
 
+    @PostConstruct
+    void validateConfiguration() {
+        String secret = appProperties.getJwt().getSecret();
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("app.jwt.secret must contain at least 32 UTF-8 bytes");
+        }
+        if (appProperties.getJwt().getAccessTokenExpirationMs() == null
+                || appProperties.getJwt().getAccessTokenExpirationMs() <= 0) {
+            throw new IllegalStateException("app.jwt.access-token-expiration-ms must be positive");
+        }
+        if (appProperties.getJwt().getRefreshTokenExpirationMs() == null
+                || appProperties.getJwt().getRefreshTokenExpirationMs() <= 0) {
+            throw new IllegalStateException("app.jwt.refresh-token-expiration-ms must be positive");
+        }
+    }
+
     private Key getSigningKey() {
-        byte[] keyBytes = appProperties.getJwt().getSecret().getBytes();
+        byte[] keyBytes = appProperties.getJwt().getSecret().getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

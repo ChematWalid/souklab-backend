@@ -5,6 +5,7 @@ import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.service.storage.FileAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,7 +25,6 @@ import java.nio.charset.StandardCharsets;
  */
 @RestController
 @RequestMapping(FileServingController.BASE_PATH)
-@RequiredArgsConstructor
 @Slf4j
 public class FileServingController {
 
@@ -39,13 +39,10 @@ public class FileServingController {
     private final StorageService storageService;
     private final FileAccessService fileAccessService;
 
-    /**
-     * Creates a file-serving controller with authorization enabled by the application context.
-     *
-     * @param storageService configured storage provider
-     */
-    public FileServingController(StorageService storageService) {
-        this(storageService, null);
+    @Autowired
+    public FileServingController(StorageService storageService, FileAccessService fileAccessService) {
+        this.storageService = storageService;
+        this.fileAccessService = fileAccessService;
     }
 
     /**

@@ -155,6 +155,8 @@ The server listens on `http://localhost:8080/api/v1`.
 
 ## API Documentation & Testing Suite
 
+- **Production Audit**: See [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
+
 - **API Specification**: See [`docs/API_SPEC.md`](docs/API_SPEC.md) for full endpoint references.
 - **Postman API Reference**: Exhaustive contracts documented in [`docs/POSTMAN_API_REFERENCE.md`](docs/POSTMAN_API_REFERENCE.md).
 - **Postman Test Suite**: Located in [`.postman/souklab.postman_collection.json`](.postman/souklab.postman_collection.json).

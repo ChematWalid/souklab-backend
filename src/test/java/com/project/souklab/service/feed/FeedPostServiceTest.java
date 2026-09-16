@@ -69,6 +69,7 @@ class FeedPostServiceTest {
                 "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority("permission:artisan:content"))));
         when(userRepository.findByEmail("artisan@example.com")).thenReturn(Optional.of(user));
         when(accessControlService.isAdmin(any())).thenReturn(false);
+        when(accessControlService.canManageArtisanContent(any())).thenReturn(true);
     }
 
     @AfterEach

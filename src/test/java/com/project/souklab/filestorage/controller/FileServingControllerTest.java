@@ -255,7 +255,7 @@ class FileServingControllerTest {
             StorageResource resource = new StorageResource("test-key", spyStream, "text/plain", data.length, "test.txt");
             StorageService mockService = mock(StorageService.class);
             when(mockService.retrieve("test-key")).thenReturn(resource);
-            FileServingController controller = new FileServingController(mockService);
+            FileServingController controller = new FileServingController(mockService, mock(FileAccessService.class));
 
             ResponseEntity<StreamingResponseBody> response = controller.serveFile("test-key");
             ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -285,7 +285,7 @@ class FileServingControllerTest {
             StorageResource resource = new StorageResource("test-key", spyStream, "text/plain", data.length, "test.txt");
             StorageService mockService = mock(StorageService.class);
             when(mockService.retrieve("test-key")).thenReturn(resource);
-            FileServingController controller = new FileServingController(mockService);
+            FileServingController controller = new FileServingController(mockService, mock(FileAccessService.class));
 
             ResponseEntity<StreamingResponseBody> response = controller.serveFile("test-key");
             OutputStream throwingOutput = new OutputStream() {
