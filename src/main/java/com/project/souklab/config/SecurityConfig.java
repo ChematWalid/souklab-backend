@@ -128,7 +128,9 @@ public class SecurityConfig {
                                 "/error",
                                 "/ws/**",
                                 "/api/v1/catalog/**",
-                                "/api/v1/public/**"
+                                "/api/v1/public/**",
+                                "/api/v1/feed/**",
+                                "/api/v1/artisans/*/reviews"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
