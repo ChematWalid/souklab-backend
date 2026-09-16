@@ -295,14 +295,29 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 ---
 
-## 5. Formations & Workshops (`/api/v1/formations/**`)
+## 5. Formations & Workshops (`/api/v1/artisan/formations/**`)
 
-- `GET /api/v1/formations`: Browse published upcoming workshops.
-- `GET /api/v1/formations/{id}`: Detailed curriculum and schedule.
-- `POST /api/v1/formations`: Create course draft (`ROLE_ARTISAN`).
-- `PUT /api/v1/formations/{id}`: Update curriculum.
-- `POST /api/v1/formations/{id}/submit`: Submit course for admin review (`PENDING_REVIEW`).
-- `POST /api/v1/formations/{id}/enroll`: Enroll in workshop (`ROLE_CLIENT`).
+> **Access Control Note**: ROLE_CLIENT is rejected with 403 Forbidden on every route in this section. Formations are strictly peer-to-peer among artisans — there is no client-facing enrollment path.
+
+### Authoring & Workshop Management (`ArtisanFormationController`)
+- `POST /api/v1/artisan/formations`: Create a new masterclass draft (`ROLE_ARTISAN` — additionally requires accredited instructor status `isTeacher = true`).
+- `GET /api/v1/artisan/formations/me`: Retrieve paginated list of formations authored by the authenticated artisan (`ROLE_ARTISAN`).
+- `GET /api/v1/artisan/formations/{id}`: Retrieve comprehensive details for an authored formation including review history and course materials (`ROLE_ARTISAN` — author ownership verified).
+- `PUT /api/v1/artisan/formations/{id}`: Update an authored formation's curriculum and scheduling metadata (`ROLE_ARTISAN` — author ownership verified; core schedule/pricing changes on approved/published formations reset status to `PENDING_REVIEW`).
+- `POST /api/v1/artisan/formations/{id}/thumbnail`: Upload showcase thumbnail image (`ROLE_ARTISAN` — author ownership verified; multipart image up to 10MB, scanned via ClamAV).
+- `POST /api/v1/artisan/formations/{id}/files`: Upload course syllabus or learning resource attachment (`ROLE_ARTISAN` — author ownership verified; multipart document up to 10MB, max 10 attachments per formation, scanned via ClamAV).
+- `DELETE /api/v1/artisan/formations/{id}/files/{fileId}`: Soft-delete an attachment file from an authored formation (`ROLE_ARTISAN` — author ownership verified).
+- `POST /api/v1/artisan/formations/{id}/submit`: Submit a draft or rejected formation for administrative moderation (`ROLE_ARTISAN` — author ownership verified; validates completeness, transitions to `PENDING_REVIEW`).
+- `DELETE /api/v1/artisan/formations/{id}`: Soft-delete an authored formation (`ROLE_ARTISAN` — author ownership verified).
+
+### Peer Discovery, Enrollment & Materials (`ArtisanFormationEnrollmentController`)
+- `GET /api/v1/artisan/formations/catalog`: Browse published masterclass catalog (`ROLE_ARTISAN` — paginated, default sorted by `scheduledAt` ascending).
+- `GET /api/v1/artisan/formations/catalog/{id}`: Retrieve detailed public representation of a published masterclass, active enrollment count, and syllabus overview (`ROLE_ARTISAN`).
+- `POST /api/v1/artisan/formations/{id}/enroll`: Enroll the authenticated artisan in a published masterclass (`ROLE_ARTISAN` — author self-enrollment blocked, enforces maximum participant capacity).
+- `POST /api/v1/artisan/formations/{id}/cancel`: Cancel confirmed enrollment reservation (`ROLE_ARTISAN` — requires active enrollment, enforces configured cancellation cutoff deadline before start).
+- `GET /api/v1/artisan/formations/my-enrollments`: Retrieve paginated enrollment history and upcoming registered workshops for the authenticated artisan (`ROLE_ARTISAN`).
+- `GET /api/v1/artisan/formations/{id}/files/{fileId}/download`: Download protected course document attachment stream (`ROLE_ARTISAN` — restricted strictly to confirmed enrolled participants and the authoring instructor).
+
 
 ---
 
