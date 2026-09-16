@@ -363,7 +363,8 @@ Platform KPI statistics are planned and no `/api/v1/admin/stats` endpoint is cur
 - `GET /api/v1/admin/formations/pending`: Paginated queue of formations awaiting administrative review.
 - `POST /api/v1/admin/formations/{id}/review`: Approve or reject workshop curriculum.
 - `POST /api/v1/admin/formations/{id}/publish`: Publish approved workshop to public catalog.
-Report moderation is planned and no `/api/v1/admin/reports/**` endpoint is currently exposed.
+- `GET /api/v1/admin/reports`: Paginated report queue with optional status and target filters.
+- `POST /api/v1/admin/reports/{id}/resolve`: Resolve an open report with `DISMISS`, `HIDE`, or `REMOVE`; the action is applied to the reported target and recorded for auditability.
 
 ---
 
