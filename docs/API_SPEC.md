@@ -304,8 +304,8 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 - `GET /api/v1/artisan/formations/me`: Retrieve paginated list of formations authored by the authenticated artisan (`ROLE_ARTISAN`).
 - `GET /api/v1/artisan/formations/{id}`: Retrieve comprehensive details for an authored formation including review history and course materials (`ROLE_ARTISAN` — author ownership verified).
 - `PUT /api/v1/artisan/formations/{id}`: Update an authored formation's curriculum and scheduling metadata (`ROLE_ARTISAN` — author ownership verified; core schedule/pricing changes on approved/published formations reset status to `PENDING_REVIEW`).
-- `POST /api/v1/artisan/formations/{id}/thumbnail`: Upload showcase thumbnail image (`ROLE_ARTISAN` — author ownership verified; multipart image up to 10MB, scanned via ClamAV).
-- `POST /api/v1/artisan/formations/{id}/files`: Upload course syllabus or learning resource attachment (`ROLE_ARTISAN` — author ownership verified; multipart document up to 10MB, max 10 attachments per formation, scanned via ClamAV).
+- `POST /api/v1/artisan/formations/{id}/thumbnail`: Upload showcase thumbnail image (`ROLE_ARTISAN` — author ownership verified; multipart image up to 10MB, scanned when enabled).
+- `POST /api/v1/artisan/formations/{id}/files`: Upload course syllabus or learning resource attachment (`ROLE_ARTISAN` — author ownership verified; multipart document up to 25MB, max 10 attachments per formation, scanned when enabled).
 - `DELETE /api/v1/artisan/formations/{id}/files/{fileId}`: Soft-delete an attachment file from an authored formation (`ROLE_ARTISAN` — author ownership verified).
 - `POST /api/v1/artisan/formations/{id}/submit`: Submit a draft or rejected formation for administrative moderation (`ROLE_ARTISAN` — author ownership verified; validates completeness, transitions to `PENDING_REVIEW`).
 - `DELETE /api/v1/artisan/formations/{id}`: Soft-delete an authored formation (`ROLE_ARTISAN` — author ownership verified).
@@ -323,34 +323,19 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 ## 6. Social Feed, Reviews & Moderation
 
-- `GET /api/v1/feed`: Paginated community posts (`FORMATION`, `ACTUALITE`, `ANNONCE`).
-- `POST /api/v1/feed`: Create a post (`ROLE_ARTISAN` / `ROLE_ADMIN`).
-- `POST /api/v1/client/reviews`: Submit a review for an artisan (Rating: 1-5, comment).
-- `POST /api/v1/reports`: File abuse report on a user, post, or message.
+These resources are planned and are not exposed by the current source tree. No feed, review, or report controllers/entities are currently implemented.
 
 ---
 
-## 7. Realtime Direct Messaging (`/api/v1/messages/**` & `/ws`)
+## 7. Realtime notifications (`/ws`)
 
-### REST Endpoints
-- `GET /api/v1/messages/conversations`: List user conversations with last message preview and unread count.
-- `POST /api/v1/messages/conversations`: Initiate conversation with a user.
-- `GET /api/v1/messages/conversations/{id}/messages`: Fetch paginated chat history.
-- `POST /api/v1/messages/send`: Send a text message with optional media attachments.
-
-### WebSocket STOMP Channels
-- Handshake: `ws://localhost:8080/ws` (Pass `Authorization: Bearer <token>` in connect headers)
-- Subscribe to personal messages: `/user/queue/messages`
-- Subscribe to live notifications: `/user/queue/notifications`
-- Send message: Destination `/app/chat.send`
+Direct messaging REST resources and chat handlers are planned and are not exposed by the current source tree. The implemented WebSocket endpoint is `/ws`; authenticated clients may subscribe to `/user/queue/notifications` for notification pushes.
 
 ---
 
-## 8. Subscriptions & Chargily Pay V2 (`/api/v1/subscription/**`)
+## 8. Subscriptions & Chargily Pay V2
 
-- `GET /api/v1/public/subscription/pricing`: Active platform tiers and DZD prices.
-- `POST /api/v1/subscription/checkout`: Create a Chargily checkout session URL.
-- `POST /api/v1/subscription/webhook`: Chargily payment notification listener with HMAC-SHA256 signature verification.
+This module is planned and is not exposed by the current source tree. There are no `/api/v1/subscription/**` controllers, payment entities, or Chargily client beans yet. See [`ROADMAP.md`](ROADMAP.md) Phase 9 for the implementation plan.
 
 ---
 
@@ -362,12 +347,11 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 - `POST /api/v1/admin/users/approve-bulk`: Bulk approve multiple user accounts.
 - `POST /api/v1/admin/users/{id}/ban`: Ban a user account with reason.
 - `POST /api/v1/admin/users/{id}/timeout`: Timeout user for specified minutes with reason.
-- `GET /api/v1/admin/stats`: KPI dashboard (total artisans, pending validations, active workshops, revenues).
-- `POST /api/v1/admin/users/{id}/validation`: Approve, reject, or suspend artisan account.
+Platform KPI statistics are planned and no `/api/v1/admin/stats` endpoint is currently exposed.
 - `GET /api/v1/admin/formations/pending`: Paginated queue of formations awaiting administrative review.
 - `POST /api/v1/admin/formations/{id}/review`: Approve or reject workshop curriculum.
 - `POST /api/v1/admin/formations/{id}/publish`: Publish approved workshop to public catalog.
-- `POST /api/v1/admin/reports/{id}/resolve`: Resolve abuse reports and execute penalty actions.
+Report moderation is planned and no `/api/v1/admin/reports/**` endpoint is currently exposed.
 
 ---
 

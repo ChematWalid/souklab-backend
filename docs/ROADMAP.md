@@ -111,8 +111,9 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
   - Temporary timeout (`POST /timeout`) with automatic expiration lapse.
   - Effective `ACTIVE` status resolution in listing and search before user login.
   - Manual unban endpoint (`POST /api/v1/admin/users/{id}/unban`) with conflict guards and `ACCOUNT_REINSTATED` notification.
-- [x] **Step 10.4**: **End-to-End Regression & Integration Suite (COMPLETED)**:
-  - 584 unit and slice tests passing across all domain services and controllers.
-  - Complete 6-batch Postman E2E testing suite (254 requests, 39 endpoints audited and verified against live server).
+- [x] **Step 10.4**: **Regression & Integration Suite (IMPLEMENTED)**:
+  - Unit and MVC slice tests are present across domain services and controllers.
+  - Postman collections document the endpoint verification scenarios.
+  - Execute the Maven test profile with a supported JDK and the required external services before release; CI results are the authoritative pass count.
 - [ ] **Step 10.2**: Implement platform analytics & KPI aggregation (`/api/v1/admin/stats`).
 - [ ] **Step 10.3**: Actuator monitoring, health checks, rate-limit fine-tuning, and Swagger/OpenAPI documentation.

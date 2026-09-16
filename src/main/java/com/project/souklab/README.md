@@ -39,5 +39,6 @@ graph TD
 - **`model`**: JPA domain entities and lifecycle audit models (34 classes including base entity, entities, and domain enums).
 - **`security`**: Security filters, JWT authentication, upload boundaries, and token rate limiting.
 - **`service`**: Core transactional business logic, search indexing, profile lifecycle, and domain workflows.
+- **`service.storage`**: Application-specific ownership and enrollment checks for protected storage objects.
 - **`util`**: Stateless helpers (security context, artisan authentication resolution, code generation, email dispatch).
 - **`validation`**: Custom Jakarta Bean Validation constraints.

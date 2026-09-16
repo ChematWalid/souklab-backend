@@ -42,6 +42,6 @@ graph TD
 | [`security`](security/README.md) | File retrieval rate limit filter. |
 | [`stub`](stub/README.md) | In-memory storage implementation for lightweight testing. |
 | [`validation`](validation/README.md) | Magic number verification, size-limiting input streams, and MIME checks. |
-| [`lifecycle`](lifecycle/StorageObjectLifecycle.java) | Transaction-aware post-commit object cleanup. |
+| [`lifecycle`](lifecycle/README.md) | Transaction-aware post-commit object cleanup. |
 
 The storage engine deliberately contains no user, role, or domain authorization rules. Applications compose it with their own access-policy service before serving an object. This keeps the provider adapters reusable across projects.

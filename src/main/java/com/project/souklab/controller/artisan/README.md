@@ -15,14 +15,14 @@ Handles HTTP endpoints for artisan public profile discovery, self-service profil
 ### Professional Credentials (`ArtisanCertificationController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/artisan/certifications` | `ROLE_ARTISAN` | Uploads and records an official qualification or certification document (multipart, ClamAV scanned). |
+| `POST` | `/api/v1/artisan/certifications` | `ROLE_ARTISAN` | Uploads and records an official qualification or certification document (multipart, scanned when enabled). |
 | `GET` | `/api/v1/artisan/certifications` | `ROLE_ARTISAN` | Lists all certifications recorded for the authenticated artisan. |
 | `DELETE` | `/api/v1/artisan/certifications/{id}` | `ROLE_ARTISAN` | Soft-deletes a certification document belonging to the authenticated artisan. |
 
 ### Showcase Gallery (`ArtisanGalleryController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/artisan/gallery` | `ROLE_ARTISAN` | Uploads a portfolio showcase photograph (multipart, max 10 images quota, ClamAV scanned). |
+| `POST` | `/api/v1/artisan/gallery` | `ROLE_ARTISAN` | Uploads a portfolio showcase photograph (multipart, max 10 images quota, scanned when enabled). |
 | `GET` | `/api/v1/artisan/gallery` | `ROLE_ARTISAN` | Retrieves all active portfolio gallery images ordered by display sequence. |
 | `PUT` | `/api/v1/artisan/gallery/order` | `ROLE_ARTISAN` | Updates the sequential presentation order of portfolio images. |
 | `DELETE` | `/api/v1/artisan/gallery/{id}` | `ROLE_ARTISAN` | Soft-deletes a portfolio showcase photograph. |

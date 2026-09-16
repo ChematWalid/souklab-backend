@@ -16,6 +16,7 @@ sequenceDiagram
 
     Domain->>NotifService: createForUser(recipient, message, type, targetId)
     NotifService->>DB: save(Notification)
+    NotifService->>STOMP: register afterCommit delivery
     NotifService->>STOMP: convertAndSendToUser(recipientEmail, "/queue/notifications", DTO)
     STOMP-->>Client: Realtime Push Notification
 ```
@@ -26,4 +27,4 @@ sequenceDiagram
 
 | Service Class | Responsibility |
 | :--- | :--- |
-| [`NotificationService`](NotificationService.java) | Handles notification persistence, paginated feeds excluding soft-deleted items (`deletedAt IS NULL`), raw unread counts, query-scoped mark-read, bulk mark-all-read, and soft-delete updates. |
+| [`NotificationService`](NotificationService.java) | Handles notification persistence, paginated feeds excluding soft-deleted items (`deletedAt IS NULL`), unread counts, query-scoped mark-read, bulk mark-all-read, soft-delete updates, and post-commit STOMP delivery. |

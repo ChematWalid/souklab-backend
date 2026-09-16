@@ -88,6 +88,7 @@ src/main/java/com/project/souklab/
 │   ├── controller/      # Direct file streaming endpoints
 │   ├── exception/       # File storage exception taxonomy
 │   ├── image/           # Image resizing and thumbnailing service
+│   ├── lifecycle/       # Post-commit object cleanup
 │   ├── s3/              # S3/MinIO service implementation
 │   ├── scan/            # ClamAV virus scanning integration
 │   ├── security/        # File serving rate limit filter
@@ -106,6 +107,7 @@ src/main/java/com/project/souklab/
 │   ├── notification/    # In-app notifications and WebSocket dispatch
 │   ├── profile/         # Profile lifecycle, FK taxonomy resolution, and PATCH updates
 │   ├── security/        # Token issuance and verification
+│   ├── storage/         # Application-specific file access policy
 │   └── user/            # User management and avatar processing
 ├── util/                # Stateless utility functions and mappers
 └── validation/          # Custom Jakarta Bean Validation constraints
@@ -192,12 +194,13 @@ Each individual package across the application contains its own dedicated `READM
   - [`filestorage.controller`](src/main/java/com/project/souklab/filestorage/controller/README.md) — File streaming controller
   - [`filestorage.exception`](src/main/java/com/project/souklab/filestorage/exception/README.md) — Storage exceptions
   - [`filestorage.image`](src/main/java/com/project/souklab/filestorage/image/README.md) — Image processing service
+  - [`filestorage.lifecycle`](src/main/java/com/project/souklab/filestorage/lifecycle/README.md) — Post-commit object cleanup
   - [`filestorage.s3`](src/main/java/com/project/souklab/filestorage/s3/README.md) — MinIO/S3 client
   - [`filestorage.scan`](src/main/java/com/project/souklab/filestorage/scan/README.md) — ClamAV scanner
   - [`filestorage.security`](src/main/java/com/project/souklab/filestorage/security/README.md) — Download rate limiting
   - [`filestorage.stub`](src/main/java/com/project/souklab/filestorage/stub/README.md) — In-memory test stubs
   - [`filestorage.validation`](src/main/java/com/project/souklab/filestorage/validation/README.md) — File validation
-- [`com.project.souklab.service.storage`](src/main/java/com/project/souklab/service/storage/FileAccessService.java) — Application-specific storage access policy
+- [`com.project.souklab.service.storage`](src/main/java/com/project/souklab/service/storage/README.md) — Application-specific storage access policy
 - [`com.project.souklab.model`](src/main/java/com/project/souklab/model/README.md) — Domain entities and enums (34 models)
 - [`com.project.souklab.security`](src/main/java/com/project/souklab/security/README.md) — Security filters and token parsing
 - [`com.project.souklab.service`](src/main/java/com/project/souklab/service/README.md) — Service layer architecture
@@ -211,6 +214,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`service.notification`](src/main/java/com/project/souklab/service/notification/README.md) — Notification dispatcher
   - [`service.profile`](src/main/java/com/project/souklab/service/profile/README.md) — User profile management and taxonomy resolution
   - [`service.security`](src/main/java/com/project/souklab/service/security/README.md) — Token and verification services
+  - [`service.storage`](src/main/java/com/project/souklab/service/storage/README.md) — File ownership and enrollment access policy
   - [`service.user`](src/main/java/com/project/souklab/service/user/README.md) — User moderation and avatars
 - [`com.project.souklab.util`](src/main/java/com/project/souklab/util/README.md) — Helper utilities
 - [`com.project.souklab.validation`](src/main/java/com/project/souklab/validation/README.md) — Custom validator annotations

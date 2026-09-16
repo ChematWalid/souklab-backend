@@ -1,7 +1,8 @@
 package com.project.souklab.config;
 
 /**
- * TODO Phase 9: re-enable, requires spring-boot-starter-webflux for Chargily Pay V2 integration.
+ * Reserved configuration placeholder for the planned Chargily Pay integration.
+ * The current application has no WebClient dependency or payment endpoints.
  */
 public class WebClientConfig {
 

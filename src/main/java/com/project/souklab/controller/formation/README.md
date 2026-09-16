@@ -15,8 +15,8 @@ REST controllers managing masterclass authoring, course material uploads, peer w
 | `GET` | `/api/v1/artisan/formations/me` | `ROLE_ARTISAN` | Retrieves paginated list of formations authored by the authenticated artisan. |
 | `GET` | `/api/v1/artisan/formations/{id}` | `ROLE_ARTISAN` | Retrieves complete authored formation details including review history and course materials. |
 | `PUT` | `/api/v1/artisan/formations/{id}` | `ROLE_ARTISAN` | Updates curriculum and schedule (core changes on approved/published reset to `PENDING_REVIEW`). |
-| `POST` | `/api/v1/artisan/formations/{id}/thumbnail` | `ROLE_ARTISAN` | Uploads showcase thumbnail image (multipart, max 10MB, ClamAV scanned). |
-| `POST` | `/api/v1/artisan/formations/{id}/files` | `ROLE_ARTISAN` | Uploads course syllabus or resource document attachment (max 10 attachments, ClamAV scanned). |
+| `POST` | `/api/v1/artisan/formations/{id}/thumbnail` | `ROLE_ARTISAN` | Uploads showcase thumbnail image (multipart, max 10MB, scanned when enabled). |
+| `POST` | `/api/v1/artisan/formations/{id}/files` | `ROLE_ARTISAN` | Uploads course syllabus or resource document attachment (max 10 attachments, max 25MB, scanned when enabled). |
 | `DELETE` | `/api/v1/artisan/formations/{id}/files/{fileId}` | `ROLE_ARTISAN` | Soft-deletes a course material attachment. |
 | `POST` | `/api/v1/artisan/formations/{id}/submit` | `ROLE_ARTISAN` | Submits draft or rejected formation for administrative moderation (`PENDING_REVIEW`). |
 | `DELETE` | `/api/v1/artisan/formations/{id}` | `ROLE_ARTISAN` | Soft-deletes an authored formation. |
