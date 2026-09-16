@@ -364,7 +364,9 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 - `POST /api/v1/admin/users/{id}/timeout`: Timeout user for specified minutes with reason.
 - `GET /api/v1/admin/stats`: KPI dashboard (total artisans, pending validations, active workshops, revenues).
 - `POST /api/v1/admin/users/{id}/validation`: Approve, reject, or suspend artisan account.
+- `GET /api/v1/admin/formations/pending`: Paginated queue of formations awaiting administrative review.
 - `POST /api/v1/admin/formations/{id}/review`: Approve or reject workshop curriculum.
+- `POST /api/v1/admin/formations/{id}/publish`: Publish approved workshop to public catalog.
 - `POST /api/v1/admin/reports/{id}/resolve`: Resolve abuse reports and execute penalty actions.
 
 ---

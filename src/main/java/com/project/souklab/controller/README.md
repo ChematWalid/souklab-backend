@@ -27,8 +27,11 @@ graph LR
 
 | Subpackage | Purpose |
 | :--- | :--- |
-| [`artisan`](artisan/README.md) | Artisan profile updates, public profile viewing, portfolio management. |
+| [`artisan`](artisan/README.md) | Artisan profile updates, public profile viewing, portfolio certifications, and gallery images. |
 | [`auth`](auth/README.md) | Registration, login, email verification, token refreshing, password management. |
+| [`catalog`](catalog/README.md) | Public reference taxonomy endpoints (Wilayas, categories, materials, epoques, techniques). |
+| [`directory`](directory/README.md) | Public artisan discovery search engine and multi-facet directory filtering. |
 | [`formateur`](formateur/README.md) | Formateur teacher accreditation applications, administrative review, grant, and revocation. |
+| [`formation`](formation/README.md) | Artisan masterclass authoring, peer workshop enrollment, syllabus downloads, and administrative moderation. |
 | [`notification`](notification/README.md) | User in-app notification queries, unread counts, mark-read, and soft deletion. |
 | [`user`](user/README.md) | Administrative user management, timeouts, bans, and user avatar gallery operations. |

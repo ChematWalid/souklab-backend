@@ -26,10 +26,14 @@ graph TD
 
 | Subpackage | Domain Responsibility |
 | :--- | :--- |
-| [`artisan`](artisan/README.md) | Artisan profile updates, public profile sanitization, and contact gating. |
+| [`artisan`](artisan/README.md) | Artisan profile updates, public profile sanitization, certifications, and portfolio gallery management. |
 | [`audit`](audit/README.md) | Asynchronous system auditing and administrative audit log queries. |
 | [`auth`](auth/README.md) | Credential verification, onboarding wizard, Spring Security user details. |
+| [`catalog`](catalog/README.md) | Cached reference taxonomy retrieval (Wilayas, categories, materials, epoques, techniques). |
+| [`directory`](directory/README.md) | Public artisan directory search via Hibernate Search with Elasticsearch backend. |
 | [`formateur`](formateur/README.md) | Artisan teacher accreditation lifecycle, applications, and cooldown tracking. |
+| [`formation`](formation/README.md) | Peer masterclass authoring, syllabus document uploads, capacity limits, and review moderation. |
 | [`notification`](notification/README.md) | In-app notification feeds, badge counter tracking, STOMP push broadcasts. |
+| [`profile`](profile/README.md) | Profile lifecycle management, taxonomy foreign key wiring, and strongly-typed JSON patch mutations. |
 | [`security`](security/README.md) | Cryptographic token management (verification tokens and refresh tokens). |
 | [`user`](user/README.md) | Administrative moderation (approvals, bans, timeouts) and avatar gallery management. |

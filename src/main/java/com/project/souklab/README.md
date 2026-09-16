@@ -30,14 +30,14 @@ graph TD
 
 ## Subpackages Overview
 
-- **`config`**: Spring bean definitions, CORS, clock, security configuration, and async settings.
-- **`controller`**: REST API resource adapters and controllers.
-- **`dao`**: Spring Data JPA repositories.
-- **`dto`**: Request and response data transfer objects.
-- **`exception`**: Custom business exceptions and global exception translation.
-- **`filestorage`**: Pluggable file storage engine (MinIO/S3, ClamAV antivirus, image processing).
-- **`model`**: JPA domain entities and lifecycle audit models.
-- **`security`**: Security filters, JWT authentication, and token rate limiting.
-- **`service`**: Core transactional business logic and domain workflows.
-- **`util`**: Stateless helpers (security context, code generation, email dispatch).
+- **`config`**: Spring bean definitions, CORS, clock, security configuration, async settings, caching, and Hibernate Search Elasticsearch lifecycle runners.
+- **`controller`**: REST API resource adapters and controllers (auth, artisan, catalog, directory, formateur, formation, notification, user).
+- **`dao`**: Spring Data JPA repositories (25 repositories spanning identity, taxonomies, formations, and moderation).
+- **`dto`**: Request and response data transfer objects (admin, artisan, auth, catalog, common, directory, formateur, formation, notification, profile, user).
+- **`exception`**: Custom business exceptions, validation errors, and global exception translation.
+- **`filestorage`**: Pluggable file storage engine (MinIO/S3, ClamAV antivirus, image processing, download rate limiting, URL resolution).
+- **`model`**: JPA domain entities and lifecycle audit models (34 classes including base entity, entities, and domain enums).
+- **`security`**: Security filters, JWT authentication, upload boundaries, and token rate limiting.
+- **`service`**: Core transactional business logic, search indexing, profile lifecycle, and domain workflows.
+- **`util`**: Stateless helpers (security context, artisan authentication resolution, code generation, email dispatch).
 - **`validation`**: Custom Jakarta Bean Validation constraints.

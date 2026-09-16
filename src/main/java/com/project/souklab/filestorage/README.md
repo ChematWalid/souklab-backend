@@ -18,13 +18,14 @@ graph TD
 
 ---
 
-## Core Interfaces & Value Objects
+## Core Interfaces, Utilities & Value Objects
 
 | Interface / Class | Type | Responsibility |
 | :--- | :---: | :--- |
 | [`StorageService`](StorageService.java) | Interface | Core contract defining `upload`, `download`, `delete`, `exists`, and `getUrl` operations. |
 | [`StorageResource`](StorageResource.java) | Value Object | Encapsulates input stream, content length, and MIME type for streaming downloads. |
 | [`StorageResult`](StorageResult.java) | Value Object | Contains storage key, resolved access URL, file size, and bucket metadata. |
+| [`FileUrlResolver`](FileUrlResolver.java) | Utility Class | Resolves physical object keys to accessible HTTP URLs using configured public prefixes. |
 
 ---
 
