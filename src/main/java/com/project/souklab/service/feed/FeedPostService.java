@@ -343,6 +343,6 @@ public class FeedPostService {
 
     private boolean isAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return accessControlService.isAdmin(authentication);
+        return accessControlService.canModerateFeed(authentication);
     }
 }

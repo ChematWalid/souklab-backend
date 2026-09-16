@@ -83,7 +83,7 @@ class AuthControllerTest {
                 .name("Karim Client")
                 .phone("+213555000111")
                 .accountStatus(status)
-                .roles(Set.of("ROLE_CLIENT"))
+                .permissions(Set.of("permission:profile:read"))
                 .emailVerified(true)
                 .createdAt(LocalDateTime.of(2026, 9, 1, 10, 0))
                 .build();
@@ -98,7 +98,7 @@ class AuthControllerTest {
                 .name("Ahmed Artisan")
                 .phone("+213555222333")
                 .accountStatus(status)
-                .roles(Set.of("ROLE_ARTISAN"))
+                .permissions(Set.of("permission:artisan:content"))
                 .emailVerified(false)
                 .teacher(false)
                 .verified(false)
@@ -113,7 +113,7 @@ class AuthControllerTest {
                 .tokenType("Bearer")
                 .expiresIn(900L)
                 .user(user)
-                .roles(List.of("ROLE_CLIENT"))
+                .permissions(List.of("permission:profile:read"))
                 .build();
     }
 
@@ -136,7 +136,7 @@ class AuthControllerTest {
                                     {
                                       "email": "karim@souklab.dz",
                                       "password": "Password123!",
-                                      "role": "CLIENT",
+                                      "accountType": "CLIENT",
                                       "firstName": "Karim",
                                       "lastName": "Client"
                                     }
@@ -152,7 +152,7 @@ class AuthControllerTest {
             ArgumentCaptor<UserRegistrationDTO> captor = ArgumentCaptor.forClass(UserRegistrationDTO.class);
             verify(authService).registerUser(captor.capture());
             assertThat(captor.getValue().getEmail()).isEqualTo("karim@souklab.dz");
-            assertThat(captor.getValue().getRole()).isEqualTo("CLIENT");
+            assertThat(captor.getValue().getAccountType()).isEqualTo("CLIENT");
         }
 
         /**
@@ -170,7 +170,7 @@ class AuthControllerTest {
                                     {
                                       "email": "ahmed@souklab.dz",
                                       "password": "Password123!",
-                                      "role": "ARTISAN",
+                                      "accountType": "ARTISAN",
                                       "firstName": "Ahmed",
                                       "lastName": "Artisan"
                                     }
@@ -195,7 +195,7 @@ class AuthControllerTest {
                                     {
                                       "email": "not-an-email",
                                       "password": "short",
-                                      "role": ""
+                                      "accountType": ""
                                     }
                                     """))
                     .andExpect(status().isUnprocessableContent())
@@ -222,7 +222,7 @@ class AuthControllerTest {
                                     {
                                       "email": "existing@souklab.dz",
                                       "password": "Password123!",
-                                      "role": "CLIENT"
+                                      "accountType": "CLIENT"
                                     }
                                     """))
                     .andExpect(status().isConflict())
@@ -247,7 +247,7 @@ class AuthControllerTest {
                                     {
                                       "email": "admin@souklab.dz",
                                       "password": "Password123!",
-                                      "role": "ADMIN"
+                                      "accountType": "ADMIN"
                                     }
                                     """))
                     .andExpect(status().isBadRequest())
@@ -866,7 +866,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.code").value(200))
                     .andExpect(jsonPath("$.data.id").value("user-1"))
                     .andExpect(jsonPath("$.data.email").value("karim@souklab.dz"))
-                    .andExpect(jsonPath("$.data.roles[0]").value("ROLE_CLIENT"));
+                    .andExpect(jsonPath("$.data.permissions[0]").value("permission:profile:read"));
 
             verify(profileService).getCurrentUser();
         }
@@ -1043,7 +1043,7 @@ class AuthControllerTest {
     class OAuthGoogleArtisanTests {
 
         /**
-         * Verifies that initiating Google OAuth for artisan sets SOUKLAB_OAUTH_INTENT=ROLE_ARTISAN cookie
+         * Verifies that initiating Google OAuth for artisan sets SOUKLAB_OAUTH_INTENT=ARTISAN cookie
          * and redirects to /oauth2/authorization/google with 302 Found.
          */
         @Test
@@ -1052,7 +1052,7 @@ class AuthControllerTest {
             mockMvc.perform(get("/api/v1/auth/oauth/google/artisan"))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/oauth2/authorization/google"))
-                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SOUKLAB_OAUTH_INTENT=ROLE_ARTISAN")))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SOUKLAB_OAUTH_INTENT=ARTISAN")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Path=/")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SameSite=Lax")))
@@ -1065,7 +1065,7 @@ class AuthControllerTest {
     class OAuthGoogleClientTests {
 
         /**
-         * Verifies that initiating Google OAuth for client sets SOUKLAB_OAUTH_INTENT=ROLE_CLIENT cookie
+         * Verifies that initiating Google OAuth for client sets SOUKLAB_OAUTH_INTENT=CLIENT cookie
          * and redirects to /oauth2/authorization/google with 302 Found.
          */
         @Test
@@ -1074,7 +1074,7 @@ class AuthControllerTest {
             mockMvc.perform(get("/api/v1/auth/oauth/google/client"))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/oauth2/authorization/google"))
-                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SOUKLAB_OAUTH_INTENT=ROLE_CLIENT")))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SOUKLAB_OAUTH_INTENT=CLIENT")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Path=/")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SameSite=Lax")))

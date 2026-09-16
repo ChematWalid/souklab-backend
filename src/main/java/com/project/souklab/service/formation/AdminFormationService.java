@@ -171,7 +171,7 @@ public class AdminFormationService {
             throw new UnauthorizedException("User is not authenticated");
         }
 
-        if (!accessControlService.isAdmin(authentication)) {
+        if (!accessControlService.canManageFormations(authentication)) {
             throw new ForbiddenException("Access denied: administrator role required.");
         }
 

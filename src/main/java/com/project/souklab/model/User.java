@@ -98,12 +98,12 @@ public class User extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "user_roles",
+        name = "user_permissions",
         joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
+        inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     @Builder.Default
-    private Set<Role> roles = new HashSet<>();
+    private Set<AuthorizationPermission> permissions = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default

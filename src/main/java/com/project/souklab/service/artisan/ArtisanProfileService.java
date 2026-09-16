@@ -21,7 +21,7 @@ import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.ArtisanProfileView;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RoleName;
+import com.project.souklab.security.Permission;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ArtisanProfileService {
 
-    private static final String ROLE_ADMIN_NAME = RoleName.ADMIN.authority();
     private static final String ERROR_NOT_AUTHENTICATED = "Not authenticated.";
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
     private static final String ERROR_ARTISAN_NOT_FOUND_PREFIX = "Artisan not found with id: ";
@@ -71,8 +70,8 @@ public class ArtisanProfileService {
         User viewer = userRepository.findByEmail(email.toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
-        boolean isAdmin = viewer.getRoles().stream()
-                .anyMatch(r -> ROLE_ADMIN_NAME.equals(r.getName()));
+        boolean isAdmin = viewer.getPermissions().stream()
+                .anyMatch(permission -> Permission.ADMIN_USERS.authority().equals(permission.getPermissionKey()));
 
         verifyViewerAccess(viewer, isAdmin);
 
@@ -160,7 +159,7 @@ public class ArtisanProfileService {
      * Non-admin viewers must hold an ACTIVE account with a verified email address.
      *
      * @param viewer  the authenticated user performing the request
-     * @param isAdmin {@code true} if the viewer holds the ROLE_ADMIN authority
+     * @param isAdmin {@code true} if the viewer holds the administrator permission
      * @throws ForbiddenException if the non-admin viewer's account or email is not verified
      */
     private void verifyViewerAccess(User viewer, boolean isAdmin) {
@@ -183,7 +182,7 @@ public class ArtisanProfileService {
      * @param viewer  the authenticated user performing the request
      * @param artisan the target artisan whose profile is being viewed
      * @param isSelf  {@code true} if the viewer is viewing their own profile
-     * @param isAdmin {@code true} if the viewer holds the ROLE_ADMIN authority
+     * @param isAdmin {@code true} if the viewer holds the administrator permission
      */
     private void recordProfileViewIfEligible(User viewer, Artisan artisan, boolean isSelf, boolean isAdmin) {
         if (!isSelf && !isAdmin && !artisanProfileViewRepository.existsByViewerIdAndArtisanId(viewer.getId(), artisan.getId())) {
@@ -203,7 +202,7 @@ public class ArtisanProfileService {
      *
      * @param viewer  the authenticated user performing the request
      * @param isSelf  {@code true} if the viewer owns the profile
-     * @param isAdmin {@code true} if the viewer holds the ROLE_ADMIN authority
+     * @param isAdmin {@code true} if the viewer holds the administrator permission
      * @return {@code true} if contact fields must be masked; {@code false} otherwise
      */
     private boolean resolveContactInfoLocked(User viewer, boolean isSelf, boolean isAdmin) {

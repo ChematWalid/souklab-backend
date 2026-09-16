@@ -26,7 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("@accessControl.isAdmin(authentication)")
+@PreAuthorize("@accessControl.canManageUsers(authentication)")
 public class UserManagementController {
 
     private final UserManagementService userManagementService;

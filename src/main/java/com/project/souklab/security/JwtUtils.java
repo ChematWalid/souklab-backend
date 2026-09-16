@@ -18,6 +18,7 @@ import java.security.Key;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -25,6 +26,8 @@ import java.util.Date;
 public class JwtUtils {
 
     private static final String ERROR_UNEXPECTED_PRINCIPAL_TYPE_PREFIX = "Expected principal of type UserDetails, but found: ";
+    public static final int AUTHORIZATION_SCHEMA_VERSION = 2;
+    private static final String AUTHORIZATION_VERSION_CLAIM = "authz_version";
 
     private final AppProperties appProperties;
     private final Clock clock;
@@ -57,6 +60,8 @@ public class JwtUtils {
     public String generateTokenFromUsername(String username, long expirationMs) {
         return Jwts.builder()
                 .setSubject(username)
+                .setId(UUID.randomUUID().toString())
+                .claim(AUTHORIZATION_VERSION_CLAIM, AUTHORIZATION_SCHEMA_VERSION)
                 .setIssuedAt(Date.from(Instant.now(clock)))
                 .setExpiration(Date.from(Instant.now(clock).plusMillis(expirationMs)))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -73,11 +78,16 @@ public class JwtUtils {
 
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parserBuilder()
+            var claims = Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .setClock(() -> Date.from(clock.instant()))
                     .build()
-                    .parseClaimsJws(authToken);
+                    .parseClaimsJws(authToken).getBody();
+            Object version = claims.get(AUTHORIZATION_VERSION_CLAIM);
+            if (!(version instanceof Number number) || number.intValue() != AUTHORIZATION_SCHEMA_VERSION) {
+                log.warn("Rejected JWT with obsolete authorization schema version");
+                return false;
+            }
             return true;
         } catch (SecurityException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());

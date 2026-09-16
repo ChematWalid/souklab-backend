@@ -24,7 +24,7 @@ graph TD
 | Repository Interface | Managed Entity | Key Query Capabilities |
 | :--- | :--- | :--- |
 | [`UserRepository`](UserRepository.java) | `User` | `findByEmail`, `existsByEmail`, `findByStatusAndDeletedAtIsNull`, search query filters. |
-| [`RoleRepository`](RoleRepository.java) | `Role` | `findByName` (`ROLE_CLIENT`, `ROLE_ARTISAN`, `ROLE_ADMIN`). |
+| [`AuthorizationPermissionRepository`](AuthorizationPermissionRepository.java) | `AuthorizationPermission` | Enabled permission lookup by key and bulk key lookup. |
 | [`RefreshTokenRepository`](RefreshTokenRepository.java) | `RefreshToken` | `findByToken`, `deleteByUser`, revocation cleanup. |
 | [`VerificationTokenRepository`](VerificationTokenRepository.java) | `VerificationToken` | `findActiveToken`, `invalidateActiveTokens` for email verification and password reset. |
 | [`OAuthIdentityRepository`](OAuthIdentityRepository.java) | `OAuthIdentity` | `findByProviderAndProviderUserId`, OAuth account linking. |

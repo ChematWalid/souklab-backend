@@ -74,7 +74,7 @@ All endpoints are versioned with the `/api/v1` prefix. Standard response envelop
 
 ## 2. Authentication & Onboarding (`/api/v1/auth/**`)
 
-Authorization is evaluated using granular permissions mapped from persisted compatibility roles `ROLE_CLIENT`, `ROLE_ARTISAN`, and `ROLE_ADMIN`. Existing role labels in examples remain valid response data and client input. Ownership, verification, enrollment, account status, and moderation rules are enforced by centralized policies. Missing permissions and failed policies return the standard `403 Forbidden` envelope.
+Authorization is evaluated using database-backed granular permissions. Ownership, verification, enrollment, account status, and moderation rules are enforced by centralized policies. Missing permissions and failed policies return the standard `403 Forbidden` envelope. Role strings are not accepted by the API; registration accepts an `accountType` only to select initial onboarding permissions.
 
 ### `POST /api/v1/auth/register`
 Creates a base user account.
@@ -85,7 +85,7 @@ Creates a base user account.
   "email": "artisan@example.com",
   "password": "StrongPassword123!",
   "name": "Ahmed Benali",
-  "role": "ROLE_ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 - **Response**: `201 Created` with User summary & confirmation email dispatch.
@@ -120,8 +120,8 @@ Authenticates credentials and returns JWT access + refresh tokens.
       "phone": "+213 555 12 34 56",
       "avatarUrl": null,
       "accountStatus": "PENDING",
-      "roles": [
-        "ROLE_ARTISAN"
+      "permissions": [
+        "permission:artisan:content"
       ],
       "emailVerified": true,
       "emailVerifiedAt": "2026-09-01T10:00:00",
@@ -139,8 +139,8 @@ Authenticates credentials and returns JWT access + refresh tokens.
       "rating": 0.0,
       "reviewsCount": 0
     },
-    "roles": [
-      "ROLE_ARTISAN"
+    "permissions": [
+      "permission:artisan:content"
     ]
   }
 }
@@ -299,26 +299,26 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 ## 5. Formations & Workshops (`/api/v1/artisan/formations/**`)
 
-> **Access Control Note**: ROLE_CLIENT is rejected with 403 Forbidden on every route in this section. Formations are strictly peer-to-peer among artisans — there is no client-facing enrollment path.
+> **Access Control Note**: Formation authoring and enrollment require `permission:artisan:formations`; administrative moderation requires `permission:admin:formations`.
 
 ### Authoring & Workshop Management (`ArtisanFormationController`)
-- `POST /api/v1/artisan/formations`: Create a new masterclass draft (`ROLE_ARTISAN` — additionally requires accredited instructor status `isTeacher = true`).
-- `GET /api/v1/artisan/formations/me`: Retrieve paginated list of formations authored by the authenticated artisan (`ROLE_ARTISAN`).
-- `GET /api/v1/artisan/formations/{id}`: Retrieve comprehensive details for an authored formation including review history and course materials (`ROLE_ARTISAN` — author ownership verified).
-- `PUT /api/v1/artisan/formations/{id}`: Update an authored formation's curriculum and scheduling metadata (`ROLE_ARTISAN` — author ownership verified; core schedule/pricing changes on approved/published formations reset status to `PENDING_REVIEW`).
-- `POST /api/v1/artisan/formations/{id}/thumbnail`: Upload showcase thumbnail image (`ROLE_ARTISAN` — author ownership verified; multipart image up to 10MB, scanned when enabled).
-- `POST /api/v1/artisan/formations/{id}/files`: Upload course syllabus or learning resource attachment (`ROLE_ARTISAN` — author ownership verified; multipart document up to 25MB, max 10 attachments per formation, scanned when enabled).
-- `DELETE /api/v1/artisan/formations/{id}/files/{fileId}`: Soft-delete an attachment file from an authored formation (`ROLE_ARTISAN` — author ownership verified).
-- `POST /api/v1/artisan/formations/{id}/submit`: Submit a draft or rejected formation for administrative moderation (`ROLE_ARTISAN` — author ownership verified; validates completeness, transitions to `PENDING_REVIEW`).
-- `DELETE /api/v1/artisan/formations/{id}`: Soft-delete an authored formation (`ROLE_ARTISAN` — author ownership verified).
+- `POST /api/v1/artisan/formations`: Create a new masterclass draft (`permission:artisan:formations` — additionally requires accredited instructor status `isTeacher = true`).
+- `GET /api/v1/artisan/formations/me`: Retrieve paginated list of formations authored by the authenticated artisan (`permission:artisan:formations`).
+- `GET /api/v1/artisan/formations/{id}`: Retrieve comprehensive details for an authored formation including review history and course materials (`permission:artisan:formations` — author ownership verified).
+- `PUT /api/v1/artisan/formations/{id}`: Update an authored formation's curriculum and scheduling metadata (`permission:artisan:formations` — author ownership verified; core schedule/pricing changes on approved/published formations reset status to `PENDING_REVIEW`).
+- `POST /api/v1/artisan/formations/{id}/thumbnail`: Upload showcase thumbnail image (`permission:artisan:formations` — author ownership verified; multipart image up to 10MB, scanned when enabled).
+- `POST /api/v1/artisan/formations/{id}/files`: Upload course syllabus or learning resource attachment (`permission:artisan:formations` — author ownership verified; multipart document up to 25MB, max 10 attachments per formation, scanned when enabled).
+- `DELETE /api/v1/artisan/formations/{id}/files/{fileId}`: Soft-delete an attachment file from an authored formation (`permission:artisan:formations` — author ownership verified).
+- `POST /api/v1/artisan/formations/{id}/submit`: Submit a draft or rejected formation for administrative moderation (`permission:artisan:formations` — author ownership verified; validates completeness, transitions to `PENDING_REVIEW`).
+- `DELETE /api/v1/artisan/formations/{id}`: Soft-delete an authored formation (`permission:artisan:formations` — author ownership verified).
 
 ### Peer Discovery, Enrollment & Materials (`ArtisanFormationEnrollmentController`)
-- `GET /api/v1/artisan/formations/catalog`: Browse published masterclass catalog (`ROLE_ARTISAN` — paginated, default sorted by `scheduledAt` ascending).
-- `GET /api/v1/artisan/formations/catalog/{id}`: Retrieve detailed public representation of a published masterclass, active enrollment count, and syllabus overview (`ROLE_ARTISAN`).
-- `POST /api/v1/artisan/formations/{id}/enroll`: Enroll the authenticated artisan in a published masterclass (`ROLE_ARTISAN` — author self-enrollment blocked, enforces maximum participant capacity).
-- `POST /api/v1/artisan/formations/{id}/cancel`: Cancel confirmed enrollment reservation (`ROLE_ARTISAN` — requires active enrollment, enforces configured cancellation cutoff deadline before start).
-- `GET /api/v1/artisan/formations/my-enrollments`: Retrieve paginated enrollment history and upcoming registered workshops for the authenticated artisan (`ROLE_ARTISAN`).
-- `GET /api/v1/artisan/formations/{id}/files/{fileId}/download`: Download protected course document attachment stream (`ROLE_ARTISAN` — restricted strictly to confirmed enrolled participants and the authoring instructor).
+- `GET /api/v1/artisan/formations/catalog`: Browse published masterclass catalog (`permission:artisan:formations` — paginated, default sorted by `scheduledAt` ascending).
+- `GET /api/v1/artisan/formations/catalog/{id}`: Retrieve detailed public representation of a published masterclass, active enrollment count, and syllabus overview (`permission:artisan:formations`).
+- `POST /api/v1/artisan/formations/{id}/enroll`: Enroll the authenticated artisan in a published masterclass (`permission:artisan:formations` — author self-enrollment blocked, enforces maximum participant capacity).
+- `POST /api/v1/artisan/formations/{id}/cancel`: Cancel confirmed enrollment reservation (`permission:artisan:formations` — requires active enrollment, enforces configured cancellation cutoff deadline before start).
+- `GET /api/v1/artisan/formations/my-enrollments`: Retrieve paginated enrollment history and upcoming registered workshops for the authenticated artisan (`permission:artisan:formations`).
+- `GET /api/v1/artisan/formations/{id}/files/{fileId}/download`: Download protected course document attachment stream (`permission:artisan:formations` — restricted strictly to confirmed enrolled participants and the authoring instructor).
 
 
 ---
@@ -327,7 +327,7 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 - `GET /api/v1/feed`: Browse published posts with optional `type` filter and pagination.
 - `GET /api/v1/feed/{id}`: Retrieve one published post and its media.
-- `POST /api/v1/feed`: Submit an `ACTUALITE`, `FORMATION`, or `ANNONCE` post for moderation (`ROLE_ARTISAN` for active verified artisans or `ROLE_ADMIN`).
+- `POST /api/v1/feed`: Submit an `ACTUALITE`, `FORMATION`, or `ANNONCE` post for moderation (`permission:artisan:content` for active verified artisans or `permission:admin:feed`).
 - `PUT /api/v1/feed/{id}` and `DELETE /api/v1/feed/{id}`: Author/admin update or remove a post.
 - `POST/DELETE /api/v1/feed/{id}/media[/{mediaId}]`: Add or remove validated image attachments.
 - `GET /api/v1/artisans/{artisanId}/reviews`: Browse visible artisan reviews.

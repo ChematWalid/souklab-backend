@@ -2,9 +2,8 @@ package com.project.souklab.service.auth;
 
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AccountStatus;
-import com.project.souklab.model.Role;
+import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RolePermissionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -35,10 +34,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + emailOrUsername));
 
         Set<GrantedAuthority> authorities = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            RolePermissionMapper.authoritiesFor(role.getName()).stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .forEach(authorities::add);
+        for (AuthorizationPermission permission : user.getPermissions()) {
+            if (permission.isEnabled()) {
+                authorities.add(new SimpleGrantedAuthority(permission.getPermissionKey()));
+            }
         }
 
         boolean isAccountLocked = user.isSuspensionActive(LocalDateTime.now(clock));

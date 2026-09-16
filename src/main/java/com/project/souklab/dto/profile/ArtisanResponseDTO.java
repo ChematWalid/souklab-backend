@@ -37,7 +37,7 @@ public class ArtisanResponseDTO implements ProfileResponse {
     private String phone;
     private String avatarUrl;
     private AccountStatus accountStatus;
-    private Set<String> roles;
+    private Set<String> permissions;
     private boolean emailVerified;
     private LocalDateTime emailVerifiedAt;
     private LocalDateTime createdAt;

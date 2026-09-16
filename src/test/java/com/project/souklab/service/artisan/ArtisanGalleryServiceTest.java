@@ -124,7 +124,7 @@ class ArtisanGalleryServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ARTISAN");
+        GrantedAuthority authority = new SimpleGrantedAuthority("permission:artisan:content");
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -366,7 +366,7 @@ class ArtisanGalleryServiceTest {
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.isAuthenticated()).thenReturn(true);
 
-            GrantedAuthority clientAuthority = new SimpleGrantedAuthority("ROLE_CLIENT");
+            GrantedAuthority clientAuthority = new SimpleGrantedAuthority("permission:profile:read");
             doReturn(List.of(clientAuthority)).when(authentication).getAuthorities();
 
             SecurityContextHolder.setContext(securityContext);

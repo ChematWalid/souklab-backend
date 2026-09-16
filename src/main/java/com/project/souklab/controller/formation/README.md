@@ -2,7 +2,7 @@
 
 REST controllers managing masterclass authoring, course material uploads, peer workshop discovery, enrollment reservations, and administrative curriculum moderation.
 
-> **Access Boundary**: Peer discovery, enrollment, and authoring routes are strictly reserved for artisans (`ROLE_ARTISAN`). `ROLE_CLIENT` callers are rejected with `403 Forbidden` across all routes.
+> **Access Boundary**: Artisan formation routes require `permission:artisan:formations`; administrative moderation routes require `permission:admin:formations`.
 
 ---
 
@@ -11,32 +11,32 @@ REST controllers managing masterclass authoring, course material uploads, peer w
 ### Artisan Masterclass Authoring (`ArtisanFormationController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/artisan/formations` | `ROLE_ARTISAN` | Creates a new formation draft (requires accredited instructor status `isTeacher = true`). |
-| `GET` | `/api/v1/artisan/formations/me` | `ROLE_ARTISAN` | Retrieves paginated list of formations authored by the authenticated artisan. |
-| `GET` | `/api/v1/artisan/formations/{id}` | `ROLE_ARTISAN` | Retrieves complete authored formation details including review history and course materials. |
-| `PUT` | `/api/v1/artisan/formations/{id}` | `ROLE_ARTISAN` | Updates curriculum and schedule (core changes on approved/published reset to `PENDING_REVIEW`). |
-| `POST` | `/api/v1/artisan/formations/{id}/thumbnail` | `ROLE_ARTISAN` | Uploads showcase thumbnail image (multipart, max 10MB, scanned when enabled). |
-| `POST` | `/api/v1/artisan/formations/{id}/files` | `ROLE_ARTISAN` | Uploads course syllabus or resource document attachment (max 10 attachments, max 25MB, scanned when enabled). |
-| `DELETE` | `/api/v1/artisan/formations/{id}/files/{fileId}` | `ROLE_ARTISAN` | Soft-deletes a course material attachment. |
-| `POST` | `/api/v1/artisan/formations/{id}/submit` | `ROLE_ARTISAN` | Submits draft or rejected formation for administrative moderation (`PENDING_REVIEW`). |
-| `DELETE` | `/api/v1/artisan/formations/{id}` | `ROLE_ARTISAN` | Soft-deletes an authored formation. |
+| `POST` | `/api/v1/artisan/formations` | `permission:artisan:formations` | Creates a new formation draft (requires accredited instructor status `isTeacher = true`). |
+| `GET` | `/api/v1/artisan/formations/me` | `permission:artisan:formations` | Retrieves paginated list of formations authored by the authenticated artisan. |
+| `GET` | `/api/v1/artisan/formations/{id}` | `permission:artisan:formations` | Retrieves complete authored formation details including review history and course materials. |
+| `PUT` | `/api/v1/artisan/formations/{id}` | `permission:artisan:formations` | Updates curriculum and schedule (core changes on approved/published reset to `PENDING_REVIEW`). |
+| `POST` | `/api/v1/artisan/formations/{id}/thumbnail` | `permission:artisan:formations` | Uploads showcase thumbnail image (multipart, max 10MB, scanned when enabled). |
+| `POST` | `/api/v1/artisan/formations/{id}/files` | `permission:artisan:formations` | Uploads course syllabus or resource document attachment (max 10 attachments, max 25MB, scanned when enabled). |
+| `DELETE` | `/api/v1/artisan/formations/{id}/files/{fileId}` | `permission:artisan:formations` | Soft-deletes a course material attachment. |
+| `POST` | `/api/v1/artisan/formations/{id}/submit` | `permission:artisan:formations` | Submits draft or rejected formation for administrative moderation (`PENDING_REVIEW`). |
+| `DELETE` | `/api/v1/artisan/formations/{id}` | `permission:artisan:formations` | Soft-deletes an authored formation. |
 
 ### Peer Discovery, Enrollment & Downloads (`ArtisanFormationEnrollmentController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/artisan/formations/catalog` | `ROLE_ARTISAN` | Browses published peer masterclass catalog (paginated, sorted by `scheduledAt ASC`). |
-| `GET` | `/api/v1/artisan/formations/catalog/{id}` | `ROLE_ARTISAN` | Retrieves detailed public view of a published masterclass, capacity, and syllabus files. |
-| `POST` | `/api/v1/artisan/formations/{id}/enroll` | `ROLE_ARTISAN` | Enrolls caller in published workshop (blocks self-enrollment, enforces max capacity). |
-| `POST` | `/api/v1/artisan/formations/{id}/cancel` | `ROLE_ARTISAN` | Cancels confirmed enrollment reservation (enforces configured cutoff deadline before start). |
-| `GET` | `/api/v1/artisan/formations/my-enrollments` | `ROLE_ARTISAN` | Retrieves paginated enrollment history and registered workshops for authenticated artisan. |
-| `GET` | `/api/v1/artisan/formations/{id}/files/{fileId}/download` | `ROLE_ARTISAN` | Streams protected course attachment (restricted to author and confirmed participants). |
+| `GET` | `/api/v1/artisan/formations/catalog` | `permission:artisan:formations` | Browses published peer masterclass catalog (paginated, sorted by `scheduledAt ASC`). |
+| `GET` | `/api/v1/artisan/formations/catalog/{id}` | `permission:artisan:formations` | Retrieves detailed public view of a published masterclass, capacity, and syllabus files. |
+| `POST` | `/api/v1/artisan/formations/{id}/enroll` | `permission:artisan:formations` | Enrolls caller in published workshop (blocks self-enrollment, enforces max capacity). |
+| `POST` | `/api/v1/artisan/formations/{id}/cancel` | `permission:artisan:formations` | Cancels confirmed enrollment reservation (enforces configured cutoff deadline before start). |
+| `GET` | `/api/v1/artisan/formations/my-enrollments` | `permission:artisan:formations` | Retrieves paginated enrollment history and registered workshops for authenticated artisan. |
+| `GET` | `/api/v1/artisan/formations/{id}/files/{fileId}/download` | `permission:artisan:formations` | Streams protected course attachment (restricted to author and confirmed participants). |
 
 ### Administrative Moderation (`AdminFormationController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/admin/formations/pending` | `ROLE_ADMIN` | Retrieves paginated queue of formations awaiting moderation review. |
-| `POST` | `/api/v1/admin/formations/{id}/review` | `ROLE_ADMIN` | Submits review decision (`APPROVED` or `REJECTED`) with moderation comment. |
-| `POST` | `/api/v1/admin/formations/{id}/publish` | `ROLE_ADMIN` | Publishes an approved formation to the public catalog. |
+| `GET` | `/api/v1/admin/formations/pending` | `permission:admin:formations` | Retrieves paginated queue of formations awaiting moderation review. |
+| `POST` | `/api/v1/admin/formations/{id}/review` | `permission:admin:formations` | Submits review decision (`APPROVED` or `REJECTED`) with moderation comment. |
+| `POST` | `/api/v1/admin/formations/{id}/publish` | `permission:admin:formations` | Publishes an approved formation to the public catalog. |
 
 ---
 

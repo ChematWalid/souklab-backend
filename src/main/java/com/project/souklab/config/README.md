@@ -11,7 +11,7 @@ Centralizes framework configurations, custom Spring Beans, security filter setup
 - Configures Caffeine in-memory caches for reference taxonomy data and rate limiting (`CacheConfig`).
 - Binds externalized configuration properties (`AppProperties`, `AvatarProperties`).
 - Configures WebSocket endpoints, STOMP message routing, and authentication handshakes (`WebSocketConfig`).
-- Seeds bootstrap roles and initial administrator accounts (`DataSeeder`).
+- Seeds canonical permissions and initial administrator accounts (`DataSeeder`).
 - Harmonizes outer HTTP status codes with inner envelope codes (`ApiResponseCodeAdvice`).
 - Manages Hibernate Search 8.2.2.Final with Elasticsearch analysis and indexing lifecycle in subpackage [`search`](search/README.md).
 
@@ -29,7 +29,7 @@ Centralizes framework configurations, custom Spring Beans, security filter setup
 | [`ClockConfig`](ClockConfig.java) | `@Configuration` | Exposes a `java.time.Clock` bean for time-dependent operations (token expiration, cooldown tracking). |
 | [`PasswordEncoderConfig`](PasswordEncoderConfig.java) | `@Configuration` | Exposes a `BCryptPasswordEncoder` bean for secure credential hashing. |
 | [`ApiResponseCodeAdvice`](ApiResponseCodeAdvice.java) | `@ControllerAdvice` | Intercepts HTTP response bodies to synchronize outer HTTP status codes with inner `ApiResponse.code`. |
-| [`DataSeeder`](DataSeeder.java) | `@Component`, `CommandLineRunner` | Seeds compatibility roles (`ROLE_CLIENT`, `ROLE_ARTISAN`, `ROLE_ADMIN`) used by `RolePermissionMapper` and bootstrap administrator accounts. |
+| [`DataSeeder`](DataSeeder.java) | `@Component`, `CommandLineRunner` | Seeds the canonical permission catalog and bootstrap administrator accounts. |
 | [`WebSocketConfig`](WebSocketConfig.java) | `@Configuration`, `@EnableWebSocketMessageBroker` | Configures STOMP messaging, `/ws` endpoint, user destination prefixes, and external broker relays. |
 | [`WebSocketAuthInterceptor`](WebSocketAuthInterceptor.java) | `ChannelInterceptor` | Authenticates STOMP `CONNECT` frames by validating Bearer JWT tokens in connect headers. |
 | [`WebClientConfig`](WebClientConfig.java) | Class | Foundation configuration class for external HTTP client integrations. |

@@ -6,7 +6,7 @@ The schema is defined by the JPA mappings in `com.project.souklab.model`; this d
 
 | Area | Tables / mappings |
 | --- | --- |
-| Identity | `users`, `roles`, `user_roles`, `refresh_tokens`, `verification_tokens`, `oauth_identities`, `clients`, `user_avatars` |
+| Identity | `users`, `permissions`, `user_permissions`, `refresh_tokens`, `verification_tokens`, `oauth_identities`, `clients`, `user_avatars` |
 | Artisan | `artisans`, `artisan_gallery_images`, `artisan_certifications`, `artisan_profile_views`, `artisan_formateur_requests`, and artisan taxonomy join tables |
 | Catalog | `regions`, `job_categories`, `job_sub_categories`, `material_families`, `materials`, `epoques`, `techniques` |
 | Formations | `formations`, `formation_files`, `formation_enrollments`, `formation_reviews` |

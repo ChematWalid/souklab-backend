@@ -8,7 +8,7 @@ Data transfer contracts for authentication, registration, password lifecycle, an
 
 | DTO Class | Direction | Description |
 | :--- | :---: | :--- |
-| [`UserRegistrationDTO`](UserRegistrationDTO.java) | Inbound | Registration payload with email, password, firstName, lastName, and initial role (`CLIENT` or `ARTISAN`). |
+| [`UserRegistrationDTO`](UserRegistrationDTO.java) | Inbound | Registration payload with email, password, firstName, lastName, and account type (`CLIENT` or `ARTISAN`). |
 | [`LoginDTO`](LoginDTO.java) | Inbound | Credentials payload (`email`, `password`) for JWT authentication. |
 | [`JwtResponseDTO`](JwtResponseDTO.java) | Outbound | Authentication response returning access token, refresh token, expiration duration, and user summary. |
 | [`TokenRefreshRequestDTO`](TokenRefreshRequestDTO.java) | Inbound | Payload containing refresh token for session renewal. |

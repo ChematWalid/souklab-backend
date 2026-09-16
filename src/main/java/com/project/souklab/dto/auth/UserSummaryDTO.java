@@ -18,8 +18,7 @@ public class UserSummaryDTO {
     private String firstName;
     private String lastName;
     private String name;
-    private String role;
-    private Set<String> roles;
+    private Set<String> permissions;
     private AccountStatus accountStatus;
     private boolean isPremium;
     private boolean isValidated;

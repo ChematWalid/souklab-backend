@@ -16,7 +16,6 @@ import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.dto.profile.UserPatchDTO;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
-import com.project.souklab.security.RoleName;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
 import com.project.souklab.util.SecurityUtils;
@@ -47,8 +46,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
-    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
+    private static final String ARTISAN_SIGNUP_INTENT = "ARTISAN";
+    private static final String CLIENT_SIGNUP_INTENT = "CLIENT";
     private static final String OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI = "/oauth2/authorization/google";
 
     private final AuthService authService;
@@ -177,7 +176,7 @@ public class AuthController {
      */
     @GetMapping("/oauth/google/artisan")
     public void initiateGoogleOAuthArtisan(HttpServletResponse response) throws IOException {
-        setIntentCookie(response, ROLE_ARTISAN_NAME);
+        setIntentCookie(response, ARTISAN_SIGNUP_INTENT);
         response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);
     }
 
@@ -186,7 +185,7 @@ public class AuthController {
      */
     @GetMapping("/oauth/google/client")
     public void initiateGoogleOAuthClient(HttpServletResponse response) throws IOException {
-        setIntentCookie(response, ROLE_CLIENT_NAME);
+        setIntentCookie(response, CLIENT_SIGNUP_INTENT);
         response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);
     }
 
@@ -194,7 +193,7 @@ public class AuthController {
      * Sets the OAuth2 registration intent cookie on the outgoing response.
      *
      * @param response   the HTTP response to attach the cookie to
-     * @param intentRole the role intent string (e.g., {@code "ROLE_ARTISAN"})
+     * @param intentRole the account-type signup intent (for example, {@code "ARTISAN"})
      */
     private void setIntentCookie(HttpServletResponse response, String intentRole) {
         ResponseCookie cookie = ResponseCookie.from(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, intentRole)

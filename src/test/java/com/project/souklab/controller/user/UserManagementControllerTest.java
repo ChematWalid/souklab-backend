@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.project.souklab.controller.support.SecurityTestUtils.admin;
 import static com.project.souklab.controller.support.SecurityTestUtils.artisan;
@@ -68,7 +69,7 @@ class UserManagementControllerTest {
                 .lastName("User")
                 .name("Sample User")
                 .status(status)
-                .primaryRole("CLIENT")
+                .permissions(Set.of("permission:profile:read"))
                 .build();
     }
 

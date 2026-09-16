@@ -21,9 +21,8 @@ import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanFormateurRequest;
 import com.project.souklab.model.FormateurRequestStatus;
 import com.project.souklab.model.NotificationType;
-import com.project.souklab.model.Role;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RoleName;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.EmailUtil;
 import com.project.souklab.util.SecurityUtils;
@@ -103,7 +102,7 @@ public class ArtisanFormateurService {
 
         ArtisanFormateurRequest saved = formateurRequestRepository.saveAndFlush(request);
 
-        List<User> admins = userRepository.findByRoleName(RoleName.ADMIN.authority());
+        List<User> admins = userRepository.findByPermissionKey(Permission.ADMIN_USERS.authority());
         String artisanName = resolveArtisanFullName(user);
         String notifMsg = "New artisan formateur request submitted by "
                 + (artisanName != null && !artisanName.isBlank() ? artisanName + " (" + user.getEmail() + ")" : user.getEmail())

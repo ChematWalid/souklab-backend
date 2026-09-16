@@ -19,6 +19,34 @@ public class AccessControlService {
         return hasPermission(authentication, Permission.ADMIN_USERS);
     }
 
+    public boolean canManageUsers(Authentication authentication) {
+        return hasPermission(authentication, Permission.ADMIN_USERS);
+    }
+
+    public boolean canManageFormations(Authentication authentication) {
+        return hasPermission(authentication, Permission.ADMIN_FORMATIONS);
+    }
+
+    public boolean canModerateFeed(Authentication authentication) {
+        return hasPermission(authentication, Permission.ADMIN_FEED);
+    }
+
+    public boolean canModerateReports(Authentication authentication) {
+        return hasPermission(authentication, Permission.ADMIN_REPORTS);
+    }
+
+    public boolean canManageArtisanFormations(Authentication authentication) {
+        return hasPermission(authentication, Permission.ARTISAN_FORMATIONS);
+    }
+
+    public boolean canManageArtisanContent(Authentication authentication) {
+        return hasPermission(authentication, Permission.ARTISAN_CONTENT);
+    }
+
+    public boolean canManageArtisanReviews(Authentication authentication) {
+        return hasPermission(authentication, Permission.ARTISAN_REVIEWS);
+    }
+
     public boolean isArtisan(Authentication authentication) {
         return hasPermission(authentication, Permission.ARTISAN_CONTENT);
     }

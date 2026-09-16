@@ -25,12 +25,12 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findWithLockById(String id);
     
-    @EntityGraph(attributePaths = {"roles"})
+    @EntityGraph(attributePaths = {"permissions"})
     Optional<User> findByEmail(String email);
     
     boolean existsByEmail(String email);
 
-    @EntityGraph(attributePaths = {"roles"})
+    @EntityGraph(attributePaths = {"permissions"})
     @Query("SELECT u FROM User u WHERE u.email = :emailOrUsername")
     Optional<User> findByUsername(@Param("emailOrUsername") String emailOrUsername);
 
@@ -43,6 +43,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query("SELECT u FROM User u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<User> searchUsers(@Param("query") String query, Pageable pageable);
 
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName AND u.deletedAt IS NULL")
-    List<User> findByRoleName(@Param("roleName") String roleName);
+    @Query("SELECT u FROM User u JOIN u.permissions p WHERE p.permissionKey = :permissionKey AND p.enabled = true AND u.deletedAt IS NULL")
+    List<User> findByPermissionKey(@Param("permissionKey") String permissionKey);
 }

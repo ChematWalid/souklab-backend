@@ -28,8 +28,8 @@ graph TD
 
 | Module | Core Responsibility | Key Technologies |
 | :--- | :--- | :--- |
-| **Authentication & Authorization** | Stateless JWT authentication, compatibility roles mapped to granular permissions and centralized domain policies (`CLIENT`, `ARTISAN`, `ADMIN`), email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security 6, JJWT (HS256), BCrypt |
-| **User & Profile Management** | Artisan public profiles, profile completion wizard, contact gating based on membership/roles, profile view metrics deduplication. | Spring Data JPA, Jakarta Validation |
+| **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security 6, JJWT (HS256), BCrypt |
+| **User & Profile Management** | Artisan public profiles, profile completion wizard, permission-aware contact gating, profile view metrics deduplication. | Spring Data JPA, Jakarta Validation |
 | **Public Directory & Search** | Full-text scored search, faceted discovery (Wilayas, categories, materials, epoques, techniques), accent folding, edge n-grams, and JPA criteria fallback. | Hibernate Search 8.2.2.Final, Elasticsearch 8.x |
 | **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques). | Caffeine Cache, Spring Data JPA |
 | **Formations & Peer Workshops** | Peer masterclass authoring (`isTeacher`), syllabus ClamAV scanning, administrative review lifecycle, capacity limits, cancellation deadlines, and client 403 boundary. | Spring Security, ClamAV, Spring Data JPA |

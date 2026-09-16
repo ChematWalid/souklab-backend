@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Shared security helper for artisan-scoped service operations.
- * Centralises the pattern of asserting {@code ROLE_ARTISAN} authority,
+ * Centralises the pattern of asserting artisan content permission,
  * resolving the username from the security context, and loading the
  * {@link Artisan} profile — eliminating copy-paste across multiple services.
  */
@@ -26,14 +26,14 @@ public final class ArtisanSecurityUtils {
      * using the supplied {@link ArtisanRepository}.
      * <ol>
      *   <li>Asserts a non-anonymous, authenticated principal is present.</li>
-     *   <li>Verifies the principal holds {@code ROLE_ARTISAN}.</li>
+     *   <li>Verifies the principal holds the artisan content permission.</li>
      *   <li>Loads and returns the matching {@link Artisan} entity by email or ID.</li>
      * </ol>
      *
      * @param artisanRepository repository used to retrieve the artisan entity
      * @return the resolved {@link Artisan} entity for the current request
      * @throws UnauthorizedException if the security context contains no authenticated principal
-     * @throws ForbiddenException    if the principal lacks {@code ROLE_ARTISAN} or no artisan profile exists
+     * @throws ForbiddenException    if the principal lacks the required permission or no artisan profile exists
      */
     public static Artisan resolveAuthenticatedArtisan(ArtisanRepository artisanRepository) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

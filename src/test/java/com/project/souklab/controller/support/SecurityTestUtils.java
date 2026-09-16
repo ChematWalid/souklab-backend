@@ -1,6 +1,7 @@
 package com.project.souklab.controller.support;
 
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 /**
@@ -19,7 +20,8 @@ public final class SecurityTestUtils {
      * Returns a RequestPostProcessor authenticating as an Artisan user.
      */
     public static RequestPostProcessor artisan(String email) {
-        return SecurityMockMvcRequestPostProcessors.user(email).roles("ARTISAN");
+        return SecurityMockMvcRequestPostProcessors.user(email)
+                .authorities(new SimpleGrantedAuthority("permission:artisan:content"), new SimpleGrantedAuthority("permission:artisan:formations"), new SimpleGrantedAuthority("permission:artisan:reviews"));
     }
 
     /**
@@ -33,7 +35,8 @@ public final class SecurityTestUtils {
      * Returns a RequestPostProcessor authenticating as an Admin user.
      */
     public static RequestPostProcessor admin(String email) {
-        return SecurityMockMvcRequestPostProcessors.user(email).roles("ADMIN");
+        return SecurityMockMvcRequestPostProcessors.user(email)
+                .authorities(new SimpleGrantedAuthority("permission:admin:users"), new SimpleGrantedAuthority("permission:admin:formations"), new SimpleGrantedAuthority("permission:admin:feed"), new SimpleGrantedAuthority("permission:admin:reports"));
     }
 
     /**
@@ -47,7 +50,8 @@ public final class SecurityTestUtils {
      * Returns a RequestPostProcessor authenticating as a Client user.
      */
     public static RequestPostProcessor client(String email) {
-        return SecurityMockMvcRequestPostProcessors.user(email).roles("CLIENT");
+        return SecurityMockMvcRequestPostProcessors.user(email)
+                .authorities(new SimpleGrantedAuthority("permission:profile:read"), new SimpleGrantedAuthority("permission:profile:write"));
     }
 
     /**

@@ -35,7 +35,7 @@ import java.nio.charset.StandardCharsets;
  */
 @RestController
 @RequestMapping("/api/v1/artisan/formations")
-@PreAuthorize("@accessControl.isArtisan(authentication)")
+@PreAuthorize("@accessControl.canManageArtisanFormations(authentication)")
 @RequiredArgsConstructor
 @Slf4j
 public class ArtisanFormationEnrollmentController {

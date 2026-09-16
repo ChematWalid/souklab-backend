@@ -176,7 +176,7 @@ class FormationServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ARTISAN");
+        GrantedAuthority authority = new SimpleGrantedAuthority("permission:artisan:formations");
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);

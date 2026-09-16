@@ -2,6 +2,8 @@
 
 This document provides the exhaustive specification for all requests, headers, request bodies, and responses configured in the **Souklab Postman Collection** (`.postman/souklab.postman_collection.json`).
 
+> Authorization contract: registration accepts `accountType` (`CLIENT` or `ARTISAN`) only. Responses expose database-backed `permissions` such as `permission:artisan:content`; legacy `role`, `roles`, and `ROLE_*` fields are obsolete and must not be sent or expected.
+
 ## Table of Contents
 1. [Auth — Client](#1-auth--client)
 2. [Auth — Artisan](#2-auth--artisan)

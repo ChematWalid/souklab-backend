@@ -29,7 +29,7 @@ public class ClientProfileResponseDTO implements ProfileResponse {
     /** Placeholder — wired to real upload path in Phase D. */
     private String avatarUrl;
     private AccountStatus accountStatus;
-    private Set<String> roles;
+    private Set<String> permissions;
     private boolean emailVerified;
     private LocalDateTime emailVerifiedAt;
     private LocalDateTime createdAt;

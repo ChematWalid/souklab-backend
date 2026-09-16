@@ -6,7 +6,7 @@ Spring Security filters, JWT extraction, rate limiting mechanisms, and OAuth2 su
 
 ## Authorization model
 
-`RoleName` preserves the persisted `ROLE_*` compatibility contract. `RolePermissionMapper` maps each role to type-safe `Permission` authorities, and `AccessControlService` exposes reusable predicates for method security and domain workflows. JWTs remain subject-based; current database roles are resolved whenever the principal is loaded.
+`AuthorizationPermission` is the canonical persisted capability. `AccessControlService` exposes reusable predicates for method security and domain workflows. JWTs carry an authorization schema version while current permissions are resolved from the database whenever the principal is loaded. Account type is onboarding metadata, not an authorization mechanism.
 
 ## Security Filter Pipeline
 
@@ -31,6 +31,6 @@ graph TD
 | [`RateLimitFilter`](RateLimitFilter.java) | `OncePerRequestFilter` | Sliding window rate limiting on authentication endpoints (`/auth/login`, `/auth/register`) backed by Caffeine cache and Bucket4j. |
 | [`AvatarUploadRateLimitFilter`](AvatarUploadRateLimitFilter.java) | `OncePerRequestFilter` | Dedicated rate limit filter protecting multipart avatar upload endpoints from denial-of-service bursting. |
 | [`AvatarUploadSizeFilter`](AvatarUploadSizeFilter.java) | `OncePerRequestFilter` | Inspects `Content-Length` and early stream boundaries to reject oversized avatar payloads before memory buffering. |
-| [`OAuth2AuthenticationSuccessHandler`](OAuth2AuthenticationSuccessHandler.java) | Handler | Processes successful Google OAuth2 callbacks: creates or links user accounts, checks role intent cookies, and issues JWT tokens. |
-| [`Permission`](Permission.java) / [`RolePermissionMapper`](RolePermissionMapper.java) | Authorization contract | Defines granular permissions and maps legacy roles to permission and compatibility authorities. |
+| [`OAuth2AuthenticationSuccessHandler`](OAuth2AuthenticationSuccessHandler.java) | Handler | Processes successful Google OAuth2 callbacks: creates or links user accounts, checks account-type intent cookies, and issues JWT tokens. |
+| [`Permission`](Permission.java) | Authorization contract | Defines the stable granular permission identifiers used by persistence and policy checks. |
 | [`AccessControlService`](AccessControlService.java) | Policy facade | Provides centralized Spring method-security predicates for administrator and artisan access. |

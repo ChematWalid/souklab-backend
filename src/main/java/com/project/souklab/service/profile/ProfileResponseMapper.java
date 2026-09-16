@@ -14,9 +14,9 @@ import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanGalleryImage;
 import com.project.souklab.model.Client;
-import com.project.souklab.model.Role;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RoleName;
+import com.project.souklab.model.AuthorizationPermission;
+import com.project.souklab.security.Permission;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -34,8 +34,6 @@ import java.util.stream.Collectors;
 @Component
 public class ProfileResponseMapper {
 
-    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
-    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
 
     /**
      * Dispatches to the correct role-specific profile DTO.
@@ -45,11 +43,11 @@ public class ProfileResponseMapper {
      * @return the appropriate {@link ProfileResponse} subtype based on the user's roles
      */
     public ProfileResponse mapToProfileResponse(User user) {
-        boolean isArtisan = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_ARTISAN_NAME));
+        boolean isArtisan = user.getPermissions().stream()
+                .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
 
-        Set<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
+        Set<String> roleNames = user.getPermissions().stream()
+                .map(AuthorizationPermission::getPermissionKey)
                 .collect(Collectors.toSet());
 
         if (isArtisan) {
@@ -68,11 +66,6 @@ public class ProfileResponseMapper {
      * @return a {@link UserSummaryDTO} populated with admin-visible fields
      */
     public UserSummaryDTO mapToSummaryDTO(User user) {
-        String primaryRole = user.getRoles().stream()
-                .findFirst()
-                .map(Role::getName)
-                .orElse(ROLE_CLIENT_NAME);
-
         boolean isTeacher = user.getArtisan() != null && user.getArtisan().isTeacher();
         boolean isPremium = (user.getArtisan() != null && user.getArtisan().isPremium())
                 || (user.getClient() != null && user.getClient().isPremium());
@@ -85,8 +78,7 @@ public class ProfileResponseMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .name(user.getName())
-                .role(primaryRole)
-                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
+                .permissions(user.getPermissions().stream().map(AuthorizationPermission::getPermissionKey).collect(Collectors.toSet()))
                 .accountStatus(user.getStatus())
                 .isPremium(isPremium)
                 .isValidated(isValidated)
@@ -144,7 +136,7 @@ public class ProfileResponseMapper {
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
                 .accountStatus(user.getStatus())
-                .roles(roleNames)
+                .permissions(roleNames)
                 .emailVerified(user.isEmailVerified())
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .createdAt(user.getCreatedAt())
@@ -189,7 +181,7 @@ public class ProfileResponseMapper {
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
                 .accountStatus(user.getStatus())
-                .roles(roleNames)
+                .permissions(roleNames)
                 .emailVerified(user.isEmailVerified())
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .createdAt(user.getCreatedAt())

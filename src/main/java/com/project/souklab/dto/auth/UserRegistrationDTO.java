@@ -28,6 +28,6 @@ public class UserRegistrationDTO {
 
     private String lastName;
 
-    @NotBlank(message = "Role is required (ARTISAN or CLIENT)")
-    private String role;
+    @NotBlank(message = "Account type is required (ARTISAN or CLIENT)")
+    private String accountType;
 }

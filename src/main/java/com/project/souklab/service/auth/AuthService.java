@@ -3,7 +3,7 @@ package com.project.souklab.service.auth;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.OAuthIdentityRepository;
 import com.project.souklab.dao.RefreshTokenRepository;
-import com.project.souklab.dao.RoleRepository;
+import com.project.souklab.dao.AuthorizationPermissionRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
 import com.project.souklab.dto.auth.ForgotPasswordRequestDTO;
@@ -24,9 +24,9 @@ import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.OAuthIdentity;
 import com.project.souklab.model.RefreshToken;
-import com.project.souklab.model.Role;
+import com.project.souklab.model.AuthorizationPermission;
+import com.project.souklab.security.Permission;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RoleName;
 import com.project.souklab.model.VerificationTokenType;
 import com.project.souklab.security.JwtUtils;
 import com.project.souklab.service.audit.AuditLogService;
@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -63,15 +64,13 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
-    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
     private static final String ERROR_INVALID_CREDENTIALS = "Invalid email or password.";
-    private static final String ERROR_ROLE_NOT_FOUND_PREFIX = "Role not found: ";
+    private static final String ERROR_PERMISSION_NOT_FOUND_PREFIX = "Permission not found: ";
     private static final long MS_PER_SECOND = 1000L;
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final AuthorizationPermissionRepository permissionRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final OAuthIdentityRepository oauthIdentityRepository;
     private final PasswordEncoder passwordEncoder;
@@ -91,11 +90,11 @@ public class AuthService {
      * CLIENT users start with status ACTIVE (can immediately log in and participate).
      * Public registration strictly prohibits ADMIN accounts.
      *
-     * @param dto the registration payload containing email, password, role, and name fields
+     * @param dto the registration payload containing email, password, account type, and name fields
      * @return the profile response for the newly created user
      * @throws ConflictException         if the email is already registered
-     * @throws BadRequestException       if the requested role is invalid or ADMIN
-     * @throws ResourceNotFoundException if the resolved role does not exist in the database
+     * @throws BadRequestException       if the requested account type is invalid or ADMIN
+     * @throws ResourceNotFoundException if a required permission does not exist in the database
      */
     @Transactional
     public ProfileResponse registerUser(UserRegistrationDTO dto) {
@@ -104,11 +103,11 @@ public class AuthService {
             throw new ConflictException("Email is already registered: " + email);
         }
 
-        Role assignedRole = validateRegistrationRole(dto.getRole());
-        boolean isArtisan = assignedRole.getName().equals(ROLE_ARTISAN_NAME);
+        Set<AuthorizationPermission> permissions = validateRegistrationAccountType(dto.getAccountType());
+        boolean isArtisan = "ARTISAN".equalsIgnoreCase(dto.getAccountType());
         AccountStatus initialStatus = isArtisan ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
-        User savedUser = userRepository.save(buildNewUser(dto, email, assignedRole, initialStatus));
+        User savedUser = userRepository.save(buildNewUser(dto, email, permissions, initialStatus));
 
         try {
             String rawCode = verificationTokenService.issueToken(savedUser, VerificationTokenType.EMAIL_VERIFICATION);
@@ -196,7 +195,7 @@ public class AuthService {
                 .tokenType("Bearer")
                 .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
-                .roles(user.getRoles().stream().map(Role::getName).toList())
+                .permissions(user.getPermissions().stream().map(AuthorizationPermission::getPermissionKey).toList())
                 .build();
     }
 
@@ -446,33 +445,38 @@ public class AuthService {
                 .tokenType("Bearer")
                 .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
-                .roles(user.getRoles().stream().map(Role::getName).toList())
+                .permissions(user.getPermissions().stream().map(AuthorizationPermission::getPermissionKey).toList())
                 .build();
     }
 
     /**
-     * Validates the registration role input string and returns the matching {@link Role} entity.
-     * Accepts bare role names (e.g., {@code "ARTISAN"}) or prefixed names (e.g., {@code "ROLE_ARTISAN"}).
+     * Validates the registration account type and resolves its default permissions.
      * ADMIN registration via the public endpoint is always rejected.
      *
      * @param roleInput the raw role string from the registration request, may be {@code null}
-     * @return the resolved {@link Role} entity
+     * @return the permissions assigned to the new account
      * @throws BadRequestException       if the role is ADMIN or not one of ARTISAN / CLIENT
      * @throws ResourceNotFoundException if the role does not exist in the database
      */
-    private Role validateRegistrationRole(String roleInput) {
-        String normalized = RoleName.normalize(roleInput);
-        if (RoleName.ADMIN.authority().equals(normalized)) {
+    private Set<AuthorizationPermission> validateRegistrationAccountType(String accountTypeInput) {
+        if ("ADMIN".equalsIgnoreCase(accountTypeInput)) {
             throw new BadRequestException("Administrator registration is not permitted via public registration.");
         }
-
-        String roleName = normalized;
-        if (!roleName.equals(ROLE_ARTISAN_NAME) && !roleName.equals(ROLE_CLIENT_NAME)) {
-            throw new BadRequestException("Invalid registration role. Allowed roles are ARTISAN or CLIENT.");
+        if (!"ARTISAN".equalsIgnoreCase(accountTypeInput) && !"CLIENT".equalsIgnoreCase(accountTypeInput)) {
+            throw new BadRequestException("Invalid account type. Allowed values are ARTISAN or CLIENT.");
         }
+        return permissionsForRegistration("ARTISAN".equalsIgnoreCase(accountTypeInput));
+    }
 
-        return roleRepository.findByName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException(ERROR_ROLE_NOT_FOUND_PREFIX + roleName));
+    private Set<AuthorizationPermission> permissionsForRegistration(boolean artisan) {
+        Set<String> keys = artisan
+                ? Set.of(Permission.ARTISAN_CONTENT.authority(), Permission.ARTISAN_FORMATIONS.authority(), Permission.ARTISAN_REVIEWS.authority(), Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority())
+                : Set.of(Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority());
+        List<AuthorizationPermission> permissions = permissionRepository.findByPermissionKeyInAndEnabledTrue(keys);
+        if (permissions.size() != keys.size()) {
+            throw new ResourceNotFoundException(ERROR_PERMISSION_NOT_FOUND_PREFIX + keys);
+        }
+        return new HashSet<>(permissions);
     }
 
     /**
@@ -485,7 +489,7 @@ public class AuthService {
      * @param initialStatus the initial {@link AccountStatus} derived from the role
      * @return a fully constructed but not yet persisted {@link User} entity
      */
-    private User buildNewUser(UserRegistrationDTO dto, String email, Role assignedRole, AccountStatus initialStatus) {
+    private User buildNewUser(UserRegistrationDTO dto, String email, Set<AuthorizationPermission> permissions, AccountStatus initialStatus) {
         String firstName = dto.getFirstName();
         String lastName = dto.getLastName();
         if ((firstName == null || firstName.isBlank()) && dto.getName() != null && !dto.getName().isBlank()) {
@@ -501,7 +505,7 @@ public class AuthService {
                 .lastName(lastName)
                 .status(initialStatus)
                 .emailVerified(false)
-                .roles(new HashSet<>(Set.of(assignedRole)))
+                .permissions(permissions)
                 .build();
     }
 
@@ -644,20 +648,17 @@ public class AuthService {
         }
 
         String normalizedIntent = intentRole.trim().toUpperCase();
-        String roleName;
+        boolean artisan;
         AccountStatus initialStatus;
         if (normalizedIntent.contains("ARTISAN")) {
-            roleName = ROLE_ARTISAN_NAME;
+            artisan = true;
             initialStatus = AccountStatus.PENDING;
         } else if (normalizedIntent.contains("CLIENT")) {
-            roleName = ROLE_CLIENT_NAME;
+            artisan = false;
             initialStatus = AccountStatus.ACTIVE;
         } else {
             throw new BadRequestException("Invalid OAuth registration role intent: " + intentRole);
         }
-
-        Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException(ERROR_ROLE_NOT_FOUND_PREFIX + roleName));
 
         User user = User.builder()
                 .email(email)
@@ -668,7 +669,7 @@ public class AuthService {
                 .status(initialStatus)
                 .emailVerified(true)
                 .emailVerifiedAt(LocalDateTime.now(clock))
-                .roles(new HashSet<>(Set.of(role)))
+                .permissions(permissionsForRegistration(artisan))
                 .build();
 
         user = userRepository.save(user);

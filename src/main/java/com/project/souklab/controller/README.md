@@ -8,7 +8,7 @@ HTTP adapter layer exposing RESTful endpoints according to API conventions.
 
 - **Thin Controllers**: Controllers contain no business logic; they validate incoming requests, delegate to application services, and wrap results in standard `ApiResponse` or `PaginatedResponse` wrappers.
 - **Consistent Envelopes**: All successful responses return `ApiResponse<T>`, and all paginated list endpoints return `ApiResponse<PaginatedResponse<T>>`.
-- **Security Scoping**: Endpoints enforce centralized permission policies through `AccessControlService`; persisted roles remain compatibility bundles and are not referenced directly by controllers.
+- **Security Scoping**: Endpoints enforce centralized permission policies through `AccessControlService`; no persisted role model or role compatibility layer remains.
 - **Input Validation**: Request bodies are validated using `@Valid` and Jakarta constraints.
 
 ```mermaid

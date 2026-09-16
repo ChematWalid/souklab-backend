@@ -18,7 +18,7 @@ public class JwtResponseDTO {
     @Builder.Default
     private String tokenType = "Bearer";
     private long expiresIn;
-    /** Role-specific profile object: ClientProfileResponseDTO for clients, ArtisanResponseDTO for artisans. */
+    /** Account-type profile object: ClientProfileResponseDTO for clients, ArtisanResponseDTO for artisans. */
     private ProfileResponse user;
-    private List<String> roles;
+    private List<String> permissions;
 }

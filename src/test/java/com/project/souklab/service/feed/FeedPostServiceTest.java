@@ -15,6 +15,7 @@ import com.project.souklab.model.Artisan;
 import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.model.User;
+import com.project.souklab.model.AccountStatus;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.security.AccessControlService;
 import org.junit.jupiter.api.AfterEach;
@@ -60,12 +61,12 @@ class FeedPostServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = User.builder().email("artisan@example.com").status(com.project.souklab.model.AccountStatus.ACTIVE).build();
+        user = User.builder().email("artisan@example.com").status(AccountStatus.ACTIVE).build();
         user.setId("user-1");
         Artisan artisan = Artisan.builder().id("artisan-1").user(user).isVerified(true).build();
         user.setArtisan(artisan);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority("ROLE_ARTISAN"))));
+                "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority("permission:artisan:content"))));
         when(userRepository.findByEmail("artisan@example.com")).thenReturn(Optional.of(user));
         when(accessControlService.isAdmin(any())).thenReturn(false);
     }

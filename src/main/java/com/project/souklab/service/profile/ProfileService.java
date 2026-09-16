@@ -23,7 +23,7 @@ import com.project.souklab.model.Material;
 import com.project.souklab.model.Region;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RoleName;
+import com.project.souklab.security.Permission;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,8 +44,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
-    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
     private static final String ERROR_NOT_AUTHENTICATED = "Not authenticated.";
 
@@ -100,10 +98,9 @@ public class ProfileService {
         User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
-        boolean isArtisan = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_ARTISAN_NAME));
-        boolean isClient = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_CLIENT_NAME));
+        boolean isArtisan = user.getPermissions().stream()
+                .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
+        boolean isClient = !isArtisan;
 
         if (isArtisan) {
             completeArtisanProfile(user, dto);
@@ -135,10 +132,9 @@ public class ProfileService {
         User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
-        boolean isArtisan = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_ARTISAN_NAME));
-        boolean isClient = user.getRoles().stream()
-                .anyMatch(r -> r.getName().equals(ROLE_CLIENT_NAME));
+        boolean isArtisan = user.getPermissions().stream()
+                .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
+        boolean isClient = !isArtisan;
 
         if (!isArtisan && !isClient) {
             throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");

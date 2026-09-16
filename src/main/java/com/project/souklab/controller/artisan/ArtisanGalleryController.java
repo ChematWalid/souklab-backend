@@ -27,7 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1/artisan/gallery")
-@PreAuthorize("@accessControl.isArtisan(authentication)")
+@PreAuthorize("@accessControl.canManageArtisanContent(authentication)")
 @RequiredArgsConstructor
 public class ArtisanGalleryController {
 

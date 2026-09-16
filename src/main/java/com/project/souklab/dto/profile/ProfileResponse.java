@@ -28,7 +28,7 @@ public interface ProfileResponse {
 
     AccountStatus getAccountStatus();
 
-    Set<String> getRoles();
+    Set<String> getPermissions();
 
     boolean isEmailVerified();
 

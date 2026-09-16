@@ -7,6 +7,8 @@ import com.project.souklab.dto.review.ArtisanReviewRequestDTO;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.model.Artisan;
+import com.project.souklab.model.FormationEnrollment;
+import com.project.souklab.model.ReviewStatus;
 import com.project.souklab.model.ArtisanReview;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.Formation;
@@ -51,7 +53,7 @@ class ArtisanReviewServiceTest {
     private Artisan reviewer;
     private Artisan subject;
     private Formation formation;
-    private com.project.souklab.model.FormationEnrollment enrollment;
+    private FormationEnrollment enrollment;
 
     @BeforeEach
     void setUp() {
@@ -65,11 +67,11 @@ class ArtisanReviewServiceTest {
         subject = Artisan.builder().id("subject").user(subjectUser).build();
         formation = Formation.builder().author(subject).status(FormationStatus.COMPLETED).build();
         formation.setId("formation");
-        enrollment = com.project.souklab.model.FormationEnrollment.builder()
+        enrollment = FormationEnrollment.builder()
                 .formation(formation).artisan(reviewer).status(EnrollmentStatus.ATTENDED).build();
         enrollment.setId("enrollment");
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority("ROLE_ARTISAN"))));
+                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority("permission:artisan:reviews"))));
         when(artisanRepository.findByUserEmailIgnoreCase("reviewer@example.com")).thenReturn(Optional.of(reviewer));
     }
 
@@ -87,8 +89,8 @@ class ArtisanReviewServiceTest {
             review.setId("review");
             return review;
         });
-        when(reviewRepository.averageRating("subject", com.project.souklab.model.ReviewStatus.PUBLISHED)).thenReturn(new BigDecimal("4.25"));
-        when(reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull("subject", com.project.souklab.model.ReviewStatus.PUBLISHED)).thenReturn(1L);
+        when(reviewRepository.averageRating("subject", ReviewStatus.PUBLISHED)).thenReturn(new BigDecimal("4.25"));
+        when(reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull("subject", ReviewStatus.PUBLISHED)).thenReturn(1L);
 
         var result = service.create("formation", new ArtisanReviewRequestDTO(new BigDecimal("4.2"), "Excellent"));
 

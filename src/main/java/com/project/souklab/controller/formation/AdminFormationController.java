@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/admin/formations")
-@PreAuthorize("@accessControl.isAdmin(authentication)")
+@PreAuthorize("@accessControl.canManageFormations(authentication)")
 @RequiredArgsConstructor
 public class AdminFormationController {
 

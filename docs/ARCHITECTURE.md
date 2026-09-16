@@ -41,7 +41,7 @@ Social feed, direct messaging, subscriptions, payments, and analytics are roadma
 
 HTTP authentication uses a signed JWT access token in the `Authorization: Bearer` header. Refresh tokens are opaque UUID values persisted by `RefreshTokenService` and rotated/revoked during refresh and logout. User status, lockout state, and email verification are checked by the authentication service and JWT user-details loading path.
 
-Method-level authorization uses code-defined permissions mapped from persisted compatibility roles. `AccessControlService` centralizes coarse checks while domain services enforce ownership, account state, verification, enrollment, and moderation policies. WebSocket clients connect to `/ws` (SockJS enabled), send a bearer token in STOMP `CONNECT` headers, and use `/app`, `/topic`, `/queue`, and `/user` destinations. The broker is an externally configured STOMP relay; it is not an embedded RabbitMQ container managed by the application.
+Method-level authorization uses database-backed permissions and centralized domain policies. `AccessControlService` centralizes coarse checks while domain services enforce ownership, account state, verification, enrollment, and moderation policies. WebSocket clients connect to `/ws` (SockJS enabled), send a bearer token in STOMP `CONNECT` headers, and use `/app`, `/topic`, `/queue`, and `/user` destinations. The broker is an externally configured STOMP relay; it is not an embedded RabbitMQ container managed by the application.
 
 ## Storage pipeline
 

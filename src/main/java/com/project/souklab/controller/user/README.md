@@ -9,13 +9,13 @@ Handles administrative user moderation (approvals, bans, timeouts) and user avat
 ### User Moderation (`UserManagementController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/admin/users` | `ROLE_ADMIN` | Paginated search and filter across all users. |
-| `GET` | `/api/v1/admin/users/pending` | `ROLE_ADMIN` | Lists users awaiting administrative validation. |
-| `POST` | `/api/v1/admin/users/{id}/approve` | `ROLE_ADMIN` | Approves pending user, activates account, and sends notification. |
-| `POST` | `/api/v1/admin/users/approve-bulk` | `ROLE_ADMIN` | Bulk approves a list of pending user IDs. |
-| `POST` | `/api/v1/admin/users/{id}/ban` | `ROLE_ADMIN` | Permanently bans user, revokes refresh tokens, dispatches notification. |
-| `POST` | `/api/v1/admin/users/{id}/timeout` | `ROLE_ADMIN` | Temporarily suspends user for specified duration in minutes. |
-| `GET` | `/api/v1/admin/users/audit-logs` | `ROLE_ADMIN` | Queries platform administrative audit logs. |
+| `GET` | `/api/v1/admin/users` | `permission:admin:users` | Paginated search and filter across all users. |
+| `GET` | `/api/v1/admin/users/pending` | `permission:admin:users` | Lists users awaiting administrative validation. |
+| `POST` | `/api/v1/admin/users/{id}/approve` | `permission:admin:users` | Approves pending user, activates account, and sends notification. |
+| `POST` | `/api/v1/admin/users/approve-bulk` | `permission:admin:users` | Bulk approves a list of pending user IDs. |
+| `POST` | `/api/v1/admin/users/{id}/ban` | `permission:admin:users` | Permanently bans user, revokes refresh tokens, dispatches notification. |
+| `POST` | `/api/v1/admin/users/{id}/timeout` | `permission:admin:users` | Temporarily suspends user for specified duration in minutes. |
+| `GET` | `/api/v1/admin/users/audit-logs` | `permission:admin:users` | Queries platform administrative audit logs. |
 
 ### Avatar Gallery (`AvatarController`)
 | Method | Endpoint | Access | Description |

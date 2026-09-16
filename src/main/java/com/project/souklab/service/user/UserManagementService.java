@@ -10,8 +10,8 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.NotificationType;
-import com.project.souklab.model.Role;
 import com.project.souklab.model.User;
+import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.security.RefreshTokenService;
@@ -183,11 +183,10 @@ public class UserManagementService {
     }
 
     private UserResponseDTO mapToDTO(User user) {
-        Set<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
+        Set<String> roleNames = user.getPermissions().stream()
+                .map(AuthorizationPermission::getPermissionKey)
                 .collect(Collectors.toSet());
 
-        String primaryRole = roleNames.isEmpty() ? null : roleNames.iterator().next();
         String name = ((user.getFirstName() != null ? user.getFirstName() : "") + " " +
                 (user.getLastName() != null ? user.getLastName() : "")).trim();
         if (name.isEmpty()) {
@@ -209,8 +208,7 @@ public class UserManagementService {
                 .status(effectiveStatus)
                 .emailVerified(user.isEmailVerified())
                 .emailVerifiedAt(user.getEmailVerifiedAt())
-                .primaryRole(primaryRole)
-                .roles(roleNames)
+                .permissions(roleNames)
                 .bannedUntil(isExpiredTimeout ? null : user.getBannedUntil())
                 .banReason(isExpiredTimeout ? null : user.getBanReason())
                 .lastLoginAt(user.getLastLoginAt())

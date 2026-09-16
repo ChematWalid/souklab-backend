@@ -193,7 +193,7 @@ public class ContentReportService {
 
     private void requireAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!accessControlService.isAdmin(authentication)) {
+        if (!accessControlService.canModerateReports(authentication)) {
             throw new ForbiddenException("Administrator access is required.");
         }
     }

@@ -8,6 +8,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.report.ContentReportRequestDTO;
 import com.project.souklab.dto.report.ReportResolutionRequestDTO;
 import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.ContentReport;
 import com.project.souklab.model.ReportResolutionAction;
 import com.project.souklab.model.ReportTargetType;
@@ -77,6 +78,6 @@ class ContentReportServiceTest {
         when(postRepository.findByIdAndDeletedAtIsNull("post-1")).thenReturn(Optional.empty());
         ContentReportRequestDTO request = new ContentReportRequestDTO(ReportTargetType.POST, "post-1", "abuse", null);
 
-        assertThatThrownBy(() -> service.create(request)).isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+        assertThatThrownBy(() -> service.create(request)).isInstanceOf(ResourceNotFoundException.class);
     }
 }

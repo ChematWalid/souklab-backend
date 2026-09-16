@@ -24,8 +24,7 @@ public class UserResponseDTO {
     private AccountStatus status;
     private boolean emailVerified;
     private LocalDateTime emailVerifiedAt;
-    private String primaryRole;
-    private Set<String> roles;
+    private Set<String> permissions;
     private boolean isPremium;
     private boolean isValidated;
     private boolean isTeacher;

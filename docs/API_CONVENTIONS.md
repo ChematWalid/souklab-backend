@@ -77,7 +77,7 @@ rule going forward:
 - **400** — the request itself is malformed (bad JSON, unparseable body).
   Field-level *validation* failures use 422, not 400.
 - **403** — the caller is identified and authenticated, but isn't
-  *allowed* to do this. Includes role mismatches, missing required
+  *allowed* to do this. Includes permission mismatches, missing required
   profile/state on the caller's own account, and policy blocks (cooldown,
   permanent block).
 - **409** — the request is well-formed and the caller is allowed to make
@@ -92,14 +92,14 @@ Worked examples from this codebase:
 - Submitting a Formateur request when already an approved Formateur → 409
   (the outcome you're requesting already exists)
 - Submitting a Formateur request with no registered artisan profile → 403
-  (role/profile mismatch, not a state conflict)
+  (permission/profile mismatch, not a state conflict)
 - Submitting during an active cooldown or permanent block → 403
   (policy forbids the action)
 - Admin hitting `PATCH /me` → 403 (no profile entity to patch)
 
 ### `@PreAuthorize` failures
 
-Controllers use centralized permission predicates rather than raw role literals. Persisted `ROLE_*` values remain compatibility data and are mapped by the security layer to granular permissions.
+Controllers use centralized permission predicates rather than role literals. Permission identifiers are the only authorization contract and are resolved from the database.
 
 Spring Security's `AccessDeniedException` is handled explicitly in
 `GlobalExceptionHandler` and mapped to the same envelope as every other
@@ -189,7 +189,7 @@ this project uses **JSON Merge Patch** semantics via `JsonNode`:
   Validation rules as the equivalent "complete" DTO, never relaxed for
   PATCH) and applied.
 
-Account-level fields (email, password, role, accountStatus) and
+Account-level fields (email, password, accountType, accountStatus) and
 admin/workflow-controlled fields (e.g. `isTeacher`) are never accepted
 through a self-service PATCH — they're excluded from the DTO entirely,
 not merely validated-and-rejected.

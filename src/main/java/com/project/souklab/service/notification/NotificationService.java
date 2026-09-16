@@ -10,7 +10,7 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.Notification;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RoleName;
+import com.project.souklab.security.Permission;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -123,14 +123,14 @@ public class NotificationService {
     }
 
     /**
-     * Sends a system-wide notification to all users who possess the 'ROLE_ADMIN' role.
+     * Sends a system-wide notification to all users who possess the administrator permission.
      * Uses targeted repository query to avoid scanning the entire users table.
      *
      * @param message the content of the notification to be sent to admins
      */
     @Transactional
     public void notifyAdmins(String message) {
-        List<User> admins = userRepository.findByRoleName(RoleName.ADMIN.authority());
+        List<User> admins = userRepository.findByPermissionKey(Permission.ADMIN_USERS.authority());
         for (User admin : admins) {
             createForUser(admin, message);
         }

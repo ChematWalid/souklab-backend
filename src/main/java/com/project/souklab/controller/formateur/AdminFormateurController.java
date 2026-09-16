@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-@PreAuthorize("@accessControl.isAdmin(authentication)")
+@PreAuthorize("@accessControl.canManageUsers(authentication)")
 public class AdminFormateurController {
 
     private final ArtisanFormateurService artisanFormateurService;

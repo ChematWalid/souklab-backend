@@ -6,7 +6,7 @@ import com.project.souklab.dao.JobSubCategoryRepository;
 import com.project.souklab.dao.MaterialFamilyRepository;
 import com.project.souklab.dao.MaterialRepository;
 import com.project.souklab.dao.RegionRepository;
-import com.project.souklab.dao.RoleRepository;
+import com.project.souklab.dao.AuthorizationPermissionRepository;
 import com.project.souklab.dao.TechniqueRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AccountStatus;
@@ -16,10 +16,10 @@ import com.project.souklab.model.JobSubCategory;
 import com.project.souklab.model.Material;
 import com.project.souklab.model.MaterialFamily;
 import com.project.souklab.model.Region;
-import com.project.souklab.model.Role;
+import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
-import com.project.souklab.security.RoleName;
+import com.project.souklab.security.Permission;
 import com.project.souklab.util.EmailUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Reference data seeder initializing security roles, admin user, geographic hierarchy,
+ * Reference data seeder initializing permissions, admin user, geographic hierarchy,
  * craft categories, material families, historical epochs, and craftsmanship techniques.
  */
 @Slf4j
@@ -46,7 +46,7 @@ import java.util.Set;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final AuthorizationPermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final AppProperties appProperties;
     private final EmailUtil emailUtil;
@@ -62,7 +62,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        seedRoles();
+        seedPermissions();
         seedAdminUser();
         seedRegions();
         seedJobCategories();
@@ -71,14 +71,14 @@ public class DataSeeder implements CommandLineRunner {
         seedTechniques();
     }
 
-    private void seedRoles() {
-        List<String> roleNames = List.of(RoleName.ADMIN.authority(), RoleName.ARTISAN.authority(), RoleName.CLIENT.authority());
-        for (String name : roleNames) {
-            if (roleRepository.findByName(name).isEmpty()) {
-                Role role = new Role();
-                role.setName(name);
-                role.setDescription(name + " role");
-                roleRepository.save(role);
+    private void seedPermissions() {
+        for (Permission permission : Permission.values()) {
+            if (permissionRepository.findByPermissionKeyAndEnabledTrue(permission.authority()).isEmpty()) {
+                AuthorizationPermission definition = new AuthorizationPermission();
+                definition.setPermissionKey(permission.authority());
+                definition.setDescription(permission.name());
+                definition.setEnabled(true);
+                permissionRepository.save(definition);
             }
         }
     }
@@ -94,8 +94,7 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        Role adminRole = roleRepository.findByName(RoleName.ADMIN.authority())
-                .orElseThrow(() -> new IllegalStateException("Administrator role not found. Seed roles first."));
+        Set<AuthorizationPermission> adminPermissions = new HashSet<>(permissionRepository.findAll());
 
         String defaultPassword = appProperties.getAdmin().getDefaultPassword();
         if (defaultPassword == null || defaultPassword.isBlank()) {
@@ -110,7 +109,7 @@ public class DataSeeder implements CommandLineRunner {
                 .status(AccountStatus.ACTIVE)
                 .emailVerified(true)
                 .emailVerifiedAt(LocalDateTime.now(clock))
-                .roles(new HashSet<>(Set.of(adminRole)))
+                .permissions(adminPermissions)
                 .build();
 
         userRepository.save(admin);
