@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
+import java.time.LocalDateTime;
 
 /**
  * Coordinates formation-backed artisan reviews and aggregate rating updates.
@@ -37,6 +39,7 @@ public class ArtisanReviewService {
     private final FormationEnrollmentRepository enrollmentRepository;
     private final ArtisanRepository artisanRepository;
     private final NotificationService notificationService;
+    private final Clock clock;
 
     /**
      * Lists visible reviews for an artisan.
@@ -128,7 +131,7 @@ public class ArtisanReviewService {
             throw new ForbiddenException("You may only remove your own review.");
         }
         review.setStatus(ReviewStatus.REMOVED);
-        review.setDeletedAt(java.time.LocalDateTime.now());
+        review.setDeletedAt(LocalDateTime.now(clock));
         reviewRepository.save(review);
         recalculate(review.getArtisan());
     }

@@ -30,11 +30,15 @@ public class ArtisanReviewResponseDTO {
      * @return response DTO
      */
     public static ArtisanReviewResponseDTO from(ArtisanReview review) {
-        String name = review.getReviewer().getUser().getFirstName() + " " + review.getReviewer().getUser().getLastName();
+        String name = java.util.stream.Stream.of(review.getReviewer().getUser().getFirstName(), review.getReviewer().getUser().getLastName())
+                .filter(java.util.Objects::nonNull)
+                .filter(value -> !value.isBlank())
+                .reduce((left, right) -> left + " " + right)
+                .orElse(review.getReviewer().getUser().getEmail());
         return ArtisanReviewResponseDTO.builder()
                 .id(review.getId())
                 .reviewerId(review.getReviewer().getId())
-                .reviewerName(name.trim())
+                .reviewerName(name)
                 .artisanId(review.getArtisan().getId())
                 .formationId(review.getEnrollment().getFormation().getId())
                 .rating(review.getRating())

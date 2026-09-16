@@ -32,11 +32,15 @@ public class FeedPostResponseDTO {
      * @return response DTO
      */
     public static FeedPostResponseDTO from(FeedPost post) {
-        String authorName = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
+        String authorName = java.util.stream.Stream.of(post.getAuthor().getFirstName(), post.getAuthor().getLastName())
+                .filter(java.util.Objects::nonNull)
+                .filter(value -> !value.isBlank())
+                .reduce((left, right) -> left + " " + right)
+                .orElse(post.getAuthor().getEmail());
         return FeedPostResponseDTO.builder()
                 .id(post.getId())
                 .authorId(post.getAuthor().getId())
-                .authorName(authorName.trim())
+                .authorName(authorName)
                 .type(post.getType().name())
                 .title(post.getTitle())
                 .body(post.getBody())
