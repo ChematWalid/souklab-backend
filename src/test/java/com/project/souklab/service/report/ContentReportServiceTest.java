@@ -13,6 +13,7 @@ import com.project.souklab.model.ReportResolutionAction;
 import com.project.souklab.model.ReportTargetType;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.security.AccessControlService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ class ContentReportServiceTest {
     @Mock private ArtisanRepository artisanRepository;
     @Mock private UserRepository userRepository;
     @Mock private NotificationService notificationService;
+    @Mock private AccessControlService accessControlService;
 
     private ContentReportService service;
     private User reporter;
@@ -51,7 +53,7 @@ class ContentReportServiceTest {
     @BeforeEach
     void setUp() {
         service = new ContentReportService(reportRepository, postRepository, reviewRepository, artisanRepository, userRepository, notificationService,
-                Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC));
+                Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC), accessControlService);
         reporter = User.builder().email("reporter@example.com").build();
         reporter.setId("user-1");
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("reporter@example.com", "credentials", List.of()));

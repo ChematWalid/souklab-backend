@@ -16,6 +16,7 @@ import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.security.AccessControlService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,7 @@ class FeedPostServiceTest {
     @Mock private FileUrlResolver fileUrlResolver;
     @Mock private NotificationService notificationService;
     @Mock private StorageObjectLifecycle storageObjectLifecycle;
+    @Mock private AccessControlService accessControlService;
 
     @InjectMocks private FeedPostService service;
 
@@ -65,6 +67,7 @@ class FeedPostServiceTest {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority("ROLE_ARTISAN"))));
         when(userRepository.findByEmail("artisan@example.com")).thenReturn(Optional.of(user));
+        when(accessControlService.isAdmin(any())).thenReturn(false);
     }
 
     @AfterEach
