@@ -24,6 +24,7 @@ import com.project.souklab.model.FeedPostMedia;
 import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.model.Formation;
+import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.SecurityUtils;
@@ -161,6 +162,7 @@ public class FeedPostService {
         post.setStatus(FeedPostStatus.REMOVED);
         post.setDeletedAt(LocalDateTime.now(clock));
         postRepository.save(post);
+        post.getMedia().forEach(media -> storageObjectLifecycle.deleteAfterCommit(media.getStorageKey()));
     }
 
     /**
@@ -180,14 +182,16 @@ public class FeedPostService {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Media file is required.");
         }
+        String storedKey = null;
         try {
             ValidatedFile validated = fileValidator.validateAndSanitize(
                     file.getInputStream(), file.getOriginalFilename(), file.getContentType(), file.getSize(), IMAGE_TYPES);
             ValidatedFile scanned = virusScanService.scan(validated);
             StorageResult stored = storageService.store(scanned.content(), scanned.sanitizedFilename(), scanned.detectedMimeType(), scanned.size());
+            storedKey = stored.key();
             FeedPostMedia media = FeedPostMedia.builder()
                     .post(post)
-                    .storageKey(stored.key())
+                    .storageKey(storedKey)
                     .contentType(scanned.detectedMimeType())
                     .fileSize(scanned.size())
                     .displayOrder(post.getMedia().size())
@@ -202,6 +206,11 @@ public class FeedPostService {
                     .build();
         } catch (IOException exception) {
             throw new BadRequestException("Unable to read media upload.");
+        } catch (RuntimeException exception) {
+            if (storedKey != null) {
+                storageService.delete(storedKey);
+            }
+            throw exception;
         }
     }
 
@@ -243,7 +252,9 @@ public class FeedPostService {
         post.setStatus(FeedPostStatus.PUBLISHED);
         post.setPublishedAt(LocalDateTime.now(clock));
         FeedPost saved = postRepository.save(post);
-        notificationService.notifyAdmins("Feed post published: " + saved.getTitle());
+        if (saved.getType() == FeedPostType.FORMATION) {
+            notificationService.createForUser(saved.getAuthor(), "Your formation post was published.", NotificationType.NEW_FORMATION, saved.getId());
+        }
         return toResponse(saved);
     }
 
@@ -290,8 +301,7 @@ public class FeedPostService {
     }
 
     private FeedPostResponseDTO toResponse(FeedPost post) {
-        FeedPostResponseDTO base = FeedPostResponseDTO.from(post);
-        return base;
+        return FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
     }
 
     private User currentUser() {

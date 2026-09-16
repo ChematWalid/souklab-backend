@@ -85,8 +85,10 @@ public class ContentReportService {
     public Page<ContentReportResponseDTO> list(ReportStatus status, ReportTargetType targetType, Pageable pageable) {
         requireAdmin();
         Page<ContentReport> reports;
-        if (status == null) {
+        if (status == null && targetType == null) {
             reports = reportRepository.findAll(pageable);
+        } else if (status == null) {
+            reports = reportRepository.findByTargetType(targetType, pageable);
         } else if (targetType == null) {
             reports = reportRepository.findByStatus(status, pageable);
         } else {

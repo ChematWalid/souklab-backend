@@ -7,6 +7,7 @@ import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Public or moderation representation of a feed post.
@@ -33,6 +34,17 @@ public class FeedPostResponseDTO {
      * @return response DTO
      */
     public static FeedPostResponseDTO from(FeedPost post) {
+        return from(post, Function.identity());
+    }
+
+    /**
+     * Maps an entity to a response using a storage-key URL resolver.
+     *
+     * @param post feed post
+     * @param urlResolver resolver for attachment keys
+     * @return response DTO
+     */
+    public static FeedPostResponseDTO from(FeedPost post, Function<String, String> urlResolver) {
         String authorName = java.util.stream.Stream.of(post.getAuthor().getFirstName(), post.getAuthor().getLastName())
                 .filter(java.util.Objects::nonNull)
                 .filter(value -> !value.isBlank())
@@ -49,7 +61,12 @@ public class FeedPostResponseDTO {
                 .formationId(post.getFormation() == null ? null : post.getFormation().getId())
                 .publishedAt(post.getPublishedAt())
                 .moderationNote(post.getModerationNote())
-                .media(post.getMedia().stream().map(FeedPostMediaResponseDTO::from).toList())
+                .media(post.getMedia().stream().map(media -> FeedPostMediaResponseDTO.builder()
+                        .id(media.getId())
+                        .url(urlResolver.apply(media.getStorageKey()))
+                        .contentType(media.getContentType())
+                        .displayOrder(media.getDisplayOrder())
+                        .build()).toList())
                 .build();
     }
 }

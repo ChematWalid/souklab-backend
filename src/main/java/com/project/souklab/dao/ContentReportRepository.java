@@ -12,5 +12,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface ContentReportRepository extends JpaRepository<ContentReport, String> {
     Page<ContentReport> findByStatus(ReportStatus status, Pageable pageable);
+    Page<ContentReport> findByTargetType(ReportTargetType targetType, Pageable pageable);
     Page<ContentReport> findByTargetTypeAndStatus(ReportTargetType targetType, ReportStatus status, Pageable pageable);
 }
