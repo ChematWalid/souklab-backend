@@ -18,7 +18,7 @@ graph TD
 
 ---
 
-## Repositories Reference (25 Repositories)
+## Repositories Reference (29 Repositories)
 
 ### Identity, Security & Auditing
 | Repository Interface | Managed Entity | Key Query Capabilities |
@@ -60,3 +60,11 @@ graph TD
 | [`FormationEnrollmentRepository`](FormationEnrollmentRepository.java) | `FormationEnrollment` | `countByFormationIdAndStatus`, `findByFormationIdAndArtisanId`, seat capacity checks. |
 | [`FormationFileRepository`](FormationFileRepository.java) | `FormationFile` | `findByFormationIdAndDeletedAtIsNull`, course syllabus attachments. |
 | [`FormationReviewRepository`](FormationReviewRepository.java) | `FormationReview` | `findByFormationIdOrderByReviewedAtDesc`, administrative review history. |
+
+### Social Feed, Reviews & Reports
+| Repository Interface | Managed Entity | Key Query Capabilities |
+| :--- | :--- | :--- |
+| [`FeedPostRepository`](FeedPostRepository.java) | `FeedPost` | Public visibility, type filtering, author and moderation queue queries. |
+| [`FeedPostMediaRepository`](FeedPostMediaRepository.java) | `FeedPostMedia` | Ordered post attachment lookup. |
+| [`ArtisanReviewRepository`](ArtisanReviewRepository.java) | `ArtisanReview` | Visible review pages, enrollment uniqueness, average and count aggregates. |
+| [`ContentReportRepository`](ContentReportRepository.java) | `ContentReport` | Status and target-type moderation queue filters. |

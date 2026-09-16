@@ -10,6 +10,7 @@ The schema is defined by the JPA mappings in `com.project.souklab.model`; this d
 | Artisan | `artisans`, `artisan_gallery_images`, `artisan_certifications`, `artisan_profile_views`, `artisan_formateur_requests`, and artisan taxonomy join tables |
 | Catalog | `regions`, `job_categories`, `job_sub_categories`, `material_families`, `materials`, `epoques`, `techniques` |
 | Formations | `formations`, `formation_files`, `formation_enrollments`, `formation_reviews` |
+| Social | `feed_posts`, `feed_post_media`, `artisan_reviews`, `content_reports` |
 | Operations | `notifications`, `audit_logs` |
 
 All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft-delete is represented by `deleted_at` only where the entity mapping includes that inherited field in persistence queries; join-table behavior and foreign-key actions are controlled by the annotations on each relationship.

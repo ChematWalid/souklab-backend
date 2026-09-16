@@ -66,10 +66,13 @@ src/main/java/com/project/souklab/
 │   ├── catalog/         # Reference craft taxonomies and administrative geography
 │   ├── directory/       # Public artisan directory search and faceted filtering
 │   ├── formateur/       # Formateur accreditation and moderation endpoints
+│   ├── feed/            # Public feed and post moderation endpoints
+│   ├── review/          # Formation-backed artisan review endpoints
+│   ├── report/          # Abuse reporting endpoints
 │   ├── formation/       # Masterclass authoring, peer enrollment, and review endpoints
 │   ├── notification/    # Notification feed and read-state management
 │   └── user/            # User avatar upload/activation and admin moderation
-├── dao/                 # Spring Data JPA repositories (25 repositories)
+├── dao/                 # Spring Data JPA repositories (29 repositories)
 ├── dto/                 # Data Transfer Objects (contracts for API requests/responses)
 │   ├── admin/           # Administrative audit representations
 │   ├── artisan/         # Certification and gallery image responses
@@ -79,7 +82,10 @@ src/main/java/com/project/souklab/
 │   ├── directory/       # Directory search cards and criteria filter DTOs
 │   ├── formateur/       # Formateur request and moderation DTOs
 │   ├── formation/       # Masterclass authoring, review, enrollment, and file DTOs
+│   ├── feed/             # Feed posts, media, and moderation DTOs
 │   ├── notification/    # Notification payload representations
+│   ├── review/           # Decimal artisan review DTOs
+│   ├── report/           # Report and resolution DTOs
 │   ├── profile/         # Artisan and client profile representations
 │   └── user/            # Moderation requests and avatar responses
 ├── exception/           # Exception hierarchy and GlobalExceptionHandler
@@ -94,7 +100,7 @@ src/main/java/com/project/souklab/
 │   ├── security/        # File serving rate limit filter
 │   ├── stub/            # In-memory test stubs
 │   └── validation/      # Magic bytes and MIME validation
-├── model/               # JPA entities and domain enums (34 models)
+├── model/               # JPA entities and domain enums (44 model types)
 ├── security/            # Security filters (JWT, rate limiting, upload boundaries)
 ├── service/             # Application business logic and transactional services
 │   ├── artisan/         # Artisan profile and portfolio operations
@@ -172,10 +178,13 @@ Each individual package across the application contains its own dedicated `READM
   - [`controller.catalog`](src/main/java/com/project/souklab/controller/catalog/README.md) — Reference craft taxonomy endpoints
   - [`controller.directory`](src/main/java/com/project/souklab/controller/directory/README.md) — Public artisan directory search endpoints
   - [`controller.formateur`](src/main/java/com/project/souklab/controller/formateur/README.md) — Formateur accreditation endpoints
+  - [`controller.feed`](src/main/java/com/project/souklab/controller/feed/README.md) — Public feed and admin moderation endpoints
+  - [`controller.review`](src/main/java/com/project/souklab/controller/review/README.md) — Artisan review endpoints
+  - [`controller.report`](src/main/java/com/project/souklab/controller/report/README.md) — Abuse reporting endpoints
   - [`controller.formation`](src/main/java/com/project/souklab/controller/formation/README.md) — Formations authoring, peer enrollment, and review endpoints
   - [`controller.notification`](src/main/java/com/project/souklab/controller/notification/README.md) — Notification endpoints
   - [`controller.user`](src/main/java/com/project/souklab/controller/user/README.md) — User and avatar endpoints
-- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (25 repositories)
+- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (29 repositories)
 - [`com.project.souklab.dto`](src/main/java/com/project/souklab/dto/README.md) — DTO taxonomy
   - [`dto.admin`](src/main/java/com/project/souklab/dto/admin/README.md) — Admin audit DTOs
   - [`dto.artisan`](src/main/java/com/project/souklab/dto/artisan/README.md) — Portfolio certification and gallery response DTOs
@@ -201,7 +210,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`filestorage.stub`](src/main/java/com/project/souklab/filestorage/stub/README.md) — In-memory test stubs
   - [`filestorage.validation`](src/main/java/com/project/souklab/filestorage/validation/README.md) — File validation
 - [`com.project.souklab.service.storage`](src/main/java/com/project/souklab/service/storage/README.md) — Application-specific storage access policy
-- [`com.project.souklab.model`](src/main/java/com/project/souklab/model/README.md) — Domain entities and enums (34 models)
+- [`com.project.souklab.model`](src/main/java/com/project/souklab/model/README.md) — Domain entities and enums (44 model types)
 - [`com.project.souklab.security`](src/main/java/com/project/souklab/security/README.md) — Security filters and token parsing
 - [`com.project.souklab.service`](src/main/java/com/project/souklab/service/README.md) — Service layer architecture
   - [`service.artisan`](src/main/java/com/project/souklab/service/artisan/README.md) — Artisan profile and portfolio services
@@ -210,6 +219,9 @@ Each individual package across the application contains its own dedicated `READM
   - [`service.catalog`](src/main/java/com/project/souklab/service/catalog/README.md) — Cached taxonomy retrieval service
   - [`service.directory`](src/main/java/com/project/souklab/service/directory/README.md) — Hibernate Search Elasticsearch discovery service
   - [`service.formateur`](src/main/java/com/project/souklab/service/formateur/README.md) — Formateur management
+  - [`service.feed`](src/main/java/com/project/souklab/service/feed/README.md) — Feed post lifecycle and media storage
+  - [`service.review`](src/main/java/com/project/souklab/service/review/README.md) — Formation-backed artisan reviews
+  - [`service.report`](src/main/java/com/project/souklab/service/report/README.md) — Report validation and moderation actions
   - [`service.formation`](src/main/java/com/project/souklab/service/formation/README.md) — Masterclass lifecycle, peer enrollment, and moderation
   - [`service.notification`](src/main/java/com/project/souklab/service/notification/README.md) — Notification dispatcher
   - [`service.profile`](src/main/java/com/project/souklab/service/profile/README.md) — User profile management and taxonomy resolution

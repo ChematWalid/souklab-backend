@@ -24,6 +24,9 @@ Contracts and schemas defining client-server communications across the applicati
 | [`directory`](directory/README.md) | Public directory search result cards, criteria filter payloads, and sort options. |
 | [`formateur`](formateur/README.md) | Accreditation applications, approval notes, rejections, and cooldown data. |
 | [`formation`](formation/README.md) | Masterclass authoring, curriculum updates, enrollment, review, and file descriptors. |
+| [`feed`](feed/README.md) | Moderated feed post, media, and moderation payloads. |
 | [`notification`](notification/README.md) | Notification item feed responses. |
 | [`profile`](profile/README.md) | Artisan public profile views, client representations, and patch updates. |
 | [`user`](user/README.md) | User moderation requests (bans, timeouts) and avatar representations. |
+| [`review`](review/README.md) | Decimal formation review requests and responses. |
+| [`report`](report/README.md) | Report submission, resolution, and moderation responses. |

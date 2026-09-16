@@ -76,9 +76,9 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 ---
 
 ## 📍 Phase 7: Social Feed, Reviews & Moderation
-- [ ] **Step 7.1**: Implement `FeedPost` (Actualité, Formation, Annonce) with multi-image attachments.
-- [ ] **Step 7.2**: Implement `Review` system with automatic recalculation of artisan average rating and review counts.
-- [ ] **Step 7.3**: Implement `Report` system for flagging abuse on users, messages, and posts.
+- [x] **Step 7.1**: Implement `FeedPost` (Actualité, Formation, Annonce) with moderated multi-image attachments.
+- [x] **Step 7.2**: Implement decimal `ArtisanReview` ratings for attended formations with automatic artisan aggregate recalculation.
+- [x] **Step 7.3**: Implement `ContentReport` workflow for users, posts, and reviews with explicit administrator resolution actions.
 
 ---
 

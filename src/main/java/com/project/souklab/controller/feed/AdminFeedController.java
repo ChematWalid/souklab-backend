@@ -63,4 +63,16 @@ public class AdminFeedController {
     public ResponseEntity<ApiResponse<FeedPostResponseDTO>> hide(@PathVariable String id, @Valid @RequestBody FeedPostModerationDTO request) {
         return ResponseEntity.ok(ApiResponse.success(feedPostService.hide(id, request), "Feed post hidden."));
     }
+
+    /**
+     * Removes a post as an administrator.
+     *
+     * @param id post identifier
+     * @return empty success response
+     */
+    @PostMapping("/{id}/remove")
+    public ResponseEntity<ApiResponse<Void>> remove(@PathVariable String id) {
+        feedPostService.remove(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Feed post removed."));
+    }
 }

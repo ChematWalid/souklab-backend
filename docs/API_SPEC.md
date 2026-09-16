@@ -323,7 +323,19 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 ## 6. Social Feed, Reviews & Moderation
 
-These resources are planned and are not exposed by the current source tree. No feed, review, or report controllers/entities are currently implemented.
+- `GET /api/v1/feed`: Browse published posts with optional `type` filter and pagination.
+- `GET /api/v1/feed/{id}`: Retrieve one published post and its media.
+- `POST /api/v1/feed`: Submit an `ACTUALITE`, `FORMATION`, or `ANNONCE` post for moderation (`ROLE_ARTISAN` for active verified artisans or `ROLE_ADMIN`).
+- `PUT /api/v1/feed/{id}` and `DELETE /api/v1/feed/{id}`: Author/admin update or remove a post.
+- `POST/DELETE /api/v1/feed/{id}/media[/{mediaId}]`: Add or remove validated image attachments.
+- `GET /api/v1/artisans/{artisanId}/reviews`: Browse visible artisan reviews.
+- `POST /api/v1/artisan/formations/{formationId}/reviews`: Submit one decimal `0.00–5.00` review after an `ATTENDED` completed enrollment.
+- `PUT/DELETE /api/v1/artisan/reviews/{reviewId}`: Edit or remove an owned review.
+- `POST /api/v1/reports`: Report a user, post, or review.
+- `GET /api/v1/admin/feed/pending`: Administrator moderation queue.
+- `POST /api/v1/admin/feed/{id}/publish|hide|remove`: Administrator post moderation actions.
+- `GET /api/v1/admin/reports`: Administrator report queue with status and target filters.
+- `POST /api/v1/admin/reports/{id}/resolve`: Dismiss, hide, or remove the reported target.
 
 ---
 

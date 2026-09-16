@@ -36,7 +36,7 @@ erDiagram
 
 ---
 
-## Entities & Enums Reference (34 Models)
+## Entities & Enums Reference (44 Model Types)
 
 ### Lifecycle & Identity Core
 | Class / Enum | Type | Description |
@@ -87,3 +87,13 @@ erDiagram
 | [`FormationStatus`](FormationStatus.java) | `enum` | Formation states: `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`. |
 | [`EnrollmentStatus`](EnrollmentStatus.java) | `enum` | Enrollment states: `CONFIRMED`, `ATTENDED`, `CANCELLED`. |
 | [`FormationReviewDecision`](FormationReviewDecision.java) | `enum` | Admin verdicts: `APPROVED`, `REJECTED`. |
+
+### Social Feed, Reviews & Reports
+| Class / Enum | Type | Description |
+| :--- | :---: | :--- |
+| [`FeedPost`](FeedPost.java) | `@Entity` | Moderated public community post. |
+| [`FeedPostMedia`](FeedPostMedia.java) | `@Entity` | Provider-neutral image attachment for a feed post. |
+| [`ArtisanReview`](ArtisanReview.java) | `@Entity` | Decimal-rated review linked to an attended formation enrollment. |
+| [`ContentReport`](ContentReport.java) | `@Entity` | Auditable report targeting a user, post, or review. |
+| [`FeedPostType`](FeedPostType.java), [`FeedPostStatus`](FeedPostStatus.java) | `enum` | Feed categorization and moderation visibility states. |
+| [`ReviewStatus`](ReviewStatus.java), [`ReportTargetType`](ReportTargetType.java), [`ReportStatus`](ReportStatus.java), [`ReportResolutionAction`](ReportResolutionAction.java) | `enum` | Review visibility, report target, lifecycle, and resolution states. |
