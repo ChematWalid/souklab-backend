@@ -1,6 +1,7 @@
 package com.project.souklab.service.report;
 
 import com.project.souklab.dao.ArtisanReviewRepository;
+import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ContentReportRepository;
 import com.project.souklab.dao.FeedPostRepository;
 import com.project.souklab.dao.UserRepository;
@@ -40,6 +41,7 @@ class ContentReportServiceTest {
     @Mock private ContentReportRepository reportRepository;
     @Mock private FeedPostRepository postRepository;
     @Mock private ArtisanReviewRepository reviewRepository;
+    @Mock private ArtisanRepository artisanRepository;
     @Mock private UserRepository userRepository;
     @Mock private NotificationService notificationService;
 
@@ -48,7 +50,7 @@ class ContentReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ContentReportService(reportRepository, postRepository, reviewRepository, userRepository, notificationService,
+        service = new ContentReportService(reportRepository, postRepository, reviewRepository, artisanRepository, userRepository, notificationService,
                 Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC));
         reporter = User.builder().email("reporter@example.com").build();
         reporter.setId("user-1");

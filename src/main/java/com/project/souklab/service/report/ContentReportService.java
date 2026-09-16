@@ -1,6 +1,7 @@
 package com.project.souklab.service.report;
 
 import com.project.souklab.dao.ArtisanReviewRepository;
+import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ContentReportRepository;
 import com.project.souklab.dao.FeedPostRepository;
 import com.project.souklab.dao.UserRepository;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.math.RoundingMode;
 
 /**
  * Coordinates abuse report submission and administrator resolution actions.
@@ -43,6 +45,7 @@ public class ContentReportService {
     private final ContentReportRepository reportRepository;
     private final FeedPostRepository postRepository;
     private final ArtisanReviewRepository reviewRepository;
+    private final ArtisanRepository artisanRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final Clock clock;
@@ -153,6 +156,7 @@ public class ContentReportService {
                     review.setDeletedAt(LocalDateTime.now(clock));
                 }
                 reviewRepository.save(review);
+                recalculate(review.getArtisan());
             }
             case USER -> {
                 User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
@@ -164,6 +168,14 @@ public class ContentReportService {
                 userRepository.save(user);
             }
         }
+    }
+
+    private void recalculate(com.project.souklab.model.Artisan artisan) {
+        java.math.BigDecimal average = reviewRepository.averageRating(artisan.getId(), com.project.souklab.model.ReviewStatus.PUBLISHED);
+        long count = reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull(artisan.getId(), com.project.souklab.model.ReviewStatus.PUBLISHED);
+        artisan.setRating(average == null ? 0.0 : average.setScale(2, RoundingMode.HALF_UP).doubleValue());
+        artisan.setReviewsCount((int) count);
+        artisanRepository.save(artisan);
     }
 
     private User currentUser() {
