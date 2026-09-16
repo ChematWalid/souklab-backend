@@ -52,7 +52,7 @@ public class ArtisanReviewController {
      * @return created review
      */
     @PostMapping("/api/v1/artisan/formations/{formationId}/reviews")
-    @PreAuthorize("hasRole('ARTISAN')")
+    @PreAuthorize("@accessControl.isArtisan(authentication)")
     public ResponseEntity<ApiResponse<ArtisanReviewResponseDTO>> create(
             @PathVariable String formationId,
             @Valid @RequestBody ArtisanReviewRequestDTO request) {
@@ -68,7 +68,7 @@ public class ArtisanReviewController {
      * @return updated review
      */
     @PutMapping("/api/v1/artisan/reviews/{reviewId}")
-    @PreAuthorize("hasRole('ARTISAN')")
+    @PreAuthorize("@accessControl.isArtisan(authentication)")
     public ResponseEntity<ApiResponse<ArtisanReviewResponseDTO>> update(
             @PathVariable String reviewId,
             @Valid @RequestBody ArtisanReviewRequestDTO request) {
@@ -82,7 +82,7 @@ public class ArtisanReviewController {
      * @return empty success response
      */
     @DeleteMapping("/api/v1/artisan/reviews/{reviewId}")
-    @PreAuthorize("hasRole('ARTISAN')")
+    @PreAuthorize("@accessControl.isArtisan(authentication)")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String reviewId) {
         reviewService.delete(reviewId);
         return ResponseEntity.ok(ApiResponse.success(null, "Review removed successfully."));

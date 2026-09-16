@@ -21,6 +21,7 @@ import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.ArtisanProfileView;
 import com.project.souklab.model.User;
+import com.project.souklab.security.RoleName;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ArtisanProfileService {
 
-    private static final String ROLE_ADMIN_NAME = "ROLE_ADMIN";
+    private static final String ROLE_ADMIN_NAME = RoleName.ADMIN.authority();
     private static final String ERROR_NOT_AUTHENTICATED = "Not authenticated.";
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
     private static final String ERROR_ARTISAN_NOT_FOUND_PREFIX = "Artisan not found with id: ";

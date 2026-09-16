@@ -53,7 +53,7 @@ public class ContentReportController {
      * @return report queue
      */
     @GetMapping("/api/v1/admin/reports")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@accessControl.isAdmin(authentication)")
     public ResponseEntity<ApiResponse<Page<ContentReportResponseDTO>>> list(
             @RequestParam(required = false) ReportStatus status,
             @RequestParam(required = false) ReportTargetType targetType,
@@ -69,7 +69,7 @@ public class ContentReportController {
      * @return resolved report
      */
     @PostMapping("/api/v1/admin/reports/{id}/resolve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@accessControl.isAdmin(authentication)")
     public ResponseEntity<ApiResponse<ContentReportResponseDTO>> resolve(
             @PathVariable String id,
             @Valid @RequestBody ReportResolutionRequestDTO request) {

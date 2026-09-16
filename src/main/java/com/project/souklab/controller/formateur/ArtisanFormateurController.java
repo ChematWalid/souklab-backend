@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/artisan/formateur-request")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ARTISAN')")
+@PreAuthorize("@accessControl.isArtisan(authentication)")
 public class ArtisanFormateurController {
 
     private final ArtisanFormateurService artisanFormateurService;

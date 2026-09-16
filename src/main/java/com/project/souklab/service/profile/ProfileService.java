@@ -23,6 +23,7 @@ import com.project.souklab.model.Material;
 import com.project.souklab.model.Region;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
+import com.project.souklab.security.RoleName;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,8 +44,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
-    private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
+    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
+    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
     private static final String ERROR_NOT_AUTHENTICATED = "Not authenticated.";
 

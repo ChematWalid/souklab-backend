@@ -16,6 +16,7 @@ import com.project.souklab.model.ArtisanGalleryImage;
 import com.project.souklab.model.Client;
 import com.project.souklab.model.Role;
 import com.project.souklab.model.User;
+import com.project.souklab.security.RoleName;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -33,8 +34,8 @@ import java.util.stream.Collectors;
 @Component
 public class ProfileResponseMapper {
 
-    private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
-    private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
+    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
+    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
 
     /**
      * Dispatches to the correct role-specific profile DTO.

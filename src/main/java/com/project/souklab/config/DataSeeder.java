@@ -19,6 +19,7 @@ import com.project.souklab.model.Region;
 import com.project.souklab.model.Role;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
+import com.project.souklab.security.RoleName;
 import com.project.souklab.util.EmailUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +72,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedRoles() {
-        List<String> roleNames = List.of("ROLE_ADMIN", "ROLE_ARTISAN", "ROLE_CLIENT");
+        List<String> roleNames = List.of(RoleName.ADMIN.authority(), RoleName.ARTISAN.authority(), RoleName.CLIENT.authority());
         for (String name : roleNames) {
             if (roleRepository.findByName(name).isEmpty()) {
                 Role role = new Role();
@@ -93,8 +94,8 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                .orElseThrow(() -> new IllegalStateException("ROLE_ADMIN role not found. Seed roles first."));
+        Role adminRole = roleRepository.findByName(RoleName.ADMIN.authority())
+                .orElseThrow(() -> new IllegalStateException("Administrator role not found. Seed roles first."));
 
         String defaultPassword = appProperties.getAdmin().getDefaultPassword();
         if (defaultPassword == null || defaultPassword.isBlank()) {

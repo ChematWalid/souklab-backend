@@ -8,6 +8,7 @@ import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostModerationDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.FileUrlResolver;
@@ -26,6 +27,7 @@ import com.project.souklab.model.FeedPostType;
 import com.project.souklab.model.Formation;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
+import com.project.souklab.security.AccessControlService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +63,7 @@ public class FeedPostService {
     private final FileUrlResolver fileUrlResolver;
     private final NotificationService notificationService;
     private final StorageObjectLifecycle storageObjectLifecycle;
+    private final AccessControlService accessControlService;
     private final Clock clock;
 
     /**
@@ -245,7 +248,7 @@ public class FeedPostService {
         requireAdmin();
         FeedPost post = findPost(id);
         if (post.getStatus() == FeedPostStatus.REMOVED) {
-            throw new com.project.souklab.exception.ConflictException("Removed posts cannot be published.");
+            throw new ConflictException("Removed posts cannot be published.");
         }
         post.setModeratedBy(currentUser());
         post.setModerationNote(request.getNote().trim());
@@ -270,7 +273,7 @@ public class FeedPostService {
         requireAdmin();
         FeedPost post = findPost(id);
         if (post.getStatus() == FeedPostStatus.REMOVED) {
-            throw new com.project.souklab.exception.ConflictException("Removed posts cannot be hidden.");
+            throw new ConflictException("Removed posts cannot be hidden.");
         }
         post.setStatus(FeedPostStatus.HIDDEN);
         post.setModeratedBy(currentUser());
@@ -340,7 +343,6 @@ public class FeedPostService {
 
     private boolean isAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        return accessControlService.isAdmin(authentication);
     }
 }

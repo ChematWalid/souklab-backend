@@ -10,6 +10,7 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.Notification;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
+import com.project.souklab.security.RoleName;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -129,7 +130,7 @@ public class NotificationService {
      */
     @Transactional
     public void notifyAdmins(String message) {
-        List<User> admins = userRepository.findByRoleName("ROLE_ADMIN");
+        List<User> admins = userRepository.findByRoleName(RoleName.ADMIN.authority());
         for (User admin : admins) {
             createForUser(admin, message);
         }

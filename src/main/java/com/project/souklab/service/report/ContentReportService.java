@@ -12,6 +12,8 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.ArtisanReview;
+import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ContentReport;
 import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostStatus;
@@ -21,6 +23,7 @@ import com.project.souklab.model.ReportTargetType;
 import com.project.souklab.model.ReviewStatus;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.security.AccessControlService;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
@@ -49,6 +53,7 @@ public class ContentReportService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final Clock clock;
+    private final AccessControlService accessControlService;
 
     /**
      * Creates a report against a supported existing target.
@@ -161,7 +166,7 @@ public class ContentReportService {
             case USER -> {
                 User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
                 if (action == ReportResolutionAction.HIDE) {
-                    user.setStatus(com.project.souklab.model.AccountStatus.SUSPENDED);
+                    user.setStatus(AccountStatus.SUSPENDED);
                 } else {
                     user.setDeletedAt(LocalDateTime.now(clock));
                 }
@@ -170,9 +175,9 @@ public class ContentReportService {
         }
     }
 
-    private void recalculate(com.project.souklab.model.Artisan artisan) {
-        java.math.BigDecimal average = reviewRepository.averageRating(artisan.getId(), com.project.souklab.model.ReviewStatus.PUBLISHED);
-        long count = reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull(artisan.getId(), com.project.souklab.model.ReviewStatus.PUBLISHED);
+    private void recalculate(Artisan artisan) {
+        BigDecimal average = reviewRepository.averageRating(artisan.getId(), ReviewStatus.PUBLISHED);
+        long count = reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull(artisan.getId(), ReviewStatus.PUBLISHED);
         artisan.setRating(average == null ? 0.0 : average.setScale(2, RoundingMode.HALF_UP).doubleValue());
         artisan.setReviewsCount((int) count);
         artisanRepository.save(artisan);
@@ -188,7 +193,7 @@ public class ContentReportService {
 
     private void requireAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getAuthorities().stream().noneMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
+        if (!accessControlService.isAdmin(authentication)) {
             throw new ForbiddenException("Administrator access is required.");
         }
     }

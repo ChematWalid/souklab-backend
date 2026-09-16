@@ -16,6 +16,7 @@ import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.dto.profile.UserPatchDTO;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
+import com.project.souklab.security.RoleName;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
 import com.project.souklab.util.SecurityUtils;
@@ -46,8 +47,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
-    private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
+    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
+    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
     private static final String OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI = "/oauth2/authorization/google";
 
     private final AuthService authService;

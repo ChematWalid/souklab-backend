@@ -74,6 +74,8 @@ All endpoints are versioned with the `/api/v1` prefix. Standard response envelop
 
 ## 2. Authentication & Onboarding (`/api/v1/auth/**`)
 
+Authorization is evaluated using granular permissions mapped from persisted compatibility roles `ROLE_CLIENT`, `ROLE_ARTISAN`, and `ROLE_ADMIN`. Existing role labels in examples remain valid response data and client input. Ownership, verification, enrollment, account status, and moderation rules are enforced by centralized policies. Missing permissions and failed policies return the standard `403 Forbidden` envelope.
+
 ### `POST /api/v1/auth/register`
 Creates a base user account.
 - **Access**: Public

@@ -26,6 +26,7 @@ import com.project.souklab.model.OAuthIdentity;
 import com.project.souklab.model.RefreshToken;
 import com.project.souklab.model.Role;
 import com.project.souklab.model.User;
+import com.project.souklab.security.RoleName;
 import com.project.souklab.model.VerificationTokenType;
 import com.project.souklab.security.JwtUtils;
 import com.project.souklab.service.audit.AuditLogService;
@@ -62,8 +63,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private static final String ROLE_ARTISAN_NAME = "ROLE_ARTISAN";
-    private static final String ROLE_CLIENT_NAME = "ROLE_CLIENT";
+    private static final String ROLE_ARTISAN_NAME = RoleName.ARTISAN.authority();
+    private static final String ROLE_CLIENT_NAME = RoleName.CLIENT.authority();
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
     private static final String ERROR_INVALID_CREDENTIALS = "Invalid email or password.";
     private static final String ERROR_ROLE_NOT_FOUND_PREFIX = "Role not found: ";
@@ -460,12 +461,12 @@ public class AuthService {
      * @throws ResourceNotFoundException if the role does not exist in the database
      */
     private Role validateRegistrationRole(String roleInput) {
-        String normalized = roleInput != null ? roleInput.trim().toUpperCase() : "";
-        if (normalized.equals("ADMIN") || normalized.equals("ROLE_ADMIN")) {
+        String normalized = RoleName.normalize(roleInput);
+        if (RoleName.ADMIN.authority().equals(normalized)) {
             throw new BadRequestException("Administrator registration is not permitted via public registration.");
         }
 
-        String roleName = normalized.startsWith("ROLE_") ? normalized : "ROLE_" + normalized;
+        String roleName = normalized;
         if (!roleName.equals(ROLE_ARTISAN_NAME) && !roleName.equals(ROLE_CLIENT_NAME)) {
             throw new BadRequestException("Invalid registration role. Allowed roles are ARTISAN or CLIENT.");
         }

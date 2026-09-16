@@ -2,6 +2,7 @@ package com.project.souklab.util;
 
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.exception.ForbiddenException;
+import com.project.souklab.security.Permission;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.Artisan;
 import org.springframework.security.core.Authentication;
@@ -15,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public final class ArtisanSecurityUtils {
 
-    private static final String ROLE_ARTISAN = "ROLE_ARTISAN";
 
     private ArtisanSecurityUtils() {
         // Utility class
@@ -43,7 +43,7 @@ public final class ArtisanSecurityUtils {
         }
 
         boolean hasArtisanRole = authentication.getAuthorities().stream()
-                .anyMatch(authority -> ROLE_ARTISAN.equals(authority.getAuthority()));
+                .anyMatch(authority -> Permission.ARTISAN_CONTENT.authority().equals(authority.getAuthority()));
         if (!hasArtisanRole) {
             throw new ForbiddenException("Access denied: artisan role required.");
         }
@@ -58,4 +58,3 @@ public final class ArtisanSecurityUtils {
                 .orElseThrow(() -> new ForbiddenException("Only registered artisans can access this resource."));
     }
 }
-

@@ -35,7 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/api/v1/artisan/formations")
-@PreAuthorize("hasRole('ARTISAN')")
+@PreAuthorize("@accessControl.isArtisan(authentication)")
 @RequiredArgsConstructor
 public class ArtisanFormationController {
 

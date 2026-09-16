@@ -44,7 +44,7 @@ erDiagram
 | [`BaseEntity`](BaseEntity.java) | `@MappedSuperclass` | Auto-generated UUID `id`, `createdAt`, `updatedAt`, and soft-delete `deletedAt` timestamps. |
 | [`User`](User.java) | `@Entity` | Central identity: email, password, `AccountStatus`, ban tracking, roles. |
 | [`Client`](Client.java) | `@Entity` | Client profile: client type, company name, premium membership status. |
-| [`Role`](Role.java) | `@Entity` | Platform authority (`ROLE_CLIENT`, `ROLE_ARTISAN`, `ROLE_ADMIN`). |
+| [`Role`](Role.java) | `@Entity` | Persisted compatibility role (`ROLE_CLIENT`, `ROLE_ARTISAN`, `ROLE_ADMIN`) mapped to permissions by the security layer. |
 | [`RefreshToken`](RefreshToken.java) | `@Entity` | Long-lived secure token for JWT rotation with expiry tracking. |
 | [`VerificationToken`](VerificationToken.java) | `@Entity` | Single-use 6-digit OTP codes for email activation and password resets. |
 | [`OAuthIdentity`](OAuthIdentity.java) | `@Entity` | Third-party OAuth provider binding (Google OAuth2 subject ID). |

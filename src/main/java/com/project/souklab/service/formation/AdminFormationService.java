@@ -23,6 +23,7 @@ import com.project.souklab.model.FormationReviewDecision;
 import com.project.souklab.model.FormationStatus;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
+import com.project.souklab.security.AccessControlService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AdminFormationService {
+
+    private final AccessControlService accessControlService;
 
     private final FormationRepository formationRepository;
     private final FormationReviewRepository formationReviewRepository;
@@ -168,9 +171,7 @@ public class AdminFormationService {
             throw new UnauthorizedException("User is not authenticated");
         }
 
-        boolean hasAdminRole = authentication.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
-        if (!hasAdminRole) {
+        if (!accessControlService.isAdmin(authentication)) {
             throw new ForbiddenException("Access denied: administrator role required.");
         }
 

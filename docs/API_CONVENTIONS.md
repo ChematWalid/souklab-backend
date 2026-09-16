@@ -99,6 +99,8 @@ Worked examples from this codebase:
 
 ### `@PreAuthorize` failures
 
+Controllers use centralized permission predicates rather than raw role literals. Persisted `ROLE_*` values remain compatibility data and are mapped by the security layer to granular permissions.
+
 Spring Security's `AccessDeniedException` is handled explicitly in
 `GlobalExceptionHandler` and mapped to the same envelope as every other
 403 (`errorCode: "FORBIDDEN"`) — it does not fall through to a bare

@@ -11,7 +11,7 @@ Core authentication workflows, credential hashing, registration state machines, 
 - New artisan registrations are saved with `AccountStatus.PENDING`, requiring administrative vetting and approval before activation.
 
 ### 2. Spring Security UserDetailsService Adapter
-- `CustomUserDetailsService` bridges SoukLab `User` entities into Spring Security `UserDetails` with mapped granted authorities (`ROLE_CLIENT`, `ROLE_ARTISAN`, `ROLE_ADMIN`).
+- `CustomUserDetailsService` bridges SoukLab `User` entities into Spring Security `UserDetails` with legacy role authorities plus granular permissions from `RolePermissionMapper`.
 
 ---
 

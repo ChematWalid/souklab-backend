@@ -2489,7 +2489,7 @@ If a user's database status is `SUSPENDED` but their `bannedUntil` timestamp is 
 ---
 
 ### 9.12 Role Boundary Enforcement
-All admin user moderation routes are guarded at the controller level with `@PreAuthorize("hasRole('ADMIN')")`. Any unauthenticated request receives `401 Unauthorized`, and any non-admin request (e.g., `ROLE_CLIENT` or `ROLE_ARTISAN`) receives `403 Forbidden`:
+All admin user moderation routes are guarded by the centralized administrator permission policy. Any unauthenticated request receives `401 Unauthorized`, and any caller without the administrator permission (including `ROLE_CLIENT` or `ROLE_ARTISAN`) receives `403 Forbidden`:
 
 - `GET /api/v1/admin/users` ➔ `403 Forbidden`
 - `GET /api/v1/admin/users?search=test` ➔ `403 Forbidden`

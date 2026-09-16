@@ -28,7 +28,7 @@ graph TD
 
 | Module | Core Responsibility | Key Technologies |
 | :--- | :--- | :--- |
-| **Authentication & RBAC** | Stateless JWT authentication, role-based authorization (`CLIENT`, `ARTISAN`, `ADMIN`), email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security 6, JJWT (HS256), BCrypt |
+| **Authentication & Authorization** | Stateless JWT authentication, compatibility roles mapped to granular permissions and centralized domain policies (`CLIENT`, `ARTISAN`, `ADMIN`), email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security 6, JJWT (HS256), BCrypt |
 | **User & Profile Management** | Artisan public profiles, profile completion wizard, contact gating based on membership/roles, profile view metrics deduplication. | Spring Data JPA, Jakarta Validation |
 | **Public Directory & Search** | Full-text scored search, faceted discovery (Wilayas, categories, materials, epoques, techniques), accent folding, edge n-grams, and JPA criteria fallback. | Hibernate Search 8.2.2.Final, Elasticsearch 8.x |
 | **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques). | Caffeine Cache, Spring Data JPA |
@@ -101,7 +101,7 @@ src/main/java/com/project/souklab/
 │   ├── stub/            # In-memory test stubs
 │   └── validation/      # Magic bytes and MIME validation
 ├── model/               # JPA entities and domain enums (44 model types)
-├── security/            # Security filters (JWT, rate limiting, upload boundaries)
+├── security/            # JWT, permissions, policy predicates, rate limiting, upload boundaries
 ├── service/             # Application business logic and transactional services
 │   ├── artisan/         # Artisan profile and portfolio operations
 │   ├── audit/           # Audit trail logging
