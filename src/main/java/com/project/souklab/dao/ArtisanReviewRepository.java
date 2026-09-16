@@ -15,6 +15,7 @@ import java.util.Optional;
  * Persistence operations for formation-backed artisan reviews.
  */
 public interface ArtisanReviewRepository extends JpaRepository<ArtisanReview, String> {
+    Optional<ArtisanReview> findByIdAndDeletedAtIsNull(String id);
     Page<ArtisanReview> findByArtisanIdAndStatusAndDeletedAtIsNull(String artisanId, ReviewStatus status, Pageable pageable);
     Optional<ArtisanReview> findByEnrollmentId(String enrollmentId);
 
