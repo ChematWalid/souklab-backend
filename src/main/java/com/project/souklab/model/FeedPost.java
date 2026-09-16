@@ -62,6 +62,13 @@ public class FeedPost extends BaseEntity {
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moderated_by")
+    private User moderatedBy;
+
+    @Column(name = "moderation_note", columnDefinition = "TEXT")
+    private String moderationNote;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<FeedPostMedia> media = new ArrayList<>();

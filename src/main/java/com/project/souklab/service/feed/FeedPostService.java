@@ -1,6 +1,5 @@
 package com.project.souklab.service.feed;
 
-import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.FeedPostRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserRepository;
@@ -25,7 +24,6 @@ import com.project.souklab.model.FeedPostMedia;
 import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.model.Formation;
-import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.SecurityUtils;
@@ -56,7 +54,6 @@ public class FeedPostService {
     private final FeedPostRepository postRepository;
     private final FormationRepository formationRepository;
     private final UserRepository userRepository;
-    private final ArtisanRepository artisanRepository;
     private final FileValidator fileValidator;
     private final VirusScanService virusScanService;
     private final StorageService storageService;
@@ -137,6 +134,9 @@ public class FeedPostService {
         Formation formation = resolveFormation(request.getFormationId());
         if (request.getType() == FeedPostType.FORMATION && formation == null) {
             throw new BadRequestException("Formation posts require a formationId.");
+        }
+        if (request.getType() != FeedPostType.FORMATION && formation != null) {
+            throw new BadRequestException("Only formation posts may reference a formation.");
         }
         post.setType(request.getType());
         post.setTitle(request.getTitle().trim());
@@ -238,6 +238,8 @@ public class FeedPostService {
         if (post.getStatus() == FeedPostStatus.REMOVED) {
             throw new com.project.souklab.exception.ConflictException("Removed posts cannot be published.");
         }
+        post.setModeratedBy(currentUser());
+        post.setModerationNote(request.getNote().trim());
         post.setStatus(FeedPostStatus.PUBLISHED);
         post.setPublishedAt(LocalDateTime.now(clock));
         FeedPost saved = postRepository.save(post);
@@ -260,6 +262,8 @@ public class FeedPostService {
             throw new com.project.souklab.exception.ConflictException("Removed posts cannot be hidden.");
         }
         post.setStatus(FeedPostStatus.HIDDEN);
+        post.setModeratedBy(currentUser());
+        post.setModerationNote(request.getNote().trim());
         return toResponse(postRepository.save(post));
     }
 

@@ -23,6 +23,7 @@ public class FeedPostResponseDTO {
     String status;
     String formationId;
     LocalDateTime publishedAt;
+    String moderationNote;
     List<FeedPostMediaResponseDTO> media;
 
     /**
@@ -47,6 +48,7 @@ public class FeedPostResponseDTO {
                 .status(post.getStatus().name())
                 .formationId(post.getFormation() == null ? null : post.getFormation().getId())
                 .publishedAt(post.getPublishedAt())
+                .moderationNote(post.getModerationNote())
                 .media(post.getMedia().stream().map(FeedPostMediaResponseDTO::from).toList())
                 .build();
     }

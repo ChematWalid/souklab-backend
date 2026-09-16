@@ -3,7 +3,6 @@ package com.project.souklab.controller.feed;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.feed.FeedPostCreateDTO;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
-import com.project.souklab.dto.feed.FeedPostModerationDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.service.feed.FeedPostService;
@@ -127,41 +126,4 @@ public class FeedPostController {
         return ResponseEntity.ok(ApiResponse.success(null, "Feed media removed successfully."));
     }
 
-    /**
-     * Lists pending posts for administrators.
-     *
-     * @param pageable pagination configuration
-     * @return pending posts
-     */
-    @GetMapping("/admin/pending")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Page<FeedPostResponseDTO>>> listPending(@PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(feedPostService.listPending(pageable)));
-    }
-
-    /**
-     * Publishes a pending post.
-     *
-     * @param id post identifier
-     * @param request moderation note
-     * @return published post
-     */
-    @PostMapping("/admin/{id}/publish")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<FeedPostResponseDTO>> publish(@PathVariable String id, @Valid @RequestBody FeedPostModerationDTO request) {
-        return ResponseEntity.ok(ApiResponse.success(feedPostService.publish(id, request), "Feed post published."));
-    }
-
-    /**
-     * Hides a post.
-     *
-     * @param id post identifier
-     * @param request moderation note
-     * @return hidden post
-     */
-    @PostMapping("/admin/{id}/hide")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<FeedPostResponseDTO>> hide(@PathVariable String id, @Valid @RequestBody FeedPostModerationDTO request) {
-        return ResponseEntity.ok(ApiResponse.success(feedPostService.hide(id, request), "Feed post hidden."));
-    }
 }
