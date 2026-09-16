@@ -5,7 +5,6 @@ import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.service.storage.FileAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -34,12 +33,11 @@ public class FileServingController {
     public static final String BASE_PATH = "/api/v1/files";
     public static final String DEFAULT_FILE_SERVING_PREFIX = BASE_PATH + "/";
     private static final String PUBLIC_CACHE_CONTROL = "public, max-age=31536000, immutable";
-    private static final String PRIVATE_CACHE_CONTROL = "private, no-store";
+    private static final String PRIVATE_CACHE_CONTROL = "private, max-age=31536000, immutable";
 
     private final StorageService storageService;
     private final FileAccessService fileAccessService;
 
-    @Autowired
     public FileServingController(StorageService storageService, FileAccessService fileAccessService) {
         this.storageService = storageService;
         this.fileAccessService = fileAccessService;
@@ -56,7 +54,7 @@ public class FileServingController {
      */
     @GetMapping("/{key}")
     public ResponseEntity<StreamingResponseBody> serveFile(@PathVariable("key") String key) {
-        boolean isPublic = fileAccessService == null || fileAccessService.authorize(key);
+        boolean isPublic = fileAccessService.authorize(key);
         StorageResource resource = storageService.retrieve(key);
 
         MediaType mediaType;

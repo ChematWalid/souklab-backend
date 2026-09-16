@@ -107,11 +107,13 @@ public class StorageConfiguration {
             throw new IllegalStateException("storage.s3.bucket is required when storage.provider=s3");
         }
 
-        String region = (s3.getRegion() != null && !s3.getRegion().isBlank()) ? s3.getRegion() : "us-east-1";
+        if (s3.getRegion() == null || s3.getRegion().isBlank()) {
+            throw new IllegalStateException("storage.s3.region is required when storage.provider=s3");
+        }
         boolean pathStyle = Boolean.TRUE.equals(s3.getPathStyleAccess());
 
         S3ClientBuilder builder = S3Client.builder()
-                .region(Region.of(region))
+                .region(Region.of(s3.getRegion()))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(s3.getAccessKey(), s3.getSecretKey())
                 ))

@@ -157,7 +157,7 @@ public class ArtisanFormationController {
      */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationSummaryDTO>>> getMyFormations(
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         PaginatedResponse<FormationSummaryDTO> response = formationService.getMyFormations(pageable);
         return ResponseEntity.ok(ApiResponse.success(response));

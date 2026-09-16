@@ -6,16 +6,19 @@ import com.project.souklab.dao.FormationEnrollmentRepository;
 import com.project.souklab.dao.FormationFileRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserAvatarRepository;
+import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.FileUrlResolver;
+import com.project.souklab.model.Artisan;
+import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.EnrollmentStatus;
+import com.project.souklab.model.Formation;
 import com.project.souklab.model.FormationFile;
 import com.project.souklab.security.AccessControlService;
 import com.project.souklab.security.Permission;
 import com.project.souklab.util.ArtisanSecurityUtils;
 import com.project.souklab.util.SecurityUtils;
-import com.project.souklab.dao.ArtisanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -75,8 +78,9 @@ public class FileAccessService {
 
     private void requireCertificationOwnerOrAdministrator(String storageKey) {
         String objectUrl = fileUrlResolver.toUrl(storageKey);
-        var certification = certificationRepository.findByDocumentUrlAndDeletedAtIsNull(objectUrl)
+        ArtisanCertification certification = certificationRepository.findByDocumentUrlAndDeletedAtIsNull(objectUrl)
                 .orElseThrow(() -> new ResourceNotFoundException("File not found."));
+        requireFileRead();
         if (isAdministrator() || certification.getArtisan().getUser().getEmail().equalsIgnoreCase(SecurityUtils.getCurrentUsername())) {
             return;
         }
@@ -85,15 +89,23 @@ public class FileAccessService {
 
     private void requireFormationAccess(FormationFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        requireFileRead();
         if (accessControlService.hasPermission(authentication, Permission.ADMIN_FORMATIONS)) {
             return;
         }
-        var artisan = ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository);
-        var formation = file.getFormation();
+        Artisan artisan = ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_FORMATIONS);
+        Formation formation = file.getFormation();
         boolean isAuthor = formation.getAuthor().getId().equals(artisan.getId());
         boolean isEnrolled = formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
                 formation.getId(), artisan.getId(), EnrollmentStatus.CONFIRMED);
         if (!isAuthor && !isEnrolled) {
+            throw new ForbiddenException("Access denied.");
+        }
+    }
+
+    private void requireFileRead() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!accessControlService.hasPermission(authentication, Permission.FILE_READ)) {
             throw new ForbiddenException("Access denied.");
         }
     }

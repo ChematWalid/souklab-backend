@@ -7,18 +7,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
 @ConfigurationProperties(prefix = "app")
 @Data
 public class AppProperties {
-
-    private static final String MIME_IMAGE_JPEG = "image/jpeg";
-    private static final String MIME_IMAGE_PNG = "image/png";
-    private static final String MIME_IMAGE_WEBP = "image/webp";
-    private static final String MIME_APPLICATION_PDF = "application/pdf";
 
     private Storage storage = new Storage();
     private Jwt jwt = new Jwt();
@@ -98,15 +92,16 @@ public class AppProperties {
 
     @Data
     public static class Cors {
-        private List<String> allowedOrigins = new ArrayList<>();
+        private List<String> allowedOrigins;
     }
 
     @Data
     public static class Admin {
         private String defaultEmail;
         private String defaultPassword;
-        private String defaultBanReason = "Account banned by administrator";
-        private String defaultTimeoutReason = "Account timed out by administrator";
+        private boolean bootstrapEnabled;
+        private String defaultBanReason;
+        private String defaultTimeoutReason;
     }
 
     @Data
@@ -133,7 +128,7 @@ public class AppProperties {
     @Data
     public static class OAuth {
         private Google google = new Google();
-        private int intentCookieMaxAgeSeconds = 300;
+        private int intentCookieMaxAgeSeconds;
 
         @Data
         public static class Google {
@@ -145,8 +140,8 @@ public class AppProperties {
 
     @Data
     public static class SupportConfig {
-        private String email = "support@souklab.dz";
-        private String contactMessage = "Please contact support.";
+        private String email;
+        private String contactMessage;
     }
 
     /**
@@ -184,8 +179,8 @@ public class AppProperties {
          */
         @Data
         public static class LockoutConfig {
-            private int maxAttempts = 5;
-            private int durationMinutes = 15;
+            private int maxAttempts;
+            private int durationMinutes;
         }
 
         /**
@@ -193,9 +188,9 @@ public class AppProperties {
          */
         @Data
         public static class VerificationConfig {
-            private int maxAttempts = 5;
-            private int expirationMinutes = 15;
-            private int codeLength = 6;
+            private int maxAttempts;
+            private int expirationMinutes;
+            private int codeLength;
         }
     }
 
@@ -213,7 +208,7 @@ public class AppProperties {
          */
         @Data
         public static class FormateurConfig {
-            private long reapplyCooldownDays = 14L;
+            private long reapplyCooldownDays;
         }
 
         /**
@@ -221,13 +216,9 @@ public class AppProperties {
          */
         @Data
         public static class GalleryConfig {
-            private int maxImages = 20;
-            private DataSize maxFileSize = DataSize.ofMegabytes(10);
-            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    MIME_IMAGE_JPEG,
-                    MIME_IMAGE_PNG,
-                    MIME_IMAGE_WEBP
-            ));
+            private int maxImages;
+            private DataSize maxFileSize;
+            private List<String> allowedMimeTypes;
         }
 
         /**
@@ -235,13 +226,9 @@ public class AppProperties {
          */
         @Data
         public static class CertificationConfig {
-            private int maxCount = 10;
-            private DataSize maxFileSize = DataSize.ofMegabytes(15);
-            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    MIME_APPLICATION_PDF,
-                    MIME_IMAGE_JPEG,
-                    MIME_IMAGE_PNG
-            ));
+            private int maxCount;
+            private DataSize maxFileSize;
+            private List<String> allowedMimeTypes;
         }
     }
 
@@ -292,7 +279,7 @@ public class AppProperties {
         /**
          * Default ISO currency code for formations (default: DZD).
          */
-        private String defaultCurrency = "DZD";
+        private String defaultCurrency;
 
         /**
          * Configuration for formation thumbnail images.
@@ -303,16 +290,12 @@ public class AppProperties {
             /**
              * Maximum allowable file size for formation thumbnails (default: 10MB).
              */
-            private DataSize maxFileSize = DataSize.ofMegabytes(10);
+            private DataSize maxFileSize;
 
             /**
              * Permitted MIME types for formation showcase thumbnails.
              */
-            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    MIME_IMAGE_JPEG,
-                    MIME_IMAGE_PNG,
-                    MIME_IMAGE_WEBP
-            ));
+            private List<String> allowedMimeTypes;
         }
 
         /**
@@ -324,21 +307,17 @@ public class AppProperties {
             /**
              * Maximum number of course files allowed per formation (default: 10).
              */
-            private int maxCount = 10;
+            private int maxCount;
 
             /**
              * Maximum allowable file size for individual course files (default: 25MB).
              */
-            private DataSize maxFileSize = DataSize.ofMegabytes(25);
+            private DataSize maxFileSize;
 
             /**
              * Permitted MIME types for formation course files and syllabus attachments.
              */
-            private List<String> allowedMimeTypes = new ArrayList<>(List.of(
-                    MIME_APPLICATION_PDF,
-                    MIME_IMAGE_JPEG,
-                    MIME_IMAGE_PNG
-            ));
+            private List<String> allowedMimeTypes;
         }
 
         /**
@@ -350,7 +329,7 @@ public class AppProperties {
             /**
              * Minimum cutoff deadline in hours prior to scheduled masterclass start time (default: 24).
              */
-            private int deadlineHours = 24;
+            private int deadlineHours;
         }
 
         /**
@@ -362,7 +341,7 @@ public class AppProperties {
             /**
              * Default page size for catalog listings and enrollment history (default: 10).
              */
-            private int defaultPageSize = 10;
+            private int defaultPageSize;
         }
     }
 }

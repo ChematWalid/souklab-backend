@@ -1,6 +1,6 @@
 # Storage Access Policy (`com.project.souklab.service.storage`)
 
-Application-specific authorization for opaque file keys. This package is deliberately separate from `filestorage`, so the portable storage engine does not depend on users, roles, formations, or enrollment rules.
+Application-specific authorization for opaque file keys. This package is deliberately separate from `filestorage`, so the portable storage engine does not depend on users, permissions, formations, or enrollment rules.
 
 | Class | Responsibility |
 | --- | --- |

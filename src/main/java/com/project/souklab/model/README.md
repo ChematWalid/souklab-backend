@@ -15,7 +15,7 @@ erDiagram
     User ||--o{ RefreshToken : "owns sessions"
     User ||--o{ VerificationToken : "owns verification"
     User ||--o{ OAuthIdentity : "links OAuth"
-    User }o--o{ Role : "holds"
+    User }o--o{ AuthorizationPermission : "holds"
     Artisan ||--o{ ArtisanFormateurRequest : "submits"
     Artisan ||--o{ ArtisanProfileView : "tracked views"
     Artisan ||--o{ ArtisanCertification : "holds credentials"

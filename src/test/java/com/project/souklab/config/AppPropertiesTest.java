@@ -12,42 +12,42 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Isolated unit tests verifying default values and property binding for
+ * Isolated unit tests verifying empty Java defaults and property binding for
  * SupportConfig, Admin defaults, OAuth cookie settings, AuthConfig.VerificationConfig,
  * and ArtisanConfig.FormateurConfig in {@link AppProperties}.
  */
 class AppPropertiesTest {
 
     @Test
-    @DisplayName("AppProperties default values are correctly initialized")
-    void defaultValuesArePresentUponInstantiation() {
+    @DisplayName("AppProperties does not provide policy defaults in Java")
+    void policyDefaultsAreNotProvidedByJava() {
         AppProperties appProperties = new AppProperties();
 
         // Support
         assertThat(appProperties.getSupport()).isNotNull();
-        assertThat(appProperties.getSupport().getEmail()).isEqualTo("support@souklab.dz");
-        assertThat(appProperties.getSupport().getContactMessage()).isEqualTo("Please contact support.");
+        assertThat(appProperties.getSupport().getEmail()).isNull();
+        assertThat(appProperties.getSupport().getContactMessage()).isNull();
 
         // Admin defaults
         assertThat(appProperties.getAdmin()).isNotNull();
-        assertThat(appProperties.getAdmin().getDefaultBanReason()).isEqualTo("Account banned by administrator");
-        assertThat(appProperties.getAdmin().getDefaultTimeoutReason()).isEqualTo("Account timed out by administrator");
+        assertThat(appProperties.getAdmin().getDefaultBanReason()).isNull();
+        assertThat(appProperties.getAdmin().getDefaultTimeoutReason()).isNull();
 
         // OAuth
         assertThat(appProperties.getOauth()).isNotNull();
-        assertThat(appProperties.getOauth().getIntentCookieMaxAgeSeconds()).isEqualTo(300);
+        assertThat(appProperties.getOauth().getIntentCookieMaxAgeSeconds()).isZero();
 
         // Auth verification
         assertThat(appProperties.getAuth()).isNotNull();
         assertThat(appProperties.getAuth().getVerification()).isNotNull();
-        assertThat(appProperties.getAuth().getVerification().getMaxAttempts()).isEqualTo(5);
-        assertThat(appProperties.getAuth().getVerification().getExpirationMinutes()).isEqualTo(15);
-        assertThat(appProperties.getAuth().getVerification().getCodeLength()).isEqualTo(6);
+        assertThat(appProperties.getAuth().getVerification().getMaxAttempts()).isZero();
+        assertThat(appProperties.getAuth().getVerification().getExpirationMinutes()).isZero();
+        assertThat(appProperties.getAuth().getVerification().getCodeLength()).isZero();
 
         // Artisan formateur
         assertThat(appProperties.getArtisan()).isNotNull();
         assertThat(appProperties.getArtisan().getFormateur()).isNotNull();
-        assertThat(appProperties.getArtisan().getFormateur().getReapplyCooldownDays()).isEqualTo(14L);
+        assertThat(appProperties.getArtisan().getFormateur().getReapplyCooldownDays()).isZero();
     }
 
     @Test

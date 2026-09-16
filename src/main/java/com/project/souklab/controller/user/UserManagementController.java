@@ -34,13 +34,13 @@ public class UserManagementController {
     @GetMapping
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getAllUsers(
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(userManagementService.getAllUsers(search, pageable)));
     }
 
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getPendingUsers(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(userManagementService.getPendingUsers(pageable)));
     }
 

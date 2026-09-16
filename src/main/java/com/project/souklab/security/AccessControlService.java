@@ -50,4 +50,12 @@ public class AccessControlService {
     public boolean isArtisan(Authentication authentication) {
         return hasPermission(authentication, Permission.ARTISAN_CONTENT);
     }
+
+    public boolean canReadProfile(Authentication authentication) {
+        return hasPermission(authentication, Permission.PROFILE_READ);
+    }
+
+    public boolean canWriteProfile(Authentication authentication) {
+        return hasPermission(authentication, Permission.PROFILE_WRITE);
+    }
 }

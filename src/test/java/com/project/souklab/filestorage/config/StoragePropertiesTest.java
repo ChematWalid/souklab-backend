@@ -19,20 +19,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StoragePropertiesTest {
 
     /**
-     * Verifies that a newly instantiated StorageProperties object has expected default values.
+ * Verifies that a newly instantiated StorageProperties object has no policy defaults.
      */
     @Test
-    @DisplayName("StorageProperties uninitialized instance has expected default values")
-    void uninitializedInstanceHasDefaultValues() {
+    @DisplayName("StorageProperties uninitialized instance has no Java policy defaults")
+    void uninitializedInstanceHasNoJavaPolicyDefaults() {
         StorageProperties properties = new StorageProperties();
 
         assertThat(properties.getRateLimit()).isNotNull();
-        assertThat(properties.getRateLimit().isEnabled()).isTrue();
-        assertThat(properties.getRateLimit().getCapacity()).isEqualTo(120);
-        assertThat(properties.getRateLimit().getRefillDuration()).isEqualTo(Duration.ofMinutes(1));
+        assertThat(properties.getRateLimit().isEnabled()).isFalse();
+        assertThat(properties.getRateLimit().getCapacity()).isZero();
+        assertThat(properties.getRateLimit().getRefillDuration()).isNull();
         assertThat(properties.getRateLimit().getCache()).isNotNull();
-        assertThat(properties.getRateLimit().getCache().getMaximumSize()).isEqualTo(10000L);
-        assertThat(properties.getRateLimit().getCache().getExpireAfterAccess()).isEqualTo(Duration.ofMinutes(10));
+        assertThat(properties.getRateLimit().getCache().getMaximumSize()).isZero();
+        assertThat(properties.getRateLimit().getCache().getExpireAfterAccess()).isNull();
     }
 
     /**

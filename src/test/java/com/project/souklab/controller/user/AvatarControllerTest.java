@@ -1,14 +1,14 @@
 package com.project.souklab.controller.user;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
-import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.user.AvatarResponseDTO;
 import com.project.souklab.exception.AvatarLimitExceededException;
+import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
-import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.exception.UnsupportedFileTypeException;
 import com.project.souklab.filestorage.exception.VirusDetectedException;
+import com.project.souklab.filestorage.exception.FileTooLargeException;
 import com.project.souklab.model.User;
 import com.project.souklab.service.user.AvatarService;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,11 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.project.souklab.controller.support.SecurityTestUtils.client;
 import static org.hamcrest.Matchers.nullValue;
@@ -58,12 +56,6 @@ class AvatarControllerTest {
     @MockitoBean
     private AvatarService avatarService;
 
-    @MockitoBean
-    private UserRepository userRepository;
-
-    @MockitoBean
-    private StorageProperties storageProperties;
-
     private User testUser;
     private MockMultipartFile validFile;
 
@@ -83,9 +75,6 @@ class AvatarControllerTest {
                 new byte[]{1, 2, 3, 4}
         );
 
-        StorageProperties.ValidationProperties validation = new StorageProperties.ValidationProperties();
-        validation.setMaxFileSize(DataSize.ofMegabytes(10));
-        when(storageProperties.getValidation()).thenReturn(validation);
     }
 
     @Nested
@@ -147,8 +136,6 @@ class AvatarControllerTest {
         @Test
         @DisplayName("POST /api/v1/users/me/avatars with valid file returns 201 Created and tier URLs")
         void uploadAvatar_whenValidFile_returns201Created() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-
             AvatarResponseDTO responseDTO = AvatarResponseDTO.builder()
                     .id("avatar-uuid-1")
                     .urlOriginal("/api/v1/files/orig-key.png")
@@ -161,7 +148,7 @@ class AvatarControllerTest {
                     .uploadedAt(LocalDateTime.now())
                     .build();
 
-            when(avatarService.uploadAvatar(any(User.class), any())).thenReturn(responseDTO);
+            when(avatarService.uploadAvatar(any())).thenReturn(responseDTO);
 
             mockMvc.perform(multipart(AVATAR_URL)
                             .file(validFile)
@@ -187,6 +174,8 @@ class AvatarControllerTest {
         @DisplayName("POST /api/v1/users/me/avatars with empty file returns 400 Bad Request")
         void uploadAvatar_whenEmptyFile_returns400() throws Exception {
             MockMultipartFile emptyFile = new MockMultipartFile("file", "empty.jpg", "image/jpeg", new byte[0]);
+            when(avatarService.uploadAvatar(any()))
+                    .thenThrow(new BadRequestException("Avatar file is required and cannot be empty"));
 
             mockMvc.perform(multipart(AVATAR_URL)
                             .file(emptyFile)
@@ -194,7 +183,7 @@ class AvatarControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
 
-            verifyNoInteractions(avatarService);
+            verify(avatarService).uploadAvatar(any());
         }
 
         /**
@@ -209,6 +198,8 @@ class AvatarControllerTest {
                     "image/jpeg",
                     new byte[1024 * 1024 * 11]
             );
+            when(avatarService.uploadAvatar(any()))
+                    .thenThrow(new FileTooLargeException(oversized.getSize(), 10L * 1024 * 1024));
 
             mockMvc.perform(multipart(AVATAR_URL)
                             .file(oversized)
@@ -217,7 +208,7 @@ class AvatarControllerTest {
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.errorCode").value("FILE_TOO_LARGE"));
 
-            verifyNoInteractions(avatarService);
+            verify(avatarService).uploadAvatar(any());
         }
 
         /**
@@ -226,8 +217,7 @@ class AvatarControllerTest {
         @Test
         @DisplayName("POST /api/v1/users/me/avatars with unsupported file type returns 400 Bad Request")
         void uploadAvatar_whenUnsupportedFileType_returns400() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-            when(avatarService.uploadAvatar(any(), any()))
+            when(avatarService.uploadAvatar(any()))
                     .thenThrow(new UnsupportedFileTypeException("application/pdf"));
 
             mockMvc.perform(multipart(AVATAR_URL)
@@ -244,8 +234,7 @@ class AvatarControllerTest {
         @Test
         @DisplayName("POST /api/v1/users/me/avatars when virus detected returns 422 Unprocessable Content")
         void uploadAvatar_whenVirusDetected_returns422() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-            when(avatarService.uploadAvatar(any(), any()))
+            when(avatarService.uploadAvatar(any()))
                     .thenThrow(new VirusDetectedException("Eicar-Signature"));
 
             mockMvc.perform(multipart(AVATAR_URL)
@@ -262,8 +251,7 @@ class AvatarControllerTest {
         @Test
         @DisplayName("POST /api/v1/users/me/avatars when quota exceeded returns 409 Conflict")
         void uploadAvatar_whenQuotaExceeded_returns409() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-            when(avatarService.uploadAvatar(any(), any()))
+            when(avatarService.uploadAvatar(any()))
                     .thenThrow(new AvatarLimitExceededException("Maximum avatar limit of 10 reached"));
 
             mockMvc.perform(multipart(AVATAR_URL)
@@ -282,8 +270,6 @@ class AvatarControllerTest {
         @Test
         @DisplayName("authenticated user retrieves avatar gallery returning 200 OK with PaginatedResponse")
         void listAvatars_whenAuthenticated_returns200WithPaginatedEnvelope() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-
             AvatarResponseDTO dto = AvatarResponseDTO.builder()
                     .id("av-1")
                     .urlOriginal("/api/v1/files/orig-1.png")
@@ -305,7 +291,7 @@ class AvatarControllerTest {
                     .last(true)
                     .build();
 
-            when(avatarService.listAvatars(eq(testUser), any(Pageable.class))).thenReturn(paginated);
+            when(avatarService.listAvatars(any(Pageable.class))).thenReturn(paginated);
 
             mockMvc.perform(get(AVATAR_URL)
                             .with(client()))
@@ -330,8 +316,7 @@ class AvatarControllerTest {
         @Test
         @DisplayName("authenticated user deletes avatar returning 200 OK with null data")
         void deleteAvatar_whenAuthenticated_returns200WithNullData() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-            doNothing().when(avatarService).deleteAvatar(eq(testUser), eq("av-1"));
+            doNothing().when(avatarService).deleteAvatar(eq("av-1"));
 
             mockMvc.perform(delete(AVATAR_URL + "/av-1")
                             .with(client()))
@@ -341,15 +326,14 @@ class AvatarControllerTest {
                     .andExpect(jsonPath("$.message").value("Avatar deleted successfully"))
                     .andExpect(jsonPath("$.data").value(nullValue()));
 
-            verify(avatarService).deleteAvatar(eq(testUser), eq("av-1"));
+            verify(avatarService).deleteAvatar(eq("av-1"));
         }
 
         @Test
         @DisplayName("delete avatar with bad or unowned ID returns 404 Not Found")
         void deleteAvatar_whenNotFoundOrNotOwned_returns404() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
             doThrow(new ResourceNotFoundException("Avatar not found with id: missing-id"))
-                    .when(avatarService).deleteAvatar(eq(testUser), eq("missing-id"));
+                    .when(avatarService).deleteAvatar(eq("missing-id"));
 
             mockMvc.perform(delete(AVATAR_URL + "/missing-id")
                             .with(client()))
@@ -366,8 +350,6 @@ class AvatarControllerTest {
         @Test
         @DisplayName("authenticated user activates avatar returning 200 OK with AvatarResponseDTO")
         void activateAvatar_whenAuthenticated_returns200WithUpdatedDTO() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-
             AvatarResponseDTO responseDTO = AvatarResponseDTO.builder()
                     .id("av-target")
                     .urlOriginal("/api/v1/files/orig-target.png")
@@ -380,7 +362,7 @@ class AvatarControllerTest {
                     .uploadedAt(LocalDateTime.now())
                     .build();
 
-            when(avatarService.activateAvatar(eq(testUser), eq("av-target"))).thenReturn(responseDTO);
+            when(avatarService.activateAvatar(eq("av-target"))).thenReturn(responseDTO);
 
             mockMvc.perform(put(AVATAR_URL + "/av-target/activate")
                             .with(client()))
@@ -395,8 +377,6 @@ class AvatarControllerTest {
         @Test
         @DisplayName("activating already active avatar returns 200 OK no-op with current AvatarResponseDTO")
         void activateAvatar_whenAlreadyActive_returns200NoOp() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-
             AvatarResponseDTO responseDTO = AvatarResponseDTO.builder()
                     .id("av-already-active")
                     .urlOriginal("/api/v1/files/orig-already.png")
@@ -409,7 +389,7 @@ class AvatarControllerTest {
                     .uploadedAt(LocalDateTime.now())
                     .build();
 
-            when(avatarService.activateAvatar(eq(testUser), eq("av-already-active"))).thenReturn(responseDTO);
+            when(avatarService.activateAvatar(eq("av-already-active"))).thenReturn(responseDTO);
 
             mockMvc.perform(put(AVATAR_URL + "/av-already-active/activate")
                             .with(client()))
@@ -423,8 +403,7 @@ class AvatarControllerTest {
         @Test
         @DisplayName("activating avatar with bad or unowned ID returns 404 Not Found")
         void activateAvatar_whenNotFoundOrNotOwned_returns404() throws Exception {
-            when(userRepository.findByEmail("client@souklab.com")).thenReturn(Optional.of(testUser));
-            when(avatarService.activateAvatar(eq(testUser), eq("bad-id")))
+            when(avatarService.activateAvatar(eq("bad-id")))
                     .thenThrow(new ResourceNotFoundException("Avatar not found with id: bad-id"));
 
             mockMvc.perform(put(AVATAR_URL + "/bad-id/activate")

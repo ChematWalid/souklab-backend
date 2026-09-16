@@ -22,6 +22,7 @@ import com.project.souklab.model.FormationEnrollment;
 import com.project.souklab.model.FormationFile;
 import com.project.souklab.model.FormationStatus;
 import com.project.souklab.util.ArtisanSecurityUtils;
+import com.project.souklab.security.Permission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -267,6 +268,6 @@ public class FormationEnrollmentService {
      * @return resolved Artisan entity for the current authenticated principal
      */
     private Artisan resolveAuthenticatedArtisan() {
-        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository);
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_FORMATIONS);
     }
 }

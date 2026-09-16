@@ -10,8 +10,10 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
 import com.project.souklab.filestorage.scan.VirusScanService;
+import com.project.souklab.filestorage.lifecycle.StorageObjectLifecycle;
 import com.project.souklab.filestorage.validation.FileValidator;
 import com.project.souklab.filestorage.validation.ValidatedFile;
 import com.project.souklab.model.Artisan;
@@ -53,6 +55,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,6 +85,12 @@ class ArtisanCertificationServiceTest {
     @Mock
     private VirusScanService virusScanService;
 
+    @Mock
+    private StorageObjectLifecycle storageObjectLifecycle;
+
+    @Mock
+    private FileUrlResolver fileUrlResolver;
+
     @Spy
     private AppProperties appProperties = new AppProperties();
 
@@ -96,6 +105,10 @@ class ArtisanCertificationServiceTest {
 
     @BeforeEach
     void setUp() {
+        appProperties.getArtisan().getCertification().setMaxCount(10);
+        appProperties.getArtisan().getCertification().setMaxFileSize(DataSize.ofMegabytes(10));
+        appProperties.getArtisan().getCertification().setAllowedMimeTypes(List.of("application/pdf", "image/jpeg", "image/png"));
+        lenient().when(fileUrlResolver.toStorageKey(anyString())).thenAnswer(invocation -> invocation.getArgument(0, String.class).replace("/api/v1/files/", ""));
         testUser = User.builder()
                 .email(ARTISAN_EMAIL)
                 .build();
@@ -438,7 +451,7 @@ class ArtisanCertificationServiceTest {
 
             assertThatThrownBy(() -> certificationService.uploadCertification(file, "Title", "Issuer", null, null))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("Access denied: artisan role required.");
+                    .hasMessageContaining("Access denied: artisan content permission required.");
         }
     }
 

@@ -111,8 +111,8 @@ class ArtisanFormateurControllerTest {
      * Verifies that @WithMockUser annotation form works identically to programmatic post-processor.
      */
     @Test
-    @WithMockUser(roles = "ARTISAN")
-    @DisplayName("submitRequest: @WithMockUser(roles = 'ARTISAN') returns 201 Created")
+    @WithMockUser(authorities = "permission:artisan:content")
+    @DisplayName("submitRequest: permission authority returns 201 Created")
     void submitRequest_withMockUserAnnotation_shouldReturn201Created() throws Exception {
         FormateurRequestResponseDTO mockResponse = FormateurRequestResponseDTO.builder()
                 .id("req-103")

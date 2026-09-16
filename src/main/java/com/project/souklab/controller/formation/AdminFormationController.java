@@ -40,7 +40,7 @@ public class AdminFormationController {
      */
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationSummaryDTO>>> getPendingFormations(
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         PaginatedResponse<FormationSummaryDTO> response = adminFormationService.getPendingFormations(pageable);
         return ResponseEntity.ok(ApiResponse.success(response));

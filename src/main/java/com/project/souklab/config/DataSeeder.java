@@ -63,7 +63,11 @@ public class DataSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         seedPermissions();
-        seedAdminUser();
+        if (appProperties.getAdmin().isBootstrapEnabled()) {
+            seedAdminUser();
+        } else {
+            log.info("Admin bootstrap is disabled; reference data seeding remains enabled");
+        }
         seedRegions();
         seedJobCategories();
         seedMaterials();

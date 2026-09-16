@@ -11,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -57,7 +56,7 @@ public class ContentReportController {
     public ResponseEntity<ApiResponse<Page<ContentReportResponseDTO>>> list(
             @RequestParam(required = false) ReportStatus status,
             @RequestParam(required = false) ReportTargetType targetType,
-            @PageableDefault(size = 20) Pageable pageable) {
+            Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(reportService.list(status, targetType, pageable)));
     }
 

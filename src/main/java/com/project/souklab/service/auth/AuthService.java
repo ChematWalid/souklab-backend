@@ -127,6 +127,13 @@ public class AuthService {
         return profileResponseMapper.mapToProfileResponse(savedUser);
     }
 
+    /** Handles logout input at the service boundary, including current-principal resolution. */
+    public void logout(TokenRefreshRequestDTO request) {
+        String userEmail = SecurityUtils.getCurrentUsername();
+        String refreshToken = request != null ? request.getRefreshToken() : null;
+        logout(userEmail, refreshToken);
+    }
+
     /**
      * Authenticates a user by email and password, issuing access + refresh token pair.
      * Enforces a 15-minute temporary lockout after 5 consecutive failed login attempts.

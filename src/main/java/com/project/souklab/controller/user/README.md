@@ -20,7 +20,7 @@ Handles administrative user moderation (approvals, bans, timeouts) and user avat
 ### Avatar Gallery (`AvatarController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/users/me/avatar` | Authenticated | Uploads new avatar (enforces rate limit, ClamAV scan, magic bytes, resizing). |
+| `POST` | `/api/v1/users/me/avatars` | Authenticated | Uploads new avatar (enforces rate limit, ClamAV scan, magic bytes, resizing, and configured quota). |
 | `GET` | `/api/v1/users/me/avatars` | Authenticated | Lists all gallery avatars owned by the authenticated user. |
 | `PUT` | `/api/v1/users/me/avatars/{id}/activate` | Authenticated | Activates a gallery avatar as the primary profile avatar. |
 | `DELETE` | `/api/v1/users/me/avatars/{id}` | Authenticated | Deletes an avatar record and associated storage files from S3/MinIO. |
@@ -32,4 +32,5 @@ Handles administrative user moderation (approvals, bans, timeouts) and user avat
 | Class | Responsibility |
 | :--- | :--- |
 | [`UserManagementController`](UserManagementController.java) | Administrative approval, ban, timeout, and audit log endpoints. |
+| [`PermissionManagementController`](PermissionManagementController.java) | Administrator-only assignment and revocation of enabled user capabilities. |
 | [`AvatarController`](AvatarController.java) | User avatar upload, gallery retrieval, activation, and deletion. |

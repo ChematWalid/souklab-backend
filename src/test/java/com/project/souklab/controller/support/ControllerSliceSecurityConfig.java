@@ -4,9 +4,11 @@ import tools.jackson.databind.json.JsonMapper;
 import com.project.souklab.dto.common.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.security.AccessControlService;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +26,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 @EnableConfigurationProperties(AppProperties.class)
+@Import(AccessControlService.class)
 public class ControllerSliceSecurityConfig {
 
     /**

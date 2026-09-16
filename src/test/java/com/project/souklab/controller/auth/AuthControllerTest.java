@@ -204,7 +204,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.message").value("Validation failed"))
                     .andExpect(jsonPath("$.errors.email").exists())
                     .andExpect(jsonPath("$.errors.password").value("Password must be at least 8 characters long"))
-                    .andExpect(jsonPath("$.errors.role").value("Role is required (ARTISAN or CLIENT)"));
+                    .andExpect(jsonPath("$.errors.accountType").value("Account type is required (ARTISAN or CLIENT)"));
         }
 
         /**
@@ -437,7 +437,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("authenticated logout with token passes email and token to service returning 200 OK")
         void logout_whenAuthenticatedWithToken_shouldPassBothToService() throws Exception {
-            doNothing().when(authService).logout(eq("client@souklab.com"), eq("token-xyz"));
+            doNothing().when(authService).logout(any(TokenRefreshRequestDTO.class));
 
             mockMvc.perform(post("/api/v1/auth/logout")
                             .with(client())
@@ -453,7 +453,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.message").value("Logout successful."))
                     .andExpect(jsonPath("$.data").value(nullValue()));
 
-            verify(authService).logout("client@souklab.com", "token-xyz");
+            verify(authService).logout(any(TokenRefreshRequestDTO.class));
         }
 
         /**
@@ -462,7 +462,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("authenticated logout without body passes username and null token to service returning 200 OK")
         void logout_whenAuthenticatedWithoutBody_shouldPassNullTokenToService() throws Exception {
-            doNothing().when(authService).logout(eq("client@souklab.com"), isNull());
+            doNothing().when(authService).logout(any(TokenRefreshRequestDTO.class));
 
             mockMvc.perform(post("/api/v1/auth/logout")
                             .with(client()))
@@ -472,7 +472,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.message").value("Logout successful."))
                     .andExpect(jsonPath("$.data").value(nullValue()));
 
-            verify(authService).logout("client@souklab.com", null);
+            verify(authService).logout(isNull(TokenRefreshRequestDTO.class));
         }
 
         /**
@@ -481,7 +481,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("anonymous logout without body passes nulls to service returning 200 OK")
         void logout_whenAnonymousAndEmptyBody_shouldPassNullsToService() throws Exception {
-            doNothing().when(authService).logout(isNull(), isNull());
+            doNothing().when(authService).logout((TokenRefreshRequestDTO) null);
 
             mockMvc.perform(post("/api/v1/auth/logout"))
                     .andExpect(status().isOk())
@@ -489,7 +489,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.code").value(200))
                     .andExpect(jsonPath("$.message").value("Logout successful."));
 
-            verify(authService).logout(null, null);
+            verify(authService).logout((TokenRefreshRequestDTO) null);
         }
     }
 

@@ -36,16 +36,20 @@ public final class ArtisanSecurityUtils {
      * @throws ForbiddenException    if the principal lacks the required permission or no artisan profile exists
      */
     public static Artisan resolveAuthenticatedArtisan(ArtisanRepository artisanRepository) {
+        return resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_CONTENT);
+    }
+
+    public static Artisan resolveAuthenticatedArtisan(ArtisanRepository artisanRepository, Permission requiredPermission) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getName())) {
             throw new UnauthorizedException("User is not authenticated");
         }
 
-        boolean hasArtisanRole = authentication.getAuthorities().stream()
-                .anyMatch(authority -> Permission.ARTISAN_CONTENT.authority().equals(authority.getAuthority()));
-        if (!hasArtisanRole) {
-            throw new ForbiddenException("Access denied: artisan role required.");
+        boolean hasArtisanPermission = authentication.getAuthorities().stream()
+                .anyMatch(authority -> requiredPermission.authority().equals(authority.getAuthority()));
+        if (!hasArtisanPermission) {
+            throw new ForbiddenException("Access denied: " + requiredPermission.authority() + " permission required.");
         }
 
         String username = SecurityUtils.getCurrentUsername();

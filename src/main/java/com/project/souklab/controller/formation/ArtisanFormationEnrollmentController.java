@@ -50,7 +50,7 @@ public class ArtisanFormationEnrollmentController {
      */
     @GetMapping("/catalog")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationSummaryDTO>>> getPublishedCatalog(
-            @PageableDefault(size = 10, sort = "scheduledAt", direction = Sort.Direction.ASC) Pageable pageable
+            @PageableDefault(sort = "scheduledAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         Page<FormationSummaryDTO> page = formationEnrollmentService.getPublishedCatalog(pageable);
         return ResponseEntity.ok(ApiResponse.success(PaginatedResponse.from(page)));
@@ -106,7 +106,7 @@ public class ArtisanFormationEnrollmentController {
      */
     @GetMapping("/my-enrollments")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationEnrollmentDetailDTO>>> getMyEnrollments(
-            @PageableDefault(size = 10, sort = "enrolledAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "enrolledAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<FormationEnrollmentDetailDTO> page = formationEnrollmentService.getMyEnrollments(pageable);
         return ResponseEntity.ok(ApiResponse.success(PaginatedResponse.from(page)));

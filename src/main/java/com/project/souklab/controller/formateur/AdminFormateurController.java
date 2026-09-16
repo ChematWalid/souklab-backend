@@ -33,7 +33,7 @@ public class AdminFormateurController {
 
     @GetMapping("/formateur-requests")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormateurRequestResponseDTO>>> getPendingRequests(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getPendingRequests(pageable)));
     }
 

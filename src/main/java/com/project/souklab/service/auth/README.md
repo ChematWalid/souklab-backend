@@ -6,7 +6,7 @@ Core authentication workflows, credential hashing, registration state machines, 
 
 ## Key Workflows
 
-### 1. Registration & Initial Role Assignment
+### 1. Registration & Initial Capability Assignment
 - New client registrations are saved with `AccountStatus.ACTIVE` and require email verification.
 - New artisan registrations are saved with `AccountStatus.PENDING`, requiring administrative vetting and approval before activation.
 
@@ -19,5 +19,6 @@ Core authentication workflows, credential hashing, registration state machines, 
 
 | Service Class | Responsibility |
 | :--- | :--- |
-| [`AuthService`](AuthService.java) | Handles `registerUser`, `login`, `refreshToken`, `verifyEmail`, `resendVerification`, `forgotPassword`, `resetPassword`, `changePassword`, and `completeProfile`. |
+| [`AuthService`](AuthService.java) | Handles `registerUser`, `login`, `logout`, `refreshToken`, `verifyEmail`, `resendVerification`, `forgotPassword`, `resetPassword`, and `changePassword`. Profile operations are owned by `ProfileService`. |
+| [`PermissionManagementService`](PermissionManagementService.java) | Adds and removes enabled database-backed capabilities for users after administrator authorization. |
 | [`CustomUserDetailsService`](CustomUserDetailsService.java) | Implements Spring Security's `UserDetailsService`, loading users by email with enabled permission authorities. |

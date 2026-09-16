@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +45,7 @@ public class FeedPostController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<FeedPostResponseDTO>>> list(
             @RequestParam(required = false) FeedPostType type,
-            @PageableDefault(size = 20) Pageable pageable) {
+            Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(feedPostService.listPublic(type, pageable)));
     }
 

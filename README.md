@@ -28,7 +28,7 @@ graph TD
 
 | Module | Core Responsibility | Key Technologies |
 | :--- | :--- | :--- |
-| **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security 6, JJWT (HS256), BCrypt |
+| **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security, JJWT (HS256), BCrypt |
 | **User & Profile Management** | Artisan public profiles, profile completion wizard, permission-aware contact gating, profile view metrics deduplication. | Spring Data JPA, Jakarta Validation |
 | **Public Directory & Search** | Full-text scored search, faceted discovery (Wilayas, categories, materials, epoques, techniques), accent folding, edge n-grams, and JPA criteria fallback. | Hibernate Search 8.2.2.Final, Elasticsearch 8.x |
 | **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques). | Caffeine Cache, Spring Data JPA |
@@ -43,14 +43,14 @@ graph TD
 ## Technology Stack
 
 - **Runtime & Language**: Java 17+, Spring Boot 4.0+
-- **Data Persistence**: Spring Data JPA + Hibernate 6 + MariaDB / MySQL 8.0
+- **Data Persistence**: Spring Data JPA + Hibernate ORM + MariaDB / MySQL 8.0
 - **Search Engine & Indexing**: Hibernate Search 8.2.2.Final (Elasticsearch 8.x backend)
 - **Caching**: Caffeine Cache (catalog taxonomies, rate limiting buckets)
 - **Connection Pool**: HikariCP (configured with leak detection and connection pooling)
 - **Object Storage**: S3-compatible object store (MinIO for local development, AWS S3 / Cloudflare R2 for production)
 - **Security & Antivirus**: Spring Security, JJWT, Bucket4j, ClamAV Daemon
 - **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ)
-- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Postman / Newman
+- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway, Postman / Newman
 
 ---
 
@@ -150,6 +150,8 @@ Service endpoints:
 ```
 
 The server listens on `http://localhost:8080/api/v1`.
+
+Authorization capabilities and their endpoint/service boundaries are documented in [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). Local development keeps Flyway disabled by default; production enables the versioned migrations and uses Hibernate schema validation.
 
 ---
 

@@ -141,7 +141,7 @@ public class StorageProperties {
     /**
      * Rate limiting configuration for file operations.
      */
-    private RateLimitProperties rateLimit = new RateLimitProperties();
+        private RateLimitProperties rateLimit = new RateLimitProperties();
 
     /**
      * Nested rate limiting configuration properties for file operations.
@@ -152,17 +152,17 @@ public class StorageProperties {
         /**
          * Whether rate limiting for file operations is enabled.
          */
-        private boolean enabled = true;
+        private boolean enabled;
 
         /**
          * Maximum number of requests allowed within the refill duration.
          */
-        private int capacity = 120;
+        private int capacity;
 
         /**
          * Duration over which the rate limit capacity refills (e.g. 1m).
          */
-        private Duration refillDuration = Duration.ofMinutes(1);
+        private Duration refillDuration;
 
         /**
          * In-memory cache configuration for rate limiting buckets.
@@ -178,12 +178,12 @@ public class StorageProperties {
             /**
              * Maximum number of client buckets retained in memory.
              */
-            private long maximumSize = 10000;
+            private long maximumSize;
 
             /**
              * Inactivity duration after which an idle client bucket is evicted.
              */
-            private Duration expireAfterAccess = Duration.ofMinutes(10);
+            private Duration expireAfterAccess;
         }
     }
 }

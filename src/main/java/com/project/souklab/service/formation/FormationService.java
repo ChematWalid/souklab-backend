@@ -33,6 +33,7 @@ import com.project.souklab.model.FormationReview;
 import com.project.souklab.model.FormationStatus;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.ArtisanSecurityUtils;
+import com.project.souklab.security.Permission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -416,7 +417,7 @@ public class FormationService {
      * @return resolved Artisan entity for the current authenticated principal
      */
     private Artisan resolveAuthenticatedArtisan() {
-        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository);
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_FORMATIONS);
     }
 
     /**

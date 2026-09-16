@@ -46,15 +46,15 @@ public class ProfileResponseMapper {
         boolean isArtisan = user.getPermissions().stream()
                 .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
 
-        Set<String> roleNames = user.getPermissions().stream()
+        Set<String> permissionKeys = user.getPermissions().stream()
                 .map(AuthorizationPermission::getPermissionKey)
                 .collect(Collectors.toSet());
 
         if (isArtisan) {
-            return buildArtisanProfileResponse(user, roleNames);
+            return buildArtisanProfileResponse(user, permissionKeys);
         }
 
-        return buildClientProfileResponse(user, roleNames);
+        return buildClientProfileResponse(user, permissionKeys);
     }
 
     /**
@@ -95,7 +95,7 @@ public class ProfileResponseMapper {
      * @param roleNames the set of role name strings assigned to the user
      * @return the fully populated {@link ArtisanResponseDTO}
      */
-    private ArtisanResponseDTO buildArtisanProfileResponse(User user, Set<String> roleNames) {
+    private ArtisanResponseDTO buildArtisanProfileResponse(User user, Set<String> permissionKeys) {
         Artisan profile = user.getArtisan();
         RegionSummaryDTO regionSummary = profile != null ? RegionSummaryDTO.from(profile.getRegion()) : null;
         JobSubCategorySummaryDTO subCategorySummary = profile != null ? JobSubCategorySummaryDTO.from(profile.getSubCategory()) : null;
@@ -136,7 +136,7 @@ public class ProfileResponseMapper {
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
                 .accountStatus(user.getStatus())
-                .permissions(roleNames)
+                .permissions(permissionKeys)
                 .emailVerified(user.isEmailVerified())
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .createdAt(user.getCreatedAt())
@@ -170,7 +170,7 @@ public class ProfileResponseMapper {
      * @param roleNames the set of role name strings assigned to the user
      * @return the fully populated {@link ClientProfileResponseDTO}
      */
-    private ClientProfileResponseDTO buildClientProfileResponse(User user, Set<String> roleNames) {
+    private ClientProfileResponseDTO buildClientProfileResponse(User user, Set<String> permissionKeys) {
         Client client = user.getClient();
         return ClientProfileResponseDTO.builder()
                 .id(user.getId())
@@ -181,7 +181,7 @@ public class ProfileResponseMapper {
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
                 .accountStatus(user.getStatus())
-                .permissions(roleNames)
+                .permissions(permissionKeys)
                 .emailVerified(user.isEmailVerified())
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .createdAt(user.getCreatedAt())

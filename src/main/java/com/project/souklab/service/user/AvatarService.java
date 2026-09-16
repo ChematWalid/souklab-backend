@@ -58,6 +58,39 @@ public class AvatarService {
     private final TransactionTemplate transactionTemplate;
     private final Clock clock;
     private final AvatarProperties avatarProperties;
+    private final CurrentUserProvider currentUserProvider;
+
+    /** Compatibility constructor retained for focused unit tests and existing callers. */
+    public AvatarService(UserAvatarRepository userAvatarRepository,
+                         UserRepository userRepository,
+                         FileValidator fileValidator,
+                         VirusScanService virusScanService,
+                         ImageProcessingService imageProcessingService,
+                         StorageService storageService,
+                         TransactionTemplate transactionTemplate,
+                         Clock clock,
+                         AvatarProperties avatarProperties) {
+        this(userAvatarRepository, userRepository, fileValidator, virusScanService,
+                imageProcessingService, storageService, transactionTemplate, clock,
+                avatarProperties, null);
+    }
+
+    /** Service entry point that owns principal and entity resolution. */
+    public AvatarResponseDTO uploadAvatar(MultipartFile file) {
+        return uploadAvatar(currentUserProvider.requireCurrentUser(), file);
+    }
+
+    public PaginatedResponse<AvatarResponseDTO> listAvatars(Pageable pageable) {
+        return listAvatars(currentUserProvider.requireCurrentUser(), pageable);
+    }
+
+    public void deleteAvatar(String avatarId) {
+        deleteAvatar(currentUserProvider.requireCurrentUser(), avatarId);
+    }
+
+    public AvatarResponseDTO activateAvatar(String avatarId) {
+        return activateAvatar(currentUserProvider.requireCurrentUser(), avatarId);
+    }
 
     /**
      * Uploads, processes, stores, and activates a new avatar for the authenticated user.

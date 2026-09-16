@@ -18,7 +18,6 @@ import com.project.souklab.model.AccountStatus;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
-import com.project.souklab.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -27,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -94,9 +94,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> logout(
             @RequestBody(required = false) TokenRefreshRequestDTO tokenRequest,
             HttpServletRequest request) {
-        String userEmail = SecurityUtils.getCurrentUsername();
-        String refreshToken = tokenRequest != null ? tokenRequest.getRefreshToken() : null;
-        authService.logout(userEmail, refreshToken);
+        authService.logout(tokenRequest);
         return ResponseEntity.ok(ApiResponse.success(null, "Logout successful."));
     }
 
@@ -149,6 +147,7 @@ public class AuthController {
      * Returns the profile of the currently authenticated user.
      */
     @GetMapping("/me")
+    @PreAuthorize("@accessControl.canReadProfile(authentication)")
     public ResponseEntity<ApiResponse<ProfileResponse>> getCurrentUser() {
         return ResponseEntity.ok(ApiResponse.success(profileService.getCurrentUser()));
     }
@@ -157,6 +156,7 @@ public class AuthController {
      * Partially updates the authenticated user's profile using a strongly-typed patch DTO.
      */
     @PatchMapping("/me")
+    @PreAuthorize("@accessControl.canWriteProfile(authentication)")
     public ResponseEntity<ApiResponse<ProfileResponse>> patchCurrentUser(@Valid @RequestBody(required = false) UserPatchDTO patchDTO) {
         ProfileResponse response = profileService.patchCurrentUser(patchDTO);
         return ResponseEntity.ok(ApiResponse.success(response, "Profile updated successfully."));
@@ -166,6 +166,7 @@ public class AuthController {
      * Completes the artisan or client profile for the authenticated user.
      */
     @PostMapping("/complete-profile")
+    @PreAuthorize("@accessControl.canWriteProfile(authentication)")
     public ResponseEntity<ApiResponse<ProfileResponse>> completeProfile(@Valid @RequestBody CompleteProfileRequestDTO request) {
         ProfileResponse response = profileService.completeProfile(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Profile completed successfully."));

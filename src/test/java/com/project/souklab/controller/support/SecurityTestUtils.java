@@ -1,8 +1,11 @@
 package com.project.souklab.controller.support;
 
+import com.project.souklab.security.Permission;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
+import java.util.Arrays;
 
 /**
  * Reusable RequestPostProcessor helpers providing authenticated principals
@@ -21,7 +24,9 @@ public final class SecurityTestUtils {
      */
     public static RequestPostProcessor artisan(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
-                .authorities(new SimpleGrantedAuthority("permission:artisan:content"), new SimpleGrantedAuthority("permission:artisan:formations"), new SimpleGrantedAuthority("permission:artisan:reviews"));
+                .authorities(authorities(Permission.ARTISAN_CONTENT, Permission.ARTISAN_FORMATIONS,
+                        Permission.ARTISAN_REVIEWS, Permission.PROFILE_READ, Permission.PROFILE_WRITE,
+                        Permission.REPORT_CREATE, Permission.FILE_READ));
     }
 
     /**
@@ -36,7 +41,9 @@ public final class SecurityTestUtils {
      */
     public static RequestPostProcessor admin(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
-                .authorities(new SimpleGrantedAuthority("permission:admin:users"), new SimpleGrantedAuthority("permission:admin:formations"), new SimpleGrantedAuthority("permission:admin:feed"), new SimpleGrantedAuthority("permission:admin:reports"));
+                .authorities(Arrays.stream(Permission.values())
+                        .map(SecurityTestUtils::authority)
+                        .toArray(SimpleGrantedAuthority[]::new));
     }
 
     /**
@@ -51,7 +58,8 @@ public final class SecurityTestUtils {
      */
     public static RequestPostProcessor client(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
-                .authorities(new SimpleGrantedAuthority("permission:profile:read"), new SimpleGrantedAuthority("permission:profile:write"));
+                .authorities(authorities(Permission.PROFILE_READ, Permission.PROFILE_WRITE,
+                        Permission.REPORT_CREATE, Permission.FILE_READ));
     }
 
     /**
@@ -59,5 +67,14 @@ public final class SecurityTestUtils {
      */
     public static RequestPostProcessor client() {
         return client("client@souklab.com");
+    }
+
+    private static SimpleGrantedAuthority[] authorities(Permission... permissions) {
+        return Arrays.stream(permissions).map(SecurityTestUtils::authority)
+                .toArray(SimpleGrantedAuthority[]::new);
+    }
+
+    private static SimpleGrantedAuthority authority(Permission permission) {
+        return new SimpleGrantedAuthority(permission.authority());
     }
 }

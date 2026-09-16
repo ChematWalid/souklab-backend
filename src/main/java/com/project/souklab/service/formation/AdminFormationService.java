@@ -172,7 +172,7 @@ public class AdminFormationService {
         }
 
         if (!accessControlService.canManageFormations(authentication)) {
-            throw new ForbiddenException("Access denied: administrator role required.");
+            throw new ForbiddenException("Access denied: administrator permission required.");
         }
 
         String username = SecurityUtils.getCurrentUsername();

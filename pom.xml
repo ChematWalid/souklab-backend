@@ -55,6 +55,16 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Managed schema migrations; enabled explicitly for deployment environments. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
         <!-- Security: Spring Security 6 & OAuth2 Client -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -297,6 +307,13 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar @{argLine}</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>

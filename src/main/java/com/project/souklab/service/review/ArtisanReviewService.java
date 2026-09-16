@@ -16,6 +16,7 @@ import com.project.souklab.model.ReviewStatus;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.util.ArtisanSecurityUtils;
+import com.project.souklab.security.Permission;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -145,7 +146,7 @@ public class ArtisanReviewService {
     }
 
     private Artisan currentArtisan() {
-        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository);
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_REVIEWS);
     }
 
     private BigDecimal normalizeRating(BigDecimal rating) {
