@@ -1,6 +1,7 @@
 package com.project.souklab.service.user;
 
 import com.project.souklab.config.AvatarProperties;
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.UserAvatarRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
@@ -10,7 +11,6 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
-import com.project.souklab.filestorage.FileServingRoutes;
 import com.project.souklab.filestorage.exception.StorageException;
 import com.project.souklab.filestorage.image.ImageProcessingService;
 import com.project.souklab.filestorage.image.ImageVariant;
@@ -56,6 +56,7 @@ public class AvatarService {
     private final TransactionTemplate transactionTemplate;
     private final Clock clock;
     private final AvatarProperties avatarProperties;
+    private final AppProperties appProperties;
     private final CurrentUserProvider currentUserProvider;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -68,6 +69,7 @@ public class AvatarService {
                          TransactionTemplate transactionTemplate,
                          Clock clock,
                          AvatarProperties avatarProperties,
+                         AppProperties appProperties,
                          CurrentUserProvider currentUserProvider) {
         this.userAvatarRepository = userAvatarRepository;
         this.userRepository = userRepository;
@@ -78,6 +80,7 @@ public class AvatarService {
         this.transactionTemplate = transactionTemplate;
         this.clock = clock;
         this.avatarProperties = avatarProperties;
+        this.appProperties = appProperties;
         this.currentUserProvider = currentUserProvider;
     }
 
@@ -93,7 +96,7 @@ public class AvatarService {
                          AvatarProperties avatarProperties) {
         this(userAvatarRepository, userRepository, fileValidator, virusScanService,
                 imageProcessingService, storageService, transactionTemplate, clock,
-                avatarProperties, null);
+                avatarProperties, new AppProperties(), null);
     }
 
     /** Service entry point that owns principal and entity resolution. */
@@ -362,7 +365,7 @@ public class AvatarService {
      * @param thumbnailKey the storage key of the active thumbnail image variant
      */
     private void syncUserAvatar(User user, String thumbnailKey) {
-        user.setAvatarUrl(FileServingRoutes.BASE_PATH + "/" + thumbnailKey);
+        user.setAvatarUrl(appProperties.getStorage().toUrl(thumbnailKey));
         userRepository.save(user);
     }
 
@@ -373,12 +376,11 @@ public class AvatarService {
      * @return the populated response DTO
      */
     private AvatarResponseDTO mapToResponseDTO(UserAvatar avatar) {
-        String urlPrefix = FileServingRoutes.DEFAULT_PREFIX;
         return AvatarResponseDTO.builder()
                 .id(avatar.getId())
-                .urlOriginal(urlPrefix + avatar.getStorageKeyOriginal())
-                .urlMedium(urlPrefix + avatar.getStorageKeyMedium())
-                .urlThumbnail(urlPrefix + avatar.getStorageKeyThumbnail())
+                .urlOriginal(appProperties.getStorage().toUrl(avatar.getStorageKeyOriginal()))
+                .urlMedium(appProperties.getStorage().toUrl(avatar.getStorageKeyMedium()))
+                .urlThumbnail(appProperties.getStorage().toUrl(avatar.getStorageKeyThumbnail()))
                 .originalFilename(avatar.getOriginalFilename())
                 .contentType(avatar.getContentType())
                 .fileSize(avatar.getFileSize())
