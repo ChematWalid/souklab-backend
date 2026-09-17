@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 
@@ -68,7 +69,7 @@ class FileStorageCoreVerificationTest {
         ));
         tika = new Tika();
         validator = new FileValidator(properties, tika);
-        storageService = new InMemoryStorageService();
+        storageService = new InMemoryStorageService(Clock.systemUTC());
     }
 
     /**

@@ -19,7 +19,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 ---
 
 ## 📍 Phase 2: Security, Authentication & Identity Management (COMPLETED)
-- [x] **Step 2.1**: Implement `User`, `Role`, `RefreshToken`, and `VerificationToken` JPA entities and repositories.
+- [x] **Step 2.1**: Implement `User`, `AuthorizationPermission`, `RefreshToken`, and `VerificationToken` JPA entities and repositories.
 - [x] **Step 2.2**: Implement `JwtUtils` (deterministic with injected `Clock`), `JwtAuthenticationFilter`, `RateLimitFilter` (Caffeine bounded cache), and `CustomUserDetailsService`.
 - [x] **Step 2.3**: Configure `SecurityConfig` (stateless session, route whitelisting, CORS bean, method security with standard 403 error envelopes).
 - [x] **Step 2.4**: Implement `AuthService` and `AuthController` (`/api/v1/auth/register`, `/login`, `/refresh`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`, `/change-password`, `/me`, `PATCH /me`, `/complete-profile`).
@@ -29,7 +29,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 
 ## 📍 Phase D: Dedicated File Storage & Avatar Pipeline (COMPLETED)
 - [x] **Step D.1**: Build pluggable `StorageService` abstraction with `StorageResource`, in-memory stub provider, and S3/MinIO compatible provider (`S3StorageService`).
-- [x] **Step D.2**: Implement ClamAV daemon antivirus stream scanning (`ClamAvScanner`) with fail-open/fail-closed configuration guards.
+- [x] **Step D.2**: Implement ClamAV daemon antivirus stream scanning (`ClamdInstreamScanner`) with fail-open/fail-closed configuration guards.
 - [x] **Step D.3**: Implement multi-tier avatar image processing (`AvatarImageProcessor`) generating `original` (max 2000px), `medium` (max 500px), and `thumbnail` (max 150px) variants.
 - [x] **Step D.4**: Implement `UserAvatar` entity, gallery management (10-avatar quota, list, activate, delete), and `AvatarController`.
 - [x] **Step D.5**: Implement streaming file serving endpoint (`GET /api/v1/files/{key}`) with immutable HTTP caching and dedicated avatar rate-limiting (`AvatarUploadRateLimitFilter`).

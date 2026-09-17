@@ -1,12 +1,12 @@
 # Production Readiness Audit
 
-Audit date: 2026-09-16
+Audit date: 2026-09-17
 
 This report is based on the current source tree, build configuration, migrations, container files, tests, and local verification commands. It is an engineering readiness review, not a compliance certification.
 
 ## Current recommendation
 
-Do not expose the application to public production traffic yet. The authorization defects found during this pass are fixed, but the release process still lacks automated migration execution, CI gates, a supported test-runtime configuration, and production observability.
+The codebase is internally consistent and testable against the local dependency stack. Production rollout still requires the operational controls listed below, especially a CI/release gate, migration execution policy, and observability.
 
 ## Findings
 
@@ -14,18 +14,16 @@ Do not expose the application to public production traffic yet. The authorizatio
 
 | Finding | Evidence | Recommendation |
 | --- | --- | --- |
-| Schema changes are manual artifacts | `docs/migrations` contains SQL scripts, while `pom.xml` has no Flyway or Liquibase integration. | Adopt one migration runner, execute migrations in CI/deploy, validate checksums, and document rollback/recovery procedures. |
-| Test coverage regressed during authorization migration | The authorization commit removed 6,082 test lines while adding focused replacement tests. | Restore the behavioral tests and mechanically migrate their fixtures to permissions; require coverage thresholds in CI. |
-| Runtime tests are not executable on the current JDK setup | Mockito inline mock-maker fails to self-attach on JDK 26; focused pure permission tests pass, Mockito-backed tests fail before assertions. | Standardize CI and local development on a supported JDK, or configure Mockito as an explicit test JVM agent. |
-| No repository CI/release gate is present | No `.github` workflow or equivalent pipeline is tracked. | Add compile, test, migration validation, dependency scanning, image scanning, and artifact publication gates. |
+| Production schema changes require deployment discipline | Flyway is bundled and enabled by the production profile, while local development keeps it disabled. | Apply reviewed migrations before startup and document rollback/recovery ownership. |
+| No tracked CI/release gate is present | No `.github` workflow or equivalent pipeline is tracked. | Add compile, test, migration, dependency, image, and artifact gates. |
+| No application observability surface is configured | No Actuator or Micrometer management endpoint is configured. | Add dependency readiness, metrics, correlation IDs, and operational dashboards. |
+| Rate limiting is process-local | Bucket4j state is held in Caffeine caches. | Use a shared limiter or edge gateway when horizontally scaling. |
 
 ### Medium priority
 
 | Finding | Evidence | Recommendation |
 | --- | --- | --- |
-| No built-in health/readiness/metrics surface | No Actuator, Micrometer, or management endpoint is configured. | Add health/readiness probes, metrics, structured request correlation, and dependency dashboards before rollout. |
 | Data seeding runs on every application startup | `DataSeeder` implements `CommandLineRunner` and also owns first-admin bootstrap. | Separate immutable reference-data migrations from an explicitly enabled bootstrap job; never email a bootstrap password in production. |
-| Rate limiting is process-local | Bucket4j state is held in Caffeine caches. | Use a shared Redis or edge-gateway limiter for horizontally scaled deployments. |
 | S3 bucket creation is enabled by default | `storage.s3.auto-create-bucket` defaults to `true` in application configuration. | Default this to `false` in production and provision buckets/IAM policies outside the application. |
 | CORS allows credentials | `SecurityConfig` enables credentials with configurable origin patterns. | Reject wildcard origins at startup and keep an explicit production allowlist. |
 | Search and external services are startup-coupled | Search index lifecycle and S3 initialization run during application startup. | Define dependency readiness policies, bounded retries, and a clear degraded-mode strategy. |
@@ -39,16 +37,21 @@ Do not expose the application to public production traffic yet. The authorizatio
 - User permissions are lazy by default; authentication queries explicitly fetch them through entity graphs.
 - JWT configuration now fails fast when the secret is shorter than 32 UTF-8 bytes or token expirations are non-positive.
 - Environment documentation now includes previously omitted storage, database, and Elasticsearch variables.
+- All production timestamp creation uses the application `java.time.Clock` bean; storage adapters no longer create fallback clocks.
+- Runtime tuning values are bound through environment variables and typed configuration classes; file URL generation honors the configured prefix.
+- The local Compose verifier provisions MariaDB, RabbitMQ, MinIO, Elasticsearch, and ClamAV and tears down only its test environment.
+- Documentation now identifies the generated Postman material as archival and points to the current permission-based API specification.
 
 ## Verification evidence
 
-- `./mvnw -DskipTests compile`: passed.
-- `./mvnw -DskipTests test-compile`: passed.
-- Permission and capability-isolation tests: 4 tests passed.
+- `./mvnw -DskipTests compile` on Java 21: passed.
+- Full Compose-backed suite: 828 tests, 0 failures, 0 errors, 0 skipped.
+- JaCoCo report: generated successfully; 187 classes analyzed.
 - `git diff --check`: passed.
-- Production Java scan for `ROLE_*`, legacy role repositories, and inline project-class references: clean.
-- Mockito-backed runtime tests: blocked by JDK 26 agent self-attachment in this environment.
+- Production time scan: only `ClockConfig` creates the system clock; all production `now` calls use an injected clock.
+- Architecture scans: no controller repository imports and no inline implementation classes.
+- Native SonarLint executable/plugin: not installed or configured in this repository, so no native SonarLint result is available; local compiler, test, and source-hygiene checks are the available evidence.
 
 ## Next release gate
 
-The next production milestone should restore the removed behavioral tests, add a migration runner and CI pipeline, configure a supported test JDK/Mockito agent, and expose health/readiness/metrics endpoints before any external deployment.
+The next production milestone should add a CI pipeline, formalize migration and rollback ownership, and expose health/readiness/metrics endpoints before any external deployment.

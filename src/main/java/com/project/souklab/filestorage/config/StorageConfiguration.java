@@ -10,7 +10,6 @@ import com.project.souklab.filestorage.scan.VirusScanner;
 import com.project.souklab.filestorage.stub.InMemoryStorageService;
 import com.project.souklab.filestorage.validation.FileValidator;
 import org.apache.tika.Tika;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -73,14 +72,13 @@ public class StorageConfiguration {
     /**
      * Registers the in-memory storage service bean when {@code storage.provider=in-memory} (or omitted).
      *
-     * @param clockProvider optional provider for the application Clock bean
+     * @param clock application Clock bean used for storage timestamps
      * @return an InMemoryStorageService bean
      */
     @Bean
     @ConditionalOnProperty(name = "storage.provider", havingValue = "in-memory", matchIfMissing = true)
     @ConditionalOnMissingBean(StorageService.class)
-    public StorageService inMemoryStorageService(ObjectProvider<Clock> clockProvider) {
-        Clock clock = clockProvider.getIfAvailable(Clock::systemUTC);
+    public StorageService inMemoryStorageService(Clock clock) {
         return new InMemoryStorageService(clock);
     }
 
@@ -133,14 +131,13 @@ public class StorageConfiguration {
      *
      * @param properties file storage properties
      * @param s3Client the configured S3Client
-     * @param clockProvider optional provider for the application Clock bean
+     * @param clock application Clock bean used for storage timestamps
      * @return an S3StorageService bean
      */
     @Bean
     @ConditionalOnProperty(name = "storage.provider", havingValue = "s3")
     @ConditionalOnMissingBean(StorageService.class)
-    public StorageService s3StorageService(StorageProperties properties, S3Client s3Client, ObjectProvider<Clock> clockProvider) {
-        Clock clock = clockProvider.getIfAvailable(Clock::systemUTC);
+    public StorageService s3StorageService(StorageProperties properties, S3Client s3Client, Clock clock) {
         return new S3StorageService(properties, s3Client, clock);
     }
 

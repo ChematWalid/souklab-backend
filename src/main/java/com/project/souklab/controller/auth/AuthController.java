@@ -55,7 +55,7 @@ public class AuthController {
     private final AppProperties appProperties;
 
     /**
-     * Registers a new user and returns the role-specific profile response.
+     * Registers a new user and returns the account-type-specific profile response.
      */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<ProfileResponse>> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {

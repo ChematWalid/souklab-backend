@@ -32,12 +32,11 @@ public class InMemoryStorageService implements StorageService {
     private final Map<String, StoredFile> store = new ConcurrentHashMap<>();
     private final Clock clock;
 
-    public InMemoryStorageService() {
-        this(Clock.systemUTC());
-    }
-
     public InMemoryStorageService(Clock clock) {
-        this.clock = clock != null ? clock : Clock.systemUTC();
+        if (clock == null) {
+            throw new IllegalArgumentException("Clock cannot be null");
+        }
+        this.clock = clock;
     }
 
     /**

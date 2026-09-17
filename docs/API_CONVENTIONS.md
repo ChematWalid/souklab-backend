@@ -63,7 +63,7 @@ Use `@PageableDefault(size = 20)` on the controller method — do not build
 | Field validation failure | 422 | `MethodArgumentNotValidException` / `ConstraintViolationException`, includes `errors` map |
 | Malformed/unreadable JSON | 400 | Genuine request-shape problems only |
 | Unauthenticated | 401 | |
-| **Role/permission mismatch** | **403** | Authenticated, but not allowed to do this. Covers: `@PreAuthorize` failures, "you don't have the profile this action requires," business-rule blocks (cooldowns, permanent blocks) |
+| **Permission mismatch** | **403** | Authenticated, but not allowed to do this. Covers: `@PreAuthorize` failures, "you don't have the profile this action requires," business-rule blocks (cooldowns, permanent blocks) |
 | Not found | 404 | |
 | **State conflict** | **409** | The action can't proceed because of *current state*, not because the request is invalid — duplicate-in-progress request, "you already have the thing you're requesting" |
 | Rate limited | 429 | |

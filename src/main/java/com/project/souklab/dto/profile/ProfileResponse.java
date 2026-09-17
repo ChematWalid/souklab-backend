@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * Common response contract for user profiles (Client and Artisan).
  * Provides compile-time type safety across Auth and Profile endpoints while
- * allowing polymorphic responses without leaking role-specific fields.
+ * allowing polymorphic responses without leaking account-type-specific fields.
  */
 public interface ProfileResponse {
 

@@ -56,14 +56,13 @@ public class S3StorageService implements StorageService {
     private final S3Client s3Client;
     private final Clock clock;
 
-    public S3StorageService(StorageProperties properties, S3Client s3Client) {
-        this(properties, s3Client, Clock.systemUTC());
-    }
-
     public S3StorageService(StorageProperties properties, S3Client s3Client, Clock clock) {
         this.properties = properties;
         this.s3Client = s3Client;
-        this.clock = clock != null ? clock : Clock.systemUTC();
+        if (clock == null) {
+            throw new IllegalArgumentException("Clock cannot be null");
+        }
+        this.clock = clock;
     }
 
     /**

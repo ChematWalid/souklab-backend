@@ -131,7 +131,7 @@ src/main/java/com/project/souklab/
 ### 2. Infrastructure Setup
 Launch local infrastructure containers:
 ```bash
-docker compose up -d mariadb minio rabbitmq clamav
+docker compose up -d mariadb minio rabbitmq elasticsearch clamav
 ```
 
 Service endpoints:
@@ -139,6 +139,7 @@ Service endpoints:
 - **MinIO S3**: `http://localhost:9000` (Console: `http://localhost:9001`)
 - **RabbitMQ**: `localhost:5672` (Management: `http://localhost:15672`)
 - **ClamAV**: `localhost:3310`
+- **Elasticsearch**: `localhost:9200`
 
 ### 3. Build & Run
 ```bash
@@ -160,12 +161,8 @@ Authorization capabilities and their endpoint/service boundaries are documented 
 - **Production Audit**: See [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
 
 - **API Specification**: See [`docs/API_SPEC.md`](docs/API_SPEC.md) for full endpoint references.
-- **Postman API Reference**: Exhaustive contracts documented in [`docs/POSTMAN_API_REFERENCE.md`](docs/POSTMAN_API_REFERENCE.md).
-- **Postman Test Suite**: Located in [`.postman/souklab.postman_collection.json`](.postman/souklab.postman_collection.json).
-  To run the automated Newman verification:
-  ```bash
-  npx newman run .postman/souklab.postman_collection.json -e .postman/souklab.postman_environment.json
-  ```
+- **Postman API Reference**: The current permission-based contract is documented in [`docs/API_SPEC.md`](docs/API_SPEC.md) and [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). The older generated reference is retained as an archival migration artifact and is not an executable contract.
+- **Postman Test Suite**: The checked-in collection is retained for historical scenarios and must be regenerated before running Newman against the current permission-based API.
 
 ---
 

@@ -60,7 +60,7 @@ public class ProfileService {
     /**
      * Returns the profile of the currently authenticated user.
      *
-     * @return a role-specific {@link ProfileResponse} for the authenticated user
+     * @return an account-type-specific {@link ProfileResponse} for the authenticated user
      * @throws UnauthorizedException     if no user is currently authenticated
      * @throws ResourceNotFoundException if the authenticated email is not present in the database
      */
@@ -83,7 +83,7 @@ public class ProfileService {
      * For clients, sets company name, bio, address, region, and city.
      *
      * @param dto the profile completion payload
-     * @return the updated role-specific profile response
+     * @return the updated account-type-specific profile response
      * @throws UnauthorizedException     if no user is authenticated
      * @throws ResourceNotFoundException if the authenticated email does not map to an existing user,
      *                                   or if any referenced taxonomy entity does not exist
@@ -118,12 +118,12 @@ public class ProfileService {
     }
 
     /**
-     * Partially updates (PATCH) the authenticated user's profile based on their role using a
+     * Partially updates (PATCH) the authenticated user's profile based on their account type using a
      * strongly-typed {@link UserPatchDTO}.
      * Follows "omitted = unchanged, explicit null = clear" semantics modelled by {@link PatchField}.
      *
      * @param dto the strongly-typed patch payload; may be {@code null} to no-op
-     * @return the updated role-specific profile response
+     * @return the updated account-type-specific profile response
      * @throws UnauthorizedException     if no user is authenticated
      * @throws ResourceNotFoundException if the authenticated email does not map to an existing user
      * @throws ForbiddenException        if the authenticated user is an administrator (no editable profile)

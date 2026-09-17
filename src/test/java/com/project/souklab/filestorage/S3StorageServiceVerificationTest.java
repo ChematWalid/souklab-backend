@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage;
 
+import com.project.souklab.config.ClockConfig;
 import com.project.souklab.filestorage.config.StorageConfiguration;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.exception.FileNotFoundStorageException;
@@ -25,6 +26,7 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Clock;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +64,7 @@ class S3StorageServiceVerificationTest {
     private FileValidator validator;
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withUserConfiguration(StorageConfiguration.class)
+            .withUserConfiguration(StorageConfiguration.class, ClockConfig.class)
             .withPropertyValues(
                     "storage.validation.max-file-size=2MB",
                     "storage.validation.allowed-mime-types=image/jpeg,image/png,application/pdf"
@@ -101,7 +103,7 @@ class S3StorageServiceVerificationTest {
                 .endpointOverride(URI.create(properties.getS3().getEndpoint()))
                 .build();
 
-        s3StorageService = new S3StorageService(properties, s3Client);
+        s3StorageService = new S3StorageService(properties, s3Client, Clock.systemUTC());
         s3StorageService.initBucket();
 
         validator = new FileValidator(properties, new Tika());
@@ -312,7 +314,7 @@ class S3StorageServiceVerificationTest {
                 .endpointOverride(URI.create("http://localhost:59999"))
                 .build();
 
-        S3StorageService deadStorageService = new S3StorageService(deadProps, deadClient);
+        S3StorageService deadStorageService = new S3StorageService(deadProps, deadClient, Clock.systemUTC());
 
         assertThatThrownBy(() -> deadStorageService.store(
                 new ByteArrayInputStream(VALID_JPEG_BYTES),
@@ -424,7 +426,7 @@ class S3StorageServiceVerificationTest {
     void testFailFast_whenValidationMaxFileSizeMissing() {
         System.out.println("=== FAIL-FAST MAX-FILE-SIZE CHECK EVIDENCE ===");
         new ApplicationContextRunner()
-                .withUserConfiguration(StorageConfiguration.class)
+                .withUserConfiguration(StorageConfiguration.class, ClockConfig.class)
                 .withPropertyValues(
                         "storage.provider=in-memory",
                         "storage.validation.allowed-mime-types=image/jpeg"
@@ -447,7 +449,7 @@ class S3StorageServiceVerificationTest {
     void testFailFast_whenValidationAllowedMimeTypesMissing() {
         System.out.println("=== FAIL-FAST ALLOWED-MIME-TYPES CHECK EVIDENCE ===");
         new ApplicationContextRunner()
-                .withUserConfiguration(StorageConfiguration.class)
+                .withUserConfiguration(StorageConfiguration.class, ClockConfig.class)
                 .withPropertyValues(
                         "storage.provider=in-memory",
                         "storage.validation.max-file-size=2MB"

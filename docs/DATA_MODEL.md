@@ -10,7 +10,7 @@ The JPA classes under `src/main/java/com/project/souklab/model` are the authorit
 
 | Aggregate | Entities |
 | --- | --- |
-| Identity and access | `User`, `Role`, `RefreshToken`, `VerificationToken`, `OAuthIdentity`, `UserAvatar`, `Client` |
+| Identity and access | `User`, `AuthorizationPermission`, `RefreshToken`, `VerificationToken`, `OAuthIdentity`, `UserAvatar`, `Client` |
 | Artisan | `Artisan`, `ArtisanCertification`, `ArtisanGalleryImage`, `ArtisanProfileView`, `ArtisanFormateurRequest` |
 | Catalog | `Region`, `JobCategory`, `JobSubCategory`, `MaterialFamily`, `Material`, `Epoque`, `Technique` |
 | Formations | `Formation`, `FormationFile`, `FormationEnrollment`, `FormationReview` |

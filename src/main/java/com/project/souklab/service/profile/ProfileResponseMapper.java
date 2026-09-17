@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 /**
  * Stateless mapping component that converts {@link User} entities into
- * role-specific {@link ProfileResponse} subtypes and admin-facing {@link UserSummaryDTO}.
+ * account-type-specific {@link ProfileResponse} subtypes and admin-facing {@link UserSummaryDTO}.
  * No repository or service dependencies are injected here; all data is resolved
  * from the entity graph passed in by the caller.
  */
@@ -36,11 +36,11 @@ public class ProfileResponseMapper {
 
 
     /**
-     * Dispatches to the correct role-specific profile DTO.
+     * Dispatches to the correct account-type-specific profile DTO.
      * Artisans receive {@link ArtisanResponseDTO}; all others receive {@link ClientProfileResponseDTO}.
      *
      * @param user the user entity to map
-     * @return the appropriate {@link ProfileResponse} subtype based on the user's roles
+     * @return the appropriate {@link ProfileResponse} subtype based on the user's permissions
      */
     public ProfileResponse mapToProfileResponse(User user) {
         boolean isArtisan = user.getPermissions().stream()
@@ -87,12 +87,12 @@ public class ProfileResponseMapper {
     }
 
     /**
-     * Builds the full {@link ArtisanResponseDTO} for a user with the ARTISAN role,
+     * Builds the full {@link ArtisanResponseDTO} for a user with artisan capabilities,
      * assembling all taxonomy summaries, gallery images, and certifications from
      * the associated {@link Artisan} profile.
      *
      * @param user      the artisan user entity
-     * @param roleNames the set of role name strings assigned to the user
+     * @param permissionKeys the set of permission keys assigned to the user
      * @return the fully populated {@link ArtisanResponseDTO}
      */
     private ArtisanResponseDTO buildArtisanProfileResponse(User user, Set<String> permissionKeys) {
@@ -163,11 +163,11 @@ public class ProfileResponseMapper {
     }
 
     /**
-     * Builds the {@link ClientProfileResponseDTO} for a user without the ARTISAN role,
+     * Builds the {@link ClientProfileResponseDTO} for a user without artisan capabilities,
      * populating only client-specific fields from the associated {@link Client} profile.
      *
      * @param user      the client user entity
-     * @param roleNames the set of role name strings assigned to the user
+     * @param permissionKeys the set of permission keys assigned to the user
      * @return the fully populated {@link ClientProfileResponseDTO}
      */
     private ClientProfileResponseDTO buildClientProfileResponse(User user, Set<String> permissionKeys) {
