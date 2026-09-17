@@ -13,39 +13,40 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Isolated unit tests verifying AppProperties.FormationConfig property binding,
- * default values, and environment variable resolution.
+ * Isolated unit tests verifying AppProperties.FormationConfig property binding
+ * and environment variable resolution.
  */
 class FormationPropertiesTest {
 
     /**
-     * Verifies that newly instantiated FormationConfig contains the specified default values.
+     * Verifies that policy values are supplied by configuration binding rather than Java fallbacks.
      */
     @Test
-    @DisplayName("FormationConfig has expected defaults upon instantiation")
-    void defaultValuesArePresentUponInstantiation() {
+    @DisplayName("FormationConfig does not provide policy defaults upon instantiation")
+    void policyValuesAreNotHardcodedUponInstantiation() {
         AppProperties.FormationConfig config = new AppProperties.FormationConfig();
 
         assertThat(config.getThumbnail()).isNotNull();
-        assertThat(config.getThumbnail().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(10));
-        assertThat(config.getThumbnail().getAllowedMimeTypes()).containsExactly("image/jpeg", "image/png", "image/webp");
+        assertThat(config.getThumbnail().getMaxFileSize()).isNull();
+        assertThat(config.getThumbnail().getAllowedMimeTypes()).isNull();
 
         assertThat(config.getFile()).isNotNull();
-        assertThat(config.getFile().getMaxCount()).isEqualTo(10);
-        assertThat(config.getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(25));
-        assertThat(config.getFile().getAllowedMimeTypes()).containsExactly("application/pdf", "image/jpeg", "image/png");
+        assertThat(config.getFile().getMaxCount()).isZero();
+        assertThat(config.getFile().getMaxFileSize()).isNull();
+        assertThat(config.getFile().getAllowedMimeTypes()).isNull();
 
         assertThat(config.getCancellation()).isNotNull();
-        assertThat(config.getCancellation().getDeadlineHours()).isEqualTo(24);
+        assertThat(config.getCancellation().getDeadlineHours()).isZero();
 
         assertThat(config.getPagination()).isNotNull();
-        assertThat(config.getPagination().getDefaultPageSize()).isEqualTo(10);
+        assertThat(config.getPagination().getDefaultPageSize()).isZero();
 
-        assertThat(config.getDefaultCurrency()).isEqualTo("DZD");
+        assertThat(config.getDefaultCurrency()).isNull();
     }
 
     /**
-     * Verifies that AppProperties exposes FormationConfig defaults and storage file-serving prefix at the root level.
+     * Verifies that AppProperties exposes nested formation configuration and the invariant
+     * storage file-serving prefix at the root level.
      */
     @Test
     @DisplayName("AppProperties root exposes FormationConfig and Storage with expected defaults")
@@ -56,14 +57,14 @@ class FormationPropertiesTest {
         assertThat(appProperties.getStorage().getFileServingPrefix()).isEqualTo("/api/v1/files/");
 
         assertThat(appProperties.getFormation()).isNotNull();
-        assertThat(appProperties.getFormation().getThumbnail().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(10));
-        assertThat(appProperties.getFormation().getThumbnail().getAllowedMimeTypes()).containsExactly("image/jpeg", "image/png", "image/webp");
-        assertThat(appProperties.getFormation().getFile().getMaxCount()).isEqualTo(10);
-        assertThat(appProperties.getFormation().getFile().getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(25));
-        assertThat(appProperties.getFormation().getFile().getAllowedMimeTypes()).containsExactly("application/pdf", "image/jpeg", "image/png");
-        assertThat(appProperties.getFormation().getCancellation().getDeadlineHours()).isEqualTo(24);
-        assertThat(appProperties.getFormation().getPagination().getDefaultPageSize()).isEqualTo(10);
-        assertThat(appProperties.getFormation().getDefaultCurrency()).isEqualTo("DZD");
+        assertThat(appProperties.getFormation().getThumbnail().getMaxFileSize()).isNull();
+        assertThat(appProperties.getFormation().getThumbnail().getAllowedMimeTypes()).isNull();
+        assertThat(appProperties.getFormation().getFile().getMaxCount()).isZero();
+        assertThat(appProperties.getFormation().getFile().getMaxFileSize()).isNull();
+        assertThat(appProperties.getFormation().getFile().getAllowedMimeTypes()).isNull();
+        assertThat(appProperties.getFormation().getCancellation().getDeadlineHours()).isZero();
+        assertThat(appProperties.getFormation().getPagination().getDefaultPageSize()).isZero();
+        assertThat(appProperties.getFormation().getDefaultCurrency()).isNull();
     }
 
     /**

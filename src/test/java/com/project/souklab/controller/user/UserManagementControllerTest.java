@@ -87,7 +87,7 @@ class UserManagementControllerTest {
             PaginatedResponse<UserResponseDTO> paginatedResponse = PaginatedResponse.<UserResponseDTO>builder()
                     .content(List.of(user))
                     .pageNumber(0)
-                    .pageSize(20)
+                    .pageSize(10)
                     .totalElements(1L)
                     .totalPages(1)
                     .last(true)
@@ -103,14 +103,14 @@ class UserManagementControllerTest {
                     .andExpect(jsonPath("$.data.content[0].id").value("u-1"))
                     .andExpect(jsonPath("$.data.content[0].email").value("user1@example.com"))
                     .andExpect(jsonPath("$.data.pageNumber").value(0))
-                    .andExpect(jsonPath("$.data.pageSize").value(20))
+                    .andExpect(jsonPath("$.data.pageSize").value(10))
                     .andExpect(jsonPath("$.data.totalElements").value(1));
 
             ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
             verify(userManagementService).getAllUsers(isNull(), pageableCaptor.capture());
             Pageable captured = pageableCaptor.getValue();
             assertThat(captured.getPageNumber()).isEqualTo(0);
-            assertThat(captured.getPageSize()).isEqualTo(20);
+            assertThat(captured.getPageSize()).isEqualTo(10);
             assertThat(captured.getSort().getOrderFor("createdAt").getDirection()).isEqualTo(Sort.Direction.DESC);
         }
 
@@ -165,7 +165,7 @@ class UserManagementControllerTest {
             PaginatedResponse<UserResponseDTO> paginatedResponse = PaginatedResponse.<UserResponseDTO>builder()
                     .content(Collections.emptyList())
                     .pageNumber(0)
-                    .pageSize(20)
+                    .pageSize(10)
                     .totalElements(0L)
                     .totalPages(0)
                     .last(true)
@@ -222,7 +222,7 @@ class UserManagementControllerTest {
             PaginatedResponse<UserResponseDTO> paginatedResponse = PaginatedResponse.<UserResponseDTO>builder()
                     .content(List.of(pendingUser))
                     .pageNumber(0)
-                    .pageSize(20)
+                    .pageSize(10)
                     .totalElements(1L)
                     .totalPages(1)
                     .last(true)
@@ -238,13 +238,13 @@ class UserManagementControllerTest {
                     .andExpect(jsonPath("$.data.content[0].id").value("u-p1"))
                     .andExpect(jsonPath("$.data.content[0].status").value("PENDING"))
                     .andExpect(jsonPath("$.data.pageNumber").value(0))
-                    .andExpect(jsonPath("$.data.pageSize").value(20));
+                    .andExpect(jsonPath("$.data.pageSize").value(10));
 
             ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
             verify(userManagementService).getPendingUsers(pageableCaptor.capture());
             Pageable captured = pageableCaptor.getValue();
             assertThat(captured.getPageNumber()).isEqualTo(0);
-            assertThat(captured.getPageSize()).isEqualTo(20);
+            assertThat(captured.getPageSize()).isEqualTo(10);
             assertThat(captured.getSort().getOrderFor("createdAt").getDirection()).isEqualTo(Sort.Direction.DESC);
         }
 

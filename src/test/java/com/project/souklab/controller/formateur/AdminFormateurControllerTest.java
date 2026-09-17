@@ -73,7 +73,7 @@ class AdminFormateurControllerTest {
             PaginatedResponse<FormateurRequestResponseDTO> pageResponse = PaginatedResponse.<FormateurRequestResponseDTO>builder()
                     .content(List.of(item))
                     .pageNumber(0)
-                    .pageSize(20)
+                    .pageSize(10)
                     .totalElements(1L)
                     .totalPages(1)
                     .last(true)
@@ -92,7 +92,7 @@ class AdminFormateurControllerTest {
             ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
             verify(artisanFormateurService).getPendingRequests(captor.capture());
             assertThat(captor.getValue().getPageNumber()).isEqualTo(0);
-            assertThat(captor.getValue().getPageSize()).isEqualTo(20);
+            assertThat(captor.getValue().getPageSize()).isEqualTo(10);
         }
 
         /**

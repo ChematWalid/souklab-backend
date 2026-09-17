@@ -20,7 +20,6 @@ import com.project.souklab.filestorage.validation.FileValidator;
 import com.project.souklab.filestorage.validation.ValidatedFile;
 import com.project.souklab.model.User;
 import com.project.souklab.model.UserAvatar;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +41,6 @@ import java.util.Map;
  * image processing, storage persistence with rollback compensation, and transactional activation.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class AvatarService {
 
@@ -59,6 +57,29 @@ public class AvatarService {
     private final Clock clock;
     private final AvatarProperties avatarProperties;
     private final CurrentUserProvider currentUserProvider;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AvatarService(UserAvatarRepository userAvatarRepository,
+                         UserRepository userRepository,
+                         FileValidator fileValidator,
+                         VirusScanService virusScanService,
+                         ImageProcessingService imageProcessingService,
+                         StorageService storageService,
+                         TransactionTemplate transactionTemplate,
+                         Clock clock,
+                         AvatarProperties avatarProperties,
+                         CurrentUserProvider currentUserProvider) {
+        this.userAvatarRepository = userAvatarRepository;
+        this.userRepository = userRepository;
+        this.fileValidator = fileValidator;
+        this.virusScanService = virusScanService;
+        this.imageProcessingService = imageProcessingService;
+        this.storageService = storageService;
+        this.transactionTemplate = transactionTemplate;
+        this.clock = clock;
+        this.avatarProperties = avatarProperties;
+        this.currentUserProvider = currentUserProvider;
+    }
 
     /** Compatibility constructor retained for focused unit tests and existing callers. */
     public AvatarService(UserAvatarRepository userAvatarRepository,

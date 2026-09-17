@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Verifies feed author eligibility and pending moderation creation.
@@ -68,8 +69,8 @@ class FeedPostServiceTest {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority("permission:artisan:content"))));
         when(userRepository.findByEmail("artisan@example.com")).thenReturn(Optional.of(user));
-        when(accessControlService.isAdmin(any())).thenReturn(false);
-        when(accessControlService.canManageArtisanContent(any())).thenReturn(true);
+        lenient().when(accessControlService.isAdmin(any())).thenReturn(false);
+        lenient().when(accessControlService.canManageArtisanContent(any())).thenReturn(true);
     }
 
     @AfterEach

@@ -99,13 +99,15 @@ class ArtisanFormateurServiceTest {
     @BeforeEach
     void setUp() {
         clock = Clock.fixed(FIXED_INSTANT, ZONE);
+        AppProperties properties = new AppProperties();
+        properties.getArtisan().getFormateur().setReapplyCooldownDays(14);
         artisanFormateurService = new ArtisanFormateurService(
                 formateurRequestRepository,
                 artisanRepository,
                 userRepository,
                 notificationService,
                 emailUtil,
-                new AppProperties(),
+                properties,
                 clock
         );
 

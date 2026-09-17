@@ -111,6 +111,12 @@ class ArtisanFormateurServiceCooldownTest {
         adminUser.setId("admin-user-1");
     }
 
+    private AppProperties configuredProperties() {
+        AppProperties properties = new AppProperties();
+        properties.getArtisan().getFormateur().setReapplyCooldownDays(14);
+        return properties;
+    }
+
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
@@ -126,7 +132,7 @@ class ArtisanFormateurServiceCooldownTest {
                 userRepository,
                 notificationService,
                 emailUtil,
-                new AppProperties(),
+                configuredProperties(),
                 fixedClock
         );
 
@@ -169,7 +175,7 @@ class ArtisanFormateurServiceCooldownTest {
                 userRepository,
                 notificationService,
                 emailUtil,
-                new AppProperties(),
+                configuredProperties(),
                 fixedClockDuringCooldown
         );
 
@@ -208,7 +214,7 @@ class ArtisanFormateurServiceCooldownTest {
                 userRepository,
                 notificationService,
                 emailUtil,
-                new AppProperties(),
+                configuredProperties(),
                 fixedClockAfterCooldown
         );
 

@@ -21,6 +21,7 @@ import com.project.souklab.model.FormationStatus;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.security.AccessControlService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +54,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +86,9 @@ class AdminFormationServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private AccessControlService accessControlService;
+
     @Spy
     private AppProperties appProperties = new AppProperties();
 
@@ -100,6 +105,7 @@ class AdminFormationServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(accessControlService.canManageFormations(any())).thenReturn(true);
         adminUser = User.builder()
                 .email(ADMIN_EMAIL)
                 .firstName("Super")
@@ -152,10 +158,10 @@ class AdminFormationServiceTest {
         when(authentication.getName()).thenReturn(ADMIN_EMAIL);
 
         GrantedAuthority authority = new SimpleGrantedAuthority("permission:admin:formations");
-        doReturn(List.of(authority)).when(authentication).getAuthorities();
+        lenient().doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
-        when(userRepository.findByEmail(ADMIN_EMAIL)).thenReturn(Optional.of(adminUser));
+        lenient().when(userRepository.findByEmail(ADMIN_EMAIL)).thenReturn(Optional.of(adminUser));
     }
 
     @Nested

@@ -37,6 +37,8 @@ class FileRateLimitFilterTest {
         properties.getRateLimit().setEnabled(true);
         properties.getRateLimit().setCapacity(2);
         properties.getRateLimit().setRefillDuration(Duration.ofMinutes(1));
+        properties.getRateLimit().getCache().setMaximumSize(100);
+        properties.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(10));
 
         filter = new FileRateLimitFilter(servletResponseUtil, properties);
     }

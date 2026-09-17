@@ -105,6 +105,8 @@ class FormationEnrollmentServiceTest {
 
     @BeforeEach
     void setUp() {
+        appProperties.getFormation().getCancellation().setDeadlineHours(24);
+        appProperties.getFormation().getPagination().setDefaultPageSize(10);
         instructorUser = User.builder()
                 .email(INSTRUCTOR_EMAIL)
                 .firstName("Karim")

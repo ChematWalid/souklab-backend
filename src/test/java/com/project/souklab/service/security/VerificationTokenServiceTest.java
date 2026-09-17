@@ -54,7 +54,11 @@ class VerificationTokenServiceTest {
     void setUp() {
         fixedClock = Clock.fixed(FIXED_INSTANT, ZONE_ID);
         fixedNow = LocalDateTime.now(fixedClock);
-        verificationTokenService = new VerificationTokenService(verificationTokenRepository, new AppProperties(), fixedClock);
+        AppProperties properties = new AppProperties();
+        properties.getAuth().getVerification().setMaxAttempts(5);
+        properties.getAuth().getVerification().setExpirationMinutes(CODE_EXPIRATION_MINUTES);
+        properties.getAuth().getVerification().setCodeLength(6);
+        verificationTokenService = new VerificationTokenService(verificationTokenRepository, properties, fixedClock);
 
         testUser = User.builder()
                 .email("artisan@example.com")
