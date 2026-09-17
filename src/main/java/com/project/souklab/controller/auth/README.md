@@ -17,7 +17,8 @@ Handles authentication, onboarding, credential recovery, and session token renew
 | `POST` | `/api/v1/auth/reset-password` | Public | Validates reset code and updates user password with confirmation matching. |
 | `POST` | `/api/v1/auth/change-password` | Authenticated | Allows authenticated users to change password given their existing password. |
 | `POST` | `/api/v1/auth/complete-profile` | Authenticated | Wizard endpoint to fill profile data (bio, address, crafts, company). |
-| `GET` | `/api/v1/auth/oauth2/authorize/google` | Public | Initiates Google OAuth2 login flow with intent cookie (`CLIENT` or `ARTISAN`). |
+| `GET` | `/api/v1/auth/oauth/google/artisan` | Public | Initiates Google OAuth2 login flow with artisan account-type intent. |
+| `GET` | `/api/v1/auth/oauth/google/client` | Public | Initiates Google OAuth2 login flow with client account-type intent. |
 
 ---
 

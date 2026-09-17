@@ -10,7 +10,7 @@ Image transformation, aspect-ratio preservation, and multi-tier thumbnail genera
 | :--- | :---: | :---: | :--- |
 | `THUMBNAIL` | 150 x 150 px | 85% | Avatar thumbnails, comment author icons, notification badges. |
 | `MEDIUM` | 500 x 500 px | 85% | Profile headers, user gallery previews. |
-| `FULL` | Original (max 2048px) | 90% | High-resolution portfolio showcase. |
+| `ORIGINAL` | Original (max 2000px) | 90% | High-resolution portfolio showcase. |
 
 ---
 

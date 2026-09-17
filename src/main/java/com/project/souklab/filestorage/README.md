@@ -26,6 +26,7 @@ graph TD
 | [`StorageResource`](StorageResource.java) | Value Object | Encapsulates input stream, content length, and MIME type for streaming downloads. |
 | [`StorageResult`](StorageResult.java) | Value Object | Contains storage key, resolved access URL, file size, and bucket metadata. |
 | [`FileUrlResolver`](FileUrlResolver.java) | Utility Class | Resolves physical object keys to accessible HTTP URLs using configured public prefixes. |
+| [`FileServingRoutes`](FileServingRoutes.java) | Contract | Defines the neutral file-serving route shared by HTTP adapters and URL-producing services. |
 
 ---
 

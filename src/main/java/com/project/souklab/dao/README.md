@@ -11,7 +11,7 @@ Repositories inherit from `JpaRepository` and `JpaSpecificationExecutor`. All qu
 ```mermaid
 graph TD
     Service["Service Layer"] --> Repo["Spring Data JPA Repository"]
-    Repo --> Hibernate["Hibernate ORM 6"]
+    Repo --> Hibernate["Hibernate ORM"]
     Hibernate --> Hikari["HikariCP Connection Pool"]
     Hikari --> DB[("MariaDB / MySQL Database")]
 ```

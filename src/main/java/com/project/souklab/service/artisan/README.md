@@ -9,7 +9,7 @@ Business logic for artisan public profiles, contact details gating, deduplicated
 - **Contact Info Gating**: Public views of artisan profiles mask contact details (phone, email, website, physical address) unless the viewer is an administrator, the artisan themselves, or an active client with a premium subscription.
 - **Impression Tracking**: Tracks profile visits in `ArtisanProfileView`, ensuring view counts only increment once per unique viewer-artisan pair.
 - **Portfolio Credentials (`ArtisanCertificationService`)**: Manages the upload, verification, storage, listing, and soft deletion of official artisan certificates with ClamAV stream scanning.
-- **Showcase Gallery (`ArtisanGalleryService`)**: Manages multi-image portfolio uploads (enforcing a 10-image quota per artisan), display sequence reordering, and soft deletion.
+- **Showcase Gallery (`ArtisanGalleryService`)**: Manages multi-image portfolio uploads (enforcing the configured 20-image quota per artisan), display sequence reordering, and soft deletion.
 - **Clean Architecture Refactoring**: Delegates caller security context resolution to `ArtisanSecurityUtils` and storage URL generation to `FileUrlResolver`.
 
 ---
@@ -20,4 +20,4 @@ Business logic for artisan public profiles, contact details gating, deduplicated
 | :--- | :--- |
 | [`ArtisanProfileService`](ArtisanProfileService.java) | Manages public profile retrieval, contact masking, view metrics, and profile updates. |
 | [`ArtisanCertificationService`](ArtisanCertificationService.java) | Handles official certification document uploads with ClamAV scanning, listing, and deletion. |
-| [`ArtisanGalleryService`](ArtisanGalleryService.java) | Handles showcase portfolio image uploads, 10-photo quota enforcement, ordering, and deletion. |
+| [`ArtisanGalleryService`](ArtisanGalleryService.java) | Handles showcase portfolio image uploads, configured 20-photo quota enforcement, ordering, and deletion. |

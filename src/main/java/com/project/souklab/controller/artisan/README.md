@@ -9,7 +9,7 @@ Handles HTTP endpoints for artisan public profile discovery, self-service profil
 ### Profile Management (`ArtisanController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/artisans/{artisanId}` | Authenticated | Retrieves public view of an artisan profile with contact info gating and view tracking. |
+| `GET` | `/api/v1/artisan/{id}` | Authenticated | Retrieves public view of an artisan profile with contact info gating and view tracking. |
 | `PATCH` | `/api/v1/artisan/profile` | `permission:artisan:content` | Partial updates to bio, address, website, craft subcategories, and techniques. |
 
 ### Professional Credentials (`ArtisanCertificationController`)
@@ -22,7 +22,7 @@ Handles HTTP endpoints for artisan public profile discovery, self-service profil
 ### Showcase Gallery (`ArtisanGalleryController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/artisan/gallery` | `permission:artisan:content` | Uploads a portfolio showcase photograph (multipart, max 10 images quota, scanned when enabled). |
+| `POST` | `/api/v1/artisan/gallery` | `permission:artisan:content` | Uploads a portfolio showcase photograph (multipart, max 20 images quota, scanned when enabled). |
 | `GET` | `/api/v1/artisan/gallery` | `permission:artisan:content` | Retrieves all active portfolio gallery images ordered by display sequence. |
 | `PUT` | `/api/v1/artisan/gallery/order` | `permission:artisan:content` | Updates the sequential presentation order of portfolio images. |
 | `DELETE` | `/api/v1/artisan/gallery/{id}` | `permission:artisan:content` | Soft-deletes a portfolio showcase photograph. |
@@ -33,6 +33,6 @@ Handles HTTP endpoints for artisan public profile discovery, self-service profil
 
 | Class | Responsibility |
 | :--- | :--- |
-| [`ArtisanController`](ArtisanController.java) | REST controller mapping `/api/v1/artisans` and `/api/v1/artisan/profile`. Delegates to `ArtisanProfileService`. |
+| [`ArtisanController`](ArtisanController.java) | REST controller mapping `/api/v1/artisan/{id}` and `/api/v1/artisan/profile`. Delegates to `ArtisanProfileService`. |
 | [`ArtisanCertificationController`](ArtisanCertificationController.java) | REST controller handling artisan credential uploads, listing, and deletion via `ArtisanCertificationService`. |
 | [`ArtisanGalleryController`](ArtisanGalleryController.java) | REST controller managing portfolio showcase uploads, reordering, and deletion via `ArtisanGalleryService`. |

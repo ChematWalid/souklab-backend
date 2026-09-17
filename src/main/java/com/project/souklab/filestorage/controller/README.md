@@ -8,7 +8,7 @@ HTTP controllers for direct file streaming and access-controlled resource downlo
 
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/files/{category}/{filename}` | Authenticated | Streams stored files from S3/MinIO with appropriate `Content-Type` headers and download rate limits. |
+| `GET` | `/api/v1/files/{key}` | Access policy dependent | Streams a stored object after `FileAccessService` authorization, with MIME detection and download rate limiting. |
 
 ---
 
@@ -16,4 +16,4 @@ HTTP controllers for direct file streaming and access-controlled resource downlo
 
 | Class | Responsibility |
 | :--- | :--- |
-| [`FileServingController`](FileServingController.java) | Streams stored file content directly to HTTP clients with ETag caching and mime detection. |
+| [`FileServingController`](FileServingController.java) | Streams stored file content directly to HTTP clients with immutable cache headers and MIME detection. |

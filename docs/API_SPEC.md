@@ -263,6 +263,22 @@ Completes profile details for newly registered Artisans or Clients.
 }
 ```
 
+### `POST /api/v1/auth/logout`
+Revokes the authenticated user's refresh tokens.
+- **Access**: Authenticated
+
+### `GET /api/v1/auth/me`
+Returns the authenticated user's permission-aware profile response.
+- **Access**: Authenticated
+
+### `PATCH /api/v1/auth/me`
+Partially updates the authenticated user's profile using the documented PATCH field semantics.
+- **Access**: Authenticated
+
+### `GET /api/v1/auth/oauth/google/artisan` and `GET /api/v1/auth/oauth/google/client`
+Start Google OAuth2 onboarding with an account-type intent. The callback links or creates the account and issues the normal JWT response.
+- **Access**: Public; requires interactive browser navigation and Google consent.
+
 ---
 
 ## 3. Public Directory & Search Engine (`/api/v1/public/directory/**`)
@@ -279,15 +295,21 @@ Full-text search and multi-facet filtering over active, verified artisans.
   - `epoque` (array of strings, optional): Historical era slugs
   - `technique` (array of strings, optional): Craft technique slugs
   - `featured` (boolean, optional): Filter premium/featured artisans
-  - `page` (int, default: `0`), `size` (int, default: `12`), `sort` (string, default: `rating,desc`)
+  - `page` (int, default: `0`), `size` (int, default: `20`), `sort` (string, default: `rating,desc`)
 - **Response**: `200 OK` with paginated `ArtisanDirectoryCardDTO` list. Contact info (phone/email) is masked unless the requesting user has an active premium client subscription.
-
-### `GET /api/v1/public/directory/{id}`
-Returns complete artisan public dossier (Bio, Gallery, Certifications, Achievements, Reviews, Active Formations).
 
 ---
 
-## 4. Catalog & Reference Taxonomy (`/api/v1/catalog/**`)
+## 4. Artisan Profiles, Credentials & Gallery
+
+- `GET /api/v1/artisan/{id}`: Retrieve an artisan public view with deduplicated profile-view tracking and premium-gated contact fields.
+- `PATCH /api/v1/artisan/profile`: Update the authenticated artisan profile (`permission:artisan:content`).
+- `POST/GET/DELETE /api/v1/artisan/certifications[/{id}]`: Manage owned certification documents (`permission:artisan:content`).
+- `POST/GET/PUT/DELETE /api/v1/artisan/gallery[/{id}]` and `PUT /api/v1/artisan/gallery/order`: Manage the configured artisan gallery (`permission:artisan:content`).
+
+---
+
+## 5. Catalog & Reference Taxonomy (`/api/v1/catalog/**`)
 
 - `GET /api/v1/catalog/regions`: All wilayas and communes in hierarchical tree.
 - `GET /api/v1/catalog/categories`: Categories with child subcategories.
@@ -297,7 +319,7 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 ---
 
-## 5. Formations & Workshops (`/api/v1/artisan/formations/**`)
+## 6. Formations & Workshops (`/api/v1/artisan/formations/**`)
 
 > **Access Control Note**: Formation authoring and enrollment require `permission:artisan:formations`; administrative moderation requires `permission:admin:formations`.
 
@@ -323,7 +345,7 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 ---
 
-## 6. Social Feed, Reviews & Moderation
+## 7. Social Feed, Reviews & Moderation
 
 - `GET /api/v1/feed`: Browse published posts with optional `type` filter and pagination.
 - `GET /api/v1/feed/{id}`: Retrieve one published post and its media.
@@ -341,19 +363,19 @@ Returns complete artisan public dossier (Bio, Gallery, Certifications, Achieveme
 
 ---
 
-## 7. Realtime notifications (`/ws`)
+## 8. Realtime notifications (`/ws`)
 
 Direct messaging REST resources and chat handlers are planned and are not exposed by the current source tree. The implemented WebSocket endpoint is `/ws`; authenticated clients may subscribe to `/user/queue/notifications` for notification pushes.
 
 ---
 
-## 8. Subscriptions & Chargily Pay V2
+## 9. Subscriptions & Chargily Pay V2
 
 This module is planned and is not exposed by the current source tree. There are no `/api/v1/subscription/**` controllers, payment entities, or Chargily client beans yet. See [`ROADMAP.md`](ROADMAP.md) Phase 9 for the implementation plan.
 
 ---
 
-## 9. Admin & Moderation Operations (`/api/v1/admin/**`)
+## 10. Admin & Moderation Operations (`/api/v1/admin/**`)
 
 - `GET /api/v1/admin/users`: Paginated list of users with optional search filter.
 - `GET /api/v1/admin/users/pending`: Paginated list of pending artisan registrations.
@@ -361,6 +383,9 @@ This module is planned and is not exposed by the current source tree. There are 
 - `POST /api/v1/admin/users/approve-bulk`: Bulk approve multiple user accounts.
 - `POST /api/v1/admin/users/{id}/ban`: Ban a user account with reason.
 - `POST /api/v1/admin/users/{id}/timeout`: Timeout user for specified minutes with reason.
+- `POST /api/v1/admin/users/{id}/unban`: Reinstate a banned or timed-out account.
+- `GET /api/v1/admin/users/audit-logs`: Query administrative audit logs.
+- `GET/POST/DELETE /api/v1/admin/users/{userId}/permissions`: List, assign, or revoke enabled permissions.
 Platform KPI statistics are planned and no `/api/v1/admin/stats` endpoint is currently exposed.
 - `GET /api/v1/admin/formations/pending`: Paginated queue of formations awaiting administrative review.
 - `POST /api/v1/admin/formations/{id}/review`: Approve or reject workshop curriculum.
@@ -370,10 +395,19 @@ Platform KPI statistics are planned and no `/api/v1/admin/stats` endpoint is cur
 
 ---
 
-## 10. Notifications (`/api/v1/notifications/**`)
+## 11. Notifications (`/api/v1/notifications/**`)
 
 - `GET /api/v1/notifications`: Paginated list of notifications for the authenticated user (`?page=0&size=20`).
 - `GET /api/v1/notifications/unread-count`: Count of unread, non-deleted notifications.
 - `PUT /api/v1/notifications/{id}/read`: Mark a specific notification as read.
 - `PUT /api/v1/notifications/read-all`: Mark all notifications for the authenticated user as read.
 - `DELETE /api/v1/notifications/{id}`: Soft-delete a notification for the authenticated user.
+
+## 12. File Storage (`/api/v1/files/**`)
+
+- `GET /api/v1/files/{key}`: Stream a stored object after the application file-access policy authorizes the request; MIME detection, immutable cache headers, and configured rate limiting are applied.
+
+## 13. Formateur Governance (`/api/v1/artisan/formateur-request` and `/api/v1/admin/formateur-requests/**`)
+
+- `POST /api/v1/artisan/formateur-request`: Submit an artisan accreditation request (`permission:artisan:content`).
+- `GET /api/v1/admin/formateur-requests`, approve/reject/lift-cooldown, and direct grant/revoke endpoints: Administrator governance under `permission:admin:users`.

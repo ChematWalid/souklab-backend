@@ -11,7 +11,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 ---
 
 ## 📍 Phase 1: Build Infrastructure & Core Foundation (COMPLETED)
-- [x] **Step 1.1**: Clean up and optimize `pom.xml` (Spring Boot 3.3.x, Java 21, Spring Data JPA, Spring Security, MySQL Connector, JJWT, Bucket4j / Caffeine rate limiting, ClamAV antivirus client, Jakarta Validation).
+- [x] **Step 1.1**: Clean up and optimize `pom.xml` (Spring Boot 4.0.x, Java 21, Spring Data JPA, Spring Security, MySQL Connector, JJWT, Bucket4j / Caffeine rate limiting, ClamAV antivirus client, Jakarta Validation).
 - [x] **Step 1.2**: Configure `application.properties` and environment-driven properties (Datasource connection pool, Hibernate DDL, JWT secret, CORS policies, AppProperties hierarchy).
 - [x] **Step 1.3**: Implement Core Utilities & Foundation (`BaseEntity`, `ApiResponse<T>`, `PaginatedResponse<T>`, `AppException`, `GlobalExceptionHandler`).
 - [x] **Step 1.4**: Compile and verify base setup with `./mvnw clean compile`.
@@ -30,7 +30,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 ## 📍 Phase D: Dedicated File Storage & Avatar Pipeline (COMPLETED)
 - [x] **Step D.1**: Build pluggable `StorageService` abstraction with `StorageResource`, in-memory stub provider, and S3/MinIO compatible provider (`S3StorageService`).
 - [x] **Step D.2**: Implement ClamAV daemon antivirus stream scanning (`ClamdInstreamScanner`) with fail-open/fail-closed configuration guards.
-- [x] **Step D.3**: Implement multi-tier avatar image processing (`AvatarImageProcessor`) generating `original` (max 2000px), `medium` (max 500px), and `thumbnail` (max 150px) variants.
+- [x] **Step D.3**: Implement multi-tier avatar image processing (`ThumbnailatorImageProcessingService` and `ResolutionTier`) generating `original` (max 2000px), `medium` (max 500px), and `thumbnail` (max 150px) variants.
 - [x] **Step D.4**: Implement `UserAvatar` entity, gallery management (10-avatar quota, list, activate, delete), and `AvatarController`.
 - [x] **Step D.5**: Implement streaming file serving endpoint (`GET /api/v1/files/{key}`) with immutable HTTP caching and dedicated avatar rate-limiting (`AvatarUploadRateLimitFilter`).
 

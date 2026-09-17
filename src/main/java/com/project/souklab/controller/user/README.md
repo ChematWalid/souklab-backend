@@ -17,6 +17,13 @@ Handles administrative user moderation (approvals, bans, timeouts) and user avat
 | `POST` | `/api/v1/admin/users/{id}/timeout` | `permission:admin:users` | Temporarily suspends user for specified duration in minutes. |
 | `GET` | `/api/v1/admin/users/audit-logs` | `permission:admin:users` | Queries platform administrative audit logs. |
 
+### Permission Management (`PermissionManagementController`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/admin/users/{userId}/permissions` | `permission:admin:users` | Lists enabled permissions assigned to a user. |
+| `POST` | `/api/v1/admin/users/{userId}/permissions` | `permission:admin:users` | Assigns an enabled permission to a user. |
+| `DELETE` | `/api/v1/admin/users/{userId}/permissions` | `permission:admin:users` | Revokes an assigned permission from a user. |
+
 ### Avatar Gallery (`AvatarController`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
