@@ -30,6 +30,9 @@ public class ConfigurationPolicyValidator {
         }
         requireNonEmpty("storage.validation.allowed-mime-types", validation.getAllowedMimeTypes());
         validateCors(appProperties.getCors().getAllowedOrigins());
+        validateAsync(appProperties.getAsync());
+        validateCache(appProperties.getCache());
+        validateMassIndexing(appProperties.getSearch().getMassIndexing());
 
         if (isProduction() && Boolean.TRUE.equals(storageProperties.getS3().getAutoCreateBucket())) {
             throw new IllegalStateException("storage.s3.auto-create-bucket must be false in production");
@@ -62,6 +65,37 @@ public class ConfigurationPolicyValidator {
 
     private boolean isProduction() {
         return environment.matchesProfiles("prod", "production");
+    }
+
+    private void validateAsync(AppProperties.Async async) {
+        if (async == null) {
+            throw new IllegalStateException("app.async must be configured");
+        }
+        validateExecutor("app.async.application", async.getApplication());
+        validateExecutor("app.async.workflow", async.getWorkflow());
+    }
+
+    private void validateExecutor(String name, AppProperties.Async.Executor executor) {
+        if (executor == null || executor.getCorePoolSize() <= 0 || executor.getMaxPoolSize() <= 0
+                || executor.getCorePoolSize() > executor.getMaxPoolSize()
+                || executor.getQueueCapacity() <= 0
+                || executor.getThreadNamePrefix() == null || executor.getThreadNamePrefix().isBlank()) {
+            throw new IllegalStateException(name + " must define valid pool sizes, queue capacity, and thread prefix");
+        }
+    }
+
+    private void validateCache(AppProperties.Cache cache) {
+        if (cache == null || cache.getMaximumSize() <= 0 || cache.getExpireAfterWrite() == null
+                || cache.getExpireAfterWrite().isZero() || cache.getExpireAfterWrite().isNegative()) {
+            throw new IllegalStateException("app.cache must define a positive size and expiration");
+        }
+    }
+
+    private void validateMassIndexing(AppProperties.Search.MassIndexing indexing) {
+        if (indexing == null || indexing.getThreadsToLoadObjects() <= 0
+                || indexing.getBatchSizeToLoadObjects() <= 0 || indexing.getIdFetchSize() <= 0) {
+            throw new IllegalStateException("app.search.mass-indexing values must be positive");
+        }
     }
 
     private void requirePositive(String name, long value) {

@@ -18,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Duration;
 
 /**
  * Dedicated rate-limiting filter for authenticated avatar upload requests (POST /api/v1/users/me/avatars).
@@ -125,16 +124,17 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
      * @return new configured Bucket
      */
     private Bucket createNewBucket() {
-        int capacity = (rateLimitProperties != null && rateLimitProperties.getCapacity() > 0)
-                ? rateLimitProperties.getCapacity()
-                : 5;
-        Duration refillDuration = (rateLimitProperties != null && rateLimitProperties.getRefillDuration() != null)
-                ? rateLimitProperties.getRefillDuration()
-                : Duration.ofMinutes(1);
+        if (rateLimitProperties == null
+                || rateLimitProperties.getCapacity() <= 0
+                || rateLimitProperties.getRefillDuration() == null
+                || rateLimitProperties.getRefillDuration().isZero()
+                || rateLimitProperties.getRefillDuration().isNegative()) {
+            throw new IllegalStateException("avatar.rate-limit must be configured before creating avatar upload buckets");
+        }
 
         Bandwidth limit = Bandwidth.builder()
-                .capacity(capacity)
-                .refillGreedy(capacity, refillDuration)
+                .capacity(rateLimitProperties.getCapacity())
+                .refillGreedy(rateLimitProperties.getCapacity(), rateLimitProperties.getRefillDuration())
                 .build();
         return Bucket.builder().addLimit(limit).build();
     }

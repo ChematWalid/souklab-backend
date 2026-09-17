@@ -10,7 +10,7 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
-import com.project.souklab.filestorage.controller.FileServingController;
+import com.project.souklab.filestorage.FileServingRoutes;
 import com.project.souklab.filestorage.exception.StorageException;
 import com.project.souklab.filestorage.image.ImageProcessingService;
 import com.project.souklab.filestorage.image.ImageVariant;
@@ -362,7 +362,7 @@ public class AvatarService {
      * @param thumbnailKey the storage key of the active thumbnail image variant
      */
     private void syncUserAvatar(User user, String thumbnailKey) {
-        user.setAvatarUrl(FileServingController.BASE_PATH + "/" + thumbnailKey);
+        user.setAvatarUrl(FileServingRoutes.BASE_PATH + "/" + thumbnailKey);
         userRepository.save(user);
     }
 
@@ -373,7 +373,7 @@ public class AvatarService {
      * @return the populated response DTO
      */
     private AvatarResponseDTO mapToResponseDTO(UserAvatar avatar) {
-        String urlPrefix = FileServingController.BASE_PATH + "/";
+        String urlPrefix = FileServingRoutes.DEFAULT_PREFIX;
         return AvatarResponseDTO.builder()
                 .id(avatar.getId())
                 .urlOriginal(urlPrefix + avatar.getStorageKeyOriginal())

@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.filestorage.config.StorageProperties;
-import com.project.souklab.filestorage.controller.FileServingController;
+import com.project.souklab.filestorage.FileServingRoutes;
 import com.project.souklab.util.ServletResponseUtil;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -29,8 +29,6 @@ import java.time.Duration;
 @Component
 public class FileRateLimitFilter extends OncePerRequestFilter {
 
-    private static final int DEFAULT_CAPACITY = 120;
-    private static final Duration DEFAULT_REFILL_DURATION = Duration.ofMinutes(1);
     private static final long TOKENS_PER_REQUEST = 1L;
     private static final String USER_KEY_PREFIX = "user:";
     private static final String IP_KEY_PREFIX = "ip:";
@@ -66,7 +64,7 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        return uri == null || !uri.startsWith(FileServingController.BASE_PATH);
+        return uri == null || !uri.startsWith(FileServingRoutes.BASE_PATH);
     }
 
     /**
@@ -132,12 +130,14 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
      * @return new configured Bucket
      */
     private Bucket createNewBucket() {
-        int capacity = (rateLimitProperties != null && rateLimitProperties.getCapacity() > 0)
-                ? rateLimitProperties.getCapacity()
-                : DEFAULT_CAPACITY;
-        Duration refillDuration = (rateLimitProperties != null && rateLimitProperties.getRefillDuration() != null)
-                ? rateLimitProperties.getRefillDuration()
-                : DEFAULT_REFILL_DURATION;
+        if (rateLimitProperties == null || rateLimitProperties.getCapacity() <= 0
+                || rateLimitProperties.getRefillDuration() == null
+                || rateLimitProperties.getRefillDuration().isZero()
+                || rateLimitProperties.getRefillDuration().isNegative()) {
+            throw new IllegalStateException("storage.rate-limit must be configured before creating file request buckets");
+        }
+        int capacity = rateLimitProperties.getCapacity();
+        Duration refillDuration = rateLimitProperties.getRefillDuration();
 
         Bandwidth limit = Bandwidth.builder()
                 .capacity(capacity)

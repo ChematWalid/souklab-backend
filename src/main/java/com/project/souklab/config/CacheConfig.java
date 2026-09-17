@@ -1,22 +1,24 @@
 package com.project.souklab.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Spring Cache abstraction configuration with Caffeine in-memory store.
- * Registers catalog taxonomy caches with a 60-minute time-to-live expiration policy
- * to support low-latency reads for high-frequency reference data.
+ * Registers catalog taxonomy caches with externally configured expiration and size
+ * policies to support low-latency reads for high-frequency reference data.
  */
 @Configuration
 @EnableCaching
+@RequiredArgsConstructor
 public class CacheConfig {
+
+    private final AppProperties appProperties;
 
     public static final String CACHE_REGIONS = "catalog_regions";
     public static final String CACHE_CATEGORIES = "catalog_categories";
@@ -26,7 +28,7 @@ public class CacheConfig {
 
     /**
      * Configures the primary {@link CacheManager} registering dedicated catalog cache buckets
-     * backed by Caffeine with 60-minute write expiration and maximum size bounds.
+     * backed by Caffeine with configured write expiration and maximum size bounds.
      *
      * @return Configured CaffeineCacheManager bean
      */
@@ -41,8 +43,8 @@ public class CacheConfig {
         );
         cacheManager.setCaffeine(
             Caffeine.newBuilder()
-                .expireAfterWrite(60, TimeUnit.MINUTES)
-                .maximumSize(1000)
+                .expireAfterWrite(appProperties.getCache().getExpireAfterWrite())
+                .maximumSize(appProperties.getCache().getMaximumSize())
         );
         return cacheManager;
     }

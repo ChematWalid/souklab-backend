@@ -54,16 +54,25 @@ class AppPropertiesTest {
     @DisplayName("AppProperties binds custom values from environment / property sources")
     void bindsCustomConfiguration() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test-app-properties", Map.of(
-                "app.support.email", "help@customdomain.com",
-                "app.support.contact-message", "Please reach out to support team.",
-                "app.admin.default-ban-reason", "Violated community guidelines",
-                "app.admin.default-timeout-reason", "Temporary suspension",
-                "app.oauth.intent-cookie-max-age-seconds", "600",
-                "app.auth.verification.max-attempts", "3",
-                "app.auth.verification.expiration-minutes", "30",
-                "app.auth.verification.code-length", "8",
-                "app.artisan.formateur.reapply-cooldown-days", "30"
+        environment.getPropertySources().addLast(new MapPropertySource("test-app-properties", Map.ofEntries(
+                Map.entry("app.support.email", "help@customdomain.com"),
+                Map.entry("app.support.contact-message", "Please reach out to support team."),
+                Map.entry("app.admin.default-ban-reason", "Violated community guidelines"),
+                Map.entry("app.admin.default-timeout-reason", "Temporary suspension"),
+                Map.entry("app.oauth.intent-cookie-max-age-seconds", "600"),
+                Map.entry("app.auth.verification.max-attempts", "3"),
+                Map.entry("app.auth.verification.expiration-minutes", "30"),
+                Map.entry("app.auth.verification.code-length", "8"),
+                Map.entry("app.artisan.formateur.reapply-cooldown-days", "30"),
+                Map.entry("app.async.application.core-pool-size", "2"),
+                Map.entry("app.async.application.max-pool-size", "8"),
+                Map.entry("app.async.application.queue-capacity", "50"),
+                Map.entry("app.async.application.thread-name-prefix", "custom-async-"),
+                Map.entry("app.cache.expire-after-write", "15m"),
+                Map.entry("app.cache.maximum-size", "250"),
+                Map.entry("app.search.mass-indexing.threads-to-load-objects", "3"),
+                Map.entry("app.search.mass-indexing.batch-size-to-load-objects", "40"),
+                Map.entry("app.search.mass-indexing.id-fetch-size", "75")
         )));
 
         Binder binder = new Binder(ConfigurationPropertySources.from(environment.getPropertySources()));
@@ -78,5 +87,14 @@ class AppPropertiesTest {
         assertThat(appProperties.getAuth().getVerification().getExpirationMinutes()).isEqualTo(30);
         assertThat(appProperties.getAuth().getVerification().getCodeLength()).isEqualTo(8);
         assertThat(appProperties.getArtisan().getFormateur().getReapplyCooldownDays()).isEqualTo(30L);
+        assertThat(appProperties.getAsync().getApplication().getCorePoolSize()).isEqualTo(2);
+        assertThat(appProperties.getAsync().getApplication().getMaxPoolSize()).isEqualTo(8);
+        assertThat(appProperties.getAsync().getApplication().getQueueCapacity()).isEqualTo(50);
+        assertThat(appProperties.getAsync().getApplication().getThreadNamePrefix()).isEqualTo("custom-async-");
+        assertThat(appProperties.getCache().getExpireAfterWrite()).hasMinutes(15);
+        assertThat(appProperties.getCache().getMaximumSize()).isEqualTo(250);
+        assertThat(appProperties.getSearch().getMassIndexing().getThreadsToLoadObjects()).isEqualTo(3);
+        assertThat(appProperties.getSearch().getMassIndexing().getBatchSizeToLoadObjects()).isEqualTo(40);
+        assertThat(appProperties.getSearch().getMassIndexing().getIdFetchSize()).isEqualTo(75);
     }
 }

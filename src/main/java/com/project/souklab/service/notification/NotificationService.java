@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Clock;
@@ -207,12 +206,8 @@ public class NotificationService {
 
     private void dispatchRealtimePush(String recipientEmail, NotificationResponseDTO payload) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    sendRealtimePayload(recipientEmail, payload);
-                }
-            });
+            TransactionSynchronizationManager.registerSynchronization(
+                    new RealtimeNotificationAfterCommit(messagingTemplate, recipientEmail, payload));
         } else {
             sendRealtimePayload(recipientEmail, payload);
         }

@@ -28,10 +28,6 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "app.search.sync-on-startup", havingValue = "true", matchIfMissing = true)
 public class IndexLifecycleRunner implements ApplicationRunner {
 
-    private static final int THREADS_TO_LOAD_OBJECTS = 2;
-    private static final int BATCH_SIZE_TO_LOAD_OBJECTS = 25;
-    private static final int ID_FETCH_SIZE = 50;
-
     private final AppProperties appProperties;
 
     @PersistenceContext
@@ -46,11 +42,12 @@ public class IndexLifecycleRunner implements ApplicationRunner {
 
         try {
             log.info("Initiating asynchronous Hibernate Search mass indexing for Artisan entity...");
+            AppProperties.Search.MassIndexing indexing = appProperties.getSearch().getMassIndexing();
             SearchSession searchSession = Search.session(entityManager);
             MassIndexer massIndexer = searchSession.massIndexer(Artisan.class)
-                    .threadsToLoadObjects(THREADS_TO_LOAD_OBJECTS)
-                    .batchSizeToLoadObjects(BATCH_SIZE_TO_LOAD_OBJECTS)
-                    .idFetchSize(ID_FETCH_SIZE);
+                    .threadsToLoadObjects(indexing.getThreadsToLoadObjects())
+                    .batchSizeToLoadObjects(indexing.getBatchSizeToLoadObjects())
+                    .idFetchSize(indexing.getIdFetchSize());
 
             massIndexer.start()
                     .thenAccept(v -> log.info("Hibernate Search mass indexing finished successfully."))

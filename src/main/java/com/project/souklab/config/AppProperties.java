@@ -1,6 +1,6 @@
 package com.project.souklab.config;
 
-import com.project.souklab.filestorage.controller.FileServingController;
+import com.project.souklab.filestorage.FileServingRoutes;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +27,8 @@ public class AppProperties {
     private AuthConfig auth = new AuthConfig();
     private ArtisanConfig artisan = new ArtisanConfig();
     private Search search = new Search();
+    private Async async = new Async();
+    private Cache cache = new Cache();
     private SupportConfig support = new SupportConfig();
 
     /**
@@ -61,7 +63,7 @@ public class AppProperties {
         /**
          * Route prefix for public or authenticated file streaming endpoints (default: /api/v1/files/).
          */
-        private String fileServingPrefix = FileServingController.DEFAULT_FILE_SERVING_PREFIX;
+        private String fileServingPrefix = FileServingRoutes.DEFAULT_PREFIX;
 
         /**
          * Returns the configured file-serving route prefix normalised with a guaranteed trailing slash.
@@ -71,7 +73,7 @@ public class AppProperties {
          */
         public String resolveFileServingPrefix() {
             if (fileServingPrefix == null || fileServingPrefix.isBlank()) {
-                return FileServingController.DEFAULT_FILE_SERVING_PREFIX;
+                return FileServingRoutes.DEFAULT_PREFIX;
             }
             return fileServingPrefix.endsWith("/") ? fileServingPrefix : fileServingPrefix + "/";
         }
@@ -248,6 +250,36 @@ public class AppProperties {
         private String indexPrefix;
         private String schemaManagement;
         private boolean syncOnStartup;
+        private MassIndexing massIndexing = new MassIndexing();
+
+        @Data
+        public static class MassIndexing {
+            private int threadsToLoadObjects;
+            private int batchSizeToLoadObjects;
+            private int idFetchSize;
+        }
+    }
+
+    /** Runtime configuration for application-managed asynchronous executors. */
+    @Data
+    public static class Async {
+        private Executor application = new Executor();
+        private Executor workflow = new Executor();
+
+        @Data
+        public static class Executor {
+            private int corePoolSize;
+            private int maxPoolSize;
+            private int queueCapacity;
+            private String threadNamePrefix;
+        }
+    }
+
+    /** Runtime configuration for the in-memory catalog cache. */
+    @Data
+    public static class Cache {
+        private Duration expireAfterWrite;
+        private long maximumSize;
     }
 
     /**

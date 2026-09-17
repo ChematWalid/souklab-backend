@@ -1,10 +1,9 @@
 package com.project.souklab.filestorage.controller;
 
+import com.project.souklab.filestorage.FileServingRoutes;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.service.storage.FileAccessService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,15 +22,9 @@ import java.nio.charset.StandardCharsets;
  * Streams content directly from the underlying storage provider with immutable caching headers.
  */
 @RestController
-@RequestMapping(FileServingController.BASE_PATH)
-@Slf4j
+@RequestMapping(FileServingRoutes.BASE_PATH)
 public class FileServingController {
 
-    /**
-     * Single source of truth for the file-serving route, referenced by AvatarService and FileRateLimitFilter to avoid drift.
-     */
-    public static final String BASE_PATH = "/api/v1/files";
-    public static final String DEFAULT_FILE_SERVING_PREFIX = BASE_PATH + "/";
     private static final String PUBLIC_CACHE_CONTROL = "public, max-age=31536000, immutable";
     private static final String PRIVATE_CACHE_CONTROL = "private, max-age=31536000, immutable";
 
