@@ -51,6 +51,9 @@ public class ConfigurationPolicyValidator {
         requireExactValue("spring.jpa.properties.hibernate.format_sql", environment.getProperty("spring.jpa.properties.hibernate.format_sql"), "false");
         requireExactValue("spring.flyway.enabled", environment.getProperty("spring.flyway.enabled"), "true");
         requireExactValue("spring.mail.properties.mail.debug", environment.getProperty("spring.mail.properties.mail.debug"), "false");
+        requirePositiveProperty("spring.mail.properties.mail.smtp.connectiontimeout");
+        requirePositiveProperty("spring.mail.properties.mail.smtp.timeout");
+        requirePositiveProperty("spring.mail.properties.mail.smtp.writetimeout");
         requireExactValue("logging.level.root", environment.getProperty("logging.level.root"), "INFO");
         requireExactValue("logging.level.com.project.souklab", environment.getProperty("logging.level.com.project.souklab"), "INFO");
         requireExactValue("logging.level.org.hibernate.search", environment.getProperty("logging.level.org.hibernate.search"), "WARN");
@@ -164,6 +167,17 @@ public class ConfigurationPolicyValidator {
     private void requireConfigured(String name, String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalStateException(name + " must be configured");
+        }
+    }
+
+    private void requirePositiveProperty(String name) {
+        String value = environment.getProperty(name);
+        try {
+            if (value == null || Long.parseLong(value) <= 0) {
+                throw new IllegalStateException(name + " must be positive in production");
+            }
+        } catch (NumberFormatException exception) {
+            throw new IllegalStateException(name + " must be a positive integer in production", exception);
         }
     }
 }
