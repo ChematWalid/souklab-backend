@@ -76,7 +76,7 @@ class ConversationServiceTest {
         when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
         when(conversationRepository.findBetween(sender, recipient)).thenReturn(Optional.of(conversation));
         when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(conversation.getParticipants().iterator().next()));
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
 
         ConversationResponse result = service.createOrGet(recipient.getId());
 
@@ -88,7 +88,7 @@ class ConversationServiceTest {
     void send_persistsMessageNotifiesRecipientAndIsIdempotent() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "key")).thenReturn(Optional.empty());
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "key")).thenReturn(Optional.empty());
         when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> { Message m = invocation.getArgument(0); m.setId("message"); m.setCreatedAt(LocalDateTime.now(clock)); return m; });
         MessageResponse result = service.send("conversation", new SendMessageRequest("key", "hello", List.of()));
         assertThat(result.content()).isEqualTo("hello");
@@ -101,7 +101,7 @@ class ConversationServiceTest {
         Message existing = message("existing", sender, "old");
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "key")).thenReturn(Optional.of(existing));
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "key")).thenReturn(Optional.of(existing));
         assertThat(service.send("conversation", new SendMessageRequest("key", "retry", List.of())).id()).isEqualTo("existing");
         verify(messageRepository, never()).save(any()); verifyNoInteractions(notificationService);
     }
@@ -127,7 +127,7 @@ class ConversationServiceTest {
         self.setArchived(false);
         when(conversationRepository.findAllForUser(sender)).thenReturn(List.of(conversation));
         when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
         when(messageRepository.countUnread(conversation, sender, null)).thenReturn(2L);
 
         assertThat(service.list(false)).singleElement().satisfies(result -> {
@@ -212,7 +212,7 @@ class ConversationServiceTest {
         when(conversationRepository.findBetween(sender, recipient)).thenReturn(Optional.empty());
         when(conversationRepository.save(any(Conversation.class))).thenReturn(conversation);
         when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(conversation.getParticipants().stream().filter(p -> p.getUser() == sender).findFirst().orElseThrow()));
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
 
         assertThat(service.createOrGet(recipient.getId()).id()).isEqualTo("conversation");
         verify(conversationRepository).save(any(Conversation.class));
@@ -224,7 +224,7 @@ class ConversationServiceTest {
         first.setCreatedAt(LocalDateTime.of(2026, 1, 1, 0, 0));
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any(PageRequest.class)))
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(first), PageRequest.of(0, 1), 2));
         MessagePageResponse initial = service.messages("conversation", null, 1);
         assertThat(initial.nextCursor()).isNotBlank();
@@ -241,7 +241,7 @@ class ConversationServiceTest {
         upload.setStorageKey("attachment-key"); upload.setOriginalFilename("note.pdf"); upload.setContentType("application/pdf"); upload.setSize(10);
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "key")).thenReturn(Optional.empty());
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "key")).thenReturn(Optional.empty());
         when(uploadRepository.findByStorageKeyAndOwnerAndConversationAndUsedAtIsNull("attachment-key", sender, conversation)).thenReturn(Optional.of(upload));
         when(messageRepository.save(any(Message.class))).thenThrow(new IllegalStateException("database failure"));
 
@@ -268,7 +268,7 @@ class ConversationServiceTest {
         Message saved = message("committed", sender, "hello");
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "commit-key")).thenReturn(Optional.empty());
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "commit-key")).thenReturn(Optional.empty());
         when(messageRepository.save(any(Message.class))).thenReturn(saved);
         ConversationParticipant self = conversation.getParticipants().stream().filter(p -> p.getUser() == sender).findFirst().orElseThrow();
         when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
@@ -307,7 +307,7 @@ class ConversationServiceTest {
     void sendRejectsConfiguredContentAndAttachmentLimits() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(eq(conversation), eq(sender), anyString())).thenReturn(Optional.empty());
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(eq(conversation), eq(sender), anyString())).thenReturn(Optional.empty());
         String oversized = "x".repeat(4001);
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("long", oversized, List.of())))
                 .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
@@ -350,7 +350,7 @@ class ConversationServiceTest {
     void markReadWithNoMessagesDoesNothing() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
         service.markRead("conversation", null);
         verify(participantRepository, never()).findByConversationAndUser(conversation, sender);
     }
@@ -359,12 +359,12 @@ class ConversationServiceTest {
     void messagesClampsConfiguredPageSizeAtBothBounds() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
 
         service.messages("conversation", null, 0);
         service.messages("conversation", null, 1000);
 
-        verify(messageRepository, times(2)).findByConversationOrderByCreatedAtDesc(eq(conversation), any());
+        verify(messageRepository, times(2)).findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any());
     }
 
     @Test
@@ -408,7 +408,7 @@ class ConversationServiceTest {
         Message saved = message("event-message", sender, "hello");
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "event-key")).thenReturn(Optional.empty());
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "event-key")).thenReturn(Optional.empty());
         when(messageRepository.save(any(Message.class))).thenReturn(saved);
         doThrow(new IllegalStateException("broker down")).when(messagingTemplate).convertAndSendToUser(anyString(), anyString(), any());
 
@@ -420,11 +420,11 @@ class ConversationServiceTest {
         Message saved = message("null-attachments", sender, "hello");
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "null-key")).thenReturn(Optional.empty());
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "null-key")).thenReturn(Optional.empty());
         when(messageRepository.save(any(Message.class))).thenReturn(saved);
         assertThat(service.send("conversation", new SendMessageRequest("null-key", "hello", null)).id()).isEqualTo("null-attachments");
 
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any()))
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any()))
                 .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 2));
         assertThat(service.messages("conversation", null, 1).nextCursor()).isNull();
     }
@@ -442,7 +442,7 @@ class ConversationServiceTest {
         saved.getAttachments().add(attachment);
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "attachment-key"))
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "attachment-key"))
                 .thenReturn(Optional.empty());
         when(messageRepository.save(any(Message.class))).thenReturn(saved);
 
@@ -462,7 +462,7 @@ class ConversationServiceTest {
         Message saved = message("notification-failure", sender, "hello");
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "failure-key")).thenReturn(Optional.empty());
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "failure-key")).thenReturn(Optional.empty());
         when(messageRepository.save(any(Message.class))).thenReturn(saved);
         doThrow(new IllegalStateException("notification failure")).when(notificationService).createForUser(any(), anyString(), any(), anyString());
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("failure-key", "hello", null)))
@@ -481,12 +481,12 @@ class ConversationServiceTest {
         Message read = message("read-message", recipient, "read");
         when(conversationRepository.findAllForUser(sender)).thenReturn(List.of(conversation));
         when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(new PageImpl<>(List.of(deleted)));
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
         when(messageRepository.findById("read-message")).thenReturn(Optional.of(read));
         when(messageRepository.countUnread(conversation, sender, read.getCreatedAt())).thenReturn(0L);
 
         assertThat(service.list(false)).singleElement().satisfies(result -> {
-            assertThat(result.lastMessagePreview()).isEmpty();
+            assertThat(result.lastMessagePreview()).isNull();
             assertThat(result.unreadCount()).isZero();
         });
     }
@@ -495,7 +495,7 @@ class ConversationServiceTest {
     void send_rejectsUnknownAttachmentReservation() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationAndAuthorAndIdempotencyKey(conversation, sender, "missing-key"))
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "missing-key"))
                 .thenReturn(Optional.empty());
         when(uploadRepository.findByStorageKeyAndOwnerAndConversationAndUsedAtIsNull("unknown", sender, conversation))
                 .thenReturn(Optional.empty());
@@ -510,11 +510,11 @@ class ConversationServiceTest {
     void blankCursor_isEquivalentToInitialPage() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
 
         service.messages("conversation", "   ", 20);
 
-        verify(messageRepository).findByConversationOrderByCreatedAtDesc(eq(conversation), any());
+        verify(messageRepository).findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any());
         verify(messageRepository, never()).findBefore(any(), any(), any(), any());
     }
 
@@ -613,7 +613,7 @@ class ConversationServiceTest {
         Message latest = message("latest", recipient, "visible preview");
         when(conversationRepository.findAllForUser(sender)).thenReturn(List.of(conversation));
         when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(new PageImpl<>(List.of(latest)));
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(new PageImpl<>(List.of(latest)));
         when(messageRepository.countUnread(conversation, sender, null)).thenReturn(1L);
 
         assertThat(service.list(false)).singleElement()
@@ -628,7 +628,7 @@ class ConversationServiceTest {
         self.setLastReadMessageId("missing-read");
         when(conversationRepository.findAllForUser(sender)).thenReturn(List.of(conversation));
         when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
-        when(messageRepository.findByConversationOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
         when(messageRepository.findById("missing-read")).thenReturn(Optional.empty());
         when(messageRepository.countUnread(conversation, sender, null)).thenReturn(0L);
         assertThat(service.list(false)).hasSize(1);

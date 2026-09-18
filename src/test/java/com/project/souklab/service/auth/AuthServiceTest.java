@@ -551,7 +551,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.login(dto, null))
                 .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("This account was created via social login. Please sign in with Google.");
+                .hasMessage("Invalid email or password.");
     }
 
     /**
@@ -574,7 +574,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.login(dto, null))
                 .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("This account was created via social login. Please sign in with Google.");
+                .hasMessage("Invalid email or password.");
     }
 
     /**
