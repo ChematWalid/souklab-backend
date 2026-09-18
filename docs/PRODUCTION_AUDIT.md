@@ -28,7 +28,7 @@ observability, release automation, and horizontal-scaling controls remain open g
 | --- | --- | --- |
 | Data seeding runs on every application startup | `DataSeeder` implements `CommandLineRunner` and also owns first-admin bootstrap. | Separate immutable reference-data migrations from an explicitly enabled bootstrap job; never email a bootstrap password in production. |
 | S3 bucket creation is local-only | Local `.env.example` enables bucket creation for MinIO; `application-prod.properties` forces it off and validator rejects it in production. | Provision buckets/IAM policies outside the application. |
-| CORS allows credentials | `SecurityConfig` enables credentials with configurable origin patterns. | Reject wildcard origins at startup and keep an explicit production allowlist. |
+| CORS allows credentials | `SecurityConfig` enables credentials with configurable origin patterns; `ConfigurationPolicyValidator` rejects wildcard patterns at startup. | Keep an explicit production allowlist and review it per deployment environment. |
 | Search and external services are startup-coupled | Search index lifecycle and S3 initialization run during application startup. | Define dependency readiness policies, bounded retries, and a clear degraded-mode strategy. |
 
 ### Fixed during this audit
@@ -51,6 +51,8 @@ observability, release automation, and horizontal-scaling controls remain open g
 - Permission seed migrations now provide required audit timestamps and are verified with 12 seeded permissions.
 - Production-only readiness now checks S3, Elasticsearch, the RabbitMQ STOMP endpoint, and ClamAV.
 - Elasticsearch has an explicit first-install `create-or-update` bootstrap mode and strict normal-operation `validate` mode.
+- Infrastructure failures now use generic API response text while retaining detailed server-side logs and stable error codes.
+- Credentialed CORS rejects wildcard origin patterns at startup.
 - Authentication failures use a stable generic response; security headers include `nosniff`, `DENY` framing, and `no-referrer`.
 - Paginated artisan directory queries no longer fetch multiple collections in the page query; collection batch fetching and supporting message/upload indexes were added.
 - Chat reads exclude soft-deleted messages and deleted idempotency records; after-commit dispatch no longer uses anonymous production classes.
