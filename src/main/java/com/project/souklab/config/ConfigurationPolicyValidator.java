@@ -91,7 +91,7 @@ public class ConfigurationPolicyValidator {
 
     private void validateCors(java.util.List<String> origins) {
         if (origins == null || origins.isEmpty() || origins.stream().anyMatch(origin -> origin == null
-                || origin.isBlank() || "*".equals(origin.trim()))) {
+                || origin.isBlank() || origin.contains("*"))) {
             throw new IllegalStateException("app.cors.allowed-origins must contain explicit origins when credentials are enabled");
         }
     }
