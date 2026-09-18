@@ -19,7 +19,8 @@ public class AppProperties {
     private Admin admin = new Admin();
     private Email email = new Email();
     private Mailersend mailersend = new Mailersend();
-    private Chargily chargily = new Chargily();
+    private ChargilyProperties chargily = new ChargilyProperties();
+    private SubscriptionProperties subscription = new SubscriptionProperties();
     private OAuth oauth = new OAuth();
     private Relay relay = new Relay();
     private RateLimit rateLimit = new RateLimit();
@@ -163,14 +164,6 @@ public class AppProperties {
         private String senderName;
         private Duration connectionTimeout;
         private Duration readTimeout;
-    }
-
-    @Data
-    public static class Chargily {
-        private String apiKey;
-        private String secretKey;
-        private String mode;
-        private String webhookSecret;
     }
 
     @Data

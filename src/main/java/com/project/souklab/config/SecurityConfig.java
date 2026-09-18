@@ -5,6 +5,7 @@ import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.security.FileRateLimitFilter;
 import com.project.souklab.security.AvatarUploadRateLimitFilter;
 import com.project.souklab.security.AvatarUploadSizeFilter;
+import com.project.souklab.security.ChargilyWebhookSizeFilter;
 import com.project.souklab.security.JwtAuthenticationFilter;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
 import com.project.souklab.security.RateLimitFilter;
@@ -66,6 +67,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public ChargilyWebhookSizeFilter chargilyWebhookSizeFilter() {
+        return new ChargilyWebhookSizeFilter(appProperties, servletResponseUtil);
+    }
+
+    @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration() {
         FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>(jwtAuthenticationFilter);
         registration.setEnabled(false);
@@ -96,6 +102,13 @@ public class SecurityConfig {
     @Bean
     public FilterRegistrationBean<AvatarUploadRateLimitFilter> avatarUploadRateLimitFilterRegistration(AvatarUploadRateLimitFilter filter) {
         FilterRegistrationBean<AvatarUploadRateLimitFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ChargilyWebhookSizeFilter> chargilyWebhookSizeFilterRegistration(ChargilyWebhookSizeFilter filter) {
+        FilterRegistrationBean<ChargilyWebhookSizeFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
     }
@@ -149,6 +162,8 @@ public class SecurityConfig {
                                 "/api/v1/catalog/**",
                                 "/api/v1/public/**",
                                 "/api/v1/feed/**",
+                                "/api/v1/subscriptions/plans",
+                                "/api/v1/integrations/chargily/webhook",
                                 "/api/v1/artisans/*/reviews"
                         ).permitAll()
                         .anyRequest().authenticated()
@@ -171,6 +186,7 @@ public class SecurityConfig {
         http.addFilterAfter(fileRateLimitFilter, JwtAuthenticationFilter.class);
         http.addFilterAfter(avatarUploadSizeFilter(), JwtAuthenticationFilter.class);
         http.addFilterAfter(avatarUploadRateLimitFilter(), AvatarUploadSizeFilter.class);
+        http.addFilterBefore(chargilyWebhookSizeFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

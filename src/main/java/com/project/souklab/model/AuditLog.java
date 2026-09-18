@@ -21,6 +21,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuditLog extends BaseEntity {
 
+    public AuditLog(AuditLogAction action, String details, User user) {
+        this.action = action;
+        this.details = details;
+        this.user = user;
+    }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private AuditLogAction action;
@@ -31,4 +37,25 @@ public class AuditLog extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "target_account_id", length = 36)
+    private String targetAccountId;
+
+    @Column(length = 80)
+    private String operation;
+
+    @Column(name = "previous_state", length = 500)
+    private String previousState;
+
+    @Column(name = "new_state", length = 500)
+    private String newState;
+
+    @Column(length = 1000)
+    private String reason;
+
+    @Column(name = "payment_id", length = 36)
+    private String paymentId;
+
+    @Column(name = "subscription_id", length = 36)
+    private String subscriptionId;
 }

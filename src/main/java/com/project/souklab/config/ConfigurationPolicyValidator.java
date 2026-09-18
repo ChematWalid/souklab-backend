@@ -7,6 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.util.Base64;
+
 /** Fails fast on unsafe or unusable runtime policy configuration. */
 @Component
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class ConfigurationPolicyValidator {
         validateCache(appProperties.getCache());
         validateMassIndexing(appProperties.getSearch().getMassIndexing());
         validateDirectory(appProperties.getDirectory());
+        validateSubscriptionPolicy();
 
         if (isProduction() && Boolean.TRUE.equals(storageProperties.getS3().getAutoCreateBucket())) {
             throw new IllegalStateException("storage.s3.auto-create-bucket must be false in production");
@@ -42,6 +48,79 @@ public class ConfigurationPolicyValidator {
 
         if (isProduction()) {
             validateProductionPolicy();
+        }
+    }
+
+    private void validateSubscriptionPolicy() {
+        SubscriptionProperties subscription = appProperties.getSubscription();
+        ChargilyProperties chargily = appProperties.getChargily();
+        if (chargily != null && chargily.isEnabled()) {
+            validateChargily(chargily);
+        }
+        if (subscription == null || !subscription.isEnabled()) {
+            return;
+        }
+        if (!"DZD".equals(subscription.getCurrency())) {
+            throw new IllegalStateException("app.subscription.currency must be DZD");
+        }
+        if (subscription.getMinimumPlanAmount() <= 0
+                || subscription.getMaximumPlanAmount() < subscription.getMinimumPlanAmount()) {
+            throw new IllegalStateException("app.subscription plan amount bounds are invalid");
+        }
+        if (subscription.getLifecycleBatchSize() <= 0 || subscription.getReminderOffsets() == null
+                || subscription.getReminderOffsets().stream().anyMatch(offset -> offset == null || offset <= 0)) {
+            throw new IllegalStateException("app.subscription lifecycle settings are invalid");
+        }
+        validatePositiveDuration("app.subscription.lifecycle-interval", subscription.getLifecycleInterval());
+        requireConfigured("app.subscription.lifecycle-time-zone", subscription.getLifecycleTimeZone());
+        try {
+            ZoneId.of(subscription.getLifecycleTimeZone());
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException("app.subscription.lifecycle-time-zone must be a valid time zone", exception);
+        }
+        validatePositiveDuration("app.subscription.checkout-idempotency-retention", subscription.getCheckoutIdempotencyRetention());
+        validatePositiveDuration("app.subscription.webhook-retention", subscription.getWebhookRetention());
+        if (chargily == null || !chargily.isEnabled()) {
+            throw new IllegalStateException("enabled subscriptions require enabled Chargily configuration");
+        }
+        validateChargily(chargily);
+    }
+
+    private void validateChargily(ChargilyProperties chargily) {
+        requireConfigured("app.chargily.api-key", chargily.getApiKey());
+        requireConfigured("app.chargily.secret-key", chargily.getSecretKey());
+        requireConfigured("app.chargily.base-url", chargily.getBaseUrl());
+        requireConfigured("app.chargily.webhook-encryption-key", chargily.getWebhookEncryptionKey());
+        validateUrl("app.chargily.base-url", chargily.getBaseUrl());
+        validateUrl("app.chargily.webhook-url", chargily.getWebhookUrl());
+        validateUrl("app.chargily.success-url", chargily.getSuccessUrl());
+        validateUrl("app.chargily.failure-url", chargily.getFailureUrl());
+        validatePositiveDuration("app.chargily.connect-timeout", chargily.getConnectTimeout());
+        validatePositiveDuration("app.chargily.read-timeout", chargily.getReadTimeout());
+        validatePositiveDuration("app.chargily.response-timeout", chargily.getResponseTimeout());
+        validatePositiveDuration("app.chargily.retry-backoff", chargily.getRetryBackoff());
+        if (chargily.getRetryCount() < 0 || chargily.getRequestBodyLimit() <= 0
+                || !"DZD".equals(chargily.getCurrency())) {
+            throw new IllegalStateException("Chargily retry, request limit, or currency configuration is invalid");
+        }
+        try {
+            if (Base64.getDecoder().decode(chargily.getWebhookEncryptionKey()).length != 32) {
+                throw new IllegalStateException("app.chargily.webhook-encryption-key must decode to 32 bytes");
+            }
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException("app.chargily.webhook-encryption-key must be valid Base64", exception);
+        }
+    }
+
+    private void validateUrl(String name, String value) {
+        requireConfigured(name, value);
+        try {
+            URI uri = URI.create(value);
+            if (uri.getScheme() == null || uri.getHost() == null) {
+                throw new IllegalArgumentException("not absolute");
+            }
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException(name + " must be a valid absolute URL", exception);
         }
     }
 

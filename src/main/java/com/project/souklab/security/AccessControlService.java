@@ -35,6 +35,10 @@ public class AccessControlService {
         return hasPermission(authentication, Permission.ADMIN_REPORTS);
     }
 
+    public boolean canManageFinancialOperations(Authentication authentication) {
+        return hasPermission(authentication, Permission.FINANCIAL_ADMIN);
+    }
+
     public boolean canManageArtisanFormations(Authentication authentication) {
         return hasPermission(authentication, Permission.ARTISAN_FORMATIONS);
     }
