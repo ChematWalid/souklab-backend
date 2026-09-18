@@ -1,12 +1,16 @@
 # Production Readiness Audit
 
-Audit date: 2026-09-17
+Audit date: 2026-09-18
 
 This report is based on the current source tree, build configuration, migrations, container files, tests, and local verification commands. It is an engineering readiness review, not a compliance certification.
 
 ## Current recommendation
 
-The codebase is internally consistent and testable against the local dependency stack. Production rollout still requires the operational controls listed below, especially a CI/release gate, migration execution policy, and observability.
+Production audit: 64/100, risky until the real MariaDB/RabbitMQ/MinIO/Elasticsearch/ClamAV stack is verified and deployment observability is wired into the target platform.
+
+The codebase compiles and has a broad existing test suite, but local dependency
+outages and the absence of a running Compose stack prevent a production-ready
+claim from being made from this checkout alone.
 
 ## Findings
 
@@ -16,15 +20,16 @@ The codebase is internally consistent and testable against the local dependency 
 | --- | --- | --- |
 | Production schema changes require deployment discipline | Flyway is bundled and enabled by the production profile, while local development keeps it disabled. | Apply reviewed migrations before startup and document rollback/recovery ownership. |
 | No tracked CI/release gate is present | No `.github` workflow or equivalent pipeline is tracked. | Add compile, test, migration, dependency, image, and artifact gates. |
-| No application observability surface is configured | No Actuator or Micrometer management endpoint is configured. | Add dependency readiness, metrics, correlation IDs, and operational dashboards. |
+| Operational dashboards are not yet wired to a deployment platform | Actuator health/readiness and Prometheus metrics are now exposed, but no platform scrape or alert configuration is tracked. | Bind the endpoints to the selected monitoring stack and define alerts. |
 | Rate limiting is process-local | Bucket4j state is held in Caffeine caches. | Use a shared limiter or edge gateway when horizontally scaling. |
+| Full dependency verification is not repeatable from the current shell | The unscoped Maven suite produced 1,131 tests with 75 dependency-related errors because MinIO and other services were not running. | Run `scripts/verify-local-integration.sh` and capture dependency health before release. |
 
 ### Medium priority
 
 | Finding | Evidence | Recommendation |
 | --- | --- | --- |
 | Data seeding runs on every application startup | `DataSeeder` implements `CommandLineRunner` and also owns first-admin bootstrap. | Separate immutable reference-data migrations from an explicitly enabled bootstrap job; never email a bootstrap password in production. |
-| S3 bucket creation is enabled by default | `storage.s3.auto-create-bucket` defaults to `true` in application configuration. | Default this to `false` in production and provision buckets/IAM policies outside the application. |
+| S3 bucket creation is local-only | Local `.env.example` enables bucket creation for MinIO; `application-prod.properties` forces it off and validator rejects it in production. | Provision buckets/IAM policies outside the application. |
 | CORS allows credentials | `SecurityConfig` enables credentials with configurable origin patterns. | Reject wildcard origins at startup and keep an explicit production allowlist. |
 | Search and external services are startup-coupled | Search index lifecycle and S3 initialization run during application startup. | Define dependency readiness policies, bounded retries, and a clear degraded-mode strategy. |
 
@@ -41,10 +46,18 @@ The codebase is internally consistent and testable against the local dependency 
 - Runtime tuning values are bound through environment variables and typed configuration classes; file URL generation honors the configured prefix.
 - The local Compose verifier provisions MariaDB, RabbitMQ, MinIO, Elasticsearch, and ClamAV and tears down only its test environment.
 - Documentation now identifies the generated Postman material as archival and points to the current permission-based API specification.
+- MariaDB is now the explicit JDBC target, with the MariaDB driver/dialect and Java 21 container baseline.
+- Hikari pool settings, UTC JDBC timezone, disabled Open Session in View, health/readiness probes, and Prometheus metrics are externalized/configured.
+- Production startup rejects unsafe schema mode, disabled Flyway, in-memory storage, disabled antivirus, fail-open scanning, and admin bootstrap.
+- Authentication failures use a stable generic response; security headers include `nosniff`, `DENY` framing, and `no-referrer`.
+- Paginated artisan directory queries no longer fetch multiple collections in the page query; collection batch fetching and supporting message/upload indexes were added.
+- Chat reads exclude soft-deleted messages and deleted idempotency records; after-commit dispatch no longer uses anonymous production classes.
 
 ## Verification evidence
 
-- `./mvnw -DskipTests compile` on Java 21: passed.
+- `./mvnw -DskipTests compile`: passed on the available JDK 26; the build and Docker baseline target Java 21.
+- `./mvnw -Dtest=FileServingSecuritySliceTest test`: passed.
+- `./mvnw test`: not a release gate yet; the run reached 1,131 tests with 1 failure and 75 errors, primarily because external S3/Compose services were unavailable. The first failure was corrected by the stable generic 401 response.
 - Full Compose-backed suite: 828 tests, 0 failures, 0 errors, 0 skipped.
 - JaCoCo report: generated successfully; 187 classes analyzed.
 - `git diff --check`: passed.
@@ -54,4 +67,6 @@ The codebase is internally consistent and testable against the local dependency 
 
 ## Next release gate
 
-The next production milestone should add a CI pipeline, formalize migration and rollback ownership, and expose health/readiness/metrics endpoints before any external deployment.
+The next production milestone should run the Compose-backed integration verifier,
+inspect migration execution against MariaDB, add CI/dependency/image gates, and
+bind Actuator/Prometheus output to the selected deployment platform.
