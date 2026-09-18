@@ -55,6 +55,7 @@ observability, release automation, and horizontal-scaling controls remain open g
 - Credentialed CORS rejects wildcard origin patterns at startup.
 - Production profile overrides development logging, SQL formatting, SQL output, and SMTP debug settings with safe levels.
 - Production startup rejects direct environment overrides that would re-enable SQL/SMTP diagnostics, verbose application logging, health details, broad Actuator exposure, or environment info disclosure.
+- SMTP connection, read, and write timeouts are now explicit environment settings and must be positive in production.
 - Authentication failures use a stable generic response; security headers include `nosniff`, `DENY` framing, and `no-referrer`.
 - Paginated artisan directory queries no longer fetch multiple collections in the page query; collection batch fetching and supporting message/upload indexes were added.
 - Chat reads exclude soft-deleted messages and deleted idempotency records; after-commit dispatch no longer uses anonymous production classes.
