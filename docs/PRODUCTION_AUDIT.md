@@ -61,7 +61,7 @@ observability, release automation, and horizontal-scaling controls remain open g
 - `./mvnw -Dtest=FileServingSecuritySliceTest test`: passed.
 - An initial no-dependency `./mvnw test` run reached 1,131 tests with 1 failure and 75 errors because external S3/Compose services were unavailable; it is diagnostic only.
 - Final Compose-backed suite: 1,133 tests, 0 failures, 0 errors, 0 skipped, on Java 21 with MariaDB 11.4, RabbitMQ 4.0, MinIO, Elasticsearch 8.15, and ClamAV 1.4.
-- JaCoCo report: generated successfully; 211 production classes analyzed.
+- JaCoCo report: generated successfully; 214 production classes analyzed.
 - `git diff --check`: passed.
 - Fresh production bootstrap: Flyway applied V0-V4 to MariaDB 11.4, created 39 tables, and inserted 12 permissions.
 - Strict production restart: `ddl-auto=validate`, Flyway up-to-date, Search schema `validate`, STOMP relay connected, and `/actuator/health/readiness` returned HTTP 200.
