@@ -2,6 +2,7 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AuthorizationPermission;
+import com.project.souklab.security.Permission;
 import com.project.souklab.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,22 +48,22 @@ class UserRepositoryTest {
     @Test
     @DisplayName("findByEmail: loads user and eagerly fetches permissions after persistence context is cleared")
     void findByEmail_whenUserExists_returnsUserWithRolesEagerlyLoadedAfterContextCleared() {
-        AuthorizationPermission roleClient = new AuthorizationPermission();
-        roleClient.setPermissionKey("permission:profile:read");
-        roleClient.setDescription("Read profiles");
-        entityManager.persist(roleClient);
+        AuthorizationPermission profileRead = new AuthorizationPermission();
+        profileRead.setPermissionKey(Permission.PROFILE_READ.authority());
+        profileRead.setDescription("Read profiles");
+        entityManager.persist(profileRead);
 
-        AuthorizationPermission roleArtisan = new AuthorizationPermission();
-        roleArtisan.setPermissionKey("permission:artisan:content");
-        roleArtisan.setDescription("Create artisan content");
-        entityManager.persist(roleArtisan);
+        AuthorizationPermission artisanContent = new AuthorizationPermission();
+        artisanContent.setPermissionKey(Permission.ARTISAN_CONTENT.authority());
+        artisanContent.setDescription("Create artisan content");
+        entityManager.persist(artisanContent);
 
         User user = User.builder()
                 .email("artisan@souklab.com")
                 .firstName("Karim")
                 .lastName("Mansouri")
                 .status(AccountStatus.ACTIVE)
-                .permissions(Set.of(roleClient, roleArtisan))
+                .permissions(Set.of(profileRead, artisanContent))
                 .build();
         entityManager.persist(user);
 
@@ -77,7 +78,7 @@ class UserRepositoryTest {
         assertThat(detachedUser.getPermissions())
                 .hasSize(2)
                 .extracting(AuthorizationPermission::getPermissionKey)
-                .containsExactlyInAnyOrder("permission:profile:read", "permission:artisan:content");
+                .containsExactlyInAnyOrder(Permission.PROFILE_READ.authority(), Permission.ARTISAN_CONTENT.authority());
     }
 
     /**
@@ -164,15 +165,15 @@ class UserRepositoryTest {
     @Test
     @DisplayName("findByUsername: matches by email and eagerly loads permissions")
     void findByUsername_matchesByEmailAndEagerlyLoadsRoles() {
-        AuthorizationPermission role = new AuthorizationPermission();
-        role.setPermissionKey("permission:admin:users");
-        role.setDescription("Manage users");
-        entityManager.persist(role);
+        AuthorizationPermission adminUsers = new AuthorizationPermission();
+        adminUsers.setPermissionKey(Permission.ADMIN_USERS.authority());
+        adminUsers.setDescription("Manage users");
+        entityManager.persist(adminUsers);
 
         User user = User.builder()
                 .email("admin@souklab.com")
                 .status(AccountStatus.ACTIVE)
-                .permissions(Set.of(role))
+                .permissions(Set.of(adminUsers))
                 .build();
         entityManager.persist(user);
         entityManager.flush();
@@ -185,7 +186,7 @@ class UserRepositoryTest {
         assertThat(found.get().getPermissions())
                 .hasSize(1)
                 .extracting(AuthorizationPermission::getPermissionKey)
-                .containsExactly("permission:admin:users");
+                .containsExactly(Permission.ADMIN_USERS.authority());
     }
 
     /**
@@ -344,33 +345,33 @@ class UserRepositoryTest {
     @Test
     @DisplayName("findByPermissionKey: returns active users with role and excludes soft-deleted users")
     void findByPermissionKey_returnsActiveUsersWithRole_andExcludesSoftDeletedUsers() {
-        AuthorizationPermission adminRole = new AuthorizationPermission();
-        adminRole.setPermissionKey("permission:admin:users");
-        adminRole.setDescription("Manage users");
-        entityManager.persist(adminRole);
+        AuthorizationPermission adminUsers = new AuthorizationPermission();
+        adminUsers.setPermissionKey(Permission.ADMIN_USERS.authority());
+        adminUsers.setDescription("Manage users");
+        entityManager.persist(adminUsers);
 
-        AuthorizationPermission clientRole = new AuthorizationPermission();
-        clientRole.setPermissionKey("permission:profile:read");
-        clientRole.setDescription("Read profiles");
-        entityManager.persist(clientRole);
+        AuthorizationPermission profileRead = new AuthorizationPermission();
+        profileRead.setPermissionKey(Permission.PROFILE_READ.authority());
+        profileRead.setDescription("Read profiles");
+        entityManager.persist(profileRead);
 
         User activeAdmin = User.builder()
                 .email("active.admin@souklab.com")
                 .status(AccountStatus.ACTIVE)
-                .permissions(Set.of(adminRole))
+                .permissions(Set.of(adminUsers))
                 .build();
 
         User softDeletedAdmin = User.builder()
                 .email("deleted.admin@souklab.com")
                 .status(AccountStatus.ACTIVE)
-                .permissions(Set.of(adminRole))
+                .permissions(Set.of(adminUsers))
                 .build();
         softDeletedAdmin.setDeletedAt(FIXED_NOW.minusDays(1));
 
         User activeClient = User.builder()
                 .email("active.client@souklab.com")
                 .status(AccountStatus.ACTIVE)
-                .permissions(Set.of(clientRole))
+                .permissions(Set.of(profileRead))
                 .build();
 
         entityManager.persist(activeAdmin);
@@ -379,7 +380,7 @@ class UserRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        List<User> admins = userRepository.findByPermissionKey("permission:admin:users");
+        List<User> admins = userRepository.findByPermissionKey(Permission.ADMIN_USERS.authority());
 
         assertThat(admins)
                 .hasSize(1)

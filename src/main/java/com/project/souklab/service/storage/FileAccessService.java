@@ -7,6 +7,8 @@ import com.project.souklab.dao.FormationFileRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserAvatarRepository;
 import com.project.souklab.dao.ArtisanRepository;
+import com.project.souklab.dao.MessageAttachmentRepository;
+import com.project.souklab.dao.UserRepository;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.FileUrlResolver;
@@ -15,6 +17,7 @@ import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.Formation;
 import com.project.souklab.model.FormationFile;
+import com.project.souklab.model.User;
 import com.project.souklab.security.AccessControlService;
 import com.project.souklab.security.Permission;
 import com.project.souklab.util.ArtisanSecurityUtils;
@@ -42,6 +45,8 @@ public class FileAccessService {
     private final ArtisanRepository artisanRepository;
     private final FileUrlResolver fileUrlResolver;
     private final AccessControlService accessControlService;
+    private final MessageAttachmentRepository messageAttachmentRepository;
+    private final UserRepository userRepository;
 
     /**
      * Verifies that the current principal may retrieve the stored object identified by the key.
@@ -51,6 +56,11 @@ public class FileAccessService {
      */
     @Transactional(readOnly = true)
     public boolean authorize(String storageKey) {
+        User currentUser = resolveCurrentUserOrNull();
+        if (currentUser != null && messageAttachmentRepository.findAccessibleByStorageKey(storageKey, currentUser).isPresent()) {
+            requireFileRead();
+            return false;
+        }
         if (userAvatarRepository.findFirstByStorageKeyOriginalOrStorageKeyMediumOrStorageKeyThumbnail(
                 storageKey, storageKey, storageKey).isPresent()) {
             return true;
@@ -74,6 +84,11 @@ public class FileAccessService {
                 .orElseThrow(() -> new ResourceNotFoundException("File not found."));
         requireFormationAccess(file);
         return false;
+    }
+
+    private User resolveCurrentUserOrNull() {
+        String email = SecurityUtils.getCurrentUsername();
+        return email == null ? null : userRepository.findByEmail(email).orElse(null);
     }
 
     private void requireCertificationOwnerOrAdministrator(String storageKey) {

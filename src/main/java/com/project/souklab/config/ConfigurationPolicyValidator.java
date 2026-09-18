@@ -29,10 +29,12 @@ public class ConfigurationPolicyValidator {
             throw new IllegalStateException("storage.validation.max-file-size must be positive");
         }
         requireNonEmpty("storage.validation.allowed-mime-types", validation.getAllowedMimeTypes());
+        requireConfigured("app.storage.file-serving-prefix", appProperties.getStorage().getFileServingPrefix());
         validateCors(appProperties.getCors().getAllowedOrigins());
         validateAsync(appProperties.getAsync());
         validateCache(appProperties.getCache());
         validateMassIndexing(appProperties.getSearch().getMassIndexing());
+        validateDirectory(appProperties.getDirectory());
 
         if (isProduction() && Boolean.TRUE.equals(storageProperties.getS3().getAutoCreateBucket())) {
             throw new IllegalStateException("storage.s3.auto-create-bucket must be false in production");
@@ -98,6 +100,15 @@ public class ConfigurationPolicyValidator {
         }
     }
 
+    private void validateDirectory(AppProperties.Directory directory) {
+        if (directory == null || directory.getDefaultPageIndex() < 0
+                || directory.getDefaultPageSize() < directory.getMinPageSize()
+                || directory.getMinPageSize() <= 0
+                || directory.getMaxPageSize() < directory.getMinPageSize()) {
+            throw new IllegalStateException("app.directory pagination values must be valid");
+        }
+    }
+
     private void requirePositive(String name, long value) {
         if (value <= 0) {
             throw new IllegalStateException(name + " must be positive");
@@ -107,6 +118,12 @@ public class ConfigurationPolicyValidator {
     private void requireNonEmpty(String name, java.util.List<String> values) {
         if (values == null || values.isEmpty() || values.stream().anyMatch(value -> value == null || value.isBlank())) {
             throw new IllegalStateException(name + " must not be empty");
+        }
+    }
+
+    private void requireConfigured(String name, String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(name + " must be configured");
         }
     }
 }

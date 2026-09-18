@@ -11,20 +11,23 @@ final class RealtimeNotificationAfterCommit implements TransactionSynchronizatio
 
     private final SimpMessagingTemplate messagingTemplate;
     private final String recipientEmail;
+    private final String destination;
     private final NotificationResponseDTO payload;
 
     RealtimeNotificationAfterCommit(SimpMessagingTemplate messagingTemplate,
                                     String recipientEmail,
+                                    String destination,
                                     NotificationResponseDTO payload) {
         this.messagingTemplate = messagingTemplate;
         this.recipientEmail = recipientEmail;
+        this.destination = destination;
         this.payload = payload;
     }
 
     @Override
     public void afterCommit() {
         try {
-            messagingTemplate.convertAndSendToUser(recipientEmail, "/queue/notifications", payload);
+            messagingTemplate.convertAndSendToUser(recipientEmail, destination, payload);
         } catch (Exception exception) {
             log.warn("Failed to deliver real-time WebSocket notification to user '{}': {}",
                     recipientEmail, exception.getMessage());

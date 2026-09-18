@@ -39,6 +39,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.Instant;
@@ -54,6 +55,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -105,6 +107,7 @@ class ArtisanCertificationServiceTest {
 
     @BeforeEach
     void setUp() {
+        appProperties.getStorage().setFileServingPrefix("/api/v1/files/");
         appProperties.getArtisan().getCertification().setMaxCount(10);
         appProperties.getArtisan().getCertification().setMaxFileSize(DataSize.ofMegabytes(10));
         appProperties.getArtisan().getCertification().setAllowedMimeTypes(List.of("application/pdf", "image/jpeg", "image/png"));
@@ -136,7 +139,7 @@ class ArtisanCertificationServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("permission:artisan:content");
+        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_CONTENT.authority());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -303,6 +306,24 @@ class ArtisanCertificationServiceTest {
             assertThatThrownBy(() -> certificationService.uploadCertification(file, "Title", "  ", null, null))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessageContaining("Certification issuer is required.");
+
+            assertThatThrownBy(() -> certificationService.uploadCertification(file, null, "Issuer", null, null))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("Certification title is required.");
+
+            assertThatThrownBy(() -> certificationService.uploadCertification(file, "Title", null, null, null))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("Certification issuer is required.");
+        }
+
+        @Test
+        void uploadCertification_whenFileIsNull_shouldThrowBadRequestException() {
+            authenticateArtisan();
+            when(certificationRepository.countByArtisanIdAndDeletedAtIsNull(ARTISAN_ID)).thenReturn(0L);
+
+            assertThatThrownBy(() -> certificationService.uploadCertification(null, "Title", "Issuer", null, null))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("document file is required");
         }
 
         /**
@@ -416,6 +437,52 @@ class ArtisanCertificationServiceTest {
             verify(storageService).delete("rollback-cert-key");
         }
 
+        @Test
+        @DisplayName("uploadCertification_whenInputStreamCannotBeRead_shouldThrowStorageException")
+        void uploadCertification_whenInputStreamCannotBeRead_shouldThrowStorageException() throws Exception {
+            authenticateArtisan();
+            MockMultipartFile unreadableFile = new MockMultipartFile(
+                    "file", "broken.pdf", "application/pdf", "bytes".getBytes()) {
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    throw new IOException("stream unavailable");
+                }
+            };
+            when(certificationRepository.countByArtisanIdAndDeletedAtIsNull(ARTISAN_ID)).thenReturn(0L);
+
+            assertThatThrownBy(() -> certificationService.uploadCertification(
+                    unreadableFile, "Title", "Issuer", null, null))
+                    .isInstanceOf(com.project.souklab.filestorage.exception.StorageException.class)
+                    .hasMessageContaining("Failed to read uploaded certification stream");
+
+            verify(storageService, never()).store(any(), any(), any(), anyLong());
+        }
+
+        @Test
+        @DisplayName("uploadCertification_whenCompensatingDeleteFails_shouldPreserveOriginalFailure")
+        void uploadCertification_whenCompensatingDeleteFails_shouldPreserveOriginalFailure() throws Exception {
+            authenticateArtisan();
+            MockMultipartFile file = new MockMultipartFile(
+                    "file", "cert.pdf", "application/pdf", "bytes".getBytes());
+            when(certificationRepository.countByArtisanIdAndDeletedAtIsNull(ARTISAN_ID)).thenReturn(0L);
+            ValidatedFile validated = new ValidatedFile(
+                    new ByteArrayInputStream(file.getBytes()), "cert.pdf", "application/pdf", file.getSize());
+            when(fileValidator.validateAndSanitize(any(), anyString(), anyString(), anyLong(), anyList()))
+                    .thenReturn(validated);
+            when(virusScanService.scan(validated)).thenReturn(validated);
+            when(storageService.store(any(), anyString(), anyString(), anyLong()))
+                    .thenReturn(new StorageResult("delete-fails-cert-key", "cert.pdf", "application/pdf", file.getSize(), Instant.now()));
+            when(certificationRepository.save(any(ArtisanCertification.class)))
+                    .thenThrow(new RuntimeException("database failure"));
+            doThrow(new RuntimeException("delete failure")).when(storageService).delete("delete-fails-cert-key");
+
+            assertThatThrownBy(() -> certificationService.uploadCertification(
+                    file, "Title", "Issuer", null, null))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessage("database failure");
+            verify(storageService).delete("delete-fails-cert-key");
+        }
+
         /**
          * Verifies unauthenticated call throws UnauthorizedException.
          */
@@ -442,7 +509,7 @@ class ArtisanCertificationServiceTest {
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.isAuthenticated()).thenReturn(true);
 
-            GrantedAuthority clientAuthority = new SimpleGrantedAuthority("permission:profile:read");
+            GrantedAuthority clientAuthority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.PROFILE_READ.authority());
             doReturn(List.of(clientAuthority)).when(authentication).getAuthorities();
 
             SecurityContextHolder.setContext(securityContext);

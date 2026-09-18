@@ -95,4 +95,33 @@ class AuditLogServiceAttributionTest {
         assertThat(saved.getUser()).isNull();
         verify(userRepository, never()).findByEmail(any());
     }
+
+    @Test
+    @DisplayName("3-arg logAction persists with the supplied username attribution")
+    void testLogActionWithUsername_persistsAuditEntry() {
+        auditLogService.logAction(AuditLogAction.PERMISSION_GRANTED, "Granted permission", "admin@souklab.com");
+
+        verify(auditLogRepository).save(argThat(log ->
+                log.getAction() == AuditLogAction.PERMISSION_GRANTED
+                        && "Granted permission".equals(log.getDetails())));
+        verify(userRepository).findByEmail("admin@souklab.com");
+    }
+
+    @Test
+    void explicitAnonymousUsernameDoesNotResolveAUser() {
+        auditLogService.logAction(AuditLogAction.BAN_USER, "anonymous action", "anonymousUser");
+        verify(auditLogRepository).save(any(AuditLog.class));
+        verify(userRepository, never()).findByEmail("anonymousUser");
+    }
+
+    @Test
+    @DisplayName("audit persistence failures are contained by the audit service")
+    void testLogAction_whenPersistenceFails_doesNotPropagateException() {
+        doThrow(new IllegalStateException("database unavailable"))
+                .when(auditLogRepository).save(any(AuditLog.class));
+
+        auditLogService.logAction(AuditLogAction.BAN_USER, "Ban failed");
+
+        verify(auditLogRepository).save(any(AuditLog.class));
+    }
 }

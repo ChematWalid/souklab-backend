@@ -365,7 +365,7 @@ Full-text search and multi-facet filtering over active, verified artisans.
 
 ## 8. Realtime notifications (`/ws`)
 
-Direct messaging REST resources and chat handlers are planned and are not exposed by the current source tree. The implemented WebSocket endpoint is `/ws`; authenticated clients may subscribe to `/user/queue/notifications` for notification pushes.
+Direct messaging is exposed through `/api/v1/conversations` and the authenticated `/ws` STOMP endpoint. Conversations are private one-to-one resources. Clients can create/list/archive conversations, page message history with cursors, upload validated attachments, send idempotent messages, edit/delete authored messages, and advance read-up-to state. STOMP commands use `/app/v1/conversations/{conversationId}/...`; versioned events are delivered to participant user destinations. Typing events are ephemeral and presence is broadcast on the configured presence destination. Only active, verified users with `permission:message:send` may mutate chat; existing participants may read history while ineligible. Administrators have no private-chat bypass.
 
 ---
 

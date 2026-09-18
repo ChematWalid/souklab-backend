@@ -64,7 +64,7 @@ class SearchPropertiesTest {
     @DisplayName("AppProperties.Search binds default configuration values from properties")
     void bindsDefaultConfiguration() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test-env", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test-env", Map.of(
                 "app.search.enabled", "true",
                 "app.search.uris", "http://localhost:9200",
                 "app.search.connection-timeout", "5000",
@@ -95,7 +95,7 @@ class SearchPropertiesTest {
     @DisplayName("AppProperties.Search binds all 9 properties from environment source directly")
     void bindsDirectSearchProperties() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test-env", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test-env", Map.of(
                 "app.search.enabled", "false",
                 "app.search.uris", "http://elasticsearch.cluster.internal:9200",
                 "app.search.username", "elastic_user",
@@ -128,7 +128,7 @@ class SearchPropertiesTest {
     @DisplayName("AppProperties binds nested search configuration tree correctly")
     void bindsAppPropertiesSearchTree() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test-env", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test-env", Map.of(
                 "app.search.enabled", "true",
                 "app.search.uris", "http://elasticsearch.internal:9200",
                 "app.search.username", "admin",

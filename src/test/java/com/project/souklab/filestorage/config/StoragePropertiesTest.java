@@ -42,7 +42,7 @@ class StoragePropertiesTest {
     @DisplayName("StorageProperties binds default rate limiting and cache configuration values")
     void bindsDefaultConfiguration() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
                 "storage.rate-limit.enabled", "true",
                 "storage.rate-limit.capacity", "120",
                 "storage.rate-limit.refill-duration", "1m",
@@ -67,7 +67,7 @@ class StoragePropertiesTest {
     @DisplayName("StorageProperties binds custom rate limiting configuration overrides")
     void bindsCustomConfiguration() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
                 "storage.rate-limit.enabled", "false",
                 "storage.rate-limit.capacity", "60",
                 "storage.rate-limit.refill-duration", "30s",

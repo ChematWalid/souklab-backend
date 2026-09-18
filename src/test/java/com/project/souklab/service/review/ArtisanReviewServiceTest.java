@@ -24,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -71,7 +73,7 @@ class ArtisanReviewServiceTest {
                 .formation(formation).artisan(reviewer).status(EnrollmentStatus.ATTENDED).build();
         enrollment.setId("enrollment");
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority("permission:artisan:reviews"))));
+                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_REVIEWS.authority()))));
         when(artisanRepository.findByUserEmailIgnoreCase("reviewer@example.com")).thenReturn(Optional.of(reviewer));
     }
 
@@ -116,5 +118,73 @@ class ArtisanReviewServiceTest {
 
         assertThatThrownBy(() -> service.create("formation", new ArtisanReviewRequestDTO(BigDecimal.ONE, "Too early")))
                 .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void listsAndUpdatesOwnedReviewWithRoundedRating() {
+        ArtisanReview review = ArtisanReview.builder().reviewer(reviewer).artisan(subject)
+                .enrollment(enrollment).rating(new BigDecimal("3.50")).comment("old").status(ReviewStatus.PUBLISHED).build();
+        review.setId("review");
+        when(reviewRepository.findByArtisanIdAndStatusAndDeletedAtIsNull("subject", ReviewStatus.PUBLISHED, PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(review)));
+        assertThat(service.list("subject", PageRequest.of(0, 10))).hasSize(1);
+        when(reviewRepository.findByIdAndDeletedAtIsNull("review")).thenReturn(Optional.of(review));
+        when(reviewRepository.save(any(ArtisanReview.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRepository.averageRating("subject", ReviewStatus.PUBLISHED)).thenReturn(null);
+        when(reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull("subject", ReviewStatus.PUBLISHED)).thenReturn(0L);
+        var result = service.update("review", new ArtisanReviewRequestDTO(new BigDecimal("4.126"), " changed "));
+        assertThat(result.getRating()).isEqualByComparingTo("4.13");
+        assertThat(review.getComment()).isEqualTo("changed");
+        assertThat(subject.getRating()).isZero();
+    }
+
+    @Test
+    void deletesOwnedReviewAndRejectsForeignOrRemovedEdits() {
+        ArtisanReview review = ArtisanReview.builder().reviewer(reviewer).artisan(subject).enrollment(enrollment)
+                .rating(BigDecimal.ONE).comment("old").status(ReviewStatus.PUBLISHED).build();
+        review.setId("review");
+        when(reviewRepository.findByIdAndDeletedAtIsNull("review")).thenReturn(Optional.of(review));
+        when(reviewRepository.averageRating("subject", ReviewStatus.PUBLISHED)).thenReturn(new BigDecimal("2.5"));
+        when(reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull("subject", ReviewStatus.PUBLISHED)).thenReturn(2L);
+        service.delete("review");
+        assertThat(review.getStatus()).isEqualTo(ReviewStatus.REMOVED);
+        assertThat(review.getDeletedAt()).isNotNull();
+
+        Artisan other = Artisan.builder().id("other").build();
+        review.setStatus(ReviewStatus.PUBLISHED); review.setReviewer(other);
+        assertThatThrownBy(() -> service.update("review", new ArtisanReviewRequestDTO(BigDecimal.TEN, "x")))
+                .isInstanceOf(ForbiddenException.class);
+        review.setReviewer(reviewer); review.setStatus(ReviewStatus.REMOVED);
+        assertThatThrownBy(() -> service.update("review", new ArtisanReviewRequestDTO(BigDecimal.TEN, "x")))
+                .isInstanceOf(ConflictException.class);
+
+        review.setStatus(ReviewStatus.PUBLISHED);
+        review.setReviewer(other);
+        assertThatThrownBy(() -> service.delete("review"))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void rejectsMissingReviewsForUpdateAndDelete() {
+        when(reviewRepository.findByIdAndDeletedAtIsNull("missing")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.update("missing", new ArtisanReviewRequestDTO(BigDecimal.ONE, "x")))
+                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+        assertThatThrownBy(() -> service.delete("missing"))
+                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+    }
+
+    @Test
+    void rejectsMissingEnrollmentSelfReviewAndExistingReview() {
+        when(enrollmentRepository.findByFormationIdAndArtisanId("missing", "reviewer")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.create("missing", new ArtisanReviewRequestDTO(BigDecimal.ONE, "x")))
+                .isInstanceOf(ForbiddenException.class);
+        formation.setAuthor(reviewer);
+        when(enrollmentRepository.findByFormationIdAndArtisanId("formation", "reviewer")).thenReturn(Optional.of(enrollment));
+        assertThatThrownBy(() -> service.create("formation", new ArtisanReviewRequestDTO(BigDecimal.ONE, "x")))
+                .isInstanceOf(ConflictException.class);
+        formation.setAuthor(subject);
+        when(reviewRepository.findByEnrollmentId("enrollment")).thenReturn(Optional.of(new ArtisanReview()));
+        assertThatThrownBy(() -> service.create("formation", new ArtisanReviewRequestDTO(BigDecimal.ONE, "x")))
+                .isInstanceOf(ConflictException.class);
     }
 }

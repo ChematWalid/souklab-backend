@@ -20,6 +20,6 @@ All routes require authentication. Repository queries scope by recipient and exc
 
 ## Delivery
 
-`NotificationService` saves the notification first. When a transaction synchronization is active, the STOMP push is registered with `afterCommit`; broker failures are logged and do not roll back the database write. The destination is `/user/{username}/queue/notifications` through the configured external STOMP relay.
+`NotificationService` saves the notification first. When a transaction synchronization is active, the STOMP push is registered with `afterCommit`; broker failures are logged and do not roll back the database write. The destination is `/user/{username}` plus the configured `app.chat.notification-destination` through the external STOMP relay.
 
-The enum still contains future-facing values for messaging and payments. `NEW_REVIEW` and `NEW_REPORT` are active Phase 7 event types; messaging and payment values remain reserved until those modules are implemented.
+`NEW_MESSAGE` is emitted once for every successfully persisted direct message and targets its conversation. `NEW_REVIEW` and `NEW_REPORT` are active Phase 7 event types; payment values remain reserved for Phase 9.

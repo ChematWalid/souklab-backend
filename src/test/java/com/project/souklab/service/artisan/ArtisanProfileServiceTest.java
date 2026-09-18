@@ -23,6 +23,7 @@ import com.project.souklab.model.Region;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
+import com.project.souklab.security.Permission;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -86,10 +87,11 @@ class ArtisanProfileServiceTest {
     /**
      * Creates a test AuthorizationPermission entity with the specified name.
      */
-    private AuthorizationPermission createRole(String name) {
-        AuthorizationPermission r = new AuthorizationPermission();
-        r.setPermissionKey(name);
-        return r;
+    private AuthorizationPermission createPermission(Permission permission) {
+        AuthorizationPermission entity = new AuthorizationPermission();
+        entity.setPermissionKey(permission.authority());
+        entity.setEnabled(true);
+        return entity;
     }
 
     /**
@@ -204,7 +206,7 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: throws ResourceNotFoundException when viewer user not found")
     void getArtisanProfile_whenViewerNotFound_throwsResourceNotFoundException() {
-        setAuthenticatedViewer("viewer@souklab.dz", "permission:profile:read");
+        setAuthenticatedViewer("viewer@souklab.dz", Permission.PROFILE_READ.authority());
         when(userRepository.findByEmail("viewer@souklab.dz")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> artisanProfileService.getArtisanProfile("artisan-user-id"))
@@ -218,12 +220,12 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: throws ForbiddenException when non-admin viewer is not active")
     void getArtisanProfile_whenViewerNotActive_throwsForbiddenException() {
-        setAuthenticatedViewer("viewer@souklab.dz", "permission:profile:read");
+        setAuthenticatedViewer("viewer@souklab.dz", Permission.PROFILE_READ.authority());
         User viewer = User.builder()
                 .email("viewer@souklab.dz")
                 .status(AccountStatus.PENDING)
                 .emailVerified(true)
-                .permissions(Set.of(createRole("permission:profile:read")))
+                .permissions(Set.of(createPermission(Permission.PROFILE_READ)))
                 .build();
         when(userRepository.findByEmail("viewer@souklab.dz")).thenReturn(Optional.of(viewer));
 
@@ -238,12 +240,12 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: throws ForbiddenException when non-admin viewer email is unverified")
     void getArtisanProfile_whenViewerEmailNotVerified_throwsForbiddenException() {
-        setAuthenticatedViewer("viewer@souklab.dz", "permission:profile:read");
+        setAuthenticatedViewer("viewer@souklab.dz", Permission.PROFILE_READ.authority());
         User viewer = User.builder()
                 .email("viewer@souklab.dz")
                 .status(AccountStatus.ACTIVE)
                 .emailVerified(false)
-                .permissions(Set.of(createRole("permission:profile:read")))
+                .permissions(Set.of(createPermission(Permission.PROFILE_READ)))
                 .build();
         when(userRepository.findByEmail("viewer@souklab.dz")).thenReturn(Optional.of(viewer));
 
@@ -258,11 +260,11 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: throws ResourceNotFoundException when target artisan does not exist")
     void getArtisanProfile_whenArtisanNotFound_throwsResourceNotFoundException() {
-        setAuthenticatedViewer("admin@souklab.dz", "permission:admin:users");
+        setAuthenticatedViewer("admin@souklab.dz", Permission.ADMIN_USERS.authority());
         User admin = User.builder()
                 .email("admin@souklab.dz")
                 .status(AccountStatus.ACTIVE)
-                .permissions(Set.of(createRole("permission:admin:users")))
+                .permissions(Set.of(createPermission(Permission.ADMIN_USERS)))
                 .build();
         when(userRepository.findByEmail("admin@souklab.dz")).thenReturn(Optional.of(admin));
         when(artisanRepository.findById("missing-artisan")).thenReturn(Optional.empty());
@@ -278,8 +280,8 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: self-viewer sees unmasked contact info without incrementing views")
     void getArtisanProfile_whenViewerIsSelf_unmasksContactInfoAndDoesNotIncrementViewCount() {
-        setAuthenticatedViewer("artisan@souklab.dz", "permission:artisan:content");
-        targetUser.setPermissions(Set.of(createRole("permission:artisan:content")));
+        setAuthenticatedViewer("artisan@souklab.dz", Permission.ARTISAN_CONTENT.authority());
+        targetUser.setPermissions(Set.of(createPermission(Permission.ARTISAN_CONTENT)));
 
         when(userRepository.findByEmail("artisan@souklab.dz")).thenReturn(Optional.of(targetUser));
         when(artisanRepository.findById("artisan-user-id")).thenReturn(Optional.of(targetArtisan));
@@ -307,12 +309,12 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: admin viewer sees unmasked contact info without incrementing views")
     void getArtisanProfile_whenViewerIsAdmin_unmasksContactInfoAndDoesNotIncrementViewCount() {
-        setAuthenticatedViewer("admin@souklab.dz", "permission:admin:users");
+        setAuthenticatedViewer("admin@souklab.dz", Permission.ADMIN_USERS.authority());
         User admin = User.builder()
                 .email("admin@souklab.dz")
                 .status(AccountStatus.SUSPENDED)
                 .emailVerified(false)
-                .permissions(Set.of(createRole("permission:admin:users")))
+                .permissions(Set.of(createPermission(Permission.ADMIN_USERS)))
                 .build();
         admin.setId("admin-id");
 
@@ -336,14 +338,14 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: non-premium viewer receives masked contact info and masked certification URLs")
     void getArtisanProfile_whenViewerIsNonPremium_masksContactInfoAndNullsDocumentUrl() {
-        setAuthenticatedViewer("client@souklab.dz", "permission:profile:read");
+        setAuthenticatedViewer("client@souklab.dz", Permission.PROFILE_READ.authority());
         Client client = Client.builder().isPremium(false).build();
         User viewer = User.builder()
                 .email("client@souklab.dz")
                 .status(AccountStatus.ACTIVE)
                 .emailVerified(true)
                 .client(client)
-                .permissions(Set.of(createRole("permission:profile:read")))
+                .permissions(Set.of(createPermission(Permission.PROFILE_READ)))
                 .build();
         viewer.setId("client-viewer-id");
 
@@ -407,14 +409,14 @@ class ArtisanProfileServiceTest {
     @Test
     @DisplayName("getArtisanProfile: premium client viewer receives unmasked contact info and certification URLs")
     void getArtisanProfile_whenViewerIsPremiumClient_unmasksAllFields() {
-        setAuthenticatedViewer("premium@souklab.dz", "permission:profile:read");
+        setAuthenticatedViewer("premium@souklab.dz", Permission.PROFILE_READ.authority());
         Client client = Client.builder().isPremium(true).build();
         User viewer = User.builder()
                 .email("premium@souklab.dz")
                 .status(AccountStatus.ACTIVE)
                 .emailVerified(true)
                 .client(client)
-                .permissions(Set.of(createRole("permission:profile:read")))
+                .permissions(Set.of(createPermission(Permission.PROFILE_READ)))
                 .build();
         viewer.setId("premium-viewer-id");
 
@@ -451,5 +453,128 @@ class ArtisanProfileServiceTest {
         verify(artisanProfileViewRepository, never()).save(any(ArtisanProfileView.class));
         verify(artisanRepository, never()).save(any(Artisan.class));
         assertThat(targetArtisan.getViewsCount()).isEqualTo(120);
+    }
+
+    @Test
+    @DisplayName("getArtisanProfile: premium artisan viewer is allowed to see contact information")
+    void getArtisanProfile_whenViewerIsPremiumArtisan_unmasksContactInfo() {
+        setAuthenticatedViewer("premium-artisan@souklab.dz", Permission.ARTISAN_CONTENT.authority());
+        Artisan viewerArtisan = Artisan.builder().isPremium(true).build();
+        User viewer = User.builder()
+                .email("premium-artisan@souklab.dz")
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .artisan(viewerArtisan)
+                .permissions(Set.of(createPermission(Permission.ARTISAN_CONTENT)))
+                .build();
+        viewer.setId("premium-artisan-viewer-id");
+
+        when(userRepository.findByEmail("premium-artisan@souklab.dz")).thenReturn(Optional.of(viewer));
+        when(artisanRepository.findById("artisan-user-id")).thenReturn(Optional.of(targetArtisan));
+        when(artisanProfileViewRepository.existsByViewerIdAndArtisanId(
+                "premium-artisan-viewer-id", "artisan-user-id")).thenReturn(true);
+        when(artisanGalleryImageRepository.findByArtisanIdAndDeletedAtIsNullOrderByDisplayOrderAsc(
+                "artisan-user-id")).thenReturn(Collections.emptyList());
+        when(artisanCertificationRepository.findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+                "artisan-user-id")).thenReturn(Collections.emptyList());
+
+        ArtisanPublicViewDTO result = artisanProfileService.getArtisanProfile("artisan-user-id");
+
+        assertThat(result.isContactInfoLocked()).isFalse();
+        assertThat(result.getPhone()).isEqualTo("+213550123456");
+        assertThat(result.getEmail()).isEqualTo("artisan@souklab.dz");
+    }
+
+    @Test
+    @DisplayName("getArtisanProfile: maps an incomplete artisan profile without linked user or taxonomy collections")
+    void getArtisanProfile_whenTargetProfileHasOptionalDataMissing_mapsSafeDefaults() {
+        setAuthenticatedViewer("admin@souklab.dz", Permission.ADMIN_USERS.authority());
+        User admin = User.builder()
+                .email("admin@souklab.dz")
+                .status(AccountStatus.SUSPENDED)
+                .emailVerified(false)
+                .permissions(Set.of(createPermission(Permission.ADMIN_USERS)))
+                .build();
+        admin.setId("admin-id");
+        targetArtisan.setId("x");
+        targetArtisan.setUser(null);
+        targetArtisan.setMaterials(null);
+        targetArtisan.setTechniques(null);
+        targetArtisan.setEpoques(null);
+
+        when(userRepository.findByEmail("admin@souklab.dz")).thenReturn(Optional.of(admin));
+        when(artisanRepository.findById("x")).thenReturn(Optional.of(targetArtisan));
+        when(artisanGalleryImageRepository.findByArtisanIdAndDeletedAtIsNullOrderByDisplayOrderAsc("x"))
+                .thenReturn(Collections.emptyList());
+        when(artisanCertificationRepository.findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc("x"))
+                .thenReturn(Collections.emptyList());
+
+        ArtisanPublicViewDTO result = artisanProfileService.getArtisanProfile("x");
+
+        assertThat(result.getName()).isNull();
+        assertThat(result.getAvatarUrl()).isNull();
+        assertThat(result.getMaterials()).isEmpty();
+        assertThat(result.getTechniques()).isEmpty();
+        assertThat(result.getEpoques()).isEmpty();
+        assertThat(result.isContactInfoLocked()).isFalse();
+    }
+
+    @Test
+    @DisplayName("getArtisanProfile: masks short identifiers and safely derives a partial display name")
+    void getArtisanProfile_whenMaskedIdIsShortAndTargetNameIsPartial_usesSafeFallbacks() {
+        setAuthenticatedViewer("client@souklab.dz", Permission.PROFILE_READ.authority());
+        Client client = Client.builder().isPremium(false).build();
+        User viewer = User.builder()
+                .email("client@souklab.dz")
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .client(client)
+                .permissions(Set.of(createPermission(Permission.PROFILE_READ)))
+                .build();
+        viewer.setId("client-id");
+
+        targetArtisan.setId("x");
+        targetArtisan.setUser(targetUser);
+
+        when(userRepository.findByEmail("client@souklab.dz")).thenReturn(Optional.of(viewer));
+        when(artisanRepository.findById("x")).thenReturn(Optional.of(targetArtisan));
+        when(artisanProfileViewRepository.existsByViewerIdAndArtisanId("client-id", "x")).thenReturn(true);
+        when(artisanGalleryImageRepository.findByArtisanIdAndDeletedAtIsNullOrderByDisplayOrderAsc("x"))
+                .thenReturn(Collections.emptyList());
+        when(artisanCertificationRepository.findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc("x"))
+                .thenReturn(Collections.emptyList());
+
+        ArtisanPublicViewDTO result = artisanProfileService.getArtisanProfile("x");
+
+        assertThat(result.isContactInfoLocked()).isTrue();
+        assertThat(result.getName()).isEqualTo("Artisan #X");
+    }
+
+    @Test
+    @DisplayName("getArtisanProfile: derives a display name from a partial target name")
+    void getArtisanProfile_whenTargetNameIsBlank_usesAvailableNameParts() {
+        setAuthenticatedViewer("admin@souklab.dz", Permission.ADMIN_USERS.authority());
+        User admin = User.builder()
+                .email("admin@souklab.dz")
+                .status(AccountStatus.ACTIVE)
+                .permissions(Set.of(createPermission(Permission.ADMIN_USERS)))
+                .build();
+        admin.setId("admin-id");
+        User partialTarget = org.mockito.Mockito.mock(User.class);
+        when(partialTarget.getName()).thenReturn("");
+        when(partialTarget.getFirstName()).thenReturn(null);
+        when(partialTarget.getLastName()).thenReturn("Solo");
+        when(partialTarget.getAvatarUrl()).thenReturn(null);
+        targetArtisan.setUser(partialTarget);
+
+        when(userRepository.findByEmail("admin@souklab.dz")).thenReturn(Optional.of(admin));
+        when(artisanRepository.findById("artisan-user-id")).thenReturn(Optional.of(targetArtisan));
+        when(artisanGalleryImageRepository.findByArtisanIdAndDeletedAtIsNullOrderByDisplayOrderAsc("artisan-user-id"))
+                .thenReturn(Collections.emptyList());
+        when(artisanCertificationRepository.findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc("artisan-user-id"))
+                .thenReturn(Collections.emptyList());
+
+        assertThat(artisanProfileService.getArtisanProfile("artisan-user-id").getName())
+                .isEqualTo("Solo");
     }
 }

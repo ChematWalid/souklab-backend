@@ -93,8 +93,11 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
      */
     private PaginatedResponse<ArtisanDirectoryCardDTO> searchHibernateSearch(DirectorySearchFilterDTO filter) {
         SearchSession searchSession = Search.session(entityManager);
-        int page = filter.resolvePage();
-        int size = filter.resolveSize();
+        int page = filter.resolvePage(appProperties.getDirectory().getDefaultPageIndex());
+        int size = filter.resolveSize(
+                appProperties.getDirectory().getDefaultPageSize(),
+                appProperties.getDirectory().getMinPageSize(),
+                appProperties.getDirectory().getMaxPageSize());
         int offset = page * size;
 
         SearchResult<Artisan> result = searchSession.search(Artisan.class)
@@ -113,7 +116,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
                 .toList();
 
         long totalElements = result.total().hitCount();
-        int totalPages = size > 0 ? (int) Math.ceil((double) totalElements / size) : 0;
+        int totalPages = (int) Math.ceil((double) totalElements / size);
         boolean isLast = (long) (page + 1) * size >= totalElements;
 
         return PaginatedResponse.<ArtisanDirectoryCardDTO>builder()
@@ -271,7 +274,13 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     public PaginatedResponse<ArtisanDirectoryCardDTO> searchRelationalFallback(DirectorySearchFilterDTO filter) {
         Specification<Artisan> spec = buildRelationalSpecification(filter);
         Sort sort = buildRelationalSort(filter);
-        Pageable pageable = PageRequest.of(filter.resolvePage(), filter.resolveSize(), sort);
+        Pageable pageable = PageRequest.of(
+                filter.resolvePage(appProperties.getDirectory().getDefaultPageIndex()),
+                filter.resolveSize(
+                        appProperties.getDirectory().getDefaultPageSize(),
+                        appProperties.getDirectory().getMinPageSize(),
+                        appProperties.getDirectory().getMaxPageSize()),
+                sort);
 
         Page<Artisan> page = artisanRepository.findAll(spec, pageable);
         Page<ArtisanDirectoryCardDTO> dtoPage = page.map(ArtisanDirectoryCardDTO::from);

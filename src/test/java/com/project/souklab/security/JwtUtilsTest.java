@@ -208,6 +208,17 @@ class JwtUtilsTest {
         assertThat(isValid).isFalse();
     }
 
+    @Test
+    @DisplayName("validateJwtToken rejects tokens without the current authorization schema version")
+    void validateJwtToken_withoutCurrentAuthorizationSchemaVersion_shouldReturnFalse() {
+        String legacyToken = Jwts.builder()
+                .setSubject("legacy@example.com")
+                .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
+
+        assertThat(jwtUtils.validateJwtToken(legacyToken)).isFalse();
+    }
+
     /**
      * Verifies that validateJwtToken catches ExpiredJwtException and returns false for expired tokens.
      */
@@ -251,5 +262,53 @@ class JwtUtilsTest {
         assertThat(jwtUtils.validateJwtToken(null)).isFalse();
         assertThat(jwtUtils.validateJwtToken("")).isFalse();
         assertThat(jwtUtils.validateJwtToken("   ")).isFalse();
+    }
+
+    @Test
+    void validateConfigurationRejectsMissingOrNonPositivePolicyValues() {
+        AppProperties invalidSecret = new AppProperties();
+        invalidSecret.getJwt().setSecret("short");
+        invalidSecret.getJwt().setAccessTokenExpirationMs(1L);
+        invalidSecret.getJwt().setRefreshTokenExpirationMs(1L);
+        assertThatThrownBy(() -> new JwtUtils(invalidSecret, fixedClock).validateConfiguration())
+                .isInstanceOf(IllegalStateException.class);
+
+        AppProperties missingAccess = configuredProperties();
+        missingAccess.getJwt().setAccessTokenExpirationMs(null);
+        assertThatThrownBy(() -> new JwtUtils(missingAccess, fixedClock).validateConfiguration())
+                .hasMessageContaining("access-token");
+
+        AppProperties zeroAccess = configuredProperties();
+        zeroAccess.getJwt().setAccessTokenExpirationMs(0L);
+        assertThatThrownBy(() -> new JwtUtils(zeroAccess, fixedClock).validateConfiguration())
+                .hasMessageContaining("access-token");
+
+        AppProperties missingRefresh = configuredProperties();
+        missingRefresh.getJwt().setRefreshTokenExpirationMs(null);
+        assertThatThrownBy(() -> new JwtUtils(missingRefresh, fixedClock).validateConfiguration())
+                .hasMessageContaining("refresh-token");
+
+        AppProperties zeroRefresh = configuredProperties();
+        zeroRefresh.getJwt().setRefreshTokenExpirationMs(0L);
+        assertThatThrownBy(() -> new JwtUtils(zeroRefresh, fixedClock).validateConfiguration())
+                .hasMessageContaining("refresh-token");
+    }
+
+    @Test
+    void rejectsTokenWithWrongAuthorizationSchemaNumber() {
+        String token = Jwts.builder()
+                .setSubject("wrong-version@example.com")
+                .claim("authz_version", 1)
+                .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
+        assertThat(jwtUtils.validateJwtToken(token)).isFalse();
+    }
+
+    private AppProperties configuredProperties() {
+        AppProperties configured = new AppProperties();
+        configured.getJwt().setSecret(TEST_SECRET);
+        configured.getJwt().setAccessTokenExpirationMs(ACCESS_TOKEN_EXPIRATION_MS);
+        configured.getJwt().setRefreshTokenExpirationMs(REFRESH_TOKEN_EXPIRATION_MS);
+        return configured;
     }
 }

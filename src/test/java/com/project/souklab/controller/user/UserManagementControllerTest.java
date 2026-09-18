@@ -7,6 +7,7 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.user.UserManagementService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -69,7 +70,7 @@ class UserManagementControllerTest {
                 .lastName("User")
                 .name("Sample User")
                 .status(status)
-                .permissions(Set.of("permission:profile:read"))
+                .permissions(Set.of(Permission.PROFILE_READ.authority()))
                 .build();
     }
 

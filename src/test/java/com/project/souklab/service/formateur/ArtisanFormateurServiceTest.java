@@ -292,7 +292,7 @@ class ArtisanFormateurServiceTest {
                 .build();
         saved.setId("saved-req-1");
         when(formateurRequestRepository.saveAndFlush(any(ArtisanFormateurRequest.class))).thenReturn(saved);
-        when(userRepository.findByPermissionKey("permission:admin:users")).thenReturn(List.of(adminUser));
+        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(adminUser));
 
         FormateurRequestDTO dto = FormateurRequestDTO.builder().motivation("Ceramics teaching").build();
         FormateurRequestResponseDTO response = artisanFormateurService.submitRequest(dto);
@@ -324,7 +324,7 @@ class ArtisanFormateurServiceTest {
                 .build();
         saved.setId("saved-req-blank");
         when(formateurRequestRepository.saveAndFlush(any())).thenReturn(saved);
-        when(userRepository.findByPermissionKey("permission:admin:users")).thenReturn(List.of(adminUser));
+        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(adminUser));
 
         FormateurRequestDTO dto = FormateurRequestDTO.builder().motivation("   ").build();
         artisanFormateurService.submitRequest(dto);
@@ -355,7 +355,7 @@ class ArtisanFormateurServiceTest {
                 .build();
         saved.setId("saved-req-null-mot");
         when(formateurRequestRepository.saveAndFlush(any())).thenReturn(saved);
-        when(userRepository.findByPermissionKey("permission:admin:users")).thenReturn(List.of(adminUser));
+        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(adminUser));
 
         FormateurRequestDTO dto = FormateurRequestDTO.builder().motivation(null).build();
         artisanFormateurService.submitRequest(dto);
@@ -387,7 +387,7 @@ class ArtisanFormateurServiceTest {
                 .build();
         saved.setId("req-single-name");
         when(formateurRequestRepository.saveAndFlush(any())).thenReturn(saved);
-        when(userRepository.findByPermissionKey("permission:admin:users")).thenReturn(List.of(adminUser));
+        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(adminUser));
 
         artisanFormateurService.submitRequest(null);
 
@@ -418,7 +418,7 @@ class ArtisanFormateurServiceTest {
                 .build();
         saved.setId("req-single-last");
         when(formateurRequestRepository.saveAndFlush(any())).thenReturn(saved);
-        when(userRepository.findByPermissionKey("permission:admin:users")).thenReturn(List.of(adminUser));
+        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(adminUser));
 
         artisanFormateurService.submitRequest(null);
 

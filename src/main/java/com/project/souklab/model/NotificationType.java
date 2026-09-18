@@ -9,7 +9,7 @@ public enum NotificationType {
     FORMATION_APPROVED,
     /** Reserved for Phase 6 (Formations rejection). */
     FORMATION_REJECTED,
-    /** Reserved for Phase 8 (Realtime Direct Messaging). */
+    /** Emitted for a successfully persisted direct message. */
     NEW_MESSAGE,
     /** Reserved for Phase 9 (Monetization & Subscriptions). */
     SUBSCRIPTION_RENEWED,

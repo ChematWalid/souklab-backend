@@ -3,6 +3,7 @@ package com.project.souklab.service.feed;
 import com.project.souklab.dao.FeedPostRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.feed.FeedPostCreateDTO;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostModerationDTO;
@@ -51,9 +52,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FeedPostService {
 
-    private static final int MAX_MEDIA_PER_POST = 10;
-    private static final List<String> IMAGE_TYPES = List.of("image/jpeg", "image/png", "image/webp");
-
     private final FeedPostRepository postRepository;
     private final FormationRepository formationRepository;
     private final UserRepository userRepository;
@@ -65,6 +63,7 @@ public class FeedPostService {
     private final StorageObjectLifecycle storageObjectLifecycle;
     private final AccessControlService accessControlService;
     private final Clock clock;
+    private final AppProperties appProperties;
 
     /**
      * Lists public published posts.
@@ -179,8 +178,9 @@ public class FeedPostService {
     public FeedPostMediaResponseDTO addMedia(String id, MultipartFile file) {
         FeedPost post = findPost(id);
         requireAuthorOrAdmin(post);
-        if (post.getMedia().size() >= MAX_MEDIA_PER_POST) {
-            throw new BadRequestException("A feed post may contain at most " + MAX_MEDIA_PER_POST + " images.");
+        int maxMediaPerPost = appProperties.getFeed().getMaxMediaPerPost();
+        if (post.getMedia().size() >= maxMediaPerPost) {
+            throw new BadRequestException("A feed post may contain at most " + maxMediaPerPost + " images.");
         }
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Media file is required.");
@@ -188,7 +188,8 @@ public class FeedPostService {
         String storedKey = null;
         try {
             ValidatedFile validated = fileValidator.validateAndSanitize(
-                    file.getInputStream(), file.getOriginalFilename(), file.getContentType(), file.getSize(), IMAGE_TYPES);
+                    file.getInputStream(), file.getOriginalFilename(), file.getContentType(), file.getSize(),
+                    appProperties.getFeed().getAllowedImageMimeTypes());
             ValidatedFile scanned = virusScanService.scan(validated);
             StorageResult stored = storageService.store(scanned.content(), scanned.sanitizedFilename(), scanned.detectedMimeType(), scanned.size());
             storedKey = stored.key();

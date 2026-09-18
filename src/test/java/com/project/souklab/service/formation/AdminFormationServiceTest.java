@@ -105,6 +105,7 @@ class AdminFormationServiceTest {
 
     @BeforeEach
     void setUp() {
+        appProperties.getStorage().setFileServingPrefix("/api/v1/files/");
         lenient().when(accessControlService.canManageFormations(any())).thenReturn(true);
         adminUser = User.builder()
                 .email(ADMIN_EMAIL)
@@ -157,7 +158,7 @@ class AdminFormationServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ADMIN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("permission:admin:formations");
+        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ADMIN_FORMATIONS.authority());
         lenient().doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);

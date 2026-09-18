@@ -17,4 +17,5 @@ Configuration and startup lifecycle orchestration for Hibernate Search 8.2.2.Fin
 | Class | Type | Responsibility |
 | :--- | :---: | :--- |
 | [`CustomElasticsearchAnalysisConfigurer`](CustomElasticsearchAnalysisConfigurer.java) | `ElasticsearchAnalysisConfigurer` | Configures custom Elasticsearch tokenizers, edge n-gram filters, and analyzers for artisan indexing. |
-| [`IndexLifecycleRunner`](IndexLifecycleRunner.java) | `ApplicationRunner` | Triggers asynchronous Hibernate Search `MassIndexer` execution during application startup when enabled. |
+| [`IndexLifecycleRunner`](IndexLifecycleRunner.java) | `ApplicationReadyEvent` listener | Triggers asynchronous Hibernate Search `MassIndexer` execution during application startup when enabled. |
+| [`SearchIndexingService`](SearchIndexingService.java) | Transactional service | Provides the transactional EntityManager boundary required to initialize the Hibernate Search mass indexer. |

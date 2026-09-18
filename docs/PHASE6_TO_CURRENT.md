@@ -8,7 +8,7 @@ This document summarizes the work delivered from Phase 6 through the current sec
 | --- | --- | --- |
 | Phase 6 | Formateur governance and formations | Completed |
 | Phase 7 | Social feed, artisan reviews, and content moderation | Completed |
-| Phase 8 | In-app notifications and WebSocket delivery | Notification subsystem completed; direct messaging remains roadmap work |
+| Phase 8 | In-app notifications, direct messaging, and WebSocket delivery | Completed |
 | Post-Phase 8 | Authorization migration, production audit, and hardening | Implemented through commit `32de354` |
 
 ## Phase 6: Formateur governance and formations
@@ -75,7 +75,7 @@ This document summarizes the work delivered from Phase 6 through the current sec
 - Added the Phase 7 schema migration artifact for social tables.
 - Updated API, roadmap, notification, data-model, architecture, Postman, and package-level documentation.
 
-## Phase 8: Notifications and realtime delivery
+## Phase 8: Direct messaging, notifications, and realtime delivery
 
 - Added the persisted `Notification` entity and repository.
 - Added user-scoped notification feeds, unread counts, mark-read operations, bulk mark-read behavior, and soft deletion.
@@ -84,7 +84,8 @@ This document summarizes the work delivered from Phase 6 through the current sec
 - Added WebSocket/STOMP delivery and deferred push after successful transaction commit.
 - Added support for externally configured STOMP/RabbitMQ relay destinations.
 - Added WebSocket authentication interception for bearer-token messaging connections.
-- Kept direct messaging entities and message services as future roadmap items; the notification subsystem is independent of those unfinished modules.
+- Added private one-to-one conversations, participants, messages, attachments, REST history, cursor pagination, idempotent sends, edits, soft deletes, read-up-to receipts, typing events, and presence tracking.
+- Added message authorization, attachment upload tracking, and after-commit realtime events for direct messages.
 
 ## Authorization migration
 
@@ -92,7 +93,7 @@ Authorization was migrated from role-oriented/string checks to database-backed c
 
 ### Permission model
 
-The persisted permission set currently contains 11 capabilities:
+The persisted permission set currently contains 12 capabilities:
 
 1. `permission:admin:users`
 2. `permission:admin:formations`
@@ -105,6 +106,7 @@ The persisted permission set currently contains 11 capabilities:
 9. `permission:profile:write`
 10. `permission:report:create`
 11. `permission:file:read`
+12. `permission:message:send`
 
 `Permission` is the type-safe Java source of truth, while the `permissions` and `user_permissions` tables are the database source of truth. Account type is onboarding metadata used to select initial permissions; it is not itself an authorization authority.
 
@@ -231,18 +233,17 @@ facts:
   This keeps production code unchanged. JDK 21 removes the JaCoCo class-file
   version errors and Mockito-backed tests execute normally.
 
-The current test inventory contains 82 report classes after the full run. Forty-
-three test source files use Mockito annotations or APIs. Twenty-six source files
-exercise persisted permission authorities or permission-based fixtures. Pure
+The current test inventory contains 124 Surefire report files after the full run.
+Forty-three test source files use Mockito annotations or APIs. Twenty-six source
+files exercise persisted permission authorities or permission-based fixtures. Pure
 tests include DTO/model/configuration and storage-validation checks; Mockito-
 backed tests include service, controller, filter, security, and mapper tests.
 
 The authorization migration commit was `09d325c`. It removed 6,082 test lines
 across 94 files. The only test class deleted outright was the obsolete
 `RolePermissionMapperTest`; the role-specific portions of other tests were
-legitimately replaced with permission capabilities. The following business-logic
-test classes were not merely role boilerplate and remain identified as coverage
-gaps because they were heavily reduced rather than fully reconstructed:
+replaced with permission capabilities. The following business-logic suites were
+therefore restored and expanded from the pre-migration assertion source:
 
 - `AuthServiceTest` — 2,211 lines removed;
 - `ProfileServiceTest` — 1,435 lines removed;
@@ -252,9 +253,11 @@ gaps because they were heavily reduced rather than fully reconstructed:
 - `UserRepositoryTest` — 341 lines removed;
 - `CustomUserDetailsServiceTest` — 107 lines removed.
 
-Focused permission-based tests and the migrated controller/service tests now
-cover the changed authorization paths, but these reductions should not be
-described as a complete restoration of the pre-migration behavioral suite.
+The deleted business behavior has been restored in the seven named suites above,
+with obsolete role-only assertions removed and permission-combination,
+inactive-user, ownership-boundary, administrator-capability, and lazy-loading
+regressions added. `RolePermissionMapperTest` remains deleted because it tested
+removed protocol behavior.
 
 Successful checks included:
 
@@ -276,38 +279,57 @@ Successful checks included:
 - permission-message assertions updated to the canonical `Permission.authority()`
   values.
 
-The complete clean Maven test run was executed with JDK 21, Maven Wrapper, and
-the configured Mockito javaagent:
+The complete clean Maven test run was executed with the Maven Wrapper, configured
+Mockito javaagent, and the isolated Phase 8 Compose environment. The current run
+covered the restored authorization/business-logic suites, messaging suites, full
+application contexts, repository slices, and dependency verification tests:
 
 ```text
-Tests run: 646, Failures: 0, Errors: 85, Skipped: 0
+Tests run: 1085, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-The remaining errors are environment-only integration failures: MySQL-backed
-application/repository contexts cannot connect in the sandbox, S3 verification
-cannot reach its endpoint, and ClamAV socket tests cannot bind local sockets.
-There were no Mockito self-attachment errors, JaCoCo class-file-version errors,
-compilation failures, or changed-path unit/controller assertion failures on JDK
-21. The same suite on JDK 26 previously exposed JaCoCo instrumentation errors,
-so JDK 21 is the current reproducible verification runtime.
+The same run verified MariaDB-backed application/repository contexts, RabbitMQ
+STOMP connectivity, MinIO/S3 behavior, Elasticsearch-backed startup readiness,
+and ClamAV clean/infected scanning. The run completed with no failures, errors,
+or skipped tests. Expected framework/deprecation warnings remain documented in
+the verification logs; they are not test failures.
+
+The latest clean JaCoCo report records 98.10% instruction, 98.41% line, 88.63%
+branch, 98.02% method, and 100% class coverage. Class coverage is complete, but
+the requested 100% line/branch coverage is not yet achieved; uncovered executable
+paths remain and must not be represented as complete coverage.
+
+The coverage recovery consists of restored pre-migration business behavior in
+authentication, profiles, user management, artisan profiles, response mapping,
+repositories, and security-detail loading; new permission-combination,
+ownership-boundary, inactive-account, administrator-boundary, and lazy-loading
+regressions; and Phase 8 notification/messaging/realtime behavior. The deleted
+`RolePermissionMapperTest` remains intentionally absent because it tested the
+removed role protocol rather than current business behavior.
+
+The isolated verification also proved the real MariaDB, RabbitMQ/STOMP, MinIO/S3,
+Elasticsearch, and ClamAV paths. ClamAV was tested with both a clean payload and
+the EICAR signature. The verification script removed only its own containers,
+network, and named volumes after completion.
 
 ## Current repository state
 
 - Branch: `main`
 - Latest commit: `32de354 refactor(security): harden configuration and permissions`
 - Remote: `origin/main`
-- The hardening commit was pushed successfully.
-- The current test and documentation edits are intentionally uncommitted.
+- The current Phase 8 implementation, test, and documentation edits are
+  intentionally uncommitted.
 - GitHub reported one dependency vulnerability on the default branch after the push; dependency review should be handled as a separate release-security task.
 
 ## Remaining roadmap and release work
 
 The following are not claimed as complete by this document:
 
-- direct messaging conversation/message entities and services;
 - a full CI pipeline with compilation, tests, migrations, formatting/static analysis, dependency scanning, and configuration validation;
 - health/readiness/metrics endpoints and external dependency dashboards;
 - shared distributed rate limiting for horizontally scaled deployments;
 - a fully supported JDK/Maven matrix for all integration tests;
 - final remediation of the GitHub-reported dependency vulnerability;
-- running the full integration suite against provisioned MySQL, Elasticsearch, S3/MinIO, and optional ClamAV services.
+- raising line and branch coverage to the requested 100% with behavior-level
+  assertions rather than coverage exclusions;
+- production CI wiring for the same isolated dependency verification.

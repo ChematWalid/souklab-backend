@@ -34,4 +34,5 @@ graph LR
 | [`formateur`](formateur/README.md) | Formateur teacher accreditation applications, administrative review, grant, and revocation. |
 | [`formation`](formation/README.md) | Artisan masterclass authoring, peer workshop enrollment, syllabus downloads, and administrative moderation. |
 | [`notification`](notification/README.md) | User in-app notification queries, unread counts, mark-read, and soft deletion. |
+| [`chat`](chat/README.md) | Private conversation, message lifecycle, attachment, and read-state endpoints. |
 | [`user`](user/README.md) | Administrative user management, timeouts, bans, and user avatar gallery operations. |

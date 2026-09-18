@@ -86,6 +86,8 @@ class DirectorySearchFilterDTOTest {
 
         DirectorySearchFilterDTO explicitPage = DirectorySearchFilterDTO.builder().page(3).build();
         assertThat(explicitPage.resolvePage()).isEqualTo(3);
+        assertThat(nullPage.resolvePage(7)).isEqualTo(7);
+        assertThat(explicitPage.resolvePage(7)).isEqualTo(3);
     }
 
     @Test
@@ -105,6 +107,9 @@ class DirectorySearchFilterDTOTest {
 
         DirectorySearchFilterDTO overflowSize = DirectorySearchFilterDTO.builder().size(500).build();
         assertThat(overflowSize.resolveSize()).isEqualTo(100);
+        assertThat(nullSize.resolveSize(9, 2, 50)).isEqualTo(9);
+        assertThat(underflowSize.resolveSize(9, 2, 50)).isEqualTo(2);
+        assertThat(overflowSize.resolveSize(9, 2, 50)).isEqualTo(50);
     }
 
     @Test
@@ -115,6 +120,17 @@ class DirectorySearchFilterDTOTest {
 
         DirectorySearchFilterDTO explicitSort = DirectorySearchFilterDTO.builder().sortBy(DirectorySortOrder.RATING_DESC).build();
         assertThat(explicitSort.resolveSortBy()).isEqualTo(DirectorySortOrder.RATING_DESC);
+    }
+
+    @Test
+    void taxonomyFiltersHandleNullCollectionsAndBlankValues() {
+        DirectorySearchFilterDTO dto = DirectorySearchFilterDTO.builder()
+                .regionSlug(" ").wilayaCode(null).categorySlug(" ").subCategorySlug(null)
+                .materials(null).techniques(null).epoques(null).build();
+        assertThat(dto.hasTaxonomyFilters()).isFalse();
+        dto.setQ(" query ");
+        assertThat(dto.getQ()).isEqualTo(" query ");
+        assertThat(dto.hasKeyword()).isTrue();
     }
 
     @Test

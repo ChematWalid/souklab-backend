@@ -4,6 +4,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.User;
+import com.project.souklab.security.Permission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -122,15 +123,15 @@ class CustomUserDetailsServiceTest {
     }
 
     private User buildUser(String email, AccountStatus status, LocalDateTime bannedUntil) {
-        AuthorizationPermission role = new AuthorizationPermission();
-        role.setPermissionKey("CLIENT");
+        AuthorizationPermission permission = new AuthorizationPermission();
+        permission.setPermissionKey(Permission.PROFILE_READ.authority());
 
         return User.builder()
                 .email(email)
                 .password("encoded-pwd")
                 .status(status)
                 .bannedUntil(bannedUntil)
-                .permissions(Set.of(role))
+                .permissions(Set.of(permission))
                 .build();
     }
 }

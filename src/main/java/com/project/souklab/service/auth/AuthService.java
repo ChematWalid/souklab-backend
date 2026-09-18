@@ -477,8 +477,8 @@ public class AuthService {
 
     private Set<AuthorizationPermission> permissionsForRegistration(boolean artisan) {
         Set<String> keys = artisan
-                ? Set.of(Permission.ARTISAN_CONTENT.authority(), Permission.ARTISAN_FORMATIONS.authority(), Permission.ARTISAN_REVIEWS.authority(), Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority())
-                : Set.of(Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority());
+                ? Set.of(Permission.ARTISAN_CONTENT.authority(), Permission.ARTISAN_FORMATIONS.authority(), Permission.ARTISAN_REVIEWS.authority(), Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority(), Permission.MESSAGE_SEND.authority())
+                : Set.of(Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority(), Permission.MESSAGE_SEND.authority());
         List<AuthorizationPermission> permissions = permissionRepository.findByPermissionKeyInAndEnabledTrue(keys);
         if (permissions.size() != keys.size()) {
             throw new ResourceNotFoundException(ERROR_PERMISSION_NOT_FOUND_PREFIX + keys);

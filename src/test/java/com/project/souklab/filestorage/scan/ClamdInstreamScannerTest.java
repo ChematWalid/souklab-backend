@@ -222,6 +222,48 @@ class ClamdInstreamScannerTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    void constructorRejectsNullPropertiesAndUnknownVirusNamesUseStableFallback() throws Exception {
+        assertThatThrownBy(() -> new ClamdInstreamScanner(null))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        try (MockClamServer server = new MockClamServer("stream: FOUND")) {
+            server.awaitReady();
+            ClamdInstreamScanner scanner = new ClamdInstreamScanner(
+                    createProperties(server.getPort(), Duration.ofSeconds(2), Duration.ofSeconds(5)));
+            assertThat(scanner.scan(new ByteArrayInputStream(new byte[]{1})).virusName())
+                    .isEqualTo("UNKNOWN_VIRUS");
+        }
+    }
+
+    @Test
+    void usesDefaultTimeoutsAndHandlesZeroLengthReadsAndNewlineResponses() throws Exception {
+        try (MockClamServer server = new MockClamServer("stream: OK\n")) {
+            server.awaitReady();
+            StorageProperties.VirusScanProperties props = createProperties(server.getPort(), null, null);
+            InputStream zeroThenData = new InputStream() {
+                private int calls;
+                @Override public int read(byte[] buffer, int offset, int length) {
+                    if (calls++ == 0) return 0;
+                    if (calls == 2) { buffer[offset] = 1; return 1; }
+                    return -1;
+                }
+                @Override public int read() { return -1; }
+            };
+            assertThat(new ClamdInstreamScanner(props).scan(zeroThenData).isClean()).isTrue();
+        }
+    }
+
+    @Test
+    void parsesFoundResponseWithoutStreamPrefix() throws Exception {
+        try (MockClamServer server = new MockClamServer("Virus.Name FOUND")) {
+            server.awaitReady();
+            StorageProperties.VirusScanProperties props = createProperties(server.getPort(), null, null);
+            assertThat(new ClamdInstreamScanner(props).scan(new ByteArrayInputStream(new byte[]{1})).virusName())
+                    .isEqualTo("Virus.Name");
+        }
+    }
+
     /**
      * In-memory mock TCP server implementing ClamAV's zINSTREAM protocol.
      */

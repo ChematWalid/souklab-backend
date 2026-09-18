@@ -19,6 +19,7 @@ import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
+import com.project.souklab.filestorage.exception.StorageException;
 import com.project.souklab.filestorage.scan.VirusScanService;
 import com.project.souklab.filestorage.validation.FileValidator;
 import com.project.souklab.filestorage.validation.ValidatedFile;
@@ -45,6 +46,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -53,12 +55,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -67,9 +72,11 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -78,7 +85,7 @@ import static org.mockito.Mockito.when;
  * and review submission validations.
  */
 @ExtendWith(MockitoExtension.class)
-class FormationServiceTest {
+    class FormationServiceTest {
 
     private static final String ARTISAN_EMAIL = "artisan_teacher@souklab.com";
     private static final String ARTISAN_ID = "artisan-uuid-100";
@@ -133,6 +140,7 @@ class FormationServiceTest {
 
     @BeforeEach
     void setUp() {
+        appProperties.getStorage().setFileServingPrefix("/api/v1/files/");
         appProperties.getFormation().setDefaultCurrency("DZD");
         appProperties.getFormation().getFile().setMaxCount(10);
         appProperties.getFormation().getFile().setMaxFileSize(DataSize.ofMegabytes(25));
@@ -193,7 +201,7 @@ class FormationServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("permission:artisan:formations");
+        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_FORMATIONS.authority());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -263,6 +271,63 @@ class FormationServiceTest {
                     .hasMessageContaining("Only accredited master artisans can create formations.");
 
             verify(formationRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("createFormation_whenLocationIsOmitted_usesNullLocationAndConfiguredCurrency")
+        void createFormation_whenLocationIsOmitted_preservesNullLocation() {
+            authenticateArtisan(teacherArtisan);
+            FormationCreateDTO dto = FormationCreateDTO.builder()
+                    .title("Online Ceramics")
+                    .description("Remote ceramics masterclass")
+                    .location(null)
+                    .isOnline(true)
+                    .scheduledAt(LocalDateTime.now().plusDays(5))
+                    .durationHours(2)
+                    .maxParticipants(5)
+                    .price(1000)
+                    .currency(null)
+                    .build();
+            when(formationRepository.save(any(Formation.class))).thenAnswer(invocation -> {
+                Formation entity = invocation.getArgument(0);
+                entity.setId("online-formation");
+                return entity;
+            });
+            when(formationFileRepository.findByFormationIdAndDeletedAtIsNull("online-formation"))
+                    .thenReturn(List.of());
+            when(formationReviewRepository.findByFormationIdOrderByReviewedAtDesc("online-formation"))
+                    .thenReturn(List.of());
+            when(formationEnrollmentRepository.countByFormationIdAndStatus("online-formation", EnrollmentStatus.CONFIRMED))
+                    .thenReturn(0L);
+
+            FormationResponseDTO response = formationService.createFormation(dto);
+
+            assertThat(response.getLocation()).isNull();
+            assertThat(response.getCurrency()).isEqualTo("DZD");
+        }
+
+        @Test
+        void createFormation_whenCurrencyIsBlank_usesConfiguredCurrency() {
+            authenticateArtisan(teacherArtisan);
+            FormationCreateDTO dto = FormationCreateDTO.builder()
+                    .title("Blank Currency")
+                    .description("Description")
+                    .scheduledAt(LocalDateTime.now().plusDays(5))
+                    .durationHours(2)
+                    .maxParticipants(5)
+                    .price(1000)
+                    .currency(" ")
+                    .build();
+            when(formationRepository.save(any(Formation.class))).thenAnswer(invocation -> {
+                Formation entity = invocation.getArgument(0);
+                entity.setId("blank-currency");
+                return entity;
+            });
+            when(formationFileRepository.findByFormationIdAndDeletedAtIsNull("blank-currency")).thenReturn(List.of());
+            when(formationReviewRepository.findByFormationIdOrderByReviewedAtDesc("blank-currency")).thenReturn(List.of());
+            when(formationEnrollmentRepository.countByFormationIdAndStatus("blank-currency", EnrollmentStatus.CONFIRMED)).thenReturn(0L);
+
+            assertThat(formationService.createFormation(dto).getCurrency()).isEqualTo("DZD");
         }
     }
 
@@ -385,6 +450,23 @@ class FormationServiceTest {
 
             assertThat(response.getStatus()).isEqualTo(FormationStatus.APPROVED);
         }
+
+        @Test
+        void updateFormation_whenPublishedAndCoreMetadataChanges_shouldResetToPendingReview() {
+            authenticateArtisan(teacherArtisan);
+            testFormation.setStatus(FormationStatus.PUBLISHED);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
+            when(formationRepository.save(any(Formation.class))).thenAnswer(inv -> inv.getArgument(0));
+            when(formationFileRepository.findByFormationIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(List.of());
+            when(formationReviewRepository.findByFormationIdOrderByReviewedAtDesc(testFormation.getId())).thenReturn(List.of());
+            FormationUpdateDTO dto = FormationUpdateDTO.builder()
+                    .title(testFormation.getTitle()).description(testFormation.getDescription())
+                    .scheduledAt(testFormation.getScheduledAt()).durationHours(testFormation.getDurationHours())
+                    .maxParticipants(testFormation.getMaxParticipants() + 1).price(testFormation.getPrice()).currency("DZD").build();
+
+            assertThat(formationService.updateFormation(testFormation.getId(), dto).getStatus())
+                    .isEqualTo(FormationStatus.PENDING_REVIEW);
+        }
     }
 
     @Nested
@@ -467,6 +549,52 @@ class FormationServiceTest {
                     .isInstanceOf(FileTooLargeException.class);
 
             verify(storageService, never()).store(any(), anyString(), anyString(), anyLong());
+        }
+
+        @Test
+        @DisplayName("uploadThumbnail_whenInputStreamCannotBeRead_shouldThrowStorageException")
+        void uploadThumbnail_whenInputStreamCannotBeRead_shouldThrowStorageException() throws Exception {
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+            MultipartFile unreadable = new MockMultipartFile(
+                    "file", "broken.jpg", "image/jpeg", "bytes".getBytes()) {
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    throw new IOException("stream unavailable");
+                }
+            };
+
+            assertThatThrownBy(() -> formationService.uploadThumbnail(testFormation.getId(), unreadable))
+                    .isInstanceOf(StorageException.class)
+                    .hasMessageContaining("Failed to read upload stream");
+            verifyNoInteractions(storageService, virusScanService);
+        }
+
+        @Test
+        void uploadThumbnail_whenFileIsEmpty_shouldThrowBadRequestException() {
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
+            MultipartFile empty = new MockMultipartFile("file", "empty.jpg", "image/jpeg", new byte[0]);
+
+            assertThatThrownBy(() -> formationService.uploadThumbnail(testFormation.getId(), empty))
+                    .isInstanceOf(BadRequestException.class);
+        }
+
+        @Test
+        void uploadThumbnail_whenStorageFailsBeforeKey_doesNotDeleteUnknownKey() {
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
+            MultipartFile file = new MockMultipartFile("file", "thumb.jpg", "image/jpeg", new byte[]{1});
+            ValidatedFile validated = new ValidatedFile(new ByteArrayInputStream(new byte[]{1}), "thumb.jpg", "image/jpeg", 1);
+            when(fileValidator.validateAndSanitize(any(), anyString(), anyString(), anyLong(), anyList())).thenReturn(validated);
+            when(virusScanService.scan(validated)).thenReturn(validated);
+            when(storageService.store(any(), anyString(), anyString(), anyLong()))
+                    .thenThrow(new IllegalStateException("storage failure"));
+
+            assertThatThrownBy(() -> formationService.uploadThumbnail(testFormation.getId(), file))
+                    .isInstanceOf(IllegalStateException.class);
+            verify(storageService, never()).delete(anyString());
         }
     }
 
@@ -621,6 +749,37 @@ class FormationServiceTest {
                     .isInstanceOf(BadRequestException.class)
                     .hasMessageContaining("Required fields missing or invalid for review submission.");
         }
+
+        @Test
+        void submitForReview_rejectsEachInvalidRequiredField() {
+            List<Consumer<Formation>> invalidations = List.of(
+                    formation -> formation.setTitle(null),
+                    formation -> formation.setTitle(" "),
+                    formation -> formation.setDescription(null),
+                    formation -> formation.setDescription(" "),
+                    formation -> formation.setScheduledAt(null),
+                    formation -> formation.setDurationHours(0),
+                    formation -> formation.setMaxParticipants(0)
+            );
+
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+
+            for (Consumer<Formation> invalidation : invalidations) {
+                testFormation.setStatus(FormationStatus.DRAFT);
+                testFormation.setTitle("Valid title");
+                testFormation.setDescription("Valid description");
+                testFormation.setScheduledAt(LocalDateTime.now().plusDays(10));
+                testFormation.setDurationHours(6);
+                testFormation.setMaxParticipants(10);
+                invalidation.accept(testFormation);
+
+                assertThatThrownBy(() -> formationService.submitForReview(testFormation.getId()))
+                        .isInstanceOf(BadRequestException.class)
+                        .hasMessageContaining("Required fields missing or invalid for review submission.");
+            }
+        }
     }
 
     @Nested
@@ -639,6 +798,29 @@ class FormationServiceTest {
             formationService.deleteFormation(testFormation.getId());
 
             assertThat(testFormation.getDeletedAt()).isNotNull();
+            verify(formationRepository).save(testFormation);
+        }
+
+        @Test
+        @DisplayName("deleteFormation_whenCourseFilesExist_softDeletesFilesAndSchedulesTheirStorageCleanup")
+        void deleteFormation_whenCourseFilesExist_softDeletesFilesAndSchedulesCleanup() {
+            authenticateArtisan(teacherArtisan);
+            FormationFile file = FormationFile.builder()
+                    .formation(testFormation)
+                    .storageKey("course-key")
+                    .originalFilename("guide.pdf")
+                    .build();
+            file.setId("course-file");
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+            when(formationFileRepository.findByFormationIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(List.of(file));
+
+            formationService.deleteFormation(testFormation.getId());
+
+            assertThat(file.getDeletedAt()).isNotNull();
+            verify(formationFileRepository).save(file);
+            verify(storageObjectLifecycle).deleteAfterCommit("course-key");
             verify(formationRepository).save(testFormation);
         }
 
@@ -685,6 +867,92 @@ class FormationServiceTest {
             assertThat(response.getContent()).hasSize(1);
             assertThat(response.getContent().get(0).getTitle()).isEqualTo("Mastering Ceramics");
             assertThat(response.getContent().get(0).getActiveEnrollmentsCount()).isEqualTo(3L);
+        }
+    }
+
+    @Nested
+    @DisplayName("Remaining authoring and retrieval branches")
+    class RemainingBranchesTests {
+
+        @Test
+        void uploadThumbnailRejectsMissingFile() {
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+
+            assertThatThrownBy(() -> formationService.uploadThumbnail(testFormation.getId(), null))
+                    .isInstanceOf(BadRequestException.class);
+        }
+
+        @Test
+        void uploadCourseFileRejectsMissingAndOversizedFiles() {
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+            MultipartFile empty = new MockMultipartFile("file", "", "application/pdf", new byte[0]);
+            assertThatThrownBy(() -> formationService.uploadCourseFile(testFormation.getId(), empty))
+                    .isInstanceOf(BadRequestException.class);
+
+            MultipartFile oversized = Mockito.mock(MultipartFile.class);
+            when(oversized.isEmpty()).thenReturn(false);
+            when(oversized.getSize()).thenReturn(DataSize.ofMegabytes(25).toBytes() + 1);
+            assertThatThrownBy(() -> formationService.uploadCourseFile(testFormation.getId(), oversized))
+                    .isInstanceOf(FileTooLargeException.class);
+        }
+
+        @Test
+        void deleteCourseFileRejectsUnknownFile() {
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+            when(formationFileRepository.findByIdAndFormationIdAndDeletedAtIsNull("missing", testFormation.getId()))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> formationService.deleteCourseFile(testFormation.getId(), "missing"))
+                    .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+        }
+
+        @Test
+        void getsTeacherFormationsAndOwnedDetails() {
+            Pageable pageable = PageRequest.of(0, 10);
+            when(formationRepository.findByAuthorIdAndStatusAndDeletedAtIsNull(
+                    OTHER_ARTISAN_ID, FormationStatus.PUBLISHED, pageable))
+                    .thenReturn(new PageImpl<>(List.of(testFormation)));
+            assertThat(formationService.getTeacherFormations(OTHER_ARTISAN_ID, pageable).getContent())
+                    .hasSize(1);
+
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+            assertThat(formationService.getFormationDetails(testFormation.getId()).getTitle())
+                    .isEqualTo(testFormation.getTitle());
+        }
+
+        @Test
+        void missingFormationAndFailedCompensatingDeleteAreHandled() throws Exception {
+            authenticateArtisan(teacherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull("missing"))
+                    .thenReturn(Optional.empty());
+            assertThatThrownBy(() -> formationService.getFormationDetails("missing"))
+                    .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+            MultipartFile file = new MockMultipartFile("file", "thumb.jpg", "image/jpeg", new byte[]{1});
+            ValidatedFile validated = new ValidatedFile(new ByteArrayInputStream(new byte[]{1}),
+                    "thumb.jpg", "image/jpeg", 1);
+            when(fileValidator.validateAndSanitize(any(), anyString(), anyString(), anyLong(), anyList()))
+                    .thenReturn(validated);
+            when(virusScanService.scan(validated)).thenReturn(validated);
+            when(storageService.store(any(), anyString(), anyString(), anyLong()))
+                    .thenReturn(new StorageResult("compensate-key", "thumb.jpg", "image/jpeg", 1, Instant.now()));
+            when(formationRepository.save(testFormation)).thenThrow(new IllegalStateException("db failure"));
+            doThrow(new IllegalStateException("storage unavailable")).when(storageService).delete("compensate-key");
+
+            assertThatThrownBy(() -> formationService.uploadThumbnail(testFormation.getId(), file))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("db failure");
+            verify(storageService).delete("compensate-key");
         }
     }
 }

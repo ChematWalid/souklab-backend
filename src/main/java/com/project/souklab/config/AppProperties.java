@@ -1,6 +1,5 @@
 package com.project.souklab.config;
 
-import com.project.souklab.filestorage.FileServingRoutes;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -30,11 +29,34 @@ public class AppProperties {
     private Async async = new Async();
     private Cache cache = new Cache();
     private SupportConfig support = new SupportConfig();
+    private Notification notification = new Notification();
+    private Feed feed = new Feed();
+    private Directory directory = new Directory();
 
     /**
      * Formations and masterclasses configuration bound to {@code app.formation.*}.
      */
     private FormationConfig formation = new FormationConfig();
+    private Chat chat = new Chat();
+
+    @Data
+    public static class Notification {
+        private int maxMessageLength;
+    }
+
+    @Data
+    public static class Feed {
+        private int maxMediaPerPost;
+        private List<String> allowedImageMimeTypes;
+    }
+
+    @Data
+    public static class Directory {
+        private int defaultPageIndex;
+        private int defaultPageSize;
+        private int minPageSize;
+        private int maxPageSize;
+    }
 
 
     @Data
@@ -45,6 +67,28 @@ public class AppProperties {
         private String clientPasscode;
         private String systemLogin;
         private String systemPasscode;
+    }
+
+    @Data
+    public static class Chat {
+        private int messageMaxLength;
+        private int attachmentMaxCount;
+        private int minPageSize;
+        private int defaultPageSize;
+        private int maxPageSize;
+        private Duration cursorLifetime;
+        private Duration typingEventInterval;
+        private String websocketProtocolVersion;
+        private String applicationDestinationPrefix;
+        private String userDestinationPrefix;
+        private String messageDestinationPrefix;
+        private String eventDestination;
+        private String presenceDestination;
+        private String notificationDestination;
+        private String websocketEndpoint;
+        private String brokerDestinationPrefixes;
+        private String unresolvedUserDestination;
+        private String userRegistryBroadcast;
     }
 
     @Data
@@ -63,7 +107,7 @@ public class AppProperties {
         /**
          * Route prefix for public or authenticated file streaming endpoints (default: /api/v1/files/).
          */
-        private String fileServingPrefix = FileServingRoutes.DEFAULT_PREFIX;
+        private String fileServingPrefix;
 
         /**
          * Returns the configured file-serving route prefix normalised with a guaranteed trailing slash.
@@ -73,7 +117,7 @@ public class AppProperties {
          */
         public String resolveFileServingPrefix() {
             if (fileServingPrefix == null || fileServingPrefix.isBlank()) {
-                return FileServingRoutes.DEFAULT_PREFIX;
+                throw new IllegalStateException("app.storage.file-serving-prefix must be configured");
             }
             return fileServingPrefix.endsWith("/") ? fileServingPrefix : fileServingPrefix + "/";
         }

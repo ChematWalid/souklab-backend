@@ -1,5 +1,6 @@
 package com.project.souklab.service.notification;
 
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.NotificationRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
@@ -12,7 +13,6 @@ import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.security.Permission;
 import com.project.souklab.util.SecurityUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,15 +28,22 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class NotificationService {
-
-    private static final int MAX_MESSAGE_LENGTH = 4000;
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final Clock clock;
+    private final AppProperties appProperties;
+
+    public NotificationService(NotificationRepository notificationRepository, UserRepository userRepository,
+                                SimpMessagingTemplate messagingTemplate, Clock clock, AppProperties appProperties) {
+        this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
+        this.messagingTemplate = messagingTemplate;
+        this.clock = clock;
+        this.appProperties = appProperties;
+    }
 
     /**
      * Creates a new notification for a specific user and sends it over WebSocket.
@@ -207,7 +214,8 @@ public class NotificationService {
     private void dispatchRealtimePush(String recipientEmail, NotificationResponseDTO payload) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
             TransactionSynchronizationManager.registerSynchronization(
-                    new RealtimeNotificationAfterCommit(messagingTemplate, recipientEmail, payload));
+                    new RealtimeNotificationAfterCommit(messagingTemplate, recipientEmail,
+                            appProperties.getChat().getNotificationDestination(), payload));
         } else {
             sendRealtimePayload(recipientEmail, payload);
         }
@@ -215,15 +223,16 @@ public class NotificationService {
 
     private void sendRealtimePayload(String recipientEmail, NotificationResponseDTO payload) {
         try {
-            messagingTemplate.convertAndSendToUser(recipientEmail, "/queue/notifications", payload);
+            messagingTemplate.convertAndSendToUser(recipientEmail, appProperties.getChat().getNotificationDestination(), payload);
         } catch (Exception ex) {
             log.warn("Failed to deliver real-time WebSocket notification to user '{}': {}", recipientEmail, ex.getMessage());
         }
     }
 
     private void validateMessageLength(String message) {
-        if (message != null && message.length() > MAX_MESSAGE_LENGTH) {
-            throw new BadRequestException("Notification message exceeds maximum allowed length of " + MAX_MESSAGE_LENGTH + " characters.");
+        int maxMessageLength = appProperties.getNotification().getMaxMessageLength();
+        if (message != null && message.length() > maxMessageLength) {
+            throw new BadRequestException("Notification message exceeds maximum allowed length of " + maxMessageLength + " characters.");
         }
     }
 

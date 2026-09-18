@@ -14,12 +14,35 @@ import com.project.souklab.model.Region;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Predicate;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.engine.search.query.SearchResultTotal;
 import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
 import org.hibernate.search.engine.search.query.dsl.SearchQuerySelectStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.predicate.dsl.MatchPredicateFieldMoreStep;
+import org.hibernate.search.engine.search.predicate.dsl.MatchPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.MatchPredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.TermsPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.TermsPredicateFieldMoreStep;
+import org.hibernate.search.engine.search.predicate.dsl.TermsPredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.ExistsPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.ExistsPredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.RangePredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.RangePredicateFieldMoreStep;
+import org.hibernate.search.engine.search.predicate.dsl.RangePredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.NotPredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hibernate.search.engine.search.sort.dsl.FieldSortOptionsStep;
+import org.hibernate.search.engine.search.sort.dsl.ScoreSortOptionsStep;
+import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
+import org.hibernate.search.engine.search.sort.dsl.TypedSearchSortFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +57,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -73,6 +97,12 @@ class DirectorySearchServiceTest {
     @BeforeEach
     void setUp() {
         directorySearchService = new DirectorySearchServiceImpl(entityManager, artisanRepository, appProperties);
+        AppProperties.Directory directory = new AppProperties.Directory();
+        directory.setDefaultPageIndex(0);
+        directory.setDefaultPageSize(20);
+        directory.setMinPageSize(1);
+        directory.setMaxPageSize(100);
+        org.mockito.Mockito.lenient().when(appProperties.getDirectory()).thenReturn(directory);
     }
 
     /**
@@ -172,6 +202,17 @@ class DirectorySearchServiceTest {
 
             DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder()
                     .keyword("ceramique")
+                    .regionSlug("tizi-ouzou")
+                    .wilayaCode("15")
+                    .categorySlug("art-du-feu")
+                    .subCategorySlug("poterie-traditionnelle")
+                    .materials(List.of("argile-rouge"))
+                    .techniques(List.of("modelage-ancestral"))
+                    .epoques(List.of("epoque-ottomane"))
+                    .minRating(4.0)
+                    .verifiedOnly(true)
+                    .premiumOnly(true)
+                    .teacherOnly(true)
                     .page(0)
                     .size(20)
                     .build();
@@ -184,6 +225,20 @@ class DirectorySearchServiceTest {
             assertThat(response.getContent().get(0).getId()).isEqualTo("artisan-user-1");
             assertThat(response.getContent().get(0).getArtisanName()).isEqualTo("Djamel Amrani");
             verify(artisanRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+
+            for (DirectorySortOrder sortOrder : DirectorySortOrder.values()) {
+                filter.setSortBy(sortOrder);
+                directorySearchService.search(filter);
+            }
+
+            filter.setKeyword(null);
+            filter.setSortBy(DirectorySortOrder.RELEVANCE);
+            directorySearchService.search(filter);
+
+            when(totalResult.hitCount()).thenReturn(25L);
+            DirectorySearchFilterDTO emptyFilter = DirectorySearchFilterDTO.builder().page(0).size(20).build();
+            PaginatedResponse<ArtisanDirectoryCardDTO> nonLastPage = directorySearchService.search(emptyFilter);
+            assertThat(nonLastPage.isLast()).isFalse();
         }
     }
 
@@ -262,6 +317,208 @@ class DirectorySearchServiceTest {
         Pageable capturedPageable = pageableCaptor.getValue();
         assertThat(capturedPageable.getPageNumber()).isEqualTo(1);
         assertThat(capturedPageable.getPageSize()).isEqualTo(15);
+
+        CriteriaBuilder cb = mock(CriteriaBuilder.class, org.mockito.Answers.RETURNS_DEEP_STUBS);
+        CriteriaQuery<?> query = mock(CriteriaQuery.class);
+        Root<Artisan> root = mock(Root.class, org.mockito.Answers.RETURNS_DEEP_STUBS);
+        org.mockito.Mockito.doReturn(String.class).when(query).getResultType();
+        org.mockito.Mockito.lenient().when(cb.isNull(any())).thenReturn(mock(Predicate.class));
+        org.mockito.Mockito.lenient().when(cb.and(any(Predicate[].class))).thenReturn(mock(Predicate.class));
+        org.mockito.Mockito.lenient().when(cb.or(any(Predicate[].class))).thenReturn(mock(Predicate.class));
+        org.mockito.Mockito.lenient().when(cb.like(any(), any(String.class))).thenReturn(mock(Predicate.class));
+        org.mockito.Mockito.lenient().when(cb.equal(any(), any())).thenReturn(mock(Predicate.class));
+        org.mockito.Mockito.lenient().when(cb.greaterThanOrEqualTo(any(), any(Double.class))).thenReturn(mock(Predicate.class));
+        org.mockito.Mockito.lenient().when(cb.isTrue(any())).thenReturn(mock(Predicate.class));
+        specCaptor.getValue().toPredicate(root, query, cb);
+
+        DirectorySearchFilterDTO emptyFilter = DirectorySearchFilterDTO.builder().build();
+        ArgumentCaptor<Specification<Artisan>> emptySpecCaptor = ArgumentCaptor.forClass(Specification.class);
+        when(artisanRepository.findAll(emptySpecCaptor.capture(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+        directorySearchService.searchRelationalFallback(emptyFilter);
+        org.mockito.Mockito.doReturn(Long.class).when(query).getResultType();
+        emptySpecCaptor.getValue().toPredicate(root, query, cb);
+        org.mockito.Mockito.doReturn(long.class).when(query).getResultType();
+        emptySpecCaptor.getValue().toPredicate(root, query, cb);
+    }
+
+    @Test
+    @DisplayName("Hibernate Search DSL: builds text predicates and enables fuzzy matching for long terms")
+    void hibernateSearchDsl_coversAllPredicateAndSortBranches() {
+        SearchPredicateFactory predicateFactory = mock(SearchPredicateFactory.class,
+                org.mockito.Answers.RETURNS_DEEP_STUBS);
+        MatchPredicateFieldStep matchFieldStep = mock(MatchPredicateFieldStep.class);
+        MatchPredicateFieldMoreStep matchMoreStep = mock(MatchPredicateFieldMoreStep.class);
+        MatchPredicateOptionsStep matchOptionsStep = mock(MatchPredicateOptionsStep.class);
+        org.mockito.Mockito.doReturn(matchFieldStep).when(predicateFactory).match();
+        org.mockito.Mockito.doReturn(matchMoreStep).when(matchFieldStep).field(org.mockito.ArgumentMatchers.anyString());
+        org.mockito.Mockito.doReturn(matchOptionsStep).when(matchMoreStep).matching(org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.doReturn(matchOptionsStep).when(matchOptionsStep).boost(org.mockito.ArgumentMatchers.anyFloat());
+        org.mockito.Mockito.doReturn(matchOptionsStep).when(matchOptionsStep).fuzzy(org.mockito.ArgumentMatchers.anyInt());
+        org.mockito.Mockito.doReturn(mock(org.hibernate.search.engine.search.predicate.SearchPredicate.class))
+                .when(matchOptionsStep).toPredicate();
+        BooleanPredicateClausesStep<?, ?> booleanStep = mock(BooleanPredicateClausesStep.class);
+        org.mockito.Mockito.doReturn(booleanStep).when(predicateFactory).bool();
+        org.mockito.Mockito.doReturn(booleanStep).when(booleanStep).should(any(SearchPredicate.class));
+        org.mockito.Mockito.doReturn(mock(SearchPredicate.class)).when(booleanStep).toPredicate();
+        DirectorySearchFilterDTO comprehensive = DirectorySearchFilterDTO.builder()
+                .keyword("ceramique")
+                .regionSlug("tizi-ouzou")
+                .wilayaCode("15")
+                .categorySlug("ceramique")
+                .subCategorySlug("poterie")
+                .materials(List.of("argile"))
+                .techniques(List.of("modelage"))
+                .epoques(List.of("numide"))
+                .minRating(4.0)
+                .verifiedOnly(true)
+                .premiumOnly(true)
+                .teacherOnly(true)
+                .build();
+
+        ReflectionTestUtils.invokeMethod(directorySearchService, "createTextMatch",
+                predicateFactory, "bio", "term", 1.0f);
+        ReflectionTestUtils.invokeMethod(directorySearchService, "createTextMatch",
+                predicateFactory, "bio", "longer-term", 1.0f);
+        ReflectionTestUtils.invokeMethod(directorySearchService, "buildFullTextQuery",
+                predicateFactory, comprehensive);
+        ReflectionTestUtils.invokeMethod(directorySearchService, "buildFullTextQuery",
+                predicateFactory, DirectorySearchFilterDTO.builder().build());
+
+    }
+
+    @Test
+    @DisplayName("Hibernate Search DSL: always excludes soft-deleted artisans")
+    void hibernateSearchDsl_alwaysAddsSoftDeleteFilter() {
+        SearchPredicateFactory predicateFactory = mock(SearchPredicateFactory.class,
+                org.mockito.Answers.RETURNS_DEEP_STUBS);
+        List<SearchPredicate> filters = ReflectionTestUtils.invokeMethod(directorySearchService,
+                "buildFilterClauses", predicateFactory, DirectorySearchFilterDTO.builder().build());
+
+        assertThat(filters).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Hibernate Search DSL: builds every configured filter predicate")
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void hibernateSearchDsl_buildsAllConfiguredFilters() {
+        SearchPredicateFactory factory = mock(SearchPredicateFactory.class);
+        SearchPredicate predicate = mock(SearchPredicate.class);
+        MatchPredicateFieldStep matchField = mock(MatchPredicateFieldStep.class);
+        MatchPredicateFieldMoreStep matchMore = mock(MatchPredicateFieldMoreStep.class);
+        MatchPredicateOptionsStep matchOptions = mock(MatchPredicateOptionsStep.class);
+        BooleanPredicateClausesStep bool = mock(BooleanPredicateClausesStep.class);
+        ExistsPredicateFieldStep existsField = mock(ExistsPredicateFieldStep.class);
+        ExistsPredicateOptionsStep existsOptions = mock(ExistsPredicateOptionsStep.class);
+        NotPredicateFinalStep not = mock(NotPredicateFinalStep.class);
+        TermsPredicateFieldStep termsField = mock(TermsPredicateFieldStep.class);
+        TermsPredicateFieldMoreStep termsMore = mock(TermsPredicateFieldMoreStep.class);
+        TermsPredicateOptionsStep termsOptions = mock(TermsPredicateOptionsStep.class);
+        RangePredicateFieldStep rangeField = mock(RangePredicateFieldStep.class);
+        RangePredicateFieldMoreStep rangeMore = mock(RangePredicateFieldMoreStep.class);
+        RangePredicateOptionsStep rangeOptions = mock(RangePredicateOptionsStep.class);
+
+        org.mockito.Mockito.doReturn(matchField).when(factory).match();
+        org.mockito.Mockito.doReturn(matchMore).when(matchField).field(any(String.class));
+        org.mockito.Mockito.doReturn(matchOptions).when(matchMore).matching(any());
+        org.mockito.Mockito.doReturn(predicate).when(matchOptions).toPredicate();
+        org.mockito.Mockito.doReturn(bool).when(factory).bool();
+        org.mockito.Mockito.doReturn(bool).when(bool).should(any(org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep.class));
+        org.mockito.Mockito.doReturn(predicate).when(bool).toPredicate();
+        org.mockito.Mockito.doReturn(existsField).when(factory).exists();
+        org.mockito.Mockito.doReturn(existsOptions).when(existsField).field(any(String.class));
+        org.mockito.Mockito.doReturn(not).when(factory).not(any(org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep.class));
+        org.mockito.Mockito.doReturn(predicate).when(not).toPredicate();
+        org.mockito.Mockito.doReturn(termsField).when(factory).terms();
+        org.mockito.Mockito.doReturn(termsMore).when(termsField).field(any(String.class));
+        org.mockito.Mockito.doReturn(termsOptions).when(termsMore).matchingAny(any(java.util.Collection.class));
+        org.mockito.Mockito.doReturn(predicate).when(termsOptions).toPredicate();
+        org.mockito.Mockito.doReturn(rangeField).when(factory).range();
+        org.mockito.Mockito.doReturn(rangeMore).when(rangeField).field(any(String.class));
+        org.mockito.Mockito.doReturn(rangeOptions).when(rangeMore).atLeast(any());
+        org.mockito.Mockito.doReturn(predicate).when(rangeOptions).toPredicate();
+
+        DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder()
+                .regionSlug("region").wilayaCode("16").categorySlug("category")
+                .subCategorySlug("subcategory").materials(List.of("wood"))
+                .techniques(List.of("carving")).epoques(List.of("modern"))
+                .minRating(3.5).verifiedOnly(true).premiumOnly(true).teacherOnly(true).build();
+
+        List<SearchPredicate> predicates = ReflectionTestUtils.invokeMethod(directorySearchService,
+                "buildFilterClauses", factory, filter);
+        assertThat(predicates).hasSize(12);
+        verify(termsMore, org.mockito.Mockito.times(3)).matchingAny(any(java.util.Collection.class));
+        verify(rangeMore).atLeast(3.5);
+    }
+
+    @Test
+    @DisplayName("Directory filters: blank, empty, null, and threshold boundary values are ignored")
+    @SuppressWarnings("unchecked")
+    void directoryFilters_ignoreBlankAndBoundaryValues() {
+        SearchPredicateFactory predicateFactory = mock(SearchPredicateFactory.class,
+                org.mockito.Answers.RETURNS_DEEP_STUBS);
+        DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder()
+                .regionSlug(" ").wilayaCode("").categorySlug(" ").subCategorySlug("")
+                .materials(List.of()).techniques(List.of()).epoques(List.of())
+                .minRating(0.0).verifiedOnly(false).premiumOnly(false).teacherOnly(false).build();
+
+        List<SearchPredicate> predicates = ReflectionTestUtils.invokeMethod(directorySearchService,
+                "buildFilterClauses", predicateFactory, filter);
+        assertThat(predicates).hasSize(1);
+
+        DirectorySearchFilterDTO nullCollections = DirectorySearchFilterDTO.builder()
+                .materials(null).techniques(null).epoques(null).build();
+        List<SearchPredicate> nullCollectionPredicates = ReflectionTestUtils.invokeMethod(directorySearchService,
+                "buildFilterClauses", predicateFactory, nullCollections);
+        assertThat(nullCollectionPredicates).hasSize(1);
+
+        ArgumentCaptor<Specification<Artisan>> specCaptor = ArgumentCaptor.forClass(Specification.class);
+        when(artisanRepository.findAll(specCaptor.capture(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+        directorySearchService.searchRelationalFallback(filter);
+
+        CriteriaBuilder cb = mock(CriteriaBuilder.class, org.mockito.Answers.RETURNS_DEEP_STUBS);
+        CriteriaQuery<?> query = mock(CriteriaQuery.class);
+        Root<Artisan> root = mock(Root.class, org.mockito.Answers.RETURNS_DEEP_STUBS);
+        org.mockito.Mockito.doReturn(String.class).when(query).getResultType();
+        org.mockito.Mockito.doReturn(mock(Predicate.class)).when(cb).isNull(any());
+        org.mockito.Mockito.doReturn(mock(Predicate.class)).when(cb).and(any(Predicate[].class));
+        specCaptor.getValue().toPredicate(root, query, cb);
+
+        DirectorySearchFilterDTO categoryOnly = DirectorySearchFilterDTO.builder().categorySlug("category").build();
+        ArgumentCaptor<Specification<Artisan>> categoryCaptor = ArgumentCaptor.forClass(Specification.class);
+        when(artisanRepository.findAll(categoryCaptor.capture(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+        directorySearchService.searchRelationalFallback(categoryOnly);
+        categoryCaptor.getValue().toPredicate(root, query, cb);
+
+        DirectorySearchFilterDTO subCategoryOnly = DirectorySearchFilterDTO.builder().subCategorySlug("subcategory").build();
+        ArgumentCaptor<Specification<Artisan>> subCategoryCaptor = ArgumentCaptor.forClass(Specification.class);
+        when(artisanRepository.findAll(subCategoryCaptor.capture(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+        directorySearchService.searchRelationalFallback(subCategoryOnly);
+        subCategoryCaptor.getValue().toPredicate(root, query, cb);
+    }
+
+    @Test
+    @DisplayName("Hibernate Search DSL: maps every configured sort order")
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void hibernateSearchDsl_mapsEverySortOrder() {
+        SearchSortFactory sortFactory = mock(SearchSortFactory.class);
+        FieldSortOptionsStep fieldStep = mock(FieldSortOptionsStep.class);
+        TypedSearchSortFactory typedSortFactory = mock(TypedSearchSortFactory.class);
+        ScoreSortOptionsStep scoreStep = mock(ScoreSortOptionsStep.class);
+        org.mockito.Mockito.doReturn(fieldStep).when(sortFactory).field(any(String.class));
+        org.mockito.Mockito.doReturn(fieldStep).when(fieldStep).desc();
+        org.mockito.Mockito.doReturn(typedSortFactory).when(fieldStep).then();
+        org.mockito.Mockito.doReturn(fieldStep).when(typedSortFactory).field(any(String.class));
+        org.mockito.Mockito.doReturn(scoreStep).when(sortFactory).score();
+        org.mockito.Mockito.doReturn(typedSortFactory).when(scoreStep).then();
+
+        DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder().keyword("poterie").build();
+        for (DirectorySortOrder order : DirectorySortOrder.values()) {
+            filter.setSortBy(order);
+            Object sort = ReflectionTestUtils.invokeMethod(directorySearchService, "buildSort", sortFactory, filter);
+            assertThat(sort).isNotNull();
+        }
     }
 
     private Artisan createSampleArtisan() {

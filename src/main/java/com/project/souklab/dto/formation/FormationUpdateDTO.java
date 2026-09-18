@@ -77,8 +77,7 @@ public class FormationUpdateDTO {
     private int price;
 
     /**
-     * ISO standard currency code (default: DZD).
+     * ISO standard currency code. If omitted, the existing currency is preserved.
      */
-    @Builder.Default
-    private String currency = "DZD";
+    private String currency;
 }

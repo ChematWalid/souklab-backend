@@ -303,4 +303,20 @@ class FileServingControllerTest {
             assertThat(closed.get()).isTrue();
         }
     }
+
+    @Test
+    void directControllerHandlesInvalidMediaTypeBlankFilenameNullStreamAndPublicCache() throws Exception {
+        StorageService storage = mock(StorageService.class);
+        FileAccessService access = mock(FileAccessService.class);
+        when(access.authorize("public-key")).thenReturn(true);
+        StorageResource resource = new StorageResource("public-key", null, "not/a valid type", 0, " ");
+        when(storage.retrieve("public-key")).thenReturn(resource);
+        FileServingController controller = new FileServingController(storage, access);
+
+        ResponseEntity<StreamingResponseBody> response = controller.serveFile("public-key");
+        assertThat(response.getHeaders().getCacheControl()).contains("public");
+        assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)).contains("public-key");
+        response.getBody().writeTo(new ByteArrayOutputStream());
+    }
 }

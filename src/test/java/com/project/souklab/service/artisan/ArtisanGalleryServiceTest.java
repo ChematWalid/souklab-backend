@@ -39,6 +39,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.Instant;
@@ -55,6 +56,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -106,6 +108,7 @@ class ArtisanGalleryServiceTest {
 
     @BeforeEach
     void setUp() {
+        appProperties.getStorage().setFileServingPrefix("/api/v1/files/");
         appProperties.getArtisan().getGallery().setMaxImages(20);
         appProperties.getArtisan().getGallery().setMaxFileSize(DataSize.ofMegabytes(10));
         appProperties.getArtisan().getGallery().setAllowedMimeTypes(List.of("image/jpeg", "image/png"));
@@ -137,7 +140,7 @@ class ArtisanGalleryServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("permission:artisan:content");
+        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_CONTENT.authority());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -241,6 +244,10 @@ class ArtisanGalleryServiceTest {
             when(galleryImageRepository.countByArtisanIdAndDeletedAtIsNull(ARTISAN_ID)).thenReturn(0L);
 
             assertThatThrownBy(() -> galleryService.uploadImage(emptyFile, "Title", "Caption"))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("Image file is required and cannot be empty.");
+
+            assertThatThrownBy(() -> galleryService.uploadImage(null, "Title", "Caption"))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessageContaining("Image file is required and cannot be empty.");
         }
@@ -353,6 +360,52 @@ class ArtisanGalleryServiceTest {
             verify(storageService).delete("storage-key-to-delete");
         }
 
+        @Test
+        @DisplayName("uploadImage_whenInputStreamCannotBeRead_shouldThrowStorageException")
+        void uploadImage_whenInputStreamCannotBeRead_shouldThrowStorageException() throws Exception {
+            authenticateArtisan();
+            MockMultipartFile unreadableFile = new MockMultipartFile(
+                    "file", "broken.jpg", "image/jpeg", "bytes".getBytes()) {
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    throw new IOException("stream unavailable");
+                }
+            };
+            when(galleryImageRepository.countByArtisanIdAndDeletedAtIsNull(ARTISAN_ID)).thenReturn(0L);
+
+            assertThatThrownBy(() -> galleryService.uploadImage(unreadableFile, "Title", "Caption"))
+                    .isInstanceOf(com.project.souklab.filestorage.exception.StorageException.class)
+                    .hasMessageContaining("Failed to read uploaded image stream");
+
+            verify(storageService, never()).store(any(), any(), any(), anyLong());
+        }
+
+        @Test
+        @DisplayName("uploadImage_whenCompensatingDeleteFails_shouldPreserveOriginalFailure")
+        void uploadImage_whenCompensatingDeleteFails_shouldPreserveOriginalFailure() throws Exception {
+            authenticateArtisan();
+            MockMultipartFile file = new MockMultipartFile(
+                    "file", "test.jpg", "image/jpeg", "bytes".getBytes());
+            when(galleryImageRepository.countByArtisanIdAndDeletedAtIsNull(ARTISAN_ID)).thenReturn(0L);
+            ValidatedFile validated = new ValidatedFile(
+                    new ByteArrayInputStream(file.getBytes()), "test.jpg", "image/jpeg", file.getSize());
+            when(fileValidator.validateAndSanitize(any(), anyString(), anyString(), anyLong(), anyList()))
+                    .thenReturn(validated);
+            when(virusScanService.scan(validated)).thenReturn(validated);
+            when(galleryImageRepository.findByArtisanIdAndDeletedAtIsNullOrderByDisplayOrderAsc(ARTISAN_ID))
+                    .thenReturn(Collections.emptyList());
+            when(storageService.store(any(), anyString(), anyString(), anyLong()))
+                    .thenReturn(new StorageResult("delete-fails-key", "test.jpg", "image/jpeg", file.getSize(), Instant.now()));
+            when(galleryImageRepository.save(any(ArtisanGalleryImage.class)))
+                    .thenThrow(new RuntimeException("database failure"));
+            doThrow(new RuntimeException("delete failure")).when(storageService).delete("delete-fails-key");
+
+            assertThatThrownBy(() -> galleryService.uploadImage(file, "Title", "Caption"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessage("database failure");
+            verify(storageService).delete("delete-fails-key");
+        }
+
         /**
          * Verifies unauthenticated invocation throws UnauthorizedException.
          */
@@ -379,7 +432,7 @@ class ArtisanGalleryServiceTest {
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.isAuthenticated()).thenReturn(true);
 
-            GrantedAuthority clientAuthority = new SimpleGrantedAuthority("permission:profile:read");
+            GrantedAuthority clientAuthority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.PROFILE_READ.authority());
             doReturn(List.of(clientAuthority)).when(authentication).getAuthorities();
 
             SecurityContextHolder.setContext(securityContext);

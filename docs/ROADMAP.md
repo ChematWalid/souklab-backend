@@ -90,8 +90,8 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
   - Dual-channel delivery via Spring STOMP backed by RabbitMQ external broker relay with deferred push (`TransactionSynchronizationManager.afterCommit()`).
 - [x] **Step 8.1**: Configure Spring STOMP WebSocket chat channels (`/ws`, `/topic`, `/queue`, `/app`, `/user`).
 - [x] **Step 8.2**: Implement `WebSocketAuthInterceptor` for messaging channels.
-- [ ] **Step 8.3**: Implement `Conversation`, `ConversationParticipant`, `Message` entities and repositories.
-- [ ] **Step 8.4**: Implement `MessageService` with read receipts and realtime STOMP dispatching.
+- [x] **Step 8.3**: Implement private one-to-one `Conversation`, `ConversationParticipant`, `Message`, and attachment persistence with REST history and lifecycle APIs.
+- [x] **Step 8.4**: Implement message service behavior with idempotent sends, read-up-to receipts, edits, soft deletes, typing events, presence tracking, and realtime STOMP dispatching.
 
 ---
 

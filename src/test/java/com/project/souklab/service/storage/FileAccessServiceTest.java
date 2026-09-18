@@ -1,0 +1,210 @@
+package com.project.souklab.service.storage;
+
+import com.project.souklab.dao.*;
+import com.project.souklab.filestorage.FileUrlResolver;
+import com.project.souklab.model.*;
+import com.project.souklab.model.User;
+import com.project.souklab.security.AccessControlService;
+import com.project.souklab.security.Permission;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class FileAccessServiceTest {
+    @Mock UserAvatarRepository userAvatarRepository;
+    @Mock ArtisanGalleryImageRepository galleryImageRepository;
+    @Mock ArtisanCertificationRepository certificationRepository;
+    @Mock FormationFileRepository formationFileRepository;
+    @Mock FormationRepository formationRepository;
+    @Mock FormationEnrollmentRepository formationEnrollmentRepository;
+    @Mock ArtisanRepository artisanRepository;
+    @Mock FileUrlResolver fileUrlResolver;
+    @Mock AccessControlService accessControlService;
+    @Mock MessageAttachmentRepository messageAttachmentRepository;
+    @Mock UserRepository userRepository;
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void authorize_allowsOwnedMessageAttachmentOnlyWithFileReadPermission() {
+        User user = User.builder().email("client@example.com").build();
+        MessageAttachment attachment = new MessageAttachment();
+        String key = "message-attachment-key";
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user.getEmail(), "credentials", List.of()));
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(messageAttachmentRepository.findAccessibleByStorageKey(key, user)).thenReturn(Optional.of(attachment));
+        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
+
+        assertThat(fileAccessService().authorize(key)).isFalse();
+        verify(accessControlService).hasPermission(any(), eq(Permission.FILE_READ));
+    }
+
+    @Test
+    void authorize_rejectsOwnedMessageAttachmentWithoutFileReadPermission() {
+        User user = User.builder().email("client@example.com").build();
+        String key = "protected-message-key";
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user.getEmail(), "credentials", List.of()));
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(messageAttachmentRepository.findAccessibleByStorageKey(key, user)).thenReturn(Optional.of(new MessageAttachment()));
+        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(false);
+
+        assertThatThrownBy(() -> fileAccessService().authorize(key))
+                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+    }
+
+    @Test
+    void authorize_allowsPublicAvatarGalleryAndFormationThumbnail() {
+        when(userAvatarRepository.findFirstByStorageKeyOriginalOrStorageKeyMediumOrStorageKeyThumbnail("avatar", "avatar", "avatar"))
+                .thenReturn(Optional.of(mock(UserAvatar.class)));
+        assertThat(fileAccessService().authorize("avatar")).isTrue();
+
+        when(userAvatarRepository.findFirstByStorageKeyOriginalOrStorageKeyMediumOrStorageKeyThumbnail("gallery", "gallery", "gallery"))
+                .thenReturn(Optional.empty());
+        when(fileUrlResolver.toUrl("gallery")).thenReturn("/files/gallery");
+        when(galleryImageRepository.findByImageUrlAndDeletedAtIsNull("/files/gallery"))
+                .thenReturn(Optional.of(mock(ArtisanGalleryImage.class)));
+        assertThat(fileAccessService().authorize("gallery")).isTrue();
+
+        when(userAvatarRepository.findFirstByStorageKeyOriginalOrStorageKeyMediumOrStorageKeyThumbnail("thumbnail", "thumbnail", "thumbnail"))
+                .thenReturn(Optional.empty());
+        when(fileUrlResolver.toUrl("thumbnail")).thenReturn("/files/thumbnail");
+        when(formationRepository.findByThumbnailUrlAndDeletedAtIsNull("/files/thumbnail"))
+                .thenReturn(Optional.of(mock(Formation.class)));
+        assertThat(fileAccessService().authorize("thumbnail")).isTrue();
+    }
+
+    @Test
+    void authorize_allowsCertificationOwnerAndAdministrator() {
+        User owner = User.builder().email("owner@example.com").build();
+        Artisan artisan = Artisan.builder().user(owner).build();
+        ArtisanCertification certification = ArtisanCertification.builder().artisan(artisan).build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(owner.getEmail(), "credentials", List.of()));
+        when(userRepository.findByEmail(owner.getEmail())).thenReturn(Optional.of(owner));
+        when(fileUrlResolver.toUrl("certificate")).thenReturn("/files/certificate");
+        when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/certificate"))
+                .thenReturn(Optional.of(certification));
+        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_USERS))).thenReturn(false);
+
+        assertThat(fileAccessService().authorize("certificate")).isFalse();
+
+        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_USERS))).thenReturn(true);
+        assertThat(fileAccessService().authorize("certificate")).isFalse();
+    }
+
+    @Test
+    void authorize_rejectsCertificationForDifferentUserAndMissingFormationFile() {
+        User owner = User.builder().email("owner@example.com").build();
+        User viewer = User.builder().email("viewer@example.com").build();
+        Artisan artisan = Artisan.builder().user(owner).build();
+        ArtisanCertification certification = ArtisanCertification.builder().artisan(artisan).build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(viewer.getEmail(), "credentials", List.of()));
+        when(userRepository.findByEmail(viewer.getEmail())).thenReturn(Optional.of(viewer));
+        when(fileUrlResolver.toUrl("certificate")).thenReturn("/files/certificate");
+        when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/certificate"))
+                .thenReturn(Optional.of(certification));
+        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_USERS))).thenReturn(false);
+        assertThatThrownBy(() -> fileAccessService().authorize("certificate"))
+                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+
+        when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/missing")).thenReturn(Optional.empty());
+        when(fileUrlResolver.toUrl("missing")).thenReturn("/files/missing");
+        assertThatThrownBy(() -> fileAccessService().authorize("missing"))
+                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+
+        when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/stale"))
+                .thenReturn(Optional.of(certification), Optional.empty());
+        when(fileUrlResolver.toUrl("stale")).thenReturn("/files/stale");
+        assertThatThrownBy(() -> fileAccessService().authorize("stale"))
+                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+    }
+
+    @Test
+    void authorize_allowsFormationFileForAuthorAndConfirmedParticipant() {
+        User authorUser = User.builder().email("author@example.com").build();
+        Artisan author = Artisan.builder().id("author-artisan").user(authorUser).build();
+        Formation formation = Formation.builder().author(author).build();
+        formation.setId("formation");
+        FormationFile file = FormationFile.builder().formation(formation).storageKey("syllabus").build();
+
+        authenticate(authorUser, Permission.ARTISAN_FORMATIONS.authority());
+        when(userRepository.findByEmail(authorUser.getEmail())).thenReturn(Optional.of(authorUser));
+        when(formationFileRepository.findByStorageKeyAndDeletedAtIsNull("syllabus")).thenReturn(Optional.of(file));
+        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_FORMATIONS))).thenReturn(false);
+        when(artisanRepository.findByUserEmailIgnoreCase(authorUser.getEmail())).thenReturn(Optional.of(author));
+        when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
+                "formation", "author-artisan", EnrollmentStatus.CONFIRMED)).thenReturn(false);
+
+        assertThat(fileAccessService().authorize("syllabus")).isFalse();
+
+        User participantUser = User.builder().email("participant@example.com").build();
+        Artisan participant = Artisan.builder().id("participant-artisan").user(participantUser).build();
+        authenticate(participantUser, Permission.ARTISAN_FORMATIONS.authority());
+        when(userRepository.findByEmail(participantUser.getEmail())).thenReturn(Optional.of(participantUser));
+        when(artisanRepository.findByUserEmailIgnoreCase(participantUser.getEmail())).thenReturn(Optional.of(participant));
+        when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
+                "formation", "participant-artisan", EnrollmentStatus.CONFIRMED)).thenReturn(true);
+
+        assertThat(fileAccessService().authorize("syllabus")).isFalse();
+    }
+
+    @Test
+    void authorize_rejectsUnenrolledFormationFileAndAllowsAdministrator() {
+        User user = User.builder().email("viewer@example.com").build();
+        Artisan viewer = Artisan.builder().id("viewer-artisan").user(user).build();
+        Artisan author = Artisan.builder().id("author-artisan").user(User.builder().email("author@example.com").build()).build();
+        Formation formation = Formation.builder().author(author).build();
+        formation.setId("formation");
+        FormationFile file = FormationFile.builder().formation(formation).storageKey("protected").build();
+
+        authenticate(user, Permission.ARTISAN_FORMATIONS.authority());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(formationFileRepository.findByStorageKeyAndDeletedAtIsNull("protected")).thenReturn(Optional.of(file));
+        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_FORMATIONS))).thenReturn(false);
+        when(artisanRepository.findByUserEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(viewer));
+        when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
+                "formation", "viewer-artisan", EnrollmentStatus.CONFIRMED)).thenReturn(false);
+
+        assertThatThrownBy(() -> fileAccessService().authorize("protected"))
+                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+
+        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_FORMATIONS))).thenReturn(true);
+        assertThat(fileAccessService().authorize("protected")).isFalse();
+    }
+
+    private void authenticate(User user, String authority) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user.getEmail(), "credentials", List.of(
+                        new org.springframework.security.core.authority.SimpleGrantedAuthority(authority))));
+    }
+
+    private FileAccessService fileAccessService() {
+        return new FileAccessService(userAvatarRepository, galleryImageRepository, certificationRepository,
+                formationFileRepository, formationRepository, formationEnrollmentRepository, artisanRepository,
+                fileUrlResolver, accessControlService, messageAttachmentRepository, userRepository);
+    }
+}

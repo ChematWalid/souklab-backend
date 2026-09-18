@@ -164,6 +164,28 @@ class ArtisanDirectoryCardDTOTest {
     }
 
     @Test
+    void from_handlesRootCountryParentsBlankImagesAndBadgeLimits() {
+        Region root = Region.builder().name("Algeria").code("DZ").build();
+        Region child = Region.builder().name("Algiers").code("16").parent(root).build();
+        List<ArtisanGalleryImage> images = List.of(
+                ArtisanGalleryImage.builder().imageUrl(" ").displayOrder(0).build(),
+                ArtisanGalleryImage.builder().imageUrl(null).displayOrder(1).build());
+        Set<Material> materials = new java.util.LinkedHashSet<>();
+        for (int i = 0; i < 5; i++) materials.add(Material.builder().name("m" + i).build());
+        Set<Technique> techniques = new java.util.LinkedHashSet<>();
+        for (int i = 0; i < 5; i++) techniques.add(Technique.builder().name("t" + i).build());
+        Artisan dtoSource = Artisan.builder().region(child).galleryImages(images)
+                .materials(materials).techniques(techniques).build();
+
+        ArtisanDirectoryCardDTO dto = ArtisanDirectoryCardDTO.from(dtoSource);
+        assertThat(dto.getWilayaName()).isEqualTo("Algiers");
+        assertThat(dto.getWilayaCode()).isEqualTo("16");
+        assertThat(dto.getCoverImageUrl()).isNull();
+        assertThat(dto.getPrimaryMaterials()).hasSize(4);
+        assertThat(dto.getPrimaryTechniques()).hasSize(4);
+    }
+
+    @Test
     @DisplayName("truncateBio: when bio is null or blank should return empty string")
     void truncateBio_whenNullOrBlank_shouldReturnEmptyString() {
         assertThat(ArtisanDirectoryCardDTO.truncateBio(null, 100)).isEmpty();

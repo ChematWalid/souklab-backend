@@ -108,8 +108,7 @@ public class Formation extends BaseEntity {
      * ISO standard currency code for the admission price.
      */
     @Column(length = 10, nullable = false)
-    @Builder.Default
-    private String currency = "DZD";
+    private String currency;
 
     /**
      * Publication and moderation lifecycle status.

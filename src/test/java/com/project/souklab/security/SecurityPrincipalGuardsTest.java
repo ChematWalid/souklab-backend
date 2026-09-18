@@ -16,8 +16,15 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import com.project.souklab.dto.auth.JwtResponseDTO;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests verifying principal type-safety guards in JwtUtils and OAuth2AuthenticationSuccessHandler.
@@ -120,5 +127,60 @@ class SecurityPrincipalGuardsTest {
                 });
 
         System.out.println("Proof: OAuth2AuthenticationSuccessHandler guarded against non-OAuth2User principal");
+    }
+
+    @Test
+    void processesCookieIntentAndClearsItAfterSuccessfulAuthentication() throws Exception {
+        AuthService authService = Mockito.mock(AuthService.class);
+        ServletResponseUtil responseUtil = Mockito.mock(ServletResponseUtil.class);
+        OAuth2AuthenticationSuccessHandler handler = new OAuth2AuthenticationSuccessHandler(authService, responseUtil);
+        OAuth2User principal = Mockito.mock(OAuth2User.class);
+        JwtResponseDTO tokens = JwtResponseDTO.builder().accessToken("access").refreshToken("refresh").build();
+        when(authService.processOAuth2Success(eq(principal), eq("ARTISAN"), any())).thenReturn(tokens);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new jakarta.servlet.http.Cookie(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, "ARTISAN"));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        handler.onAuthenticationSuccess(request, response, new TestingAuthenticationToken(principal, "credentials"));
+
+        verify(authService).processOAuth2Success(eq(principal), eq("ARTISAN"), eq(request));
+        verify(responseUtil).writeResponse(eq(response), eq(200), any());
+        assertThat(response.getHeader("Set-Cookie")).contains("SOUKLAB_OAUTH_INTENT=", "Max-Age=0");
+    }
+
+    @Test
+    void consumesSessionIntentWhenCookieIsAbsentAndAllowsNoIntent() throws Exception {
+        AuthService authService = Mockito.mock(AuthService.class);
+        ServletResponseUtil responseUtil = Mockito.mock(ServletResponseUtil.class);
+        OAuth2AuthenticationSuccessHandler handler = new OAuth2AuthenticationSuccessHandler(authService, responseUtil);
+        OAuth2User principal = Mockito.mock(OAuth2User.class);
+        when(authService.processOAuth2Success(eq(principal), any(), any())).thenReturn(new JwtResponseDTO());
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.getSession().setAttribute(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, "CLIENT");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        handler.onAuthenticationSuccess(request, response, new TestingAuthenticationToken(principal, "credentials"));
+
+        verify(authService).processOAuth2Success(eq(principal), eq("CLIENT"), eq(request));
+        assertThat(request.getSession().getAttribute(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME)).isNull();
+
+        MockHttpServletRequest noIntentRequest = new MockHttpServletRequest();
+        handler.onAuthenticationSuccess(noIntentRequest, new MockHttpServletResponse(), new TestingAuthenticationToken(principal, "credentials"));
+        verify(authService).processOAuth2Success(eq(principal), eq(null), eq(noIntentRequest));
+    }
+
+    @Test
+    void ignoresUnrelatedCookiesBeforeFallingBackToNoIntent() throws Exception {
+        AuthService authService = Mockito.mock(AuthService.class);
+        ServletResponseUtil responseUtil = Mockito.mock(ServletResponseUtil.class);
+        OAuth2AuthenticationSuccessHandler handler = new OAuth2AuthenticationSuccessHandler(authService, responseUtil);
+        OAuth2User principal = Mockito.mock(OAuth2User.class);
+        when(authService.processOAuth2Success(eq(principal), eq(null), any())).thenReturn(new JwtResponseDTO());
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new jakarta.servlet.http.Cookie("OTHER", "value"));
+
+        handler.onAuthenticationSuccess(request, new MockHttpServletResponse(), new TestingAuthenticationToken(principal, "credentials"));
+
+        verify(authService).processOAuth2Success(eq(principal), eq(null), eq(request));
     }
 }

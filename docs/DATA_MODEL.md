@@ -1,6 +1,6 @@
 # Data Model
 
-The JPA classes under `src/main/java/com/project/souklab/model` are the authoritative data model. This page intentionally lists implemented concepts only; proposed feed, messaging, and payment models belong in the roadmap until code exists.
+The JPA classes under `src/main/java/com/project/souklab/model` are the authoritative data model. This page lists implemented concepts; payment models remain roadmap work.
 
 ## Common lifecycle
 

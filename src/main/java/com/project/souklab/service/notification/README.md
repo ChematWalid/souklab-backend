@@ -17,7 +17,7 @@ sequenceDiagram
     Domain->>NotifService: createForUser(recipient, message, type, targetId)
     NotifService->>DB: save(Notification)
     NotifService->>STOMP: register afterCommit delivery
-    NotifService->>STOMP: convertAndSendToUser(recipientEmail, "/queue/notifications", DTO)
+NotifService->>STOMP: convertAndSendToUser(recipientEmail, configured notification destination, DTO)
     STOMP-->>Client: Realtime Push Notification
 ```
 

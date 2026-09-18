@@ -18,7 +18,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws")
+        registry.addEndpoint(appProperties.getChat().getWebsocketEndpoint())
                 .setAllowedOriginPatterns(appProperties.getCors().getAllowedOrigins().toArray(String[]::new))
                 .withSockJS();
     }
@@ -26,18 +26,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         AppProperties.Relay relay = appProperties.getRelay();
-        registry.enableStompBrokerRelay("/topic", "/queue")
+        registry.enableStompBrokerRelay(appProperties.getChat().getBrokerDestinationPrefixes().split(","))
                 .setRelayHost(relay.getHost())
                 .setRelayPort(relay.getPort())
                 .setClientLogin(relay.getClientLogin())
                 .setClientPasscode(relay.getClientPasscode())
                 .setSystemLogin(relay.getSystemLogin())
                 .setSystemPasscode(relay.getSystemPasscode())
-                .setUserDestinationBroadcast("/topic/unresolved-user-destination")
-                .setUserRegistryBroadcast("/topic/simp-user-registry");
+                .setUserDestinationBroadcast(appProperties.getChat().getUnresolvedUserDestination())
+                .setUserRegistryBroadcast(appProperties.getChat().getUserRegistryBroadcast());
 
-        registry.setApplicationDestinationPrefixes("/app");
-        registry.setUserDestinationPrefix("/user");
+        registry.setApplicationDestinationPrefixes(appProperties.getChat().getApplicationDestinationPrefix());
+        registry.setUserDestinationPrefix(appProperties.getChat().getUserDestinationPrefix());
     }
 
     @Override

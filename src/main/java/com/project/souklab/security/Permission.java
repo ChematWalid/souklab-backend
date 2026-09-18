@@ -14,7 +14,8 @@ public enum Permission {
     PROFILE_READ,
     PROFILE_WRITE,
     REPORT_CREATE,
-    FILE_READ;
+    FILE_READ,
+    MESSAGE_SEND;
 
     public String authority() {
         return "permission:" + name().toLowerCase().replace('_', ':');

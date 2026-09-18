@@ -45,16 +45,16 @@ class FormationPropertiesTest {
     }
 
     /**
-     * Verifies that AppProperties exposes nested formation configuration and the invariant
-     * storage file-serving prefix at the root level.
+     * Verifies that AppProperties exposes nested formation and storage configuration
+     * without supplying policy defaults in Java.
      */
     @Test
-    @DisplayName("AppProperties root exposes FormationConfig and Storage with expected defaults")
+    @DisplayName("AppProperties root exposes FormationConfig and Storage without Java defaults")
     void appPropertiesRootExposesFormationDefaults() {
         AppProperties appProperties = new AppProperties();
 
         assertThat(appProperties.getStorage()).isNotNull();
-        assertThat(appProperties.getStorage().getFileServingPrefix()).isEqualTo("/api/v1/files/");
+        assertThat(appProperties.getStorage().getFileServingPrefix()).isNull();
 
         assertThat(appProperties.getFormation()).isNotNull();
         assertThat(appProperties.getFormation().getThumbnail().getMaxFileSize()).isNull();
@@ -74,7 +74,7 @@ class FormationPropertiesTest {
     @DisplayName("FormationConfig correctly binds custom configuration values from property sources")
     void bindsCustomConfiguration() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test-formation", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test-formation", Map.of(
                 "app.formation.thumbnail.max-file-size", "15MB",
                 "app.formation.thumbnail.allowed-mime-types", "image/png,image/webp",
                 "app.formation.file.max-count", "20",
@@ -105,7 +105,7 @@ class FormationPropertiesTest {
     @DisplayName("AppProperties root correctly binds nested storage and formation tree from property sources")
     void bindsRootAppPropertiesFormationTree() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test-app-formation", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test-app-formation", Map.of(
                 "app.storage.file-serving-prefix", "/custom/files/",
                 "app.formation.thumbnail.max-file-size", "8MB",
                 "app.formation.thumbnail.allowed-mime-types", "image/jpeg",

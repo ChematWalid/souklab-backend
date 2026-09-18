@@ -15,6 +15,7 @@ import com.project.souklab.model.Region;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
+import com.project.souklab.security.Permission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,8 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProfileResponseMapperTest {
 
     private ProfileResponseMapper mapper;
-    private AuthorizationPermission artisanRole;
-    private AuthorizationPermission clientRole;
+    private AuthorizationPermission artisanContentPermission;
+    private AuthorizationPermission profileReadPermission;
 
     /**
      * Initializes test fixtures and mapper instance.
@@ -44,11 +45,11 @@ class ProfileResponseMapperTest {
     void setUp() {
         mapper = new ProfileResponseMapper();
 
-        artisanRole = new AuthorizationPermission();
-        artisanRole.setPermissionKey("permission:artisan:content");
+        artisanContentPermission = new AuthorizationPermission();
+        artisanContentPermission.setPermissionKey(Permission.ARTISAN_CONTENT.authority());
 
-        clientRole = new AuthorizationPermission();
-        clientRole.setPermissionKey("permission:profile:read");
+        profileReadPermission = new AuthorizationPermission();
+        profileReadPermission.setPermissionKey(Permission.PROFILE_READ.authority());
     }
 
     /**
@@ -61,7 +62,7 @@ class ProfileResponseMapperTest {
                 .email("artisan@example.com")
                 .firstName("Ali")
                 .lastName("K")
-                .permissions(new HashSet<>(Set.of(artisanRole)))
+                .permissions(new HashSet<>(Set.of(artisanContentPermission)))
                 .artisan(null)
                 .build();
 
@@ -75,6 +76,28 @@ class ProfileResponseMapperTest {
         assertThat(dto.isTeacher()).isFalse();
         assertThat(dto.isVerified()).isFalse();
         assertThat(dto.isPremium()).isFalse();
+    }
+
+    @Test
+    void mapToProfileResponse_forArtisanWithUninitializedCollectionsUsesEmptyCollections() {
+        Artisan artisan = Artisan.builder().build();
+        artisan.setMaterials(null);
+        artisan.setTechniques(null);
+        artisan.setEpoques(null);
+        artisan.setGalleryImages(null);
+        artisan.setCertifications(null);
+        User user = User.builder()
+                .email("artisan-empty@example.com")
+                .permissions(new HashSet<>(Set.of(artisanContentPermission)))
+                .artisan(artisan)
+                .build();
+
+        ArtisanResponseDTO dto = (ArtisanResponseDTO) mapper.mapToProfileResponse(user);
+        assertThat(dto.getMaterials()).isEmpty();
+        assertThat(dto.getTechniques()).isEmpty();
+        assertThat(dto.getEpoques()).isEmpty();
+        assertThat(dto.getGalleryImages()).isEmpty();
+        assertThat(dto.getCertifications()).isEmpty();
     }
 
     /**
@@ -125,7 +148,7 @@ class ProfileResponseMapperTest {
 
         User user = User.builder()
                 .email("artisan@example.com")
-                .permissions(new HashSet<>(Set.of(artisanRole)))
+                .permissions(new HashSet<>(Set.of(artisanContentPermission)))
                 .artisan(artisan)
                 .build();
 
@@ -189,7 +212,7 @@ class ProfileResponseMapperTest {
 
         User user = User.builder()
                 .email("artisan@example.com")
-                .permissions(new HashSet<>(Set.of(artisanRole)))
+                .permissions(new HashSet<>(Set.of(artisanContentPermission)))
                 .artisan(artisan)
                 .build();
 
@@ -211,7 +234,7 @@ class ProfileResponseMapperTest {
     void mapToProfileResponse_forClientWithNullClientEntity_returnsDefaults() {
         User user = User.builder()
                 .email("client@example.com")
-                .permissions(new HashSet<>(Set.of(clientRole)))
+                .permissions(new HashSet<>(Set.of(profileReadPermission)))
                 .client(null)
                 .build();
 
@@ -237,7 +260,7 @@ class ProfileResponseMapperTest {
 
         User user = User.builder()
                 .email("client@example.com")
-                .permissions(new HashSet<>(Set.of(clientRole)))
+                .permissions(new HashSet<>(Set.of(profileReadPermission)))
                 .client(client)
                 .build();
 
@@ -266,14 +289,14 @@ class ProfileResponseMapperTest {
                 .email("artisan@example.com")
                 .firstName("Rachid")
                 .lastName("M")
-                .permissions(new HashSet<>(Set.of(artisanRole)))
+                .permissions(new HashSet<>(Set.of(artisanContentPermission)))
                 .artisan(artisan)
                 .build();
 
         UserSummaryDTO summary = mapper.mapToSummaryDTO(user);
 
         assertThat(summary.getEmail()).isEqualTo("artisan@example.com");
-        assertThat(summary.getPermissions()).contains("permission:artisan:content");
+        assertThat(summary.getPermissions()).contains(Permission.ARTISAN_CONTENT.authority());
         assertThat(summary.isTeacher()).isTrue();
         assertThat(summary.isPremium()).isTrue();
         assertThat(summary.isValidated()).isTrue();
@@ -294,13 +317,13 @@ class ProfileResponseMapperTest {
                 .email("client@example.com")
                 .firstName("Fatima")
                 .lastName("Z")
-                .permissions(new HashSet<>(Set.of(clientRole)))
+                .permissions(new HashSet<>(Set.of(profileReadPermission)))
                 .client(client)
                 .build();
 
         UserSummaryDTO summary = mapper.mapToSummaryDTO(user);
 
-        assertThat(summary.getPermissions()).contains("permission:profile:read");
+        assertThat(summary.getPermissions()).contains(Permission.PROFILE_READ.authority());
         assertThat(summary.isTeacher()).isFalse();
         assertThat(summary.isPremium()).isTrue();
         assertThat(summary.isValidated()).isTrue();
@@ -338,7 +361,7 @@ class ProfileResponseMapperTest {
                 .email("plainartisan@example.com")
                 .firstName("Hassan")
                 .lastName("B")
-                .permissions(new HashSet<>(Set.of(artisanRole)))
+                .permissions(new HashSet<>(Set.of(artisanContentPermission)))
                 .artisan(artisan)
                 .build();
 
@@ -364,7 +387,7 @@ class ProfileResponseMapperTest {
                 .email("plainclient@example.com")
                 .firstName("Mona")
                 .lastName("S")
-                .permissions(new HashSet<>(Set.of(clientRole)))
+                .permissions(new HashSet<>(Set.of(profileReadPermission)))
                 .client(client)
                 .build();
 

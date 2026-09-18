@@ -35,7 +35,7 @@ Controllers translate transport contracts and delegate to services. Services enf
 | `service` | Transactional business workflows, including application-specific `service.storage.FileAccessService`. |
 | `util` / `validation` | Stateless helpers and custom Bean Validation constraints. |
 
-Social feed, direct messaging, subscriptions, payments, and analytics are roadmap items and have no corresponding controller/service/entity implementation in this repository.
+Subscriptions, payments, and analytics remain roadmap items. Social feed, direct messaging, and notifications are implemented in their respective controller, service, entity, and repository modules.
 
 ## Authentication and authorization
 

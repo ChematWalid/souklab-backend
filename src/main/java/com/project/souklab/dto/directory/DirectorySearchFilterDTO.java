@@ -159,6 +159,10 @@ public class DirectorySearchFilterDTO {
         return page != null ? page : DEFAULT_PAGE_INDEX;
     }
 
+    public int resolvePage(int configuredDefaultPageIndex) {
+        return page != null ? page : configuredDefaultPageIndex;
+    }
+
     /**
      * Safe null-coalescing page size accessor defaulting to 20.
      *
@@ -169,6 +173,13 @@ public class DirectorySearchFilterDTO {
             return DEFAULT_PAGE_SIZE;
         }
         return Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
+    }
+
+    public int resolveSize(int configuredDefaultPageSize, int configuredMinPageSize, int configuredMaxPageSize) {
+        if (size == null) {
+            return configuredDefaultPageSize;
+        }
+        return Math.max(configuredMinPageSize, Math.min(size, configuredMaxPageSize));
     }
 
     /**

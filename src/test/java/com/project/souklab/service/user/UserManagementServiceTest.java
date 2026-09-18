@@ -14,6 +14,7 @@ import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.User;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.security.RefreshTokenService;
@@ -561,16 +562,16 @@ class UserManagementServiceTest {
     void mapToDTO_whenUserHasRoles_primaryPermissionAndRolesShouldBePopulated() {
         Pageable pageable = PageRequest.of(0, 10);
         User user = createUser("u-permissions", "permissions@example.com", "With", "Roles", AccountStatus.ACTIVE);
-        AuthorizationPermission role = new AuthorizationPermission();
-        role.setPermissionKey("permission:artisan:content");
-        user.setPermissions(Set.of(role));
+        AuthorizationPermission artisanContent = new AuthorizationPermission();
+        artisanContent.setPermissionKey(Permission.ARTISAN_CONTENT.authority());
+        user.setPermissions(Set.of(artisanContent));
 
         when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(user), pageable, 1));
 
         PaginatedResponse<UserResponseDTO> response = userManagementService.getAllUsers(null, pageable);
 
         UserResponseDTO dto = response.getContent().get(0);
-        assertThat(dto.getPermissions()).containsExactly("permission:artisan:content");
+        assertThat(dto.getPermissions()).containsExactly(Permission.ARTISAN_CONTENT.authority());
     }
 
     /**
@@ -671,8 +672,8 @@ class UserManagementServiceTest {
         LocalDateTime createdAt = LocalDateTime.of(2026, 7, 15, 9, 0);
         LocalDateTime updatedAt = LocalDateTime.of(2026, 9, 2, 14, 0);
 
-        AuthorizationPermission clientRole = new AuthorizationPermission();
-        clientRole.setPermissionKey("permission:profile:read");
+        AuthorizationPermission profileRead = new AuthorizationPermission();
+        profileRead.setPermissionKey(Permission.PROFILE_READ.authority());
 
         User user = User.builder()
                 .email("detailed@example.com")
@@ -686,7 +687,7 @@ class UserManagementServiceTest {
                 .bannedUntil(bannedUntil)
                 .banReason("Temporary suspension")
                 .lastLoginAt(lastLogin)
-                .permissions(Set.of(clientRole))
+                .permissions(Set.of(profileRead))
                 .build();
         user.setId("u-detailed");
         user.setCreatedAt(createdAt);
@@ -707,7 +708,7 @@ class UserManagementServiceTest {
         assertThat(dto.getStatus()).isEqualTo(AccountStatus.SUSPENDED);
         assertThat(dto.isEmailVerified()).isTrue();
         assertThat(dto.getEmailVerifiedAt()).isEqualTo(verifiedAt);
-        assertThat(dto.getPermissions()).containsExactly("permission:profile:read");
+        assertThat(dto.getPermissions()).containsExactly(Permission.PROFILE_READ.authority());
         assertThat(dto.getBannedUntil()).isEqualTo(bannedUntil);
         assertThat(dto.getBanReason()).isEqualTo("Temporary suspension");
         assertThat(dto.getLastLoginAt()).isEqualTo(lastLogin);

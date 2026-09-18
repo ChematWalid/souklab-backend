@@ -34,7 +34,7 @@ class AvatarPropertiesTest {
     @DisplayName("AvatarProperties binds default configuration values")
     void bindsDefaultConfiguration() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
                 "avatar.max-per-user", "10",
                 "avatar.allowed-mime-types", "image/jpeg,image/png,image/webp",
                 "avatar.rate-limit.enabled", "true",
@@ -60,7 +60,7 @@ class AvatarPropertiesTest {
     @DisplayName("AvatarProperties binds configured values from environment/properties")
     void bindsConfiguration() {
         StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new MapPropertySource("test", Map.of(
+        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
                 "avatar.max-per-user", "5",
                 "avatar.allowed-mime-types", "image/png,image/webp",
                 "avatar.rate-limit.enabled", "false",

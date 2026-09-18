@@ -30,6 +30,7 @@ import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.User;
 import com.project.souklab.model.VerificationTokenType;
 import com.project.souklab.security.JwtUtils;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.profile.ProfileResponseMapper;
@@ -140,11 +141,11 @@ class AuthServiceTest {
         appProperties.getAuth().getLockout().setDurationMinutes(15);
 
         artisanRole = new AuthorizationPermission();
-        artisanRole.setPermissionKey("permission:artisan:content");
+        artisanRole.setPermissionKey(Permission.ARTISAN_CONTENT.authority());
         artisanRole.setDescription("Artisan role");
 
         clientRole = new AuthorizationPermission();
-        clientRole.setPermissionKey("permission:profile:read");
+        clientRole.setPermissionKey(Permission.PROFILE_READ.authority());
         clientRole.setDescription("Client role");
 
         lenient().when(permissionRepository.findByPermissionKeyInAndEnabledTrue(any())).thenAnswer(invocation -> {
@@ -154,7 +155,7 @@ class AuthServiceTest {
                 return List.of();
             }
             return keys.stream()
-                    .map(key -> key.equals("permission:artisan:content") ? artisanRole : clientRole)
+                    .map(key -> key.equals(Permission.ARTISAN_CONTENT.authority()) ? artisanRole : clientRole)
                     .toList();
         });
 
@@ -968,7 +969,7 @@ class AuthServiceTest {
         assertThat(response.getRefreshToken()).isEqualTo("refresh-token-uuid");
         assertThat(response.getTokenType()).isEqualTo("Bearer");
         assertThat(response.getExpiresIn()).isEqualTo(900L);
-        assertThat(response.getPermissions()).containsExactly("permission:profile:read");
+        assertThat(response.getPermissions()).containsExactly(Permission.PROFILE_READ.authority());
 
         assertThat(user.getFailedLoginAttempts()).isZero();
         assertThat(user.getLockedUntil()).isNull();
@@ -1068,7 +1069,7 @@ class AuthServiceTest {
 
         JwtResponseDTO response = authService.login(dto, null);
 
-        assertThat(response.getPermissions()).containsExactly("permission:artisan:content");
+        assertThat(response.getPermissions()).containsExactly(Permission.ARTISAN_CONTENT.authority());
     }
 
     /**
@@ -1194,6 +1195,18 @@ class AuthServiceTest {
         verifyNoInteractions(refreshTokenService);
     }
 
+    @Test
+    @DisplayName("logout: request overload revokes the supplied refresh token")
+    void logout_requestOverload_revokesSuppliedToken() {
+        TokenRefreshRequestDTO request = new TokenRefreshRequestDTO();
+        request.setRefreshToken("request-token");
+
+        authService.logout(request);
+        authService.logout((TokenRefreshRequestDTO) null);
+
+        verify(refreshTokenRepository).deleteByToken("request-token");
+    }
+
     /**
      * Verifies processOAuth2Success throws BadRequestException when provider returns null or blank email.
      */
@@ -1207,6 +1220,38 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.processOAuth2Success(oAuth2User, null, null))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("OAuth provider did not return an email address.");
+    }
+
+    @Test
+    @DisplayName("processOAuth2Success: rejects an OAuth identity with an unverified email")
+    void processOAuth2Success_whenEmailIsUnverified_throwsBadRequestException() {
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-unverified");
+        when(oAuth2User.getAttribute("email")).thenReturn("user@example.com");
+        when(oAuth2User.getAttribute("email_verified")).thenReturn(Boolean.FALSE);
+
+        assertThatThrownBy(() -> authService.processOAuth2Success(oAuth2User, null, null))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("OAuth provider did not verify the email address.");
+    }
+
+    @Test
+    @DisplayName("processOAuth2Success: refuses linking an existing unverified account")
+    void processOAuth2Success_whenExistingEmailIsUnverified_rejectsLinking() {
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-existing-unverified");
+        when(oAuth2User.getAttribute("email")).thenReturn("unverified@example.com");
+        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-existing-unverified"))
+                .thenReturn(Optional.empty());
+        User existing = User.builder()
+                .email("unverified@example.com")
+                .emailVerified(false)
+                .build();
+        when(userRepository.findByEmail("unverified@example.com")).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> authService.processOAuth2Success(oAuth2User, null, null))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("must verify its email");
     }
 
     /**

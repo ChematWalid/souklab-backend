@@ -16,6 +16,18 @@ class UserTest {
 
     private final LocalDateTime now = LocalDateTime.of(2026, 9, 11, 12, 0, 0);
 
+    @Test
+    void getNameUsesAvailableIdentityFields() {
+        User both = User.builder().firstName("  First ").lastName(" Last ").email("both@test").build();
+        User first = User.builder().firstName(" First ").email("first@test").build();
+        User last = User.builder().lastName(" Last ").email("last@test").build();
+        User neither = User.builder().email("fallback@test").build();
+        assertThat(both.getName()).isEqualTo("First Last");
+        assertThat(first.getName()).isEqualTo("First");
+        assertThat(last.getName()).isEqualTo("Last");
+        assertThat(neither.getName()).isEqualTo("fallback@test");
+    }
+
     @Nested
     @DisplayName("isSuspensionActive")
     class IsSuspensionActiveTests {

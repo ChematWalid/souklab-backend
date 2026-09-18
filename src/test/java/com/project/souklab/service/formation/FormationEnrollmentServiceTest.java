@@ -37,6 +37,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -176,7 +177,7 @@ class FormationEnrollmentServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(artisan.getUser().getEmail());
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("permission:artisan:formations");
+        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_FORMATIONS.authority());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -207,6 +208,16 @@ class FormationEnrollmentServiceTest {
             assertThat(result.getContent()).hasSize(1);
             assertThat(result.getContent().get(0).getId()).isEqualTo(FORMATION_ID);
             assertThat(result.getContent().get(0).getActiveEnrollmentsCount()).isEqualTo(3L);
+        }
+
+        @Test
+        void getPublishedCatalog_usesConfiguredDefaultsAndPreservesSortedPageable() {
+            when(formationRepository.findByStatusAndDeletedAtIsNull(eq(FormationStatus.PUBLISHED), any(Pageable.class)))
+                    .thenReturn(Page.empty());
+            formationEnrollmentService.getPublishedCatalog(null);
+            formationEnrollmentService.getPublishedCatalog(PageRequest.of(0, 10, Sort.by("title")));
+            verify(formationRepository, org.mockito.Mockito.times(2))
+                    .findByStatusAndDeletedAtIsNull(eq(FormationStatus.PUBLISHED), any(Pageable.class));
         }
 
         /**
@@ -300,6 +311,20 @@ class FormationEnrollmentServiceTest {
             assertThatThrownBy(() -> formationEnrollmentService.getPublishedFormationDetails(FORMATION_ID))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessageContaining("Published formation not found");
+        }
+
+        @Test
+        void getPublishedFormationDetails_usesLockResultWhenAvailable() {
+            authenticateArtisan(instructorArtisan);
+            when(formationRepository.findWithLockByIdAndDeletedAtIsNull(FORMATION_ID))
+                    .thenReturn(Optional.of(publishedFormation));
+            when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
+                    FORMATION_ID, INSTRUCTOR_ID, EnrollmentStatus.CONFIRMED)).thenReturn(false);
+            when(formationEnrollmentRepository.countByFormationIdAndStatus(FORMATION_ID, EnrollmentStatus.CONFIRMED))
+                    .thenReturn(0L);
+            when(formationFileRepository.findByFormationIdAndDeletedAtIsNull(FORMATION_ID)).thenReturn(List.of());
+
+            assertThat(formationEnrollmentService.getPublishedFormationDetails(FORMATION_ID)).isNotNull();
         }
     }
 
@@ -445,6 +470,21 @@ class FormationEnrollmentServiceTest {
             assertThat(cancelledEnrollment.getStatus()).isEqualTo(EnrollmentStatus.CONFIRMED);
             assertThat(cancelledEnrollment.getCancelledAt()).isNull();
         }
+
+        @Test
+        void enrollInFormation_rejectsPreviouslyAttendedEnrollment() {
+            authenticateArtisan(peerArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(FORMATION_ID)).thenReturn(Optional.of(publishedFormation));
+            when(formationEnrollmentRepository.countByFormationIdAndStatus(FORMATION_ID, EnrollmentStatus.CONFIRMED)).thenReturn(1L);
+            FormationEnrollment attended = FormationEnrollment.builder().formation(publishedFormation)
+                    .artisan(peerArtisan).status(EnrollmentStatus.ATTENDED).build();
+            when(formationEnrollmentRepository.findByFormationIdAndArtisanId(FORMATION_ID, PEER_ID))
+                    .thenReturn(Optional.of(attended));
+
+            assertThatThrownBy(() -> formationEnrollmentService.enrollInFormation(FORMATION_ID))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("ATTENDED");
+        }
     }
 
     @Nested
@@ -529,6 +569,21 @@ class FormationEnrollmentServiceTest {
             assertThatThrownBy(() -> formationEnrollmentService.cancelEnrollment(FORMATION_ID))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessageContaining("Active confirmed enrollment not found");
+        }
+
+        @Test
+        void cancelEnrollment_allowsCancellationWhenFormationHasNoSchedule() {
+            authenticateArtisan(peerArtisan);
+            publishedFormation.setScheduledAt(null);
+            FormationEnrollment active = FormationEnrollment.builder().formation(publishedFormation)
+                    .artisan(peerArtisan).status(EnrollmentStatus.CONFIRMED).build();
+            when(formationRepository.findByIdAndDeletedAtIsNull(FORMATION_ID)).thenReturn(Optional.of(publishedFormation));
+            when(formationEnrollmentRepository.findByFormationIdAndArtisanIdAndStatus(
+                    FORMATION_ID, PEER_ID, EnrollmentStatus.CONFIRMED)).thenReturn(Optional.of(active));
+            when(formationEnrollmentRepository.save(any(FormationEnrollment.class))).thenAnswer(i -> i.getArgument(0));
+
+            assertThat(formationEnrollmentService.cancelEnrollment(FORMATION_ID).getStatus())
+                    .isEqualTo(EnrollmentStatus.CANCELLED);
         }
     }
 
@@ -647,6 +702,17 @@ class FormationEnrollmentServiceTest {
             assertThat(result.getContent()).hasSize(1);
             assertThat(result.getContent().get(0).getEnrollment().getId()).isEqualTo("enrollment-history-1");
             assertThat(result.getContent().get(0).getFormation().getId()).isEqualTo(FORMATION_ID);
+        }
+
+        @Test
+        void getMyEnrollments_usesDefaultAndSortedPageableVariants() {
+            authenticateArtisan(peerArtisan);
+            when(formationEnrollmentRepository.findByArtisanIdAndDeletedAtIsNull(eq(PEER_ID), any(Pageable.class)))
+                    .thenReturn(Page.empty());
+            formationEnrollmentService.getMyEnrollments(null);
+            formationEnrollmentService.getMyEnrollments(PageRequest.of(0, 10, Sort.by("title")));
+            verify(formationEnrollmentRepository, org.mockito.Mockito.times(2))
+                    .findByArtisanIdAndDeletedAtIsNull(eq(PEER_ID), any(Pageable.class));
         }
     }
 }

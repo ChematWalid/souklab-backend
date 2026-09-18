@@ -21,6 +21,7 @@ import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
 import org.junit.jupiter.api.DisplayName;
@@ -83,7 +84,7 @@ class AuthControllerTest {
                 .name("Karim Client")
                 .phone("+213555000111")
                 .accountStatus(status)
-                .permissions(Set.of("permission:profile:read"))
+                .permissions(Set.of(Permission.PROFILE_READ.authority()))
                 .emailVerified(true)
                 .createdAt(LocalDateTime.of(2026, 9, 1, 10, 0))
                 .build();
@@ -98,7 +99,7 @@ class AuthControllerTest {
                 .name("Ahmed Artisan")
                 .phone("+213555222333")
                 .accountStatus(status)
-                .permissions(Set.of("permission:artisan:content"))
+                .permissions(Set.of(Permission.ARTISAN_CONTENT.authority()))
                 .emailVerified(false)
                 .teacher(false)
                 .verified(false)
@@ -113,7 +114,7 @@ class AuthControllerTest {
                 .tokenType("Bearer")
                 .expiresIn(900L)
                 .user(user)
-                .permissions(List.of("permission:profile:read"))
+                .permissions(List.of(Permission.PROFILE_READ.authority()))
                 .build();
     }
 
@@ -866,7 +867,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.code").value(200))
                     .andExpect(jsonPath("$.data.id").value("user-1"))
                     .andExpect(jsonPath("$.data.email").value("karim@souklab.dz"))
-                    .andExpect(jsonPath("$.data.permissions[0]").value("permission:profile:read"));
+                    .andExpect(jsonPath("$.data.permissions[0]").value(Permission.PROFILE_READ.authority()));
 
             verify(profileService).getCurrentUser();
         }

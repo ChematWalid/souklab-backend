@@ -105,4 +105,23 @@ class AvatarUploadSizeFilterTest {
 
         verify(filterChain).doFilter(request, response);
     }
+
+    @Test
+    void doFilter_handlesMissingValidationAndHeaderFallbacks() throws Exception {
+        storageProperties.setValidation(null);
+        filter.doFilter(new MockHttpServletRequest("POST", "/api/v1/users/me/avatars"),
+                new MockHttpServletResponse(), filterChain);
+        verify(filterChain).doFilter(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+
+        StorageProperties.ValidationProperties validation = new StorageProperties.ValidationProperties();
+        storageProperties.setValidation(validation);
+        MockHttpServletRequest invalidHeader = new MockHttpServletRequest("POST", "/api/v1/users/me/avatars");
+        invalidHeader.addHeader("Content-Length", "not-a-number");
+        filter = new AvatarUploadSizeFilter(storageProperties, new ServletResponseUtil(new JsonMapper()));
+        filter.doFilter(invalidHeader, new MockHttpServletResponse(), filterChain);
+
+        MockHttpServletRequest blankHeader = new MockHttpServletRequest("POST", "/api/v1/users/me/avatars");
+        blankHeader.addHeader("Content-Length", " ");
+        filter.doFilter(blankHeader, new MockHttpServletResponse(), filterChain);
+    }
 }

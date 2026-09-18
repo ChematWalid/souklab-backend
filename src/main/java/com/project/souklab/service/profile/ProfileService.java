@@ -146,11 +146,6 @@ public class ProfileService {
 
         boolean isArtisan = user.getPermissions().stream()
                 .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
-        boolean isClient = !isArtisan;
-
-        if (!isArtisan && !isClient) {
-            throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");
-        }
 
         if (dto == null || dto.isEmpty()) {
             return profileResponseMapper.mapToProfileResponse(user);

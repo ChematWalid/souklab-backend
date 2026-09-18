@@ -199,6 +199,59 @@ class VirusScanServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    void constructorRejectsMissingDependencies() {
+        assertThatThrownBy(() -> new VirusScanService(null, fakeScanner))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("StorageProperties cannot be null");
+        assertThatThrownBy(() -> new VirusScanService(properties, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("VirusScanner cannot be null");
+    }
+
+    @Test
+    void scanRejectsUnreadableContent() {
+        InputStream unreadable = new InputStream() {
+            @Override public int read() throws IOException { throw new IOException("read failed"); }
+        };
+        ValidatedFile input = new ValidatedFile(unreadable, "broken.bin", "application/octet-stream", 1);
+
+        assertThatThrownBy(() -> virusScanService.scan(input))
+                .isInstanceOf(VirusScanException.class)
+                .hasMessageContaining("read failed");
+    }
+
+    @Test
+    void nullScanPropertiesBypassesAllScanEntryPoints() {
+        properties.setVirusScan(null);
+        ValidatedFile input = createValidatedFile(new byte[]{1}, "file.bin");
+
+        assertThat(virusScanService.scan(input)).isSameAs(input);
+        virusScanService.scanBytes(new byte[]{1}, "file.bin");
+        virusScanService.scanStream(new ByteArrayInputStream(new byte[]{1}), "file.bin");
+        assertThat(fakeScanner.getScanCount()).isZero();
+    }
+
+    @Test
+    void directEntryPointsRejectNullArguments() {
+        assertThatThrownBy(() -> virusScanService.scanBytes(null, "file.bin"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Byte array content cannot be null");
+        assertThatThrownBy(() -> virusScanService.scanStream(null, "file.bin"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Content stream cannot be null");
+    }
+
+    @Test
+    void disabledDirectEntryPointsDoNotInvokeScanner() {
+        scanProperties.setEnabled(false);
+
+        virusScanService.scanBytes(new byte[]{1}, "file.bin");
+        virusScanService.scanStream(new ByteArrayInputStream(new byte[]{1}), "file.bin");
+
+        assertThat(fakeScanner.getScanCount()).isZero();
+    }
+
     /**
      * Lightweight test double simulating a VirusScanner.
      */

@@ -10,6 +10,7 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.Notification;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
+import com.project.souklab.security.Permission;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -69,11 +71,15 @@ class NotificationServiceTest {
     void setUp() {
         fixedClock = Clock.fixed(FIXED_INSTANT, ZONE_ID);
         fixedNow = LocalDateTime.now(fixedClock);
+        com.project.souklab.config.AppProperties appProperties = new com.project.souklab.config.AppProperties();
+        appProperties.getChat().setNotificationDestination("/queue/notifications");
+        appProperties.getNotification().setMaxMessageLength(4000);
         notificationService = new NotificationService(
                 notificationRepository,
                 userRepository,
                 messagingTemplate,
-                fixedClock
+                fixedClock,
+                appProperties
         );
         SecurityContextHolder.clearContext();
 
@@ -389,7 +395,7 @@ class NotificationServiceTest {
         User admin2 = User.builder().email("admin2@souklab.com").build();
         admin2.setId("admin-uuid-2");
 
-        when(userRepository.findByPermissionKey("permission:admin:users")).thenReturn(List.of(admin1, admin2));
+        when(userRepository.findByPermissionKey(Permission.ADMIN_USERS.authority())).thenReturn(List.of(admin1, admin2));
         when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
             Notification n = invocation.getArgument(0);
             n.setId("notif-admin-" + n.getUser().getId());
@@ -399,7 +405,7 @@ class NotificationServiceTest {
 
         notificationService.notifyAdmins("System maintenance scheduled");
 
-        verify(userRepository).findByPermissionKey("permission:admin:users");
+        verify(userRepository).findByPermissionKey(Permission.ADMIN_USERS.authority());
         verify(notificationRepository, times(2)).save(any(Notification.class));
         verify(messagingTemplate).convertAndSendToUser(eq("admin1@souklab.com"), eq("/queue/notifications"), any(NotificationResponseDTO.class));
         verify(messagingTemplate).convertAndSendToUser(eq("admin2@souklab.com"), eq("/queue/notifications"), any(NotificationResponseDTO.class));
@@ -646,6 +652,31 @@ class NotificationServiceTest {
                 eq("/queue/notifications"),
                 eq(result)
         );
+    }
+
+    @Test
+    @DisplayName("dispatchRealtimePush: post-commit broker failure is contained")
+    void dispatchRealtimePush_whenPostCommitDeliveryFails_doesNotPropagate() {
+        TransactionSynchronizationManager.initSynchronization();
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+        try {
+            when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
+                Notification n = invocation.getArgument(0);
+                n.setId("notif-tx-failure");
+                n.setCreatedAt(fixedNow);
+                return n;
+            });
+            doThrow(new IllegalStateException("broker unavailable"))
+                    .when(messagingTemplate).convertAndSendToUser(any(), any(), any());
+
+            notificationService.createForUser(testUser, "Deferred resilient message");
+
+            assertThatCode(() -> TransactionSynchronizationManager.getSynchronizations()
+                    .forEach(TransactionSynchronization::afterCommit)).doesNotThrowAnyException();
+        } finally {
+            TransactionSynchronizationManager.setActualTransactionActive(false);
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 
     /**

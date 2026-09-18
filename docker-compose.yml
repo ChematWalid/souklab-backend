@@ -2,23 +2,21 @@
 # LOCAL DEVELOPMENT ONLY
 # This docker-compose configuration is intended strictly for local development
 # and automated integration testing. It is NOT a production deployment definition.
-# The default fallback credentials (${MINIO_ROOT_USER:-minioadmin}) are acceptable
-# only within local dev environments and must NEVER be used in staging or production.
+# All credentials, ports, and project names are supplied by the environment.
 # In production, file storage connects to real AWS S3 or Cloudflare R2 via secure
 # environment variables and IAM credentials.
 # ==============================================================================
 services:
   mariadb:
     image: mariadb:11.4
-    container_name: souklab-mariadb
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: ${DB_NAME:-souklab_db}
-      MARIADB_USER: ${DB_USERNAME:-souklab_test}
-      MARIADB_PASSWORD: ${DB_PASSWORD:-souklab_test_password}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-souklab_root_password}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
-      - "${MARIADB_HOST_PORT:-3306}:3306"
+      - "${MARIADB_HOST_PORT}:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
     healthcheck:
@@ -29,11 +27,10 @@ services:
 
   rabbitmq:
     image: rabbitmq:4.0-management
-    container_name: souklab-rabbitmq
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-souklab_test}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-souklab_test_password}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     command: ["sh", "-c", "rabbitmq-plugins enable --offline rabbitmq_stomp && rabbitmq-server"]
     ports:
       - "5672:5672"
@@ -49,12 +46,11 @@ services:
 
   minio:
     image: quay.io/minio/minio:RELEASE.2024-06-13T22-53-53Z
-    container_name: souklab-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin_secret}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -68,7 +64,6 @@ services:
 
   clamav:
     image: clamav/clamav:1.4
-    container_name: souklab-clamav
     restart: unless-stopped
     ports:
       - "3310:3310"
@@ -83,7 +78,6 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
-    container_name: souklab-elasticsearch
     restart: unless-stopped
     environment:
       - discovery.type=single-node
@@ -102,12 +96,12 @@ services:
 
 volumes:
   mariadb_data:
-    name: souklab_mariadb_data
+    name: ${COMPOSE_PROJECT_NAME}_mariadb_data
   rabbitmq_data:
-    name: souklab_rabbitmq_data
+    name: ${COMPOSE_PROJECT_NAME}_rabbitmq_data
   minio_data:
-    name: souklab_minio_data_v1
+    name: ${COMPOSE_PROJECT_NAME}_minio_data_v2
   clamav_data:
-    name: souklab_clamav_data
+    name: ${COMPOSE_PROJECT_NAME}_clamav_data
   es_data:
-    name: souklab_es_data
+    name: ${COMPOSE_PROJECT_NAME}_es_data

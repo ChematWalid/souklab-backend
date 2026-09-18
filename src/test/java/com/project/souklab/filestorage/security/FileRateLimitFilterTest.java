@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import tools.jackson.databind.json.JsonMapper;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Isolated unit tests for FileRateLimitFilter.
@@ -151,7 +153,7 @@ class FileRateLimitFilterTest {
     @DisplayName("Authenticated users have independent rate-limiting buckets")
     void authenticatedUsers_haveIndependentBuckets() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(new SimpleGrantedAuthority("permission:profile:read")))
+                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.PROFILE_READ.authority())))
         );
 
         for (int i = 0; i < 2; i++) {
@@ -167,7 +169,7 @@ class FileRateLimitFilterTest {
         assertThat(resExceeded.getStatus()).isEqualTo(429);
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(new SimpleGrantedAuthority("permission:artisan:content")))
+                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_CONTENT.authority())))
         );
 
         MockHttpServletRequest reqUserB = new MockHttpServletRequest("GET", "/api/v1/files/avatar.jpg");
@@ -186,5 +188,44 @@ class FileRateLimitFilterTest {
 
         assertThat(chainAnon.getRequest()).isNotNull();
         assertThat(resAnon.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void nullFileUriIsSkippedAndAnonymousRequestsUseIpKey() throws Exception {
+        MockHttpServletRequest nullUri = new MockHttpServletRequest("GET", null);
+        assertThat(filter.shouldNotFilter(nullUri)).isTrue();
+        SecurityContextHolder.getContext().setAuthentication(
+                new AnonymousAuthenticationToken("key", "anonymous",
+                        List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))));
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/files/a.pdf");
+        request.setRemoteAddr("192.0.2.1");
+        filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+    }
+
+    @Test
+    void invalidRateLimitConfigurationFailsOnBucketCreation() {
+        StorageProperties invalid = new StorageProperties();
+        invalid.getRateLimit().getCache().setMaximumSize(10);
+        invalid.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(1));
+        FileRateLimitFilter invalidFilter = new FileRateLimitFilter(servletResponseUtil, invalid);
+
+        assertThatThrownBy(() -> invalidFilter.resolveBucket("invalid"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("storage.rate-limit");
+    }
+
+    @Test
+    void rejectsEveryInvalidRefillConfigurationWhenCreatingBuckets() {
+        for (Duration duration : java.util.Arrays.asList(null, Duration.ZERO, Duration.ofSeconds(-1))) {
+            StorageProperties invalid = new StorageProperties();
+            invalid.getRateLimit().setCapacity(1);
+            invalid.getRateLimit().setRefillDuration(duration);
+            invalid.getRateLimit().getCache().setMaximumSize(10);
+            invalid.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(1));
+            FileRateLimitFilter invalidFilter = new FileRateLimitFilter(servletResponseUtil, invalid);
+
+            assertThatThrownBy(() -> invalidFilter.resolveBucket("invalid-" + duration))
+                    .isInstanceOf(IllegalStateException.class);
+        }
     }
 }

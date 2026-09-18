@@ -1,6 +1,7 @@
 package com.project.souklab.service.user;
 
 import com.project.souklab.config.AvatarProperties;
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.UserAvatarRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
@@ -95,6 +96,9 @@ class AvatarServiceTest {
     @Mock
     private TransactionTemplate transactionTemplate;
 
+    @Mock
+    private CurrentUserProvider currentUserProvider;
+
     private Clock clock;
     private AvatarProperties avatarProperties;
     private AvatarService avatarService;
@@ -107,6 +111,8 @@ class AvatarServiceTest {
         avatarProperties = new AvatarProperties();
         avatarProperties.setMaxPerUser(10L);
         avatarProperties.setAllowedMimeTypes(List.of("image/jpeg", "image/png", "image/webp"));
+        AppProperties appProperties = new AppProperties();
+        appProperties.getStorage().setFileServingPrefix("/api/v1/files/");
         avatarService = new AvatarService(
                 userAvatarRepository,
                 userRepository,
@@ -116,7 +122,9 @@ class AvatarServiceTest {
                 storageService,
                 transactionTemplate,
                 clock,
-                avatarProperties
+                avatarProperties,
+                appProperties,
+                null
         );
 
         testUser = User.builder()
@@ -460,6 +468,58 @@ class AvatarServiceTest {
         verify(storageService).delete("k3.png");
     }
 
+    @Test
+    void uploadAvatar_continuesCompensationWhenOneStorageDeleteFails() throws Exception {
+        when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
+        when(userAvatarRepository.countByUserId(testUser.getId())).thenReturn(0L);
+        ValidatedFile validated = new ValidatedFile(new ByteArrayInputStream(new byte[]{1}),
+                "portrait.png", "image/png", 1);
+        when(fileValidator.validateAndSanitize(any(), any(), any(), anyLong(), any()))
+                .thenReturn(validated);
+        when(virusScanService.scan(validated)).thenReturn(validated);
+        when(imageProcessingService.generateVariants(validated)).thenReturn(createMockVariants());
+        when(storageService.store(any(), any(), any(), anyLong()))
+                .thenReturn(new StorageResult("first", "portrait.png", "image/png", 2, Instant.now()))
+                .thenReturn(new StorageResult("second", "portrait.png", "image/png", 2, Instant.now()))
+                .thenReturn(new StorageResult("third", "portrait.png", "image/png", 2, Instant.now()));
+        when(transactionTemplate.execute(any())).thenThrow(new IllegalStateException("db failure"));
+        doThrow(new StorageException("delete failed")).when(storageService).delete("second");
+
+        assertThatThrownBy(() -> avatarService.uploadAvatar(testUser, validFile))
+                .isInstanceOf(IllegalStateException.class);
+        verify(storageService).delete("first");
+        verify(storageService).delete("second");
+        verify(storageService).delete("third");
+    }
+
+    @Test
+    void compatibilityConstructorAndCurrentUserEntryPointsDelegateToOwnedOperations() {
+        AvatarService compatibilityService = new AvatarService(
+                userAvatarRepository, userRepository, fileValidator, virusScanService,
+                imageProcessingService, storageService, transactionTemplate, clock, avatarProperties);
+        assertThat(compatibilityService).isNotNull();
+
+        AppProperties properties = new AppProperties();
+        properties.getStorage().setFileServingPrefix("/api/v1/files/");
+        AvatarService currentUserService = new AvatarService(
+                userAvatarRepository, userRepository, fileValidator, virusScanService,
+                imageProcessingService, storageService, transactionTemplate, clock,
+                avatarProperties, properties, currentUserProvider);
+        when(currentUserProvider.requireCurrentUser()).thenReturn(testUser);
+        when(userAvatarRepository.findByUserId(testUser.getId(), Pageable.unpaged()))
+                .thenReturn(new PageImpl<>(List.of()));
+        assertThat(currentUserService.listAvatars(Pageable.unpaged()).getContent()).isEmpty();
+
+        assertThatThrownBy(() -> currentUserService.uploadAvatar(null))
+                .isInstanceOf(BadRequestException.class);
+        when(userAvatarRepository.findByIdAndUserId("missing", testUser.getId()))
+                .thenReturn(Optional.empty());
+        assertThatThrownBy(() -> currentUserService.deleteAvatar("missing"))
+                .isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> currentUserService.activateAvatar("missing"))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
     /**
      * Verifies that a missing or empty file throws BadRequestException immediately.
      */
@@ -476,6 +536,54 @@ class AvatarServiceTest {
 
         verifyNoInteractions(userAvatarRepository);
         verifyNoInteractions(fileValidator);
+    }
+
+    @Test
+    @DisplayName("uploadAvatar rejects a null current user before resolving repositories")
+    void uploadAvatar_whenCurrentUserIsNull_throwsIllegalArgumentException() {
+        assertThatThrownBy(() -> avatarService.uploadAvatar(null, validFile))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Current user cannot be null");
+        verifyNoInteractions(userRepository, userAvatarRepository);
+    }
+
+    @Test
+    @DisplayName("uploadAvatar translates an unreadable multipart stream to StorageException")
+    void uploadAvatar_whenMultipartStreamCannotBeRead_throwsStorageException() throws Exception {
+        when(userAvatarRepository.countByUserId(testUser.getId())).thenReturn(0L);
+        MultipartFile unreadable = new MockMultipartFile("file", "broken.png", "image/png", "bytes".getBytes()) {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                throw new IOException("stream unavailable");
+            }
+        };
+
+        assertThatThrownBy(() -> avatarService.uploadAvatar(testUser, unreadable))
+                .isInstanceOf(StorageException.class)
+                .hasMessageContaining("Failed to read uploaded avatar stream");
+        verifyNoInteractions(virusScanService, imageProcessingService, storageService, transactionTemplate);
+    }
+
+    @Test
+    @DisplayName("uploadAvatar rejects incomplete image variant maps")
+    void uploadAvatar_whenRequiredVariantIsMissing_throwsStorageException() throws Exception {
+        when(userAvatarRepository.countByUserId(testUser.getId())).thenReturn(0L);
+        ValidatedFile validated = new ValidatedFile(
+                new ByteArrayInputStream(validFile.getBytes()), "portrait.png", "image/png", validFile.getSize());
+        when(fileValidator.validateAndSanitize(any(InputStream.class), any(), any(), anyLong(), any()))
+                .thenReturn(validated);
+        when(virusScanService.scan(validated)).thenReturn(validated);
+        EnumMap<ResolutionTier, ImageVariant> incomplete = new EnumMap<>(ResolutionTier.class);
+        incomplete.put(ResolutionTier.ORIGINAL, new ImageVariant(
+                ResolutionTier.ORIGINAL, new byte[]{1}, 1, 1, "image/png"));
+        incomplete.put(ResolutionTier.MEDIUM, new ImageVariant(
+                ResolutionTier.MEDIUM, new byte[]{1}, 1, 1, "image/png"));
+        when(imageProcessingService.generateVariants(validated)).thenReturn(incomplete);
+
+        assertThatThrownBy(() -> avatarService.uploadAvatar(testUser, validFile))
+                .isInstanceOf(StorageException.class)
+                .hasMessageContaining("all required resolution tiers");
+        verifyNoInteractions(storageService, transactionTemplate);
     }
 
     private UserAvatar buildMockAvatar(String id, boolean isActive) {
