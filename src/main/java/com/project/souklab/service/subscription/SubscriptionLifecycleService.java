@@ -1,0 +1,139 @@
+package com.project.souklab.service.subscription;
+
+import com.project.souklab.config.AppProperties;
+import com.project.souklab.dao.ArtisanSubscriptionRepository;
+import com.project.souklab.dao.ClientSubscriptionRepository;
+import com.project.souklab.dao.PaymentRepository;
+import com.project.souklab.dao.PaymentWebhookLogRepository;
+import com.project.souklab.model.PaymentWebhookLog;
+import com.project.souklab.model.ArtisanSubscription;
+import com.project.souklab.model.ClientSubscription;
+import com.project.souklab.model.NotificationType;
+import com.project.souklab.model.Payment;
+import com.project.souklab.model.PaymentStatus;
+import com.project.souklab.model.SubscriptionStatus;
+import com.project.souklab.model.WebhookProcessingStatus;
+import com.project.souklab.service.notification.NotificationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class SubscriptionLifecycleService {
+    private final PaymentRepository paymentRepository;
+    private final ArtisanSubscriptionRepository artisanSubscriptions;
+    private final ClientSubscriptionRepository clientSubscriptions;
+    private final NotificationService notificationService;
+    private final PaymentWebhookLogRepository webhookLogs;
+    private final AppProperties appProperties;
+    private final Clock clock;
+
+    @Scheduled(fixedDelayString = "${app.subscription.lifecycle-interval}")
+    @Transactional
+    public void processLifecycle() {
+        LocalDateTime now = LocalDateTime.now(clock.withZone(ZoneId.of(appProperties.getSubscription().getLifecycleTimeZone())));
+        expirePendingPayments(now);
+        PageRequest batch = PageRequest.of(0, appProperties.getSubscription().getLifecycleBatchSize());
+        artisanSubscriptions.findByStatusAndExpiresAtBefore(SubscriptionStatus.ACTIVE, now, batch).forEach(this::expire);
+        clientSubscriptions.findByStatusAndExpiresAtBefore(SubscriptionStatus.ACTIVE, now, batch).forEach(this::expire);
+        sendReminders(now);
+        releaseStaleWebhookClaims(now);
+        releaseExpiredWebhookLogs(now);
+    }
+
+    private void releaseStaleWebhookClaims(LocalDateTime now) {
+        LocalDateTime cutoff = now.minus(appProperties.getSubscription().getLifecycleInterval());
+        PageRequest batch = PageRequest.of(0, appProperties.getSubscription().getLifecycleBatchSize());
+        webhookLogs.findByStatusAndUpdatedAtBefore(WebhookProcessingStatus.PROCESSING, cutoff, batch).forEach(log -> {
+            log.setStatus(WebhookProcessingStatus.FAILED);
+            log.setFailureReason("Stale webhook processing claim released");
+        });
+    }
+
+    private void releaseExpiredWebhookLogs(LocalDateTime now) {
+        LocalDateTime cutoff = now.minus(appProperties.getSubscription().getWebhookRetention());
+        int batchSize = appProperties.getSubscription().getLifecycleBatchSize();
+        for (PaymentWebhookLog log : webhookLogs.findByCreatedAtBefore(cutoff, PageRequest.of(0, batchSize))) {
+            webhookLogs.delete(log);
+        }
+    }
+
+    private void expirePendingPayments(LocalDateTime now) {
+        int batchSize = appProperties.getSubscription().getLifecycleBatchSize();
+        LocalDateTime cutoff = now.minus(appProperties.getSubscription().getCheckoutIdempotencyRetention());
+        for (Payment payment : paymentRepository.findByStatusOrderByCreatedAtAsc(PaymentStatus.PENDING, PageRequest.of(0, batchSize))) {
+            if (payment.getCreatedAt() != null && payment.getCreatedAt().isBefore(cutoff)) {
+                payment.setStatus(PaymentStatus.EXPIRED);
+                expirePendingSubscription(payment.getSubscriptionId());
+                notificationService.createForUser(payment.getAccount(), "Your subscription checkout expired.", NotificationType.CHECKOUT_CANCELED, payment.getId());
+            }
+        }
+    }
+
+    private void expirePendingSubscription(String subscriptionId) {
+        artisanSubscriptions.findWithLockById(subscriptionId).ifPresent(subscription -> {
+            if (subscription.getStatus() == SubscriptionStatus.PENDING) {
+                subscription.setStatus(SubscriptionStatus.EXPIRED);
+            }
+        });
+        clientSubscriptions.findWithLockById(subscriptionId).ifPresent(subscription -> {
+            if (subscription.getStatus() == SubscriptionStatus.PENDING) {
+                subscription.setStatus(SubscriptionStatus.EXPIRED);
+            }
+        });
+    }
+
+    private void expire(ArtisanSubscription subscription) {
+        subscription.setStatus(SubscriptionStatus.EXPIRED);
+        if (subscription.getAccount().getArtisan() != null && artisanSubscriptions.countByAccountIdAndStatus(subscription.getAccount().getId(), SubscriptionStatus.ACTIVE) == 0) {
+            subscription.getAccount().getArtisan().setPremium(false);
+        }
+        notificationService.createForUser(subscription.getAccount(), "Your artisan subscription has expired.", NotificationType.SUBSCRIPTION_EXPIRED, subscription.getId());
+    }
+
+    private void expire(ClientSubscription subscription) {
+        subscription.setStatus(SubscriptionStatus.EXPIRED);
+        if (subscription.getAccount().getClient() != null && clientSubscriptions.countByAccountIdAndStatus(subscription.getAccount().getId(), SubscriptionStatus.ACTIVE) == 0) {
+            subscription.getAccount().getClient().setPremium(false);
+        }
+        notificationService.createForUser(subscription.getAccount(), "Your client subscription has expired.", NotificationType.SUBSCRIPTION_EXPIRED, subscription.getId());
+    }
+
+    private void sendReminders(LocalDateTime now) {
+        appProperties.getSubscription().getReminderOffsets().forEach(offset -> {
+            PageRequest batch = PageRequest.of(0, appProperties.getSubscription().getLifecycleBatchSize());
+            artisanSubscriptions.findByStatusAndExpiresAtAfterAndExpiresAtBefore(SubscriptionStatus.ACTIVE, now, now.plusDays(offset), batch).forEach(value -> remind(value, offset, now));
+            clientSubscriptions.findByStatusAndExpiresAtAfterAndExpiresAtBefore(SubscriptionStatus.ACTIVE, now, now.plusDays(offset), batch).forEach(value -> remind(value, offset, now));
+        });
+    }
+
+    private void remind(ArtisanSubscription subscription, long offset, LocalDateTime now) {
+        if (subscription.getExpiresAt() == null || subscription.getExpiresAt().isBefore(now) || sent(subscription.getReminderOffsetsSent(), offset)) return;
+        subscription.setReminderOffsetsSent(append(subscription.getReminderOffsetsSent(), offset));
+        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.SUBSCRIPTION_RENEWAL_REMINDER, subscription.getId());
+    }
+
+    private void remind(ClientSubscription subscription, long offset, LocalDateTime now) {
+        if (subscription.getExpiresAt() == null || subscription.getExpiresAt().isBefore(now) || sent(subscription.getReminderOffsetsSent(), offset)) return;
+        subscription.setReminderOffsetsSent(append(subscription.getReminderOffsetsSent(), offset));
+        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.SUBSCRIPTION_RENEWAL_REMINDER, subscription.getId());
+    }
+
+    private boolean sent(String value, long offset) {
+        return value != null && Set.of(value.split(",")).contains(Long.toString(offset));
+    }
+
+    private String append(String value, long offset) {
+        return value == null || value.isBlank() ? Long.toString(offset) : value + "," + offset;
+    }
+}
