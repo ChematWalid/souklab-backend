@@ -39,6 +39,31 @@ public class ConfigurationPolicyValidator {
         if (isProduction() && Boolean.TRUE.equals(storageProperties.getS3().getAutoCreateBucket())) {
             throw new IllegalStateException("storage.s3.auto-create-bucket must be false in production");
         }
+
+        if (isProduction()) {
+            validateProductionPolicy();
+        }
+    }
+
+    private void validateProductionPolicy() {
+        requireExactValue("spring.jpa.hibernate.ddl-auto", environment.getProperty("spring.jpa.hibernate.ddl-auto"), "validate");
+        requireExactValue("spring.flyway.enabled", environment.getProperty("spring.flyway.enabled"), "true");
+        requireExactValue("storage.provider", environment.getProperty("storage.provider"), "s3");
+        requireExactValue("storage.virus-scan.enabled", environment.getProperty("storage.virus-scan.enabled"), "true");
+        requireExactValue("storage.virus-scan.fail-open", environment.getProperty("storage.virus-scan.fail-open"), "false");
+        requireExactValue("app.admin.bootstrap-enabled", environment.getProperty("app.admin.bootstrap-enabled"), "false");
+        requireConfigured("app.search.uris", appProperties.getSearch().getUris());
+        requireConfigured("app.relay.host", appProperties.getRelay().getHost());
+        requireConfigured("app.relay.client-login", appProperties.getRelay().getClientLogin());
+        requireConfigured("app.relay.client-passcode", appProperties.getRelay().getClientPasscode());
+        requireConfigured("app.relay.system-login", appProperties.getRelay().getSystemLogin());
+        requireConfigured("app.relay.system-passcode", appProperties.getRelay().getSystemPasscode());
+    }
+
+    private void requireExactValue(String name, String actual, String expected) {
+        if (!expected.equalsIgnoreCase(actual)) {
+            throw new IllegalStateException(name + " must be " + expected + " in production");
+        }
     }
 
     private void validateRateLimit(String prefix, RateLimitProperties properties) {
