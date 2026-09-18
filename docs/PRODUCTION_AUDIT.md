@@ -6,7 +6,7 @@ This report is based on the current source tree, build configuration, migrations
 
 ## Current recommendation
 
-Production audit: 72/100, conditionally ready for a controlled deployment after the remaining operational gates are completed.
+Production audit: 76/100, conditionally ready for a controlled deployment after the remaining operational gates are completed.
 
 The codebase compiles and the dependency-backed local verifier passes. Deployment
 observability, release automation, and horizontal-scaling controls remain open gates.
@@ -18,10 +18,9 @@ observability, release automation, and horizontal-scaling controls remain open g
 | Finding | Evidence | Recommendation |
 | --- | --- | --- |
 | Production schema changes require deployment discipline | Flyway is bundled and enabled by the production profile, while local development keeps it disabled. | Apply reviewed migrations before startup and document rollback/recovery ownership. |
-| No tracked CI/release gate is present | No `.github` workflow or equivalent pipeline is tracked. | Add compile, test, migration, dependency, image, and artifact gates. |
-| Operational dashboards are not yet wired to a deployment platform | Actuator health/readiness and Prometheus metrics are now exposed, but no platform scrape or alert configuration is tracked. | Bind the endpoints to the selected monitoring stack and define alerts. |
+| Hosted CI result is not yet available | A tracked workflow now runs Java 21 compilation and the service-backed verifier, but no hosted run is available from this checkout. | Require the workflow to pass before merging or releasing. |
 | Rate limiting is process-local | Bucket4j state is held in Caffeine caches. | Use a shared limiter or edge gateway when horizontally scaling. |
-| Full dependency verification is not yet a CI release gate | The local verifier is repeatable and passes, but no tracked CI workflow runs it. | Add a service-backed CI gate before production release. |
+| Production observability is not yet platform-bound | Actuator health/readiness and Prometheus metrics are exposed, but no scrape or alert configuration is tracked. | Bind endpoints to the selected monitoring stack and define alerts. |
 
 ### Medium priority
 
@@ -48,6 +47,10 @@ observability, release automation, and horizontal-scaling controls remain open g
 - MariaDB is now the explicit JDBC target, with the MariaDB driver/dialect and Java 21 container baseline.
 - Hikari pool settings, UTC JDBC timezone, disabled Open Session in View, health/readiness probes, and Prometheus metrics are externalized/configured.
 - Production startup rejects unsafe schema mode, disabled Flyway, in-memory storage, disabled antivirus, fail-open scanning, and admin bootstrap.
+- Spring Boot Flyway auto-configuration is now included explicitly; a generated MariaDB baseline migration supports fresh installs before V1-V4.
+- Permission seed migrations now provide required audit timestamps and are verified with 12 seeded permissions.
+- Production-only readiness now checks S3, Elasticsearch, the RabbitMQ STOMP endpoint, and ClamAV.
+- Elasticsearch has an explicit first-install `create-or-update` bootstrap mode and strict normal-operation `validate` mode.
 - Authentication failures use a stable generic response; security headers include `nosniff`, `DENY` framing, and `no-referrer`.
 - Paginated artisan directory queries no longer fetch multiple collections in the page query; collection batch fetching and supporting message/upload indexes were added.
 - Chat reads exclude soft-deleted messages and deleted idempotency records; after-commit dispatch no longer uses anonymous production classes.
@@ -60,12 +63,14 @@ observability, release automation, and horizontal-scaling controls remain open g
 - Final Compose-backed suite: 1,133 tests, 0 failures, 0 errors, 0 skipped, on Java 21 with MariaDB 11.4, RabbitMQ 4.0, MinIO, Elasticsearch 8.15, and ClamAV 1.4.
 - JaCoCo report: generated successfully; 211 production classes analyzed.
 - `git diff --check`: passed.
+- Fresh production bootstrap: Flyway applied V0-V4 to MariaDB 11.4, created 39 tables, and inserted 12 permissions.
+- Strict production restart: `ddl-auto=validate`, Flyway up-to-date, Search schema `validate`, STOMP relay connected, and `/actuator/health/readiness` returned HTTP 200.
 - Production time scan: only `ClockConfig` creates the system clock; all production `now` calls use an injected clock.
 - Architecture scans: no controller repository imports and no inline implementation classes.
 - Native SonarLint executable/plugin: not installed or configured in this repository, so no native SonarLint result is available; local compiler, test, and source-hygiene checks are the available evidence.
 
 ## Next release gate
 
-The next production milestone should run the Compose-backed integration verifier,
-inspect migration execution against MariaDB, add CI/dependency/image gates, and
-bind Actuator/Prometheus output to the selected deployment platform.
+The next production milestone should require a hosted CI pass, bind
+Actuator/Prometheus output to the selected deployment platform, and replace the
+process-local rate-limit caches before horizontal scaling.

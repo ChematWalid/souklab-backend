@@ -53,6 +53,11 @@ public class ConfigurationPolicyValidator {
         requireExactValue("storage.virus-scan.fail-open", environment.getProperty("storage.virus-scan.fail-open"), "false");
         requireExactValue("app.admin.bootstrap-enabled", environment.getProperty("app.admin.bootstrap-enabled"), "false");
         requireExactValue("app.search.enabled", environment.getProperty("app.search.enabled"), "true");
+        if (appProperties.getSearch().isSchemaBootstrapEnabled()) {
+            requireExactValue("app.search.schema-management", appProperties.getSearch().getSchemaManagement(), "create-or-update");
+        } else {
+            requireExactValue("app.search.schema-management", appProperties.getSearch().getSchemaManagement(), "validate");
+        }
         requireConfigured("app.search.uris", appProperties.getSearch().getUris());
         requireConfigured("app.relay.host", appProperties.getRelay().getHost());
         requireConfigured("app.relay.client-login", appProperties.getRelay().getClientLogin());

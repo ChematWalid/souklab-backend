@@ -1,76 +1,83 @@
-CREATE TABLE feed_posts (
-    id VARCHAR(36) NOT NULL,
-    created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    deleted_at DATETIME(6),
-    author_id VARCHAR(36) NOT NULL,
-    type VARCHAR(30) NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    body TEXT NOT NULL,
-    status VARCHAR(30) NOT NULL,
-    formation_id VARCHAR(36),
-    published_at DATETIME(6),
-    moderated_by VARCHAR(36),
-    moderation_note TEXT,
-    PRIMARY KEY (id),
-    CONSTRAINT fk_feed_posts_author FOREIGN KEY (author_id) REFERENCES users (id),
-    CONSTRAINT fk_feed_posts_formation FOREIGN KEY (formation_id) REFERENCES formations (id),
-    CONSTRAINT fk_feed_posts_moderator FOREIGN KEY (moderated_by) REFERENCES users (id)
-);
-CREATE INDEX idx_feed_posts_public ON feed_posts (status, deleted_at, published_at);
-CREATE INDEX idx_feed_posts_author ON feed_posts (author_id, status, deleted_at);
+-- Phase 7 schema additions with MariaDB types matching the Hibernate mapping.
 
-CREATE TABLE feed_post_media (
-    id VARCHAR(36) NOT NULL,
-    created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    deleted_at DATETIME(6),
-    post_id VARCHAR(36) NOT NULL,
-    storage_key VARCHAR(500) NOT NULL,
-    content_type VARCHAR(100) NOT NULL,
-    file_size BIGINT NOT NULL,
-    display_order INT NOT NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT fk_feed_post_media_post FOREIGN KEY (post_id) REFERENCES feed_posts (id)
-);
+CREATE TABLE IF NOT EXISTS `feed_posts` (
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `published_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `author_id` varchar(36) NOT NULL,
+  `formation_id` varchar(36) DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `moderated_by` varchar(36) DEFAULT NULL,
+  `title` varchar(200) NOT NULL,
+  `body` text NOT NULL,
+  `moderation_note` text DEFAULT NULL,
+  `status` enum('HIDDEN','PENDING','PUBLISHED','REMOVED') NOT NULL,
+  `type` enum('ACTUALITE','ANNONCE','FORMATION') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_feed_posts_public` (`status`,`deleted_at`,`published_at`),
+  KEY `idx_feed_posts_author` (`author_id`,`status`,`deleted_at`),
+  KEY `FK13qfl80xfl2pho2u67v64p40v` (`formation_id`),
+  KEY `FKeying8r17u4u397uqh6s73ykn` (`moderated_by`),
+  CONSTRAINT `FK13qfl80xfl2pho2u67v64p40v` FOREIGN KEY (`formation_id`) REFERENCES `formations` (`id`),
+  CONSTRAINT `FKavi9fu6x29ixg81gk9clvjw0r` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKeying8r17u4u397uqh6s73ykn` FOREIGN KEY (`moderated_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-CREATE TABLE artisan_reviews (
-    id VARCHAR(36) NOT NULL,
-    created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    deleted_at DATETIME(6),
-    reviewer_id VARCHAR(36) NOT NULL,
-    artisan_id VARCHAR(36) NOT NULL,
-    enrollment_id VARCHAR(36) NOT NULL,
-    rating DECIMAL(3,2) NOT NULL,
-    comment TEXT NOT NULL,
-    status VARCHAR(30) NOT NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT uk_artisan_review_enrollment UNIQUE (enrollment_id),
-    CONSTRAINT fk_artisan_reviews_reviewer FOREIGN KEY (reviewer_id) REFERENCES artisans (id),
-    CONSTRAINT fk_artisan_reviews_artisan FOREIGN KEY (artisan_id) REFERENCES artisans (id),
-    CONSTRAINT fk_artisan_reviews_enrollment FOREIGN KEY (enrollment_id) REFERENCES formation_enrollments (id)
-);
-CREATE INDEX idx_artisan_reviews_artisan ON artisan_reviews (artisan_id, status, created_at);
-CREATE INDEX idx_artisan_reviews_reviewer ON artisan_reviews (reviewer_id, created_at);
+CREATE TABLE IF NOT EXISTS `feed_post_media` (
+  `display_order` int(11) NOT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `file_size` bigint(20) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `post_id` varchar(36) NOT NULL,
+  `content_type` varchar(100) NOT NULL,
+  `storage_key` varchar(500) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKckhtslxg8e903tpe9rb1hjrw2` (`post_id`),
+  CONSTRAINT `FKckhtslxg8e903tpe9rb1hjrw2` FOREIGN KEY (`post_id`) REFERENCES `feed_posts` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-CREATE TABLE content_reports (
-    id VARCHAR(36) NOT NULL,
-    created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    deleted_at DATETIME(6),
-    reporter_id VARCHAR(36) NOT NULL,
-    target_type VARCHAR(30) NOT NULL,
-    target_id VARCHAR(36) NOT NULL,
-    reason VARCHAR(100) NOT NULL,
-    details TEXT,
-    status VARCHAR(30) NOT NULL,
-    resolution_action VARCHAR(30),
-    resolver_id VARCHAR(36),
-    resolution_note TEXT,
-    PRIMARY KEY (id),
-    CONSTRAINT fk_content_reports_reporter FOREIGN KEY (reporter_id) REFERENCES users (id),
-    CONSTRAINT fk_content_reports_resolver FOREIGN KEY (resolver_id) REFERENCES users (id)
-);
-CREATE INDEX idx_content_reports_queue ON content_reports (status, created_at);
-CREATE INDEX idx_content_reports_target ON content_reports (target_type, target_id);
+CREATE TABLE IF NOT EXISTS `artisan_reviews` (
+  `rating` decimal(3,2) NOT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `artisan_id` varchar(36) NOT NULL,
+  `enrollment_id` varchar(36) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `reviewer_id` varchar(36) NOT NULL,
+  `comment` text NOT NULL,
+  `status` enum('HIDDEN','PUBLISHED','REMOVED') NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_artisan_review_enrollment` (`enrollment_id`),
+  KEY `idx_artisan_reviews_artisan` (`artisan_id`,`status`,`created_at`),
+  KEY `idx_artisan_reviews_reviewer` (`reviewer_id`,`created_at`),
+  CONSTRAINT `FK7npyfqd6l0if31o4aayxvshsk` FOREIGN KEY (`reviewer_id`) REFERENCES `artisans` (`id`),
+  CONSTRAINT `FKe27m416io4a7w47jgk1lny9mg` FOREIGN KEY (`artisan_id`) REFERENCES `artisans` (`id`),
+  CONSTRAINT `FKehba8n01ct9piu6oysa6yd8vf` FOREIGN KEY (`enrollment_id`) REFERENCES `formation_enrollments` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+CREATE TABLE IF NOT EXISTS `content_reports` (
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `reporter_id` varchar(36) NOT NULL,
+  `resolver_id` varchar(36) DEFAULT NULL,
+  `target_id` varchar(36) NOT NULL,
+  `reason` varchar(100) NOT NULL,
+  `details` text DEFAULT NULL,
+  `resolution_note` text DEFAULT NULL,
+  `resolution_action` enum('DISMISS','HIDE','REMOVE') DEFAULT NULL,
+  `status` enum('DISMISSED','OPEN','RESOLVED') NOT NULL,
+  `target_type` enum('POST','REVIEW','USER') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_content_reports_queue` (`status`,`created_at`),
+  KEY `idx_content_reports_target` (`target_type`,`target_id`),
+  KEY `FK40bn3nq9t2qk66fkm6c3qwvjq` (`reporter_id`),
+  KEY `FKtls6enms3r362ykxo3refu29` (`resolver_id`),
+  CONSTRAINT `FK40bn3nq9t2qk66fkm6c3qwvjq` FOREIGN KEY (`reporter_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKtls6enms3r362ykxo3refu29` FOREIGN KEY (`resolver_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;

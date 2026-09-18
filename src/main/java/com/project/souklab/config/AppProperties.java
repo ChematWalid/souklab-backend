@@ -293,6 +293,7 @@ public class AppProperties {
         private int readTimeout;
         private String indexPrefix;
         private String schemaManagement;
+        private boolean schemaBootstrapEnabled;
         private boolean syncOnStartup;
         private MassIndexing massIndexing = new MassIndexing();
 

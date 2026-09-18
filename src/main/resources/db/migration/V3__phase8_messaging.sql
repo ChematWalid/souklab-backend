@@ -1,72 +1,76 @@
-CREATE TABLE conversations (
-    id VARCHAR(36) NOT NULL PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
-);
+-- Phase 8 messaging schema additions.
 
-INSERT INTO permissions (id, permission_key, description, enabled)
-SELECT UUID(), 'permission:message:send', 'Send direct messages', TRUE
-WHERE NOT EXISTS (SELECT 1 FROM permissions WHERE permission_key = 'permission:message:send');
+CREATE TABLE IF NOT EXISTS `conversations` (
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+INSERT IGNORE INTO permissions (id, permission_key, description, enabled, created_at, updated_at) VALUES (UUID(), 'permission:message:send', 'Send direct messages', TRUE, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6));
 
-CREATE TABLE conversation_participants (
-    id VARCHAR(36) NOT NULL PRIMARY KEY,
-    conversation_id VARCHAR(36) NOT NULL,
-    user_id VARCHAR(36) NOT NULL,
-    archived BOOLEAN NOT NULL DEFAULT FALSE,
-    last_read_message_id VARCHAR(36) NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    CONSTRAINT uk_conversation_participant UNIQUE (conversation_id, user_id),
-    CONSTRAINT fk_conversation_participant_conversation FOREIGN KEY (conversation_id) REFERENCES conversations (id),
-    CONSTRAINT fk_conversation_participant_user FOREIGN KEY (user_id) REFERENCES users (id)
-);
+CREATE TABLE IF NOT EXISTS `conversation_participants` (
+  `archived` bit(1) NOT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `conversation_id` varchar(36) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `user_id` varchar(36) NOT NULL,
+  `last_read_message_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_conversation_participant` (`conversation_id`,`user_id`),
+  KEY `FKjukjgq6uinvvk4307y8u9lixu` (`user_id`),
+  CONSTRAINT `FK84npv3fo2vwl7ut63im0p417q` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`),
+  CONSTRAINT `FKjukjgq6uinvvk4307y8u9lixu` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE IF NOT EXISTS `messages` (
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `edited_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `author_id` varchar(36) NOT NULL,
+  `conversation_id` varchar(36) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `idempotency_key` varchar(128) NOT NULL,
+  `content` text NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_message_idempotency` (`conversation_id`,`author_id`,`idempotency_key`),
+  KEY `FKowtlim26svclkatusptbgi7u1` (`author_id`),
+  CONSTRAINT `FKowtlim26svclkatusptbgi7u1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKt492th6wsovh1nush5yl5jj8e` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-CREATE INDEX idx_conversation_participant_user ON conversation_participants (user_id, archived, deleted_at);
+CREATE TABLE IF NOT EXISTS `message_attachments` (
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `size` bigint(20) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `message_id` varchar(36) NOT NULL,
+  `content_type` varchar(100) NOT NULL,
+  `storage_key` varchar(500) NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKj7twd218e2gqw9cmlhwvo1rth` (`message_id`),
+  CONSTRAINT `FKj7twd218e2gqw9cmlhwvo1rth` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-CREATE TABLE messages (
-    id VARCHAR(36) NOT NULL PRIMARY KEY,
-    conversation_id VARCHAR(36) NOT NULL,
-    author_id VARCHAR(36) NOT NULL,
-    content TEXT NOT NULL,
-    idempotency_key VARCHAR(128) NOT NULL,
-    edited_at TIMESTAMP NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    CONSTRAINT uk_message_idempotency UNIQUE (conversation_id, author_id, idempotency_key),
-    CONSTRAINT fk_message_conversation FOREIGN KEY (conversation_id) REFERENCES conversations (id),
-    CONSTRAINT fk_message_author FOREIGN KEY (author_id) REFERENCES users (id)
-);
-
-CREATE INDEX idx_message_conversation_created ON messages (conversation_id, created_at, id);
-
-CREATE TABLE message_attachments (
-    id VARCHAR(36) NOT NULL PRIMARY KEY,
-    message_id VARCHAR(36) NOT NULL,
-    storage_key VARCHAR(500) NOT NULL,
-    original_filename VARCHAR(255) NOT NULL,
-    content_type VARCHAR(100) NOT NULL,
-    size BIGINT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    CONSTRAINT fk_message_attachment_message FOREIGN KEY (message_id) REFERENCES messages (id)
-);
-
-CREATE TABLE message_attachment_uploads (
-    id VARCHAR(36) NOT NULL PRIMARY KEY,
-    owner_id VARCHAR(36) NOT NULL,
-    conversation_id VARCHAR(36) NOT NULL,
-    storage_key VARCHAR(500) NOT NULL UNIQUE,
-    original_filename VARCHAR(255) NOT NULL,
-    content_type VARCHAR(100) NOT NULL,
-    size BIGINT NOT NULL,
-    used_at TIMESTAMP NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    CONSTRAINT fk_message_upload_owner FOREIGN KEY (owner_id) REFERENCES users (id),
-    CONSTRAINT fk_message_upload_conversation FOREIGN KEY (conversation_id) REFERENCES conversations (id)
-);
+CREATE TABLE IF NOT EXISTS `message_attachment_uploads` (
+  `created_at` datetime(6) NOT NULL,
+  `deleted_at` datetime(6) DEFAULT NULL,
+  `size` bigint(20) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `used_at` datetime(6) DEFAULT NULL,
+  `conversation_id` varchar(36) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `owner_id` varchar(36) NOT NULL,
+  `content_type` varchar(255) DEFAULT NULL,
+  `original_filename` varchar(255) DEFAULT NULL,
+  `storage_key` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKch5vh3pfvl1cesjl4g7lru51p` (`conversation_id`),
+  KEY `FKe0kampj5ta5877472r0o68o9i` (`owner_id`),
+  CONSTRAINT `FKch5vh3pfvl1cesjl4g7lru51p` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`),
+  CONSTRAINT `FKe0kampj5ta5877472r0o68o9i` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
