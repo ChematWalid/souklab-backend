@@ -18,12 +18,18 @@ export DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD:-souklab_root_password}"
 export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-souklab-verification}"
 export RABBITMQ_DEFAULT_USER="${RABBITMQ_DEFAULT_USER:-souklab_test}"
 export RABBITMQ_DEFAULT_PASS="${RABBITMQ_DEFAULT_PASS:-souklab_test_password}"
+export REDIS_PASSWORD="${REDIS_PASSWORD:-souklab_test_redis_password}"
+export REDIS_HOST="${REDIS_HOST:-localhost}"
+export REDIS_PORT="${REDIS_PORT:-6379}"
+export APP_RATE_LIMIT_BACKEND="${APP_RATE_LIMIT_BACKEND:-redis}"
+export APP_RATE_LIMIT_KEY_PREFIX="${APP_RATE_LIMIT_KEY_PREFIX:-souklab:ci}"
 export MINIO_ROOT_USER="${MINIO_ROOT_USER:-minioadmin}"
 export MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD:-minioadmin_secret}"
 export MARIADB_HOST_PORT="${MARIADB_HOST_PORT:-3306}"
 if ss -ltn 2>/dev/null | awk '{print $4}' | grep -Eq '(^|:)3306$'; then
   export MARIADB_HOST_PORT="${MARIADB_FALLBACK_PORT:-3307}"
 fi
+export FLYWAY_MARIADB_HOST_PORT="${FLYWAY_MARIADB_HOST_PORT:-3308}"
 export DB_URL="${DB_URL:-jdbc:mariadb://localhost:${MARIADB_HOST_PORT}/${DB_NAME}?createDatabaseIfNotExist=true&useSsl=false&serverTimezone=UTC}"
 export JPA_DATABASE_PLATFORM="${JPA_DATABASE_PLATFORM:-org.hibernate.dialect.MariaDBDialect}"
 export JPA_HIBERNATE_DDL_AUTO="${JPA_HIBERNATE_DDL_AUTO:-create-drop}"
@@ -61,8 +67,7 @@ export RELAY_SYSTEM_PASSCODE="${RELAY_SYSTEM_PASSCODE:-souklab_test_password}"
 export GOOGLE_OAUTH_CLIENT_ID="${GOOGLE_OAUTH_CLIENT_ID:-local-test-client}"
 export GOOGLE_OAUTH_CLIENT_SECRET="${GOOGLE_OAUTH_CLIENT_SECRET:-local-test-secret}"
 export GOOGLE_OAUTH_REDIRECT_URI="${GOOGLE_OAUTH_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/google}"
-# Keep the application default (in-memory) backend for the broad suite. The
-# S3 verification class explicitly selects MinIO and must be able to test
+# The S3 verification class explicitly selects MinIO and must be able to test
 # missing-property fail-fast behavior without inherited environment values.
 export STORAGE_VIRUS_SCAN_ENABLED="true"
 export STORAGE_VIRUS_SCAN_HOST="localhost"
@@ -78,14 +83,16 @@ export HIBERNATE_SEARCH_SCHEMA_MANAGEMENT="create-or-update"
 export SEARCH_SYNC_ON_STARTUP="true"
 
 cleanup() {
-  docker compose down --remove-orphans
+  # This project name is dedicated to verification; remove only its containers,
+  # network, and test volumes so the next run starts from a fresh schema.
+  docker compose down --volumes --remove-orphans
 }
 trap cleanup EXIT
 
-docker compose up -d mariadb rabbitmq minio elasticsearch clamav
+docker compose up -d mariadb mariadb-flyway rabbitmq minio elasticsearch clamav redis
 docker compose ps
 
-for service in mariadb rabbitmq minio elasticsearch clamav; do
+for service in mariadb mariadb-flyway rabbitmq minio elasticsearch clamav redis; do
   printf 'Waiting for %s...\n' "$service"
   deadline=$(( $(date +%s) + 300 ))
   until [ "$(docker compose ps --format '{{.Service}} {{.Health}}' | awk -v s="$service" '$1 == s {print $2}')" = "healthy" ]; do
@@ -98,4 +105,5 @@ for service in mariadb rabbitmq minio elasticsearch clamav; do
   done
 done
 
+./scripts/verify-flyway.sh
 ./mvnw clean test ${MAVEN_TEST_ARGS:-}

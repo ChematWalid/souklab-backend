@@ -1,0 +1,17 @@
+{
+  "title": "Souklab Application Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "panels": [
+    {"type":"timeseries","title":"HTTP request rate","gridPos":{"h":8,"w":12,"x":0,"y":0},"targets":[{"expr":"sum(rate(http_server_requests_seconds_count{job=\"souklab\"}[5m]))","legendFormat":"requests/s"}]},
+    {"type":"timeseries","title":"HTTP 5xx rate","gridPos":{"h":8,"w":12,"x":12,"y":0},"targets":[{"expr":"sum(rate(http_server_requests_seconds_count{job=\"souklab\",status=~\"5..\"}[5m]))","legendFormat":"5xx/s"}]},
+    {"type":"timeseries","title":"JVM memory used","gridPos":{"h":8,"w":12,"x":0,"y":8},"targets":[{"expr":"jvm_memory_used_bytes{job=\"souklab\"}","legendFormat":"{{area}} {{id}}"}]},
+    {"type":"timeseries","title":"Rate-limit rejections","gridPos":{"h":8,"w":12,"x":12,"y":8},"targets":[{"expr":"sum(rate(http_server_requests_seconds_count{job=\"souklab\",status=\"429\"}[5m]))","legendFormat":"429/s"}]},
+    {"type":"timeseries","title":"Upload outcomes","gridPos":{"h":8,"w":12,"x":0,"y":16},"targets":[{"expr":"sum by (operation,outcome) (rate(souklab_uploads_total{job=\"souklab\"}[5m]))","legendFormat":"{{operation}} {{outcome}}"}]},
+    {"type":"timeseries","title":"Antivirus outcomes","gridPos":{"h":8,"w":12,"x":12,"y":16},"targets":[{"expr":"sum by (outcome) (rate(souklab_virus_scans_total{job=\"souklab\"}[5m]))","legendFormat":"{{outcome}}"}]},
+    {"type":"timeseries","title":"Search outcomes","gridPos":{"h":8,"w":12,"x":0,"y":24},"targets":[{"expr":"sum by (operation,outcome) (rate(souklab_search_requests_total{job=\"souklab\"}[5m]))","legendFormat":"{{operation}} {{outcome}}"}]},
+    {"type":"timeseries","title":"WebSocket authentication","gridPos":{"h":8,"w":12,"x":12,"y":24},"targets":[{"expr":"sum by (outcome) (rate(souklab_websocket_connections_total{job=\"souklab\"}[5m]))","legendFormat":"{{outcome}}"}]},
+    {"type":"timeseries","title":"Backup freshness","gridPos":{"h":8,"w":12,"x":0,"y":32},"targets":[{"expr":"time() - souklab_backup_last_success_timestamp_seconds","legendFormat":"age seconds"}]}
+  ]
+}

@@ -17,17 +17,21 @@ public class RelayHealthIndicator implements HealthIndicator {
     private static final int CONNECT_TIMEOUT_MILLIS = 2_000;
 
     private final AppProperties.Relay properties;
+    private final OperationalMetrics metrics;
 
-    public RelayHealthIndicator(AppProperties appProperties) {
+    public RelayHealthIndicator(AppProperties appProperties, OperationalMetrics metrics) {
         this.properties = appProperties.getRelay();
+        this.metrics = metrics;
     }
 
     @Override
     public Health health() {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(properties.getHost(), properties.getPort()), CONNECT_TIMEOUT_MILLIS);
+            metrics.setDependencyAvailability("rabbitmq", true);
             return Health.up().build();
         } catch (IOException exception) {
+            metrics.setDependencyAvailability("rabbitmq", false);
             return Health.down().build();
         }
     }

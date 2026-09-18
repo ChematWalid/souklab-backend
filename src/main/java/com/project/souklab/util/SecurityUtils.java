@@ -14,7 +14,7 @@ public class SecurityUtils {
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
         }
-        
+
         Object principal = authentication.getPrincipal();
         if (principal instanceof UserDetails userDetails) {
             return userDetails.getUsername();
@@ -25,7 +25,7 @@ public class SecurityUtils {
             }
             return principalString;
         }
-        
+
         String name = authentication.getName();
         return "anonymousUser".equals(name) ? null : name;
     }

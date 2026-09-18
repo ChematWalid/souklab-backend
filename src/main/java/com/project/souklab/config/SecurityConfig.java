@@ -8,6 +8,7 @@ import com.project.souklab.security.AvatarUploadSizeFilter;
 import com.project.souklab.security.JwtAuthenticationFilter;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
 import com.project.souklab.security.RateLimitFilter;
+import com.project.souklab.security.RateLimitBucketStore;
 import com.project.souklab.util.ServletResponseUtil;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,6 +48,12 @@ public class SecurityConfig {
     private final FileRateLimitFilter fileRateLimitFilter;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final ServletResponseUtil servletResponseUtil;
+    private RateLimitBucketStore rateLimitBucketStore = RateLimitBucketStore.inMemory();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setRateLimitBucketStore(RateLimitBucketStore rateLimitBucketStore) {
+        this.rateLimitBucketStore = rateLimitBucketStore;
+    }
 
     @Bean
     public AvatarUploadSizeFilter avatarUploadSizeFilter() {
@@ -55,7 +62,7 @@ public class SecurityConfig {
 
     @Bean
     public AvatarUploadRateLimitFilter avatarUploadRateLimitFilter() {
-        return new AvatarUploadRateLimitFilter(servletResponseUtil, avatarProperties);
+        return new AvatarUploadRateLimitFilter(servletResponseUtil, avatarProperties, rateLimitBucketStore);
     }
 
     @Bean

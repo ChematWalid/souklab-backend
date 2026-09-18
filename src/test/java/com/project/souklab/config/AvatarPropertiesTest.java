@@ -25,9 +25,6 @@ class AvatarPropertiesTest {
         assertThat(properties.getRateLimit().isEnabled()).isFalse();
         assertThat(properties.getRateLimit().getCapacity()).isZero();
         assertThat(properties.getRateLimit().getRefillDuration()).isNull();
-        assertThat(properties.getRateLimit().getCache()).isNotNull();
-        assertThat(properties.getRateLimit().getCache().getMaximumSize()).isZero();
-        assertThat(properties.getRateLimit().getCache().getExpireAfterAccess()).isNull();
     }
 
     @Test
@@ -39,9 +36,7 @@ class AvatarPropertiesTest {
                 "avatar.allowed-mime-types", "image/jpeg,image/png,image/webp",
                 "avatar.rate-limit.enabled", "true",
                 "avatar.rate-limit.capacity", "5",
-                "avatar.rate-limit.refill-duration", "1m",
-                "avatar.rate-limit.cache.maximum-size", "1000",
-                "avatar.rate-limit.cache.expire-after-access", "10m"
+                "avatar.rate-limit.refill-duration", "1m"
         )));
 
         Binder binder = new Binder(ConfigurationPropertySources.from(environment.getPropertySources()));
@@ -52,8 +47,6 @@ class AvatarPropertiesTest {
         assertThat(properties.getRateLimit().isEnabled()).isTrue();
         assertThat(properties.getRateLimit().getCapacity()).isEqualTo(5);
         assertThat(properties.getRateLimit().getRefillDuration()).isEqualTo(Duration.ofMinutes(1));
-        assertThat(properties.getRateLimit().getCache().getMaximumSize()).isEqualTo(1000L);
-        assertThat(properties.getRateLimit().getCache().getExpireAfterAccess()).isEqualTo(Duration.ofMinutes(10));
     }
 
     @Test
@@ -65,9 +58,7 @@ class AvatarPropertiesTest {
                 "avatar.allowed-mime-types", "image/png,image/webp",
                 "avatar.rate-limit.enabled", "false",
                 "avatar.rate-limit.capacity", "2",
-                "avatar.rate-limit.refill-duration", "30s",
-                "avatar.rate-limit.cache.maximum-size", "500",
-                "avatar.rate-limit.cache.expire-after-access", "5m"
+                "avatar.rate-limit.refill-duration", "30s"
         )));
 
         Binder binder = new Binder(ConfigurationPropertySources.from(environment.getPropertySources()));
@@ -78,7 +69,5 @@ class AvatarPropertiesTest {
         assertThat(properties.getRateLimit().isEnabled()).isFalse();
         assertThat(properties.getRateLimit().getCapacity()).isEqualTo(2);
         assertThat(properties.getRateLimit().getRefillDuration()).isEqualTo(Duration.ofSeconds(30));
-        assertThat(properties.getRateLimit().getCache().getMaximumSize()).isEqualTo(500L);
-        assertThat(properties.getRateLimit().getCache().getExpireAfterAccess()).isEqualTo(Duration.ofMinutes(5));
     }
 }

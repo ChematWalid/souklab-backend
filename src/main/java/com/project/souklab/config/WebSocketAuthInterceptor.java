@@ -1,6 +1,5 @@
 package com.project.souklab.config;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.project.souklab.security.JwtUtils;
 import org.springframework.messaging.Message;
@@ -14,16 +13,29 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
+    private final OperationalMetrics metrics;
+
+    public WebSocketAuthInterceptor(JwtUtils jwtUtils, UserDetailsService userDetailsService) {
+        this(jwtUtils, userDetailsService, OperationalMetrics.noop());
+    }
+
+    @Autowired
+    public WebSocketAuthInterceptor(JwtUtils jwtUtils, UserDetailsService userDetailsService,
+                                    OperationalMetrics metrics) {
+        this.jwtUtils = jwtUtils;
+        this.userDetailsService = userDetailsService;
+        this.metrics = metrics;
+    }
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -31,13 +43,13 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
             List<String> authorization = accessor.getNativeHeader("Authorization");
-            
+
             if (authorization != null && !authorization.isEmpty()) {
                 String token = authorization.get(0);
                 if (token.startsWith("Bearer ")) {
                     token = token.substring(7);
                 }
-                
+
                 try {
                     if (jwtUtils.validateJwtToken(token)) {
                         String username = jwtUtils.getUserNameFromJwtToken(token);
@@ -48,12 +60,14 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                         accessor.setUser(authentication);
+                        metrics.recordWebSocket("authenticated");
                         return message;
                     }
                 } catch (Exception e) {
                     log.warn("WebSocket authentication failed");
                 }
             }
+            metrics.recordWebSocket("rejected");
             throw new AccessDeniedException("A valid Bearer token is required to establish a WebSocket connection.");
         }
         return message;

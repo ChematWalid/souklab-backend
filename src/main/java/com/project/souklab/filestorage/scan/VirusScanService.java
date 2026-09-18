@@ -1,6 +1,7 @@
 package com.project.souklab.filestorage.scan;
 
 import com.project.souklab.filestorage.config.StorageProperties;
+import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.filestorage.exception.VirusDetectedException;
 import com.project.souklab.filestorage.exception.VirusScanException;
 import com.project.souklab.filestorage.validation.ValidatedFile;
@@ -23,16 +24,26 @@ public class VirusScanService {
 
     private final StorageProperties properties;
     private final VirusScanner virusScanner;
+    private final OperationalMetrics metrics;
 
     public VirusScanService(StorageProperties properties, VirusScanner virusScanner) {
+        this(properties, virusScanner, OperationalMetrics.noop());
+    }
+
+    public VirusScanService(StorageProperties properties, VirusScanner virusScanner,
+                            OperationalMetrics metrics) {
         if (properties == null) {
             throw new IllegalArgumentException("StorageProperties cannot be null");
         }
         if (virusScanner == null) {
             throw new IllegalArgumentException("VirusScanner cannot be null");
         }
+        if (metrics == null) {
+            throw new IllegalArgumentException("OperationalMetrics cannot be null");
+        }
         this.properties = properties;
         this.virusScanner = virusScanner;
+        this.metrics = metrics;
     }
 
     /**
@@ -120,9 +131,16 @@ public class VirusScanService {
      * @param filename filename hint for logging
      */
     private void performScan(InputStream content, String filename) {
-        ScanResult result = virusScanner.scan(content);
+        ScanResult result;
+        try {
+            result = virusScanner.scan(content);
+        } catch (RuntimeException ex) {
+            metrics.recordVirusScan("error");
+            throw ex;
+        }
 
         if (result.isInfected()) {
+            metrics.recordVirusScan("infected");
             log.error("Malware detected in upload '{}': virus='{}'", filename, result.virusName());
             throw new VirusDetectedException(result.virusName());
         }
@@ -130,13 +148,17 @@ public class VirusScanService {
         if (result.isError()) {
             boolean failOpen = properties.getVirusScan().isFailOpen();
             if (failOpen) {
+                metrics.recordVirusScan("error_allowed");
                 log.warn("Virus scanner communication failure for '{}': {}. Fail-open policy active: allowing upload to proceed.",
                         filename, result.message());
             } else {
+                metrics.recordVirusScan("error_rejected");
                 log.error("Virus scanner communication failure for '{}': {}. Fail-closed policy active: rejecting upload.",
                         filename, result.message());
                 throw new VirusScanException("Virus scanning service unavailable: " + result.message());
             }
+        } else {
+            metrics.recordVirusScan("clean");
         }
     }
 }

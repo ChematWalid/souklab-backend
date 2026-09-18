@@ -24,10 +24,10 @@ public interface UserRepository extends JpaRepository<User, String> {
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findWithLockById(String id);
-    
+
     @EntityGraph(attributePaths = {"permissions"})
     Optional<User> findByEmail(String email);
-    
+
     boolean existsByEmail(String email);
 
     @EntityGraph(attributePaths = {"permissions"})

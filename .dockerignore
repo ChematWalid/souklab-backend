@@ -1,0 +1,12 @@
+.git
+.github
+target
+storage
+deploy
+docs
+scripts
+*.md
+*.png
+.env
+.env.*
+.example.env

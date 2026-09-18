@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: Souklab
+    orgId: 1
+    folder: Souklab
+    type: file
+    disableDeletion: true
+    options:
+      path: /var/lib/grafana/dashboards

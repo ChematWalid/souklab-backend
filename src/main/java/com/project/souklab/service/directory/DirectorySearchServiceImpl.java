@@ -1,6 +1,7 @@
 package com.project.souklab.service.directory;
 
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.directory.ArtisanDirectoryCardDTO;
@@ -20,7 +21,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.graph.GraphSemantic;
 import org.hibernate.search.engine.search.predicate.SearchPredicate;
@@ -36,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class DirectorySearchServiceImpl implements DirectorySearchService {
 
     private static final String FIELD_DELETED_AT = "deletedAt";
@@ -67,18 +67,37 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     private final EntityManager entityManager;
     private final ArtisanRepository artisanRepository;
     private final AppProperties appProperties;
+    private final OperationalMetrics metrics;
+
+    public DirectorySearchServiceImpl(EntityManager entityManager, ArtisanRepository artisanRepository,
+                                      AppProperties appProperties) {
+        this(entityManager, artisanRepository, appProperties, OperationalMetrics.noop());
+    }
+
+    @Autowired
+    public DirectorySearchServiceImpl(EntityManager entityManager, ArtisanRepository artisanRepository,
+                                      AppProperties appProperties, OperationalMetrics metrics) {
+        this.entityManager = entityManager;
+        this.artisanRepository = artisanRepository;
+        this.appProperties = appProperties;
+        this.metrics = metrics;
+    }
 
     @Override
     @Transactional(readOnly = true)
     public PaginatedResponse<ArtisanDirectoryCardDTO> search(DirectorySearchFilterDTO filter) {
         if (!appProperties.getSearch().isEnabled()) {
+            metrics.recordSearch("relational", "disabled");
             log.info("Hibernate Search is disabled; routing directory search to relational JPA fallback.");
             return searchRelationalFallback(filter);
         }
 
         try {
-            return searchHibernateSearch(filter);
+            PaginatedResponse<ArtisanDirectoryCardDTO> response = searchHibernateSearch(filter);
+            metrics.recordSearch("elasticsearch", "success");
+            return response;
         } catch (Exception ex) {
+            metrics.recordSearch("elasticsearch", "fallback");
             log.warn("Hibernate Search query encountered an error; falling back to relational JPA specification: {}", ex.getMessage());
             return searchRelationalFallback(filter);
         }

@@ -1,0 +1,61 @@
+groups:
+  - name: souklab-production
+    rules:
+      - alert: SouklabApplicationDown
+        expr: up{job="souklab"} == 0
+        for: 2m
+      - alert: SouklabRepeatedRestarts
+        expr: changes(process_start_time_seconds{job="souklab"}[15m]) > 2
+        for: 5m
+      - alert: SouklabHigh5xxRate
+        expr: rate(http_server_requests_seconds_count{job="souklab",status=~"5.."}[5m]) > 0.05
+        for: 10m
+      - alert: SouklabHighRequestLatency
+        expr: |
+          sum(rate(http_server_requests_seconds_sum{job="souklab"}[5m]))
+            / sum(rate(http_server_requests_seconds_count{job="souklab"}[5m])) > 1
+        for: 10m
+      - alert: SouklabDatabasePoolExhaustion
+        expr: hikaricp_connections_pending{job="souklab"} > 0
+        for: 5m
+      - alert: SouklabJvmMemoryPressure
+        expr: |
+          sum(jvm_memory_used_bytes{job="souklab",area="heap"})
+            / sum(jvm_memory_max_bytes{job="souklab",area="heap"}) > 0.9
+        for: 10m
+      - alert: SouklabDiskSpaceLow
+        expr: |
+          min(node_filesystem_avail_bytes{job="node-exporter",mountpoint="/",fstype!~"tmpfs"}
+            / node_filesystem_size_bytes{job="node-exporter",mountpoint="/",fstype!~"tmpfs"}) < 0.1
+        for: 10m
+      - alert: SouklabHostMemoryPressure
+        expr: node_memory_MemAvailable_bytes{job="node-exporter"}
+          / node_memory_MemTotal_bytes{job="node-exporter"} < 0.1
+        for: 10m
+      - alert: SouklabRedisUnavailable
+        expr: souklab_dependency_available{job="souklab",dependency="redis"} == 0
+        for: 2m
+      - alert: SouklabRabbitMqUnavailable
+        expr: souklab_dependency_available{job="souklab",dependency="rabbitmq"} == 0
+        for: 2m
+      - alert: SouklabElasticsearchUnavailable
+        expr: souklab_dependency_available{job="souklab",dependency="elasticsearch"} == 0
+        for: 2m
+      - alert: SouklabObjectStorageUnavailable
+        expr: souklab_dependency_available{job="souklab",dependency="s3"} == 0
+        for: 2m
+      - alert: SouklabClamAvUnavailable
+        expr: souklab_dependency_available{job="souklab",dependency="clamav"} == 0
+        for: 2m
+      - alert: SouklabCertificateExpiring
+        expr: caddy_tls_cert_expiration_time_seconds{job="caddy"} - time() < 1209600
+        for: 1h
+      - alert: SouklabBackupStale
+        expr: time() - souklab_backup_last_success_timestamp_seconds > 93600
+        for: 1h
+      - alert: SouklabBackupFailed
+        expr: souklab_backup_last_failure_timestamp_seconds > souklab_backup_last_success_timestamp_seconds
+        for: 5m
+      - alert: SouklabBackupMetricsMissing
+        expr: absent(souklab_backup_last_success_timestamp_seconds) == 1
+        for: 1h

@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.config;
 
+import com.project.souklab.config.OperationalMetrics;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,18 +15,22 @@ public class StorageHealthIndicator implements HealthIndicator {
 
     private final StorageProperties properties;
     private final S3Client s3Client;
+    private final OperationalMetrics metrics;
 
-    public StorageHealthIndicator(StorageProperties properties, S3Client s3Client) {
+    public StorageHealthIndicator(StorageProperties properties, S3Client s3Client, OperationalMetrics metrics) {
         this.properties = properties;
         this.s3Client = s3Client;
+        this.metrics = metrics;
     }
 
     @Override
     public Health health() {
         try {
             s3Client.headBucket(HeadBucketRequest.builder().bucket(properties.getS3().getBucket()).build());
+            metrics.setDependencyAvailability("s3", true);
             return Health.up().build();
         } catch (RuntimeException exception) {
+            metrics.setDependencyAvailability("s3", false);
             return Health.down().withDetail("provider", "s3").build();
         }
     }

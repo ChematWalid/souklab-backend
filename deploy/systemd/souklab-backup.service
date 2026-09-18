@@ -1,0 +1,21 @@
+[Unit]
+Description=Souklab encrypted production backup
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/souklab
+EnvironmentFile=-/etc/souklab/backup.env
+ExecStart=/bin/bash /opt/souklab/scripts/backup-production.sh
+User=root
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/srv/souklab-backups
+
+[Install]
+WantedBy=multi-user.target

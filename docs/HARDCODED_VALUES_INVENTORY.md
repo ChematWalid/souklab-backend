@@ -30,7 +30,7 @@ These values are represented by environment placeholders in
 - `DataSeeder` still contains large reference-data literals. They are deterministic
   seed content, not deployment policy; moving them into Flyway reference-data
   migrations is recommended before operating multiple application replicas.
-- Rate limiting is process-local Caffeine state. A shared gateway or distributed
-  limiter is required before horizontal scaling.
+- Production rate limiting uses Redis-backed Bucket4j state. Local tests and non-production
+  slices use an in-memory adapter; Redis is mandatory when the prod profile is active.
 - Existing entity timestamps remain `LocalDateTime` for schema/API compatibility;
   all application-generated timestamps use the injected UTC `Clock`.

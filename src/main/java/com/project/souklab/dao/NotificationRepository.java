@@ -13,13 +13,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, String> {
-    
+
     Page<Notification> findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(User user, Pageable pageable);
-    
+
     Optional<Notification> findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(User user, NotificationType type, String targetId);
-    
+
     Optional<Notification> findByIdAndUserAndDeletedAtIsNull(String id, User user);
-    
+
     long countByUserAndIsReadFalseAndDeletedAtIsNull(User user);
 
     @Modifying

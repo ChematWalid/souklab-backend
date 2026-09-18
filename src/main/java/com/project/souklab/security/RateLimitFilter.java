@@ -1,17 +1,15 @@
 package com.project.souklab.security;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.util.ServletResponseUtil;
-import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,16 +20,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private final ServletResponseUtil servletResponseUtil;
     private final AppProperties appProperties;
-    private final Cache<String, Bucket> cache;
+    private final RateLimitBucketStore bucketStore;
 
     public RateLimitFilter(ServletResponseUtil servletResponseUtil, AppProperties appProperties) {
+        this(servletResponseUtil, appProperties, RateLimitBucketStore.inMemory());
+    }
+
+    @Autowired
+    public RateLimitFilter(ServletResponseUtil servletResponseUtil, AppProperties appProperties,
+                           RateLimitBucketStore bucketStore) {
         this.servletResponseUtil = servletResponseUtil;
         this.appProperties = appProperties;
-        AppProperties.RateLimit.Cache cacheConfig = appProperties.getRateLimit().getCache();
-        this.cache = Caffeine.newBuilder()
-                .maximumSize(cacheConfig.getMaximumSize())
-                .expireAfterAccess(cacheConfig.getExpireAfterAccess())
-                .build();
+        this.bucketStore = bucketStore;
     }
 
     @Override
@@ -39,17 +39,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return !appProperties.getRateLimit().isEnabled();
     }
 
-    private Bucket createNewBucket() {
-        AppProperties.RateLimit config = appProperties.getRateLimit();
-        Bandwidth limit = Bandwidth.builder()
-                .capacity(config.getCapacity())
-                .refillGreedy(config.getCapacity(), config.getRefillDuration())
-                .build();
-        return Bucket.builder().addLimit(limit).build();
-    }
-
     public Bucket resolveBucket(String ip) {
-        return cache.get(ip, k -> createNewBucket());
+        AppProperties.RateLimit config = appProperties.getRateLimit();
+        return bucketStore.resolve("api:" + ip, config.getCapacity(), config.getRefillDuration());
     }
 
     @Override
@@ -57,7 +49,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String ip = request.getRemoteAddr();
-        Bucket bucket = resolveBucket(ip);
+        Bucket bucket;
+        try {
+            bucket = resolveBucket(ip);
+        } catch (RuntimeException unavailable) {
+            servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
+                    ApiResponse.error("Too many requests. Please try again later."));
+            return;
+        }
 
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);

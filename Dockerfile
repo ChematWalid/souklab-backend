@@ -6,6 +6,9 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+RUN apk add --no-cache wget
+RUN addgroup -S souklab && adduser -S -G souklab souklab
+COPY --from=build --chown=souklab:souklab /app/target/*.jar app.jar
+USER souklab
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

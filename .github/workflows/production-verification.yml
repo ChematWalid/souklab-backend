@@ -3,6 +3,7 @@ name: Production verification
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -27,8 +28,49 @@ jobs:
       - name: Compile production code
         run: ./mvnw --batch-mode --no-transfer-progress -DskipTests compile
 
+      - name: Validate migration scripts and source hygiene
+        run: |
+          bash -n scripts/check-source-hygiene.sh
+          ./scripts/check-source-hygiene.sh
+          ./mvnw --batch-mode --no-transfer-progress -DskipTests validate
+
+      - name: Validate production deployment manifests
+        run: |
+          bash -n scripts/backup-production.sh scripts/validate-production-env.sh scripts/verify-flyway.sh
+          tmp_env="$(mktemp)"
+          rendered="$(mktemp)"
+          trap 'rm -f "$tmp_env" "$rendered"' EXIT
+          cp deploy/.env.production.example "$tmp_env"
+          PRODUCTION_ENV_FILE="$tmp_env" docker compose --env-file "$tmp_env" \
+            --profile bootstrap -f deploy/compose.production.yml config > "$rendered"
+          grep -q 'SPRING_PROFILES_ACTIVE: prod' "$rendered"
+          grep -q 'APP_RATE_LIMIT_BACKEND: redis' "$rendered"
+          grep -q 'STORAGE_S3_AUTO_CREATE_BUCKET: "false"' "$rendered"
+          grep -q 'APP_ADMIN_BOOTSTRAP_ENABLED: "false"' "$rendered"
+          grep -q 'SEARCH_SCHEMA_BOOTSTRAP_ENABLED: "true"' "$rendered"
+          grep -q 'HIBERNATE_SEARCH_SCHEMA_MANAGEMENT: create-or-update' "$rendered"
+          systemd-analyze verify deploy/systemd/souklab-backup.service deploy/systemd/souklab-backup.timer
+
       - name: Verify against local production dependencies
         run: ./scripts/verify-local-integration.sh
+
+      - name: Verify package lifecycle after integration
+        run: ./mvnw --batch-mode --no-transfer-progress -DskipTests verify
+
+      - name: Build deployment image
+        run: docker build --file Dockerfile --tag souklab:ci .
+
+      - name: Write migration verification report
+        if: always()
+        run: mkdir -p target && ./scripts/check-source-hygiene.sh | tee target/migration-check.txt
+
+      - name: Dependency vulnerability gate
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          test -n "$NVD_API_KEY" || { echo 'NVD_API_KEY repository secret is required'; exit 1; }
+          ./mvnw --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:13.0.0:check \
+            -DnvdApiKey="$NVD_API_KEY" -DfailBuildOnCVSS=7
 
       - name: Upload coverage report
         if: always()
@@ -37,3 +79,58 @@ jobs:
           name: jacoco-report
           path: target/site/jacoco/
           if-no-files-found: ignore
+
+      - name: Upload test and dependency reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-verification-reports
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+            target/dependency-check-report.*
+            target/site/jacoco/
+            target/migration-check.txt
+          if-no-files-found: ignore
+
+  publish-image:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=tag
+            type=sha
+
+      - name: Build and publish immutable image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: true
+          sbom: true
+
+      - name: Record published image digest
+        run: |
+          echo "Published image digest: ${{ steps.build.outputs.digest }}" >> "$GITHUB_STEP_SUMMARY"

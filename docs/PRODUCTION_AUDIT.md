@@ -6,10 +6,12 @@ This report is based on the current source tree, build configuration, migrations
 
 ## Current recommendation
 
-Production audit: 76/100, conditionally ready for a controlled deployment after the remaining operational gates are completed.
+Production audit: conditionally ready for a controlled deployment after hosted CI,
+secret provisioning, and the documented restore drill are completed.
 
 The codebase compiles and the dependency-backed local verifier passes. Deployment
-observability, release automation, and horizontal-scaling controls remain open gates.
+observability, release automation, and the external recovery drill remain open
+verification gates.
 
 ## Findings
 
@@ -19,8 +21,8 @@ observability, release automation, and horizontal-scaling controls remain open g
 | --- | --- | --- |
 | Production schema changes require deployment discipline | Flyway is bundled and enabled by the production profile, while local development keeps it disabled. | Apply reviewed migrations before startup and document rollback/recovery ownership. |
 | Hosted CI result is not yet available | A tracked workflow now runs Java 21 compilation and the service-backed verifier, but no hosted run is available from this checkout. | Require the workflow to pass before merging or releasing. |
-| Rate limiting is process-local | Bucket4j state is held in Caffeine caches. | Use a shared limiter or edge gateway when horizontally scaling. |
-| Production observability is not yet platform-bound | Actuator health/readiness and Prometheus metrics are exposed, but no scrape or alert configuration is tracked. | Bind endpoints to the selected monitoring stack and define alerts. |
+| Rate limiting is process-local | Resolved for production: Bucket4j state is stored in Redis with environment/limiter prefixes. | Keep Redis mandatory and verify shared limits before adding application replicas. |
+| Production observability is not yet externally verified | Actuator health/readiness, dependency-availability gauges, Caddy metrics, Prometheus, Grafana, and alert configuration are tracked. | Verify scraping, dashboards, and notifications on the target VPS. |
 
 ### Medium priority
 
@@ -42,19 +44,24 @@ observability, release automation, and horizontal-scaling controls remain open g
 - Environment documentation now includes previously omitted storage, database, and Elasticsearch variables.
 - All production timestamp creation uses the application `java.time.Clock` bean; storage adapters no longer create fallback clocks.
 - Runtime tuning values are bound through environment variables and typed configuration classes; file URL generation honors the configured prefix.
-- The local Compose verifier provisions MariaDB, RabbitMQ, MinIO, Elasticsearch, and ClamAV and tears down only its test environment.
+- The local Compose verifier provisions MariaDB, RabbitMQ, MinIO, Elasticsearch, ClamAV, and Redis and tears down only its test environment.
 - Documentation now identifies the generated Postman material as archival and points to the current permission-based API specification.
 - MariaDB is now the explicit JDBC target, with the MariaDB driver/dialect and Java 21 container baseline.
 - Hikari pool settings, UTC JDBC timezone, disabled Open Session in View, health/readiness probes, and Prometheus metrics are externalized/configured.
 - Production startup rejects unsafe schema mode, disabled Flyway, in-memory storage, disabled antivirus, fail-open scanning, and admin bootstrap.
 - Spring Boot Flyway auto-configuration is now included explicitly; a generated MariaDB baseline migration supports fresh installs before V1-V4.
 - Permission seed migrations now provide required audit timestamps and are verified with 12 seeded permissions.
-- Production-only readiness now checks S3, Elasticsearch, the RabbitMQ STOMP endpoint, and ClamAV.
+- Production-only readiness now checks S3, Elasticsearch, the RabbitMQ STOMP endpoint, ClamAV, and Redis.
 - Elasticsearch has an explicit first-install `create-or-update` bootstrap mode and strict normal-operation `validate` mode.
 - Infrastructure failures now use generic API response text while retaining detailed server-side logs and stable error codes.
 - Credentialed CORS rejects wildcard origin patterns at startup.
 - Production profile overrides development logging, SQL formatting, SQL output, and SMTP debug settings with safe levels.
 - Production startup rejects direct environment overrides that would re-enable SQL/SMTP diagnostics, verbose application logging, health details, broad Actuator exposure, or environment info disclosure.
+- Redis-backed rate limiting now emits fixed-cardinality availability metrics for Redis, RabbitMQ, Elasticsearch, S3, and ClamAV; Prometheus alerts cover each mandatory dependency.
+- Encrypted backup scripts now resolve repository paths independently of the caller's working directory, with tracked systemd service/timer templates for daily execution.
+- Backup success/failure timestamps are published to a loopback-only Pushgateway, with Prometheus alerts for stale, failed, or missing backup metrics.
+- Node-exporter supplies real host disk and memory metrics for the production alerts; it is confined to the internal monitoring network.
+- Fresh Elasticsearch deployments have an explicit Compose bootstrap profile; the long-running application remains on strict search schema validation.
 - SMTP connection, read, and write timeouts are now explicit environment settings and must be positive in production.
 - MailerSend now uses an injected, bounded HTTP client with typed connection/read timeouts validated in production.
 - Authentication failures use a stable generic response; security headers include `nosniff`, `DENY` framing, and `no-referrer`.
@@ -66,10 +73,10 @@ observability, release automation, and horizontal-scaling controls remain open g
 - `./mvnw -DskipTests compile`: passed with Maven compiler release 21; the Docker baseline and verifier use Java 21.
 - `./mvnw -Dtest=FileServingSecuritySliceTest test`: passed.
 - An initial no-dependency `./mvnw test` run reached 1,131 tests with 1 failure and 75 errors because external S3/Compose services were unavailable; it is diagnostic only.
-- Final Compose-backed suite: 1,133 tests, 0 failures, 0 errors, 0 skipped, on Java 21 with MariaDB 11.4, RabbitMQ 4.0, MinIO, Elasticsearch 8.15, and ClamAV 1.4.
-- Post-remediation Compose verifier: 1,133 tests, 0 failures, 0 errors, 0 skipped after CORS and infrastructure-error response hardening.
-- Latest Compose verifier: 1,133 tests, 0 failures, 0 errors, 0 skipped after mail transport timeout and verifier configuration fixes.
-- JaCoCo report: generated successfully; 215 production classes analyzed.
+- Latest Compose-backed suite: 1,137 tests, 0 failures, 0 errors, 0 skipped, on Java 21 with MariaDB 11.4, RabbitMQ 4.0, MinIO, Elasticsearch 8.15, ClamAV, and Redis.
+- Fresh isolated Flyway gate: all five migrations applied to MariaDB 11.4 and `flyway:validate` passed.
+- Encrypted restore-drill smoke: MariaDB restored into an isolated `mariadb:11.4.4` container and encrypted object inventory validated.
+- JaCoCo report: generated successfully; 220 production classes analyzed.
 - `git diff --check`: passed.
 - Fresh production bootstrap: Flyway applied V0-V4 to MariaDB 11.4, created 39 tables, and inserted 12 permissions.
 - Strict production restart: `ddl-auto=validate`, Flyway up-to-date, Search schema `validate`, STOMP relay connected, and `/actuator/health/readiness` returned HTTP 200.
@@ -79,6 +86,6 @@ observability, release automation, and horizontal-scaling controls remain open g
 
 ## Next release gate
 
-The next production milestone should require a hosted CI pass, bind
-Actuator/Prometheus output to the selected deployment platform, and replace the
-process-local rate-limit caches before horizontal scaling.
+The next production milestone should require a hosted CI pass, successful
+Prometheus/Grafana verification on the VPS, provisioned secrets, and a recorded
+restore drill before public traffic is enabled.

@@ -1,13 +1,11 @@
 package com.project.souklab.filestorage.security;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.FileServingRoutes;
 import com.project.souklab.util.ServletResponseUtil;
-import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
+import com.project.souklab.security.RateLimitBucketStore;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,9 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.time.Duration;
 
 /**
  * Dedicated rate-limiting filter for file-serving and upload endpoints (/api/v1/files/**).
@@ -36,7 +34,7 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
 
     private final ServletResponseUtil servletResponseUtil;
     private final StorageProperties.RateLimitProperties rateLimitProperties;
-    private final Cache<String, Bucket> cache;
+    private final RateLimitBucketStore bucketStore;
 
     /**
      * Constructs a new FileRateLimitFilter with injected response utility and storage properties.
@@ -45,13 +43,15 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
      * @param properties configuration properties containing file rate-limiting limits
      */
     public FileRateLimitFilter(ServletResponseUtil servletResponseUtil, StorageProperties properties) {
+        this(servletResponseUtil, properties, RateLimitBucketStore.inMemory());
+    }
+
+    @Autowired
+    public FileRateLimitFilter(ServletResponseUtil servletResponseUtil, StorageProperties properties,
+                               RateLimitBucketStore bucketStore) {
         this.servletResponseUtil = servletResponseUtil;
         this.rateLimitProperties = properties != null ? properties.getRateLimit() : new StorageProperties.RateLimitProperties();
-        StorageProperties.RateLimitProperties.CacheProperties cacheConfig = this.rateLimitProperties.getCache();
-        this.cache = Caffeine.newBuilder()
-                .maximumSize(cacheConfig.getMaximumSize())
-                .expireAfterAccess(cacheConfig.getExpireAfterAccess())
-                .build();
+        this.bucketStore = bucketStore;
     }
 
     /**
@@ -86,7 +86,14 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
         }
 
         String key = resolveKey(request);
-        Bucket bucket = resolveBucket(key);
+        Bucket bucket;
+        try {
+            bucket = resolveBucket(key);
+        } catch (RuntimeException unavailable) {
+            servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
+                    ApiResponse.error(ERROR_TOO_MANY_REQUESTS));
+            return;
+        }
 
         if (bucket.tryConsume(TOKENS_PER_REQUEST)) {
             filterChain.doFilter(request, response);
@@ -121,28 +128,12 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
      * @return active Bucket instance
      */
     public Bucket resolveBucket(String key) {
-        return cache.get(key, k -> createNewBucket());
-    }
-
-    /**
-     * Creates a new Bucket instance initialized from the configured rateLimitProperties.
-     *
-     * @return new configured Bucket
-     */
-    private Bucket createNewBucket() {
         if (rateLimitProperties == null || rateLimitProperties.getCapacity() <= 0
                 || rateLimitProperties.getRefillDuration() == null
                 || rateLimitProperties.getRefillDuration().isZero()
                 || rateLimitProperties.getRefillDuration().isNegative()) {
             throw new IllegalStateException("storage.rate-limit must be configured before creating file request buckets");
         }
-        int capacity = rateLimitProperties.getCapacity();
-        Duration refillDuration = rateLimitProperties.getRefillDuration();
-
-        Bandwidth limit = Bandwidth.builder()
-                .capacity(capacity)
-                .refillGreedy(capacity, refillDuration)
-                .build();
-        return Bucket.builder().addLimit(limit).build();
+        return bucketStore.resolve("file:" + key, rateLimitProperties.getCapacity(), rateLimitProperties.getRefillDuration());
     }
 }

@@ -34,8 +34,10 @@ build/
 
 ### Environments ###
 .env
+deploy/.env.production
 .env.*
 !.env.example
+!deploy/.env.production.example
 
 ### Custom ###
 /storage/

@@ -25,6 +25,25 @@ services:
       timeout: 5s
       retries: 20
 
+  # Isolated schema target used only by scripts/verify-flyway.sh.
+  mariadb-flyway:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: souklab_flyway_verification
+      MARIADB_USER: ${FLYWAY_DB_USERNAME:-souklab_flyway}
+      MARIADB_PASSWORD: ${FLYWAY_DB_PASSWORD:-souklab_flyway_password}
+      MARIADB_ROOT_PASSWORD: ${FLYWAY_DB_ROOT_PASSWORD:-souklab_flyway_root}
+    ports:
+      - "${FLYWAY_MARIADB_HOST_PORT:-3308}:3306"
+    volumes:
+      - flyway_mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   rabbitmq:
     image: rabbitmq:4.0-management
     restart: unless-stopped
@@ -76,6 +95,22 @@ services:
       retries: 30
       start_period: 30s
 
+  redis:
+    image: redis:7.4.1-alpine
+    restart: unless-stopped
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-local-test-redis-password}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     restart: unless-stopped
@@ -97,6 +132,8 @@ services:
 volumes:
   mariadb_data:
     name: ${COMPOSE_PROJECT_NAME}_mariadb_data
+  flyway_mariadb_data:
+    name: ${COMPOSE_PROJECT_NAME}_flyway_mariadb_data
   rabbitmq_data:
     name: ${COMPOSE_PROJECT_NAME}_rabbitmq_data
   minio_data:
@@ -105,3 +142,5 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME}_clamav_data
   es_data:
     name: ${COMPOSE_PROJECT_NAME}_es_data
+  redis_data:
+    name: ${COMPOSE_PROJECT_NAME}_redis_data

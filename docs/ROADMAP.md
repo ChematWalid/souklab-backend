@@ -11,7 +11,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 ---
 
 ## 📍 Phase 1: Build Infrastructure & Core Foundation (COMPLETED)
-- [x] **Step 1.1**: Clean up and optimize `pom.xml` (Spring Boot 4.0.x, Java 21, Spring Data JPA, Spring Security, MySQL Connector, JJWT, Bucket4j / Caffeine rate limiting, ClamAV antivirus client, Jakarta Validation).
+- [x] **Step 1.1**: Clean up and optimize `pom.xml` (Spring Boot 4.0.x, Java 21, Spring Data JPA, Spring Security, MariaDB Connector, JJWT, Bucket4j / Redis rate limiting, ClamAV antivirus client, Jakarta Validation).
 - [x] **Step 1.2**: Configure `application.properties` and environment-driven properties (Datasource connection pool, Hibernate DDL, JWT secret, CORS policies, AppProperties hierarchy).
 - [x] **Step 1.3**: Implement Core Utilities & Foundation (`BaseEntity`, `ApiResponse<T>`, `PaginatedResponse<T>`, `AppException`, `GlobalExceptionHandler`).
 - [x] **Step 1.4**: Compile and verify base setup with `./mvnw clean compile`.
@@ -20,7 +20,7 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 
 ## 📍 Phase 2: Security, Authentication & Identity Management (COMPLETED)
 - [x] **Step 2.1**: Implement `User`, `AuthorizationPermission`, `RefreshToken`, and `VerificationToken` JPA entities and repositories.
-- [x] **Step 2.2**: Implement `JwtUtils` (deterministic with injected `Clock`), `JwtAuthenticationFilter`, `RateLimitFilter` (Caffeine bounded cache), and `CustomUserDetailsService`.
+- [x] **Step 2.2**: Implement `JwtUtils` (deterministic with injected `Clock`), `JwtAuthenticationFilter`, `RateLimitFilter` (shared Bucket4j backend), and `CustomUserDetailsService`.
 - [x] **Step 2.3**: Configure `SecurityConfig` (stateless session, route whitelisting, CORS bean, method security with standard 403 error envelopes).
 - [x] **Step 2.4**: Implement `AuthService` and `AuthController` (`/api/v1/auth/register`, `/login`, `/refresh`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`, `/change-password`, `/me`, `PATCH /me`, `/complete-profile`).
 - [x] **Step 2.5**: Write comprehensive unit, slice, and integration tests for authentication workflows (AuthControllerTest, AuthServiceTest, JwtUtilsTest, RefreshTokenServiceTest).

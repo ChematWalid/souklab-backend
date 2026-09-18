@@ -2,6 +2,7 @@ package com.project.souklab.service.user;
 
 import com.project.souklab.config.AvatarProperties;
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.dao.UserAvatarRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
@@ -58,6 +59,7 @@ public class AvatarService {
     private final AvatarProperties avatarProperties;
     private final AppProperties appProperties;
     private final CurrentUserProvider currentUserProvider;
+    private final OperationalMetrics metrics;
 
     @org.springframework.beans.factory.annotation.Autowired
     public AvatarService(UserAvatarRepository userAvatarRepository,
@@ -70,7 +72,8 @@ public class AvatarService {
                          Clock clock,
                          AvatarProperties avatarProperties,
                          AppProperties appProperties,
-                         CurrentUserProvider currentUserProvider) {
+                         CurrentUserProvider currentUserProvider,
+                         OperationalMetrics metrics) {
         this.userAvatarRepository = userAvatarRepository;
         this.userRepository = userRepository;
         this.fileValidator = fileValidator;
@@ -82,6 +85,24 @@ public class AvatarService {
         this.avatarProperties = avatarProperties;
         this.appProperties = appProperties;
         this.currentUserProvider = currentUserProvider;
+        this.metrics = metrics;
+    }
+
+    /** Compatibility constructor retained for focused unit tests and existing callers. */
+    public AvatarService(UserAvatarRepository userAvatarRepository,
+                         UserRepository userRepository,
+                         FileValidator fileValidator,
+                         VirusScanService virusScanService,
+                         ImageProcessingService imageProcessingService,
+                         StorageService storageService,
+                         TransactionTemplate transactionTemplate,
+                         Clock clock,
+                         AvatarProperties avatarProperties,
+                         AppProperties appProperties,
+                         CurrentUserProvider currentUserProvider) {
+        this(userAvatarRepository, userRepository, fileValidator, virusScanService,
+                imageProcessingService, storageService, transactionTemplate, clock,
+                avatarProperties, appProperties, currentUserProvider, OperationalMetrics.noop());
     }
 
     /** Compatibility constructor retained for focused unit tests and existing callers. */
@@ -96,7 +117,7 @@ public class AvatarService {
                          AvatarProperties avatarProperties) {
         this(userAvatarRepository, userRepository, fileValidator, virusScanService,
                 imageProcessingService, storageService, transactionTemplate, clock,
-                avatarProperties, new AppProperties(), null);
+                avatarProperties, new AppProperties(), null, OperationalMetrics.noop());
     }
 
     /** Service entry point that owns principal and entity resolution. */
@@ -213,7 +234,7 @@ public class AvatarService {
             thumbnailKey = thumbResult.key();
             storedKeys.add(thumbnailKey);
 
-            return transactionTemplate.execute(status -> {
+            AvatarResponseDTO response = transactionTemplate.execute(status -> {
                 userAvatarRepository.findByUserIdAndIsActiveTrue(authenticatedUser.getId())
                         .ifPresent(previousActive -> {
                             previousActive.setActive(false);
@@ -238,7 +259,10 @@ public class AvatarService {
 
                 return mapToResponseDTO(savedAvatar);
             });
+            metrics.recordUpload("avatar", "success");
+            return response;
         } catch (Exception ex) {
+            metrics.recordUpload("avatar", "failure");
             log.error("Avatar upload pipeline failed for user {}. Initiating rollback compensation for {} stored keys: {}",
                     authenticatedUser.getId(), storedKeys.size(), storedKeys, ex);
             compensateStorageDeletions(storedKeys);

@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Souklab production backup schedule
+
+[Timer]
+OnCalendar=*-*-* 02:15:00 UTC
+Persistent=true
+RandomizedDelaySec=15m
+Unit=souklab-backup.service
+
+[Install]
+WantedBy=timers.target

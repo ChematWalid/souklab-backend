@@ -40,18 +40,8 @@ class ConfigurationPolicyValidatorTest {
 
     @Test
     void rejectsRemainingRateLimitAndExecutorVariants() {
-        assertThatCode(() -> {
-            Fixture fixture = new Fixture();
-            fixture.avatar.getRateLimit().setEnabled(false);
-            fixture.avatar.getRateLimit().setCache(null);
-            fixture.validator.validate();
-        }).doesNotThrowAnyException();
         assertInvalid(f -> { f.avatar.getRateLimit().setEnabled(true); f.avatar.getRateLimit().setCapacity(1); f.avatar.getRateLimit().setRefillDuration(Duration.ofSeconds(-1)); }, "refill-duration");
         assertInvalid(f -> { f.avatar.getRateLimit().setEnabled(true); f.avatar.getRateLimit().setCapacity(1); f.avatar.getRateLimit().setRefillDuration(null); }, "refill-duration");
-        assertInvalid(f -> { f.avatar.getRateLimit().setEnabled(true); f.avatar.getRateLimit().setCapacity(1); f.avatar.getRateLimit().setRefillDuration(Duration.ofMinutes(1)); f.avatar.getRateLimit().getCache().setMaximumSize(0); }, "cache");
-        assertInvalid(f -> { f.avatar.getRateLimit().setEnabled(true); f.avatar.getRateLimit().setCapacity(1); f.avatar.getRateLimit().setRefillDuration(Duration.ofMinutes(1)); f.avatar.getRateLimit().setCache(null); }, "cache");
-        assertInvalid(f -> { f.avatar.getRateLimit().setEnabled(true); f.avatar.getRateLimit().setCapacity(1); f.avatar.getRateLimit().setRefillDuration(Duration.ofMinutes(1)); f.avatar.getRateLimit().getCache().setExpireAfterAccess(Duration.ZERO); }, "cache");
-        assertInvalid(f -> { f.avatar.getRateLimit().setEnabled(true); f.avatar.getRateLimit().setCapacity(1); f.avatar.getRateLimit().setRefillDuration(Duration.ofMinutes(1)); f.avatar.getRateLimit().getCache().setExpireAfterAccess(Duration.ofSeconds(-1)); }, "cache");
         assertInvalid(f -> f.app.getAsync().getApplication().setMaxPoolSize(0), "app.async.application");
         assertInvalid(f -> f.app.getAsync().getApplication().setCorePoolSize(3), "app.async.application");
         assertInvalid(f -> f.app.getAsync().getApplication().setQueueCapacity(0), "app.async.application");

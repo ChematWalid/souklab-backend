@@ -39,8 +39,6 @@ class AvatarUploadRateLimitFilterTest {
         avatarProperties.getRateLimit().setEnabled(true);
         avatarProperties.getRateLimit().setCapacity(2);
         avatarProperties.getRateLimit().setRefillDuration(Duration.ofMinutes(1));
-        avatarProperties.getRateLimit().getCache().setMaximumSize(1000L);
-        avatarProperties.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(10));
 
         filter = new AvatarUploadRateLimitFilter(servletResponseUtil, avatarProperties);
     }
@@ -263,8 +261,6 @@ class AvatarUploadRateLimitFilterTest {
     @Test
     void invalidRateLimitConfigurationFailsWhenBucketIsCreated() {
         AvatarProperties invalid = new AvatarProperties();
-        invalid.getRateLimit().getCache().setMaximumSize(10);
-        invalid.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(1));
         AvatarUploadRateLimitFilter invalidFilter = new AvatarUploadRateLimitFilter(servletResponseUtil, invalid);
 
         assertThatThrownBy(() -> invalidFilter.resolveBucket("invalid"))

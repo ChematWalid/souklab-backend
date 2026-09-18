@@ -1,0 +1,230 @@
+name: souklab-production
+
+services:
+  app:
+    image: ${APP_IMAGE:?set APP_IMAGE to an immutable published image}
+    restart: unless-stopped
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.production}"]
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mariadb://mariadb:3306/${DB_NAME}
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
+      STORAGE_VIRUS_SCAN_HOST: clamav
+      RELAY_HOST: rabbitmq
+      REDIS_HOST: redis
+      APP_RATE_LIMIT_BACKEND: redis
+      FLYWAY_ENABLED: "true"
+      JPA_HIBERNATE_DDL_AUTO: validate
+      STORAGE_S3_AUTO_CREATE_BUCKET: "false"
+      APP_ADMIN_BOOTSTRAP_ENABLED: "false"
+    expose: ["8080"]
+    depends_on:
+      mariadb: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+      elasticsearch: {condition: service_healthy}
+      clamav: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q 'UP'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    networks: [backend]
+
+  # Run once for a fresh Elasticsearch volume before starting app. The normal
+  # application service remains strict schema validation only.
+  search-bootstrap:
+    profiles: [bootstrap]
+    image: ${APP_IMAGE:?set APP_IMAGE to an immutable published image}
+    restart: "no"
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.production}"]
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_MAIN_WEB_APPLICATION_TYPE: none
+      DB_URL: jdbc:mariadb://mariadb:3306/${DB_NAME}
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
+      STORAGE_VIRUS_SCAN_HOST: clamav
+      RELAY_HOST: rabbitmq
+      REDIS_HOST: redis
+      APP_RATE_LIMIT_BACKEND: redis
+      FLYWAY_ENABLED: "true"
+      JPA_HIBERNATE_DDL_AUTO: validate
+      HIBERNATE_SEARCH_SCHEMA_MANAGEMENT: create-or-update
+      SEARCH_SCHEMA_BOOTSTRAP_ENABLED: "true"
+      STORAGE_S3_AUTO_CREATE_BUCKET: "false"
+      APP_ADMIN_BOOTSTRAP_ENABLED: "false"
+    depends_on:
+      mariadb: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+      elasticsearch: {condition: service_healthy}
+      clamav: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    networks: [backend]
+
+  mariadb:
+    image: mariadb:11.4.4
+    restart: unless-stopped
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.production}"]
+    environment:
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes: [mariadb_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [backend]
+
+  rabbitmq:
+    image: rabbitmq:4.0.7-management
+    restart: unless-stopped
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.production}"]
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    command: ["sh", "-c", "rabbitmq-plugins enable --offline rabbitmq_stomp && rabbitmq-server"]
+    volumes: [rabbitmq_data:/var/lib/rabbitmq]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [backend]
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx1024m
+    volumes: [elasticsearch_data:/usr/share/elasticsearch/data]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow >/dev/null"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 45s
+    networks: [backend]
+
+  clamav:
+    image: clamav/clamav:1.4.2
+    restart: unless-stopped
+    volumes: [clamav_data:/var/lib/clamav]
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 3310"]
+      interval: 15s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks: [backend]
+
+  redis:
+    image: redis:7.4.1-alpine
+    restart: unless-stopped
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.production}"]
+    volumes: [redis_data:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [backend]
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: unless-stopped
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks: [backend, monitoring]
+
+  pushgateway:
+    image: prom/pushgateway:v1.11.1
+    restart: unless-stopped
+    ports: ["127.0.0.1:9091:9091"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9091/-/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks: [monitoring]
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($|/)
+    volumes:
+      - /:/host:ro,rslave
+    networks: [monitoring]
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    restart: unless-stopped
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.production}"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    # Operator access is available through an SSH tunnel only; it is not a
+    # public listener and is not routed by Caddy.
+    ports: ["127.0.0.1:3000:3000"]
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks: [monitoring]
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    restart: unless-stopped
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2019/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks: [backend, monitoring]
+
+volumes:
+  mariadb_data: {name: souklab_prod_mariadb}
+  rabbitmq_data: {name: souklab_prod_rabbitmq}
+  elasticsearch_data: {name: souklab_prod_elasticsearch}
+  clamav_data: {name: souklab_prod_clamav}
+  redis_data: {name: souklab_prod_redis}
+  prometheus_data: {name: souklab_prod_prometheus}
+  grafana_data: {name: souklab_prod_grafana}
+  caddy_data: {name: souklab_prod_caddy}
+  caddy_config: {name: souklab_prod_caddy_config}
+
+networks:
+  # The backend has no published service ports, but needs controlled egress to
+  # externally provisioned S3, mail, OAuth, and payment providers.
+  backend: {driver: bridge}
+  monitoring: {internal: true}

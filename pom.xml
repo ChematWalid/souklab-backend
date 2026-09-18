@@ -116,7 +116,18 @@
             <version>8.10.1</version>
         </dependency>
 
-        <!-- In-Memory Cache: Caffeine (Bounded cache for rate limit filters) -->
+        <!-- Shared, distributed Bucket4j state for production instances. -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-redis</artifactId>
+            <version>8.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+        </dependency>
+
+        <!-- In-Memory Cache: Caffeine (non-security application caches only) -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>

@@ -1,0 +1,10 @@
+{
+	admin 0.0.0.0:2019
+}
+
+{$PUBLIC_DOMAIN} {
+	encode gzip
+	@actuator path /actuator/*
+	respond @actuator 404
+	reverse_proxy app:8080
+}

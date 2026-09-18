@@ -7,6 +7,7 @@ import com.project.souklab.filestorage.s3.S3StorageService;
 import com.project.souklab.filestorage.scan.ClamdInstreamScanner;
 import com.project.souklab.filestorage.scan.VirusScanService;
 import com.project.souklab.filestorage.scan.VirusScanner;
+import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.filestorage.stub.InMemoryStorageService;
 import com.project.souklab.filestorage.validation.FileValidator;
 import org.apache.tika.Tika;
@@ -15,6 +16,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.ObjectProvider;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -183,9 +185,15 @@ public class StorageConfiguration {
      * @param virusScanner the configured VirusScanner implementation
      * @return a configured VirusScanService bean
      */
+    public VirusScanService virusScanService(StorageProperties properties, VirusScanner virusScanner) {
+        return new VirusScanService(properties, virusScanner, OperationalMetrics.noop());
+    }
+
     @Bean
     @ConditionalOnMissingBean(VirusScanService.class)
-    public VirusScanService virusScanService(StorageProperties properties, VirusScanner virusScanner) {
-        return new VirusScanService(properties, virusScanner);
+    public VirusScanService virusScanService(StorageProperties properties, VirusScanner virusScanner,
+                                             ObjectProvider<OperationalMetrics> metricsProvider) {
+        return new VirusScanService(properties, virusScanner,
+                metricsProvider.getIfAvailable(OperationalMetrics::noop));
     }
 }

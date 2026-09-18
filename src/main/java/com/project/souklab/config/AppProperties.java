@@ -202,16 +202,6 @@ public class AppProperties {
         private boolean enabled;
         private int capacity;
         private Duration refillDuration;
-        private Cache cache = new Cache();
-
-        /**
-         * In-memory cache configuration for global rate limiting buckets.
-         */
-        @Data
-        public static class Cache {
-            private long maximumSize;
-            private Duration expireAfterAccess;
-        }
     }
 
     /**

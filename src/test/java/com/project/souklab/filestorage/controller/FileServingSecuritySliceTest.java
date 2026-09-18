@@ -61,8 +61,6 @@ class FileServingSecuritySliceTest {
             appProperties.getRateLimit().setEnabled(false);
             appProperties.getRateLimit().setCapacity(100);
             appProperties.getRateLimit().setRefillDuration(Duration.ofMinutes(1));
-            appProperties.getRateLimit().getCache().setMaximumSize(10000L);
-            appProperties.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(10));
             return appProperties;
         }
 

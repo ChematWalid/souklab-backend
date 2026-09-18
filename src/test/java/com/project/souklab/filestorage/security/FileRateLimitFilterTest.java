@@ -39,8 +39,6 @@ class FileRateLimitFilterTest {
         properties.getRateLimit().setEnabled(true);
         properties.getRateLimit().setCapacity(2);
         properties.getRateLimit().setRefillDuration(Duration.ofMinutes(1));
-        properties.getRateLimit().getCache().setMaximumSize(100);
-        properties.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(10));
 
         filter = new FileRateLimitFilter(servletResponseUtil, properties);
     }
@@ -205,8 +203,6 @@ class FileRateLimitFilterTest {
     @Test
     void invalidRateLimitConfigurationFailsOnBucketCreation() {
         StorageProperties invalid = new StorageProperties();
-        invalid.getRateLimit().getCache().setMaximumSize(10);
-        invalid.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(1));
         FileRateLimitFilter invalidFilter = new FileRateLimitFilter(servletResponseUtil, invalid);
 
         assertThatThrownBy(() -> invalidFilter.resolveBucket("invalid"))
@@ -220,8 +216,6 @@ class FileRateLimitFilterTest {
             StorageProperties invalid = new StorageProperties();
             invalid.getRateLimit().setCapacity(1);
             invalid.getRateLimit().setRefillDuration(duration);
-            invalid.getRateLimit().getCache().setMaximumSize(10);
-            invalid.getRateLimit().getCache().setExpireAfterAccess(Duration.ofMinutes(1));
             FileRateLimitFilter invalidFilter = new FileRateLimitFilter(servletResponseUtil, invalid);
 
             assertThatThrownBy(() -> invalidFilter.resolveBucket("invalid-" + duration))

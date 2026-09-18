@@ -66,6 +66,11 @@ public class ConfigurationPolicyValidator {
         requireExactValue("storage.virus-scan.enabled", environment.getProperty("storage.virus-scan.enabled"), "true");
         requireExactValue("storage.virus-scan.fail-open", environment.getProperty("storage.virus-scan.fail-open"), "false");
         requireExactValue("app.admin.bootstrap-enabled", environment.getProperty("app.admin.bootstrap-enabled"), "false");
+        requireExactValue("app.rate-limit.backend", environment.getProperty("app.rate-limit.backend"), "redis");
+        requireConfigured("app.rate-limit.redis.host", environment.getProperty("app.rate-limit.redis.host"));
+        requirePositiveProperty("app.rate-limit.redis.port");
+        requirePositiveProperty("app.rate-limit.redis.connection-timeout");
+        requirePositiveProperty("app.rate-limit.redis.command-timeout");
         requireExactValue("app.search.enabled", environment.getProperty("app.search.enabled"), "true");
         if (appProperties.getSearch().isSchemaBootstrapEnabled()) {
             requireExactValue("app.search.schema-management", appProperties.getSearch().getSchemaManagement(), "create-or-update");
@@ -94,12 +99,6 @@ public class ConfigurationPolicyValidator {
         if (properties.getRefillDuration() == null || properties.getRefillDuration().isZero()
                 || properties.getRefillDuration().isNegative()) {
             throw new IllegalStateException(prefix + ".refill-duration must be positive");
-        }
-        if (properties.getCache() == null || properties.getCache().getMaximumSize() <= 0
-                || properties.getCache().getExpireAfterAccess() == null
-                || properties.getCache().getExpireAfterAccess().isZero()
-                || properties.getCache().getExpireAfterAccess().isNegative()) {
-            throw new IllegalStateException(prefix + ".cache must have positive size and duration");
         }
     }
 

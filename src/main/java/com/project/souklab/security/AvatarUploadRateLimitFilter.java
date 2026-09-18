@@ -1,11 +1,8 @@
 package com.project.souklab.security;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.project.souklab.config.AvatarProperties;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.util.ServletResponseUtil;
-import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,6 +13,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
@@ -28,7 +26,7 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
 
     private final ServletResponseUtil servletResponseUtil;
     private final AvatarProperties.RateLimitProperties rateLimitProperties;
-    private final Cache<String, Bucket> cache;
+    private final RateLimitBucketStore bucketStore;
 
     /**
      * Constructs a new AvatarUploadRateLimitFilter with injected response utility and avatar properties.
@@ -37,13 +35,15 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
      * @param avatarProperties configuration properties containing avatar upload rate limits
      */
     public AvatarUploadRateLimitFilter(ServletResponseUtil servletResponseUtil, AvatarProperties avatarProperties) {
+        this(servletResponseUtil, avatarProperties, RateLimitBucketStore.inMemory());
+    }
+
+    @Autowired
+    public AvatarUploadRateLimitFilter(ServletResponseUtil servletResponseUtil, AvatarProperties avatarProperties,
+                                       RateLimitBucketStore bucketStore) {
         this.servletResponseUtil = servletResponseUtil;
         this.rateLimitProperties = avatarProperties != null ? avatarProperties.getRateLimit() : new AvatarProperties.RateLimitProperties();
-        AvatarProperties.RateLimitProperties.CacheProperties cacheConfig = this.rateLimitProperties.getCache();
-        this.cache = Caffeine.newBuilder()
-                .maximumSize(cacheConfig.getMaximumSize())
-                .expireAfterAccess(cacheConfig.getExpireAfterAccess())
-                .build();
+        this.bucketStore = bucketStore;
     }
 
     /**
@@ -80,7 +80,14 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String key = resolveKey(request);
-        Bucket bucket = resolveBucket(key);
+        Bucket bucket;
+        try {
+            bucket = resolveBucket(key);
+        } catch (RuntimeException unavailable) {
+            servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
+                    ApiResponse.error("Too many requests. Please try again later."));
+            return;
+        }
 
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
@@ -115,15 +122,6 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
      * @return active Bucket instance
      */
     public Bucket resolveBucket(String key) {
-        return cache.get(key, k -> createNewBucket());
-    }
-
-    /**
-     * Creates a new Bucket instance initialized from the configured rateLimitProperties.
-     *
-     * @return new configured Bucket
-     */
-    private Bucket createNewBucket() {
         if (rateLimitProperties == null
                 || rateLimitProperties.getCapacity() <= 0
                 || rateLimitProperties.getRefillDuration() == null
@@ -131,11 +129,6 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
                 || rateLimitProperties.getRefillDuration().isNegative()) {
             throw new IllegalStateException("avatar.rate-limit must be configured before creating avatar upload buckets");
         }
-
-        Bandwidth limit = Bandwidth.builder()
-                .capacity(rateLimitProperties.getCapacity())
-                .refillGreedy(rateLimitProperties.getCapacity(), rateLimitProperties.getRefillDuration())
-                .build();
-        return Bucket.builder().addLimit(limit).build();
+        return bucketStore.resolve("avatar:" + key, rateLimitProperties.getCapacity(), rateLimitProperties.getRefillDuration());
     }
 }

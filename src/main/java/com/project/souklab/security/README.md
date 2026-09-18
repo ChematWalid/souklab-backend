@@ -30,7 +30,7 @@ graph TD
 | :--- | :---: | :--- |
 | [`JwtAuthenticationFilter`](JwtAuthenticationFilter.java) | `OncePerRequestFilter` | Extracts `Bearer` token from `Authorization` header, validates signature and expiration, and populates `SecurityContextHolder`. |
 | [`JwtUtils`](JwtUtils.java) | Component | Encapsulates JJWT logic: generates signed access and refresh tokens using the configured lifetimes, extracts username/claims, and verifies signatures. |
-| [`RateLimitFilter`](RateLimitFilter.java) | `OncePerRequestFilter` | Sliding window rate limiting on authentication endpoints (`/auth/login`, `/auth/register`) backed by Caffeine cache and Bucket4j. |
+| [`RateLimitFilter`](RateLimitFilter.java) | `OncePerRequestFilter` | Bucket4j rate limiting backed by the configured shared Redis store in production. |
 | [`AvatarUploadRateLimitFilter`](AvatarUploadRateLimitFilter.java) | `OncePerRequestFilter` | Dedicated rate limit filter protecting multipart avatar upload endpoints from denial-of-service bursting. |
 | [`AvatarUploadSizeFilter`](AvatarUploadSizeFilter.java) | `OncePerRequestFilter` | Inspects `Content-Length` and early stream boundaries to reject oversized avatar payloads before memory buffering. |
 | [`OAuth2AuthenticationSuccessHandler`](OAuth2AuthenticationSuccessHandler.java) | Handler | Processes successful Google OAuth2 callbacks: creates or links user accounts, checks account-type intent cookies, and issues JWT tokens. |

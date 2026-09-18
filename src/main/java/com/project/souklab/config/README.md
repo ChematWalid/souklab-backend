@@ -8,7 +8,7 @@ Centralizes framework configurations, custom Spring Beans, security filter setup
 
 - Configures Spring Security filter chains, stateless JWT authentication, and CORS policies.
 - Sets up asynchronous task executors (`AsyncConfig`) and deterministic clocks (`ClockConfig`).
-- Configures Caffeine in-memory caches for reference taxonomy data and rate limiting (`CacheConfig`).
+- Configures Caffeine in-memory caches for reference taxonomy data; security rate limits use the shared Bucket4j backend in production.
 - Binds externalized configuration properties (`AppProperties`, `AvatarProperties`).
 - Configures WebSocket endpoints, STOMP message routing, and authentication handshakes (`WebSocketConfig`).
 - Seeds canonical permissions and reference data; administrator bootstrap is explicitly property-gated (`DataSeeder`).

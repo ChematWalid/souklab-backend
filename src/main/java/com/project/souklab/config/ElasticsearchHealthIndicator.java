@@ -19,9 +19,11 @@ public class ElasticsearchHealthIndicator implements HealthIndicator {
 
     private final AppProperties.Search properties;
     private final HttpClient client;
+    private final OperationalMetrics metrics;
 
-    public ElasticsearchHealthIndicator(AppProperties appProperties) {
+    public ElasticsearchHealthIndicator(AppProperties appProperties, OperationalMetrics metrics) {
         this.properties = appProperties.getSearch();
+        this.metrics = metrics;
         this.client = HttpClient.newBuilder()
                 .connectTimeout(timeout(properties.getConnectionTimeout()))
                 .build();
@@ -40,8 +42,11 @@ public class ElasticsearchHealthIndicator implements HealthIndicator {
                         .encodeToString(credentials.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             }
             int status = client.send(request.build(), HttpResponse.BodyHandlers.discarding()).statusCode();
-            return status >= 200 && status < 300 ? Health.up().build() : Health.down().build();
+            boolean available = status >= 200 && status < 300;
+            metrics.setDependencyAvailability("elasticsearch", available);
+            return available ? Health.up().build() : Health.down().build();
         } catch (Exception exception) {
+            metrics.setDependencyAvailability("elasticsearch", false);
             return Health.down().build();
         }
     }
