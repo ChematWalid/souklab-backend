@@ -32,6 +32,9 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    private static final String STORAGE_UNAVAILABLE_MESSAGE = "File storage is temporarily unavailable.";
+    private static final String VIRUS_SCAN_UNAVAILABLE_MESSAGE = "File security scanning is temporarily unavailable.";
+
     /**
      * Handles all custom application exceptions (AppException and subclasses like
      * ResourceNotFoundException, ConflictException, ForbiddenException, UnauthorizedException, BadRequestException).
@@ -60,7 +63,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleVirusScanException(VirusScanException ex) {
         log.error("VirusScanException [VIRUS_SCAN_UNAVAILABLE]: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(ApiResponse.error("VIRUS_SCAN_UNAVAILABLE", ex.getMessage()));
+                .body(ApiResponse.error("VIRUS_SCAN_UNAVAILABLE", VIRUS_SCAN_UNAVAILABLE_MESSAGE));
     }
 
     /**
@@ -69,8 +72,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(StorageException.class)
     public ResponseEntity<ApiResponse<Void>> handleStorageException(StorageException ex) {
         log.warn("StorageException [{}]: {}", ex.getErrorCode(), ex.getMessage());
+        String responseMessage = ex.getStatus().is5xxServerError()
+                ? STORAGE_UNAVAILABLE_MESSAGE
+                : ex.getMessage();
         return ResponseEntity.status(ex.getStatus())
-                .body(ApiResponse.error(ex.getErrorCode(), ex.getMessage()));
+                .body(ApiResponse.error(ex.getErrorCode(), responseMessage));
     }
 
     /**
