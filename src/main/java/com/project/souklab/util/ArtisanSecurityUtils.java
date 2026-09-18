@@ -18,7 +18,6 @@ public final class ArtisanSecurityUtils {
 
 
     private ArtisanSecurityUtils() {
-        // Utility class
     }
 
     /**
