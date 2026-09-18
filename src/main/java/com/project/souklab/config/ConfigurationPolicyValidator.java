@@ -47,7 +47,16 @@ public class ConfigurationPolicyValidator {
 
     private void validateProductionPolicy() {
         requireExactValue("spring.jpa.hibernate.ddl-auto", environment.getProperty("spring.jpa.hibernate.ddl-auto"), "validate");
+        requireExactValue("spring.jpa.show-sql", environment.getProperty("spring.jpa.show-sql"), "false");
+        requireExactValue("spring.jpa.properties.hibernate.format_sql", environment.getProperty("spring.jpa.properties.hibernate.format_sql"), "false");
         requireExactValue("spring.flyway.enabled", environment.getProperty("spring.flyway.enabled"), "true");
+        requireExactValue("spring.mail.properties.mail.debug", environment.getProperty("spring.mail.properties.mail.debug"), "false");
+        requireExactValue("logging.level.root", environment.getProperty("logging.level.root"), "INFO");
+        requireExactValue("logging.level.com.project.souklab", environment.getProperty("logging.level.com.project.souklab"), "INFO");
+        requireExactValue("logging.level.org.hibernate.search", environment.getProperty("logging.level.org.hibernate.search"), "WARN");
+        requireExactValue("management.endpoint.health.show-details", environment.getProperty("management.endpoint.health.show-details"), "never");
+        requireExactValue("management.endpoints.web.exposure.include", environment.getProperty("management.endpoints.web.exposure.include"), "health,info,prometheus");
+        requireExactValue("management.info.env.enabled", environment.getProperty("management.info.env.enabled"), "false");
         requireExactValue("storage.provider", environment.getProperty("storage.provider"), "s3");
         requireExactValue("storage.virus-scan.enabled", environment.getProperty("storage.virus-scan.enabled"), "true");
         requireExactValue("storage.virus-scan.fail-open", environment.getProperty("storage.virus-scan.fail-open"), "false");
