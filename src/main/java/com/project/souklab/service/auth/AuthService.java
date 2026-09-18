@@ -157,7 +157,7 @@ public class AuthService {
                 .orElseThrow(() -> new UnauthorizedException(ERROR_INVALID_CREDENTIALS));
 
         if (user.getPassword() == null || user.getPassword().isBlank()) {
-            throw new UnauthorizedException("This account was created via social login. Please sign in with Google.");
+            throw new UnauthorizedException(ERROR_INVALID_CREDENTIALS);
         }
 
         verifyAccountNotLocked(user);

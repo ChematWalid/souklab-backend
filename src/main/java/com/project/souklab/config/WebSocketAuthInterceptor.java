@@ -51,7 +51,7 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                         return message;
                     }
                 } catch (Exception e) {
-                    log.error("WebSocket Authentication failed", e);
+                    log.warn("WebSocket authentication failed");
                 }
             }
             throw new AccessDeniedException("A valid Bearer token is required to establish a WebSocket connection.");
