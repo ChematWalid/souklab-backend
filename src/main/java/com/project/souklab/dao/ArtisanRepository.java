@@ -52,6 +52,6 @@ public interface ArtisanRepository extends JpaRepository<Artisan, String>, JpaSp
      * @return page of artisan entities with associations pre-fetched
      */
     @Override
-    @EntityGraph(value = "artisan.directory", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(attributePaths = {"user", "region", "region.parent", "subCategory", "subCategory.category"})
     Page<Artisan> findAll(Specification<Artisan> spec, Pageable pageable);
 }

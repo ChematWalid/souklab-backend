@@ -434,8 +434,6 @@ public class DataSeeder implements CommandLineRunner {
         );
     }
 
-    private record SubCategorySeed(String name, String slug, String description, int displayOrder) {}
-
     private void saveCategoryWithSubs(String name, String slug, String description, String iconUrl, int displayOrder, List<SubCategorySeed> subs) {
         JobCategory category = JobCategory.builder()
             .name(name)
@@ -459,8 +457,6 @@ public class DataSeeder implements CommandLineRunner {
             jobSubCategoryRepository.save(subCategory);
         }
     }
-
-    private record MaterialSeed(String name, String slug, String description, int displayOrder) {}
 
     private void seedMaterials() {
         if (materialFamilyRepository.count() > 0) {

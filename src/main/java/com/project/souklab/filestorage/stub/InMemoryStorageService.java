@@ -40,16 +40,6 @@ public class InMemoryStorageService implements StorageService {
     }
 
     /**
-     * In-memory file representation.
-     */
-    private record StoredFile(
-            byte[] data,
-            String originalFilename,
-            String contentType,
-            Instant storedAt
-    ) {}
-
-    /**
      * Stores file content in memory.
      * Generates a safe, opaque UUID-based storage key to ensure path isolation,
      * never using the original filename as a storage path segment.

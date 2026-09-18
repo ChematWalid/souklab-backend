@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.search.engine.backend.types.Sortable;
@@ -152,6 +153,7 @@ public class Artisan {
      * Mapped through the pure junction table {@code artisan_materials}.
      */
     @ManyToMany(fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @JoinTable(
         name = "artisan_materials",
         joinColumns = @JoinColumn(name = "artisan_id"),
@@ -167,6 +169,7 @@ public class Artisan {
      * Mapped through the pure junction table {@code artisan_techniques}.
      */
     @ManyToMany(fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @JoinTable(
         name = "artisan_techniques",
         joinColumns = @JoinColumn(name = "artisan_id"),
@@ -182,6 +185,7 @@ public class Artisan {
      * Mapped through the pure junction table {@code artisan_epoques}.
      */
     @ManyToMany(fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @JoinTable(
         name = "artisan_epoques",
         joinColumns = @JoinColumn(name = "artisan_id"),
@@ -197,6 +201,7 @@ public class Artisan {
      * Cascaded and orphan-removed with the artisan lifecycle.
      */
     @OneToMany(mappedBy = "artisan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<ArtisanGalleryImage> galleryImages = new ArrayList<>();
 

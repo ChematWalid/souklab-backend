@@ -19,14 +19,18 @@ public interface MessageRepository extends JpaRepository<Message, String> {
     Page<Message> findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(@Param("conversation") Conversation conversation, Pageable pageable);
     @EntityGraph(attributePaths = {"author", "attachments"})
     @Query("select m from Message m where m.conversation = :conversation order by m.createdAt desc, m.id desc")
+    @Deprecated
     Page<Message> findByConversationOrderByCreatedAtDesc(@Param("conversation") Conversation conversation, Pageable pageable);
     @EntityGraph(attributePaths = {"author", "attachments"})
     Page<Message> findByConversationAndDeletedAtIsNullAndCreatedAtLessThanOrderByCreatedAtDesc(Conversation conversation, LocalDateTime before, Pageable pageable);
     @EntityGraph(attributePaths = {"author", "attachments"})
-    @Query("select m from Message m join fetch m.author where m.conversation = :conversation and (m.createdAt < :beforeTime or (m.createdAt = :beforeTime and m.id < :beforeId)) order by m.createdAt desc, m.id desc")
+    @Query("select m from Message m join fetch m.author where m.conversation = :conversation and m.deletedAt is null and (m.createdAt < :beforeTime or (m.createdAt = :beforeTime and m.id < :beforeId)) order by m.createdAt desc, m.id desc")
     Page<Message> findBefore(@Param("conversation") Conversation conversation, @Param("beforeTime") LocalDateTime beforeTime, @Param("beforeId") String beforeId, Pageable pageable);
     @EntityGraph(attributePaths = {"author", "attachments"})
     Optional<Message> findByIdAndConversationAndDeletedAtIsNull(String id, Conversation conversation);
+    Optional<Message> findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(Conversation conversation, User author, String idempotencyKey);
+
+    @Deprecated
     Optional<Message> findByConversationAndAuthorAndIdempotencyKey(Conversation conversation, User author, String idempotencyKey);
 
     @Query("select count(m) from Message m where m.conversation = :conversation and m.author <> :reader and m.deletedAt is null and (:afterTime is null or m.createdAt > :afterTime)")

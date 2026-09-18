@@ -17,6 +17,7 @@ import com.project.souklab.filestorage.validation.FileValidator;
 import org.springframework.web.multipart.MultipartFile;
 import com.project.souklab.security.Permission;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.service.notification.AfterCommitAction;
 import com.project.souklab.service.user.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,9 +95,9 @@ public class ConversationService {
         int requestedSize = size <= 0 ? properties.getChat().getDefaultPageSize() : size;
         int safeSize = Math.min(Math.max(requestedSize, properties.getChat().getMinPageSize()), properties.getChat().getMaxPageSize());
         Page<Message> page;
-        Cursor decoded = decodeCursor(cursor);
+        MessageCursor decoded = decodeCursor(cursor);
         PageRequest request = PageRequest.of(0, safeSize, Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id")));
-        page = decoded == null ? messageRepository.findByConversationOrderByCreatedAtDesc(c, request) : messageRepository.findBefore(c, decoded.time(), decoded.id(), request);
+        page = decoded == null ? messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(c, request) : messageRepository.findBefore(c, decoded.time(), decoded.id(), request);
         String next = page.hasNext() && !page.isEmpty() ? encodeCursor(page.getContent().get(page.getContent().size() - 1)) : null;
         return new MessagePageResponse(page.getContent().stream().map(this::toMessage).toList(), next, !page.hasNext());
     }
@@ -105,7 +106,7 @@ public class ConversationService {
     public MessageResponse send(String id, SendMessageRequest request) {
         User current = requireCurrentUser(true);
         Conversation c = requireParticipant(id, current);
-        Message existing = messageRepository.findByConversationAndAuthorAndIdempotencyKey(c, current, request.idempotencyKey()).orElse(null);
+        Message existing = messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(c, current, request.idempotencyKey()).orElse(null);
         if (existing != null) return toMessage(existing);
         if (request.content().length() > properties.getChat().getMessageMaxLength()) throw new BadRequestException("Message content exceeds configured limit");
         if (request.attachmentKeys() != null && request.attachmentKeys().size() > properties.getChat().getAttachmentMaxCount()) throw new BadRequestException("Too many attachments");
@@ -150,7 +151,7 @@ public class ConversationService {
     @Transactional
     public void markRead(String conversationId, String messageId) {
         User current = requireCurrentUser(false); Conversation c = requireParticipant(conversationId, current);
-        Message target = messageId == null ? messageRepository.findByConversationOrderByCreatedAtDesc(c, PageRequest.of(0, 1)).stream().findFirst().orElse(null) : messageRepository.findByIdAndConversationAndDeletedAtIsNull(messageId, c).orElseThrow(() -> new ResourceNotFoundException("Message not found"));
+        Message target = messageId == null ? messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(c, PageRequest.of(0, 1)).stream().findFirst().orElse(null) : messageRepository.findByIdAndConversationAndDeletedAtIsNull(messageId, c).orElseThrow(() -> new ResourceNotFoundException("Message not found"));
         if (target != null) {
             ConversationParticipant participant = participantRepository.findByConversationAndUser(c, current).orElseThrow();
             Message previous = participant.getLastReadMessageId() == null ? null : messageRepository.findById(participant.getLastReadMessageId()).orElse(null);
@@ -201,12 +202,11 @@ public class ConversationService {
         if (target.getCreatedAt() == null) return true;
         return target.getCreatedAt().isAfter(previous.getCreatedAt());
     }
-    private ConversationResponse toConversation(Conversation c, User current) { ConversationParticipant self = participantRepository.findByConversationAndUser(c, current).orElseThrow(); ConversationParticipant p = otherParticipant(c, current); String preview = messageRepository.findByConversationOrderByCreatedAtDesc(c, PageRequest.of(0, 1)).stream().findFirst().map(m -> m.getDeletedAt() == null ? m.getContent() : "").orElse(null); LocalDateTime after = self.getLastReadMessageId() == null ? null : messageRepository.findById(self.getLastReadMessageId()).map(Message::getCreatedAt).orElse(null); long unread = messageRepository.countUnread(c, current, after); return new ConversationResponse(c.getId(), p.getUser().getId(), p.getUser().getName(), self.isArchived(), preview, unread, c.getUpdatedAt()); }
+    private ConversationResponse toConversation(Conversation c, User current) { ConversationParticipant self = participantRepository.findByConversationAndUser(c, current).orElseThrow(); ConversationParticipant p = otherParticipant(c, current); String preview = messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(c, PageRequest.of(0, 1)).stream().findFirst().map(Message::getContent).orElse(null); LocalDateTime after = self.getLastReadMessageId() == null ? null : messageRepository.findById(self.getLastReadMessageId()).map(Message::getCreatedAt).orElse(null); long unread = messageRepository.countUnread(c, current, after); return new ConversationResponse(c.getId(), p.getUser().getId(), p.getUser().getName(), self.isArchived(), preview, unread, c.getUpdatedAt()); }
     private MessageResponse toMessage(Message m) { return new MessageResponse(m.getId(), m.getConversation().getId(), m.getAuthor().getId(), m.getDeletedAt() == null ? m.getContent() : "", m.getDeletedAt() != null, m.getCreatedAt(), m.getEditedAt(), m.getAttachments().stream().map(a -> new MessageAttachmentResponse(a.getId(), a.getOriginalFilename(), a.getContentType(), a.getSize(), properties.getStorage().toUrl(a.getStorageKey()))).toList()); }
     private String encodeCursor(Message message) { LocalDateTime expiry = LocalDateTime.now(clock).plus(properties.getChat().getCursorLifetime()); String value = message.getCreatedAt() + "|" + message.getId() + "|" + expiry; return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8)); }
-    private Cursor decodeCursor(String cursor) { if (cursor == null || cursor.isBlank()) return null; try { String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3); LocalDateTime expiry = LocalDateTime.parse(values[2]); if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired"); return new Cursor(LocalDateTime.parse(values[0]), values[1]); } catch (BadRequestException e) { throw e; } catch (Exception e) { throw new BadRequestException("Invalid message cursor"); } }
-    private record Cursor(LocalDateTime time, String id) {}
-    private void dispatch(Conversation c, String type, Message m, String correlationId) { ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), type, c.getId(), m.getId(), correlationId, LocalDateTime.now(clock), toMessage(m)); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() { public void afterCommit() { send(c, event); }}); else send(c, event); }
+    private MessageCursor decodeCursor(String cursor) { if (cursor == null || cursor.isBlank()) return null; try { String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3); LocalDateTime expiry = LocalDateTime.parse(values[2]); if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired"); return new MessageCursor(LocalDateTime.parse(values[0]), values[1]); } catch (BadRequestException e) { throw e; } catch (Exception e) { throw new BadRequestException("Invalid message cursor"); } }
+    private void dispatch(Conversation c, String type, Message m, String correlationId) { ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), type, c.getId(), m.getId(), correlationId, LocalDateTime.now(clock), toMessage(m)); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
     private void send(Conversation c, ChatEvent event) { for (ConversationParticipant p : c.getParticipants()) try { messagingTemplate.convertAndSendToUser(p.getUser().getEmail(), properties.getChat().getEventDestination(), event); } catch (Exception e) { log.warn("Chat event delivery failed", e); } }
-    private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "READ_UP_TO", c.getId(), message.getId(), null, LocalDateTime.now(clock), java.util.Map.of("reader", reader.getEmail(), "messageId", message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() { public void afterCommit() { send(c, event); }}); else send(c, event); }
+    private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "READ_UP_TO", c.getId(), message.getId(), null, LocalDateTime.now(clock), java.util.Map.of("reader", reader.getEmail(), "messageId", message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
 }
