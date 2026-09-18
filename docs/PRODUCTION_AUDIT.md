@@ -6,11 +6,10 @@ This report is based on the current source tree, build configuration, migrations
 
 ## Current recommendation
 
-Production audit: 64/100, risky until the real MariaDB/RabbitMQ/MinIO/Elasticsearch/ClamAV stack is verified and deployment observability is wired into the target platform.
+Production audit: 72/100, conditionally ready for a controlled deployment after the remaining operational gates are completed.
 
-The codebase compiles and has a broad existing test suite, but local dependency
-outages and the absence of a running Compose stack prevent a production-ready
-claim from being made from this checkout alone.
+The codebase compiles and the dependency-backed local verifier passes. Deployment
+observability, release automation, and horizontal-scaling controls remain open gates.
 
 ## Findings
 
@@ -22,7 +21,7 @@ claim from being made from this checkout alone.
 | No tracked CI/release gate is present | No `.github` workflow or equivalent pipeline is tracked. | Add compile, test, migration, dependency, image, and artifact gates. |
 | Operational dashboards are not yet wired to a deployment platform | Actuator health/readiness and Prometheus metrics are now exposed, but no platform scrape or alert configuration is tracked. | Bind the endpoints to the selected monitoring stack and define alerts. |
 | Rate limiting is process-local | Bucket4j state is held in Caffeine caches. | Use a shared limiter or edge gateway when horizontally scaling. |
-| Full dependency verification is not repeatable from the current shell | The unscoped Maven suite produced 1,131 tests with 75 dependency-related errors because MinIO and other services were not running. | Run `scripts/verify-local-integration.sh` and capture dependency health before release. |
+| Full dependency verification is not yet a CI release gate | The local verifier is repeatable and passes, but no tracked CI workflow runs it. | Add a service-backed CI gate before production release. |
 
 ### Medium priority
 
@@ -55,11 +54,11 @@ claim from being made from this checkout alone.
 
 ## Verification evidence
 
-- `./mvnw -DskipTests compile`: passed on the available JDK 26; the build and Docker baseline target Java 21.
+- `./mvnw -DskipTests compile`: passed with Maven compiler release 21; the Docker baseline and verifier use Java 21.
 - `./mvnw -Dtest=FileServingSecuritySliceTest test`: passed.
-- `./mvnw test`: not a release gate yet; the run reached 1,131 tests with 1 failure and 75 errors, primarily because external S3/Compose services were unavailable. The first failure was corrected by the stable generic 401 response.
-- Full Compose-backed suite: 828 tests, 0 failures, 0 errors, 0 skipped.
-- JaCoCo report: generated successfully; 187 classes analyzed.
+- An initial no-dependency `./mvnw test` run reached 1,131 tests with 1 failure and 75 errors because external S3/Compose services were unavailable; it is diagnostic only.
+- Final Compose-backed suite: 1,133 tests, 0 failures, 0 errors, 0 skipped, on Java 21 with MariaDB 11.4, RabbitMQ 4.0, MinIO, Elasticsearch 8.15, and ClamAV 1.4.
+- JaCoCo report: generated successfully; 211 production classes analyzed.
 - `git diff --check`: passed.
 - Production time scan: only `ClockConfig` creates the system clock; all production `now` calls use an injected clock.
 - Architecture scans: no controller repository imports and no inline implementation classes.
