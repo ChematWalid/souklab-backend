@@ -161,6 +161,8 @@ public class AppProperties {
         private String apiUrl;
         private String senderEmail;
         private String senderName;
+        private Duration connectionTimeout;
+        private Duration readTimeout;
     }
 
     @Data

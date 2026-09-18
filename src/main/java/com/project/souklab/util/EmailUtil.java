@@ -1,7 +1,8 @@
 package com.project.souklab.util;
 
 import com.project.souklab.config.AppProperties;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@RequiredArgsConstructor
 public class EmailUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailUtil.class);
     private static final String ADMINISTRATOR_NOTE_HEADER = "Administrator Note:\n";
@@ -29,7 +29,15 @@ public class EmailUtil {
 
     private final JavaMailSender mailSender;
     private final AppProperties appProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    @Autowired
+    public EmailUtil(JavaMailSender mailSender, AppProperties appProperties,
+                     @Qualifier("mailerSendRestTemplate") RestTemplate restTemplate) {
+        this.mailSender = mailSender;
+        this.appProperties = appProperties;
+        this.restTemplate = restTemplate;
+    }
 
     @Async(APPLICATION_TASK_EXECUTOR)
     public void sendVerificationCode(String toEmail, String code) {
@@ -281,4 +289,3 @@ public class EmailUtil {
         restTemplate.postForEntity(appProperties.getMailersend().getApiUrl(), entity, String.class);
     }
 }
-

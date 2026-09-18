@@ -60,6 +60,8 @@ public class ConfigurationPolicyValidator {
         requireExactValue("management.endpoint.health.show-details", environment.getProperty("management.endpoint.health.show-details"), "never");
         requireExactValue("management.endpoints.web.exposure.include", environment.getProperty("management.endpoints.web.exposure.include"), "health,info,prometheus");
         requireExactValue("management.info.env.enabled", environment.getProperty("management.info.env.enabled"), "false");
+        validatePositiveDuration("app.mailersend.connection-timeout", appProperties.getMailersend().getConnectionTimeout());
+        validatePositiveDuration("app.mailersend.read-timeout", appProperties.getMailersend().getReadTimeout());
         requireExactValue("storage.provider", environment.getProperty("storage.provider"), "s3");
         requireExactValue("storage.virus-scan.enabled", environment.getProperty("storage.virus-scan.enabled"), "true");
         requireExactValue("storage.virus-scan.fail-open", environment.getProperty("storage.virus-scan.fail-open"), "false");
@@ -178,6 +180,12 @@ public class ConfigurationPolicyValidator {
             }
         } catch (NumberFormatException exception) {
             throw new IllegalStateException(name + " must be a positive integer in production", exception);
+        }
+    }
+
+    private void validatePositiveDuration(String name, java.time.Duration value) {
+        if (value == null || value.isZero() || value.isNegative()) {
+            throw new IllegalStateException(name + " must be positive in production");
         }
     }
 }

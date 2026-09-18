@@ -2,7 +2,6 @@ package com.project.souklab.util;
 
 import com.project.souklab.config.AppProperties;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.client.RestClientException;
@@ -19,7 +18,7 @@ class EmailUtilTest {
     void sendsAllSmtpNotificationsWithExpectedRecipientsAndSubjects() {
         JavaMailSender sender = mock(JavaMailSender.class);
         AppProperties properties = properties(true);
-        EmailUtil email = new EmailUtil(sender, properties);
+        EmailUtil email = new EmailUtil(sender, properties, mock(RestTemplate.class));
 
         email.sendVerificationCode("verify@test", "123");
         email.sendPasswordResetCode("reset@test", "456");
@@ -47,7 +46,7 @@ class EmailUtilTest {
     void suppressesSmtpFailures() {
         JavaMailSender sender = mock(JavaMailSender.class);
         doThrow(new IllegalStateException("mail unavailable")).when(sender).send(any(SimpleMailMessage.class));
-        EmailUtil email = new EmailUtil(sender, properties(true));
+        EmailUtil email = new EmailUtil(sender, properties(true), mock(RestTemplate.class));
 
         email.sendVerificationCode("to@test", "code");
         email.sendPasswordResetCode("to@test", "code");
@@ -61,9 +60,9 @@ class EmailUtilTest {
     @Test
     void sendsViaMailerSendAndSuppressesClientAndUnexpectedFailures() {
         AppProperties properties = properties(false);
-        try (MockedConstruction<RestTemplate> construction = mockConstruction(RestTemplate.class)) {
-            EmailUtil email = new EmailUtil(mock(JavaMailSender.class), properties);
-            RestTemplate rest = construction.constructed().get(0);
+        RestTemplate rest = mock(RestTemplate.class);
+        {
+            EmailUtil email = new EmailUtil(mock(JavaMailSender.class), properties, rest);
             when(rest.postForEntity(any(String.class), any(), eq(String.class))).thenReturn(null);
 
             email.sendVerificationCode("to@test", "code");
@@ -97,9 +96,9 @@ class EmailUtilTest {
     @Test
     void suppressesBothMailerSendFailureCategoriesAcrossAllEmailFlows() {
         AppProperties properties = properties(false);
-        try (MockedConstruction<RestTemplate> construction = mockConstruction(RestTemplate.class)) {
-            EmailUtil email = new EmailUtil(mock(JavaMailSender.class), properties);
-            RestTemplate rest = construction.constructed().get(0);
+        RestTemplate rest = mock(RestTemplate.class);
+        {
+            EmailUtil email = new EmailUtil(mock(JavaMailSender.class), properties, rest);
 
             when(rest.postForEntity(any(String.class), any(), eq(String.class)))
                     .thenThrow(new RestClientException("provider unavailable"));
