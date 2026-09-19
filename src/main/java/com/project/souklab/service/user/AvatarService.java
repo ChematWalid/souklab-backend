@@ -1,5 +1,7 @@
 package com.project.souklab.service.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.project.souklab.config.AvatarProperties;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.config.OperationalMetrics;
@@ -61,7 +63,7 @@ public class AvatarService {
     private final CurrentUserProvider currentUserProvider;
     private final OperationalMetrics metrics;
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     public AvatarService(UserAvatarRepository userAvatarRepository,
                          UserRepository userRepository,
                          FileValidator fileValidator,

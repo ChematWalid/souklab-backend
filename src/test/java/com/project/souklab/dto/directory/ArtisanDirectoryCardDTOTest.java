@@ -1,5 +1,7 @@
 package com.project.souklab.dto.directory;
 
+import java.util.LinkedHashSet;
+
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanGalleryImage;
 import com.project.souklab.model.JobCategory;
@@ -170,9 +172,9 @@ class ArtisanDirectoryCardDTOTest {
         List<ArtisanGalleryImage> images = List.of(
                 ArtisanGalleryImage.builder().imageUrl(" ").displayOrder(0).build(),
                 ArtisanGalleryImage.builder().imageUrl(null).displayOrder(1).build());
-        Set<Material> materials = new java.util.LinkedHashSet<>();
+        Set<Material> materials = new LinkedHashSet<>();
         for (int i = 0; i < 5; i++) materials.add(Material.builder().name("m" + i).build());
-        Set<Technique> techniques = new java.util.LinkedHashSet<>();
+        Set<Technique> techniques = new LinkedHashSet<>();
         for (int i = 0; i < 5; i++) techniques.add(Technique.builder().name("t" + i).build());
         Artisan dtoSource = Artisan.builder().region(child).galleryImages(images)
                 .materials(materials).techniques(techniques).build();

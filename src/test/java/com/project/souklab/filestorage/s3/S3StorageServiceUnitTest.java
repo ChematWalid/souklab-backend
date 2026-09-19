@@ -1,5 +1,7 @@
 package com.project.souklab.filestorage.s3;
 
+import java.util.Map;
+
 import com.project.souklab.filestorage.exception.FileNotFoundStorageException;
 import com.project.souklab.filestorage.exception.StorageException;
 import com.project.souklab.filestorage.config.StorageProperties;
@@ -97,7 +99,7 @@ class S3StorageServiceUnitTest {
     void mapsNonNotFoundAwsFailuresAndReadsObjectMetadata() throws Exception {
         GetObjectResponse response = GetObjectResponse.builder()
                 .contentType("image/jpeg").contentLength(null)
-                .metadata(java.util.Map.of("original-filename", "photo.jpg")).build();
+                .metadata(Map.of("original-filename", "photo.jpg")).build();
         ResponseInputStream<GetObjectResponse> stream = new ResponseInputStream<>(response,
                 AbortableInputStream.create(new ByteArrayInputStream(new byte[]{1})));
         when(client.getObject(any(GetObjectRequest.class))).thenReturn(stream);

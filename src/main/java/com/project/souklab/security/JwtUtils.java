@@ -58,7 +58,7 @@ public class JwtUtils {
     public String generateAccessToken(Authentication authentication) {
         if (!(authentication.getPrincipal() instanceof UserDetails userPrincipal)) {
             throw new IllegalArgumentException(ERROR_UNEXPECTED_PRINCIPAL_TYPE_PREFIX
-                    + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null"));
+                    + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getSimpleName() : "null"));
         }
         return generateTokenFromUsername(userPrincipal.getUsername(), appProperties.getJwt().getAccessTokenExpirationMs());
     }
@@ -70,7 +70,7 @@ public class JwtUtils {
     public String generateRefreshToken(Authentication authentication) {
         if (!(authentication.getPrincipal() instanceof UserDetails userPrincipal)) {
             throw new IllegalArgumentException(ERROR_UNEXPECTED_PRINCIPAL_TYPE_PREFIX
-                    + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null"));
+                    + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getSimpleName() : "null"));
         }
         return generateTokenFromUsername(userPrincipal.getUsername(), appProperties.getJwt().getRefreshTokenExpirationMs());
     }

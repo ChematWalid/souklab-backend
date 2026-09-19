@@ -1,4 +1,7 @@
 package com.project.souklab.dao;
+import java.time.LocalDateTime;
+
+import com.project.souklab.model.FeedPostStatus;
 
 import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostStatus;
@@ -13,6 +16,10 @@ import java.util.Optional;
  * Persistence operations for moderated community feed posts.
  */
 public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
+    long countByStatusAndDeletedAtIsNull(FeedPostStatus status);
+    long countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(FeedPostStatus status,
+                                                            LocalDateTime from, LocalDateTime to);
+    long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
 
     /**
      * Lists published, non-deleted posts for public feed consumption.

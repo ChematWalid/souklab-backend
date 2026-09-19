@@ -1,4 +1,5 @@
 package com.project.souklab.service.notification;
+import com.project.souklab.config.AppProperties;
 
 import com.project.souklab.dao.NotificationRepository;
 import com.project.souklab.dao.UserRepository;
@@ -71,7 +72,7 @@ class NotificationServiceTest {
     void setUp() {
         fixedClock = Clock.fixed(FIXED_INSTANT, ZONE_ID);
         fixedNow = LocalDateTime.now(fixedClock);
-        com.project.souklab.config.AppProperties appProperties = new com.project.souklab.config.AppProperties();
+        AppProperties appProperties = new AppProperties();
         appProperties.getChat().setNotificationDestination("/queue/notifications");
         appProperties.getNotification().setMaxMessageLength(4000);
         notificationService = new NotificationService(
@@ -395,7 +396,7 @@ class NotificationServiceTest {
         User admin2 = User.builder().email("admin2@souklab.com").build();
         admin2.setId("admin-uuid-2");
 
-        when(userRepository.findByPermissionKey(Permission.ADMIN_USERS.authority())).thenReturn(List.of(admin1, admin2));
+        when(userRepository.findByPermissionKey(Permission.Admin.USERS.authority())).thenReturn(List.of(admin1, admin2));
         when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
             Notification n = invocation.getArgument(0);
             n.setId("notif-admin-" + n.getUser().getId());
@@ -405,7 +406,7 @@ class NotificationServiceTest {
 
         notificationService.notifyAdmins("System maintenance scheduled");
 
-        verify(userRepository).findByPermissionKey(Permission.ADMIN_USERS.authority());
+        verify(userRepository).findByPermissionKey(Permission.Admin.USERS.authority());
         verify(notificationRepository, times(2)).save(any(Notification.class));
         verify(messagingTemplate).convertAndSendToUser(eq("admin1@souklab.com"), eq("/queue/notifications"), any(NotificationResponseDTO.class));
         verify(messagingTemplate).convertAndSendToUser(eq("admin2@souklab.com"), eq("/queue/notifications"), any(NotificationResponseDTO.class));

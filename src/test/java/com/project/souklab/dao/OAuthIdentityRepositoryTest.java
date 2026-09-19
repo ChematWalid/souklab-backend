@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.OAuthIdentity;
 import com.project.souklab.model.User;
@@ -22,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * enforcement on (provider, provider_user_id), and multi-identity lookup per user against embedded H2.
  */
 @DataJpaTest
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
+        TestJpaProperties.DISABLE_HIBERNATE_SEARCH,
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class OAuthIdentityRepositoryTest {

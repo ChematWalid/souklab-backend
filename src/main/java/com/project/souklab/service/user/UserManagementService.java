@@ -1,6 +1,12 @@
 package com.project.souklab.service.user;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
 import com.project.souklab.dao.ArtisanRepository;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.auth.UserResponseDTO;
 import com.project.souklab.dto.common.PaginatedResponse;
@@ -40,6 +46,10 @@ public class UserManagementService {
     private final NotificationService notificationService;
     private final Clock clock;
     private final AppProperties appProperties;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     /**
      * Retrieves a paginated list of all users in the system.
@@ -99,6 +109,7 @@ public class UserManagementService {
         });
 
         auditLogService.logAction(AuditLogAction.APPROVE_USER, "Approved user ID: " + userId);
+        recordModeration(AnalyticsEvent.User.APPROVED, user, Map.of());
         notificationService.createForUser(user, "Your account has been approved and is now active!", NotificationType.ACCOUNT_VALIDATED, user.getId());
     }
 
@@ -124,6 +135,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: " + userId + ". Reason: " + reason);
+        recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of("reasonPresent", reason != null && !reason.isBlank()));
         notificationService.createForUser(user, "Your account has been permanently suspended. Reason: " + reason, NotificationType.ACCOUNT_SUSPENDED, user.getId());
     }
 
@@ -154,6 +166,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
+        recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of("minutes", minutes));
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.ACCOUNT_SUSPENDED, user.getId());
     }
 
@@ -179,7 +192,12 @@ public class UserManagementService {
         userRepository.save(user);
 
         auditLogService.logAction(AuditLogAction.UNBAN_USER, "Reinstated user ID: " + userId);
+        recordModeration(AnalyticsEvent.User.REINSTATED, user, Map.of());
         notificationService.createForUser(user, "Your account suspension has been lifted and your access has been restored.", NotificationType.ACCOUNT_REINSTATED, user.getId());
+    }
+
+    private void recordModeration(AnalyticsEvent.Type type, User user, Map<String, ?> metadata) {
+        if (activityEventService != null) activityEventService.record(type, user.getId(), user.getId(), metadata);
     }
 
     private UserResponseDTO mapToDTO(User user) {

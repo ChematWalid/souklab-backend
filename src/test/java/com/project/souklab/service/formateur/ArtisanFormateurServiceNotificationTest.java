@@ -1,4 +1,5 @@
 package com.project.souklab.service.formateur;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanFormateurRequestRepository;
@@ -119,7 +120,7 @@ class ArtisanFormateurServiceNotificationTest {
                 .build();
         saved.setId("req-1");
         when(formateurRequestRepository.saveAndFlush(any())).thenReturn(saved);
-        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(admin));
+        when(userRepository.findByPermissionKey(Permission.Admin.USERS.authority())).thenReturn(List.of(admin));
 
         FormateurRequestDTO dto = FormateurRequestDTO.builder()
                 .motivation("I want to teach pottery")
@@ -176,7 +177,7 @@ class ArtisanFormateurServiceNotificationTest {
                 .build();
         saved.setId("req-2");
         when(formateurRequestRepository.saveAndFlush(any())).thenReturn(saved);
-        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(admin));
+        when(userRepository.findByPermissionKey(Permission.Admin.USERS.authority())).thenReturn(List.of(admin));
 
         artisanFormateurService.submitRequest(null);
 

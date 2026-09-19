@@ -1,5 +1,7 @@
 package com.project.souklab.service.user;
 
+import java.util.List;
+
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
@@ -30,7 +32,7 @@ class CurrentUserProviderTest {
     void resolvesAndNormalizesAuthenticatedEmail() {
         User user = User.builder().email("person@example.test").build();
         SecurityContextHolder.getContext().setAuthentication(
-                UsernamePasswordAuthenticationToken.authenticated("  PERSON@EXAMPLE.TEST  ", "credentials", java.util.List.of()));
+                UsernamePasswordAuthenticationToken.authenticated("  PERSON@EXAMPLE.TEST  ", "credentials", List.of()));
         when(users.findByEmail("person@example.test")).thenReturn(Optional.of(user));
 
         assertThat(new CurrentUserProvider(users).requireCurrentUser()).isSameAs(user);
@@ -46,7 +48,7 @@ class CurrentUserProviderTest {
     @Test
     void rejectsBlankAuthenticatedName() {
         SecurityContextHolder.getContext().setAuthentication(
-                UsernamePasswordAuthenticationToken.authenticated("   ", "credentials", java.util.List.of()));
+                UsernamePasswordAuthenticationToken.authenticated("   ", "credentials", List.of()));
 
         assertThatThrownBy(() -> new CurrentUserProvider(users).requireCurrentUser())
                 .isInstanceOf(UnauthorizedException.class);
@@ -55,7 +57,7 @@ class CurrentUserProviderTest {
     @Test
     void reportsMissingAuthenticatedUser() {
         SecurityContextHolder.getContext().setAuthentication(
-                UsernamePasswordAuthenticationToken.authenticated("missing@example.test", "credentials", java.util.List.of()));
+                UsernamePasswordAuthenticationToken.authenticated("missing@example.test", "credentials", List.of()));
         when(users.findByEmail("missing@example.test")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> new CurrentUserProvider(users).requireCurrentUser())

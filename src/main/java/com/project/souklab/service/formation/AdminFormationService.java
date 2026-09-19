@@ -1,5 +1,11 @@
 package com.project.souklab.service.formation;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.FormationEnrollmentRepository;
 import com.project.souklab.dao.FormationFileRepository;
@@ -58,6 +64,10 @@ public class AdminFormationService {
     private final NotificationService notificationService;
     private final AppProperties appProperties;
     private final Clock clock;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     /**
      * Retrieves a paginated review queue of formations awaiting administrative moderation.
@@ -110,6 +120,11 @@ public class AdminFormationService {
             formation.setStatus(FormationStatus.REJECTED);
         }
         Formation saved = formationRepository.save(formation);
+        if (activityEventService != null) activityEventService.record(
+                (dto.getDecision() == FormationReviewDecision.APPROVED
+                        ? AnalyticsEvent.Formation.MODERATION_APPROVED
+                        : AnalyticsEvent.Formation.MODERATION_REJECTED), admin.getId(), saved.getId(),
+                Map.of("decision", dto.getDecision().name()));
 
         dispatchReviewNotification(saved, dto);
         log.info("Admin '{}' reviewed formation '{}' with decision '{}'", admin.getEmail(), saved.getId(), dto.getDecision());
@@ -134,6 +149,8 @@ public class AdminFormationService {
 
         formation.setStatus(FormationStatus.PUBLISHED);
         Formation saved = formationRepository.save(formation);
+        if (activityEventService != null) activityEventService.record(AnalyticsEvent.Formation.PUBLISHED,
+                resolveAuthenticatedAdmin().getId(), saved.getId(), Map.of());
         log.info("Formation '{}' published by administrator", saved.getId());
 
         return mapToResponseDTO(saved);

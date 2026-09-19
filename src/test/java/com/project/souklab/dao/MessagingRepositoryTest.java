@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Conversation;
 import com.project.souklab.model.ConversationParticipant;
@@ -18,10 +19,9 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.jpa.properties.hibernate.search.enabled=false"
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
+        TestJpaProperties.DISABLE_HIBERNATE_SEARCH,
+        "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class MessagingRepositoryTest {
     private static final LocalDateTime MESSAGE_TIME = LocalDateTime.of(2026, 9, 17, 12, 0);

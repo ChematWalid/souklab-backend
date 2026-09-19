@@ -1,5 +1,7 @@
 package com.project.souklab.filestorage.exception;
 
+import org.springframework.http.HttpStatus;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,7 +11,7 @@ class FileTooLargeExceptionTest {
     void stringConstructorPreservesStorageErrorContract() {
         FileTooLargeException exception = new FileTooLargeException("too large");
 
-        assertThat(exception.getStatus()).isEqualTo(org.springframework.http.HttpStatus.BAD_REQUEST);
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getErrorCode()).isEqualTo("FILE_TOO_LARGE");
         assertThat(exception.getMessage()).isEqualTo("too large");
     }

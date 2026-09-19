@@ -1,4 +1,5 @@
 package com.project.souklab.controller.auth;
+import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
@@ -84,7 +85,7 @@ class AuthControllerTest {
                 .name("Karim Client")
                 .phone("+213555000111")
                 .accountStatus(status)
-                .permissions(Set.of(Permission.PROFILE_READ.authority()))
+                .permissions(Set.of(Permission.Profile.READ.authority()))
                 .emailVerified(true)
                 .createdAt(LocalDateTime.of(2026, 9, 1, 10, 0))
                 .build();
@@ -99,7 +100,7 @@ class AuthControllerTest {
                 .name("Ahmed Artisan")
                 .phone("+213555222333")
                 .accountStatus(status)
-                .permissions(Set.of(Permission.ARTISAN_CONTENT.authority()))
+                .permissions(Set.of(Permission.Artisan.CONTENT.authority()))
                 .emailVerified(false)
                 .teacher(false)
                 .verified(false)
@@ -114,7 +115,7 @@ class AuthControllerTest {
                 .tokenType("Bearer")
                 .expiresIn(900L)
                 .user(user)
-                .permissions(List.of(Permission.PROFILE_READ.authority()))
+                .permissions(List.of(Permission.Profile.READ.authority()))
                 .build();
     }
 
@@ -867,7 +868,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.code").value(200))
                     .andExpect(jsonPath("$.data.id").value("user-1"))
                     .andExpect(jsonPath("$.data.email").value("karim@souklab.dz"))
-                    .andExpect(jsonPath("$.data.permissions[0]").value(Permission.PROFILE_READ.authority()));
+                    .andExpect(jsonPath("$.data.permissions[0]").value(Permission.Profile.READ.authority()));
 
             verify(profileService).getCurrentUser();
         }

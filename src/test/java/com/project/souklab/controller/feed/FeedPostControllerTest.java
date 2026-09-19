@@ -1,4 +1,5 @@
 package com.project.souklab.controller.feed;
+import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;

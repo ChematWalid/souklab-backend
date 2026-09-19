@@ -1,5 +1,7 @@
 package com.project.souklab.filestorage.image;
 
+import java.io.InputStream;
+
 import com.project.souklab.filestorage.validation.ValidatedFile;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +17,7 @@ class ImageProcessingServiceTest {
     void validatedFileOverloadUsesItsContentAndDetectedType() {
         ImageProcessingService service = new ImageProcessingService() {
             @Override
-            public Map<ResolutionTier, ImageVariant> generateVariants(java.io.InputStream content, String contentType) {
+            public Map<ResolutionTier, ImageVariant> generateVariants(InputStream content, String contentType) {
                 assertThat(contentType).isEqualTo("image/png");
                 return Map.of();
             }
@@ -33,7 +35,7 @@ class ImageProcessingServiceTest {
     @Test
     void validatedFileOverloadRejectsNull() {
         ImageProcessingService service = new ImageProcessingService() {
-            @Override public Map<ResolutionTier, ImageVariant> generateVariants(java.io.InputStream c, String t) { return Map.of(); }
+            @Override public Map<ResolutionTier, ImageVariant> generateVariants(InputStream c, String t) { return Map.of(); }
             @Override public Map<ResolutionTier, ImageVariant> generateVariants(byte[] b, String t) { return Map.of(); }
         };
 

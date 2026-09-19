@@ -1,5 +1,8 @@
 package com.project.souklab.security;
 
+import java.util.List;
+import org.springframework.security.core.userdetails.UserDetailsService;
+
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +28,7 @@ class JwtAuthenticationFilterTest {
     private JwtUtils jwtUtils;
 
     @Mock
-    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     @Mock
     private FilterChain filterChain;
@@ -67,7 +70,7 @@ class JwtAuthenticationFilterTest {
         when(userDetailsService.loadUserByUsername("user@example.com")).thenReturn(userDetails);
         when(userDetails.isEnabled()).thenReturn(true);
         when(userDetails.isAccountNonLocked()).thenReturn(true);
-        when(userDetails.getAuthorities()).thenReturn(java.util.List.of());
+        when(userDetails.getAuthorities()).thenReturn(List.of());
 
         filter.doFilterInternal(requestWithBearer("good-token"), new MockHttpServletResponse(), filterChain);
 

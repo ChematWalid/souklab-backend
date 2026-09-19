@@ -1,4 +1,7 @@
 package com.project.souklab.service.report;
+import java.math.BigDecimal;
+
+import com.project.souklab.exception.ForbiddenException;
 
 import com.project.souklab.dao.ArtisanReviewRepository;
 import com.project.souklab.dao.ArtisanRepository;
@@ -176,7 +179,7 @@ class ContentReportServiceTest {
         Artisan artisan = Artisan.builder().id("artisan-1").build();
         ArtisanReview review = ArtisanReview.builder().artisan(artisan).status(ReviewStatus.PUBLISHED).build();
         when(reviewRepository.findByIdAndDeletedAtIsNull("review")).thenReturn(Optional.of(review));
-        when(reviewRepository.averageRating("artisan-1", ReviewStatus.PUBLISHED)).thenReturn(new java.math.BigDecimal("4.126"));
+        when(reviewRepository.averageRating("artisan-1", ReviewStatus.PUBLISHED)).thenReturn(new BigDecimal("4.126"));
         when(reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull("artisan-1", ReviewStatus.PUBLISHED)).thenReturn(3L);
         when(reportRepository.save(any(ContentReport.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(reportRepository.findById("r")).thenReturn(Optional.of(report("r", ReportTargetType.REVIEW, "review")));
@@ -211,7 +214,7 @@ class ContentReportServiceTest {
     @Test
     void rejectsUnauthorizedAndAlreadyResolvedReports() {
         when(accessControlService.canModerateReports(any())).thenReturn(false);
-        assertThatThrownBy(() -> service.list(null, null, PageRequest.of(0, 10))).isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+        assertThatThrownBy(() -> service.list(null, null, PageRequest.of(0, 10))).isInstanceOf(ForbiddenException.class);
         allowAdmin();
         ContentReport closed = report("closed", ReportTargetType.POST, "post");
         closed.setStatus(ReportStatus.RESOLVED);
@@ -270,7 +273,7 @@ class ContentReportServiceTest {
         SecurityContextHolder.clearContext();
         assertThatThrownBy(() -> service.create(new ContentReportRequestDTO(
                 ReportTargetType.POST, "post", "reason", null)))
-                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+                .isInstanceOf(ForbiddenException.class);
     }
 
     private void allowAdmin() {

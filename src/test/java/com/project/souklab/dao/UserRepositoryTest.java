@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.security.Permission;
@@ -26,8 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * permission join filtering with soft-delete exclusion, and eager EntityGraph permission loading in H2.
  */
 @DataJpaTest
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.jpa.properties.hibernate.search.enabled=false"
 })
@@ -49,12 +49,12 @@ class UserRepositoryTest {
     @DisplayName("findByEmail: loads user and eagerly fetches permissions after persistence context is cleared")
     void findByEmail_whenUserExists_returnsUserWithRolesEagerlyLoadedAfterContextCleared() {
         AuthorizationPermission profileRead = new AuthorizationPermission();
-        profileRead.setPermissionKey(Permission.PROFILE_READ.authority());
+        profileRead.setPermissionKey(Permission.Profile.READ.authority());
         profileRead.setDescription("Read profiles");
         entityManager.persist(profileRead);
 
         AuthorizationPermission artisanContent = new AuthorizationPermission();
-        artisanContent.setPermissionKey(Permission.ARTISAN_CONTENT.authority());
+        artisanContent.setPermissionKey(Permission.Artisan.CONTENT.authority());
         artisanContent.setDescription("Create artisan content");
         entityManager.persist(artisanContent);
 
@@ -78,7 +78,7 @@ class UserRepositoryTest {
         assertThat(detachedUser.getPermissions())
                 .hasSize(2)
                 .extracting(AuthorizationPermission::getPermissionKey)
-                .containsExactlyInAnyOrder(Permission.PROFILE_READ.authority(), Permission.ARTISAN_CONTENT.authority());
+                .containsExactlyInAnyOrder(Permission.Profile.READ.authority(), Permission.Artisan.CONTENT.authority());
     }
 
     /**
@@ -166,7 +166,7 @@ class UserRepositoryTest {
     @DisplayName("findByUsername: matches by email and eagerly loads permissions")
     void findByUsername_matchesByEmailAndEagerlyLoadsRoles() {
         AuthorizationPermission adminUsers = new AuthorizationPermission();
-        adminUsers.setPermissionKey(Permission.ADMIN_USERS.authority());
+        adminUsers.setPermissionKey(Permission.Admin.USERS.authority());
         adminUsers.setDescription("Manage users");
         entityManager.persist(adminUsers);
 
@@ -186,7 +186,7 @@ class UserRepositoryTest {
         assertThat(found.get().getPermissions())
                 .hasSize(1)
                 .extracting(AuthorizationPermission::getPermissionKey)
-                .containsExactly(Permission.ADMIN_USERS.authority());
+                .containsExactly(Permission.Admin.USERS.authority());
     }
 
     /**
@@ -346,12 +346,12 @@ class UserRepositoryTest {
     @DisplayName("findByPermissionKey: returns active users with role and excludes soft-deleted users")
     void findByPermissionKey_returnsActiveUsersWithRole_andExcludesSoftDeletedUsers() {
         AuthorizationPermission adminUsers = new AuthorizationPermission();
-        adminUsers.setPermissionKey(Permission.ADMIN_USERS.authority());
+        adminUsers.setPermissionKey(Permission.Admin.USERS.authority());
         adminUsers.setDescription("Manage users");
         entityManager.persist(adminUsers);
 
         AuthorizationPermission profileRead = new AuthorizationPermission();
-        profileRead.setPermissionKey(Permission.PROFILE_READ.authority());
+        profileRead.setPermissionKey(Permission.Profile.READ.authority());
         profileRead.setDescription("Read profiles");
         entityManager.persist(profileRead);
 
@@ -380,7 +380,7 @@ class UserRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        List<User> admins = userRepository.findByPermissionKey(Permission.ADMIN_USERS.authority());
+        List<User> admins = userRepository.findByPermissionKey(Permission.Admin.USERS.authority());
 
         assertThat(admins)
                 .hasSize(1)

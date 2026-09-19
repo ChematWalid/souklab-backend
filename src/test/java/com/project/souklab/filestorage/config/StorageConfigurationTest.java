@@ -1,5 +1,7 @@
 package com.project.souklab.filestorage.config;
 
+import java.util.List;
+
 import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.filestorage.image.ImageProcessingService;
 import com.project.souklab.filestorage.scan.VirusScanService;
@@ -53,7 +55,7 @@ class StorageConfigurationTest {
         assertThatThrownBy(() -> configuration.fileValidator(missingValidation, new Tika()))
                 .hasMessageContaining("max-file-size");
         StorageProperties emptyMimeTypes = validValidationProperties();
-        emptyMimeTypes.getValidation().setAllowedMimeTypes(java.util.List.of());
+        emptyMimeTypes.getValidation().setAllowedMimeTypes(List.of());
         assertThatThrownBy(() -> configuration.fileValidator(emptyMimeTypes, new Tika()))
                 .hasMessageContaining("allowed-mime-types");
     }
@@ -123,7 +125,7 @@ class StorageConfigurationTest {
     private StorageProperties validValidationProperties() {
         StorageProperties properties = new StorageProperties();
         properties.getValidation().setMaxFileSize(DataSize.ofMegabytes(1));
-        properties.getValidation().setAllowedMimeTypes(java.util.List.of("image/jpeg"));
+        properties.getValidation().setAllowedMimeTypes(List.of("image/jpeg"));
         return properties;
     }
 

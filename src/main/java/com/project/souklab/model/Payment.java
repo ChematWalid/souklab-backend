@@ -52,6 +52,13 @@ public class Payment extends BaseEntity {
     @Column
     private long fees;
 
+    /**
+     * Origin marker for analytics: manually granted subscriptions are never
+     * cash revenue, even if an administrator later corrects their status.
+     */
+    @Column(name = "manual_grant", nullable = false)
+    private boolean manualGrant;
+
     @Column(name = "checkout_url", length = 1000)
     private String checkoutUrl;
 

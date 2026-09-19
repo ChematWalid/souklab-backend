@@ -1,5 +1,9 @@
 package com.project.souklab.service.subscription;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.dao.ArtisanSubscriptionRepository;
@@ -7,6 +11,7 @@ import com.project.souklab.dao.ClientSubscriptionRepository;
 import com.project.souklab.dao.PaymentRepository;
 import com.project.souklab.dao.SubscriptionPlanRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dto.subscription.FinancialReasonRequest;
 import com.project.souklab.dto.subscription.FinancialStateCorrectionRequest;
 import com.project.souklab.dto.subscription.ManualSubscriptionGrantRequest;
@@ -56,6 +61,10 @@ public class AdminSubscriptionService {
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
     private final Clock clock;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     @Transactional
     public SubscriptionResponse grant(ManualSubscriptionGrantRequest request) {
@@ -87,7 +96,7 @@ public class AdminSubscriptionService {
             target.getClient().setPremium(true); response = toResponse(saved, SubscriberType.CLIENT);
         }
         Payment payment = new Payment(); payment.setAccount(target); payment.setSubscriptionId(subscriptionId); payment.setProvider(PaymentProvider.CHARGILY);
-        payment.setStatus(PaymentStatus.MANUALLY_GRANTED); payment.setAmount(plan.getAmount()); payment.setCurrency(plan.getCurrency());
+        payment.setStatus(PaymentStatus.MANUALLY_GRANTED); payment.setManualGrant(true); payment.setAmount(plan.getAmount()); payment.setCurrency(plan.getCurrency());
         payment.setPlanSnapshot(snapshot); payment.setIdempotencyKey("manual-" + subscriptionId); payments.save(payment);
         auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_GRANTED, actor, target.getId(), "MANUAL_GRANT", "NONE", "ACTIVE", request.getReason(), payment.getId(), subscriptionId);
         notificationService.createForUser(target, "A subscription was manually granted to your account.", NotificationType.SUBSCRIPTION_MANUALLY_GRANTED, subscriptionId);
@@ -100,6 +109,7 @@ public class AdminSubscriptionService {
         artisanSubscriptions.findWithLockById(subscriptionId).ifPresentOrElse(subscription -> {
             rules.requireTransition(subscription.getStatus(), SubscriptionStatus.REVOKED);
             String previous = subscription.getStatus().name(); subscription.setStatus(SubscriptionStatus.REVOKED);
+            recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.REVOKED);
             cancelPendingPayments(subscriptionId);
             if (subscription.getAccount().getArtisan() != null) subscription.getAccount().getArtisan().setPremium(false);
             auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), "REVOKE", previous, "REVOKED", request.getReason(), null, subscriptionId);
@@ -107,6 +117,7 @@ public class AdminSubscriptionService {
         }, () -> clientSubscriptions.findWithLockById(subscriptionId).ifPresentOrElse(subscription -> {
             rules.requireTransition(subscription.getStatus(), SubscriptionStatus.REVOKED);
             String previous = subscription.getStatus().name(); subscription.setStatus(SubscriptionStatus.REVOKED);
+            recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.REVOKED);
             cancelPendingPayments(subscriptionId);
             if (subscription.getAccount().getClient() != null) subscription.getAccount().getClient().setPremium(false);
             auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), "REVOKE", previous, "REVOKED", request.getReason(), null, subscriptionId);
@@ -126,6 +137,7 @@ public class AdminSubscriptionService {
         }
         String previous = payment.getStatus().name();
         payment.setStatus(corrected);
+        recordPaymentTransition(payment, previous, corrected.name());
         synchronizeCorrectedPayment(payment, corrected);
         auditLogService.logFinancialAction(AuditLogAction.PAYMENT_STATE_CORRECTED, actor, payment.getAccount().getId(), "STATE_CORRECTION", previous, corrected.name(), request.getReason(), payment.getId(), payment.getSubscriptionId());
     }
@@ -224,6 +236,7 @@ public class AdminSubscriptionService {
             String previous = subscription.getStatus().name();
             rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
             subscription.setStatus(SubscriptionStatus.CANCELED);
+            recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.CANCELED);
             cancelPendingPayments(subscriptionId);
             syncArtisanPremium(subscription);
             auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_CANCELED, actor, subscription.getAccount().getId(), "CANCEL", previous, "CANCELED", request.getReason(), null, subscriptionId);
@@ -233,6 +246,7 @@ public class AdminSubscriptionService {
         String previous = subscription.getStatus().name();
         rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
         subscription.setStatus(SubscriptionStatus.CANCELED);
+        recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.CANCELED);
         cancelPendingPayments(subscriptionId);
         syncClientPremium(subscription);
         auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_CANCELED, actor, subscription.getAccount().getId(), "CANCEL", previous, "CANCELED", request.getReason(), null, subscriptionId);
@@ -253,6 +267,20 @@ public class AdminSubscriptionService {
     private void cancelPendingPayments(String subscriptionId) {
         payments.findBySubscriptionIdAndStatus(subscriptionId, PaymentStatus.PENDING)
                 .forEach(payment -> payment.setStatus(PaymentStatus.CANCELED));
+    }
+
+    private void recordPaymentTransition(Payment payment, String previous, String current) {
+        if (activityEventService != null && payment.getAccount() != null) {
+            activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION, payment.getAccount().getId(), payment.getId(),
+                    Map.of("previousStatus", previous, "status", current, "source", "ADMIN_CORRECTION"));
+        }
+    }
+
+    private void recordSubscriptionEvent(User account, String subscriptionId, AnalyticsEvent.Type eventType) {
+        if (activityEventService != null && account != null) {
+            activityEventService.record(eventType, account.getId(), subscriptionId,
+                    Map.of("status", eventType.value().substring(AnalyticsEvent.Subscription.prefix().length()), "source", "ADMIN_ACTION"));
+        }
     }
 
     private void populate(ArtisanSubscription subscription, User target, SubscriptionPlan plan, String snapshot, LocalDateTime starts) {

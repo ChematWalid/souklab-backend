@@ -1,4 +1,12 @@
 package com.project.souklab.service.feed;
+import java.io.ByteArrayInputStream;
+
+import com.project.souklab.dto.feed.FeedPostModerationDTO;
+import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ConflictException;
+import com.project.souklab.exception.ResourceNotFoundException;
+import com.project.souklab.model.NotificationType;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.FeedPostRepository;
@@ -90,7 +98,7 @@ class FeedPostServiceTest {
         Artisan artisan = Artisan.builder().id("artisan-1").user(user).isVerified(true).build();
         user.setArtisan(artisan);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_CONTENT.authority()))));
+                "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority()))));
         lenient().when(userRepository.findByEmail("artisan@example.com")).thenReturn(Optional.of(user));
         lenient().when(accessControlService.isAdmin(any())).thenReturn(false);
         lenient().when(accessControlService.canManageArtisanContent(any())).thenReturn(true);
@@ -140,7 +148,7 @@ class FeedPostServiceTest {
         assertThat(service.listPublic(FeedPostType.ACTUALITE, PageRequest.of(0, 10))).hasSize(1);
         assertThat(service.getPublic("p1").getStatus()).isEqualTo("PUBLISHED");
         post.setStatus(FeedPostStatus.HIDDEN);
-        assertThatThrownBy(() -> service.getPublic("p1")).isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+        assertThatThrownBy(() -> service.getPublic("p1")).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -148,9 +156,9 @@ class FeedPostServiceTest {
         when(postRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(formationRepository.findByIdAndDeletedAtIsNull("f1")).thenReturn(Optional.of(new Formation()));
         assertThatThrownBy(() -> service.create(new FeedPostCreateDTO(FeedPostType.FORMATION, "t", "b", null)))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         assertThatThrownBy(() -> service.create(new FeedPostCreateDTO(FeedPostType.ACTUALITE, "t", "b", "f1")))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         assertThat(service.create(new FeedPostCreateDTO(FeedPostType.FORMATION, " t ", " b ", "f1"))).isNotNull();
     }
 
@@ -174,10 +182,10 @@ class FeedPostServiceTest {
 
         assertThatThrownBy(() -> service.update("p1", new FeedPostCreateDTO(
                 FeedPostType.FORMATION, "title", "body", null)))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         assertThatThrownBy(() -> service.update("p1", new FeedPostCreateDTO(
                 FeedPostType.ACTUALITE, "title", "body", "f1")))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
 
         when(accessControlService.canModerateFeed(any())).thenReturn(true);
         assertThat(service.update("p1", new FeedPostCreateDTO(
@@ -210,7 +218,7 @@ class FeedPostServiceTest {
                 .isInstanceOf(ForbiddenException.class);
         when(accessControlService.canModerateFeed(any())).thenReturn(true);
         when(postRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        assertThat(service.publish("p1", new com.project.souklab.dto.feed.FeedPostModerationDTO(" note "))).isNotNull();
+        assertThat(service.publish("p1", new FeedPostModerationDTO(" note "))).isNotNull();
         assertThat(post.getStatus()).isEqualTo(FeedPostStatus.PUBLISHED);
     }
 
@@ -219,7 +227,7 @@ class FeedPostServiceTest {
         FeedPost post = post(FeedPostStatus.PENDING);
         when(postRepository.findByIdAndDeletedAtIsNull("p1")).thenReturn(Optional.of(post));
         MockMultipartFile file = new MockMultipartFile("file", "image.jpg", "image/jpeg", new byte[]{1});
-        ValidatedFile validated = new ValidatedFile(new java.io.ByteArrayInputStream(new byte[]{1}), "image.jpg", "image/jpeg", 1);
+        ValidatedFile validated = new ValidatedFile(new ByteArrayInputStream(new byte[]{1}), "image.jpg", "image/jpeg", 1);
         when(fileValidator.validateAndSanitize(any(), any(), any(), anyLong(), any())).thenReturn(validated);
         when(virusScanService.scan(validated)).thenReturn(validated);
         when(storageService.store(any(), any(), any(), anyLong())).thenReturn(new StorageResult("key", "image.jpg", "image/jpeg", 1, Instant.now()));
@@ -240,7 +248,7 @@ class FeedPostServiceTest {
         doThrow(new IOException("cannot read")).when(file).getInputStream();
 
         assertThatThrownBy(() -> service.addMedia("p1", file))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         verifyNoMediaPersistence();
     }
 
@@ -249,7 +257,7 @@ class FeedPostServiceTest {
         FeedPost post = post(FeedPostStatus.PENDING);
         when(postRepository.findByIdAndDeletedAtIsNull("p1")).thenReturn(Optional.of(post));
         MockMultipartFile file = new MockMultipartFile("file", "image.jpg", "image/jpeg", new byte[]{1});
-        ValidatedFile validated = new ValidatedFile(new java.io.ByteArrayInputStream(new byte[]{1}),
+        ValidatedFile validated = new ValidatedFile(new ByteArrayInputStream(new byte[]{1}),
                 "image.jpg", "image/jpeg", 1);
         when(fileValidator.validateAndSanitize(any(), any(), any(), anyLong(), any())).thenReturn(validated);
         when(virusScanService.scan(validated)).thenReturn(validated);
@@ -274,24 +282,24 @@ class FeedPostServiceTest {
         when(accessControlService.canManageArtisanContent(any())).thenReturn(true);
         when(formationRepository.findByIdAndDeletedAtIsNull("missing")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.create(new FeedPostCreateDTO(FeedPostType.FORMATION, "t", "b", "missing")))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
     void enforcesMediaGuardsAndMissingMedia() {
         FeedPost post = post(FeedPostStatus.PENDING);
         when(postRepository.findByIdAndDeletedAtIsNull("p1")).thenReturn(Optional.of(post));
-        assertThatThrownBy(() -> service.addMedia("p1", null)).isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+        assertThatThrownBy(() -> service.addMedia("p1", null)).isInstanceOf(BadRequestException.class);
         for (int i = 0; i < 10; i++) {
             FeedPostMedia media = FeedPostMedia.builder().storageKey("key-" + i).build();
             media.setId("media-" + i);
             post.getMedia().add(media);
         }
         assertThatThrownBy(() -> service.addMedia("p1", new MockMultipartFile("file", "a.jpg", "image/jpeg", new byte[]{1})))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         post.getMedia().clear();
         assertThatThrownBy(() -> service.removeMedia("p1", "missing"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -299,10 +307,10 @@ class FeedPostServiceTest {
         FeedPost removed = post(FeedPostStatus.REMOVED);
         when(postRepository.findByIdAndDeletedAtIsNull("p1")).thenReturn(Optional.of(removed));
         when(accessControlService.canModerateFeed(any())).thenReturn(true);
-        assertThatThrownBy(() -> service.publish("p1", new com.project.souklab.dto.feed.FeedPostModerationDTO("note")))
-                .isInstanceOf(com.project.souklab.exception.ConflictException.class);
-        assertThatThrownBy(() -> service.hide("p1", new com.project.souklab.dto.feed.FeedPostModerationDTO("note")))
-                .isInstanceOf(com.project.souklab.exception.ConflictException.class);
+        assertThatThrownBy(() -> service.publish("p1", new FeedPostModerationDTO("note")))
+                .isInstanceOf(ConflictException.class);
+        assertThatThrownBy(() -> service.hide("p1", new FeedPostModerationDTO("note")))
+                .isInstanceOf(ConflictException.class);
         when(postRepository.findByStatusAndDeletedAtIsNull(eq(FeedPostStatus.PENDING), any())).thenReturn(new PageImpl<>(List.of(post(FeedPostStatus.PENDING))));
         assertThat(service.listPending(PageRequest.of(0, 10))).hasSize(1);
     }
@@ -315,10 +323,10 @@ class FeedPostServiceTest {
         when(postRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(accessControlService.canModerateFeed(any())).thenReturn(true);
 
-        service.publish("p1", new com.project.souklab.dto.feed.FeedPostModerationDTO("note"));
+        service.publish("p1", new FeedPostModerationDTO("note"));
 
         verify(notificationService).createForUser(user, "Your formation post was published.",
-                com.project.souklab.model.NotificationType.NEW_FORMATION, "p1");
+                NotificationType.NEW_FORMATION, "p1");
     }
 
     @Test
@@ -328,7 +336,7 @@ class FeedPostServiceTest {
         when(postRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(accessControlService.canModerateFeed(any())).thenReturn(true);
 
-        assertThat(service.hide("p1", new com.project.souklab.dto.feed.FeedPostModerationDTO(" note ")))
+        assertThat(service.hide("p1", new FeedPostModerationDTO(" note ")))
                 .isNotNull();
         assertThat(post.getStatus()).isEqualTo(FeedPostStatus.HIDDEN);
 
@@ -341,7 +349,7 @@ class FeedPostServiceTest {
     void rejectsMissingPostAndMissingCurrentUser() {
         when(postRepository.findByIdAndDeletedAtIsNull("missing")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.getPublic("missing"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
 
         SecurityContextHolder.clearContext();
         assertThatThrownBy(() -> service.create(new FeedPostCreateDTO(

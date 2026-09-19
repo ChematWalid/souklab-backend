@@ -1,4 +1,7 @@
 package com.project.souklab.controller.formation;
+import org.hamcrest.Matchers;
+
+import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
@@ -274,7 +277,7 @@ class ArtisanFormationEnrollmentControllerTest {
             mockMvc.perform(get(BASE_URL + "/formation-101/files/file-101/download")
                             .with(artisan()))
                     .andExpect(status().isOk())
-                    .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, org.hamcrest.Matchers.containsString("filename=\"syllabus.pdf\"")))
+                    .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, Matchers.containsString("filename=\"syllabus.pdf\"")))
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/pdf"))
                     .andExpect(header().string(HttpHeaders.CONTENT_LENGTH, "19"));
         }

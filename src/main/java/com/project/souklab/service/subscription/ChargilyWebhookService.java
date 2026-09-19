@@ -1,9 +1,16 @@
 package com.project.souklab.service.subscription;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.model.User;
+
+import com.project.souklab.analytics.AnalyticsEvent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.dao.ArtisanSubscriptionRepository;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.ClientSubscriptionRepository;
 import com.project.souklab.dao.PaymentRepository;
 import com.project.souklab.dao.PaymentWebhookLogRepository;
@@ -44,6 +51,10 @@ public class ChargilyWebhookService {
     private final WebhookEventClaimService webhookEventClaimService;
     private final AppProperties appProperties;
     private final Clock clock;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     @Transactional
     public void process(byte[] rawBody, String signature) {
@@ -115,6 +126,14 @@ public class ChargilyWebhookService {
             cancelPendingSubscription(payment);
             notificationService.createForUser(payment.getAccount(), "Your subscription checkout was canceled.", NotificationType.CHECKOUT_CANCELED, payment.getId());
         }
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION, payment.getAccount().getId(), payment.getId(),
+                    Map.of("providerEvent", eventType, "status", payment.getStatus().name()));
+            if (payment.getStatus() == PaymentStatus.PAID) {
+                activityEventService.record(AnalyticsEvent.Subscription.ACTIVATED, payment.getAccount().getId(),
+                        payment.getSubscriptionId(), Map.of("paymentId", payment.getId()));
+            }
+        }
         log.setStatus(WebhookProcessingStatus.PROCESSED);
     }
 
@@ -123,14 +142,23 @@ public class ChargilyWebhookService {
             if (subscription.getStatus() == SubscriptionStatus.PENDING) {
                 rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
                 subscription.setStatus(SubscriptionStatus.CANCELED);
+                recordSubscriptionCancellation(subscription.getAccount(), subscription.getId());
             }
         });
         clientSubscriptionRepository.findWithLockById(payment.getSubscriptionId()).ifPresent(subscription -> {
             if (subscription.getStatus() == SubscriptionStatus.PENDING) {
                 rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
                 subscription.setStatus(SubscriptionStatus.CANCELED);
+                recordSubscriptionCancellation(subscription.getAccount(), subscription.getId());
             }
         });
+    }
+
+    private void recordSubscriptionCancellation(User account, String subscriptionId) {
+        if (activityEventService != null && account != null) {
+            activityEventService.record(AnalyticsEvent.Subscription.CANCELED, account.getId(), subscriptionId,
+                    Map.of("status", "CANCELED", "source", "PAYMENT_WEBHOOK"));
+        }
     }
 
     private void activateSubscription(Payment payment) {

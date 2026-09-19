@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.Epoque;
 import com.project.souklab.model.JobCategory;
 import com.project.souklab.model.JobSubCategory;
@@ -25,8 +26,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * unique slug constraints, and display order sorting across the 7 taxonomy repositories.
  */
 @DataJpaTest
-@TestPropertySource(properties = {
-    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
+    TestJpaProperties.DISABLE_HIBERNATE_SEARCH,
     "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class TaxonomyRepositoryTest {

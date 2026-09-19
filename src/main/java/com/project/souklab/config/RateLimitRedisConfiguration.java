@@ -1,5 +1,8 @@
 package com.project.souklab.config;
 
+import java.time.Duration;
+import org.springframework.core.env.Environment;
+
 import com.project.souklab.security.RateLimitBucketStore;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import io.lettuce.core.RedisClient;
@@ -18,19 +21,19 @@ public class RateLimitRedisConfiguration {
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnProperty(name = "app.rate-limit.backend", havingValue = "redis")
-    RedisClient rateLimitRedisClient(org.springframework.core.env.Environment environment) {
+    RedisClient rateLimitRedisClient(Environment environment) {
         RedisURI.Builder builder = RedisURI.builder()
                 .withHost(environment.getRequiredProperty("app.rate-limit.redis.host"))
                 .withPort(Integer.parseInt(environment.getRequiredProperty("app.rate-limit.redis.port")))
                 .withDatabase(Integer.parseInt(environment.getProperty("app.rate-limit.redis.database", "0")))
-                .withTimeout(java.time.Duration.ofMillis(Long.parseLong(
+                .withTimeout(Duration.ofMillis(Long.parseLong(
                         environment.getProperty("app.rate-limit.redis.connection-timeout", "2000"))));
         String password = environment.getProperty("app.rate-limit.redis.password");
         if (password != null && !password.isBlank()) {
             builder.withPassword(password.toCharArray());
         }
         RedisClient client = RedisClient.create(builder.build());
-        client.setOptions(ClientOptions.builder().timeoutOptions(TimeoutOptions.enabled(java.time.Duration.ofMillis(
+        client.setOptions(ClientOptions.builder().timeoutOptions(TimeoutOptions.enabled(Duration.ofMillis(
                 Long.parseLong(environment.getProperty("app.rate-limit.redis.command-timeout", "1000"))))).build());
         return client;
     }
@@ -38,7 +41,7 @@ public class RateLimitRedisConfiguration {
     @Bean(destroyMethod = "close")
     @ConditionalOnProperty(name = "app.rate-limit.backend", havingValue = "redis")
     RateLimitBucketStore redisRateLimitBucketStore(RedisClient client,
-                                                   org.springframework.core.env.Environment environment) {
+                                                   Environment environment) {
         StatefulRedisConnection<String, byte[]> connection = client.connect(
                 io.lettuce.core.codec.RedisCodec.of(io.lettuce.core.codec.StringCodec.UTF8,
                         io.lettuce.core.codec.ByteArrayCodec.INSTANCE));
@@ -68,7 +71,7 @@ public class RateLimitRedisConfiguration {
 
         @Override
         public io.github.bucket4j.Bucket resolve(String key, long capacity,
-                                                  java.time.Duration refillDuration) {
+                                                  Duration refillDuration) {
             return manager.builder().build(keyPrefix + ":" + key,
                     RateLimitBucketStore.configuration(capacity, refillDuration));
         }

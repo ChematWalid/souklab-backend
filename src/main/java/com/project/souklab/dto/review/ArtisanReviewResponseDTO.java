@@ -1,5 +1,8 @@
 package com.project.souklab.dto.review;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import com.project.souklab.model.ArtisanReview;
 import lombok.Builder;
 import lombok.Value;
@@ -30,8 +33,8 @@ public class ArtisanReviewResponseDTO {
      * @return response DTO
      */
     public static ArtisanReviewResponseDTO from(ArtisanReview review) {
-        String name = java.util.stream.Stream.of(review.getReviewer().getUser().getFirstName(), review.getReviewer().getUser().getLastName())
-                .filter(java.util.Objects::nonNull)
+        String name = Stream.of(review.getReviewer().getUser().getFirstName(), review.getReviewer().getUser().getLastName())
+                .filter(Objects::nonNull)
                 .filter(value -> !value.isBlank())
                 .reduce((left, right) -> left + " " + right)
                 .orElse(review.getReviewer().getUser().getEmail());

@@ -99,13 +99,13 @@ public class ProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
         boolean isAdmin = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.ADMIN_USERS.authority().equals(permission.getPermissionKey()));
+                .anyMatch(permission -> Permission.Admin.USERS.matches(permission.getPermissionKey()));
         if (isAdmin) {
             throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");
         }
 
         boolean isArtisan = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
+                .anyMatch(permission -> Permission.Artisan.CONTENT.matches(permission.getPermissionKey()));
         boolean isClient = !isArtisan;
 
         if (isArtisan) {
@@ -139,13 +139,13 @@ public class ProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
         boolean isAdmin = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.ADMIN_USERS.authority().equals(permission.getPermissionKey()));
+                .anyMatch(permission -> Permission.Admin.USERS.matches(permission.getPermissionKey()));
         if (isAdmin) {
             throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");
         }
 
         boolean isArtisan = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
+                .anyMatch(permission -> Permission.Artisan.CONTENT.matches(permission.getPermissionKey()));
 
         if (dto == null || dto.isEmpty()) {
             return profileResponseMapper.mapToProfileResponse(user);

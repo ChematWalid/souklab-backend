@@ -1,5 +1,8 @@
 package com.project.souklab.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.exception.AppException;
 import org.junit.jupiter.api.Test;
@@ -38,8 +41,8 @@ class FileStorageUtilTest {
         assertThatThrownBy(() -> storage.storePdf(new MockMultipartFile("file", new byte[0])))
                 .isInstanceOf(AppException.class);
         var broken = new MockMultipartFile("file", "file.pdf", "application/pdf", new byte[]{1}) {
-            @Override public java.io.InputStream getInputStream() throws java.io.IOException {
-                throw new java.io.IOException("read failure");
+            @Override public InputStream getInputStream() throws IOException {
+                throw new IOException("read failure");
             }
         };
         assertThatThrownBy(() -> storage.storePdf(broken)).isInstanceOf(AppException.class);

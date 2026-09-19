@@ -1,5 +1,9 @@
 package com.project.souklab.model;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import org.mockito.Mockito;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,13 +22,13 @@ class FormationTest {
         FormationEnrollment confirmed = mock(FormationEnrollment.class);
         FormationEnrollment deleted = mock(FormationEnrollment.class);
         FormationEnrollment pending = mock(FormationEnrollment.class);
-        org.mockito.Mockito.when(confirmed.getStatus()).thenReturn(EnrollmentStatus.CONFIRMED);
-        org.mockito.Mockito.when(confirmed.getDeletedAt()).thenReturn(null);
-        org.mockito.Mockito.when(deleted.getStatus()).thenReturn(EnrollmentStatus.CONFIRMED);
-        org.mockito.Mockito.when(deleted.getDeletedAt()).thenReturn(java.time.LocalDateTime.now());
-        org.mockito.Mockito.when(pending.getStatus()).thenReturn(EnrollmentStatus.CANCELLED);
-        org.mockito.Mockito.when(pending.getDeletedAt()).thenReturn(null);
-        formation.setEnrollments(java.util.List.of(confirmed, deleted, pending));
+        Mockito.when(confirmed.getStatus()).thenReturn(EnrollmentStatus.CONFIRMED);
+        Mockito.when(confirmed.getDeletedAt()).thenReturn(null);
+        Mockito.when(deleted.getStatus()).thenReturn(EnrollmentStatus.CONFIRMED);
+        Mockito.when(deleted.getDeletedAt()).thenReturn(LocalDateTime.now());
+        Mockito.when(pending.getStatus()).thenReturn(EnrollmentStatus.CANCELLED);
+        Mockito.when(pending.getDeletedAt()).thenReturn(null);
+        formation.setEnrollments(List.of(confirmed, deleted, pending));
 
         assertThat(formation.getActiveEnrollmentsCount()).isEqualTo(1);
     }

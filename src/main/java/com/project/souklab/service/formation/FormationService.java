@@ -1,5 +1,11 @@
 package com.project.souklab.service.formation;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.FormationEnrollmentRepository;
@@ -70,6 +76,10 @@ public class FormationService {
     private final AppProperties appProperties;
     private final NotificationService notificationService;
     private final Clock clock;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
 
     /**
@@ -288,6 +298,11 @@ public class FormationService {
         formation.setStatus(FormationStatus.PENDING_REVIEW);
         Formation saved = formationRepository.save(formation);
 
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Formation.SUBMITTED, artisan.getId(), saved.getId(),
+                    Map.of("status", saved.getStatus().name()));
+        }
+
         notificationService.notifyAdmins("New formation submitted for review: " + saved.getTitle());
         log.info("Formation '{}' submitted for administrative review by artisan '{}'", saved.getId(), artisan.getId());
 
@@ -417,7 +432,7 @@ public class FormationService {
      * @return resolved Artisan entity for the current authenticated principal
      */
     private Artisan resolveAuthenticatedArtisan() {
-        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_FORMATIONS);
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.Artisan.FORMATIONS);
     }
 
     /**

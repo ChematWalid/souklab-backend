@@ -25,4 +25,6 @@ public interface ClientSubscriptionRepository extends JpaRepository<ClientSubscr
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<ClientSubscription> findByStatusAndExpiresAtAfterAndExpiresAtBefore(SubscriptionStatus status, LocalDateTime after, LocalDateTime before, Pageable pageable);
     long countByAccountIdAndStatus(String accountId, SubscriptionStatus status);
+    long countByStatus(SubscriptionStatus status);
+    long countByStatusAndCreatedAtBetween(SubscriptionStatus status, LocalDateTime from, LocalDateTime to);
 }

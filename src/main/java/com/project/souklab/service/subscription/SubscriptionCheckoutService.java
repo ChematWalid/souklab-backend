@@ -1,8 +1,13 @@
 package com.project.souklab.service.subscription;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.ChargilyProperties;
 import com.project.souklab.dao.ArtisanSubscriptionRepository;
 import com.project.souklab.dao.ClientSubscriptionRepository;
@@ -50,6 +55,10 @@ public class SubscriptionCheckoutService {
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
     private final UserRepository userRepository;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     @Transactional
     public SubscriptionCheckoutResponse checkout(SubscriptionCheckoutRequest request, String idempotencyKey) {
@@ -86,6 +95,10 @@ public class SubscriptionCheckoutService {
         if (active) {
             throw new BadRequestException("An active subscription must be canceled or expire before renewal");
         }
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Subscription.RENEWAL, user.getId(), subscriptionId,
+                    Map.of("planId", requestedPlan.getId(), "subscriberType", targetType.name()));
+        }
         return checkout(request, idempotencyKey);
     }
 
@@ -117,6 +130,10 @@ public class SubscriptionCheckoutService {
             throw new IllegalStateException("Unable to snapshot provider checkout", exception);
         }
         Payment saved = paymentRepository.save(payment);
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Checkout.CREATED, user.getId(), saved.getId(),
+                    Map.of("paymentStatus", saved.getStatus().name(), "subscriberType", plan.getSubscriberType().name()));
+        }
         notificationService.createForUser(user, "Your subscription checkout was created.", NotificationType.CHECKOUT_CREATED, saved.getId());
         return toResponse(saved);
     }

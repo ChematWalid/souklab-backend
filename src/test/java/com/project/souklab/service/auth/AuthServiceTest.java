@@ -1,5 +1,7 @@
 package com.project.souklab.service.auth;
 
+import java.util.Collection;
+
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.OAuthIdentityRepository;
 import com.project.souklab.dao.RefreshTokenRepository;
@@ -141,21 +143,21 @@ class AuthServiceTest {
         appProperties.getAuth().getLockout().setDurationMinutes(15);
 
         artisanRole = new AuthorizationPermission();
-        artisanRole.setPermissionKey(Permission.ARTISAN_CONTENT.authority());
+        artisanRole.setPermissionKey(Permission.Artisan.CONTENT.authority());
         artisanRole.setDescription("Artisan role");
 
         clientRole = new AuthorizationPermission();
-        clientRole.setPermissionKey(Permission.PROFILE_READ.authority());
+        clientRole.setPermissionKey(Permission.Profile.READ.authority());
         clientRole.setDescription("Client role");
 
         lenient().when(permissionRepository.findByPermissionKeyInAndEnabledTrue(any())).thenAnswer(invocation -> {
             @SuppressWarnings("unchecked")
-            java.util.Collection<String> keys = invocation.getArgument(0);
+            Collection<String> keys = invocation.getArgument(0);
             if (keys == null) {
                 return List.of();
             }
             return keys.stream()
-                    .map(key -> key.equals(Permission.ARTISAN_CONTENT.authority()) ? artisanRole : clientRole)
+                    .map(key -> key.equals(Permission.Artisan.CONTENT.authority()) ? artisanRole : clientRole)
                     .toList();
         });
 
@@ -969,7 +971,7 @@ class AuthServiceTest {
         assertThat(response.getRefreshToken()).isEqualTo("refresh-token-uuid");
         assertThat(response.getTokenType()).isEqualTo("Bearer");
         assertThat(response.getExpiresIn()).isEqualTo(900L);
-        assertThat(response.getPermissions()).containsExactly(Permission.PROFILE_READ.authority());
+        assertThat(response.getPermissions()).containsExactly(Permission.Profile.READ.authority());
 
         assertThat(user.getFailedLoginAttempts()).isZero();
         assertThat(user.getLockedUntil()).isNull();
@@ -1069,7 +1071,7 @@ class AuthServiceTest {
 
         JwtResponseDTO response = authService.login(dto, null);
 
-        assertThat(response.getPermissions()).containsExactly(Permission.ARTISAN_CONTENT.authority());
+        assertThat(response.getPermissions()).containsExactly(Permission.Artisan.CONTENT.authority());
     }
 
     /**

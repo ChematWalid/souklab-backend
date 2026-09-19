@@ -195,6 +195,9 @@ public class AppProperties {
         private boolean enabled;
         private int capacity;
         private Duration refillDuration;
+        private boolean userEnabled;
+        private int userCapacity;
+        private Duration userRefillDuration;
     }
 
     /**

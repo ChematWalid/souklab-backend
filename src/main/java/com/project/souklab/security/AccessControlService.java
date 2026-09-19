@@ -12,54 +12,58 @@ public class AccessControlService {
     public boolean hasPermission(Authentication authentication, Permission permission) {
         return authentication != null && authentication.isAuthenticated()
                 && authentication.getAuthorities().stream()
-                .anyMatch(authority -> permission.authority().equals(authority.getAuthority()));
+                .anyMatch(permission::matches);
     }
 
     public boolean isAdmin(Authentication authentication) {
-        return hasPermission(authentication, Permission.ADMIN_USERS);
+        return hasPermission(authentication, Permission.Admin.USERS);
     }
 
     public boolean canManageUsers(Authentication authentication) {
-        return hasPermission(authentication, Permission.ADMIN_USERS);
+        return hasPermission(authentication, Permission.Admin.USERS);
     }
 
     public boolean canManageFormations(Authentication authentication) {
-        return hasPermission(authentication, Permission.ADMIN_FORMATIONS);
+        return hasPermission(authentication, Permission.Admin.FORMATIONS);
     }
 
     public boolean canModerateFeed(Authentication authentication) {
-        return hasPermission(authentication, Permission.ADMIN_FEED);
+        return hasPermission(authentication, Permission.Admin.FEED);
     }
 
     public boolean canModerateReports(Authentication authentication) {
-        return hasPermission(authentication, Permission.ADMIN_REPORTS);
+        return hasPermission(authentication, Permission.Admin.REPORTS);
     }
 
     public boolean canManageFinancialOperations(Authentication authentication) {
-        return hasPermission(authentication, Permission.FINANCIAL_ADMIN);
+        return hasPermission(authentication, Permission.Financial.ADMIN);
+    }
+
+    public boolean canViewAnalytics(Authentication authentication) {
+        return hasPermission(authentication, Permission.Analytics.ADMIN);
     }
 
     public boolean canManageArtisanFormations(Authentication authentication) {
-        return hasPermission(authentication, Permission.ARTISAN_FORMATIONS);
+        return hasPermission(authentication, Permission.Artisan.FORMATIONS);
     }
 
     public boolean canManageArtisanContent(Authentication authentication) {
-        return hasPermission(authentication, Permission.ARTISAN_CONTENT);
+        return hasPermission(authentication, Permission.Artisan.CONTENT);
     }
 
     public boolean canManageArtisanReviews(Authentication authentication) {
-        return hasPermission(authentication, Permission.ARTISAN_REVIEWS);
+        return hasPermission(authentication, Permission.Artisan.REVIEWS);
     }
 
     public boolean isArtisan(Authentication authentication) {
-        return hasPermission(authentication, Permission.ARTISAN_CONTENT);
+        return hasPermission(authentication, Permission.Artisan.CONTENT);
     }
 
     public boolean canReadProfile(Authentication authentication) {
-        return hasPermission(authentication, Permission.PROFILE_READ);
+        return hasPermission(authentication, Permission.Profile.READ);
     }
 
     public boolean canWriteProfile(Authentication authentication) {
-        return hasPermission(authentication, Permission.PROFILE_WRITE);
+        return hasPermission(authentication, Permission.Profile.WRITE);
     }
 }

@@ -1,4 +1,8 @@
 package com.project.souklab.controller.chat;
+import org.assertj.core.api.Assertions;
+import org.springframework.security.access.AccessDeniedException;
+
+import com.project.souklab.dto.chat.TypingCommand;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.chat.MessageResponse;
@@ -58,8 +62,8 @@ class ChatStompControllerTest {
         controller.edit("c1", new ChatStompController.EditMessageCommand("m1", "edit-correlation", "changed"), principal);
         controller.delete("c1", new ChatStompController.MessageCommand("m1", "delete-correlation"), principal);
         controller.read("c1", new ChatStompController.MessageCommand("m1", "read-correlation"), principal);
-        controller.typingStart("c1", new com.project.souklab.dto.chat.TypingCommand("typing-correlation"), principal);
-        controller.typingStop("c1", new com.project.souklab.dto.chat.TypingCommand("stop-correlation"), principal);
+        controller.typingStart("c1", new TypingCommand("typing-correlation"), principal);
+        controller.typingStop("c1", new TypingCommand("stop-correlation"), principal);
 
         verify(service).delete("c1", "m1");
         verify(service).markRead("c1", "m1");
@@ -82,23 +86,23 @@ class ChatStompControllerTest {
 
     @Test
     void commandWithoutAuthenticationIsRejected() {
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.send("c1", new SendMessageRequest("key", "hello", List.of()), null))
-                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+        Assertions.assertThatThrownBy(() -> controller.send("c1", new SendMessageRequest("key", "hello", List.of()), null))
+                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
     void commandPreservesAccessDeniedAndWrapsOtherFailures() {
-        doThrow(new org.springframework.security.access.AccessDeniedException("denied"))
+        doThrow(new AccessDeniedException("denied"))
                 .when(service).send(eq("c1"), any(SendMessageRequest.class));
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.send(
+        Assertions.assertThatThrownBy(() -> controller.send(
                         "c1", new SendMessageRequest("denied-key", "hello", List.of()), principal))
-                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+                .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("denied");
 
         reset(service);
         doThrow(new IllegalStateException("service failure"))
                 .when(service).send(eq("c1"), any(SendMessageRequest.class));
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.send(
+        Assertions.assertThatThrownBy(() -> controller.send(
                         "c1", new SendMessageRequest("failure-key", "hello", List.of()), principal))
                 .isInstanceOf(IllegalStateException.class)
                 .hasCauseInstanceOf(IllegalStateException.class);

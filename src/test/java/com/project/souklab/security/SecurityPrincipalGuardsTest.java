@@ -1,5 +1,9 @@
 package com.project.souklab.security;
 
+import jakarta.servlet.http.Cookie;
+import java.lang.Long;
+import java.lang.String;
+
 import com.project.souklab.config.AppProperties;
 import java.time.Clock;
 import com.project.souklab.service.auth.AuthService;
@@ -66,7 +70,7 @@ class SecurityPrincipalGuardsTest {
         assertThatThrownBy(() -> jwtUtils.generateAccessToken(anonymousAuth))
                 .isInstanceOf(IllegalArgumentException.class)
                 .isNotInstanceOf(ClassCastException.class)
-                .hasMessageStartingWith("Expected principal of type UserDetails, but found: java.lang.String")
+                .hasMessageStartingWith("Expected principal of type UserDetails, but found: String")
                 .satisfies(ex -> {
                     System.out.println("Exception: " + ex.getClass().getName());
                     System.out.println("Message: " + ex.getMessage());
@@ -76,7 +80,7 @@ class SecurityPrincipalGuardsTest {
         assertThatThrownBy(() -> jwtUtils.generateAccessToken(tokenWithCustomPrincipal))
                 .isInstanceOf(IllegalArgumentException.class)
                 .isNotInstanceOf(ClassCastException.class)
-                .hasMessageStartingWith("Expected principal of type UserDetails, but found: java.lang.Long");
+                .hasMessageStartingWith("Expected principal of type UserDetails, but found: Long");
 
         System.out.println("Proof: JwtUtils.generateAccessToken guarded against non-UserDetails principal");
     }
@@ -97,7 +101,7 @@ class SecurityPrincipalGuardsTest {
         assertThatThrownBy(() -> jwtUtils.generateRefreshToken(anonymousAuth))
                 .isInstanceOf(IllegalArgumentException.class)
                 .isNotInstanceOf(ClassCastException.class)
-                .hasMessageStartingWith("Expected principal of type UserDetails, but found: java.lang.String")
+                .hasMessageStartingWith("Expected principal of type UserDetails, but found: String")
                 .satisfies(ex -> {
                     System.out.println("Exception: " + ex.getClass().getName());
                     System.out.println("Message: " + ex.getMessage());
@@ -120,7 +124,7 @@ class SecurityPrincipalGuardsTest {
         assertThatThrownBy(() -> oAuth2Handler.onAuthenticationSuccess(request, response, stringPrincipalAuth))
                 .isInstanceOf(IllegalArgumentException.class)
                 .isNotInstanceOf(ClassCastException.class)
-                .hasMessageStartingWith("Expected principal of type OAuth2User, but found: java.lang.String")
+                .hasMessageStartingWith("Expected principal of type OAuth2User, but found: String")
                 .satisfies(ex -> {
                     System.out.println("Exception: " + ex.getClass().getName());
                     System.out.println("Message: " + ex.getMessage());
@@ -138,7 +142,7 @@ class SecurityPrincipalGuardsTest {
         JwtResponseDTO tokens = JwtResponseDTO.builder().accessToken("access").refreshToken("refresh").build();
         when(authService.processOAuth2Success(eq(principal), eq("ARTISAN"), any())).thenReturn(tokens);
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setCookies(new jakarta.servlet.http.Cookie(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, "ARTISAN"));
+        request.setCookies(new Cookie(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, "ARTISAN"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         handler.onAuthenticationSuccess(request, response, new TestingAuthenticationToken(principal, "credentials"));
@@ -177,7 +181,7 @@ class SecurityPrincipalGuardsTest {
         OAuth2User principal = Mockito.mock(OAuth2User.class);
         when(authService.processOAuth2Success(eq(principal), eq(null), any())).thenReturn(new JwtResponseDTO());
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setCookies(new jakarta.servlet.http.Cookie("OTHER", "value"));
+        request.setCookies(new Cookie("OTHER", "value"));
 
         handler.onAuthenticationSuccess(request, new MockHttpServletResponse(), new TestingAuthenticationToken(principal, "credentials"));
 

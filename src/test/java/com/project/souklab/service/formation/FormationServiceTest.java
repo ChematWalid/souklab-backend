@@ -1,4 +1,6 @@
 package com.project.souklab.service.formation;
+import com.project.souklab.exception.ResourceNotFoundException;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
@@ -201,7 +203,7 @@ import static org.mockito.Mockito.when;
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_FORMATIONS.authority());
+        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.FORMATIONS.authority());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -909,7 +911,7 @@ import static org.mockito.Mockito.when;
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> formationService.deleteCourseFile(testFormation.getId(), "missing"))
-                    .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                    .isInstanceOf(ResourceNotFoundException.class);
         }
 
         @Test
@@ -934,7 +936,7 @@ import static org.mockito.Mockito.when;
             when(formationRepository.findByIdAndDeletedAtIsNull("missing"))
                     .thenReturn(Optional.empty());
             assertThatThrownBy(() -> formationService.getFormationDetails("missing"))
-                    .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                    .isInstanceOf(ResourceNotFoundException.class);
 
             when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
                     .thenReturn(Optional.of(testFormation));

@@ -1,5 +1,8 @@
 package com.project.souklab.config;
 
+import java.util.List;
+import java.util.Map;
+
 import com.project.souklab.security.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -82,8 +85,8 @@ class WebSocketAuthInterceptorTest {
         var nativeHeaders = StompHeaderAccessor.class.getDeclaredMethod("getNativeHeaders");
         nativeHeaders.setAccessible(true);
         @SuppressWarnings("unchecked")
-        var headers = (java.util.Map<String, java.util.List<String>>) nativeHeaders.invoke(emptyHeaders);
-        headers.put("Authorization", java.util.List.of());
+        var headers = (Map<String, List<String>>) nativeHeaders.invoke(emptyHeaders);
+        headers.put("Authorization", List.of());
         emptyHeaders.setLeaveMutable(true);
         Message<byte[]> emptyHeaderMessage = MessageBuilder.createMessage(new byte[0], emptyHeaders.getMessageHeaders());
         assertThatThrownBy(() -> interceptor.preSend(emptyHeaderMessage, null))

@@ -24,9 +24,9 @@ public final class SecurityTestUtils {
      */
     public static RequestPostProcessor artisan(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
-                .authorities(authorities(Permission.ARTISAN_CONTENT, Permission.ARTISAN_FORMATIONS,
-                        Permission.ARTISAN_REVIEWS, Permission.PROFILE_READ, Permission.PROFILE_WRITE,
-                        Permission.REPORT_CREATE, Permission.FILE_READ));
+                .authorities(authorities(Permission.Artisan.CONTENT, Permission.Artisan.FORMATIONS,
+                        Permission.Artisan.REVIEWS, Permission.Profile.READ, Permission.Profile.WRITE,
+                        Permission.Report.CREATE, Permission.File.READ));
     }
 
     /**
@@ -41,7 +41,7 @@ public final class SecurityTestUtils {
      */
     public static RequestPostProcessor admin(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
-                .authorities(Arrays.stream(Permission.values())
+                .authorities(Permission.all().stream()
                         .map(SecurityTestUtils::authority)
                         .toArray(SimpleGrantedAuthority[]::new));
     }
@@ -58,8 +58,8 @@ public final class SecurityTestUtils {
      */
     public static RequestPostProcessor client(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
-                .authorities(authorities(Permission.PROFILE_READ, Permission.PROFILE_WRITE,
-                        Permission.REPORT_CREATE, Permission.FILE_READ));
+                .authorities(authorities(Permission.Profile.READ, Permission.Profile.WRITE,
+                        Permission.Report.CREATE, Permission.File.READ));
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.EnrollmentStatus;
@@ -26,8 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * author ownership constraints, and soft-delete exclusions.
  */
 @DataJpaTest
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
+        TestJpaProperties.DISABLE_HIBERNATE_SEARCH,
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class FormationRepositoryTest {

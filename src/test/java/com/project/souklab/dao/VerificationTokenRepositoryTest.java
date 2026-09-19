@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.User;
 import com.project.souklab.model.VerificationToken;
@@ -22,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * invalidateActiveTokens query against an embedded H2 database.
  */
 @DataJpaTest
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
+        TestJpaProperties.DISABLE_HIBERNATE_SEARCH,
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class VerificationTokenRepositoryTest {

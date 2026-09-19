@@ -1,5 +1,11 @@
 package com.project.souklab.service.review;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ArtisanReviewRepository;
 import com.project.souklab.dao.FormationEnrollmentRepository;
@@ -41,6 +47,10 @@ public class ArtisanReviewService {
     private final ArtisanRepository artisanRepository;
     private final NotificationService notificationService;
     private final Clock clock;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     /**
      * Lists visible reviews for an artisan.
@@ -88,6 +98,10 @@ public class ArtisanReviewService {
                 .status(ReviewStatus.PUBLISHED)
                 .build();
         ArtisanReview saved = reviewRepository.save(review);
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Review.SUBMITTED, reviewer.getId(), saved.getId(),
+                    Map.of("formationId", formationId, "rating", saved.getRating()));
+        }
         recalculate(subject);
         notificationService.createForUser(subject.getUser(), "You received a new artisan review.", NotificationType.NEW_REVIEW, saved.getId());
         return ArtisanReviewResponseDTO.from(saved);
@@ -146,7 +160,7 @@ public class ArtisanReviewService {
     }
 
     private Artisan currentArtisan() {
-        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_REVIEWS);
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.Artisan.REVIEWS);
     }
 
     private BigDecimal normalizeRating(BigDecimal rating) {

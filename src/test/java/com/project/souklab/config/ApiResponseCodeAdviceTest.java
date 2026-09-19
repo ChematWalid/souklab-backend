@@ -1,5 +1,7 @@
 package com.project.souklab.config;
 
+import org.springframework.http.server.ServerHttpResponse;
+
 import com.project.souklab.dto.common.ApiResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -36,6 +38,6 @@ class ApiResponseCodeAdviceTest {
                 new ServletServerHttpResponse(servletResponse));
         assertThat(body.getCode()).isZero();
         assertThat(advice.beforeBodyWrite("plain", null, MediaType.APPLICATION_JSON, null, null,
-                mock(org.springframework.http.server.ServerHttpResponse.class))).isEqualTo("plain");
+                mock(ServerHttpResponse.class))).isEqualTo("plain");
     }
 }

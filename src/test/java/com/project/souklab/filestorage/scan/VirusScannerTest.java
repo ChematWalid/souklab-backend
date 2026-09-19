@@ -1,5 +1,7 @@
 package com.project.souklab.filestorage.scan;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -14,7 +16,7 @@ class VirusScannerTest {
         VirusScanner scanner = content -> {
             try {
                 return content.read() == 'o' ? ScanResult.clean() : ScanResult.error("unexpected");
-            } catch (java.io.IOException exception) {
+            } catch (IOException exception) {
                 return ScanResult.error(exception.getMessage());
             }
         };

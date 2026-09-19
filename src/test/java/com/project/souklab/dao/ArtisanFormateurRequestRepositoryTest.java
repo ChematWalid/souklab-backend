@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanFormateurRequest;
@@ -24,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * soft-delete exclusion, latest-request lookup, existence checks, and pagination in H2.
  */
 @DataJpaTest
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
+        TestJpaProperties.DISABLE_HIBERNATE_SEARCH,
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class ArtisanFormateurRequestRepositoryTest {

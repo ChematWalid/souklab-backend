@@ -1,4 +1,9 @@
 package com.project.souklab.service.auth;
+import java.util.Map;
+
+import com.project.souklab.service.profile.ProfileService;
+
+import com.project.souklab.analytics.AnalyticsEvent;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.OAuthIdentityRepository;
@@ -30,6 +35,7 @@ import com.project.souklab.model.User;
 import com.project.souklab.model.VerificationTokenType;
 import com.project.souklab.security.JwtUtils;
 import com.project.souklab.service.audit.AuditLogService;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.profile.ProfileResponseMapper;
 import com.project.souklab.service.security.RefreshTokenService;
@@ -37,8 +43,8 @@ import com.project.souklab.service.security.VerificationTokenService;
 import com.project.souklab.util.EmailUtil;
 import com.project.souklab.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -56,12 +62,11 @@ import java.util.Set;
  * password management, and Google OAuth2 flow.
  * <p>
  * Profile lifecycle (getCurrentUser, completeProfile, patchCurrentUser) lives in
- * {@link com.project.souklab.service.profile.ProfileService}.
+ * {@link ProfileService}.
  * Mapping logic lives in {@link ProfileResponseMapper}.
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class AuthService {
 
     private static final String ERROR_USER_NOT_FOUND_PREFIX = "User not found: ";
@@ -83,6 +88,60 @@ public class AuthService {
     private final AuditLogService auditLogService;
     private final Clock clock;
     private final ProfileResponseMapper profileResponseMapper;
+    private final ActivityEventService activityEventService;
+
+    @Autowired
+    public AuthService(UserRepository userRepository,
+                       AuthorizationPermissionRepository permissionRepository,
+                       RefreshTokenRepository refreshTokenRepository,
+                       OAuthIdentityRepository oauthIdentityRepository,
+                       PasswordEncoder passwordEncoder,
+                       NotificationService notificationService,
+                       JwtUtils jwtUtils,
+                       RefreshTokenService refreshTokenService,
+                       AppProperties appProperties,
+                       VerificationTokenService verificationTokenService,
+                       EmailUtil emailUtil,
+                       AuditLogService auditLogService,
+                       Clock clock,
+                       ProfileResponseMapper profileResponseMapper,
+                       ActivityEventService activityEventService) {
+        this.userRepository = userRepository;
+        this.permissionRepository = permissionRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.oauthIdentityRepository = oauthIdentityRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.notificationService = notificationService;
+        this.jwtUtils = jwtUtils;
+        this.refreshTokenService = refreshTokenService;
+        this.appProperties = appProperties;
+        this.verificationTokenService = verificationTokenService;
+        this.emailUtil = emailUtil;
+        this.auditLogService = auditLogService;
+        this.clock = clock;
+        this.profileResponseMapper = profileResponseMapper;
+        this.activityEventService = activityEventService;
+    }
+
+    /** Backward-compatible constructor retained for focused service tests and external adapters. */
+    public AuthService(UserRepository userRepository,
+                       AuthorizationPermissionRepository permissionRepository,
+                       RefreshTokenRepository refreshTokenRepository,
+                       OAuthIdentityRepository oauthIdentityRepository,
+                       PasswordEncoder passwordEncoder,
+                       NotificationService notificationService,
+                       JwtUtils jwtUtils,
+                       RefreshTokenService refreshTokenService,
+                       AppProperties appProperties,
+                       VerificationTokenService verificationTokenService,
+                       EmailUtil emailUtil,
+                       AuditLogService auditLogService,
+                       Clock clock,
+                       ProfileResponseMapper profileResponseMapper) {
+        this(userRepository, permissionRepository, refreshTokenRepository, oauthIdentityRepository,
+                passwordEncoder, notificationService, jwtUtils, refreshTokenService, appProperties,
+                verificationTokenService, emailUtil, auditLogService, clock, profileResponseMapper, null);
+    }
 
     /**
      * Registers a new user.
@@ -108,6 +167,10 @@ public class AuthService {
         AccountStatus initialStatus = isArtisan ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
         User savedUser = userRepository.save(buildNewUser(dto, email, permissions, initialStatus));
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Registration.CREATED, savedUser.getId(), savedUser.getId(),
+                    Map.of("accountType", dto.getAccountType()));
+        }
 
         try {
             String rawCode = verificationTokenService.issueToken(savedUser, VerificationTokenType.EMAIL_VERIFICATION);
@@ -175,6 +238,9 @@ public class AuthService {
             user.setLastLoginIp(extractClientIp(request));
         }
         userRepository.save(user);
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Authentication.LOGIN_SUCCEEDED, user.getId(), user.getId(), Map.of());
+        }
 
         return generateJwtResponse(user);
     }
@@ -477,8 +543,8 @@ public class AuthService {
 
     private Set<AuthorizationPermission> permissionsForRegistration(boolean artisan) {
         Set<String> keys = artisan
-                ? Set.of(Permission.ARTISAN_CONTENT.authority(), Permission.ARTISAN_FORMATIONS.authority(), Permission.ARTISAN_REVIEWS.authority(), Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority(), Permission.MESSAGE_SEND.authority())
-                : Set.of(Permission.PROFILE_READ.authority(), Permission.PROFILE_WRITE.authority(), Permission.REPORT_CREATE.authority(), Permission.FILE_READ.authority(), Permission.MESSAGE_SEND.authority());
+                ? Set.of(Permission.Artisan.CONTENT.authority(), Permission.Artisan.FORMATIONS.authority(), Permission.Artisan.REVIEWS.authority(), Permission.Profile.READ.authority(), Permission.Profile.WRITE.authority(), Permission.Report.CREATE.authority(), Permission.File.READ.authority(), Permission.Message.SEND.authority())
+                : Set.of(Permission.Profile.READ.authority(), Permission.Profile.WRITE.authority(), Permission.Report.CREATE.authority(), Permission.File.READ.authority(), Permission.Message.SEND.authority());
         List<AuthorizationPermission> permissions = permissionRepository.findByPermissionKeyInAndEnabledTrue(keys);
         if (permissions.size() != keys.size()) {
             throw new ResourceNotFoundException(ERROR_PERMISSION_NOT_FOUND_PREFIX + keys);

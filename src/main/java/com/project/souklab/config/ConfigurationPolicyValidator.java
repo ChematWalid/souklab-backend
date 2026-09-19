@@ -1,5 +1,8 @@
 package com.project.souklab.config;
 
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.project.souklab.config.AvatarProperties.RateLimitProperties;
 import com.project.souklab.filestorage.config.StorageProperties;
 import jakarta.annotation.PostConstruct;
@@ -21,12 +24,53 @@ public class ConfigurationPolicyValidator {
     private final AvatarProperties avatarProperties;
     private final StorageProperties storageProperties;
     private final Environment environment;
+    private AnalyticsProperties analyticsProperties;
+    private AnalyticsRetentionProperties analyticsRetentionProperties;
+    private AnalyticsRabbitProperties analyticsRabbitProperties;
+    private RateLimitEndpointProperties rateLimitEndpointProperties;
+    private AnalyticsJobProperties analyticsJobProperties;
+    private AnalyticsExportProperties analyticsExportProperties;
+    private HealthProperties healthProperties;
+
+    @Autowired(required = false)
+    void setAnalyticsProperties(AnalyticsProperties value) { this.analyticsProperties = value; }
+
+    @Autowired(required = false)
+    void setAnalyticsRetentionProperties(AnalyticsRetentionProperties value) { this.analyticsRetentionProperties = value; }
+
+    @Autowired(required = false)
+    void setAnalyticsRabbitProperties(AnalyticsRabbitProperties value) { this.analyticsRabbitProperties = value; }
+
+    @Autowired(required = false)
+    void setRateLimitEndpointProperties(RateLimitEndpointProperties value) { this.rateLimitEndpointProperties = value; }
+
+    @Autowired(required = false)
+    void setAnalyticsJobProperties(AnalyticsJobProperties value) { this.analyticsJobProperties = value; }
+
+    @Autowired(required = false)
+    void setAnalyticsExportProperties(AnalyticsExportProperties value) { this.analyticsExportProperties = value; }
+
+    @Autowired(required = false)
+    void setHealthProperties(HealthProperties value) { this.healthProperties = value; }
 
     @PostConstruct
     void validate() {
         requirePositive("avatar.max-per-user", avatarProperties.getMaxPerUser());
         requireNonEmpty("avatar.allowed-mime-types", avatarProperties.getAllowedMimeTypes());
         validateRateLimit("avatar.rate-limit", avatarProperties.getRateLimit());
+        AppProperties.RateLimit globalRateLimit = appProperties.getRateLimit();
+        if (globalRateLimit.isEnabled()) {
+            requirePositive("app.rate-limit.capacity", globalRateLimit.getCapacity());
+            validatePositiveDuration("app.rate-limit.refill-duration", globalRateLimit.getRefillDuration());
+        }
+        if (appProperties.getRateLimit().isUserEnabled()) {
+            if (appProperties.getRateLimit().getUserCapacity() <= 0
+                    || appProperties.getRateLimit().getUserRefillDuration() == null
+                    || appProperties.getRateLimit().getUserRefillDuration().isZero()
+                    || appProperties.getRateLimit().getUserRefillDuration().isNegative()) {
+                throw new IllegalStateException("app.rate-limit user policy is invalid");
+            }
+        }
 
         StorageProperties.ValidationProperties validation = storageProperties.getValidation();
         if (validation == null || validation.getMaxFileSize() == null
@@ -41,6 +85,10 @@ public class ConfigurationPolicyValidator {
         validateMassIndexing(appProperties.getSearch().getMassIndexing());
         validateDirectory(appProperties.getDirectory());
         validateSubscriptionPolicy();
+        validateAnalyticsPolicy();
+        if (healthProperties != null) {
+            validatePositiveDuration("app.health.dependency-timeout", healthProperties.getDependencyTimeout());
+        }
 
         if (isProduction() && Boolean.TRUE.equals(storageProperties.getS3().getAutoCreateBucket())) {
             throw new IllegalStateException("storage.s3.auto-create-bucket must be false in production");
@@ -48,6 +96,84 @@ public class ConfigurationPolicyValidator {
 
         if (isProduction()) {
             validateProductionPolicy();
+        }
+    }
+
+    private void validateAnalyticsPolicy() {
+        if (analyticsProperties != null) {
+            requirePositive("app.analytics.default-page-size", analyticsProperties.getDefaultPageSize());
+            requirePositive("app.analytics.maximum-page-size", analyticsProperties.getMaximumPageSize());
+            if (analyticsProperties.getDefaultPageSize() > analyticsProperties.getMaximumPageSize()
+                    || analyticsProperties.getMaximumRangeDays() <= 0
+                    || analyticsProperties.getMaximumBucketCount() <= 0
+                    || analyticsProperties.getRollupBatchSize() <= 0
+                    || analyticsProperties.getBackfillBatchSize() <= 0) {
+                throw new IllegalStateException("app.analytics page, range, and bucket limits are invalid");
+            }
+            validatePositiveDuration("app.analytics.query-timeout", analyticsProperties.getQueryTimeout());
+            validatePositiveDuration("app.analytics.job-retention", analyticsProperties.getJobRetention());
+            requireConfigured("app.analytics.business-time-zone", analyticsProperties.getBusinessTimeZone());
+            try { ZoneId.of(analyticsProperties.getBusinessTimeZone()); }
+            catch (RuntimeException ex) { throw new IllegalStateException("app.analytics.business-time-zone must be valid", ex); }
+        }
+        if (analyticsJobProperties != null) {
+            requirePositive("app.analytics.jobs.concurrency", analyticsJobProperties.getConcurrency());
+            requirePositive("app.analytics.jobs.maximum-result-rows", analyticsJobProperties.getMaximumResultRows());
+            requirePositive("app.analytics.jobs.maximum-result-bytes", analyticsJobProperties.getMaximumResultBytes());
+        }
+        if (analyticsExportProperties != null) {
+            requireConfigured("app.analytics.exports.storage-prefix", analyticsExportProperties.getStoragePrefix());
+            validatePositiveDuration("app.analytics.exports.retention", analyticsExportProperties.getRetention());
+        }
+        if (analyticsRetentionProperties != null) {
+            validatePositiveDuration("app.analytics.retention.raw-events", analyticsRetentionProperties.getRawEvents());
+            validatePositiveDuration("app.analytics.retention.jobs", analyticsRetentionProperties.getJobs());
+            validatePositiveDuration("app.analytics.retention.rollups", analyticsRetentionProperties.getRollups());
+            validatePositiveDuration("app.analytics.retention.cleanup-interval", analyticsRetentionProperties.getCleanupInterval());
+            requirePositive("app.analytics.retention.cleanup-batch-size", analyticsRetentionProperties.getCleanupBatchSize());
+        }
+        if (analyticsRabbitProperties != null && analyticsRabbitProperties.isEnabled()) {
+            requireConfigured("app.analytics.rabbit.host", analyticsRabbitProperties.getHost());
+            if (analyticsRabbitProperties.getPort() <= 0 || analyticsRabbitProperties.getRelayBatchSize() <= 0
+                    || analyticsRabbitProperties.getMaxAttempts() <= 0) {
+                throw new IllegalStateException("app.analytics.rabbit port, relay-batch-size, and max-attempts must be positive");
+            }
+            requireConfigured("app.analytics.rabbit.exchange", analyticsRabbitProperties.getExchange());
+            requireConfigured("app.analytics.rabbit.queue", analyticsRabbitProperties.getQueue());
+            requireConfigured("app.analytics.rabbit.routing-key", analyticsRabbitProperties.getRoutingKey());
+            requireConfigured("app.analytics.rabbit.dead-letter-exchange", analyticsRabbitProperties.getDeadLetterExchange());
+            requireConfigured("app.analytics.rabbit.dead-letter-queue", analyticsRabbitProperties.getDeadLetterQueue());
+            validatePositiveDuration("app.analytics.rabbit.retry-backoff", analyticsRabbitProperties.getRetryBackoff());
+            validatePositiveDuration("app.analytics.rabbit.max-retry-backoff", analyticsRabbitProperties.getMaxRetryBackoff());
+            validatePositiveDuration("app.analytics.rabbit.poll-interval", analyticsRabbitProperties.getPollInterval());
+            validatePositiveDuration("app.analytics.rabbit.confirm-timeout", analyticsRabbitProperties.getConfirmTimeout());
+            if (analyticsRabbitProperties.getRetryMultiplier() < 1.0) {
+                throw new IllegalStateException("app.analytics.rabbit.retry-multiplier must be at least 1");
+            }
+        }
+        if (rateLimitEndpointProperties != null) {
+            validateRateLimitRule("app.rate-limit.endpoints.authentication", rateLimitEndpointProperties.getAuthentication());
+            validateRateLimitRule("app.rate-limit.endpoints.public-api", rateLimitEndpointProperties.getPublicApi());
+            validateRateLimitRule("app.rate-limit.endpoints.admin-api", rateLimitEndpointProperties.getAdminApi());
+            validateRateLimitRule("app.rate-limit.endpoints.analytics-jobs", rateLimitEndpointProperties.getAnalyticsJobs());
+            validateRateLimitRule("app.rate-limit.endpoints.analytics-results", rateLimitEndpointProperties.getAnalyticsResults());
+            validateRateLimitRule("app.rate-limit.endpoints.csv-exports", rateLimitEndpointProperties.getCsvExports());
+            validateRateLimitRule("app.rate-limit.endpoints.chargily-webhook", rateLimitEndpointProperties.getChargilyWebhook());
+        }
+    }
+
+    private void validateRateLimitRule(String prefix, RateLimitRule rule) {
+        if (rule != null && rule.isEnabled()) {
+            requirePositive(prefix + ".capacity", rule.getCapacity());
+            validatePositiveDuration(prefix + ".refill-duration", rule.getRefillDuration());
+            if (rule.getUserCapacity() < 0) {
+                throw new IllegalStateException(prefix + ".user-capacity must not be negative");
+            }
+            if (rule.getUserCapacity() > 0) {
+                validatePositiveDuration(prefix + ".user-refill-duration", rule.getUserRefillDuration());
+            } else if (rule.getUserRefillDuration() != null) {
+                validatePositiveDuration(prefix + ".user-refill-duration", rule.getUserRefillDuration());
+            }
         }
     }
 
@@ -136,7 +262,7 @@ public class ConfigurationPolicyValidator {
         requireExactValue("logging.level.root", environment.getProperty("logging.level.root"), "INFO");
         requireExactValue("logging.level.com.project.souklab", environment.getProperty("logging.level.com.project.souklab"), "INFO");
         requireExactValue("logging.level.org.hibernate.search", environment.getProperty("logging.level.org.hibernate.search"), "WARN");
-        requireExactValue("management.endpoint.health.show-details", environment.getProperty("management.endpoint.health.show-details"), "never");
+        requireExactValue("management.endpoint.health.show-details", environment.getProperty("management.endpoint.health.show-details"), "when-authorized");
         requireExactValue("management.endpoints.web.exposure.include", environment.getProperty("management.endpoints.web.exposure.include"), "health,info,prometheus");
         requireExactValue("management.info.env.enabled", environment.getProperty("management.info.env.enabled"), "false");
         validatePositiveDuration("app.mailersend.connection-timeout", appProperties.getMailersend().getConnectionTimeout());
@@ -181,7 +307,7 @@ public class ConfigurationPolicyValidator {
         }
     }
 
-    private void validateCors(java.util.List<String> origins) {
+    private void validateCors(List<String> origins) {
         if (origins == null || origins.isEmpty() || origins.stream().anyMatch(origin -> origin == null
                 || origin.isBlank() || origin.contains("*"))) {
             throw new IllegalStateException("app.cors.allowed-origins must contain explicit origins when credentials are enabled");
@@ -238,7 +364,7 @@ public class ConfigurationPolicyValidator {
         }
     }
 
-    private void requireNonEmpty(String name, java.util.List<String> values) {
+    private void requireNonEmpty(String name, List<String> values) {
         if (values == null || values.isEmpty() || values.stream().anyMatch(value -> value == null || value.isBlank())) {
             throw new IllegalStateException(name + " must not be empty");
         }
@@ -261,7 +387,7 @@ public class ConfigurationPolicyValidator {
         }
     }
 
-    private void validatePositiveDuration(String name, java.time.Duration value) {
+    private void validatePositiveDuration(String name, Duration value) {
         if (value == null || value.isZero() || value.isNegative()) {
             throw new IllegalStateException(name + " must be positive in production");
         }

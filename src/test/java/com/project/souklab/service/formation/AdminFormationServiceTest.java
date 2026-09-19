@@ -1,4 +1,5 @@
 package com.project.souklab.service.formation;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.dao.FormationEnrollmentRepository;
 import com.project.souklab.dao.FormationFileRepository;
@@ -158,7 +159,7 @@ class AdminFormationServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ADMIN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ADMIN_FORMATIONS.authority());
+        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Admin.FORMATIONS.authority());
         lenient().doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);

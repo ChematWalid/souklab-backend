@@ -1,0 +1,91 @@
+package com.project.souklab.analytics;
+import com.project.souklab.config.AnalyticsExportProperties;
+import com.project.souklab.config.AnalyticsJobProperties;
+import com.project.souklab.config.AppProperties;
+import com.project.souklab.dao.ArtisanFormateurRequestRepository;
+import com.project.souklab.dao.ArtisanReviewRepository;
+import com.project.souklab.dao.ArtisanSubscriptionRepository;
+import com.project.souklab.dao.ClientSubscriptionRepository;
+import com.project.souklab.dao.ContentReportRepository;
+import com.project.souklab.dao.FeedPostRepository;
+import com.project.souklab.dao.FormationEnrollmentRepository;
+import com.project.souklab.dao.FormationRepository;
+import com.project.souklab.dao.PaymentRepository;
+import com.project.souklab.dao.UserRepository;
+import com.project.souklab.dao.analytics.ActivityEventRepository;
+import com.project.souklab.dao.analytics.AnalyticsJobArtifactRepository;
+import com.project.souklab.dao.analytics.AnalyticsOutboxRepository;
+import com.project.souklab.filestorage.StorageService;
+import com.project.souklab.service.audit.AuditLogService;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.souklab.config.AnalyticsProperties;
+import com.project.souklab.dao.analytics.AnalyticsJobRepository;
+import com.project.souklab.dto.analytics.AnalyticsJobRequest;
+import com.project.souklab.exception.ForbiddenException;
+import com.project.souklab.model.analytics.AnalyticsBucket;
+import com.project.souklab.model.analytics.AnalyticsReportType;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.concurrent.Executor;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class AnalyticsJobAuthorizationTest {
+    @Mock private AnalyticsJobRepository jobs;
+    @Mock private ActivityEventRepository events;
+    @Mock private UserRepository users;
+    @Mock private AnalyticsProperties properties;
+    @Mock private ObjectMapper objectMapper;
+    @Mock private Clock clock;
+    @Mock private SimpMessagingTemplate messagingTemplate;
+    @Mock private AppProperties appProperties;
+    @Mock private FeedPostRepository feedPosts;
+    @Mock private FormationRepository formations;
+    @Mock private FormationEnrollmentRepository enrollments;
+    @Mock private ArtisanReviewRepository reviews;
+    @Mock private ContentReportRepository reports;
+    @Mock private PaymentRepository payments;
+    @Mock private AnalyticsJobArtifactRepository artifacts;
+    @Mock private StorageService storageService;
+    @Mock private AuditLogService auditLogService;
+    @Mock private AnalyticsOutboxRepository outbox;
+    @Mock private AnalyticsJobProperties jobProperties;
+    @Mock private AnalyticsExportProperties exportProperties;
+    @Mock private ArtisanSubscriptionRepository artisanSubscriptions;
+    @Mock private ClientSubscriptionRepository clientSubscriptions;
+    @Mock private ArtisanFormateurRequestRepository formateurRequests;
+    @Mock private Executor applicationTaskExecutor;
+    @Mock private TransactionTemplate transactionTemplate;
+
+    @InjectMocks
+    private AnalyticsJobService service;
+
+    @Test
+    void financialReportRequiresFinancialPermission() {
+        when(properties.getMaximumRangeDays()).thenReturn(366);
+        when(properties.getMaximumBucketCount()).thenReturn(500);
+        when(properties.getDefaultPageSize()).thenReturn(20);
+        when(properties.getMaximumPageSize()).thenReturn(100);
+
+        AnalyticsJobRequest request = new AnalyticsJobRequest();
+        request.setReportType(AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS);
+        request.setFromDate(LocalDate.of(2026, 1, 1));
+        request.setToDate(LocalDate.of(2026, 1, 1));
+        request.setBucket(AnalyticsBucket.DAY);
+
+        assertThatThrownBy(() -> service.submit(request, "admin@example.com", false))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("Financial analytics permission is required");
+    }
+}

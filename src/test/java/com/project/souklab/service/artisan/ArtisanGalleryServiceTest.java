@@ -1,4 +1,6 @@
 package com.project.souklab.service.artisan;
+import com.project.souklab.filestorage.exception.StorageException;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanGalleryImageRepository;
@@ -140,7 +142,7 @@ class ArtisanGalleryServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_CONTENT.authority());
+        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -374,7 +376,7 @@ class ArtisanGalleryServiceTest {
             when(galleryImageRepository.countByArtisanIdAndDeletedAtIsNull(ARTISAN_ID)).thenReturn(0L);
 
             assertThatThrownBy(() -> galleryService.uploadImage(unreadableFile, "Title", "Caption"))
-                    .isInstanceOf(com.project.souklab.filestorage.exception.StorageException.class)
+                    .isInstanceOf(StorageException.class)
                     .hasMessageContaining("Failed to read uploaded image stream");
 
             verify(storageService, never()).store(any(), any(), any(), anyLong());
@@ -432,7 +434,7 @@ class ArtisanGalleryServiceTest {
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.isAuthenticated()).thenReturn(true);
 
-            GrantedAuthority clientAuthority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.PROFILE_READ.authority());
+            GrantedAuthority clientAuthority = new SimpleGrantedAuthority(Permission.Profile.READ.authority());
             doReturn(List.of(clientAuthority)).when(authentication).getAuthorities();
 
             SecurityContextHolder.setContext(securityContext);

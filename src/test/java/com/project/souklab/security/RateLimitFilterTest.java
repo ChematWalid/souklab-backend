@@ -1,6 +1,7 @@
 package com.project.souklab.security;
 
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.config.RateLimitEndpointProperties;
 import com.project.souklab.util.ServletResponseUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,13 @@ class RateLimitFilterTest {
     }
 
     @Test
+    void missingConfigurationSkipsBeforeDereferencingTheRateLimitPolicy() {
+        properties.setRateLimit(null);
+
+        assertThat(filter.shouldNotFilter(new MockHttpServletRequest())).isTrue();
+    }
+
+    @Test
     void enabledConfigurationConsumesPerIpTokensAndRejectsAfterCapacity() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/test");
         request.setRemoteAddr("198.51.100.1");
@@ -48,5 +56,20 @@ class RateLimitFilterTest {
         assertThat(rejected.getStatus()).isEqualTo(429);
         assertThat(rejectedChain.getRequest()).isNull();
         assertThat(filter.resolveBucket("198.51.100.1")).isSameAs(filter.resolveBucket("198.51.100.1"));
+    }
+
+    @Test
+    void explicitlyDisabledEndpointClassBypassesGlobalBucket() throws Exception {
+        RateLimitEndpointProperties endpointProperties = new RateLimitEndpointProperties();
+        endpointProperties.getPublicApi().setEnabled(false);
+        filter.setEndpointProperties(endpointProperties);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/public/catalog");
+        request.setRemoteAddr("198.51.100.2");
+        MockFilterChain chain = new MockFilterChain();
+
+        filter.doFilter(request, new MockHttpServletResponse(), chain);
+
+        assertThat(chain.getRequest()).isNotNull();
     }
 }

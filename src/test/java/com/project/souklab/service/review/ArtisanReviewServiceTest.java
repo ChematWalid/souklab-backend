@@ -1,4 +1,6 @@
 package com.project.souklab.service.review;
+import com.project.souklab.exception.ResourceNotFoundException;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ArtisanReviewRepository;
@@ -73,7 +75,7 @@ class ArtisanReviewServiceTest {
                 .formation(formation).artisan(reviewer).status(EnrollmentStatus.ATTENDED).build();
         enrollment.setId("enrollment");
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_REVIEWS.authority()))));
+                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority(Permission.Artisan.REVIEWS.authority()))));
         when(artisanRepository.findByUserEmailIgnoreCase("reviewer@example.com")).thenReturn(Optional.of(reviewer));
     }
 
@@ -168,9 +170,9 @@ class ArtisanReviewServiceTest {
     void rejectsMissingReviewsForUpdateAndDelete() {
         when(reviewRepository.findByIdAndDeletedAtIsNull("missing")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.update("missing", new ArtisanReviewRequestDTO(BigDecimal.ONE, "x")))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
         assertThatThrownBy(() -> service.delete("missing"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

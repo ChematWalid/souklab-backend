@@ -1,5 +1,7 @@
 package com.project.souklab.service.chat;
 
+import org.springframework.messaging.Message;
+
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.chat.ChatEvent;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,7 @@ public class ChatPresenceService {
     @EventListener
     public void disconnected(SessionDisconnectEvent event) { update(event.getMessage(), -1); }
 
-    private void update(org.springframework.messaging.Message<?> message, int delta) {
+    private void update(Message<?> message, int delta) {
         if (message == null) return;
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (accessor == null || accessor.getUser() == null) return;

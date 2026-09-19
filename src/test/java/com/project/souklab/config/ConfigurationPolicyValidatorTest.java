@@ -1,5 +1,9 @@
 package com.project.souklab.config;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.function.Consumer;
+
 import com.project.souklab.filestorage.config.StorageProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.env.Environment;
@@ -51,13 +55,28 @@ class ConfigurationPolicyValidatorTest {
     }
 
     @Test
+    void rejectsInvalidEndpointUserOverride() {
+        Fixture fixture = new Fixture();
+        RateLimitEndpointProperties endpoints = new RateLimitEndpointProperties();
+        endpoints.getAdminApi().setEnabled(true);
+        endpoints.getAdminApi().setCapacity(10);
+        endpoints.getAdminApi().setRefillDuration(Duration.ofMinutes(1));
+        endpoints.getAdminApi().setUserCapacity(5);
+        endpoints.getAdminApi().setUserRefillDuration(Duration.ZERO);
+        fixture.validator.setRateLimitEndpointProperties(endpoints);
+
+        assertThatThrownBy(() -> fixture.validator.validate())
+                .hasMessageContaining("user-refill-duration");
+    }
+
+    @Test
     void rejectsMissingAndMalformedNestedPolicies() {
         assertInvalid(f -> f.storage.setValidation(null), "storage.validation.max-file-size");
         assertInvalid(f -> f.app.setAsync(null), "app.async");
         assertInvalid(f -> f.app.getCache().setExpireAfterWrite(null), "app.cache");
         assertInvalid(f -> f.app.getSearch().setMassIndexing(null), "mass-indexing");
         assertInvalid(f -> f.app.getCors().setAllowedOrigins(List.of(" ")), "app.cors.allowed-origins");
-        assertInvalid(f -> f.app.getCors().setAllowedOrigins(new java.util.ArrayList<>(java.util.Collections.singletonList(null))), "app.cors.allowed-origins");
+        assertInvalid(f -> f.app.getCors().setAllowedOrigins(new ArrayList<>(Collections.singletonList(null))), "app.cors.allowed-origins");
         assertInvalid(f -> f.app.getCors().setAllowedOrigins(List.of()), "app.cors.allowed-origins");
         assertInvalid(f -> f.app.getSearch().getMassIndexing().setThreadsToLoadObjects(-1), "mass-indexing");
         assertInvalid(f -> f.app.getSearch().getMassIndexing().setBatchSizeToLoadObjects(-1), "mass-indexing");
@@ -97,7 +116,7 @@ class ConfigurationPolicyValidatorTest {
                 .hasMessageContaining("auto-create-bucket");
     }
 
-    private void assertInvalid(java.util.function.Consumer<Fixture> change, String message) {
+    private void assertInvalid(Consumer<Fixture> change, String message) {
         Fixture fixture = new Fixture();
         change.accept(fixture);
         assertThatThrownBy(() -> fixture.validator.validate()).hasMessageContaining(message);

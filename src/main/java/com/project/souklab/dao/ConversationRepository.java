@@ -1,5 +1,7 @@
 package com.project.souklab.dao;
 
+import java.util.List;
+
 import com.project.souklab.model.Conversation;
 import com.project.souklab.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -16,5 +18,5 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
 
     @EntityGraph(attributePaths = {"participants", "participants.user"})
     @Query("select c from Conversation c join c.participants p where p.user = :user and p.deletedAt is null and c.deletedAt is null order by c.updatedAt desc")
-    java.util.List<Conversation> findAllForUser(@Param("user") User user);
+    List<Conversation> findAllForUser(@Param("user") User user);
 }

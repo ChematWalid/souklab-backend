@@ -44,7 +44,7 @@ public class ProfileResponseMapper {
      */
     public ProfileResponse mapToProfileResponse(User user) {
         boolean isArtisan = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.ARTISAN_CONTENT.authority().equals(permission.getPermissionKey()));
+                .anyMatch(permission -> Permission.Artisan.CONTENT.matches(permission.getPermissionKey()));
 
         Set<String> permissionKeys = user.getPermissions().stream()
                 .map(AuthorizationPermission::getPermissionKey)

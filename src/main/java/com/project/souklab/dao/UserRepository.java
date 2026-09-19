@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 import jakarta.persistence.LockModeType;
 
 public interface UserRepository extends JpaRepository<User, String> {
@@ -39,6 +40,26 @@ public interface UserRepository extends JpaRepository<User, String> {
     }
 
     Page<User> findByStatus(AccountStatus status, Pageable pageable);
+
+    long countByStatus(AccountStatus status);
+
+    long countByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
+
+    long countByEmailVerifiedTrueAndCreatedAtBetween(LocalDateTime from, LocalDateTime to);
+
+    long countByEmailVerifiedTrueAndDeletedAtIsNull();
+
+    @Query("select count(u) from User u where u.artisan is not null and u.deletedAt is null")
+    long countArtisanProfiles();
+
+    @Query("select count(u) from User u where u.client is not null and u.deletedAt is null")
+    long countClientProfiles();
+
+    @Query("select count(u) from User u where u.artisan is not null and u.status = :status and u.deletedAt is null")
+    long countActiveArtisanProfiles(@Param("status") AccountStatus status);
+
+    @Query("select count(u) from User u where u.client is not null and u.status = :status and u.deletedAt is null")
+    long countActiveClientProfiles(@Param("status") AccountStatus status);
 
     @Query("SELECT u FROM User u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<User> searchUsers(@Param("query") String query, Pageable pageable);

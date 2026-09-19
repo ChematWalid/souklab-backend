@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 
+
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Notification;
 import com.project.souklab.model.NotificationType;
@@ -23,8 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * pagination, unread counts, and the bulk modifying markAllAsReadForUser query against H2.
  */
 @DataJpaTest
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+@TestPropertySource(locations = TestJpaProperties.H2_PROPERTIES, properties = {
+        TestJpaProperties.DISABLE_HIBERNATE_SEARCH,
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class NotificationRepositoryTest {

@@ -14,20 +14,21 @@ import java.net.Socket;
 @Profile({"prod", "production"})
 public class RelayHealthIndicator implements HealthIndicator {
 
-    private static final int CONNECT_TIMEOUT_MILLIS = 2_000;
-
     private final AppProperties.Relay properties;
     private final OperationalMetrics metrics;
+    private final HealthProperties healthProperties;
 
-    public RelayHealthIndicator(AppProperties appProperties, OperationalMetrics metrics) {
+    public RelayHealthIndicator(AppProperties appProperties, OperationalMetrics metrics, HealthProperties healthProperties) {
         this.properties = appProperties.getRelay();
         this.metrics = metrics;
+        this.healthProperties = healthProperties;
     }
 
     @Override
     public Health health() {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(properties.getHost(), properties.getPort()), CONNECT_TIMEOUT_MILLIS);
+            socket.connect(new InetSocketAddress(properties.getHost(), properties.getPort()),
+                    Math.toIntExact(healthProperties.getDependencyTimeout().toMillis()));
             metrics.setDependencyAvailability("rabbitmq", true);
             return Health.up().build();
         } catch (IOException exception) {

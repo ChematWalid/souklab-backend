@@ -1,6 +1,12 @@
 package com.project.souklab.service.subscription;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
 import com.project.souklab.dao.ArtisanSubscriptionRepository;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.ClientSubscriptionRepository;
 import com.project.souklab.dao.PaymentRepository;
 import com.project.souklab.dto.subscription.PaymentResponse;
@@ -32,6 +38,10 @@ public class SubscriptionAccountService {
     private final ClientSubscriptionRepository clientSubscriptions;
     private final PaymentRepository payments;
     private final SubscriptionPlanRules rules;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     @Transactional(readOnly = true)
     public SubscriptionResponse current() {
@@ -74,6 +84,7 @@ public class SubscriptionAccountService {
             requireOwner(subscription.getAccount(), user);
             rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
             subscription.setStatus(SubscriptionStatus.CANCELED);
+            recordCancellation(user, subscription.getId());
             cancelPendingPayments(subscriptionId);
             if (artisanSubscriptions.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) == 0 && user.getArtisan() != null) user.getArtisan().setPremium(false);
             return;
@@ -82,6 +93,7 @@ public class SubscriptionAccountService {
         requireOwner(subscription.getAccount(), user);
         rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
         subscription.setStatus(SubscriptionStatus.CANCELED);
+        recordCancellation(user, subscription.getId());
         cancelPendingPayments(subscriptionId);
         if (clientSubscriptions.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) == 0 && user.getClient() != null) user.getClient().setPremium(false);
     }
@@ -93,6 +105,13 @@ public class SubscriptionAccountService {
 
     private void requireOwner(User owner, User current) {
         if (!owner.getId().equals(current.getId())) throw new ForbiddenException("Subscription does not belong to the authenticated account");
+    }
+
+    private void recordCancellation(User account, String subscriptionId) {
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Subscription.CANCELED, account.getId(), subscriptionId,
+                    Map.of("status", "CANCELED", "source", "ACCOUNT_ACTION"));
+        }
     }
 
     private SubscriptionResponse toResponse(ArtisanSubscription value) {

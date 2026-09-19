@@ -1,4 +1,8 @@
 package com.project.souklab.service.storage;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import com.project.souklab.exception.ForbiddenException;
+import com.project.souklab.exception.ResourceNotFoundException;
 
 import com.project.souklab.dao.*;
 import com.project.souklab.filestorage.FileUrlResolver;
@@ -51,10 +55,10 @@ class FileAccessServiceTest {
                 new UsernamePasswordAuthenticationToken(user.getEmail(), "credentials", List.of()));
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(messageAttachmentRepository.findAccessibleByStorageKey(key, user)).thenReturn(Optional.of(attachment));
-        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(true);
 
         assertThat(fileAccessService().authorize(key)).isFalse();
-        verify(accessControlService).hasPermission(any(), eq(Permission.FILE_READ));
+        verify(accessControlService).hasPermission(any(), eq(Permission.File.READ));
     }
 
     @Test
@@ -65,10 +69,10 @@ class FileAccessServiceTest {
                 new UsernamePasswordAuthenticationToken(user.getEmail(), "credentials", List.of()));
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(messageAttachmentRepository.findAccessibleByStorageKey(key, user)).thenReturn(Optional.of(new MessageAttachment()));
-        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(false);
+        when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(false);
 
         assertThatThrownBy(() -> fileAccessService().authorize(key))
-                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -103,12 +107,12 @@ class FileAccessServiceTest {
         when(fileUrlResolver.toUrl("certificate")).thenReturn("/files/certificate");
         when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/certificate"))
                 .thenReturn(Optional.of(certification));
-        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
-        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_USERS))).thenReturn(false);
+        when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.Admin.USERS))).thenReturn(false);
 
         assertThat(fileAccessService().authorize("certificate")).isFalse();
 
-        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_USERS))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.Admin.USERS))).thenReturn(true);
         assertThat(fileAccessService().authorize("certificate")).isFalse();
     }
 
@@ -124,21 +128,21 @@ class FileAccessServiceTest {
         when(fileUrlResolver.toUrl("certificate")).thenReturn("/files/certificate");
         when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/certificate"))
                 .thenReturn(Optional.of(certification));
-        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
-        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_USERS))).thenReturn(false);
+        when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.Admin.USERS))).thenReturn(false);
         assertThatThrownBy(() -> fileAccessService().authorize("certificate"))
-                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+                .isInstanceOf(ForbiddenException.class);
 
         when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/missing")).thenReturn(Optional.empty());
         when(fileUrlResolver.toUrl("missing")).thenReturn("/files/missing");
         assertThatThrownBy(() -> fileAccessService().authorize("missing"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
 
         when(certificationRepository.findByDocumentUrlAndDeletedAtIsNull("/files/stale"))
                 .thenReturn(Optional.of(certification), Optional.empty());
         when(fileUrlResolver.toUrl("stale")).thenReturn("/files/stale");
         assertThatThrownBy(() -> fileAccessService().authorize("stale"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -149,11 +153,11 @@ class FileAccessServiceTest {
         formation.setId("formation");
         FormationFile file = FormationFile.builder().formation(formation).storageKey("syllabus").build();
 
-        authenticate(authorUser, Permission.ARTISAN_FORMATIONS.authority());
+        authenticate(authorUser, Permission.Artisan.FORMATIONS.authority());
         when(userRepository.findByEmail(authorUser.getEmail())).thenReturn(Optional.of(authorUser));
         when(formationFileRepository.findByStorageKeyAndDeletedAtIsNull("syllabus")).thenReturn(Optional.of(file));
-        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
-        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_FORMATIONS))).thenReturn(false);
+        when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.Admin.FORMATIONS))).thenReturn(false);
         when(artisanRepository.findByUserEmailIgnoreCase(authorUser.getEmail())).thenReturn(Optional.of(author));
         when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
                 "formation", "author-artisan", EnrollmentStatus.CONFIRMED)).thenReturn(false);
@@ -162,7 +166,7 @@ class FileAccessServiceTest {
 
         User participantUser = User.builder().email("participant@example.com").build();
         Artisan participant = Artisan.builder().id("participant-artisan").user(participantUser).build();
-        authenticate(participantUser, Permission.ARTISAN_FORMATIONS.authority());
+        authenticate(participantUser, Permission.Artisan.FORMATIONS.authority());
         when(userRepository.findByEmail(participantUser.getEmail())).thenReturn(Optional.of(participantUser));
         when(artisanRepository.findByUserEmailIgnoreCase(participantUser.getEmail())).thenReturn(Optional.of(participant));
         when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
@@ -180,26 +184,26 @@ class FileAccessServiceTest {
         formation.setId("formation");
         FormationFile file = FormationFile.builder().formation(formation).storageKey("protected").build();
 
-        authenticate(user, Permission.ARTISAN_FORMATIONS.authority());
+        authenticate(user, Permission.Artisan.FORMATIONS.authority());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(formationFileRepository.findByStorageKeyAndDeletedAtIsNull("protected")).thenReturn(Optional.of(file));
-        when(accessControlService.hasPermission(any(), eq(Permission.FILE_READ))).thenReturn(true);
-        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_FORMATIONS))).thenReturn(false);
+        when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.Admin.FORMATIONS))).thenReturn(false);
         when(artisanRepository.findByUserEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(viewer));
         when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
                 "formation", "viewer-artisan", EnrollmentStatus.CONFIRMED)).thenReturn(false);
 
         assertThatThrownBy(() -> fileAccessService().authorize("protected"))
-                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+                .isInstanceOf(ForbiddenException.class);
 
-        when(accessControlService.hasPermission(any(), eq(Permission.ADMIN_FORMATIONS))).thenReturn(true);
+        when(accessControlService.hasPermission(any(), eq(Permission.Admin.FORMATIONS))).thenReturn(true);
         assertThat(fileAccessService().authorize("protected")).isFalse();
     }
 
     private void authenticate(User user, String authority) {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), "credentials", List.of(
-                        new org.springframework.security.core.authority.SimpleGrantedAuthority(authority))));
+                        new SimpleGrantedAuthority(authority))));
     }
 
     private FileAccessService fileAccessService() {

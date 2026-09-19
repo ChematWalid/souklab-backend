@@ -1,5 +1,7 @@
 package com.project.souklab.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.security.FileRateLimitFilter;
@@ -9,6 +11,7 @@ import com.project.souklab.security.ChargilyWebhookSizeFilter;
 import com.project.souklab.security.JwtAuthenticationFilter;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
 import com.project.souklab.security.RateLimitFilter;
+import com.project.souklab.security.UserRateLimitFilter;
 import com.project.souklab.security.RateLimitBucketStore;
 import com.project.souklab.util.ServletResponseUtil;
 import jakarta.servlet.DispatcherType;
@@ -46,14 +49,20 @@ public class SecurityConfig {
     private final AvatarProperties avatarProperties;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitFilter rateLimitFilter;
+    private UserRateLimitFilter userRateLimitFilter;
     private final FileRateLimitFilter fileRateLimitFilter;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final ServletResponseUtil servletResponseUtil;
     private RateLimitBucketStore rateLimitBucketStore = RateLimitBucketStore.inMemory();
 
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    @Autowired(required = false)
     void setRateLimitBucketStore(RateLimitBucketStore rateLimitBucketStore) {
         this.rateLimitBucketStore = rateLimitBucketStore;
+    }
+
+    @Autowired(required = false)
+    void setUserRateLimitFilter(UserRateLimitFilter userRateLimitFilter) {
+        this.userRateLimitFilter = userRateLimitFilter;
     }
 
     @Bean
@@ -151,10 +160,6 @@ public class SecurityConfig {
                                 "/api/v1/auth/oauth/**",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/actuator/health",
                                 "/actuator/health/liveness",
                                 "/actuator/health/readiness",
                                 "/error",
@@ -183,6 +188,9 @@ public class SecurityConfig {
 
         http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        if (userRateLimitFilter != null) {
+            http.addFilterAfter(userRateLimitFilter, JwtAuthenticationFilter.class);
+        }
         http.addFilterAfter(fileRateLimitFilter, JwtAuthenticationFilter.class);
         http.addFilterAfter(avatarUploadSizeFilter(), JwtAuthenticationFilter.class);
         http.addFilterAfter(avatarUploadRateLimitFilter(), AvatarUploadSizeFilter.class);

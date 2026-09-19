@@ -1,4 +1,7 @@
 package com.project.souklab.dao;
+import java.time.LocalDateTime;
+
+import com.project.souklab.model.ReviewStatus;
 
 import com.project.souklab.model.ArtisanReview;
 import com.project.souklab.model.ReviewStatus;
@@ -15,6 +18,10 @@ import java.util.Optional;
  * Persistence operations for formation-backed artisan reviews.
  */
 public interface ArtisanReviewRepository extends JpaRepository<ArtisanReview, String> {
+    long countByStatusAndDeletedAtIsNull(ReviewStatus status);
+    long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
+    @Query("select avg(r.rating) from ArtisanReview r where r.status = :status and r.deletedAt is null")
+    BigDecimal averageRatingByStatus(@Param("status") ReviewStatus status);
     Optional<ArtisanReview> findByIdAndDeletedAtIsNull(String id);
     Page<ArtisanReview> findByArtisanIdAndStatusAndDeletedAtIsNull(String artisanId, ReviewStatus status, Pageable pageable);
     Optional<ArtisanReview> findByEnrollmentId(String enrollmentId);

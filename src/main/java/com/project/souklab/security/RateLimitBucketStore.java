@@ -1,5 +1,7 @@
 package com.project.souklab.security;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
@@ -13,7 +15,7 @@ public interface RateLimitBucketStore {
 
     /** Small local implementation used by unit tests and non-production slices. */
     static RateLimitBucketStore inMemory() {
-        java.util.concurrent.ConcurrentHashMap<String, Bucket> buckets = new java.util.concurrent.ConcurrentHashMap<>();
+        ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
         return (key, capacity, refillDuration) -> buckets.computeIfAbsent(key, ignored ->
                 Bucket.builder().addLimit(Bandwidth.builder()
                         .capacity(capacity)

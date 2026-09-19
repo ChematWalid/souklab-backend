@@ -102,7 +102,7 @@ public class ArtisanFormateurService {
 
         ArtisanFormateurRequest saved = formateurRequestRepository.saveAndFlush(request);
 
-        List<User> admins = userRepository.findByPermissionKey(Permission.ADMIN_USERS.authority());
+        List<User> admins = userRepository.findByPermissionKey(Permission.Admin.USERS.authority());
         String artisanName = resolveArtisanFullName(user);
         String notifMsg = "New artisan formateur request submitted by "
                 + (artisanName != null && !artisanName.isBlank() ? artisanName + " (" + user.getEmail() + ")" : user.getEmail())

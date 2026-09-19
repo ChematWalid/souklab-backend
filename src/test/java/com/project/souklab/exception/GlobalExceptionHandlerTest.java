@@ -1,5 +1,8 @@
 package com.project.souklab.exception;
 
+import org.mockito.Mockito;
+import org.springframework.http.ResponseEntity;
+
 import com.project.souklab.filestorage.exception.StorageException;
 import com.project.souklab.filestorage.exception.VirusDetectedException;
 import com.project.souklab.filestorage.exception.VirusScanException;
@@ -86,7 +89,7 @@ class GlobalExceptionHandlerTest {
     void mapsTypeAndContentMetadataBranches() {
         MethodArgumentTypeMismatchException withType = mock(MethodArgumentTypeMismatchException.class);
         when(withType.getName()).thenReturn("page");
-        org.mockito.Mockito.doReturn(Integer.class).when(withType).getRequiredType();
+        Mockito.doReturn(Integer.class).when(withType).getRequiredType();
         assertStatus(handler.handleMethodArgumentTypeMismatchException(withType), HttpStatus.BAD_REQUEST);
 
         MethodArgumentTypeMismatchException withoutType = mock(MethodArgumentTypeMismatchException.class);
@@ -99,7 +102,7 @@ class GlobalExceptionHandlerTest {
         assertStatus(handler.handleHttpMediaTypeNotSupportedException(withoutContentType), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    private void assertStatus(org.springframework.http.ResponseEntity<?> response, HttpStatus status) {
+    private void assertStatus(ResponseEntity<?> response, HttpStatus status) {
         assertThat(response.getStatusCode()).isEqualTo(status);
         assertThat(response.getBody()).isNotNull();
     }

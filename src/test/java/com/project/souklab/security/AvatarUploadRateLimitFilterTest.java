@@ -134,7 +134,7 @@ class AvatarUploadRateLimitFilterTest {
     @DisplayName("Authenticated users have independent rate-limiting buckets")
     void authenticatedUsers_haveIndependentBuckets() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.PROFILE_READ.authority())))
+                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(Permission.Profile.READ.authority())))
         );
 
         for (int i = 0; i < 2; i++) {
@@ -150,7 +150,7 @@ class AvatarUploadRateLimitFilterTest {
         assertThat(resExceeded.getStatus()).isEqualTo(429);
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_CONTENT.authority())))
+                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority())))
         );
 
         MockHttpServletRequest reqUserB = new MockHttpServletRequest("POST", "/api/v1/users/me/avatars");

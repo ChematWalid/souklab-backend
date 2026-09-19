@@ -1,5 +1,11 @@
 package com.project.souklab.service.feed;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.FeedPostRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserRepository;
@@ -64,6 +70,10 @@ public class FeedPostService {
     private final AccessControlService accessControlService;
     private final Clock clock;
     private final AppProperties appProperties;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     /**
      * Lists public published posts.
@@ -256,6 +266,11 @@ public class FeedPostService {
         post.setStatus(FeedPostStatus.PUBLISHED);
         post.setPublishedAt(LocalDateTime.now(clock));
         FeedPost saved = postRepository.save(post);
+        if (activityEventService != null) {
+            User moderator = currentUser();
+            activityEventService.record(AnalyticsEvent.Feed.POST_PUBLISHED, moderator.getId(), saved.getId(),
+                    Map.of("postType", saved.getType().name()));
+        }
         if (saved.getType() == FeedPostType.FORMATION) {
             notificationService.createForUser(saved.getAuthor(), "Your formation post was published.", NotificationType.NEW_FORMATION, saved.getId());
         }

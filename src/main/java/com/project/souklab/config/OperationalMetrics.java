@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Application-level counters used by the production dashboards.
@@ -48,6 +50,28 @@ public class OperationalMetrics {
 
     public void recordWebSocket(String outcome) {
         increment("souklab.websocket.connections", "stomp", outcome);
+    }
+
+    public void recordRateLimitRejection(String scope) {
+        increment("souklab.rate_limit.rejections", scope, "rejected");
+    }
+
+    public void recordRequest(String method, String outcome) {
+        increment("souklab.http.requests", method, outcome);
+    }
+
+    /** Returns the current bounded counter snapshot for an operational report. */
+    public Map<String, Double> snapshot(String metricName) {
+        Map<String, Double> snapshot = new LinkedHashMap<>();
+        registry.find(metricName).counters().forEach(counter -> {
+            String key = counter.getId().getTags().stream()
+                    .map(tag -> tag.getKey() + "=" + tag.getValue())
+                    .sorted()
+                    .reduce((left, right) -> left + "," + right)
+                    .orElse("unlabelled");
+            snapshot.put(key, counter.count());
+        });
+        return snapshot;
     }
 
     /**

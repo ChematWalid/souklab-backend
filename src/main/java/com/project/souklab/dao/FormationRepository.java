@@ -1,4 +1,7 @@
 package com.project.souklab.dao;
+import java.time.LocalDateTime;
+
+import com.project.souklab.model.FormationStatus;
 
 import com.project.souklab.model.Formation;
 import com.project.souklab.model.FormationStatus;
@@ -17,6 +20,10 @@ import java.util.Optional;
  * Supports public discovery, instructor workspace browsing, dynamic specifications, and soft-delete exclusions.
  */
 public interface FormationRepository extends JpaRepository<Formation, String>, JpaSpecificationExecutor<Formation> {
+    long countByStatusAndDeletedAtIsNull(FormationStatus status);
+    long countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(FormationStatus status,
+                                                            LocalDateTime from, LocalDateTime to);
+    long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
 
     /**
      * Retrieves active formations matching a specific status, excluding soft-deleted entities.

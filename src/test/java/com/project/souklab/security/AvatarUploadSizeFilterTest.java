@@ -1,5 +1,7 @@
 package com.project.souklab.security;
 
+import org.mockito.ArgumentMatchers;
+
 import tools.jackson.databind.json.JsonMapper;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.util.ServletResponseUtil;
@@ -111,7 +113,7 @@ class AvatarUploadSizeFilterTest {
         storageProperties.setValidation(null);
         filter.doFilter(new MockHttpServletRequest("POST", "/api/v1/users/me/avatars"),
                 new MockHttpServletResponse(), filterChain);
-        verify(filterChain).doFilter(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(filterChain).doFilter(ArgumentMatchers.any(), ArgumentMatchers.any());
 
         StorageProperties.ValidationProperties validation = new StorageProperties.ValidationProperties();
         storageProperties.setValidation(validation);

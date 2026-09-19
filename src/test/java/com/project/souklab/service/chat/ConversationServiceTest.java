@@ -1,4 +1,14 @@
 package com.project.souklab.service.chat;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+import com.project.souklab.dto.chat.ConversationResponse;
+import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.exception.ResourceNotFoundException;
+import com.project.souklab.filestorage.StorageResult;
+import com.project.souklab.filestorage.validation.ValidatedFile;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.*;
@@ -190,8 +200,8 @@ class ConversationServiceTest {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
         byte[] bytes = "content".getBytes();
-        when(fileValidator.validateAndSanitize(any(), eq("note.pdf"), eq("application/pdf"), eq((long) bytes.length))).thenReturn(new com.project.souklab.filestorage.validation.ValidatedFile(new java.io.ByteArrayInputStream(bytes), "note.pdf", "application/pdf", bytes.length));
-        when(storageService.store(any(), eq("note.pdf"), eq("application/pdf"), eq((long) bytes.length))).thenReturn(new com.project.souklab.filestorage.StorageResult("key", "note.pdf", "application/pdf", bytes.length, clock.instant()));
+        when(fileValidator.validateAndSanitize(any(), eq("note.pdf"), eq("application/pdf"), eq((long) bytes.length))).thenReturn(new ValidatedFile(new ByteArrayInputStream(bytes), "note.pdf", "application/pdf", bytes.length));
+        when(storageService.store(any(), eq("note.pdf"), eq("application/pdf"), eq((long) bytes.length))).thenReturn(new StorageResult("key", "note.pdf", "application/pdf", bytes.length, clock.instant()));
 
         AttachmentUploadResponse result = service.uploadAttachment("conversation", new MockMultipartFile("file", "note.pdf", "application/pdf", bytes));
 
@@ -203,7 +213,7 @@ class ConversationServiceTest {
     void messages_rejectsMalformedCursor() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        assertThatThrownBy(() -> service.messages("conversation", "not-a-cursor", 20)).isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+        assertThatThrownBy(() -> service.messages("conversation", "not-a-cursor", 20)).isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -256,8 +266,8 @@ class ConversationServiceTest {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
         MockMultipartFile file = mock(MockMultipartFile.class);
-        when(file.getInputStream()).thenThrow(new java.io.IOException("read failure"));
-        assertThatThrownBy(() -> service.uploadAttachment("conversation", file)).isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+        when(file.getInputStream()).thenThrow(new IOException("read failure"));
+        assertThatThrownBy(() -> service.uploadAttachment("conversation", file)).isInstanceOf(BadRequestException.class);
 
         service.typing("conversation", false, "stop");
         verify(messagingTemplate).convertAndSendToUser(eq(recipient.getEmail()), eq("/queue/chat"), any());
@@ -310,15 +320,15 @@ class ConversationServiceTest {
         when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(eq(conversation), eq(sender), anyString())).thenReturn(Optional.empty());
         String oversized = "x".repeat(4001);
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("long", oversized, List.of())))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("many", "ok", List.of("1", "2", "3", "4", "5", "6"))))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
     void createOrGetRejectsSelfAndIneligibleRecipient() {
         when(userRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
-        assertThatThrownBy(() -> service.createOrGet(sender.getId())).isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+        assertThatThrownBy(() -> service.createOrGet(sender.getId())).isInstanceOf(BadRequestException.class);
         recipient.setStatus(AccountStatus.PENDING);
         when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
         assertThatThrownBy(() -> service.createOrGet(recipient.getId())).isInstanceOf(ForbiddenException.class);
@@ -328,22 +338,22 @@ class ConversationServiceTest {
     void notFoundPathsRemainPrivateAndUseDomainExceptions() {
         when(userRepository.findById("missing-recipient")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.createOrGet("missing-recipient"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
 
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
         when(messageRepository.findByIdAndConversationAndDeletedAtIsNull("missing-message", conversation))
                 .thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.edit("conversation", "missing-message", new EditMessageRequest("updated")))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
         assertThatThrownBy(() -> service.delete("conversation", "missing-message"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
         assertThatThrownBy(() -> service.markRead("conversation", "missing-message"))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
 
         when(conversationRepository.findById("missing-conversation")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.archive("missing-conversation", true))
-                .isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -378,19 +388,19 @@ class ConversationServiceTest {
         Message ownMessage = message("own-message", sender, "hello");
         when(messageRepository.findByIdAndConversationAndDeletedAtIsNull("own-message", conversation)).thenReturn(Optional.of(ownMessage));
         assertThatThrownBy(() -> service.edit("conversation", "own-message", new EditMessageRequest("x".repeat(4001))))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
     void expiredCursorIsRejectedAndMissingAttachmentIsInvalid() {
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
-        String expired = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(
-                "2026-01-01T00:00|message|2025-12-31T23:59".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String expired = Base64.getUrlEncoder().withoutPadding().encodeToString(
+                "2026-01-01T00:00|message|2025-12-31T23:59".getBytes(StandardCharsets.UTF_8));
         assertThatThrownBy(() -> service.messages("conversation", expired, 20))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         assertThatThrownBy(() -> service.uploadAttachment("conversation", null))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -400,7 +410,7 @@ class ConversationServiceTest {
         sender.setStatus(AccountStatus.ACTIVE);
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(false);
-        assertThatThrownBy(() -> service.archive("conversation", true)).isInstanceOf(com.project.souklab.exception.ResourceNotFoundException.class);
+        assertThatThrownBy(() -> service.archive("conversation", true)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -502,7 +512,7 @@ class ConversationServiceTest {
 
         assertThatThrownBy(() -> service.send("conversation",
                 new SendMessageRequest("missing-key", "hello", List.of("unknown"))))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
         verify(messageRepository, never()).save(any());
     }
 
@@ -592,14 +602,14 @@ class ConversationServiceTest {
     @Test
     void send_requiresEnabledMessagePermissionWithCorrectKey() {
         AuthorizationPermission wrongPermission = new AuthorizationPermission();
-        wrongPermission.setPermissionKey(Permission.PROFILE_READ.authority());
+        wrongPermission.setPermissionKey(Permission.Profile.READ.authority());
         wrongPermission.setEnabled(true);
         sender.setPermissions(new HashSet<>(List.of(wrongPermission)));
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("wrong-key", "hello", List.of())))
                 .isInstanceOf(ForbiddenException.class);
 
         AuthorizationPermission disabledPermission = new AuthorizationPermission();
-        disabledPermission.setPermissionKey(Permission.MESSAGE_SEND.authority());
+        disabledPermission.setPermissionKey(Permission.Message.SEND.authority());
         disabledPermission.setEnabled(false);
         sender.setPermissions(new HashSet<>(List.of(disabledPermission)));
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("disabled-key", "hello", List.of())))
@@ -617,7 +627,7 @@ class ConversationServiceTest {
         when(messageRepository.countUnread(conversation, sender, null)).thenReturn(1L);
 
         assertThat(service.list(false)).singleElement()
-                .extracting(com.project.souklab.dto.chat.ConversationResponse::lastMessagePreview)
+                .extracting(ConversationResponse::lastMessagePreview)
                 .isEqualTo("visible preview");
     }
 
@@ -633,15 +643,15 @@ class ConversationServiceTest {
         when(messageRepository.countUnread(conversation, sender, null)).thenReturn(0L);
         assertThat(service.list(false)).hasSize(1);
 
-        String malformedPayload = java.util.Base64.getUrlEncoder().withoutPadding()
-                .encodeToString("2026-01-01T00:00|only-two-fields".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String malformedPayload = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString("2026-01-01T00:00|only-two-fields".getBytes(StandardCharsets.UTF_8));
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
         assertThatThrownBy(() -> service.messages("conversation", malformedPayload, 20))
-                .isInstanceOf(com.project.souklab.exception.BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
-    private User user(String id, String email, AccountStatus status, boolean verified) { User user = new User(); user.setId(id); user.setEmail(email); user.setStatus(status); user.setEmailVerified(verified); AuthorizationPermission permission = new AuthorizationPermission(); permission.setPermissionKey(Permission.MESSAGE_SEND.authority()); permission.setEnabled(true); user.setPermissions(new HashSet<>(List.of(permission))); return user; }
+    private User user(String id, String email, AccountStatus status, boolean verified) { User user = new User(); user.setId(id); user.setEmail(email); user.setStatus(status); user.setEmailVerified(verified); AuthorizationPermission permission = new AuthorizationPermission(); permission.setPermissionKey(Permission.Message.SEND.authority()); permission.setEnabled(true); user.setPermissions(new HashSet<>(List.of(permission))); return user; }
     private ConversationParticipant participant(User user) { ConversationParticipant p = new ConversationParticipant(); p.setUser(user); return p; }
     private Message message(String id, User author, String content) { Message m = new Message(); m.setId(id); m.setConversation(conversation); m.setAuthor(author); m.setContent(content); m.setCreatedAt(LocalDateTime.now(clock)); return m; }
 }

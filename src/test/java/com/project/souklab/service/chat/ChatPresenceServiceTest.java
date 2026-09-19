@@ -1,4 +1,8 @@
 package com.project.souklab.service.chat;
+import java.util.Map;
+import org.springframework.messaging.MessageHeaders;
+
+import com.project.souklab.dto.chat.ChatEvent;
 
 import com.project.souklab.config.AppProperties;
 import org.junit.jupiter.api.Test;
@@ -43,7 +47,7 @@ class ChatPresenceServiceTest {
         service.connected(connected);
         service.disconnected(disconnected);
 
-        verify(template, times(2)).convertAndSend(eq("/topic/presence"), any(com.project.souklab.dto.chat.ChatEvent.class));
+        verify(template, times(2)).convertAndSend(eq("/topic/presence"), any(ChatEvent.class));
     }
 
     @Test
@@ -59,7 +63,7 @@ class ChatPresenceServiceTest {
     void messageWithoutStompHeadersIsIgnored() {
         SimpMessagingTemplate template = mock(SimpMessagingTemplate.class);
         ChatPresenceService service = new ChatPresenceService(template, new AppProperties(), Clock.systemUTC());
-        service.connected(new SessionConnectedEvent(this, MessageBuilder.createMessage(new byte[0], new org.springframework.messaging.MessageHeaders(java.util.Map.of()))));
+        service.connected(new SessionConnectedEvent(this, MessageBuilder.createMessage(new byte[0], new MessageHeaders(Map.of()))));
         verifyNoInteractions(template);
     }
 

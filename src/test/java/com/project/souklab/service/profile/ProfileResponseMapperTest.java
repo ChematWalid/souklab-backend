@@ -46,10 +46,10 @@ class ProfileResponseMapperTest {
         mapper = new ProfileResponseMapper();
 
         artisanContentPermission = new AuthorizationPermission();
-        artisanContentPermission.setPermissionKey(Permission.ARTISAN_CONTENT.authority());
+        artisanContentPermission.setPermissionKey(Permission.Artisan.CONTENT.authority());
 
         profileReadPermission = new AuthorizationPermission();
-        profileReadPermission.setPermissionKey(Permission.PROFILE_READ.authority());
+        profileReadPermission.setPermissionKey(Permission.Profile.READ.authority());
     }
 
     /**
@@ -296,7 +296,7 @@ class ProfileResponseMapperTest {
         UserSummaryDTO summary = mapper.mapToSummaryDTO(user);
 
         assertThat(summary.getEmail()).isEqualTo("artisan@example.com");
-        assertThat(summary.getPermissions()).contains(Permission.ARTISAN_CONTENT.authority());
+        assertThat(summary.getPermissions()).contains(Permission.Artisan.CONTENT.authority());
         assertThat(summary.isTeacher()).isTrue();
         assertThat(summary.isPremium()).isTrue();
         assertThat(summary.isValidated()).isTrue();
@@ -323,7 +323,7 @@ class ProfileResponseMapperTest {
 
         UserSummaryDTO summary = mapper.mapToSummaryDTO(user);
 
-        assertThat(summary.getPermissions()).contains(Permission.PROFILE_READ.authority());
+        assertThat(summary.getPermissions()).contains(Permission.Profile.READ.authority());
         assertThat(summary.isTeacher()).isFalse();
         assertThat(summary.isPremium()).isTrue();
         assertThat(summary.isValidated()).isTrue();

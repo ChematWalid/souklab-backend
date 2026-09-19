@@ -105,10 +105,10 @@ public class FileAccessService {
     private void requireFormationAccess(FormationFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         requireFileRead();
-        if (accessControlService.hasPermission(authentication, Permission.ADMIN_FORMATIONS)) {
+        if (accessControlService.hasPermission(authentication, Permission.Admin.FORMATIONS)) {
             return;
         }
-        Artisan artisan = ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_FORMATIONS);
+        Artisan artisan = ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.Artisan.FORMATIONS);
         Formation formation = file.getFormation();
         boolean isAuthor = formation.getAuthor().getId().equals(artisan.getId());
         boolean isEnrolled = formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
@@ -120,13 +120,13 @@ public class FileAccessService {
 
     private void requireFileRead() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!accessControlService.hasPermission(authentication, Permission.FILE_READ)) {
+        if (!accessControlService.hasPermission(authentication, Permission.File.READ)) {
             throw new ForbiddenException("Access denied.");
         }
     }
 
     private boolean isAdministrator() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return accessControlService.hasPermission(authentication, Permission.ADMIN_USERS);
+        return accessControlService.hasPermission(authentication, Permission.Admin.USERS);
     }
 }

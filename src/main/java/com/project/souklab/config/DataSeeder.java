@@ -76,11 +76,11 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedPermissions() {
-        for (Permission permission : Permission.values()) {
+        for (Permission permission : Permission.all()) {
             if (permissionRepository.findByPermissionKeyAndEnabledTrue(permission.authority()).isEmpty()) {
                 AuthorizationPermission definition = new AuthorizationPermission();
                 definition.setPermissionKey(permission.authority());
-                definition.setDescription(permission.name());
+                definition.setDescription(permission.description());
                 definition.setEnabled(true);
                 permissionRepository.save(definition);
             }

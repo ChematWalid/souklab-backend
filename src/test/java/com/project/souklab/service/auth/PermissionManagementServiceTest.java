@@ -1,5 +1,7 @@
 package com.project.souklab.service.auth;
 
+import org.mockito.ArgumentMatchers;
+
 import com.project.souklab.dao.AuthorizationPermissionRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.admin.PermissionAssignmentRequestDTO;
@@ -62,7 +64,7 @@ class PermissionManagementServiceTest {
         assertThat(service().grant("u1", new PermissionAssignmentRequestDTO(" permission:chat:send ")))
                 .containsExactly("permission:chat:send");
         verify(users).save(user);
-        verify(audit).logAction(any(), org.mockito.ArgumentMatchers.eq("u1:permission:chat:send"));
+        verify(audit).logAction(any(), ArgumentMatchers.eq("u1:permission:chat:send"));
     }
 
     @Test
@@ -93,8 +95,8 @@ class PermissionManagementServiceTest {
         assertThat(service().revoke("u1", new PermissionAssignmentRequestDTO("permission:chat:send")))
                 .isEmpty();
         verify(users).save(user);
-        verify(audit).logAction(org.mockito.ArgumentMatchers.any(),
-                org.mockito.ArgumentMatchers.eq("u1:permission:chat:send"));
+        verify(audit).logAction(ArgumentMatchers.any(),
+                ArgumentMatchers.eq("u1:permission:chat:send"));
     }
 
     @Test

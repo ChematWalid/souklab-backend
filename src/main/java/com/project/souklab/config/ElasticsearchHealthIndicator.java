@@ -1,5 +1,7 @@
 package com.project.souklab.config;
 
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.context.annotation.Profile;
@@ -39,7 +41,7 @@ public class ElasticsearchHealthIndicator implements HealthIndicator {
             if (properties.getUsername() != null && !properties.getUsername().isBlank()) {
                 String credentials = properties.getUsername() + ":" + properties.getPassword();
                 request.header("Authorization", "Basic " + Base64.getEncoder()
-                        .encodeToString(credentials.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                        .encodeToString(credentials.getBytes(StandardCharsets.UTF_8)));
             }
             int status = client.send(request.build(), HttpResponse.BodyHandlers.discarding()).statusCode();
             boolean available = status >= 200 && status < 300;

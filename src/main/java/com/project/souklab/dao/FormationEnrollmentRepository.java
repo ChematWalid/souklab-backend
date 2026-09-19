@@ -1,4 +1,7 @@
 package com.project.souklab.dao;
+import java.time.LocalDateTime;
+
+import com.project.souklab.model.EnrollmentStatus;
 
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.FormationEnrollment;
@@ -13,6 +16,10 @@ import java.util.Optional;
  * Manages participant seat reservations, status transitions, and capacity validations.
  */
 public interface FormationEnrollmentRepository extends JpaRepository<FormationEnrollment, String> {
+    long countByStatusAndDeletedAtIsNull(EnrollmentStatus status);
+    long countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(EnrollmentStatus status,
+                                                            LocalDateTime from, LocalDateTime to);
+    long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
 
     /**
      * Checks if an enrollment exists matching the given formation, artisan, and status.

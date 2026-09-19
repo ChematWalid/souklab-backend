@@ -1,5 +1,7 @@
 package com.project.souklab.util;
 
+import org.mockito.Mockito;
+
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.UnauthorizedException;
@@ -60,12 +62,12 @@ class ArtisanSecurityUtilsTest {
         assertThatThrownBy(() -> ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository))
                 .isInstanceOf(ForbiddenException.class);
 
-        Authentication noUsername = org.mockito.Mockito.mock(Authentication.class);
+        Authentication noUsername = Mockito.mock(Authentication.class);
         when(noUsername.isAuthenticated()).thenReturn(true);
         when(noUsername.getName()).thenReturn(null);
         when(noUsername.getPrincipal()).thenReturn(new Object());
-        org.mockito.Mockito.doReturn(List.<GrantedAuthority>of(
-                new SimpleGrantedAuthority(Permission.ARTISAN_CONTENT.authority())))
+        Mockito.doReturn(List.<GrantedAuthority>of(
+                new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority())))
                 .when(noUsername).getAuthorities();
         SecurityContextHolder.getContext().setAuthentication(noUsername);
         assertThatThrownBy(() -> ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository))
@@ -77,7 +79,7 @@ class ArtisanSecurityUtilsTest {
         Artisan artisan = Artisan.builder().id("id-1").build();
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("id-1", null,
-                        List.of(new SimpleGrantedAuthority(Permission.ARTISAN_CONTENT.authority()))));
+                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority()))));
         when(artisanRepository.findByUserEmailIgnoreCase("id-1")).thenReturn(Optional.empty());
         when(artisanRepository.findById("id-1")).thenReturn(Optional.of(artisan));
 
@@ -91,7 +93,7 @@ class ArtisanSecurityUtilsTest {
         Artisan artisan = Artisan.builder().id("id-2").build();
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", null,
-                        List.of(new SimpleGrantedAuthority(Permission.ARTISAN_CONTENT.authority()))));
+                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority()))));
         when(artisanRepository.findByUserEmailIgnoreCase("artisan@example.com"))
                 .thenReturn(Optional.of(artisan));
 
@@ -99,7 +101,7 @@ class ArtisanSecurityUtilsTest {
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("missing", null,
-                        List.of(new SimpleGrantedAuthority(Permission.ARTISAN_CONTENT.authority()))));
+                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority()))));
         when(artisanRepository.findByUserEmailIgnoreCase("missing")).thenReturn(Optional.empty());
         when(artisanRepository.findById("missing")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository))

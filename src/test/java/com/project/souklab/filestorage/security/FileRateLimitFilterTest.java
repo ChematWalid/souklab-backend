@@ -1,4 +1,7 @@
 package com.project.souklab.filestorage.security;
+import java.util.Arrays;
+
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.util.ServletResponseUtil;
@@ -151,7 +154,7 @@ class FileRateLimitFilterTest {
     @DisplayName("Authenticated users have independent rate-limiting buckets")
     void authenticatedUsers_haveIndependentBuckets() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.PROFILE_READ.authority())))
+                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(Permission.Profile.READ.authority())))
         );
 
         for (int i = 0; i < 2; i++) {
@@ -167,7 +170,7 @@ class FileRateLimitFilterTest {
         assertThat(resExceeded.getStatus()).isEqualTo(429);
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_CONTENT.authority())))
+                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority())))
         );
 
         MockHttpServletRequest reqUserB = new MockHttpServletRequest("GET", "/api/v1/files/avatar.jpg");
@@ -212,7 +215,7 @@ class FileRateLimitFilterTest {
 
     @Test
     void rejectsEveryInvalidRefillConfigurationWhenCreatingBuckets() {
-        for (Duration duration : java.util.Arrays.asList(null, Duration.ZERO, Duration.ofSeconds(-1))) {
+        for (Duration duration : Arrays.asList(null, Duration.ZERO, Duration.ofSeconds(-1))) {
             StorageProperties invalid = new StorageProperties();
             invalid.getRateLimit().setCapacity(1);
             invalid.getRateLimit().setRefillDuration(duration);

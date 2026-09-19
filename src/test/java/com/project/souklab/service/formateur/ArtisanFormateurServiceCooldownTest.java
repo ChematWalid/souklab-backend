@@ -1,4 +1,5 @@
 package com.project.souklab.service.formateur;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanFormateurRequestRepository;
@@ -243,7 +244,7 @@ class ArtisanFormateurServiceCooldownTest {
         newlySavedRequest.setId("new-req-456");
 
         when(formateurRequestRepository.saveAndFlush(any(ArtisanFormateurRequest.class))).thenReturn(newlySavedRequest);
-        when(userRepository.findByPermissionKey(com.project.souklab.security.Permission.ADMIN_USERS.authority())).thenReturn(List.of(adminUser));
+        when(userRepository.findByPermissionKey(Permission.Admin.USERS.authority())).thenReturn(List.of(adminUser));
 
         FormateurRequestDTO requestDTO = new FormateurRequestDTO();
         requestDTO.setMotivation("Reapplying after cooldown expired.");

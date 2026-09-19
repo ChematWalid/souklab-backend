@@ -1,4 +1,5 @@
 package com.project.souklab.controller.formation;
+import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.jayway.jsonpath.JsonPath;
 import com.project.souklab.dao.ArtisanRepository;

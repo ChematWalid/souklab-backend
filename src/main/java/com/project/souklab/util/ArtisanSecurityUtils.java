@@ -35,7 +35,7 @@ public final class ArtisanSecurityUtils {
      * @throws ForbiddenException    if the principal lacks the required permission or no artisan profile exists
      */
     public static Artisan resolveAuthenticatedArtisan(ArtisanRepository artisanRepository) {
-        return resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_CONTENT);
+        return resolveAuthenticatedArtisan(artisanRepository, Permission.Artisan.CONTENT);
     }
 
     public static Artisan resolveAuthenticatedArtisan(ArtisanRepository artisanRepository, Permission requiredPermission) {
@@ -46,7 +46,7 @@ public final class ArtisanSecurityUtils {
         }
 
         boolean hasArtisanPermission = authentication.getAuthorities().stream()
-                .anyMatch(authority -> requiredPermission.authority().equals(authority.getAuthority()));
+                .anyMatch(requiredPermission::matches);
         if (!hasArtisanPermission) {
             throw new ForbiddenException("Access denied: " + requiredPermission.authority() + " permission required.");
         }

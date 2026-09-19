@@ -1,4 +1,5 @@
 package com.project.souklab.service.formation;
+import com.project.souklab.security.Permission;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
@@ -177,7 +178,7 @@ class FormationEnrollmentServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(artisan.getUser().getEmail());
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(com.project.souklab.security.Permission.ARTISAN_FORMATIONS.authority());
+        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.FORMATIONS.authority());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -216,7 +217,7 @@ class FormationEnrollmentServiceTest {
                     .thenReturn(Page.empty());
             formationEnrollmentService.getPublishedCatalog(null);
             formationEnrollmentService.getPublishedCatalog(PageRequest.of(0, 10, Sort.by("title")));
-            verify(formationRepository, org.mockito.Mockito.times(2))
+            verify(formationRepository, Mockito.times(2))
                     .findByStatusAndDeletedAtIsNull(eq(FormationStatus.PUBLISHED), any(Pageable.class));
         }
 
@@ -711,7 +712,7 @@ class FormationEnrollmentServiceTest {
                     .thenReturn(Page.empty());
             formationEnrollmentService.getMyEnrollments(null);
             formationEnrollmentService.getMyEnrollments(PageRequest.of(0, 10, Sort.by("title")));
-            verify(formationEnrollmentRepository, org.mockito.Mockito.times(2))
+            verify(formationEnrollmentRepository, Mockito.times(2))
                     .findByArtisanIdAndDeletedAtIsNull(eq(PEER_ID), any(Pageable.class));
         }
     }

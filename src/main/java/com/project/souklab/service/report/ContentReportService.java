@@ -1,6 +1,12 @@
 package com.project.souklab.service.report;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
 import com.project.souklab.dao.ArtisanReviewRepository;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ContentReportRepository;
 import com.project.souklab.dao.FeedPostRepository;
@@ -54,6 +60,10 @@ public class ContentReportService {
     private final NotificationService notificationService;
     private final Clock clock;
     private final AccessControlService accessControlService;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     /**
      * Creates a report against a supported existing target.
@@ -77,6 +87,10 @@ public class ContentReportService {
                 .status(ReportStatus.OPEN)
                 .build();
         ContentReport saved = reportRepository.save(report);
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Report.SUBMITTED, reporter.getId(), saved.getId(),
+                    Map.of("targetType", request.getTargetType().name()));
+        }
         notificationService.notifyAdmins("New content report submitted.");
         return ContentReportResponseDTO.from(saved);
     }
@@ -127,7 +141,12 @@ public class ContentReportService {
         report.setResolutionNote(request.getNote().trim());
         report.setStatus(request.getAction() == ReportResolutionAction.DISMISS ? ReportStatus.DISMISSED : ReportStatus.RESOLVED);
         report.setUpdatedAt(LocalDateTime.now(clock));
-        return ContentReportResponseDTO.from(reportRepository.save(report));
+        ContentReportResponseDTO response = ContentReportResponseDTO.from(reportRepository.save(report));
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Report.RESOLVED, resolver.getId(), report.getId(),
+                    Map.of("status", report.getStatus().name(), "action", request.getAction().name()));
+        }
+        return response;
     }
 
     private void ensureTargetExists(ReportTargetType type, String id) {

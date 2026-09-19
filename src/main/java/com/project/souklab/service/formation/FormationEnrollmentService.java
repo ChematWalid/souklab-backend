@@ -1,5 +1,11 @@
 package com.project.souklab.service.formation;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.FormationEnrollmentRepository;
@@ -58,6 +64,10 @@ public class FormationEnrollmentService {
     private final StorageService storageService;
     private final AppProperties appProperties;
     private final Clock clock;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
 
     /**
@@ -166,6 +176,10 @@ public class FormationEnrollmentService {
             enrollment = formationEnrollmentRepository.save(newEnrollment);
         }
 
+        if (activityEventService != null) {
+            activityEventService.record(AnalyticsEvent.Formation.ENROLLMENT, artisan.getId(), formation.getId(),
+                    Map.of("status", enrollment.getStatus().name()));
+        }
         return FormationEnrollmentResponseDTO.from(enrollment);
     }
 
@@ -268,6 +282,6 @@ public class FormationEnrollmentService {
      * @return resolved Artisan entity for the current authenticated principal
      */
     private Artisan resolveAuthenticatedArtisan() {
-        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.ARTISAN_FORMATIONS);
+        return ArtisanSecurityUtils.resolveAuthenticatedArtisan(artisanRepository, Permission.Artisan.FORMATIONS);
     }
 }

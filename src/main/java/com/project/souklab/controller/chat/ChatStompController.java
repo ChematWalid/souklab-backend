@@ -1,5 +1,9 @@
 package com.project.souklab.controller.chat;
 
+import java.util.Map;
+import java.util.concurrent.Callable;
+import org.springframework.security.access.AccessDeniedException;
+
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.chat.*;
 import com.project.souklab.service.chat.ConversationService;
@@ -65,14 +69,14 @@ public class ChatStompController {
     @MessageExceptionHandler
     public void handleError(Throwable error, Principal principal) {
         if (principal != null) {
-            ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "COMMAND_ERROR", null, null, null, LocalDateTime.now(clock), java.util.Map.of("message", error.getMessage() == null ? "Chat command failed" : error.getMessage()));
+            ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "COMMAND_ERROR", null, null, null, LocalDateTime.now(clock), Map.of("message", error.getMessage() == null ? "Chat command failed" : error.getMessage()));
             acknowledge(principal, event);
         }
     }
-    private <T> T withPrincipal(Principal principal, java.util.concurrent.Callable<T> action) {
-        if (!(principal instanceof UsernamePasswordAuthenticationToken authentication)) throw new org.springframework.security.access.AccessDeniedException("Authenticated STOMP principal required");
+    private <T> T withPrincipal(Principal principal, Callable<T> action) {
+        if (!(principal instanceof UsernamePasswordAuthenticationToken authentication)) throw new AccessDeniedException("Authenticated STOMP principal required");
         var context = SecurityContextHolder.createEmptyContext(); context.setAuthentication(authentication); SecurityContextHolder.setContext(context);
-        try { return action.call(); } catch (org.springframework.security.access.AccessDeniedException e) { throw e; } catch (Exception e) { throw new IllegalStateException(e); } finally { SecurityContextHolder.clearContext(); }
+        try { return action.call(); } catch (AccessDeniedException e) { throw e; } catch (Exception e) { throw new IllegalStateException(e); } finally { SecurityContextHolder.clearContext(); }
     }
 
     public record MessageCommand(String messageId, String correlationId) {}

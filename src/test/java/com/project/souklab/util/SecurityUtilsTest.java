@@ -1,5 +1,8 @@
 package com.project.souklab.util;
 
+import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,15 +38,15 @@ class SecurityUtilsTest {
 
     @Test
     void fallsBackToAuthenticationNameForNonStandardPrincipal() {
-        var authentication = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
-        org.mockito.Mockito.when(authentication.isAuthenticated()).thenReturn(true);
-        org.mockito.Mockito.when(authentication.getPrincipal()).thenReturn(new Object());
-        org.mockito.Mockito.when(authentication.getName()).thenReturn("named-user");
+        var authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.isAuthenticated()).thenReturn(true);
+        Mockito.when(authentication.getPrincipal()).thenReturn(new Object());
+        Mockito.when(authentication.getName()).thenReturn("named-user");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         assertThat(SecurityUtils.getCurrentUsername()).isEqualTo("named-user");
 
-        org.mockito.Mockito.when(authentication.getName()).thenReturn("anonymousUser");
+        Mockito.when(authentication.getName()).thenReturn("anonymousUser");
         assertThat(SecurityUtils.getCurrentUsername()).isNull();
     }
 }

@@ -1,5 +1,7 @@
 package com.project.souklab.config.search;
 
+import org.springframework.boot.DefaultApplicationArguments;
+
 import com.project.souklab.config.AppProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +57,6 @@ public class IndexLifecycleRunner {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
-        run(new org.springframework.boot.DefaultApplicationArguments(new String[0]));
+        run(new DefaultApplicationArguments(new String[0]));
     }
 }

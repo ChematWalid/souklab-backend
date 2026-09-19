@@ -1,4 +1,5 @@
 package com.project.souklab.controller.user;
+import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.auth.UserResponseDTO;
@@ -70,7 +71,7 @@ class UserManagementControllerTest {
                 .lastName("User")
                 .name("Sample User")
                 .status(status)
-                .permissions(Set.of(Permission.PROFILE_READ.authority()))
+                .permissions(Set.of(Permission.Profile.READ.authority()))
                 .build();
     }
 

@@ -1,5 +1,12 @@
 package com.project.souklab.service.chat;
 
+import java.io.IOException;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ConversationParticipantRepository;
 import com.project.souklab.dao.ConversationRepository;
@@ -55,6 +62,10 @@ public class ConversationService {
     private final StorageService storageService;
     private final FileValidator fileValidator;
     private final Map<String, Instant> lastTypingEvent = new ConcurrentHashMap<>();
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     @Transactional
     public ConversationResponse createOrGet(String recipientId) {
@@ -78,7 +89,7 @@ public class ConversationService {
         User current = requireCurrentUser(false);
         return conversationRepository.findAllForUser(current).stream()
                 .map(c -> participantRepository.findByConversationAndUser(c, current).filter(p -> p.isArchived() == archived).map(p -> toConversation(c, current)).orElse(null))
-                .filter(java.util.Objects::nonNull).toList();
+                .filter(Objects::nonNull).toList();
     }
 
     @Transactional
@@ -119,6 +130,10 @@ public class ConversationService {
         }
         try {
             Message saved = messageRepository.save(message);
+            if (activityEventService != null) {
+                activityEventService.record(AnalyticsEvent.Message.SENT, current.getId(), saved.getId(),
+                        Map.of("conversationId", c.getId()));
+            }
             c.setUpdatedAt(LocalDateTime.now(clock));
             User recipient = otherParticipant(c, current).getUser();
             notificationService.createForUser(recipient, "New message from " + current.getName(), NotificationType.NEW_MESSAGE, c.getId());
@@ -145,7 +160,7 @@ public class ConversationService {
         User current = requireCurrentUser(true); Conversation c = requireParticipant(conversationId, current);
         Message message = messageRepository.findByIdAndConversationAndDeletedAtIsNull(messageId, c).orElseThrow(() -> new ResourceNotFoundException("Message not found"));
         if (!message.getAuthor().getId().equals(current.getId())) throw new ForbiddenException("Only the author may delete this message");
-        message.setDeletedAt(LocalDateTime.now(clock)); message.setContent(""); dispatch(c, "MESSAGE_DELETED", message, null);
+                message.setDeletedAt(LocalDateTime.now(clock)); message.setContent(""); dispatch(c, "MESSAGE_DELETED", message, null);
     }
 
     @Transactional
@@ -173,7 +188,7 @@ public class ConversationService {
             lastTypingEvent.remove(current.getId() + ":" + conversationId);
         }
         User recipient = otherParticipant(conversation, current).getUser();
-        ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), typing ? "TYPING_STARTED" : "TYPING_STOPPED", conversationId, null, correlationId, LocalDateTime.now(clock), java.util.Map.of("username", current.getEmail(), "typing", typing));
+        ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), typing ? "TYPING_STARTED" : "TYPING_STOPPED", conversationId, null, correlationId, LocalDateTime.now(clock), Map.of("username", current.getEmail(), "typing", typing));
         messagingTemplate.convertAndSendToUser(recipient.getEmail(), properties.getChat().getMessageDestinationPrefix(), event);
     }
 
@@ -186,13 +201,13 @@ public class ConversationService {
             StorageResult stored = storageService.store(validated.content(), validated.sanitizedFilename(), validated.detectedMimeType(), validated.size());
             MessageAttachmentUpload upload = new MessageAttachmentUpload(); upload.setOwner(current); upload.setConversation(requireParticipant(conversationId, current)); upload.setStorageKey(stored.key()); upload.setOriginalFilename(stored.originalFilename()); upload.setContentType(stored.contentType()); upload.setSize(stored.size()); attachmentUploadRepository.save(upload);
             return new AttachmentUploadResponse(stored.key(), stored.originalFilename(), stored.contentType(), stored.size());
-        } catch (java.io.IOException e) { throw new BadRequestException("Unable to read attachment"); }
+        } catch (IOException e) { throw new BadRequestException("Unable to read attachment"); }
     }
 
     private User requireCurrentUser(boolean sending) { User user = currentUserProvider.requireCurrentUser(); requireEligible(user, sending); return user; }
     private void requireEligible(User user, boolean sending) {
         if (user.getStatus() == AccountStatus.SUSPENDED || user.getStatus() == AccountStatus.REJECTED) throw new ForbiddenException("Account is not eligible for messaging");
-        if (sending && (user.getStatus() != AccountStatus.ACTIVE || !user.isEmailVerified() || user.getPermissions().stream().noneMatch(p -> p.isEnabled() && Permission.MESSAGE_SEND.authority().equals(p.getPermissionKey())))) throw new ForbiddenException("Account is not eligible to send messages");
+        if (sending && (user.getStatus() != AccountStatus.ACTIVE || !user.isEmailVerified() || user.getPermissions().stream().noneMatch(p -> p.isEnabled() && Permission.Message.SEND.matches(p.getPermissionKey())))) throw new ForbiddenException("Account is not eligible to send messages");
     }
     private Conversation requireParticipant(String id, User user) { Conversation c = conversationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conversation not found")); if (!participantRepository.existsByConversationAndUser(c, user)) throw new ResourceNotFoundException("Conversation not found"); return c; }
     private ConversationParticipant otherParticipant(Conversation c, User current) { return c.getParticipants().stream().filter(p -> !p.getUser().getId().equals(current.getId())).findFirst().orElseThrow(); }
@@ -208,5 +223,5 @@ public class ConversationService {
     private MessageCursor decodeCursor(String cursor) { if (cursor == null || cursor.isBlank()) return null; try { String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3); LocalDateTime expiry = LocalDateTime.parse(values[2]); if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired"); return new MessageCursor(LocalDateTime.parse(values[0]), values[1]); } catch (BadRequestException e) { throw e; } catch (Exception e) { throw new BadRequestException("Invalid message cursor"); } }
     private void dispatch(Conversation c, String type, Message m, String correlationId) { ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), type, c.getId(), m.getId(), correlationId, LocalDateTime.now(clock), toMessage(m)); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
     private void send(Conversation c, ChatEvent event) { for (ConversationParticipant p : c.getParticipants()) try { messagingTemplate.convertAndSendToUser(p.getUser().getEmail(), properties.getChat().getEventDestination(), event); } catch (Exception e) { log.warn("Chat event delivery failed", e); } }
-    private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "READ_UP_TO", c.getId(), message.getId(), null, LocalDateTime.now(clock), java.util.Map.of("reader", reader.getEmail(), "messageId", message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
+    private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "READ_UP_TO", c.getId(), message.getId(), null, LocalDateTime.now(clock), Map.of("reader", reader.getEmail(), "messageId", message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
 }

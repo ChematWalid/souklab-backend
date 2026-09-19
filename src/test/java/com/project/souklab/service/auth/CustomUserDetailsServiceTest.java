@@ -124,7 +124,7 @@ class CustomUserDetailsServiceTest {
 
     private User buildUser(String email, AccountStatus status, LocalDateTime bannedUntil) {
         AuthorizationPermission permission = new AuthorizationPermission();
-        permission.setPermissionKey(Permission.PROFILE_READ.authority());
+        permission.setPermissionKey(Permission.Profile.READ.authority());
 
         return User.builder()
                 .email(email)

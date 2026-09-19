@@ -1,5 +1,7 @@
 package com.project.souklab.util;
 
+import org.mockito.ArgumentCaptor;
+
 import com.project.souklab.config.AppProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.mail.SimpleMailMessage;
@@ -32,7 +34,7 @@ class EmailUtilTest {
         email.sendFormateurRevokedEmail("revoked@test", "reason");
         email.sendAdminWelcomeEmail("admin@test", "initial");
 
-        var captor = org.mockito.ArgumentCaptor.forClass(SimpleMailMessage.class);
+        var captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
         verify(sender, times(11)).send(captor.capture());
         assertThat(captor.getAllValues()).extracting(SimpleMailMessage::getTo)
                 .containsExactlyInAnyOrder(

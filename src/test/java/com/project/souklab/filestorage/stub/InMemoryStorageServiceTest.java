@@ -1,4 +1,5 @@
 package com.project.souklab.filestorage.stub;
+import com.project.souklab.filestorage.validation.SizeLimitingInputStream;
 
 import com.project.souklab.filestorage.exception.FileNotFoundStorageException;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
@@ -43,7 +44,7 @@ class InMemoryStorageServiceTest {
                 .doesNotThrowAnyException();
         assertThatCode(() -> service.store(new ByteArrayInputStream(new byte[]{1}), "file", "x", 1))
                 .doesNotThrowAnyException();
-        var limited = new com.project.souklab.filestorage.validation.SizeLimitingInputStream(
+        var limited = new SizeLimitingInputStream(
                 new ByteArrayInputStream(new byte[]{1, 2}), 1);
         assertThatThrownBy(() -> service.store(limited, "file", "x", 2))
                 .isInstanceOf(FileTooLargeException.class);

@@ -1,5 +1,11 @@
 package com.project.souklab.service.subscription;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanSubscriptionRepository;
 import com.project.souklab.dao.ClientSubscriptionRepository;
@@ -37,6 +43,10 @@ public class SubscriptionLifecycleService {
     private final PaymentWebhookLogRepository webhookLogs;
     private final AppProperties appProperties;
     private final Clock clock;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     @Scheduled(fixedDelayString = "${app.subscription.lifecycle-interval}")
     @Transactional
@@ -74,6 +84,8 @@ public class SubscriptionLifecycleService {
         for (Payment payment : paymentRepository.findByStatusOrderByCreatedAtAsc(PaymentStatus.PENDING, PageRequest.of(0, batchSize))) {
             if (payment.getCreatedAt() != null && payment.getCreatedAt().isBefore(cutoff)) {
                 payment.setStatus(PaymentStatus.EXPIRED);
+                if (activityEventService != null) activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION,
+                        payment.getAccount().getId(), payment.getId(), Map.of("status", PaymentStatus.EXPIRED.name()));
                 expirePendingSubscription(payment.getSubscriptionId());
                 notificationService.createForUser(payment.getAccount(), "Your subscription checkout expired.", NotificationType.CHECKOUT_CANCELED, payment.getId());
             }
@@ -84,17 +96,20 @@ public class SubscriptionLifecycleService {
         artisanSubscriptions.findWithLockById(subscriptionId).ifPresent(subscription -> {
             if (subscription.getStatus() == SubscriptionStatus.PENDING) {
                 subscription.setStatus(SubscriptionStatus.EXPIRED);
+                recordSubscriptionExpiry(subscription);
             }
         });
         clientSubscriptions.findWithLockById(subscriptionId).ifPresent(subscription -> {
             if (subscription.getStatus() == SubscriptionStatus.PENDING) {
                 subscription.setStatus(SubscriptionStatus.EXPIRED);
+                recordSubscriptionExpiry(subscription);
             }
         });
     }
 
     private void expire(ArtisanSubscription subscription) {
         subscription.setStatus(SubscriptionStatus.EXPIRED);
+        recordSubscriptionExpiry(subscription);
         if (subscription.getAccount().getArtisan() != null && artisanSubscriptions.countByAccountIdAndStatus(subscription.getAccount().getId(), SubscriptionStatus.ACTIVE) == 0) {
             subscription.getAccount().getArtisan().setPremium(false);
         }
@@ -103,6 +118,7 @@ public class SubscriptionLifecycleService {
 
     private void expire(ClientSubscription subscription) {
         subscription.setStatus(SubscriptionStatus.EXPIRED);
+        recordSubscriptionExpiry(subscription);
         if (subscription.getAccount().getClient() != null && clientSubscriptions.countByAccountIdAndStatus(subscription.getAccount().getId(), SubscriptionStatus.ACTIVE) == 0) {
             subscription.getAccount().getClient().setPremium(false);
         }
@@ -127,6 +143,16 @@ public class SubscriptionLifecycleService {
         if (subscription.getExpiresAt() == null || subscription.getExpiresAt().isBefore(now) || sent(subscription.getReminderOffsetsSent(), offset)) return;
         subscription.setReminderOffsetsSent(append(subscription.getReminderOffsetsSent(), offset));
         notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.SUBSCRIPTION_RENEWAL_REMINDER, subscription.getId());
+    }
+
+    private void recordSubscriptionExpiry(ArtisanSubscription subscription) {
+        if (activityEventService != null && subscription.getAccount() != null) activityEventService.record(AnalyticsEvent.Subscription.EXPIRED, subscription.getAccount().getId(), subscription.getId(),
+                Map.of("status", SubscriptionStatus.EXPIRED.name()));
+    }
+
+    private void recordSubscriptionExpiry(ClientSubscription subscription) {
+        if (activityEventService != null && subscription.getAccount() != null) activityEventService.record(AnalyticsEvent.Subscription.EXPIRED, subscription.getAccount().getId(), subscription.getId(),
+                Map.of("status", SubscriptionStatus.EXPIRED.name()));
     }
 
     private boolean sent(String value, long offset) {

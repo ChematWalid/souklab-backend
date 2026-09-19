@@ -1,10 +1,16 @@
 package com.project.souklab.service.artisan;
 
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.project.souklab.analytics.AnalyticsEvent;
+
 import com.project.souklab.dao.ArtisanCertificationRepository;
 import com.project.souklab.dao.ArtisanGalleryImageRepository;
 import com.project.souklab.dao.ArtisanProfileViewRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dto.artisan.CertificationResponseDTO;
 import com.project.souklab.dto.artisan.GalleryImageResponseDTO;
 import com.project.souklab.dto.catalog.EpoqueSummaryDTO;
@@ -50,6 +56,10 @@ public class ArtisanProfileService {
     private final ArtisanProfileViewRepository artisanProfileViewRepository;
     private final ArtisanGalleryImageRepository artisanGalleryImageRepository;
     private final ArtisanCertificationRepository artisanCertificationRepository;
+    private ActivityEventService activityEventService;
+
+    @Autowired(required = false)
+    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
 
     /**
      * Retrieves an artisan's profile for authenticated viewers.
@@ -71,7 +81,7 @@ public class ArtisanProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
         boolean isAdmin = viewer.getPermissions().stream()
-                .anyMatch(permission -> Permission.ADMIN_USERS.authority().equals(permission.getPermissionKey()));
+                .anyMatch(permission -> Permission.Admin.USERS.matches(permission.getPermissionKey()));
 
         verifyViewerAccess(viewer, isAdmin);
 
@@ -191,6 +201,10 @@ public class ArtisanProfileService {
                     .artisan(artisan)
                     .build();
             artisanProfileViewRepository.save(view);
+            if (activityEventService != null) {
+                activityEventService.record(AnalyticsEvent.Profile.VIEW, viewer.getId(), artisan.getId(),
+                        Map.of("viewerType", viewer.getArtisan() != null ? "ARTISAN" : "CLIENT"));
+            }
             artisan.setViewsCount(artisan.getViewsCount() + 1);
             artisanRepository.save(artisan);
         }
