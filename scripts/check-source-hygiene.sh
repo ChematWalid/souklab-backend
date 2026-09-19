@@ -63,6 +63,11 @@ if rg -n --pcre2 'Map\.of\("(?:accountType|subscriberType|reasonPresent|minutes|
   echo 'raw analytics metadata keys detected; use grouped AnalyticsMetadata enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'Map\.of\("(?:username|online|typing|reader|messageId|message)"' \
+    src/main/java/com/project/souklab/service/chat src/main/java/com/project/souklab/controller/chat --glob '*.java'; then
+  echo 'raw chat metadata keys detected; use grouped ChatMetadata enums' >&2
+  exit 1
+fi
 
 mapfile -t migrations < <(find src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' -printf '%f\n' | sort -V)
 test "${#migrations[@]}" -gt 0 || { echo 'no Flyway migrations found' >&2; exit 1; }
