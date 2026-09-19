@@ -160,12 +160,22 @@ public final class AnalyticsEvent {
     }
 
     public enum Subscription implements Type {
-        ACTIVATED("SUBSCRIPTION_ACTIVATED"), EXPIRED("SUBSCRIPTION_EXPIRED"),
-        CANCELED("SUBSCRIPTION_CANCELED"), REVOKED("SUBSCRIPTION_REVOKED"),
-        RENEWAL("SUBSCRIPTION_RENEWAL");
+        ACTIVATED("SUBSCRIPTION_ACTIVATED", Status.ACTIVATED), EXPIRED("SUBSCRIPTION_EXPIRED", Status.EXPIRED),
+        CANCELED("SUBSCRIPTION_CANCELED", Status.CANCELED), REVOKED("SUBSCRIPTION_REVOKED", Status.REVOKED),
+        RENEWAL("SUBSCRIPTION_RENEWAL", Status.RENEWAL);
         private final String value;
-        Subscription(String value) { this.value = value; }
+        private final Status status;
+        Subscription(String value, Status status) { this.value = value; this.status = status; }
         public String value() { return value; }
-        public static String prefix() { return "SUBSCRIPTION_"; }
+
+        public Status status() { return status; }
+
+        public enum Status implements Type {
+            ACTIVATED("ACTIVATED"), EXPIRED("EXPIRED"), CANCELED("CANCELED"),
+            REVOKED("REVOKED"), RENEWAL("RENEWAL");
+            private final String value;
+            Status(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 }

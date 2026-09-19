@@ -19,6 +19,7 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsEvent.Source.Payment.WEBHOOK.value()).isEqualTo("PAYMENT_WEBHOOK");
         assertThat(AnalyticsEvent.Source.Admin.CORRECTION.value()).isEqualTo("ADMIN_CORRECTION");
         assertThat(AnalyticsEvent.Subscription.RENEWAL.value()).isEqualTo("SUBSCRIPTION_RENEWAL");
+        assertThat(AnalyticsEvent.Subscription.RENEWAL.status().value()).isEqualTo("RENEWAL");
         assertThat(AnalyticsEvent.fromValue("REPORT_RESOLVED")).contains(AnalyticsEvent.Report.RESOLVED);
         assertThat(AnalyticsEvent.fromValue("unknown_event")).isEmpty();
         assertThat(AnalyticsFilterKey.fromKey("eventType")).contains(AnalyticsFilterKey.EVENT_TYPE);

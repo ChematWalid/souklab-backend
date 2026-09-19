@@ -278,10 +278,10 @@ public class AdminSubscriptionService {
         }
     }
 
-    private void recordSubscriptionEvent(User account, String subscriptionId, AnalyticsEvent.Type eventType) {
+    private void recordSubscriptionEvent(User account, String subscriptionId, AnalyticsEvent.Subscription eventType) {
         if (activityEventService != null && account != null) {
             activityEventService.record(eventType, account.getId(), subscriptionId,
-                    Map.of(AnalyticsMetadata.State.STATUS.value(), eventType.value().substring(AnalyticsEvent.Subscription.prefix().length()), AnalyticsMetadata.Subscription.SOURCE.value(), AnalyticsEvent.Source.Admin.ACTION.value()));
+                    Map.of(AnalyticsMetadata.State.STATUS.value(), eventType.status().value(), AnalyticsMetadata.Subscription.SOURCE.value(), AnalyticsEvent.Source.Admin.ACTION.value()));
         }
     }
 
