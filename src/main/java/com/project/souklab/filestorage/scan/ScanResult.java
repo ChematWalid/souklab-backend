@@ -1,5 +1,7 @@
 package com.project.souklab.filestorage.scan;
 
+import com.project.souklab.model.EnumValue;
+
 /**
  * Encapsulates the result of an antivirus scan operation.
  * Distinguishes between clean files, infected files (with malware signature),
@@ -14,7 +16,7 @@ public record ScanResult(
     /**
      * Outcome status of a scan operation.
      */
-    public enum Status {
+    public enum Status implements EnumValue {
         CLEAN,
         INFECTED,
         ERROR

@@ -1,6 +1,6 @@
 package com.project.souklab.model;
 
-public enum BillingPeriod {
+public enum BillingPeriod implements EnumValue {
     MONTHLY,
     YEARLY
 }

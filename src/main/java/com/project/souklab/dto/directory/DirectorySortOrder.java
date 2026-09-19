@@ -1,9 +1,11 @@
 package com.project.souklab.dto.directory;
 
+import com.project.souklab.model.EnumValue;
+
 /**
  * Enumeration of supported sort orders for public artisan directory search queries.
  */
-public enum DirectorySortOrder {
+public enum DirectorySortOrder implements EnumValue {
 
     /**
      * Relevance scoring (Elasticsearch BM25 score) boosted by featured status.

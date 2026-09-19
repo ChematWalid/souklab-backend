@@ -1,6 +1,8 @@
 package com.project.souklab.model.analytics;
 
-public enum AnalyticsSortDirection {
+import com.project.souklab.model.EnumValue;
+
+public enum AnalyticsSortDirection implements EnumValue {
     ASC,
     DESC
 }

@@ -1,6 +1,8 @@
 package com.project.souklab.model.analytics;
 
-public enum AnalyticsOutputFormat {
+import com.project.souklab.model.EnumValue;
+
+public enum AnalyticsOutputFormat implements EnumValue {
     JSON,
     CSV
 }

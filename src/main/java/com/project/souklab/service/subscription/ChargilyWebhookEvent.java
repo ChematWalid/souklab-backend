@@ -1,6 +1,7 @@
 package com.project.souklab.service.subscription;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.project.souklab.model.EnumValue;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -9,7 +10,7 @@ import java.util.Optional;
 public final class ChargilyWebhookEvent {
     private ChargilyWebhookEvent() { }
 
-    public enum Checkout {
+    public enum Checkout implements EnumValue {
         PAID("checkout.paid"),
         FAILED("checkout.failed"),
         CANCELED("checkout.canceled"),

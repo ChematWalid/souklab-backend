@@ -1,3 +1,5 @@
 package com.project.souklab.model.analytics;
 
-public enum AnalyticsBucket { DAY, WEEK, MONTH, QUARTER }
+import com.project.souklab.model.EnumValue;
+
+public enum AnalyticsBucket implements EnumValue { DAY, WEEK, MONTH, QUARTER }
