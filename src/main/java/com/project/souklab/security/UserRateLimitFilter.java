@@ -8,6 +8,7 @@ import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.config.RateLimitEndpointProperties;
 import com.project.souklab.config.RateLimitRule;
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.util.ServletResponseUtil;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
@@ -129,7 +130,7 @@ public class UserRateLimitFilter extends OncePerRequestFilter {
     private void reject(HttpServletResponse response) throws IOException {
         if (responses != null) {
             responses.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error("Too many requests. Please try again later."));
+                    ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, "Too many requests. Please try again later."));
         } else {
             response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "Too many requests. Please try again later.");
         }

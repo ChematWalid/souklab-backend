@@ -2,6 +2,7 @@ package com.project.souklab.security;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.util.ServletResponseUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,7 +28,8 @@ public class ChargilyWebhookSizeFilter extends OncePerRequestFilter {
         if (HttpMethod.POST.matches(request.getMethod()) && WEBHOOK_URI.equals(request.getRequestURI())
                 && contentLength(request) > appProperties.getChargily().getRequestBodyLimit()) {
             servletResponseUtil.writeResponse(response, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE,
-                    ApiResponse.error("Webhook body exceeds the configured request limit"));
+                    ApiResponse.error(ApiErrorCode.BAD_REQUEST,
+                            "Webhook body exceeds the configured request limit"));
             return;
         }
         filterChain.doFilter(request, response);

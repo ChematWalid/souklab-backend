@@ -1,6 +1,7 @@
 package com.project.souklab.filestorage.security;
 
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.FileServingRoutes;
 import com.project.souklab.util.ServletResponseUtil;
@@ -91,7 +92,7 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
             bucket = resolveBucket(key);
         } catch (RuntimeException unavailable) {
             servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error(ERROR_TOO_MANY_REQUESTS));
+                    ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, ERROR_TOO_MANY_REQUESTS));
             return;
         }
 
@@ -101,7 +102,7 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
             servletResponseUtil.writeResponse(
                     response,
                     HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error(ERROR_TOO_MANY_REQUESTS)
+                    ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, ERROR_TOO_MANY_REQUESTS)
             );
         }
     }

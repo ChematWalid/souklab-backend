@@ -5,6 +5,7 @@ import com.project.souklab.config.RateLimitEndpointProperties;
 import com.project.souklab.config.RateLimitRule;
 import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.util.ServletResponseUtil;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
@@ -108,7 +109,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } catch (RuntimeException unavailable) {
             metrics.recordRateLimitRejection(ruleName(request));
             servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error("Too many requests. Please try again later."));
+                    ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, "Too many requests. Please try again later."));
             return;
         }
 
@@ -119,7 +120,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             servletResponseUtil.writeResponse(
                     response,
                     HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error("Too many requests. Please try again later.")
+                    ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, "Too many requests. Please try again later.")
             );
         }
     }

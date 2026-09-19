@@ -2,6 +2,7 @@ package com.project.souklab.security;
 
 import com.project.souklab.config.AvatarProperties;
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.util.ServletResponseUtil;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
@@ -86,7 +87,7 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
             bucket = resolveBucket(key);
         } catch (RuntimeException unavailable) {
             servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error("Too many requests. Please try again later."));
+                    ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, "Too many requests. Please try again later."));
             return;
         }
 
@@ -96,7 +97,7 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
             servletResponseUtil.writeResponse(
                     response,
                     HttpStatus.TOO_MANY_REQUESTS.value(),
-                    ApiResponse.error("Too many requests. Please try again later.")
+                    ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, "Too many requests. Please try again later.")
             );
         }
     }

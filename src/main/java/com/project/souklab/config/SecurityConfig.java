@@ -3,6 +3,7 @@ package com.project.souklab.config;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.security.FileRateLimitFilter;
 import com.project.souklab.security.AvatarUploadRateLimitFilter;
@@ -182,7 +183,8 @@ public class SecurityConfig {
                                 servletResponseUtil.writeResponse(
                                         response,
                                         HttpServletResponse.SC_UNAUTHORIZED,
-                                        ApiResponse.error("Unauthorized: Full authentication is required to access this resource")
+                                        ApiResponse.error(ApiErrorCode.UNAUTHORIZED,
+                                                "Unauthorized: Full authentication is required to access this resource")
                                 )
                         )
                 );
