@@ -54,7 +54,7 @@ class NotificationRepositoryTest {
     /**
      * Helper to persist a notification with given parameters.
      */
-    private Notification persistNotification(User user, NotificationType type, String targetId, String message, boolean isRead) {
+    private Notification persistNotification(User user, NotificationType.Key type, String targetId, String message, boolean isRead) {
         Notification notification = new Notification();
         notification.setUser(user);
         notification.setType(type);
@@ -75,15 +75,15 @@ class NotificationRepositoryTest {
         User otherUser = persistUser("other@souklab.com");
 
         Notification olderNotification = persistNotification(
-                targetUser, NotificationType.PAYMENT_SUCCESS, "tx-older", "Older payment notification", false);
+                targetUser, NotificationType.Payment.SUCCESS, "tx-older", "Older payment notification", false);
         Notification newerNotification = persistNotification(
-                targetUser, NotificationType.PAYMENT_FAILED, "tx-newer", "Newer payment failure", false);
+                targetUser, NotificationType.Payment.FAILED, "tx-newer", "Newer payment failure", false);
         Notification deletedNotification = persistNotification(
-                targetUser, NotificationType.ACCOUNT_VALIDATED, "val-1", "Deleted notification", false);
+                targetUser, NotificationType.Account.VALIDATED, "val-1", "Deleted notification", false);
         deletedNotification.setDeletedAt(FIXED_NOW.minusHours(1));
 
         Notification otherUserNotification = persistNotification(
-                otherUser, NotificationType.PAYMENT_SUCCESS, "tx-other", "Other user notification", false);
+                otherUser, NotificationType.Payment.SUCCESS, "tx-other", "Other user notification", false);
 
         entityManager.flush();
 
@@ -118,9 +118,9 @@ class NotificationRepositoryTest {
     void findByUserAndDeletedAtIsNullOrderByCreatedAtDesc_appliesPagination() {
         User user = persistUser("paged@souklab.com");
 
-        Notification notif1 = persistNotification(user, NotificationType.PAYMENT_SUCCESS, "p1", "Msg 1", false);
-        Notification notif2 = persistNotification(user, NotificationType.PAYMENT_SUCCESS, "p2", "Msg 2", false);
-        Notification notif3 = persistNotification(user, NotificationType.PAYMENT_SUCCESS, "p3", "Msg 3", false);
+        Notification notif1 = persistNotification(user, NotificationType.Payment.SUCCESS, "p1", "Msg 1", false);
+        Notification notif2 = persistNotification(user, NotificationType.Payment.SUCCESS, "p2", "Msg 2", false);
+        Notification notif3 = persistNotification(user, NotificationType.Payment.SUCCESS, "p3", "Msg 3", false);
 
         entityManager.flush();
 
@@ -168,9 +168,9 @@ class NotificationRepositoryTest {
         User user = persistUser("latest@souklab.com");
 
         Notification older = persistNotification(
-                user, NotificationType.NEW_MESSAGE, "msg-conv-1", "Older chat message", false);
+                user, NotificationType.Message.NEW, "msg-conv-1", "Older chat message", false);
         Notification newer = persistNotification(
-                user, NotificationType.NEW_MESSAGE, "msg-conv-1", "Newer chat message", false);
+                user, NotificationType.Message.NEW, "msg-conv-1", "Newer chat message", false);
 
         entityManager.flush();
 
@@ -190,7 +190,7 @@ class NotificationRepositoryTest {
 
         Optional<Notification> result = notificationRepository
                 .findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                        user, NotificationType.NEW_MESSAGE, "msg-conv-1");
+                        user, NotificationType.Message.NEW, "msg-conv-1");
 
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(newer.getId());
@@ -207,7 +207,7 @@ class NotificationRepositoryTest {
         User user = persistUser("mismatch@souklab.com");
 
         Notification deleted = persistNotification(
-                user, NotificationType.NEW_MESSAGE, "conv-99", "Deleted message", false);
+                user, NotificationType.Message.NEW, "conv-99", "Deleted message", false);
         deleted.setDeletedAt(FIXED_NOW);
         entityManager.persist(deleted);
         entityManager.flush();
@@ -215,17 +215,17 @@ class NotificationRepositoryTest {
 
         Optional<Notification> deletedMatch = notificationRepository
                 .findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                        user, NotificationType.NEW_MESSAGE, "conv-99");
+                        user, NotificationType.Message.NEW, "conv-99");
         assertThat(deletedMatch).isEmpty();
 
         Optional<Notification> wrongType = notificationRepository
                 .findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                        user, NotificationType.PAYMENT_SUCCESS, "conv-99");
+                        user, NotificationType.Payment.SUCCESS, "conv-99");
         assertThat(wrongType).isEmpty();
 
         Optional<Notification> wrongTarget = notificationRepository
                 .findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                        user, NotificationType.NEW_MESSAGE, "nonexistent-target");
+                        user, NotificationType.Message.NEW, "nonexistent-target");
         assertThat(wrongTarget).isEmpty();
     }
 
@@ -240,9 +240,9 @@ class NotificationRepositoryTest {
         User intruder = persistUser("intruder@souklab.com");
 
         Notification activeNotif = persistNotification(
-                owner, NotificationType.ACCOUNT_VALIDATED, "act-1", "Owner alert", false);
+                owner, NotificationType.Account.VALIDATED, "act-1", "Owner alert", false);
         Notification deletedNotif = persistNotification(
-                owner, NotificationType.ACCOUNT_VALIDATED, "act-2", "Owner deleted alert", false);
+                owner, NotificationType.Account.VALIDATED, "act-2", "Owner deleted alert", false);
         deletedNotif.setDeletedAt(FIXED_NOW);
 
         entityManager.persist(deletedNotif);
@@ -277,16 +277,16 @@ class NotificationRepositoryTest {
         User userA = persistUser("usera@souklab.com");
         User userB = persistUser("userb@souklab.com");
 
-        persistNotification(userA, NotificationType.NEW_MESSAGE, "m1", "Unread 1", false);
-        persistNotification(userA, NotificationType.NEW_MESSAGE, "m2", "Unread 2", false);
-        persistNotification(userA, NotificationType.NEW_MESSAGE, "m3", "Already read", true);
+        persistNotification(userA, NotificationType.Message.NEW, "m1", "Unread 1", false);
+        persistNotification(userA, NotificationType.Message.NEW, "m2", "Unread 2", false);
+        persistNotification(userA, NotificationType.Message.NEW, "m3", "Already read", true);
 
-        Notification deletedUnreadA = persistNotification(userA, NotificationType.NEW_MESSAGE, "m4", "Deleted unread", false);
+        Notification deletedUnreadA = persistNotification(userA, NotificationType.Message.NEW, "m4", "Deleted unread", false);
         deletedUnreadA.setDeletedAt(FIXED_NOW);
         entityManager.persist(deletedUnreadA);
 
-        persistNotification(userB, NotificationType.NEW_MESSAGE, "m5", "User B unread", false);
-        persistNotification(userB, NotificationType.NEW_MESSAGE, "m6", "User B unread 2", false);
+        persistNotification(userB, NotificationType.Message.NEW, "m5", "User B unread", false);
+        persistNotification(userB, NotificationType.Message.NEW, "m6", "User B unread 2", false);
 
         entityManager.flush();
         entityManager.clear();
@@ -310,19 +310,19 @@ class NotificationRepositoryTest {
         User otherUser = persistUser("other_mark@souklab.com");
 
         Notification targetUnread1 = persistNotification(
-                targetUser, NotificationType.PAYMENT_SUCCESS, "p1", "Unread 1", false);
+                targetUser, NotificationType.Payment.SUCCESS, "p1", "Unread 1", false);
         Notification targetUnread2 = persistNotification(
-                targetUser, NotificationType.PAYMENT_FAILED, "p2", "Unread 2", false);
+                targetUser, NotificationType.Payment.FAILED, "p2", "Unread 2", false);
         Notification targetAlreadyRead = persistNotification(
-                targetUser, NotificationType.ACCOUNT_VALIDATED, "a1", "Already read", true);
+                targetUser, NotificationType.Account.VALIDATED, "a1", "Already read", true);
 
         Notification targetDeletedUnread = persistNotification(
-                targetUser, NotificationType.ACCOUNT_SUSPENDED, "a2", "Deleted unread", false);
+                targetUser, NotificationType.Account.SUSPENDED, "a2", "Deleted unread", false);
         targetDeletedUnread.setDeletedAt(FIXED_NOW);
         entityManager.persist(targetDeletedUnread);
 
         Notification otherUnread = persistNotification(
-                otherUser, NotificationType.PAYMENT_SUCCESS, "p3", "Other unread", false);
+                otherUser, NotificationType.Payment.SUCCESS, "p3", "Other unread", false);
 
         entityManager.flush();
         entityManager.clear();

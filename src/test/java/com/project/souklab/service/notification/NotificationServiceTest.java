@@ -160,7 +160,7 @@ class NotificationServiceTest {
     @DisplayName("createForUser (4-arg): persists notification with type and targetId and dispatches push")
     void createForUser_4arg_persistsTypeAndTargetId_savesAndDispatches() {
         String message = "New order received";
-        NotificationType type = NotificationType.NEW_MESSAGE;
+        NotificationType.Key type = NotificationType.Message.NEW;
         String targetId = "target-entity-99";
 
         when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
@@ -255,7 +255,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("createOrUpdateAggregatedNotification: formats 'username baseMessage' when count is 1")
     void createOrUpdateAggregatedNotification_whenCountIsOne_andNoExisting_createsNewNotificationWithSingleFormat() {
-        NotificationType type = NotificationType.NEW_REVIEW;
+        NotificationType.Key type = NotificationType.Review.NEW;
         String targetId = "product-123";
         String baseMessage = "reviewed your product";
         String initiator = "Fatima";
@@ -293,7 +293,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("createOrUpdateAggregatedNotification: formats 'username and N others baseMessage' when count > 1")
     void createOrUpdateAggregatedNotification_whenCountGreaterThanOne_andNoExisting_createsNewNotificationWithAggregatedFormat() {
-        NotificationType type = NotificationType.NEW_REVIEW;
+        NotificationType.Key type = NotificationType.Review.NEW;
         String targetId = "product-123";
         String baseMessage = "reviewed your product";
         String initiator = "Fatima";
@@ -329,7 +329,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("createOrUpdateAggregatedNotification: updates existing notification message, resets isRead, and refreshes createdAt")
     void createOrUpdateAggregatedNotification_whenExistingNotificationPresent_updatesMessageResetsReadAndUpdatesCreatedAt() {
-        NotificationType type = NotificationType.NEW_REVIEW;
+        NotificationType.Key type = NotificationType.Review.NEW;
         String targetId = "product-123";
         LocalDateTime priorTime = fixedNow.minusHours(3);
 
@@ -378,7 +378,7 @@ class NotificationServiceTest {
         String initiator = "LongInitiatorName";
 
         assertThatThrownBy(() -> notificationService.createOrUpdateAggregatedNotification(
-                testUser, NotificationType.NEW_MESSAGE, "tgt", longBase, 5, initiator))
+                testUser, NotificationType.Message.NEW, "tgt", longBase, 5, initiator))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Notification message exceeds maximum allowed length of 4000 characters.");
 

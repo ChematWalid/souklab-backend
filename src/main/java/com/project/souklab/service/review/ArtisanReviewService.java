@@ -104,7 +104,7 @@ public class ArtisanReviewService {
                     Map.of(AnalyticsMetadata.Content.FORMATION_ID, formationId, AnalyticsMetadata.Content.RATING, saved.getRating()));
         }
         recalculate(subject);
-        notificationService.createForUser(subject.getUser(), "You received a new artisan review.", NotificationType.NEW_REVIEW, saved.getId());
+        notificationService.createForUser(subject.getUser(), "You received a new artisan review.", NotificationType.Review.NEW, saved.getId());
         return ArtisanReviewResponseDTO.from(saved);
     }
 

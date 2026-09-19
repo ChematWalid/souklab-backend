@@ -273,7 +273,7 @@ public class FeedPostService {
                     Map.of(AnalyticsMetadata.Content.POST_TYPE, saved.getType()));
         }
         if (saved.getType() == FeedPostType.FORMATION) {
-            notificationService.createForUser(saved.getAuthor(), "Your formation post was published.", NotificationType.NEW_FORMATION, saved.getId());
+            notificationService.createForUser(saved.getAuthor(), "Your formation post was published.", NotificationType.Formation.NEW, saved.getId());
         }
         return toResponse(saved);
     }

@@ -137,7 +137,7 @@ public class ConversationService {
             }
             c.setUpdatedAt(LocalDateTime.now(clock));
             User recipient = otherParticipant(c, current).getUser();
-            notificationService.createForUser(recipient, "New message from " + current.getName(), NotificationType.NEW_MESSAGE, c.getId());
+            notificationService.createForUser(recipient, "New message from " + current.getName(), NotificationType.Message.NEW, c.getId());
             dispatch(c, ChatEventType.Message.CREATED, saved, null);
             return toMessage(saved);
         } catch (RuntimeException exception) {

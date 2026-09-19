@@ -325,7 +325,7 @@ class FeedPostServiceTest {
         service.publish("p1", new FeedPostModerationDTO("note"));
 
         verify(notificationService).createForUser(user, "Your formation post was published.",
-                NotificationType.NEW_FORMATION, "p1");
+                NotificationType.Formation.NEW, "p1");
     }
 
     @Test

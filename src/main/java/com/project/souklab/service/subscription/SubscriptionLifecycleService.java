@@ -88,7 +88,7 @@ public class SubscriptionLifecycleService {
                 if (activityEventService != null) activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION,
                         payment.getAccount().getId(), payment.getId(), Map.of(AnalyticsMetadata.State.STATUS, PaymentStatus.EXPIRED));
                 expirePendingSubscription(payment.getSubscriptionId());
-                notificationService.createForUser(payment.getAccount(), "Your subscription checkout expired.", NotificationType.CHECKOUT_CANCELED, payment.getId());
+                notificationService.createForUser(payment.getAccount(), "Your subscription checkout expired.", NotificationType.Checkout.CANCELED, payment.getId());
             }
         }
     }
@@ -114,7 +114,7 @@ public class SubscriptionLifecycleService {
         if (subscription.getAccount().getArtisan() != null && artisanSubscriptions.countByAccountIdAndStatus(subscription.getAccount().getId(), SubscriptionStatus.ACTIVE) == 0) {
             subscription.getAccount().getArtisan().setPremium(false);
         }
-        notificationService.createForUser(subscription.getAccount(), "Your artisan subscription has expired.", NotificationType.SUBSCRIPTION_EXPIRED, subscription.getId());
+        notificationService.createForUser(subscription.getAccount(), "Your artisan subscription has expired.", NotificationType.Subscription.EXPIRED, subscription.getId());
     }
 
     private void expire(ClientSubscription subscription) {
@@ -123,7 +123,7 @@ public class SubscriptionLifecycleService {
         if (subscription.getAccount().getClient() != null && clientSubscriptions.countByAccountIdAndStatus(subscription.getAccount().getId(), SubscriptionStatus.ACTIVE) == 0) {
             subscription.getAccount().getClient().setPremium(false);
         }
-        notificationService.createForUser(subscription.getAccount(), "Your client subscription has expired.", NotificationType.SUBSCRIPTION_EXPIRED, subscription.getId());
+        notificationService.createForUser(subscription.getAccount(), "Your client subscription has expired.", NotificationType.Subscription.EXPIRED, subscription.getId());
     }
 
     private void sendReminders(LocalDateTime now) {
@@ -137,13 +137,13 @@ public class SubscriptionLifecycleService {
     private void remind(ArtisanSubscription subscription, long offset, LocalDateTime now) {
         if (subscription.getExpiresAt() == null || subscription.getExpiresAt().isBefore(now) || sent(subscription.getReminderOffsetsSent(), offset)) return;
         subscription.setReminderOffsetsSent(append(subscription.getReminderOffsetsSent(), offset));
-        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.SUBSCRIPTION_RENEWAL_REMINDER, subscription.getId());
+        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.Subscription.RENEWAL_REMINDER, subscription.getId());
     }
 
     private void remind(ClientSubscription subscription, long offset, LocalDateTime now) {
         if (subscription.getExpiresAt() == null || subscription.getExpiresAt().isBefore(now) || sent(subscription.getReminderOffsetsSent(), offset)) return;
         subscription.setReminderOffsetsSent(append(subscription.getReminderOffsetsSent(), offset));
-        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.SUBSCRIPTION_RENEWAL_REMINDER, subscription.getId());
+        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.Subscription.RENEWAL_REMINDER, subscription.getId());
     }
 
     private void recordSubscriptionExpiry(ArtisanSubscription subscription) {

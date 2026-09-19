@@ -2,8 +2,7 @@ package com.project.souklab.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.Convert;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -25,9 +24,9 @@ public class Notification extends BaseEntity {
     private String message;
     private boolean isRead = false;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = NotificationTypeConverter.class)
     @Column(length = 50)
-    private NotificationType type;
+    private NotificationType.Key type;
 
     private String targetId;
 

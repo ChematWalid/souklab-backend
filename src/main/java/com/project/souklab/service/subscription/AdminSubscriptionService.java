@@ -103,7 +103,7 @@ public class AdminSubscriptionService {
         payment.setStatus(PaymentStatus.MANUALLY_GRANTED); payment.setManualGrant(true); payment.setAmount(plan.getAmount()); payment.setCurrency(plan.getCurrency());
         payment.setPlanSnapshot(snapshot); payment.setIdempotencyKey("manual-" + subscriptionId); payments.save(payment);
         auditLogService.logFinancialState(AuditLogAction.SUBSCRIPTION_GRANTED, actor, target.getId(), FinancialAuditOperation.Manual.GRANT, FinancialAuditState.NONE, SubscriptionStatus.ACTIVE, request.getReason(), payment.getId(), subscriptionId);
-        notificationService.createForUser(target, "A subscription was manually granted to your account.", NotificationType.SUBSCRIPTION_MANUALLY_GRANTED, subscriptionId);
+        notificationService.createForUser(target, "A subscription was manually granted to your account.", NotificationType.Subscription.MANUALLY_GRANTED, subscriptionId);
         return response;
     }
 
@@ -117,7 +117,7 @@ public class AdminSubscriptionService {
             cancelPendingPayments(subscriptionId);
             if (subscription.getAccount().getArtisan() != null) subscription.getAccount().getArtisan().setPremium(false);
             auditLogService.logFinancialState(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), FinancialAuditOperation.Subscription.REVOKE, previous, SubscriptionStatus.REVOKED, request.getReason(), null, subscriptionId);
-            notificationService.createForUser(subscription.getAccount(), "Your subscription was revoked.", NotificationType.SUBSCRIPTION_REVOKED, subscriptionId);
+            notificationService.createForUser(subscription.getAccount(), "Your subscription was revoked.", NotificationType.Subscription.REVOKED, subscriptionId);
         }, () -> clientSubscriptions.findWithLockById(subscriptionId).ifPresentOrElse(subscription -> {
             rules.requireTransition(subscription.getStatus(), SubscriptionStatus.REVOKED);
             SubscriptionStatus previous = subscription.getStatus(); subscription.setStatus(SubscriptionStatus.REVOKED);
@@ -125,7 +125,7 @@ public class AdminSubscriptionService {
             cancelPendingPayments(subscriptionId);
             if (subscription.getAccount().getClient() != null) subscription.getAccount().getClient().setPremium(false);
             auditLogService.logFinancialState(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), FinancialAuditOperation.Subscription.REVOKE, previous, SubscriptionStatus.REVOKED, request.getReason(), null, subscriptionId);
-            notificationService.createForUser(subscription.getAccount(), "Your subscription was revoked.", NotificationType.SUBSCRIPTION_REVOKED, subscriptionId);
+            notificationService.createForUser(subscription.getAccount(), "Your subscription was revoked.", NotificationType.Subscription.REVOKED, subscriptionId);
         }, () -> { throw new ResourceNotFoundException("Subscription not found"); }));
     }
 

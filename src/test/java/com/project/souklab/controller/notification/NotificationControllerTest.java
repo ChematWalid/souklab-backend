@@ -60,7 +60,7 @@ class NotificationControllerTest {
                 .id(id)
                 .message(message)
                 .isRead(isRead)
-                .type(NotificationType.ACCOUNT_VALIDATED)
+                .type(NotificationType.Account.VALIDATED)
                 .targetId("target-123")
                 .createdAt(LocalDateTime.of(2026, 9, 1, 10, 0))
                 .build();

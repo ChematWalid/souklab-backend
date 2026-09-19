@@ -109,7 +109,7 @@ public class ArtisanFormateurService {
                 + (dto != null && dto.getMotivation() != null && !dto.getMotivation().isBlank()
                         ? ": \"" + dto.getMotivation() + "\"" : "");
         for (User admin : admins) {
-            notificationService.createForUser(admin, notifMsg, NotificationType.FORMATEUR_REQUEST_SUBMITTED, saved.getId());
+            notificationService.createForUser(admin, notifMsg, NotificationType.Formateur.REQUEST_SUBMITTED, saved.getId());
             emailUtil.sendFormateurRequestSubmittedNoticeToAdmin(admin.getEmail(), user.getEmail(), artisanName, dto != null ? dto.getMotivation() : null);
         }
 
@@ -155,7 +155,7 @@ public class ArtisanFormateurService {
 
         User artisanUser = artisan.getUser();
         notificationService.createForUser(artisanUser, "Your request for Formateur status has been approved! Note: " + dto.getAdminNote(),
-                NotificationType.FORMATEUR_APPROVED, saved.getId());
+                NotificationType.Formateur.APPROVED, saved.getId());
         emailUtil.sendFormateurApprovedEmail(artisanUser.getEmail(), dto.getAdminNote());
 
         return mapToDTO(saved);
@@ -195,7 +195,7 @@ public class ArtisanFormateurService {
 
         User artisanUser = request.getArtisan().getUser();
         notificationService.createForUser(artisanUser, "Your Formateur request was rejected. Note: " + dto.getAdminNote(),
-                NotificationType.FORMATEUR_REJECTED, saved.getId());
+                NotificationType.Formateur.REJECTED, saved.getId());
         emailUtil.sendFormateurRejectedEmail(artisanUser.getEmail(), dto.getAdminNote(), cooldownUntil, canReapply);
 
         return mapToDTO(saved);
@@ -235,7 +235,7 @@ public class ArtisanFormateurService {
 
         User artisanUser = artisan.getUser();
         notificationService.createForUser(artisanUser, "You have been granted Formateur status by an administrator! Note: " + dto.getAdminNote(),
-                NotificationType.FORMATEUR_GRANTED, saved.getId());
+                NotificationType.Formateur.GRANTED, saved.getId());
         emailUtil.sendFormateurGrantedEmail(artisanUser.getEmail(), dto.getAdminNote());
 
         return mapToDTO(saved);
@@ -262,7 +262,7 @@ public class ArtisanFormateurService {
 
         User artisanUser = artisan.getUser();
         notificationService.createForUser(artisanUser, "Your Formateur status has been revoked. Reason: " + dto.getReason(),
-                NotificationType.FORMATEUR_REVOKED, artisanId);
+                NotificationType.Formateur.REVOKED, artisanId);
         emailUtil.sendFormateurRevokedEmail(artisanUser.getEmail(), dto.getReason());
     }
 

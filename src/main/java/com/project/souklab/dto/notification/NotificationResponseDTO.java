@@ -1,6 +1,8 @@
 package com.project.souklab.dto.notification;
 
 import com.project.souklab.model.NotificationType;
+import com.project.souklab.model.NotificationTypeDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.Value;
 
@@ -12,7 +14,8 @@ public class NotificationResponseDTO {
     String id;
     String message;
     boolean isRead;
-    NotificationType type;
+    @JsonDeserialize(using = NotificationTypeDeserializer.class)
+    NotificationType.Key type;
     String targetId;
     LocalDateTime createdAt;
 }

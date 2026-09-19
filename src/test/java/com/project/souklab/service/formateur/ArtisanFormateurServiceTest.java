@@ -331,7 +331,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(dto);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.FORMATEUR_REQUEST_SUBMITTED), eq("saved-req-blank"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("saved-req-blank"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Karim Bensaid (artisan@example.com)");
     }
 
@@ -362,7 +362,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(dto);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.FORMATEUR_REQUEST_SUBMITTED), eq("saved-req-null-mot"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("saved-req-null-mot"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Karim Bensaid (artisan@example.com)");
     }
 
@@ -393,7 +393,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(null);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.FORMATEUR_REQUEST_SUBMITTED), eq("req-single-name"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("req-single-name"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Karim (artisan@example.com)");
     }
 
@@ -424,7 +424,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(null);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.FORMATEUR_REQUEST_SUBMITTED), eq("req-single-last"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("req-single-last"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Bensaid (artisan@example.com)");
     }
 
@@ -566,7 +566,7 @@ class ArtisanFormateurServiceTest {
         verify(notificationService).createForUser(
                 artisanUser,
                 "Your request for Formateur status has been approved! Note: Portfolio validated, exemplary work.",
-                NotificationType.FORMATEUR_APPROVED,
+                NotificationType.Formateur.APPROVED,
                 "req-pending-approve"
         );
         verify(emailUtil).sendFormateurApprovedEmail("artisan@example.com", "Portfolio validated, exemplary work.");
@@ -672,7 +672,7 @@ class ArtisanFormateurServiceTest {
         verify(notificationService).createForUser(
                 artisanUser,
                 "Your Formateur request was rejected. Note: Severe policy breach in submission",
-                NotificationType.FORMATEUR_REJECTED,
+                NotificationType.Formateur.REJECTED,
                 "req-reject-perm"
         );
         verify(emailUtil).sendFormateurRejectedEmail("artisan@example.com", "Severe policy breach in submission", null, false);
@@ -854,7 +854,7 @@ class ArtisanFormateurServiceTest {
         verify(notificationService).createForUser(
                 artisanUser,
                 "You have been granted Formateur status by an administrator! Note: Master artisan with 20 years experience",
-                NotificationType.FORMATEUR_GRANTED,
+                NotificationType.Formateur.GRANTED,
                 "audit-grant-1"
         );
         verify(emailUtil).sendFormateurGrantedEmail("artisan@example.com", "Master artisan with 20 years experience");
@@ -942,7 +942,7 @@ class ArtisanFormateurServiceTest {
         verify(notificationService).createForUser(
                 artisanUser,
                 "Your Formateur status has been revoked. Reason: Repeated workshop cancellations without notice",
-                NotificationType.FORMATEUR_REVOKED,
+                NotificationType.Formateur.REVOKED,
                 "artisan-user-1"
         );
         verify(emailUtil).sendFormateurRevokedEmail("artisan@example.com", "Repeated workshop cancellations without notice");

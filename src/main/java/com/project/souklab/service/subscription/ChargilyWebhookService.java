@@ -117,15 +117,15 @@ public class ChargilyWebhookService {
         if (eventType == ChargilyWebhookEvent.Checkout.PAID) {
             payment.setStatus(PaymentStatus.PAID);
             activateSubscription(payment);
-            notificationService.createForUser(payment.getAccount(), "Your subscription payment was successful.", NotificationType.PAYMENT_SUCCESS, payment.getId());
+            notificationService.createForUser(payment.getAccount(), "Your subscription payment was successful.", NotificationType.Payment.SUCCESS, payment.getId());
         } else if (eventType == ChargilyWebhookEvent.Checkout.FAILED) {
             payment.setStatus(PaymentStatus.FAILED);
             cancelPendingSubscription(payment);
-            notificationService.createForUser(payment.getAccount(), "Your subscription payment failed.", NotificationType.PAYMENT_FAILED, payment.getId());
+            notificationService.createForUser(payment.getAccount(), "Your subscription payment failed.", NotificationType.Payment.FAILED, payment.getId());
         } else {
             payment.setStatus(PaymentStatus.CANCELED);
             cancelPendingSubscription(payment);
-            notificationService.createForUser(payment.getAccount(), "Your subscription checkout was canceled.", NotificationType.CHECKOUT_CANCELED, payment.getId());
+            notificationService.createForUser(payment.getAccount(), "Your subscription checkout was canceled.", NotificationType.Checkout.CANCELED, payment.getId());
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION, payment.getAccount().getId(), payment.getId(),

@@ -266,7 +266,7 @@ class UserManagementServiceTest {
         verify(notificationService).createForUser(
                 user,
                 "Your account has been approved and is now active!",
-                NotificationType.ACCOUNT_VALIDATED,
+                NotificationType.Account.VALIDATED,
                 "u-pending"
         );
     }
@@ -297,7 +297,7 @@ class UserManagementServiceTest {
         verify(notificationService).createForUser(
                 user,
                 "Your account has been approved and is now active!",
-                NotificationType.ACCOUNT_VALIDATED,
+                NotificationType.Account.VALIDATED,
                 "u-artisan"
         );
     }
@@ -339,7 +339,7 @@ class UserManagementServiceTest {
         verify(notificationService).createForUser(
                 user,
                 "Your account has been permanently suspended. Reason: Repeated fraudulent transactions",
-                NotificationType.ACCOUNT_SUSPENDED,
+                NotificationType.Account.SUSPENDED,
                 "u-bad"
         );
     }
@@ -365,7 +365,7 @@ class UserManagementServiceTest {
         verify(notificationService).createForUser(
                 user,
                 "Your account has been permanently suspended. Reason: null",
-                NotificationType.ACCOUNT_SUSPENDED,
+                NotificationType.Account.SUSPENDED,
                 "u-bad2"
         );
     }
@@ -440,7 +440,7 @@ class UserManagementServiceTest {
         verify(notificationService).createForUser(
                 user,
                 "Your account has been timed out for 120 minutes. Reason: Spamming chat",
-                NotificationType.ACCOUNT_SUSPENDED,
+                NotificationType.Account.SUSPENDED,
                 "u-timeout"
         );
     }
@@ -471,7 +471,7 @@ class UserManagementServiceTest {
         verify(notificationService).createForUser(
                 user,
                 "Your account has been timed out for 30 minutes. Reason: null",
-                NotificationType.ACCOUNT_SUSPENDED,
+                NotificationType.Account.SUSPENDED,
                 "u-timeout2"
         );
     }
@@ -498,7 +498,7 @@ class UserManagementServiceTest {
         verify(notificationService).createForUser(
                 user,
                 "Your account suspension has been lifted and your access has been restored.",
-                NotificationType.ACCOUNT_REINSTATED,
+                NotificationType.Account.REINSTATED,
                 "u-unban"
         );
     }

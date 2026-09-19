@@ -102,7 +102,7 @@ class ConversationServiceTest {
         when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> { Message m = invocation.getArgument(0); m.setId("message"); m.setCreatedAt(LocalDateTime.now(clock)); return m; });
         MessageResponse result = service.send("conversation", new SendMessageRequest("key", "hello", List.of()));
         assertThat(result.content()).isEqualTo("hello");
-        verify(notificationService).createForUser(recipient, "New message from " + sender.getName(), NotificationType.NEW_MESSAGE, "conversation");
+        verify(notificationService).createForUser(recipient, "New message from " + sender.getName(), NotificationType.Message.NEW, "conversation");
         verify(messageRepository).save(any(Message.class));
     }
 

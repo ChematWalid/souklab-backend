@@ -64,7 +64,7 @@ erDiagram
 | [`UserAvatar`](UserAvatar.java) | `@Entity` | Gallery avatar entity with thumbnail, medium, and full resolution URLs. |
 | [`Notification`](Notification.java) | `@Entity` | In-app notification with recipient reference, message, type, and read flag. |
 | [`FormateurRequestStatus`](FormateurRequestStatus.java) | `enum` | Accreditation states: `PENDING`, `APPROVED`, `REJECTED`. |
-| [`NotificationType`](NotificationType.java) | `enum` | Notification triggers (`ACCOUNT_VALIDATED`, `FORMATEUR_GRANTED`, etc.). |
+| [`NotificationType`](NotificationType.java) | grouped enum taxonomy | Notification triggers grouped by domain (`NotificationType.Account.VALIDATED`, `NotificationType.Formateur.GRANTED`, etc.). |
 
 ### Reference Taxonomies
 | Class / Enum | Type | Description |

@@ -171,10 +171,10 @@ public class AdminFormationService {
 
         if (dto.getDecision() == FormationReviewDecision.APPROVED) {
             String message = "Your formation '" + formation.getTitle() + "' has been approved!";
-            notificationService.createForUser(authorUser, message, NotificationType.FORMATION_APPROVED, formation.getId());
+            notificationService.createForUser(authorUser, message, NotificationType.Formation.APPROVED, formation.getId());
         } else {
             String message = "Your formation '" + formation.getTitle() + "' was rejected: " + dto.getComment().trim();
-            notificationService.createForUser(authorUser, message, NotificationType.FORMATION_REJECTED, formation.getId());
+            notificationService.createForUser(authorUser, message, NotificationType.Formation.REJECTED, formation.getId());
         }
     }
 

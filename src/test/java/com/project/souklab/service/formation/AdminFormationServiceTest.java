@@ -220,7 +220,7 @@ class AdminFormationServiceTest {
             verify(notificationService).createForUser(
                     eq(authorUser),
                     eq("Your formation 'Traditional Carpet Weaving' has been approved!"),
-                    eq(NotificationType.FORMATION_APPROVED),
+                    eq(NotificationType.Formation.APPROVED),
                     eq("formation-uuid-50")
             );
         }
@@ -252,7 +252,7 @@ class AdminFormationServiceTest {
             verify(notificationService).createForUser(
                     eq(authorUser),
                     eq("Your formation 'Traditional Carpet Weaving' was rejected: Please clarify workshop location and safety gear."),
-                    eq(NotificationType.FORMATION_REJECTED),
+                    eq(NotificationType.Formation.REJECTED),
                     eq("formation-uuid-50")
             );
         }

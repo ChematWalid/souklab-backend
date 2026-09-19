@@ -16,7 +16,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
 
     Page<Notification> findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(User user, Pageable pageable);
 
-    Optional<Notification> findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(User user, NotificationType type, String targetId);
+    Optional<Notification> findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(User user, NotificationType.Key type, String targetId);
 
     Optional<Notification> findByIdAndUserAndDeletedAtIsNull(String id, User user);
 

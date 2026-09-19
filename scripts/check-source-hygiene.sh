@@ -51,6 +51,10 @@ if rg -n --pcre2 'DirectorySortOrder\.(?:RELEVANCE|RATING_DESC|REVIEWS_DESC|VIEW
   echo 'flat directory sort references detected; use grouped sort enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'NotificationType\.(?:ACCOUNT_VALIDATED|ACCOUNT_REJECTED|ACCOUNT_SUSPENDED|ACCOUNT_REINSTATED|FORMATION_APPROVED|FORMATION_REJECTED|NEW_FORMATION|NEW_MESSAGE|SUBSCRIPTION_RENEWED|SUBSCRIPTION_EXPIRED|SUBSCRIPTION_RENEWAL_REMINDER|SUBSCRIPTION_MANUALLY_GRANTED|SUBSCRIPTION_REVOKED|PAYMENT_SUCCESS|PAYMENT_FAILED|CHECKOUT_CREATED|CHECKOUT_CANCELED|REFUND_REQUEST_UNAVAILABLE|NEW_REPORT|NEW_REVIEW|FORMATEUR_REQUEST_SUBMITTED|FORMATEUR_APPROVED|FORMATEUR_GRANTED|FORMATEUR_REJECTED|FORMATEUR_REVOKED)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat notification type references detected; use grouped notification enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 '"(?:PLAN_(?:CREATE|UPDATE|DEACTIVATE)|REFUND_REQUEST)"' src/main/java src/test/java --glob '*.java' \
     --glob '!FinancialAuditOperation.java'; then
   echo 'raw financial audit operation literals detected; use FinancialAuditOperation grouped enums' >&2

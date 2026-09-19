@@ -47,6 +47,6 @@ class AdminRefundServiceTest {
         verify(audit).logFinancialAction(any(), any(), any(), any(FinancialAuditOperation.Type.class),
                 any(), any(), any(), any(), any());
         verify(notifications).createForUser(account, "Refund requests are unavailable for Chargily Pay V2.",
-                NotificationType.REFUND_REQUEST_UNAVAILABLE, "payment-1");
+                NotificationType.Refund.REQUEST_UNAVAILABLE, "payment-1");
     }
 }

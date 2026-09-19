@@ -29,7 +29,7 @@ public class AdminRefundService {
                 currentUserProvider.requireCurrentUser(), payment.getAccount().getId(), FinancialAuditOperation.Refund.REQUEST,
                 payment.getStatus().value(), payment.getStatus().value(), request.getReason(), payment.getId(), payment.getSubscriptionId());
         notificationService.createForUser(payment.getAccount(),
-                "Refund requests are unavailable for Chargily Pay V2.", NotificationType.REFUND_REQUEST_UNAVAILABLE, payment.getId());
+                "Refund requests are unavailable for Chargily Pay V2.", NotificationType.Refund.REQUEST_UNAVAILABLE, payment.getId());
         throw new BadRequestException("Chargily Pay V2 refunds are not supported");
     }
 

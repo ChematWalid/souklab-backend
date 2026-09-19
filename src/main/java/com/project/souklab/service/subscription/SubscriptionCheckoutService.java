@@ -134,7 +134,7 @@ public class SubscriptionCheckoutService {
             activityEventService.record(AnalyticsEvent.Checkout.CREATED, user.getId(), saved.getId(),
                     Map.of(AnalyticsMetadata.Payment.STATUS, saved.getStatus(), AnalyticsMetadata.Account.SUBSCRIBER_TYPE, plan.getSubscriberType()));
         }
-        notificationService.createForUser(user, "Your subscription checkout was created.", NotificationType.CHECKOUT_CREATED, saved.getId());
+        notificationService.createForUser(user, "Your subscription checkout was created.", NotificationType.Checkout.CREATED, saved.getId());
         return toResponse(saved);
     }
 

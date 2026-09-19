@@ -69,7 +69,7 @@ public class NotificationService {
      * @return a NotificationResponseDTO representing the newly created notification
      */
     @Transactional
-    public NotificationResponseDTO createForUser(User user, String message, NotificationType type, String targetId) {
+    public NotificationResponseDTO createForUser(User user, String message, NotificationType.Key type, String targetId) {
         validateMessageLength(message);
 
         Notification notification = new Notification();
@@ -97,7 +97,7 @@ public class NotificationService {
      * @return a NotificationResponseDTO representing the newly created or updated notification
      */
     @Transactional
-    public NotificationResponseDTO createOrUpdateAggregatedNotification(User user, NotificationType type, String targetId, String baseMessage, int count, String initiatorUsername) {
+    public NotificationResponseDTO createOrUpdateAggregatedNotification(User user, NotificationType.Key type, String targetId, String baseMessage, int count, String initiatorUsername) {
         Optional<Notification> opt = notificationRepository.findFirstByUserAndTypeAndTargetIdAndDeletedAtIsNullOrderByCreatedAtDesc(user, type, targetId);
         Notification notification;
         String message;
