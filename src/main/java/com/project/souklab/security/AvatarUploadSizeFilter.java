@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -42,7 +43,7 @@ public class AvatarUploadSizeFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        if ("POST".equalsIgnoreCase(request.getMethod()) && AVATAR_UPLOAD_URI.equalsIgnoreCase(request.getRequestURI())) {
+        if (HttpMethod.POST.matches(request.getMethod()) && AVATAR_UPLOAD_URI.equalsIgnoreCase(request.getRequestURI())) {
             if (storageProperties.getValidation() != null && storageProperties.getValidation().getMaxFileSize() != null) {
                 long maxFileBytes = storageProperties.getValidation().getMaxFileSize().toBytes();
                 long maxAllowedRequestBytes = maxFileBytes + MULTIPART_HEADER_OVERHEAD_BYTES;

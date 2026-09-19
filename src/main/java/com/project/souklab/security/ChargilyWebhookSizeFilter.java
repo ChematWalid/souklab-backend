@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,7 +24,7 @@ public class ChargilyWebhookSizeFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if ("POST".equalsIgnoreCase(request.getMethod()) && WEBHOOK_URI.equals(request.getRequestURI())
+        if (HttpMethod.POST.matches(request.getMethod()) && WEBHOOK_URI.equals(request.getRequestURI())
                 && contentLength(request) > appProperties.getChargily().getRequestBodyLimit()) {
             servletResponseUtil.writeResponse(response, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE,
                     ApiResponse.error("Webhook body exceeds the configured request limit"));

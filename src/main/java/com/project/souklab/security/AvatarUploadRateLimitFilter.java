@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -59,7 +60,7 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
         if (rateLimitProperties != null && !rateLimitProperties.isEnabled()) {
             return true;
         }
-        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+        if (!HttpMethod.POST.matches(request.getMethod())) {
             return true;
         }
         String uri = request.getRequestURI();
