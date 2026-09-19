@@ -3,11 +3,12 @@ package com.project.souklab.model.analytics;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.project.souklab.analytics.AnalyticsMetric;
+import com.project.souklab.model.EnumValue;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum AnalyticsFilterKey {
+public enum AnalyticsFilterKey implements EnumValue {
     EVENT_TYPE(AnalyticsMetric.Payload.EVENT_TYPE);
 
     private final AnalyticsMetric.Key key;
@@ -16,8 +17,13 @@ public enum AnalyticsFilterKey {
         this.key = key;
     }
 
+    public AnalyticsMetric.Key metricKey() {
+        return key;
+    }
+
+    @Override
     @JsonValue
-    public String key() {
+    public String value() {
         return key.value();
     }
 
@@ -27,6 +33,6 @@ public enum AnalyticsFilterKey {
     }
 
     public static Optional<AnalyticsFilterKey> fromKey(String key) {
-        return Arrays.stream(values()).filter(filter -> filter.key.value().equals(key)).findFirst();
+        return Arrays.stream(values()).filter(filter -> filter.value().equals(key)).findFirst();
     }
 }

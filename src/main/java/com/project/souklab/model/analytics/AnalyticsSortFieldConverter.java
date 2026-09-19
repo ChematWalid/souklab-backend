@@ -8,7 +8,7 @@ public class AnalyticsSortFieldConverter implements AttributeConverter<Analytics
 
     @Override
     public String convertToDatabaseColumn(AnalyticsSortField attribute) {
-        return attribute == null ? null : attribute.field();
+        return attribute == null ? null : attribute.value();
     }
 
     @Override
