@@ -45,12 +45,12 @@ class Phase10AnalyticsRabbitApplicationIntegrationTest {
     void applicationTopologyIsReachableAndPublisherConfirms() throws Exception {
         String eventId = UUID.randomUUID().toString();
         String body = objectMapper.writeValueAsString(Map.of(
-                AnalyticsMetric.Payload.EVENT_ID.value(), eventId,
-                AnalyticsMetric.Payload.EVENT_TYPE.value(), AnalyticsEvent.Authentication.Login.SUCCEEDED.value(),
-                AnalyticsMetric.Payload.EVENT_TIME.value(), LocalDateTime.now().toString(),
-                AnalyticsMetric.Payload.ACTOR_ID.value(), "",
-                AnalyticsMetric.Payload.SUBJECT_ID.value(), "",
-                AnalyticsMetric.Payload.METADATA.value(), Map.of()));
+                AnalyticsMetric.Payload.Event.ID.value(), eventId,
+                AnalyticsMetric.Payload.Event.TYPE.value(), AnalyticsEvent.Authentication.Login.SUCCEEDED.value(),
+                AnalyticsMetric.Payload.Event.TIME.value(), LocalDateTime.now().toString(),
+                AnalyticsMetric.Payload.Actor.ID.value(), "",
+                AnalyticsMetric.Payload.Subject.ID.value(), "",
+                AnalyticsMetric.Payload.Metadata.VALUE.value(), Map.of()));
         try (Connection connection = connectionFactory.createConnection();
              Channel channel = connection.createChannel(false)) {
             channel.exchangeDeclarePassive(properties.getExchange());

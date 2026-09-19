@@ -35,7 +35,7 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsEvent.Subscription.RENEWAL.status().value()).isEqualTo("RENEWAL");
         assertThat(AnalyticsEvent.fromValue("REPORT_RESOLVED")).contains(AnalyticsEvent.Report.RESOLVED);
         assertThat(AnalyticsEvent.fromValue("unknown_event")).isEmpty();
-        assertThat(AnalyticsFilterKey.fromKey(AnalyticsMetric.Payload.EVENT_TYPE.value()))
+        assertThat(AnalyticsFilterKey.fromKey(AnalyticsMetric.Payload.Event.TYPE.value()))
                 .contains(AnalyticsFilterKey.EVENT_TYPE);
         assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
         assertThat(AnalyticsSortField.fromField(AnalyticsMetric.Series.Activity.EVENTS.value()))
@@ -123,8 +123,8 @@ class AnalyticsEventTaxonomyTest {
         ObjectMapper mapper = new ObjectMapper();
 
         String json = mapper.writeValueAsString(Map.of(
-                AnalyticsMetric.Payload.EVENT_ID, "event-1",
-                AnalyticsMetric.Payload.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value()));
+                AnalyticsMetric.Payload.Event.ID, "event-1",
+                AnalyticsMetric.Payload.Event.TYPE, AnalyticsEvent.Report.RESOLVED.value()));
 
         assertThat(json).contains("\"eventId\":\"event-1\"", "\"eventType\":\"REPORT_RESOLVED\"");
     }

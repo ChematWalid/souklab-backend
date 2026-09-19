@@ -38,13 +38,13 @@ public class ActivityEventService {
         outbox.setEventId(saved.getId());
         outbox.setEventType(type);
         outbox.setNextAttemptAt(LocalDateTime.now(clock));
-        Map<AnalyticsMetric.Payload, Object> payload = new LinkedHashMap<>();
-        payload.put(AnalyticsMetric.Payload.EVENT_ID, saved.getId());
-        payload.put(AnalyticsMetric.Payload.EVENT_TYPE, type);
-        payload.put(AnalyticsMetric.Payload.ACTOR_ID, actorId == null ? "" : actorId);
-        payload.put(AnalyticsMetric.Payload.SUBJECT_ID, subjectId == null ? "" : subjectId);
-        payload.put(AnalyticsMetric.Payload.EVENT_TIME, saved.getEventTime());
-        payload.put(AnalyticsMetric.Payload.METADATA, normalizedMetadata);
+        Map<AnalyticsMetric.Key, Object> payload = new LinkedHashMap<>();
+        payload.put(AnalyticsMetric.Payload.Event.ID, saved.getId());
+        payload.put(AnalyticsMetric.Payload.Event.TYPE, type);
+        payload.put(AnalyticsMetric.Payload.Actor.ID, actorId == null ? "" : actorId);
+        payload.put(AnalyticsMetric.Payload.Subject.ID, subjectId == null ? "" : subjectId);
+        payload.put(AnalyticsMetric.Payload.Event.TIME, saved.getEventTime());
+        payload.put(AnalyticsMetric.Payload.Metadata.VALUE, normalizedMetadata);
         try { outbox.setPayloadJson(objectMapper.writeValueAsString(payload)); }
         catch (JsonProcessingException e) { throw new IllegalArgumentException("Activity metadata is not serializable", e); }
         outboxRepository.save(outbox);

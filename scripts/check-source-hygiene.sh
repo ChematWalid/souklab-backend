@@ -67,6 +67,10 @@ if rg -n --pcre2 'AnalyticsMetadata\.(?:Account\.SUBSCRIBER_TYPE|Moderation\.(?:
   echo 'flat analytics metadata references detected; use grouped metadata enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsMetric\.Payload\.(?:EVENT_ID|EVENT_TYPE|EVENT_TIME|ACTOR_ID|SUBJECT_ID|METADATA)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics payload references detected; use grouped payload enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 'DirectorySortOrder\.(?:RELEVANCE|RATING_DESC|REVIEWS_DESC|VIEWS_DESC|NEWEST)|DirectorySortOrder\.values\(' src/main/java src/test/java --glob '*.java'; then
   echo 'flat directory sort references detected; use grouped sort enums' >&2
   exit 1

@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum AnalyticsFilterKey implements EnumValue {
-    EVENT_TYPE(AnalyticsMetric.Payload.EVENT_TYPE);
+    EVENT_TYPE(AnalyticsMetric.Payload.Event.TYPE);
 
     private final AnalyticsMetric.Key key;
 

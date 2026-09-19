@@ -980,14 +980,35 @@ public final class AnalyticsMetric {
         public String value() { return value; }
     }
 
-    public enum Payload implements Key {
-        EVENT_ID("eventId"), EVENT_TYPE("eventType"), EVENT_TIME("eventTime"),
-        ACTOR_ID("actorId"), SUBJECT_ID("subjectId"), METADATA("metadata");
+    public static final class Payload {
+        private Payload() { }
 
-        private final String value;
+        public enum Event implements Key {
+            ID("eventId"), TYPE("eventType"), TIME("eventTime");
+            private final String value;
+            Event(String value) { this.value = value; }
+            public String value() { return value; }
+        }
 
-        Payload(String value) { this.value = value; }
+        public enum Actor implements Key {
+            ID("actorId");
+            private final String value;
+            Actor(String value) { this.value = value; }
+            public String value() { return value; }
+        }
 
-        public String value() { return value; }
+        public enum Subject implements Key {
+            ID("subjectId");
+            private final String value;
+            Subject(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Metadata implements Key {
+            VALUE("metadata");
+            private final String value;
+            Metadata(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 }
