@@ -2,7 +2,7 @@ package com.project.souklab.controller.support;
 
 import com.project.souklab.security.Permission;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.Arrays;
@@ -42,8 +42,7 @@ public final class SecurityTestUtils {
     public static RequestPostProcessor admin(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
                 .authorities(Permission.all().stream()
-                        .map(SecurityTestUtils::authority)
-                        .toArray(SimpleGrantedAuthority[]::new));
+                        .toArray(GrantedAuthority[]::new));
     }
 
     /**
@@ -69,12 +68,7 @@ public final class SecurityTestUtils {
         return client("client@souklab.com");
     }
 
-    private static SimpleGrantedAuthority[] authorities(Permission... permissions) {
-        return Arrays.stream(permissions).map(SecurityTestUtils::authority)
-                .toArray(SimpleGrantedAuthority[]::new);
-    }
-
-    private static SimpleGrantedAuthority authority(Permission permission) {
-        return new SimpleGrantedAuthority(permission.value());
+    private static GrantedAuthority[] authorities(Permission... permissions) {
+        return Arrays.copyOf(permissions, permissions.length, GrantedAuthority[].class);
     }
 }
