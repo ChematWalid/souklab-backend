@@ -151,7 +151,7 @@ class AnalyticsEventTaxonomyTest {
                 PaginatedResponse.<Map<AnalyticsMetric.Series, Object>>builder()
                         .content(List.of(Map.of(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9L)))
                         .pageNumber(0).pageSize(20).totalElements(1).totalPages(1).last(true).build(),
-                Map.of(AnalyticsMetric.Table.USERS,
+                Map.of(AnalyticsMetric.Table.User.USERS,
                         PaginatedResponse.<Map<AnalyticsMetric.Csv, Object>>builder()
                                 .content(List.of(Map.of(AnalyticsMetric.Csv.KEY, "ACTIVE", AnalyticsMetric.Csv.VALUE, 3L)))
                                 .pageNumber(0).pageSize(20).totalElements(1).totalPages(1).last(true).build()));
@@ -160,8 +160,8 @@ class AnalyticsEventTaxonomyTest {
 
         assertThat(restored.summary()).containsEntry(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS, 7);
         assertThat(restored.series().getContent().getFirst()).containsEntry(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9);
-        assertThat(restored.tables()).containsKey(AnalyticsMetric.Table.USERS);
-        assertThat(restored.tables().get(AnalyticsMetric.Table.USERS).getContent().getFirst())
+        assertThat(restored.tables()).containsKey(AnalyticsMetric.Table.User.USERS);
+        assertThat(restored.tables().get(AnalyticsMetric.Table.User.USERS).getContent().getFirst())
                 .containsEntry(AnalyticsMetric.Csv.KEY, "ACTIVE");
     }
 }

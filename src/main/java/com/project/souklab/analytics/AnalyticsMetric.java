@@ -184,22 +184,85 @@ public final class AnalyticsMetric {
         public String value() { return value; }
     }
 
-    public enum Table implements Key {
-        USERS("users"), FORMATEUR_REQUESTS("formateurRequests"), REPORTS("reports"),
-        FEED_POSTS("feedPosts"), FORMATIONS("formations"), ENROLLMENTS("enrollments"),
-        PAYMENTS("payments"), SUBSCRIPTIONS("subscriptions"), SUBSCRIPTIONS_ARTISAN("subscriptionsArtisan"),
-        SUBSCRIPTIONS_CLIENT("subscriptionsClient"), ACTIVITY("activity");
+    public static final class Table {
+        private Table() { }
 
-        private final String value;
-
-        Table(String value) { this.value = value; }
-
-        public String value() { return value; }
-
-        @JsonCreator
-        public static Table fromValue(String value) {
-            for (Table key : values()) if (key.value.equals(value)) return key;
+        public static Key fromValue(String value) {
+            for (Key key : all()) {
+                if (key.value().equals(value)) return key;
+            }
             throw new IllegalArgumentException("Unknown analytics table key: " + value);
+        }
+
+        private static List<Key> all() {
+            return Stream.of(User.values(), Formateur.values(), Report.values(), Feed.values(), Formation.values(),
+                            Enrollment.values(), Payment.values(), Subscription.values(), Activity.values())
+                    .flatMap(Arrays::stream)
+                    .map(key -> (Key) key)
+                    .toList();
+        }
+
+        public enum User implements Key {
+            USERS("users");
+            private final String value;
+            User(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Formateur implements Key {
+            REQUESTS("formateurRequests");
+            private final String value;
+            Formateur(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Report implements Key {
+            REPORTS("reports");
+            private final String value;
+            Report(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Feed implements Key {
+            POSTS("feedPosts");
+            private final String value;
+            Feed(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Formation implements Key {
+            FORMATIONS("formations");
+            private final String value;
+            Formation(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Enrollment implements Key {
+            ENROLLMENTS("enrollments");
+            private final String value;
+            Enrollment(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Payment implements Key {
+            PAYMENTS("payments");
+            private final String value;
+            Payment(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Subscription implements Key {
+            ALL("subscriptions"), ARTISAN("subscriptionsArtisan"), CLIENT("subscriptionsClient");
+            private final String value;
+            Subscription(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Activity implements Key {
+            EVENTS("activity");
+            private final String value;
+            Activity(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 

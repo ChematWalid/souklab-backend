@@ -727,29 +727,29 @@ public class AnalyticsJobService {
                 .toLocalDate();
     }
 
-    private Map<AnalyticsMetric.Table, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> buildTables(AnalyticsJob job,
+    private Map<AnalyticsMetric.Key, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> buildTables(AnalyticsJob job,
                                                                                                            Map<AnalyticsMetric.Key, Object> summary) {
-        Map<AnalyticsMetric.Table, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables = new LinkedHashMap<>();
+        Map<AnalyticsMetric.Key, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables = new LinkedHashMap<>();
         switch (job.getReportType()) {
             case MODERATION -> {
-                addStatusTable(tables, AnalyticsMetric.Table.USERS, summary.get(AnalyticsMetric.Summary.User.STATUSES), job);
-                addStatusTable(tables, AnalyticsMetric.Table.FORMATEUR_REQUESTS, summary.get(AnalyticsMetric.Summary.Moderation.FORMATEUR_STATUSES), job);
-                addStatusTable(tables, AnalyticsMetric.Table.REPORTS, summary.get(AnalyticsMetric.Summary.Report.BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.User.USERS, summary.get(AnalyticsMetric.Summary.User.STATUSES), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Formateur.REQUESTS, summary.get(AnalyticsMetric.Summary.Moderation.FORMATEUR_STATUSES), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Report.REPORTS, summary.get(AnalyticsMetric.Summary.Report.BY_STATUS), job);
             }
             case CONTENT_LEARNING -> {
-                addStatusTable(tables, AnalyticsMetric.Table.FEED_POSTS, summary.get(AnalyticsMetric.Summary.Content.FEED_POSTS_BY_STATUS), job);
-                addStatusTable(tables, AnalyticsMetric.Table.FORMATIONS, summary.get(AnalyticsMetric.Summary.Formation.BY_STATUS), job);
-                addStatusTable(tables, AnalyticsMetric.Table.ENROLLMENTS, summary.get(AnalyticsMetric.Summary.Formation.ENROLLMENTS_BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Feed.POSTS, summary.get(AnalyticsMetric.Summary.Content.FEED_POSTS_BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Formation.FORMATIONS, summary.get(AnalyticsMetric.Summary.Formation.BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Enrollment.ENROLLMENTS, summary.get(AnalyticsMetric.Summary.Formation.ENROLLMENTS_BY_STATUS), job);
             }
             case SUBSCRIPTIONS_PAYMENTS -> {
-                addStatusTable(tables, AnalyticsMetric.Table.PAYMENTS, summary.get(AnalyticsMetric.Summary.Payment.BY_STATUS), job);
-                addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS, summary.get(AnalyticsMetric.Summary.Subscription.BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Payment.PAYMENTS, summary.get(AnalyticsMetric.Summary.Payment.BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Subscription.ALL, summary.get(AnalyticsMetric.Summary.Subscription.BY_STATUS), job);
                 if (summary.get(AnalyticsMetric.Summary.Subscription.BY_SUBSCRIBER_TYPE) instanceof Map<?, ?> byType) {
-                    addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_ARTISAN, byType.get(AnalyticsMetric.AccountType.ARTISAN), job);
-                    addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_CLIENT, byType.get(AnalyticsMetric.AccountType.CLIENT), job);
+                    addStatusTable(tables, AnalyticsMetric.Table.Subscription.ARTISAN, byType.get(AnalyticsMetric.AccountType.ARTISAN), job);
+                    addStatusTable(tables, AnalyticsMetric.Table.Subscription.CLIENT, byType.get(AnalyticsMetric.AccountType.CLIENT), job);
                 }
             }
-            case ENGAGEMENT, TIME_SERIES -> addStatusTable(tables, AnalyticsMetric.Table.ACTIVITY, Map.of(
+            case ENGAGEMENT, TIME_SERIES -> addStatusTable(tables, AnalyticsMetric.Table.Activity.EVENTS, Map.of(
                     AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, 0L),
                     AnalyticsMetric.Summary.Engagement.MESSAGES_SENT, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.MESSAGES_SENT, 0L),
                     AnalyticsMetric.Summary.Engagement.PUBLISHED_POSTS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.PUBLISHED_POSTS, 0L),
@@ -760,8 +760,8 @@ public class AnalyticsJobService {
         return tables;
     }
 
-    private void addStatusTable(Map<AnalyticsMetric.Table, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables,
-                                 AnalyticsMetric.Table table, Object source, AnalyticsJob job) {
+    private void addStatusTable(Map<AnalyticsMetric.Key, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables,
+                                 AnalyticsMetric.Key table, Object source, AnalyticsJob job) {
         if (!(source instanceof Map<?, ?> values)) return;
         List<Map<AnalyticsMetric.Csv, Object>> rows = values.entrySet().stream()
                 .map(entry -> Map.<AnalyticsMetric.Csv, Object>of(AnalyticsMetric.Csv.KEY, keyValue(entry.getKey()),
