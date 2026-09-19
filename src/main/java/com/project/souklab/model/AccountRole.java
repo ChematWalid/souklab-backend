@@ -1,5 +1,6 @@
 package com.project.souklab.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -21,5 +22,10 @@ public enum AccountRole {
             if (role.value.equals(normalized)) return Optional.of(role);
         }
         return Optional.empty();
+    }
+
+    @JsonCreator
+    public static AccountRole fromJson(String input) {
+        return fromInput(input).orElse(null);
     }
 }

@@ -535,8 +535,8 @@ public class AuthService {
      * @throws BadRequestException       if the role is ADMIN or not one of ARTISAN / CLIENT
      * @throws ResourceNotFoundException if the role does not exist in the database
      */
-    private AccountRole parseRegistrationRole(String accountTypeInput) {
-        AccountRole role = AccountRole.fromInput(accountTypeInput).orElseThrow(
+    private AccountRole parseRegistrationRole(AccountRole accountTypeInput) {
+        AccountRole role = Optional.ofNullable(accountTypeInput).orElseThrow(
                 () -> new BadRequestException("Invalid account type. Allowed values are ARTISAN or CLIENT."));
         if (role == AccountRole.ADMIN) {
             throw new BadRequestException("Administrator registration is not permitted via public registration.");

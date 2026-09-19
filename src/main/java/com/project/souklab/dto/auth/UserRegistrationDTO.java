@@ -1,7 +1,9 @@
 package com.project.souklab.dto.auth;
 
+import com.project.souklab.model.AccountRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +30,6 @@ public class UserRegistrationDTO {
 
     private String lastName;
 
-    @NotBlank(message = "Account type is required (ARTISAN or CLIENT)")
-    private String accountType;
+    @NotNull(message = "Account type is required (ARTISAN or CLIENT)")
+    private AccountRole accountType;
 }

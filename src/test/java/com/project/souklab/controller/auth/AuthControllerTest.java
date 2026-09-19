@@ -22,6 +22,7 @@ import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.AccountRole;
 import com.project.souklab.security.Permission;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
@@ -154,7 +155,7 @@ class AuthControllerTest {
             ArgumentCaptor<UserRegistrationDTO> captor = ArgumentCaptor.forClass(UserRegistrationDTO.class);
             verify(authService).registerUser(captor.capture());
             assertThat(captor.getValue().getEmail()).isEqualTo("karim@souklab.dz");
-            assertThat(captor.getValue().getAccountType()).isEqualTo("CLIENT");
+            assertThat(captor.getValue().getAccountType()).isEqualTo(AccountRole.CLIENT);
         }
 
         /**

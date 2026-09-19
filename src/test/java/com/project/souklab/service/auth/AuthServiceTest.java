@@ -25,6 +25,7 @@ import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.OAuthIdentity;
 import com.project.souklab.model.RefreshToken;
@@ -196,7 +197,7 @@ class AuthServiceTest {
         UserRegistrationDTO dto = UserRegistrationDTO.builder()
                 .email("Existing@Example.COM")
                 .password("password123")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
@@ -217,7 +218,7 @@ class AuthServiceTest {
         UserRegistrationDTO dto = UserRegistrationDTO.builder()
                 .email("admin@example.com")
                 .password("password123")
-                .accountType("ADMIN")
+                .accountType(AccountRole.ADMIN)
                 .build();
 
         when(userRepository.existsByEmail("admin@example.com")).thenReturn(false);
@@ -236,7 +237,7 @@ class AuthServiceTest {
         UserRegistrationDTO dto = UserRegistrationDTO.builder()
                 .email("admin@example.com")
                 .password("password123")
-                .accountType("ADMIN")
+                .accountType(AccountRole.ADMIN)
                 .build();
 
         when(userRepository.existsByEmail("admin@example.com")).thenReturn(false);
@@ -255,7 +256,7 @@ class AuthServiceTest {
         UserRegistrationDTO dto = UserRegistrationDTO.builder()
                 .email("someone@example.com")
                 .password("password123")
-                .accountType("MODERATOR")
+                .accountType(null)
                 .build();
 
         when(userRepository.existsByEmail("someone@example.com")).thenReturn(false);
@@ -274,7 +275,7 @@ class AuthServiceTest {
         UserRegistrationDTO dto = UserRegistrationDTO.builder()
                 .email("client@example.com")
                 .password("password123")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
@@ -295,7 +296,7 @@ class AuthServiceTest {
                 .email("client@example.com")
                 .password("rawPassword123")
                 .name("Jane Doe")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
@@ -338,7 +339,7 @@ class AuthServiceTest {
                 .email("client@example.com")
                 .password("rawPassword123")
                 .name("Jane")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
@@ -369,7 +370,7 @@ class AuthServiceTest {
                 .firstName("Alice")
                 .lastName("Smith")
                 .name("Ignored Full Name")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
@@ -398,7 +399,7 @@ class AuthServiceTest {
                 .password("rawPassword123")
                 .firstName("Karim")
                 .lastName("Najar")
-                .accountType("ARTISAN")
+                .accountType(AccountRole.ARTISAN)
                 .build();
 
         when(userRepository.existsByEmail("artisan@example.com")).thenReturn(false);
@@ -433,7 +434,7 @@ class AuthServiceTest {
                 .password("rawPassword123")
                 .firstName("Sara")
                 .lastName("Ben")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
@@ -463,7 +464,7 @@ class AuthServiceTest {
                 .password("rawPassword123")
                 .firstName("Mehdi")
                 .lastName("Alami")
-                .accountType("ARTISAN")
+                .accountType(AccountRole.ARTISAN)
                 .build();
 
         when(userRepository.existsByEmail("artisan@example.com")).thenReturn(false);
@@ -2082,7 +2083,7 @@ class AuthServiceTest {
                 .password("rawPassword123")
                 .firstName("   ")
                 .name("Karim Bensalem")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
@@ -2111,7 +2112,7 @@ class AuthServiceTest {
                 .password("rawPassword123")
                 .firstName(null)
                 .name(null)
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
@@ -2140,7 +2141,7 @@ class AuthServiceTest {
                 .password("rawPassword123")
                 .firstName(null)
                 .name("   ")
-                .accountType("CLIENT")
+                .accountType(AccountRole.CLIENT)
                 .build();
 
         when(userRepository.existsByEmail("client@example.com")).thenReturn(false);
