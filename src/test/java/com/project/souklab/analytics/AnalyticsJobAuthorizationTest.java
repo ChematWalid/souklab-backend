@@ -23,8 +23,12 @@ import com.project.souklab.config.AnalyticsProperties;
 import com.project.souklab.dao.analytics.AnalyticsJobRepository;
 import com.project.souklab.dto.analytics.AnalyticsJobRequest;
 import com.project.souklab.exception.ForbiddenException;
+import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
+import com.project.souklab.model.analytics.AnalyticsJob;
+import com.project.souklab.model.User;
+import com.project.souklab.security.Permission;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +41,10 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.concurrent.Executor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
+import java.util.Optional;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,5 +94,32 @@ class AnalyticsJobAuthorizationTest {
         assertThatThrownBy(() -> service.submit(request, "admin@example.com", false))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("Financial analytics permission is required");
+    }
+
+    @Test
+    void ownerMayReadUsingCapturedFinancialScopeAfterCurrentFinancialPermissionChanges() {
+        User owner = new User();
+        owner.setId("owner-1");
+        AnalyticsJob job = new AnalyticsJob();
+        job.setId("job-1");
+        job.setOwnerId("owner-1");
+        job.setReportType(AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS);
+        job.setPermissionScope(Permission.Analytics.ADMIN.authority() + ","
+                + Permission.Financial.ADMIN.authority());
+        when(users.findByEmail("owner@example.com")).thenReturn(Optional.of(owner));
+        when(jobs.findByIdAndOwnerId("job-1", "owner-1")).thenReturn(Optional.of(job));
+
+        assertThat(service.get("job-1", "owner@example.com")).isNotNull();
+    }
+
+    @Test
+    void nonOwnerCannotReadAnAnalyticsJob() {
+        User owner = new User();
+        owner.setId("different-owner");
+        when(users.findByEmail("other@example.com")).thenReturn(Optional.of(owner));
+        when(jobs.findByIdAndOwnerId(eq("job-1"), eq("different-owner"))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.get("job-1", "other@example.com"))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }
