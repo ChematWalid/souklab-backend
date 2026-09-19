@@ -324,13 +324,13 @@ public class AnalyticsJobService {
                         summary.put("grossCollectedDzd", grossCollected);
                         summary.put("providerFeesDzd", providerFees);
                         summary.put("netCollectedDzd", grossCollected - providerFees);
-                        long paidPayments = payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                        long paidPayments = payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
                                 PaymentStatus.PAID, from, inclusiveTo);
-                        long failedPayments = payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                        long failedPayments = payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
                                 PaymentStatus.FAILED, from, inclusiveTo)
-                                + payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                                + payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
                                 PaymentStatus.CANCELED, from, inclusiveTo)
-                                + payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                                + payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
                                 PaymentStatus.EXPIRED, from, inclusiveTo);
                         summary.put("paymentConversionRate", paidPayments + failedPayments == 0 ? 0.0
                                 : (double) paidPayments / (paidPayments + failedPayments));

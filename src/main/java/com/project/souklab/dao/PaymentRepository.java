@@ -16,6 +16,10 @@ import org.springframework.data.repository.query.Param;
 public interface PaymentRepository extends JpaRepository<Payment, String> {
     long countByStatus(PaymentStatus status);
     long countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(PaymentStatus status, LocalDateTime from, LocalDateTime to);
+    @Query("select count(p) from Payment p where p.status = :status and p.manualGrant = false and p.createdAt >= :from and p.createdAt < :to and p.deletedAt is null")
+    long countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(@Param("status") PaymentStatus status,
+                                                                                 @Param("from") LocalDateTime from,
+                                                                                 @Param("to") LocalDateTime to);
     long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
     long countByManualGrantTrueAndCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
     @Query("select coalesce(sum(p.amount), 0) from Payment p where p.status = :status and p.currency = :currency and p.manualGrant = false and p.createdAt >= :from and p.createdAt < :to and p.deletedAt is null")
