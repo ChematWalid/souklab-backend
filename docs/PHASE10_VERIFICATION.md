@@ -2,7 +2,7 @@
 
 ## Local Docker-backed verification
 
-Run on 2026-09-19 from the reviewed working tree:
+Run on 2026-09-20 from the reviewed working tree:
 
 ```text
 ./scripts/verify-local-integration.sh
@@ -28,9 +28,13 @@ Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 Result:
 
 ```text
-Tests run: 1211, Failures: 0, Errors: 0, Skipped: 4
+Tests run: 1223, Failures: 0, Errors: 0, Skipped: 4
 BUILD SUCCESS
 ```
+
+The MariaDB health checks include a startup grace period and extended retry
+window so first-run database initialization on clean Docker volumes is not
+reported as a false readiness failure.
 
 The skipped tests are existing opt-in/environment-gated tests. The
 verification containers and volumes were removed by the harness cleanup trap.

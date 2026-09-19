@@ -23,7 +23,8 @@ services:
       test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$${MARIADB_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 60
+      start_period: 30s
 
   # Isolated schema target used only by scripts/verify-flyway.sh.
   mariadb-flyway:
@@ -42,7 +43,8 @@ services:
       test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$${MARIADB_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 60
+      start_period: 30s
 
   rabbitmq:
     image: rabbitmq:4.0-management
