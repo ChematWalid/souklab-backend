@@ -62,7 +62,7 @@ class PermissionManagementServiceTest {
         when(users.findById("u1")).thenReturn(Optional.of(user));
         when(permissions.findByPermissionKeyAndEnabledTrue(Permission.Artisan.CONTENT.value())).thenReturn(Optional.of(permission));
 
-        assertThat(service().grant("u1", new PermissionAssignmentRequestDTO(" " + Permission.Artisan.CONTENT.value() + " ")))
+        assertThat(service().grant("u1", new PermissionAssignmentRequestDTO(Permission.Artisan.CONTENT)))
                 .containsExactly(Permission.Artisan.CONTENT);
         verify(users).save(user);
         verify(audit).logAction(any(), ArgumentMatchers.eq("u1:" + Permission.Artisan.CONTENT.value()));
@@ -76,10 +76,10 @@ class PermissionManagementServiceTest {
         when(users.findById("u1")).thenReturn(Optional.of(user));
         when(permissions.findByPermissionKeyAndEnabledTrue(Permission.Profile.READ.value())).thenReturn(Optional.of(permission));
 
-        assertThatThrownBy(() -> service().grant("u1", new PermissionAssignmentRequestDTO(Permission.Profile.READ.value())))
+        assertThatThrownBy(() -> service().grant("u1", new PermissionAssignmentRequestDTO(Permission.Profile.READ)))
                 .isInstanceOf(ConflictException.class);
         user.getPermissions().clear();
-        assertThatThrownBy(() -> service().revoke("u1", new PermissionAssignmentRequestDTO(Permission.Profile.READ.value())))
+        assertThatThrownBy(() -> service().revoke("u1", new PermissionAssignmentRequestDTO(Permission.Profile.READ)))
                 .isInstanceOf(ConflictException.class);
     }
 
@@ -93,7 +93,7 @@ class PermissionManagementServiceTest {
         when(permissions.findByPermissionKeyAndEnabledTrue(Permission.Artisan.CONTENT.value()))
                 .thenReturn(Optional.of(permission));
 
-        assertThat(service().revoke("u1", new PermissionAssignmentRequestDTO(Permission.Artisan.CONTENT.value())))
+        assertThat(service().revoke("u1", new PermissionAssignmentRequestDTO(Permission.Artisan.CONTENT)))
                 .isEmpty();
         verify(users).save(user);
         verify(audit).logAction(ArgumentMatchers.any(),
@@ -108,7 +108,7 @@ class PermissionManagementServiceTest {
         when(users.findById("missing")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service().list("missing")).isInstanceOf(ResourceNotFoundException.class);
         when(users.findById("u1")).thenReturn(Optional.of(User.builder().email("u@example.test").build()));
-        assertThatThrownBy(() -> service().grant("u1", new PermissionAssignmentRequestDTO("missing")))
+        assertThatThrownBy(() -> service().grant("u1", new PermissionAssignmentRequestDTO(null)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 

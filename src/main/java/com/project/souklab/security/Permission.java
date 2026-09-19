@@ -1,6 +1,7 @@
 package com.project.souklab.security;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
  * enum value such as {@code Permission.Admin.USERS}; no flat permission
  * constants are exposed.
  */
+@JsonDeserialize(using = PermissionDeserializer.class)
 public interface Permission {
     @JsonValue
     String value();

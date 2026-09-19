@@ -43,7 +43,7 @@ public class PermissionManagementService {
     public Set<Permission> grant(String userId, PermissionAssignmentRequestDTO request) {
         requireAdmin();
         User user = findUser(userId);
-        AuthorizationPermission permission = findPermission(request.getPermissionKey());
+        AuthorizationPermission permission = findPermission(request.getPermission());
         if (!user.getPermissions().add(permission)) {
             throw new ConflictException("Permission is already assigned.");
         }
@@ -56,7 +56,7 @@ public class PermissionManagementService {
     public Set<Permission> revoke(String userId, PermissionAssignmentRequestDTO request) {
         requireAdmin();
         User user = findUser(userId);
-        AuthorizationPermission permission = findPermission(request.getPermissionKey());
+        AuthorizationPermission permission = findPermission(request.getPermission());
         if (!user.getPermissions().remove(permission)) {
             throw new ConflictException("Permission is not assigned.");
         }
@@ -77,9 +77,8 @@ public class PermissionManagementService {
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
     }
 
-    private AuthorizationPermission findPermission(String key) {
-        Permission permission = Permission.fromValue(key.trim())
-                .orElseThrow(() -> new ResourceNotFoundException("Permission not found."));
+    private AuthorizationPermission findPermission(Permission permission) {
+        if (permission == null) throw new ResourceNotFoundException("Permission not found.");
         return permissionRepository.findByPermissionKeyAndEnabledTrue(permission.value())
                 .orElseThrow(() -> new ResourceNotFoundException("Permission not found."));
     }

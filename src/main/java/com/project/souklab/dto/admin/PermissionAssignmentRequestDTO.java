@@ -1,7 +1,8 @@
 package com.project.souklab.dto.admin;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.project.souklab.security.Permission;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PermissionAssignmentRequestDTO {
 
-    @NotBlank
-    @Size(max = 100)
-    private String permissionKey;
+    @NotNull
+    @JsonProperty("permissionKey")
+    private Permission permission;
 }
