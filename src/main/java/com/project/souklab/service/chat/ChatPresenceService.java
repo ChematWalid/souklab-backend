@@ -4,6 +4,7 @@ import org.springframework.messaging.Message;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.chat.ChatEvent;
+import com.project.souklab.dto.chat.ChatEventType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

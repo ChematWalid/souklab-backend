@@ -7,7 +7,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.chat.*;
 import com.project.souklab.service.chat.ConversationService;
-import com.project.souklab.service.chat.ChatEventType;
+import com.project.souklab.dto.chat.ChatEventType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;

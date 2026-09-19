@@ -3,6 +3,7 @@ package com.project.souklab.service.chat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.dto.chat.ChatEvent;
+import com.project.souklab.dto.chat.ChatEventType;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

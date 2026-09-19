@@ -1,8 +1,5 @@
 package com.project.souklab.dto.chat;
 
-import com.project.souklab.service.chat.ChatEventType;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 import java.time.LocalDateTime;
 
 public record ChatEvent(String version, ChatEventType.Type type, String conversationId, String messageId,
