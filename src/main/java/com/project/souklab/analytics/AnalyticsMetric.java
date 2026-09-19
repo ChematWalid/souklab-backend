@@ -29,6 +29,8 @@ public final class AnalyticsMetric {
         REPORT_RESOLUTIONS("reportResolutions"), AVERAGE_REPORT_RESOLUTION_SECONDS("averageReportResolutionSeconds"),
         DAU("dau"), WAU("wau"), MAU("mau"),
         ENGAGEMENT_BY_ACCOUNT_TYPE("engagementByAccountType"),
+        ENGAGEMENT_BY_REGION("engagementByRegion"),
+        ENGAGEMENT_BY_CRAFT_CATEGORY("engagementByCraftCategory"),
         LOGIN_RETENTION_COHORTS("loginRetentionCohorts"), FEED_POSTS_CREATED("feedPostsCreated"),
         FORMATIONS_CREATED("formationsCreated"), FORMATION_ENROLLMENTS("formationEnrollments"),
         ACTIVE_INSTRUCTORS("activeInstructors"), FORMATION_UTILIZATION_RATE("formationUtilizationRate"),

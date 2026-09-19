@@ -17,6 +17,7 @@ import com.project.souklab.config.AppProperties;
 import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dao.analytics.ActivityEventRepository;
+import com.project.souklab.dao.analytics.AnalyticsDimensionCount;
 import com.project.souklab.dao.analytics.AnalyticsJobRepository;
 import com.project.souklab.dao.analytics.AnalyticsJobArtifactRepository;
 import com.project.souklab.dao.analytics.AnalyticsOutboxRepository;
@@ -240,6 +241,10 @@ public class AnalyticsJobService {
                         AnalyticsMetric.AccountType.CLIENT.value(), eventFilter == null
                                 ? events.countDistinctClientActorsByEventTimeBetween(from, inclusiveTo)
                                 : events.countDistinctClientActorsByTypeAndEventTimeBetween(eventFilter, from, inclusiveTo)));
+                summary.put(AnalyticsMetric.Summary.ENGAGEMENT_BY_REGION.value(), dimensionCounts(
+                        events.countDistinctActorsByRegionAndEventTimeBetween(eventFilter, from, inclusiveTo)));
+                summary.put(AnalyticsMetric.Summary.ENGAGEMENT_BY_CRAFT_CATEGORY.value(), dimensionCounts(
+                        events.countDistinctActorsByCraftCategoryAndEventTimeBetween(eventFilter, from, inclusiveTo)));
                 if (job.getReportType() == AnalyticsReportType.GROWTH) {
                     summary.put(AnalyticsMetric.Summary.LOGIN_RETENTION_COHORTS.value(), loginRetentionCohorts(from, inclusiveTo));
                 }
@@ -771,6 +776,14 @@ public class AnalyticsJobService {
                 .content(rows.subList(start, end)).pageNumber(job.getPageNumber()).pageSize(pageSize)
                 .totalElements(rows.size()).totalPages(rows.isEmpty() ? 0 : (rows.size() + pageSize - 1) / pageSize)
                 .last(end >= rows.size()).build());
+    }
+
+    private Map<String, Long> dimensionCounts(List<AnalyticsDimensionCount> counts) {
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (AnalyticsDimensionCount count : counts) {
+            result.put(count.getDimension(), count.getCount());
+        }
+        return result;
     }
 
     private Map<String, String> readFilters(AnalyticsJob job) {

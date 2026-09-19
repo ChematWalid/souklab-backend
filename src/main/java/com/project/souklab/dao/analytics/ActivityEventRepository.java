@@ -30,6 +30,26 @@ public interface ActivityEventRepository extends JpaRepository<ActivityEvent, St
     long countDistinctActorsByTypeAndEventTimeBetween(@Param("eventType") AnalyticsEvent.Type eventType,
                                                        @Param("from") LocalDateTime from,
                                                        @Param("to") LocalDateTime to);
+    @Query("select r.slug as dimension, count(distinct e.actorId) as count "
+            + "from ActivityEvent e, User u join u.artisan a join a.region r "
+            + "where e.actorId = u.id and e.actorId is not null "
+            + "and (:eventType is null or e.eventType = :eventType) "
+            + "and e.eventTime >= :from and e.eventTime <= :to "
+            + "group by r.slug order by r.slug")
+    List<AnalyticsDimensionCount> countDistinctActorsByRegionAndEventTimeBetween(
+            @Param("eventType") AnalyticsEvent.Type eventType,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to);
+    @Query("select c.slug as dimension, count(distinct e.actorId) as count "
+            + "from ActivityEvent e, User u join u.artisan a join a.subCategory s join s.category c "
+            + "where e.actorId = u.id and e.actorId is not null "
+            + "and (:eventType is null or e.eventType = :eventType) "
+            + "and e.eventTime >= :from and e.eventTime <= :to "
+            + "group by c.slug order by c.slug")
+    List<AnalyticsDimensionCount> countDistinctActorsByCraftCategoryAndEventTimeBetween(
+            @Param("eventType") AnalyticsEvent.Type eventType,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to);
     List<ActivityEvent> findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(AnalyticsEvent.Type eventType,
                                                                                 LocalDateTime from,
                                                                                 LocalDateTime to);
