@@ -80,4 +80,16 @@ class AnalyticsEventTaxonomyTest {
         assertThat(request.getFilters()).containsEntry(
                 AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value());
     }
+
+    @Test
+    void groupedComparisonEnumsKeepStableJsonObjectKeys() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        String json = mapper.writeValueAsString(Map.of(
+                AnalyticsMetric.Summary.PERIOD_COMPARISON, Map.of(
+                        AnalyticsMetric.Comparison.CURRENT, 4,
+                        AnalyticsMetric.Comparison.PREVIOUS, 2)));
+
+        assertThat(json).contains("\"periodComparison\"", "\"current\":4", "\"previous\":2");
+    }
 }

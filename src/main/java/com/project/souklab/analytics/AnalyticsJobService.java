@@ -394,13 +394,13 @@ public class AnalyticsJobService {
                 long rangeDays = ChronoUnit.DAYS.between(job.getFromDate(), job.getToDate()) + 1;
                 LocalDateTime previousFrom = from.minusDays(rangeDays);
                 LocalDateTime previousTo = from.minusNanos(1);
-                Map<String, Object> comparison = new LinkedHashMap<>();
-                comparison.put(AnalyticsMetric.Summary.NEW_REGISTRATIONS.value(), Map.of(
-                        AnalyticsMetric.Comparison.CURRENT.value(), users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo),
-                        AnalyticsMetric.Comparison.PREVIOUS.value(), users.countByCreatedAtBetweenAndDeletedAtIsNull(previousFrom, previousTo)));
-                comparison.put(AnalyticsMetric.Summary.ACTIVITY_EVENTS.value(), Map.of(
-                        AnalyticsMetric.Comparison.CURRENT.value(), countFilteredEvents(job, from, inclusiveTo),
-                        AnalyticsMetric.Comparison.PREVIOUS.value(), countFilteredEvents(job, previousFrom, previousTo)));
+                Map<AnalyticsMetric.Key, Object> comparison = new LinkedHashMap<>();
+                comparison.put(AnalyticsMetric.Summary.NEW_REGISTRATIONS, Map.of(
+                        AnalyticsMetric.Comparison.CURRENT, users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo),
+                        AnalyticsMetric.Comparison.PREVIOUS, users.countByCreatedAtBetweenAndDeletedAtIsNull(previousFrom, previousTo)));
+                comparison.put(AnalyticsMetric.Summary.ACTIVITY_EVENTS, Map.of(
+                        AnalyticsMetric.Comparison.CURRENT, countFilteredEvents(job, from, inclusiveTo),
+                        AnalyticsMetric.Comparison.PREVIOUS, countFilteredEvents(job, previousFrom, previousTo)));
                 summary.put(AnalyticsMetric.Summary.PERIOD_COMPARISON.value(), comparison);
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put(AnalyticsMetric.Result.REPORT_TYPE.value(), job.getReportType());
