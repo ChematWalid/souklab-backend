@@ -38,7 +38,7 @@ public class Client {
 
     @Column(name = "client_type", nullable = false, length = 50)
     @Builder.Default
-    private String clientType = "INDIVIDUAL";
+    private String clientType = ClientType.INDIVIDUAL.value();
 
     @Column(name = "company_name")
     private String companyName;

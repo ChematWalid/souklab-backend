@@ -14,6 +14,7 @@ import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanGalleryImage;
 import com.project.souklab.model.Client;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.model.User;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.security.Permission;
@@ -186,7 +187,7 @@ public class ProfileResponseMapper {
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .clientType(client != null ? client.getClientType() : "INDIVIDUAL")
+                .clientType(client != null ? client.getClientType() : ClientType.INDIVIDUAL.value())
                 .companyName(client != null ? client.getCompanyName() : null)
                 .bio(client != null ? client.getBio() : null)
                 .address(client != null ? client.getAddress() : null)
