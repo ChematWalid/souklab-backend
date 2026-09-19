@@ -48,6 +48,7 @@ import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.model.analytics.AnalyticsSortDirection;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
+import com.project.souklab.model.analytics.AnalyticsSortField;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsOutboxEvent;
 import com.project.souklab.dto.analytics.AnalyticsJobEvent;
@@ -380,6 +381,7 @@ public class AnalyticsJobService {
                 result.put("summary", summary);
                 result.put("tables", buildTables(job, summary));
                 List<Map<String, Object>> allSeries = buildSeries(job, from, to);
+                sortSeries(allSeries, job);
                 if (allSeries.size() > jobProperties.getMaximumResultRows()) {
                     throw new BadRequestException("Analytics result exceeds configured row limit");
                 }
@@ -595,9 +597,6 @@ public class AnalyticsJobService {
                 && r.getOutputFormat() != AnalyticsOutputFormat.CSV) {
             throw new BadRequestException("CSV_EXPORT reports require CSV output format");
         }
-        if (r.getSortField() != null && !List.of("startDate", "endDate", "activityEvents", "newRegistrations").contains(r.getSortField())) {
-            throw new BadRequestException("Unsupported analytics sort field");
-        }
         if (r.getFilters() != null && r.getFilters().keySet().stream()
                 .anyMatch(key -> AnalyticsFilterKey.fromKey(key).isEmpty())) {
             throw new BadRequestException("Unsupported analytics filter");
@@ -650,6 +649,17 @@ public class AnalyticsJobService {
             series.sort(comparator);
         }
         return series;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sortSeries(List<Map<String, Object>> series, AnalyticsJob job) {
+        AnalyticsSortField sortField = job.getSortField();
+        if (sortField == null) return;
+        Comparator<Map<String, Object>> comparator = Comparator.comparing(
+                point -> (Comparable<Object>) point.get(sortField.field()),
+                Comparator.nullsLast(Comparator.naturalOrder()));
+        if (job.getSortDirection() == AnalyticsSortDirection.DESC) comparator = comparator.reversed();
+        series.sort(comparator);
     }
 
     private List<Map<String, Object>> loginRetentionCohorts(LocalDateTime from, LocalDateTime to) {

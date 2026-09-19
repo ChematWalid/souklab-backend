@@ -2,6 +2,7 @@ package com.project.souklab.model.analytics;
 
 import com.project.souklab.model.BaseEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,7 +27,7 @@ public class AnalyticsJob extends BaseEntity {
     @Column(name = "range_to_date", nullable = false) private LocalDate toDate;
     @Column(name = "page_number", nullable = false) private int pageNumber;
     @Column(name = "page_size", nullable = false) private int pageSize;
-    @Column(name = "sort_field", length = 64) private String sortField;
+    @Convert(converter = AnalyticsSortFieldConverter.class) @Column(name = "sort_field", length = 64) private AnalyticsSortField sortField;
     @Enumerated(EnumType.STRING) @Column(name = "sort_direction", length = 8) private AnalyticsSortDirection sortDirection;
     @Column(name = "filters_json", columnDefinition = "TEXT") private String filtersJson;
     @Column(name = "permission_scope", columnDefinition = "TEXT", nullable = false) private String permissionScope;

@@ -4,6 +4,7 @@ import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.model.analytics.AnalyticsSortDirection;
+import com.project.souklab.model.analytics.AnalyticsSortField;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,7 +20,7 @@ public class AnalyticsJobRequest {
     private Map<String, String> filters;
     private Integer pageNumber;
     private Integer pageSize;
-    private String sortField;
+    private AnalyticsSortField sortField;
     private AnalyticsSortDirection sortDirection;
     private AnalyticsOutputFormat outputFormat;
 }
