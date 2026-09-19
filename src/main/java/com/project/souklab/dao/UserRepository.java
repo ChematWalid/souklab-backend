@@ -43,9 +43,17 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     long countByStatus(AccountStatus status);
 
+    long countByDeletedAtIsNull();
+
+    long countByStatusAndDeletedAtIsNull(AccountStatus status);
+
     long countByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
 
+    long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
+
     long countByEmailVerifiedTrueAndCreatedAtBetween(LocalDateTime from, LocalDateTime to);
+
+    long countByEmailVerifiedTrueAndCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
 
     long countByEmailVerifiedTrueAndDeletedAtIsNull();
 

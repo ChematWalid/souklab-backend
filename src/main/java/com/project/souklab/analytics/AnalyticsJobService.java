@@ -192,9 +192,9 @@ public class AnalyticsJobService {
                 LocalDateTime from = utcStart(job.getFromDate());
                 LocalDateTime to = utcStart(job.getToDate().plusDays(1));
                 LocalDateTime inclusiveTo = to.minusNanos(1);
-                summary.put("totalUsers", users.count());
-                summary.put("newRegistrations", users.countByCreatedAtBetween(from, inclusiveTo));
-                summary.put("verifiedRegistrations", users.countByEmailVerifiedTrueAndCreatedAtBetween(from, inclusiveTo));
+                summary.put("totalUsers", users.countByDeletedAtIsNull());
+                summary.put("newRegistrations", users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
+                summary.put("verifiedRegistrations", users.countByEmailVerifiedTrueAndCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 long registrations = (long) summary.get("newRegistrations");
                 long verifiedRegistrations = (long) summary.get("verifiedRegistrations");
                 summary.put("activationRate", registrations == 0 ? 0.0 : (double) verifiedRegistrations / registrations);
@@ -203,10 +203,10 @@ public class AnalyticsJobService {
                 summary.put("clientProfiles", users.countClientProfiles());
                 summary.put("activeArtisanProfiles", users.countActiveArtisanProfiles(AccountStatus.ACTIVE));
                 summary.put("activeClientProfiles", users.countActiveClientProfiles(AccountStatus.ACTIVE));
-                summary.put("activeUsers", users.countByStatus(AccountStatus.ACTIVE));
-                summary.put("pendingUsers", users.countByStatus(AccountStatus.PENDING));
-                summary.put("suspendedUsers", users.countByStatus(AccountStatus.SUSPENDED));
-                summary.put("pendingUserApprovals", users.countByStatus(AccountStatus.PENDING));
+                summary.put("activeUsers", users.countByStatusAndDeletedAtIsNull(AccountStatus.ACTIVE));
+                summary.put("pendingUsers", users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
+                summary.put("suspendedUsers", users.countByStatusAndDeletedAtIsNull(AccountStatus.SUSPENDED));
+                summary.put("pendingUserApprovals", users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
                 Map<String, Long> moderationActivity = new LinkedHashMap<>();
                 for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.User.APPROVED, AnalyticsEvent.User.SUSPENDED,
                         AnalyticsEvent.User.TIMED_OUT, AnalyticsEvent.User.REINSTATED,
@@ -217,7 +217,7 @@ public class AnalyticsJobService {
                 summary.put("moderationActivity", moderationActivity);
                 Map<String, Long> userStatuses = new LinkedHashMap<>();
                 for (AccountStatus status : AccountStatus.values()) {
-                    userStatuses.put(status.value(), users.countByStatus(status));
+                    userStatuses.put(status.value(), users.countByStatusAndDeletedAtIsNull(status));
                 }
                 summary.put("userStatuses", userStatuses);
                 summary.put("activityEvents", countFilteredEvents(job, from, inclusiveTo));
@@ -246,8 +246,10 @@ public class AnalyticsJobService {
                 if (enrollments != null) summary.put("formationEnrollments", enrollments.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (reviews != null) summary.put("reviewsSubmitted", reviews.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (reviews != null) {
-                    summary.put("publishedReviews", reviews.countByStatusAndDeletedAtIsNull(ReviewStatus.PUBLISHED));
-                    BigDecimal averageRating = reviews.averageRatingByStatus(ReviewStatus.PUBLISHED);
+                    summary.put("publishedReviews", reviews.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                            ReviewStatus.PUBLISHED, from, inclusiveTo));
+                    BigDecimal averageRating = reviews.averageRatingByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                            ReviewStatus.PUBLISHED, from, inclusiveTo);
                     summary.put("averagePublishedRating", averageRating == null ? BigDecimal.ZERO : averageRating);
                 }
                 if (reports != null) summary.put("reportsSubmitted", reports.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
@@ -295,16 +297,16 @@ public class AnalyticsJobService {
                     if (job.getReportType() == AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS) {
                         Map<String, Long> subscriptions = new LinkedHashMap<>();
                         for (SubscriptionStatus status : SubscriptionStatus.values()) {
-                            subscriptions.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo)
-                                    + clientSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
+                            subscriptions.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo)
+                                    + clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                         }
                         summary.put("subscriptionsByStatus", subscriptions);
                         Map<String, Map<String, Long>> subscriptionsBySubscriberType = new LinkedHashMap<>();
                         Map<String, Long> artisanSubscriptionStatuses = new LinkedHashMap<>();
                         Map<String, Long> clientSubscriptionStatuses = new LinkedHashMap<>();
                             for (SubscriptionStatus status : SubscriptionStatus.values()) {
-                            artisanSubscriptionStatuses.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
-                            clientSubscriptionStatuses.put(status.value(), clientSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
+                            artisanSubscriptionStatuses.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                            clientSubscriptionStatuses.put(status.value(), clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                         }
                         subscriptionsBySubscriberType.put("artisan", artisanSubscriptionStatuses);
                         subscriptionsBySubscriberType.put("client", clientSubscriptionStatuses);

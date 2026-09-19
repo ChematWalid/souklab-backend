@@ -27,4 +27,5 @@ public interface ArtisanSubscriptionRepository extends JpaRepository<ArtisanSubs
     long countByAccountIdAndStatus(String accountId, SubscriptionStatus status);
     long countByStatus(SubscriptionStatus status);
     long countByStatusAndCreatedAtBetween(SubscriptionStatus status, LocalDateTime from, LocalDateTime to);
+    long countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(SubscriptionStatus status, LocalDateTime from, LocalDateTime to);
 }
