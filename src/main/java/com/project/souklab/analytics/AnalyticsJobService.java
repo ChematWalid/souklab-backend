@@ -99,18 +99,6 @@ import java.util.concurrent.Semaphore;
 @RequiredArgsConstructor
 @Slf4j
 public class AnalyticsJobService {
-    private static final Set<String> SUPPORTED_EVENT_TYPES = Set.of(
-            AnalyticsEvent.Registration.CREATED.value(), AnalyticsEvent.Authentication.LOGIN_SUCCEEDED.value(),
-            AnalyticsEvent.User.APPROVED.value(), AnalyticsEvent.User.SUSPENDED.value(), AnalyticsEvent.User.TIMED_OUT.value(),
-            AnalyticsEvent.User.REINSTATED.value(), AnalyticsEvent.Profile.VIEW.value(), AnalyticsEvent.Message.SENT.value(),
-            AnalyticsEvent.Formation.SUBMITTED.value(), AnalyticsEvent.Formation.MODERATION_APPROVED.value(),
-            AnalyticsEvent.Formation.MODERATION_REJECTED.value(), AnalyticsEvent.Formation.PUBLISHED.value(),
-            AnalyticsEvent.Formation.ENROLLMENT.value(), AnalyticsEvent.Review.SUBMITTED.value(),
-            AnalyticsEvent.Report.SUBMITTED.value(), AnalyticsEvent.Report.RESOLVED.value(),
-            AnalyticsEvent.Feed.POST_PUBLISHED.value(), AnalyticsEvent.Checkout.CREATED.value(),
-            AnalyticsEvent.Payment.STATE_TRANSITION.value(), AnalyticsEvent.Subscription.ACTIVATED.value(),
-            AnalyticsEvent.Subscription.EXPIRED.value(), AnalyticsEvent.Subscription.CANCELED.value(),
-            AnalyticsEvent.Subscription.REVOKED.value(), AnalyticsEvent.Subscription.RENEWAL.value());
     private final AnalyticsJobRepository jobs;
     private final ActivityEventRepository events;
     private final UserRepository users;
@@ -619,7 +607,7 @@ public class AnalyticsJobService {
             throw new BadRequestException("Unsupported analytics filter");
         }
         if (r.getFilters() != null && r.getFilters().containsKey("eventType")
-                && !SUPPORTED_EVENT_TYPES.contains(r.getFilters().get("eventType"))) {
+                && AnalyticsEvent.fromValue(r.getFilters().get("eventType")).isEmpty()) {
             throw new BadRequestException("Unsupported analytics event type filter");
         }
     }

@@ -1,5 +1,8 @@
 package com.project.souklab.analytics;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Canonical activity-event taxonomy. Nested enums keep related event names
  * discoverable while {@link #value()} preserves the stable persisted value.
@@ -9,6 +12,23 @@ public final class AnalyticsEvent {
 
     public interface Type {
         String value();
+    }
+
+    public static List<Type> all() {
+        return List.of(
+                Registration.CREATED, Authentication.LOGIN_SUCCEEDED,
+                User.APPROVED, User.SUSPENDED, User.TIMED_OUT, User.REINSTATED,
+                Profile.VIEW, Message.SENT,
+                Formation.SUBMITTED, Formation.MODERATION_APPROVED, Formation.MODERATION_REJECTED,
+                Formation.PUBLISHED, Formation.ENROLLMENT,
+                Review.SUBMITTED, Report.SUBMITTED, Report.RESOLVED,
+                Feed.POST_PUBLISHED, Checkout.CREATED, Payment.STATE_TRANSITION,
+                Subscription.ACTIVATED, Subscription.EXPIRED, Subscription.CANCELED,
+                Subscription.REVOKED, Subscription.RENEWAL);
+    }
+
+    public static Optional<Type> fromValue(String value) {
+        return all().stream().filter(type -> type.value().equals(value)).findFirst();
     }
 
     public enum Registration implements Type {

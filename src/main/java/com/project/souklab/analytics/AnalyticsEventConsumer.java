@@ -36,6 +36,7 @@ public class AnalyticsEventConsumer {
         String id = event.path("eventId").asText(null);
         String type = event.path("eventType").asText(null);
         if (id == null || type == null) throw new IllegalArgumentException("Analytics event lacks identity or type");
+        if (AnalyticsEvent.fromValue(type).isEmpty()) throw new IllegalArgumentException("Analytics event type is not registered");
         if (processed.existsByEventId(id)) return;
         LocalDate day = LocalDateTime.parse(event.path("eventTime").asText()).atOffset(ZoneOffset.UTC)
                 .atZoneSameInstant(ZoneId.of(properties.getBusinessTimeZone())).toLocalDate();

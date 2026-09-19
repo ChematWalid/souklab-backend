@@ -11,6 +11,8 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsEvent.Report.RESOLVED.value()).isEqualTo("REPORT_RESOLVED");
         assertThat(AnalyticsEvent.Authentication.LOGIN_SUCCEEDED.value()).isEqualTo("LOGIN_SUCCEEDED");
         assertThat(AnalyticsEvent.Subscription.RENEWAL.value()).isEqualTo("SUBSCRIPTION_RENEWAL");
+        assertThat(AnalyticsEvent.fromValue("REPORT_RESOLVED")).contains(AnalyticsEvent.Report.RESOLVED);
+        assertThat(AnalyticsEvent.fromValue("unknown_event")).isEmpty();
     }
 
     @Test
