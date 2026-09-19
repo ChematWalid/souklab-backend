@@ -12,6 +12,9 @@ The verification harness provisioned isolated MariaDB 11.4, RabbitMQ 4.0,
 Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 
 - validated and applied Flyway migrations V1 through V12 to a fresh schema;
+- enabled the application analytics RabbitMQ connection and verified the
+  durable exchange/queue, publisher confirms, consumer delivery, and
+  idempotency marker persistence;
 - ran the MariaDB migration, RabbitMQ delivery, and Redis rate-limit integration tests;
 - exercised MinIO-backed storage tests;
 - ran the complete Maven test suite with JaCoCo reporting.
@@ -19,11 +22,11 @@ Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 Result:
 
 ```text
-Tests run: 1205, Failures: 0, Errors: 0, Skipped: 1
+Tests run: 1209, Failures: 0, Errors: 0, Skipped: 4
 BUILD SUCCESS
 ```
 
-The single skipped test is the existing opt-in Phase 9 migration test. The
+The skipped tests are existing opt-in/environment-gated tests. The
 verification containers and volumes were removed by the harness cleanup trap.
 
 ## Scope boundary
