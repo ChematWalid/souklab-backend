@@ -41,6 +41,9 @@ public class ChatPresenceService {
         int current = Math.max(0, count.addAndGet(delta));
         if (current == 0) sessions.remove(username, count);
         boolean online = current > 0;
-        messagingTemplate.convertAndSend(properties.getChat().getPresenceDestination(), new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), online ? "PRESENCE_ONLINE" : "PRESENCE_OFFLINE", null, null, null, LocalDateTime.now(clock), Map.of("username", username, "online", online)));
+        ChatEventType.Type eventType = online ? ChatEventType.Presence.ONLINE : ChatEventType.Presence.OFFLINE;
+        messagingTemplate.convertAndSend(properties.getChat().getPresenceDestination(), ChatEvent.create(
+                properties.getChat().getWebsocketProtocolVersion(), eventType, null, null, null,
+                LocalDateTime.now(clock), Map.of("username", username, "online", online)));
     }
 }

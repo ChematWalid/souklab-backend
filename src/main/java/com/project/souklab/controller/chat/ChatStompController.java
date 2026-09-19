@@ -7,6 +7,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.chat.*;
 import com.project.souklab.service.chat.ConversationService;
+import com.project.souklab.service.chat.ChatEventType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -33,25 +34,25 @@ public class ChatStompController {
     @MessageMapping("/v1/conversations/{conversationId}/messages.send")
     public void send(@DestinationVariable String conversationId, @Valid @Payload SendMessageRequest request, Principal principal) {
         MessageResponse response = withPrincipal(principal, () -> conversationService.send(conversationId, request));
-        acknowledge(principal, new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "COMMAND_ACKNOWLEDGED", conversationId, response.id(), request.idempotencyKey(), LocalDateTime.now(clock), response));
+        acknowledge(principal, ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Command.ACKNOWLEDGED, conversationId, response.id(), request.idempotencyKey(), LocalDateTime.now(clock), response));
     }
 
     @MessageMapping("/v1/conversations/{conversationId}/messages.edit")
     public void edit(@DestinationVariable String conversationId, EditMessageCommand command, Principal principal) {
         MessageResponse response = withPrincipal(principal, () -> conversationService.edit(conversationId, command.messageId(), new EditMessageRequest(command.content())));
-        acknowledge(principal, new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "COMMAND_ACKNOWLEDGED", conversationId, response.id(), command.correlationId(), LocalDateTime.now(clock), response));
+        acknowledge(principal, ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Command.ACKNOWLEDGED, conversationId, response.id(), command.correlationId(), LocalDateTime.now(clock), response));
     }
 
     @MessageMapping("/v1/conversations/{conversationId}/messages.delete")
     public void delete(@DestinationVariable String conversationId, MessageCommand command, Principal principal) {
         withPrincipal(principal, () -> { conversationService.delete(conversationId, command.messageId()); return null; });
-        acknowledge(principal, new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "COMMAND_ACKNOWLEDGED", conversationId, command.messageId(), command.correlationId(), LocalDateTime.now(clock), null));
+        acknowledge(principal, ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Command.ACKNOWLEDGED, conversationId, command.messageId(), command.correlationId(), LocalDateTime.now(clock), null));
     }
 
     @MessageMapping("/v1/conversations/{conversationId}/read")
     public void read(@DestinationVariable String conversationId, MessageCommand command, Principal principal) {
         withPrincipal(principal, () -> { conversationService.markRead(conversationId, command.messageId()); return null; });
-        acknowledge(principal, new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "READ_UP_TO", conversationId, command.messageId(), command.correlationId(), LocalDateTime.now(clock), null));
+        acknowledge(principal, ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UP_TO, conversationId, command.messageId(), command.correlationId(), LocalDateTime.now(clock), null));
     }
 
     @MessageMapping("/v1/conversations/{conversationId}/typing.start")
@@ -69,7 +70,7 @@ public class ChatStompController {
     @MessageExceptionHandler
     public void handleError(Throwable error, Principal principal) {
         if (principal != null) {
-            ChatEvent event = new ChatEvent(properties.getChat().getWebsocketProtocolVersion(), "COMMAND_ERROR", null, null, null, LocalDateTime.now(clock), Map.of("message", error.getMessage() == null ? "Chat command failed" : error.getMessage()));
+            ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Command.ERROR, null, null, null, LocalDateTime.now(clock), Map.of("message", error.getMessage() == null ? "Chat command failed" : error.getMessage()));
             acknowledge(principal, event);
         }
     }
