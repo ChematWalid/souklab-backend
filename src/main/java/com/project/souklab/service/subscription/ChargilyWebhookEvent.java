@@ -1,5 +1,6 @@
 package com.project.souklab.service.subscription;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.project.souklab.model.EnumValue;
 
@@ -27,6 +28,7 @@ public final class ChargilyWebhookEvent {
             return Arrays.stream(values()).filter(event -> event != UNKNOWN && event.value.equals(value)).findFirst();
         }
 
+        @JsonCreator
         public static Checkout fromValueOrUnknown(String value) {
             return fromValue(value).orElse(UNKNOWN);
         }

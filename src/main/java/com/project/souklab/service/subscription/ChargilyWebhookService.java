@@ -61,8 +61,9 @@ public class ChargilyWebhookService {
             throw new InvalidWebhookSignatureException();
         }
         ChargilyWebhookPayload payload = parse(rawBody);
-        ChargilyWebhookEvent.Checkout eventType = ChargilyWebhookEvent.Checkout.fromValue(payload.getType()).orElse(null);
+        ChargilyWebhookEvent.Checkout eventType = payload.getType();
         if (payload.getId() == null || payload.getId().isBlank() || eventType == null
+                || eventType == ChargilyWebhookEvent.Checkout.UNKNOWN
                 || payload.getData() == null || !payload.getData().isObject() || payload.getCreatedAt() == null) {
             throw new MalformedWebhookException("Unsupported or incomplete webhook event");
         }
