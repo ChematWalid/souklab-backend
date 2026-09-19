@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.config.AnalyticsProperties;
 import com.project.souklab.dao.analytics.AnalyticsJobRepository;
 import com.project.souklab.dto.analytics.AnalyticsJobRequest;
+import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.analytics.AnalyticsBucket;
@@ -40,6 +41,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.concurrent.Executor;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -94,6 +96,21 @@ class AnalyticsJobAuthorizationTest {
         assertThatThrownBy(() -> service.submit(request, "admin@example.com", false))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("Financial analytics permission is required");
+    }
+
+    @Test
+    void rejectsBucketDisabledByConfiguration() {
+        when(properties.getSupportedBuckets()).thenReturn(List.of(AnalyticsBucket.DAY));
+
+        AnalyticsJobRequest request = new AnalyticsJobRequest();
+        request.setReportType(AnalyticsReportType.OVERVIEW);
+        request.setFromDate(LocalDate.of(2026, 1, 1));
+        request.setToDate(LocalDate.of(2026, 1, 1));
+        request.setBucket(AnalyticsBucket.WEEK);
+
+        assertThatThrownBy(() -> service.submit(request, "admin@example.com", false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Analytics bucket is not enabled by configuration");
     }
 
     @Test

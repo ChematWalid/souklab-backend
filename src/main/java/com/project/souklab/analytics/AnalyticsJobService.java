@@ -583,6 +583,10 @@ public class AnalyticsJobService {
     private void validate(AnalyticsJobRequest r, boolean financial) {
         if (r.getReportType() == null || r.getBucket() == null || r.getFromDate() == null || r.getToDate() == null) throw new BadRequestException("Report type, range, and bucket are required");
         if (r.getToDate().isBefore(r.getFromDate())) throw new BadRequestException("Analytics end date must not precede start date");
+        if (properties.getSupportedBuckets() != null && !properties.getSupportedBuckets().isEmpty()
+                && !properties.getSupportedBuckets().contains(r.getBucket())) {
+            throw new BadRequestException("Analytics bucket is not enabled by configuration");
+        }
         long days = ChronoUnit.DAYS.between(r.getFromDate(), r.getToDate()) + 1;
         if (days > properties.getMaximumRangeDays()) throw new BadRequestException("Analytics date range exceeds configured maximum");
         long estimatedBuckets = switch (r.getBucket()) {

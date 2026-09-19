@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 import com.project.souklab.filestorage.config.StorageProperties;
+import com.project.souklab.model.analytics.AnalyticsBucket;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.env.Environment;
 import org.springframework.util.unit.DataSize;
@@ -83,6 +84,36 @@ class ConfigurationPolicyValidatorTest {
         assertThatCode(() -> fixture.validator.validate()).doesNotThrowAnyException();
         openApi.setPath("v3/api-docs");
         assertThatThrownBy(() -> fixture.validator.validate()).hasMessageContaining("app.openapi.path");
+    }
+
+    @Test
+    void rejectsEmptyOrDuplicateAnalyticsBuckets() {
+        Fixture fixture = new Fixture();
+        AnalyticsProperties analytics = validAnalyticsProperties();
+        fixture.validator.setAnalyticsProperties(analytics);
+
+        analytics.setSupportedBuckets(List.of());
+        assertThatThrownBy(() -> fixture.validator.validate())
+                .hasMessageContaining("app.analytics page, range, and bucket limits");
+
+        analytics.setSupportedBuckets(List.of(AnalyticsBucket.DAY, AnalyticsBucket.DAY));
+        assertThatThrownBy(() -> fixture.validator.validate())
+                .hasMessageContaining("supported-buckets");
+    }
+
+    private AnalyticsProperties validAnalyticsProperties() {
+        AnalyticsProperties analytics = new AnalyticsProperties();
+        analytics.setDefaultPageSize(20);
+        analytics.setMaximumPageSize(100);
+        analytics.setMaximumRangeDays(366);
+        analytics.setMaximumBucketCount(500);
+        analytics.setSupportedBuckets(List.of(AnalyticsBucket.DAY, AnalyticsBucket.WEEK));
+        analytics.setRollupBatchSize(100);
+        analytics.setBackfillBatchSize(100);
+        analytics.setQueryTimeout(Duration.ofSeconds(10));
+        analytics.setJobRetention(Duration.ofHours(24));
+        analytics.setBusinessTimeZone("Africa/Algiers");
+        return analytics;
     }
 
     @Test

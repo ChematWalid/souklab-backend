@@ -112,8 +112,14 @@ public class ConfigurationPolicyValidator {
                     || analyticsProperties.getMaximumRangeDays() <= 0
                     || analyticsProperties.getMaximumBucketCount() <= 0
                     || analyticsProperties.getRollupBatchSize() <= 0
-                    || analyticsProperties.getBackfillBatchSize() <= 0) {
+                    || analyticsProperties.getBackfillBatchSize() <= 0
+                    || analyticsProperties.getSupportedBuckets() == null
+                    || analyticsProperties.getSupportedBuckets().isEmpty()
+                    || analyticsProperties.getSupportedBuckets().stream().anyMatch(bucket -> bucket == null)) {
                 throw new IllegalStateException("app.analytics page, range, and bucket limits are invalid");
+            }
+            if (analyticsProperties.getSupportedBuckets().size() != analyticsProperties.getSupportedBuckets().stream().distinct().count()) {
+                throw new IllegalStateException("app.analytics.supported-buckets must contain unique supported bucket values");
             }
             validatePositiveDuration("app.analytics.query-timeout", analyticsProperties.getQueryTimeout());
             validatePositiveDuration("app.analytics.job-retention", analyticsProperties.getJobRetention());
