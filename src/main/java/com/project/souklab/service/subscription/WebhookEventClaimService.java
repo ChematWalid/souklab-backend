@@ -18,9 +18,9 @@ public class WebhookEventClaimService {
     private final WebhookSecurityService securityService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean claim(String providerEventId, String eventType, String checkoutId, byte[] rawBody) {
+    public boolean claim(String providerEventId, ChargilyWebhookEvent.Checkout eventType, String checkoutId, byte[] rawBody) {
         String encryptedPayload = securityService.encrypt(new String(rawBody, StandardCharsets.UTF_8));
-        return repository.claimEvent(UUID.randomUUID().toString(), providerEventId, eventType, encryptedPayload,
+        return repository.claimEvent(UUID.randomUUID().toString(), providerEventId, eventType.value(), encryptedPayload,
                 WebhookProcessingStatus.RECEIVED.value(), checkoutId) == 1;
     }
 

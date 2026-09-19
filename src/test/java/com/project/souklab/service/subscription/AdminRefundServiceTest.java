@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,8 @@ class AdminRefundServiceTest {
         assertThatThrownBy(() -> service.reject("payment-1", request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("refunds are not supported");
-        verify(audit).logFinancialAction(any(), any(), any(), any(), any(), any(), any(), any(), any());
+        verify(audit).logFinancialAction(any(), any(), any(), anyString(),
+                any(), any(), any(), any(), any());
         verify(notifications).createForUser(account, "Refund requests are unavailable for Chargily Pay V2.",
                 NotificationType.REFUND_REQUEST_UNAVAILABLE, "payment-1");
     }

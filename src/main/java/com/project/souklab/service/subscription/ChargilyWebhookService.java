@@ -79,7 +79,7 @@ public class ChargilyWebhookService {
         if (checkoutId == null || checkoutId.isBlank()) {
             throw new MalformedWebhookException("Webhook checkout identifier is missing");
         }
-        boolean claimed = webhookEventClaimService.claim(payload.getId(), eventType.value(), checkoutId, rawBody);
+        boolean claimed = webhookEventClaimService.claim(payload.getId(), eventType, checkoutId, rawBody);
         if (!claimed) {
             PaymentWebhookLog existing = webhookLogRepository.findByProviderEventId(payload.getId()).orElse(null);
             if (existing == null || existing.getStatus() != WebhookProcessingStatus.FAILED) {

@@ -84,13 +84,13 @@ class ChargilyWebhookServiceTest {
                 + ",\"data\":{\"id\":\"unknown-checkout\"}}").getBytes(StandardCharsets.UTF_8);
         PaymentWebhookLog log = new PaymentWebhookLog();
         log.setStatus(WebhookProcessingStatus.RECEIVED);
-        when(claimService.claim("evt-3", "checkout.paid", "unknown-checkout", body)).thenReturn(true);
+        when(claimService.claim("evt-3", ChargilyWebhookEvent.Checkout.PAID, "unknown-checkout", body)).thenReturn(true);
         when(claimService.acquireProcessing(any(), any())).thenReturn(true);
         when(logRepository.findByProviderEventId("evt-3")).thenReturn(Optional.of(log));
 
         service.process(body, signature(body));
 
-        verify(claimService).claim("evt-3", "checkout.paid", "unknown-checkout", body);
+        verify(claimService).claim("evt-3", ChargilyWebhookEvent.Checkout.PAID, "unknown-checkout", body);
         assertThat(log.getStatus()).isEqualTo(WebhookProcessingStatus.IGNORED);
     }
 
@@ -105,7 +105,7 @@ class ChargilyWebhookServiceTest {
         payment.setSubscriptionId("subscription-4");
         ClientSubscription subscription = new ClientSubscription();
         subscription.setStatus(SubscriptionStatus.PENDING);
-        when(claimService.claim("evt-4", "checkout.failed", "checkout-4", body)).thenReturn(true);
+        when(claimService.claim("evt-4", ChargilyWebhookEvent.Checkout.FAILED, "checkout-4", body)).thenReturn(true);
         when(claimService.acquireProcessing(any(), any())).thenReturn(true);
         when(logRepository.findByProviderEventId("evt-4")).thenReturn(Optional.of(log));
         when(paymentRepository.findByProviderCheckoutId("checkout-4")).thenReturn(Optional.of(payment));
@@ -125,7 +125,7 @@ class ChargilyWebhookServiceTest {
                 + ",\"data\":{\"id\":\"checkout-5\"}}").getBytes(StandardCharsets.UTF_8);
         PaymentWebhookLog log = new PaymentWebhookLog();
         log.setStatus(WebhookProcessingStatus.PROCESSED);
-        when(claimService.claim("evt-5", "checkout.paid", "checkout-5", body)).thenReturn(false);
+        when(claimService.claim("evt-5", ChargilyWebhookEvent.Checkout.PAID, "checkout-5", body)).thenReturn(false);
         when(logRepository.findByProviderEventId("evt-5")).thenReturn(Optional.of(log));
 
         service.process(body, signature(body));
