@@ -684,18 +684,18 @@ public class AnalyticsJobService {
             }
         }
         if (firstRegistrationByActor.isEmpty()) return List.of();
-        Map<String, Set<String>> retainedByWindow = new LinkedHashMap<>();
-        retainedByWindow.put(AnalyticsMetric.Retention.DAY_1.value(), new HashSet<>());
-        retainedByWindow.put(AnalyticsMetric.Retention.DAY_7.value(), new HashSet<>());
-        retainedByWindow.put(AnalyticsMetric.Retention.DAY_30.value(), new HashSet<>());
+        Map<AnalyticsMetric.Retention, Set<String>> retainedByWindow = new LinkedHashMap<>();
+        retainedByWindow.put(AnalyticsMetric.Retention.DAY_1, new HashSet<>());
+        retainedByWindow.put(AnalyticsMetric.Retention.DAY_7, new HashSet<>());
+        retainedByWindow.put(AnalyticsMetric.Retention.DAY_30, new HashSet<>());
         for (var event : events.findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(
                 AnalyticsEvent.Authentication.Login.SUCCEEDED, from, to.plusDays(30))) {
             LocalDateTime cohort = firstRegistrationByActor.get(event.getActorId());
             if (cohort == null) continue;
             long age = ChronoUnit.DAYS.between(businessDate(cohort), businessDate(event.getEventTime()));
-            if (age == 1) retainedByWindow.get(AnalyticsMetric.Retention.DAY_1.value()).add(event.getActorId());
-            if (age == 7) retainedByWindow.get(AnalyticsMetric.Retention.DAY_7.value()).add(event.getActorId());
-            if (age == 30) retainedByWindow.get(AnalyticsMetric.Retention.DAY_30.value()).add(event.getActorId());
+            if (age == 1) retainedByWindow.get(AnalyticsMetric.Retention.DAY_1).add(event.getActorId());
+            if (age == 7) retainedByWindow.get(AnalyticsMetric.Retention.DAY_7).add(event.getActorId());
+            if (age == 30) retainedByWindow.get(AnalyticsMetric.Retention.DAY_30).add(event.getActorId());
         }
         Map<LocalDate, Long> cohortSizes = firstRegistrationByActor.values().stream()
                 .collect(Collectors.groupingBy(this::businessDate,
@@ -705,13 +705,13 @@ public class AnalyticsJobService {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put(AnalyticsMetric.Retention.COHORT_DATE.value(), entry.getKey());
             row.put(AnalyticsMetric.Retention.COHORT_SIZE.value(), size);
-            for (Map.Entry<String, Set<String>> window : retainedByWindow.entrySet()) {
+            for (Map.Entry<AnalyticsMetric.Retention, Set<String>> window : retainedByWindow.entrySet()) {
                 long retained = window.getValue().stream()
                         .filter(firstRegistrationByActor::containsKey)
                         .filter(actor -> businessDate(firstRegistrationByActor.get(actor)).equals(entry.getKey()))
                         .count();
-                row.put(window.getKey() + AnalyticsMetric.Retention.RETAINED_SUFFIX.value(), retained);
-                row.put(window.getKey() + AnalyticsMetric.Retention.RATE_SUFFIX.value(), size == 0 ? 0.0 : (double) retained / size);
+                row.put(window.getKey().value() + AnalyticsMetric.Retention.RETAINED_SUFFIX.value(), retained);
+                row.put(window.getKey().value() + AnalyticsMetric.Retention.RATE_SUFFIX.value(), size == 0 ? 0.0 : (double) retained / size);
             }
             return row;
         }).toList();
