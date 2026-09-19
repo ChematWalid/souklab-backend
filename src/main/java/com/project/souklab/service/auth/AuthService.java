@@ -29,6 +29,7 @@ import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.OAuthIdentity;
+import com.project.souklab.model.OAuthProvider;
 import com.project.souklab.model.RefreshToken;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.security.Permission;
@@ -452,7 +453,7 @@ public class AuthService {
      */
     @Transactional
     public JwtResponseDTO processOAuth2Success(OAuth2User oAuth2User, String intentRole, HttpServletRequest request) {
-        String provider = "GOOGLE";
+        String provider = OAuthProvider.GOOGLE.value();
         String providerUserId = oAuth2User.getAttribute("sub");
         if (providerUserId == null || providerUserId.isBlank()) {
             providerUserId = oAuth2User.getName();
