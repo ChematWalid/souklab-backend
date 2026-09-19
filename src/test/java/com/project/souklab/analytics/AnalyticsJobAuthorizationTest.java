@@ -88,7 +88,7 @@ class AnalyticsJobAuthorizationTest {
         when(properties.getMaximumPageSize()).thenReturn(100);
 
         AnalyticsJobRequest request = new AnalyticsJobRequest();
-        request.setReportType(AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS);
+        request.setReportType(AnalyticsReportType.Subscriptions.PAYMENTS);
         request.setFromDate(LocalDate.of(2026, 1, 1));
         request.setToDate(LocalDate.of(2026, 1, 1));
         request.setBucket(AnalyticsBucket.DAY);
@@ -103,7 +103,7 @@ class AnalyticsJobAuthorizationTest {
         when(properties.getSupportedBuckets()).thenReturn(List.of(AnalyticsBucket.DAY));
 
         AnalyticsJobRequest request = new AnalyticsJobRequest();
-        request.setReportType(AnalyticsReportType.OVERVIEW);
+        request.setReportType(AnalyticsReportType.Overview.REPORT);
         request.setFromDate(LocalDate.of(2026, 1, 1));
         request.setToDate(LocalDate.of(2026, 1, 1));
         request.setBucket(AnalyticsBucket.WEEK);
@@ -120,7 +120,7 @@ class AnalyticsJobAuthorizationTest {
         AnalyticsJob job = new AnalyticsJob();
         job.setId("job-1");
         job.setOwnerId("owner-1");
-        job.setReportType(AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS);
+        job.setReportType(AnalyticsReportType.Subscriptions.PAYMENTS);
         job.setPermissionScope(Permission.Analytics.ADMIN.value() + ","
                 + Permission.Financial.ADMIN.value());
         when(users.findByEmail("owner@example.com")).thenReturn(Optional.of(owner));

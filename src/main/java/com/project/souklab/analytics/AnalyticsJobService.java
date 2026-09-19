@@ -247,7 +247,7 @@ public class AnalyticsJobService {
                         events.countDistinctActorsByRegionAndEventTimeBetween(eventFilter, from, inclusiveTo)));
                 summary.put(AnalyticsMetric.Summary.Engagement.BY_CRAFT_CATEGORY, dimensionCounts(
                         events.countDistinctActorsByCraftCategoryAndEventTimeBetween(eventFilter, from, inclusiveTo)));
-                if (job.getReportType() == AnalyticsReportType.GROWTH) {
+                if (job.getReportType() == AnalyticsReportType.Growth.REPORT) {
                     summary.put(AnalyticsMetric.Summary.Engagement.LOGIN_RETENTION_COHORTS, loginRetentionCohorts(from, inclusiveTo));
                 }
                 if (feedPosts != null) summary.put(AnalyticsMetric.Summary.Content.FEED_POSTS_CREATED, feedPosts.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
@@ -320,7 +320,7 @@ public class AnalyticsJobService {
                         statuses.put(status, payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     }
                     summary.put(AnalyticsMetric.Summary.Payment.BY_STATUS, statuses);
-                    if (job.getReportType() == AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS) {
+                    if (job.getReportType() == AnalyticsReportType.Subscriptions.PAYMENTS) {
                         Map<SubscriptionStatus, Long> subscriptions = new LinkedHashMap<>();
                         for (SubscriptionStatus status : SubscriptionStatus.values()) {
                             subscriptions.put(status, artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo)
@@ -367,7 +367,7 @@ public class AnalyticsJobService {
                                 from, inclusiveTo));
                     }
                 }
-                if (job.getReportType() == AnalyticsReportType.OPERATIONAL) {
+                if (job.getReportType() == AnalyticsReportType.Operational.REPORT) {
                     Map<AnalyticsMetric.Key, Object> operational = new LinkedHashMap<>();
                     operational.put(AnalyticsMetric.Operational.Job.Analytics.QUEUED, jobs.countByStatus(AnalyticsJobStatus.QUEUED));
                     operational.put(AnalyticsMetric.Operational.Job.Analytics.RUNNING, jobs.countByStatus(AnalyticsJobStatus.RUNNING));
@@ -625,12 +625,12 @@ public class AnalyticsJobService {
         int pageSize = r.getPageSize() == null ? properties.getDefaultPageSize() : r.getPageSize();
         if (pageSize < 1 || pageSize > properties.getMaximumPageSize()) throw new BadRequestException("Analytics page size is outside configured bounds");
         if (r.getPageNumber() != null && r.getPageNumber() < 0) throw new BadRequestException("Analytics page number must not be negative");
-        if (r.getReportType() == AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS && !financial) {
+        if (r.getReportType() == AnalyticsReportType.Subscriptions.PAYMENTS && !financial) {
             throw new ForbiddenException("Financial analytics permission is required");
         }
         if (r.getOutputFormat() != null && r.getOutputFormat() != AnalyticsOutputFormat.JSON
                 && r.getOutputFormat() != AnalyticsOutputFormat.CSV) throw new BadRequestException("Output format must be JSON or CSV");
-        if (r.getReportType() == AnalyticsReportType.CSV_EXPORT
+        if (r.getReportType() == AnalyticsReportType.Csv.EXPORT
                 && r.getOutputFormat() != AnalyticsOutputFormat.CSV) {
             throw new BadRequestException("CSV_EXPORT reports require CSV output format");
         }
@@ -730,18 +730,18 @@ public class AnalyticsJobService {
     private Map<AnalyticsMetric.Key, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> buildTables(AnalyticsJob job,
                                                                                                            Map<AnalyticsMetric.Key, Object> summary) {
         Map<AnalyticsMetric.Key, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables = new LinkedHashMap<>();
-        switch (job.getReportType()) {
+        switch (job.getReportType().family()) {
             case MODERATION -> {
                 addStatusTable(tables, AnalyticsMetric.Table.User.USERS, summary.get(AnalyticsMetric.Summary.User.STATUSES), job);
                 addStatusTable(tables, AnalyticsMetric.Table.Formateur.REQUESTS, summary.get(AnalyticsMetric.Summary.Moderation.FORMATEUR_STATUSES), job);
                 addStatusTable(tables, AnalyticsMetric.Table.Report.REPORTS, summary.get(AnalyticsMetric.Summary.Report.BY_STATUS), job);
             }
-            case CONTENT_LEARNING -> {
+            case CONTENT -> {
                 addStatusTable(tables, AnalyticsMetric.Table.Feed.POSTS, summary.get(AnalyticsMetric.Summary.Content.FEED_POSTS_BY_STATUS), job);
                 addStatusTable(tables, AnalyticsMetric.Table.Formation.FORMATIONS, summary.get(AnalyticsMetric.Summary.Formation.BY_STATUS), job);
                 addStatusTable(tables, AnalyticsMetric.Table.Enrollment.ENROLLMENTS, summary.get(AnalyticsMetric.Summary.Formation.ENROLLMENTS_BY_STATUS), job);
             }
-            case SUBSCRIPTIONS_PAYMENTS -> {
+            case SUBSCRIPTIONS -> {
                 addStatusTable(tables, AnalyticsMetric.Table.Payment.PAYMENTS, summary.get(AnalyticsMetric.Summary.Payment.BY_STATUS), job);
                 addStatusTable(tables, AnalyticsMetric.Table.Subscription.ALL, summary.get(AnalyticsMetric.Summary.Subscription.BY_STATUS), job);
                 if (summary.get(AnalyticsMetric.Summary.Subscription.BY_SUBSCRIBER_TYPE) instanceof Map<?, ?> byType) {

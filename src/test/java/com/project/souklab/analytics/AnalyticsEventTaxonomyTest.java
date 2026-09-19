@@ -143,7 +143,7 @@ class AnalyticsEventTaxonomyTest {
     void analyticsResultKeepsTypedEnumMapKeysAcrossJsonRoundTrip() throws Exception {
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
         AnalyticsResult result = new AnalyticsResult(
-                AnalyticsReportType.OVERVIEW,
+                AnalyticsReportType.Overview.REPORT,
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 31),
                 AnalyticsBucket.DAY,

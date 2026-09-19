@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.analytics.AnalyticsMetricSummaryKeyDeserializer;
 import com.project.souklab.analytics.AnalyticsMetricTableKeyDeserializer;
+import com.project.souklab.model.analytics.AnalyticsReportTypeDeserializer;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.dto.common.PaginatedResponse;
 
 public record AnalyticsResult(
-        AnalyticsReportType reportType,
+        @JsonDeserialize(using = AnalyticsReportTypeDeserializer.class)
+        AnalyticsReportType.Key reportType,
         LocalDate fromDate,
         LocalDate toDate,
         AnalyticsBucket bucket,

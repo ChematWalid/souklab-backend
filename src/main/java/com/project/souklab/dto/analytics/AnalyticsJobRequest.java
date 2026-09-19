@@ -4,6 +4,7 @@ import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsReportType;
+import com.project.souklab.model.analytics.AnalyticsReportTypeDeserializer;
 import com.project.souklab.model.analytics.AnalyticsSortDirection;
 import com.project.souklab.model.analytics.AnalyticsSortField;
 import com.project.souklab.model.analytics.AnalyticsSortFieldDeserializer;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 @Data
 public class AnalyticsJobRequest {
-    @NotNull private AnalyticsReportType reportType;
+    @NotNull @JsonDeserialize(using = AnalyticsReportTypeDeserializer.class) private AnalyticsReportType.Key reportType;
     @NotNull private LocalDate fromDate;
     @NotNull private LocalDate toDate;
     @NotNull private AnalyticsBucket bucket;

@@ -2,11 +2,13 @@ package com.project.souklab.model.analytics;
 
 import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.model.EnumValue;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /** Typed analytics series fields grouped by their semantic dimension. */
 public final class AnalyticsSortField {
     private AnalyticsSortField() { }
 
+    @JsonDeserialize(using = AnalyticsSortFieldValueDeserializer.class)
     public interface Key extends EnumValue {
         AnalyticsMetric.Series seriesField();
     }

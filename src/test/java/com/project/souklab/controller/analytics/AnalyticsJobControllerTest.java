@@ -109,7 +109,7 @@ class AnalyticsJobControllerTest {
     }
 
     private AnalyticsJobResponse response() {
-        return AnalyticsJobResponse.builder().id("job-1").reportType(AnalyticsReportType.OVERVIEW)
+        return AnalyticsJobResponse.builder().id("job-1").reportType(AnalyticsReportType.Overview.REPORT)
                 .status(AnalyticsJobStatus.COMPLETED).bucket(AnalyticsBucket.DAY)
                 .pageNumber(0).pageSize(20).outputFormat(AnalyticsOutputFormat.JSON).build();
     }

@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor
 public class AnalyticsJob extends BaseEntity {
     @Column(name = "owner_id", nullable = false, length = 36) private String ownerId;
-    @Enumerated(EnumType.STRING) @Column(name = "report_type", nullable = false, length = 40) private AnalyticsReportType reportType;
+    @Convert(converter = AnalyticsReportTypeConverter.class) @Column(name = "report_type", nullable = false, length = 40) private AnalyticsReportType.Key reportType;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 16) private AnalyticsJobStatus status;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 16) private AnalyticsBucket bucket;
     @Column(name = "from_date", nullable = false) private LocalDate fromDate;

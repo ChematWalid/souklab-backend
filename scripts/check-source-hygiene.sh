@@ -39,6 +39,10 @@ if rg -n --pcre2 'AnalyticsMetric\.Operational\.Metric\.(?:UPLOADS|VIRUS_SCANS|S
   echo 'flat operational metric or rate-limit scope references detected; use grouped enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsReportType\.(?:OVERVIEW|GROWTH|ENGAGEMENT|MODERATION|CONTENT_LEARNING|SUBSCRIPTIONS_PAYMENTS|OPERATIONAL|TIME_SERIES|CSV_EXPORT)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics report type references detected; use grouped report enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 '"(?:PLAN_(?:CREATE|UPDATE|DEACTIVATE)|REFUND_REQUEST)"' src/main/java src/test/java --glob '*.java' \
     --glob '!FinancialAuditOperation.java'; then
   echo 'raw financial audit operation literals detected; use FinancialAuditOperation grouped enums' >&2

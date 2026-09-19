@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Value @Builder
 public class AnalyticsJobResponse {
     String id;
-    AnalyticsReportType reportType;
+    AnalyticsReportType.Key reportType;
     AnalyticsJobStatus status;
     AnalyticsBucket bucket;
     LocalDate fromDate;
