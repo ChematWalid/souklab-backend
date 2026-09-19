@@ -31,6 +31,11 @@ if rg -n --pcre2 'AnalyticsEvent\.(?:Authentication\.LOGIN_SUCCEEDED|Feed\.POST_
   echo 'flat analytics taxonomy references detected; use grouped event and operation types' >&2
   exit 1
 fi
+if rg -n --pcre2 '"(?:PLAN_(?:CREATE|UPDATE|DEACTIVATE)|REFUND_REQUEST)"' src/main/java src/test/java --glob '*.java' \
+    --glob '!FinancialAuditOperation.java'; then
+  echo 'raw financial audit operation literals detected; use FinancialAuditOperation grouped enums' >&2
+  exit 1
+fi
 if rg -n '\.authority\(\)' src/main/java src/test/java --glob '*.java'; then
   echo 'string authority adapter usage detected; use grouped Permission values and matches' >&2
   exit 1
