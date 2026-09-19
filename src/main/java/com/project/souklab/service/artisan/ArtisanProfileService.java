@@ -22,6 +22,7 @@ import com.project.souklab.dto.profile.ArtisanPublicViewDTO;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
+import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanCertification;
@@ -203,7 +204,8 @@ public class ArtisanProfileService {
             artisanProfileViewRepository.save(view);
             if (activityEventService != null) {
                 activityEventService.record(AnalyticsEvent.Profile.VIEW, viewer.getId(), artisan.getId(),
-                        Map.of("viewerType", viewer.getArtisan() != null ? "ARTISAN" : "CLIENT"));
+                        Map.of("viewerType", viewer.getArtisan() != null
+                                ? AccountRole.ARTISAN.value() : AccountRole.CLIENT.value()));
             }
             artisan.setViewsCount(artisan.getViewsCount() + 1);
             artisanRepository.save(artisan);
