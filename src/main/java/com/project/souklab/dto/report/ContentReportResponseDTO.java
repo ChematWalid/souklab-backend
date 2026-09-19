@@ -1,6 +1,9 @@
 package com.project.souklab.dto.report;
 
 import com.project.souklab.model.ContentReport;
+import com.project.souklab.model.ReportResolutionAction;
+import com.project.souklab.model.ReportStatus;
+import com.project.souklab.model.ReportTargetType;
 import lombok.Builder;
 import lombok.Value;
 
@@ -14,12 +17,12 @@ import java.time.LocalDateTime;
 public class ContentReportResponseDTO {
     String id;
     String reporterId;
-    String targetType;
+    ReportTargetType targetType;
     String targetId;
     String reason;
     String details;
-    String status;
-    String resolutionAction;
+    ReportStatus status;
+    ReportResolutionAction resolutionAction;
     String resolverId;
     String resolutionNote;
     LocalDateTime createdAt;
@@ -34,12 +37,12 @@ public class ContentReportResponseDTO {
         return ContentReportResponseDTO.builder()
                 .id(report.getId())
                 .reporterId(report.getReporter().getId())
-                .targetType(report.getTargetType().value())
+                .targetType(report.getTargetType())
                 .targetId(report.getTargetId())
                 .reason(report.getReason())
                 .details(report.getDetails())
-                .status(report.getStatus().value())
-                .resolutionAction(report.getResolutionAction() == null ? null : report.getResolutionAction().value())
+                .status(report.getStatus())
+                .resolutionAction(report.getResolutionAction())
                 .resolverId(report.getResolver() == null ? null : report.getResolver().getId())
                 .resolutionNote(report.getResolutionNote())
                 .createdAt(report.getCreatedAt())

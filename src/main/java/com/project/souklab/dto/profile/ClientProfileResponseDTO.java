@@ -1,6 +1,7 @@
 package com.project.souklab.dto.profile;
 
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.security.Permission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,7 +37,7 @@ public class ClientProfileResponseDTO implements ProfileResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private String clientType;
+    private ClientType clientType;
     private String companyName;
     private String bio;
     private String address;

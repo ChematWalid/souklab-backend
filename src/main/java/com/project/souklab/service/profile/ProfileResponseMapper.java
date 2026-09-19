@@ -190,7 +190,7 @@ public class ProfileResponseMapper {
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .clientType(client != null ? client.getClientType() : ClientType.INDIVIDUAL.value())
+                .clientType(client != null ? ClientType.fromInput(client.getClientType()).orElse(ClientType.INDIVIDUAL) : ClientType.INDIVIDUAL)
                 .companyName(client != null ? client.getCompanyName() : null)
                 .bio(client != null ? client.getBio() : null)
                 .address(client != null ? client.getAddress() : null)

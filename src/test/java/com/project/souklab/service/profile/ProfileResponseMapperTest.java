@@ -8,6 +8,7 @@ import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.ArtisanGalleryImage;
 import com.project.souklab.model.Client;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.model.Epoque;
 import com.project.souklab.model.JobSubCategory;
 import com.project.souklab.model.Material;
@@ -242,7 +243,7 @@ class ProfileResponseMapperTest {
 
         assertThat(response).isInstanceOf(ClientProfileResponseDTO.class);
         ClientProfileResponseDTO dto = (ClientProfileResponseDTO) response;
-        assertThat(dto.getClientType()).isEqualTo("INDIVIDUAL");
+        assertThat(dto.getClientType()).isEqualTo(ClientType.INDIVIDUAL);
         assertThat(dto.getCompanyName()).isNull();
     }
 
@@ -269,7 +270,7 @@ class ProfileResponseMapperTest {
         assertThat(response).isInstanceOf(ClientProfileResponseDTO.class);
         ClientProfileResponseDTO dto = (ClientProfileResponseDTO) response;
         assertThat(dto.getCompanyName()).isEqualTo("Heritage Imports");
-        assertThat(dto.getClientType()).isEqualTo("BUSINESS");
+        assertThat(dto.getClientType()).isEqualTo(ClientType.BUSINESS);
         assertThat(dto.getCity()).isEqualTo("Tangier");
     }
 

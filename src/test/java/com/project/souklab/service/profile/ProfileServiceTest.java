@@ -20,6 +20,7 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.Client;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.model.Epoque;
 import com.project.souklab.model.JobSubCategory;
 import com.project.souklab.model.Material;
@@ -232,7 +233,7 @@ class ProfileServiceTest {
         ClientProfileResponseDTO profile = (ClientProfileResponseDTO) response;
         assertThat(profile.getEmail()).isEqualTo("client@example.com");
         assertThat(profile.getCompanyName()).isEqualTo("Atlas Trade");
-        assertThat(profile.getClientType()).isEqualTo("BUSINESS");
+        assertThat(profile.getClientType()).isEqualTo(ClientType.BUSINESS);
     }
 
     /**

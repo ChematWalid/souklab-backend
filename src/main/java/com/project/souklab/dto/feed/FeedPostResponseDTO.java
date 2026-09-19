@@ -5,6 +5,8 @@ import java.util.stream.Stream;
 
 import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostMedia;
+import com.project.souklab.model.FeedPostStatus;
+import com.project.souklab.model.FeedPostType;
 import lombok.Builder;
 import lombok.Value;
 
@@ -21,10 +23,10 @@ public class FeedPostResponseDTO {
     String id;
     String authorId;
     String authorName;
-    String type;
+    FeedPostType type;
     String title;
     String body;
-    String status;
+    FeedPostStatus status;
     String formationId;
     LocalDateTime publishedAt;
     String moderationNote;
@@ -57,10 +59,10 @@ public class FeedPostResponseDTO {
                 .id(post.getId())
                 .authorId(post.getAuthor().getId())
                 .authorName(authorName)
-                .type(post.getType().value())
+                .type(post.getType())
                 .title(post.getTitle())
                 .body(post.getBody())
-                .status(post.getStatus().value())
+                .status(post.getStatus())
                 .formationId(post.getFormation() == null ? null : post.getFormation().getId())
                 .publishedAt(post.getPublishedAt())
                 .moderationNote(post.getModerationNote())
