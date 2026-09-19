@@ -444,7 +444,9 @@ public class AnalyticsJobService {
 
     @Transactional(readOnly = true)
     public AnalyticsJobResponse get(String id, String username) {
-        return response(ownerJob(id, username));
+        AnalyticsJob job = ownerJob(id, username);
+        audit(AuditLogAction.ANALYTICS_RESULT_READ, job, "outcome=STATUS");
+        return response(job);
     }
 
     @Transactional(readOnly = true)

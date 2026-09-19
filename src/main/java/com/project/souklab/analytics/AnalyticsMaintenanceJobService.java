@@ -88,8 +88,13 @@ public class AnalyticsMaintenanceJobService {
     public AnalyticsMaintenanceJobResponse get(String id, String username) {
         String ownerId = users.findByEmail(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated administrator not found")).getId();
-        return response(jobs.findByIdAndOwnerId(id, ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Analytics maintenance job not found")));
+        AnalyticsMaintenanceJob job = jobs.findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Analytics maintenance job not found"));
+        auditLogService.logAction(AuditLogAction.ANALYTICS_RESULT_READ,
+                "maintenanceJobId=" + job.getId() + ",operation=" + job.getOperation()
+                        + ",range=" + job.getFromDate() + ".." + job.getToDate()
+                        + ",permissionScope=" + job.getPermissionScope() + ",outcome=STATUS");
+        return response(job);
     }
 
     private void process(String id) {
