@@ -367,28 +367,28 @@ public class AnalyticsJobService {
                     }
                 }
                 if (job.getReportType() == AnalyticsReportType.OPERATIONAL) {
-                    Map<String, Object> operational = new LinkedHashMap<>();
-                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_QUEUED.value(), jobs.countByStatus(AnalyticsJobStatus.QUEUED));
-                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_RUNNING.value(), jobs.countByStatus(AnalyticsJobStatus.RUNNING));
-                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_COMPLETED.value(), jobs.countByStatus(AnalyticsJobStatus.COMPLETED));
-                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_FAILED.value(), jobs.countByStatus(AnalyticsJobStatus.FAILED));
+                    Map<AnalyticsMetric.Key, Object> operational = new LinkedHashMap<>();
+                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_QUEUED, jobs.countByStatus(AnalyticsJobStatus.QUEUED));
+                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_RUNNING, jobs.countByStatus(AnalyticsJobStatus.RUNNING));
+                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_COMPLETED, jobs.countByStatus(AnalyticsJobStatus.COMPLETED));
+                    operational.put(AnalyticsMetric.Operational.ANALYTICS_JOBS_FAILED, jobs.countByStatus(AnalyticsJobStatus.FAILED));
                     if (maintenanceJobs != null) {
-                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_QUEUED.value(), maintenanceJobs.countByStatus(AnalyticsJobStatus.QUEUED));
-                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_RUNNING.value(), maintenanceJobs.countByStatus(AnalyticsJobStatus.RUNNING));
-                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_COMPLETED.value(), maintenanceJobs.countByStatus(AnalyticsJobStatus.COMPLETED));
-                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_FAILED.value(), maintenanceJobs.countByStatus(AnalyticsJobStatus.FAILED));
+                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_QUEUED, maintenanceJobs.countByStatus(AnalyticsJobStatus.QUEUED));
+                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_RUNNING, maintenanceJobs.countByStatus(AnalyticsJobStatus.RUNNING));
+                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_COMPLETED, maintenanceJobs.countByStatus(AnalyticsJobStatus.COMPLETED));
+                        operational.put(AnalyticsMetric.Operational.MAINTENANCE_JOBS_FAILED, maintenanceJobs.countByStatus(AnalyticsJobStatus.FAILED));
                     }
-                    operational.put(AnalyticsMetric.Operational.OUTBOX_PENDING.value(), outbox.countByStatus(OutboxStatus.PENDING));
-                    operational.put(AnalyticsMetric.Operational.OUTBOX_PUBLISHED.value(), outbox.countByStatus(OutboxStatus.PUBLISHED));
-                    operational.put(AnalyticsMetric.Operational.OUTBOX_DEAD_LETTER.value(), outbox.countByStatus(OutboxStatus.DEAD_LETTER));
+                    operational.put(AnalyticsMetric.Operational.OUTBOX_PENDING, outbox.countByStatus(OutboxStatus.PENDING));
+                    operational.put(AnalyticsMetric.Operational.OUTBOX_PUBLISHED, outbox.countByStatus(OutboxStatus.PUBLISHED));
+                    operational.put(AnalyticsMetric.Operational.OUTBOX_DEAD_LETTER, outbox.countByStatus(OutboxStatus.DEAD_LETTER));
                     if (healthEndpoint != null) {
                         HealthDescriptor health = healthEndpoint.health();
-                        operational.put(AnalyticsMetric.Operational.APPLICATION_HEALTH.value(), health.getStatus().getCode());
-                        operational.put(AnalyticsMetric.Operational.HEALTH_COMPONENTS.value(), healthComponentStatuses(health));
+                        operational.put(AnalyticsMetric.Operational.APPLICATION_HEALTH, health.getStatus().getCode());
+                        operational.put(AnalyticsMetric.Operational.HEALTH_COMPONENTS, healthComponentStatuses(health));
                     }
                     if (operationalMetrics != null) {
-                        operational.put(AnalyticsMetric.Operational.REQUEST_COUNTERS.value(), operationalMetrics.snapshot(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC.value()));
-                        operational.put(AnalyticsMetric.Operational.RATE_LIMIT_REJECTIONS.value(), operationalMetrics.snapshot(AnalyticsMetric.Operational.RATE_LIMIT_REJECTION_METRIC.value()));
+                        operational.put(AnalyticsMetric.Operational.REQUEST_COUNTERS, operationalMetrics.snapshot(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC.value()));
+                        operational.put(AnalyticsMetric.Operational.RATE_LIMIT_REJECTIONS, operationalMetrics.snapshot(AnalyticsMetric.Operational.RATE_LIMIT_REJECTION_METRIC.value()));
                     }
                     summary.put(AnalyticsMetric.Summary.OPERATIONAL.value(), operational);
                 }
