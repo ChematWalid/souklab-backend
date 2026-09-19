@@ -5,6 +5,7 @@ import org.springframework.messaging.Message;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.chat.ChatEvent;
 import com.project.souklab.dto.chat.ChatEventType;
+import com.project.souklab.dto.chat.ChatMetadata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -45,6 +46,7 @@ public class ChatPresenceService {
         ChatEventType.Type eventType = online ? ChatEventType.Presence.ONLINE : ChatEventType.Presence.OFFLINE;
         messagingTemplate.convertAndSend(properties.getChat().getPresenceDestination(), ChatEvent.create(
                 properties.getChat().getWebsocketProtocolVersion(), eventType, null, null, null,
-                LocalDateTime.now(clock), Map.of("username", username, "online", online)));
+                LocalDateTime.now(clock), Map.of(ChatMetadata.Presence.USERNAME, username,
+                        ChatMetadata.Presence.ONLINE, online)));
     }
 }

@@ -192,7 +192,7 @@ public class ConversationService {
         ChatEventType.Type eventType = typing ? ChatEventType.Typing.STARTED : ChatEventType.Typing.STOPPED;
         ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), eventType,
                 conversationId, null, correlationId, LocalDateTime.now(clock),
-                Map.of("username", current.getEmail(), "typing", typing));
+                Map.of(ChatMetadata.Typing.USERNAME, current.getEmail(), ChatMetadata.Typing.TYPING, typing));
         messagingTemplate.convertAndSendToUser(recipient.getEmail(), properties.getChat().getMessageDestinationPrefix(), event);
     }
 
@@ -227,5 +227,5 @@ public class ConversationService {
     private MessageCursor decodeCursor(String cursor) { if (cursor == null || cursor.isBlank()) return null; try { String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3); LocalDateTime expiry = LocalDateTime.parse(values[2]); if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired"); return new MessageCursor(LocalDateTime.parse(values[0]), values[1]); } catch (BadRequestException e) { throw e; } catch (Exception e) { throw new BadRequestException("Invalid message cursor"); } }
     private void dispatch(Conversation c, ChatEventType.Type type, Message m, String correlationId) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), type, c.getId(), m.getId(), correlationId, LocalDateTime.now(clock), toMessage(m)); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
     private void send(Conversation c, ChatEvent event) { for (ConversationParticipant p : c.getParticipants()) try { messagingTemplate.convertAndSendToUser(p.getUser().getEmail(), properties.getChat().getEventDestination(), event); } catch (Exception e) { log.warn("Chat event delivery failed", e); } }
-    private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UP_TO, c.getId(), message.getId(), null, LocalDateTime.now(clock), Map.of("reader", reader.getEmail(), "messageId", message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
+    private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UP_TO, c.getId(), message.getId(), null, LocalDateTime.now(clock), Map.of(ChatMetadata.Read.READER, reader.getEmail(), ChatMetadata.Read.MESSAGE_ID, message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
 }
