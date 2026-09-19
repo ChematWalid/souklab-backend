@@ -35,6 +35,12 @@ BUILD SUCCESS
 The skipped tests are existing opt-in/environment-gated tests. The
 verification containers and volumes were removed by the harness cleanup trap.
 
+The subsequent regional/craft engagement query check used the same Docker
+harness with `-Dtest=Phase10ActivityDimensionRepositoryTest` and completed with
+`Tests run: 1, Failures: 0, Errors: 0, Skipped: 0`; both JPQL aggregations
+executed against MariaDB and returned the expected empty result for an empty
+profile dataset.
+
 ## Scope boundary
 
 This is local acceptance evidence, not production-release approval. Hosted CI,
