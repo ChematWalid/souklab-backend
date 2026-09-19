@@ -5,6 +5,7 @@ import java.util.List;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.config.RateLimitEndpointProperties;
 import com.project.souklab.util.ServletResponseUtil;
+import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ class UserRateLimitFilterTest {
         RateLimitBucketStore store = (bucketKey, capacity, refill) -> {
             key.set(bucketKey);
             return buckets.computeIfAbsent(bucketKey, ignored -> Bucket.builder()
-                    .addLimit(io.github.bucket4j.Bandwidth.builder().capacity(capacity)
+                    .addLimit(Bandwidth.builder().capacity(capacity)
                             .refillGreedy(capacity, refill).build()).build());
         };
         UserRateLimitFilter filter = new UserRateLimitFilter(

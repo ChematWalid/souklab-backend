@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
@@ -80,12 +81,12 @@ class S3StorageServiceUnitTest {
 
     @Test
     void wrapsStoreDeleteRetrieveAndExistsFailures() {
-        doThrow(SdkClientException.create("down")).when(client).putObject(any(PutObjectRequest.class), any(software.amazon.awssdk.core.sync.RequestBody.class));
+        doThrow(SdkClientException.create("down")).when(client).putObject(any(PutObjectRequest.class), any(RequestBody.class));
         assertThatThrownBy(() -> service.store(new ByteArrayInputStream(new byte[]{1}), "a.jpg", "image/jpeg", 1))
                 .isInstanceOf(StorageException.class);
         doThrow(SdkClientException.create("down")).when(client).deleteObject(any(DeleteObjectRequest.class));
         assertThatThrownBy(() -> service.delete("key")).isInstanceOf(StorageException.class);
-        doThrow(NoSuchKeyException.builder().build()).when(client).getObject(any(software.amazon.awssdk.services.s3.model.GetObjectRequest.class));
+        doThrow(NoSuchKeyException.builder().build()).when(client).getObject(any(GetObjectRequest.class));
         assertThatThrownBy(() -> service.retrieve("key")).isInstanceOf(FileNotFoundStorageException.class);
         reset(client);
         doThrow(AwsServiceException.builder().statusCode(404).build()).when(client).headObject(any(HeadObjectRequest.class));
