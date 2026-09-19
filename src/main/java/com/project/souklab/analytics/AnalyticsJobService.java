@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +45,7 @@ import com.project.souklab.model.analytics.AnalyticsJobStatus;
 import com.project.souklab.model.analytics.AnalyticsJobArtifact;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
-import com.project.souklab.model.analytics.AnalyticsSortDirection;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
-import com.project.souklab.model.analytics.AnalyticsSortField;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsOutboxEvent;
 import com.project.souklab.dto.analytics.AnalyticsJobEvent;
@@ -639,15 +636,8 @@ public class AnalyticsJobService {
         return series;
     }
 
-    @SuppressWarnings("unchecked")
     private void sortSeries(List<Map<String, Object>> series, AnalyticsJob job) {
-        AnalyticsSortField sortField = job.getSortField();
-        if (sortField == null) return;
-        Comparator<Map<String, Object>> comparator = Comparator.comparing(
-                point -> (Comparable<Object>) point.get(sortField.field()),
-                Comparator.nullsLast(Comparator.naturalOrder()));
-        if (job.getSortDirection() == AnalyticsSortDirection.DESC) comparator = comparator.reversed();
-        series.sort(comparator);
+        AnalyticsSeriesSorter.sort(series, job.getSortField(), job.getSortDirection());
     }
 
     private List<Map<String, Object>> loginRetentionCohorts(LocalDateTime from, LocalDateTime to) {
