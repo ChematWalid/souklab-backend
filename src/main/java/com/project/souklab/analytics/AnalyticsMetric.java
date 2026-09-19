@@ -1,5 +1,6 @@
 package com.project.souklab.analytics;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Stable keys used by the analytics result and rollup contracts.
@@ -54,6 +55,12 @@ public final class AnalyticsMetric {
         Summary(String value) { this.value = value; }
 
         public String value() { return value; }
+
+        @JsonCreator
+        public static Summary fromValue(String value) {
+            for (Summary key : values()) if (key.value.equals(value)) return key;
+            throw new IllegalArgumentException("Unknown analytics summary key: " + value);
+        }
     }
 
     public enum Result implements Key {
@@ -65,6 +72,12 @@ public final class AnalyticsMetric {
         Result(String value) { this.value = value; }
 
         public String value() { return value; }
+
+        @JsonCreator
+        public static Result fromValue(String value) {
+            for (Result key : values()) if (key.value.equals(value)) return key;
+            throw new IllegalArgumentException("Unknown analytics result key: " + value);
+        }
     }
 
     public enum Series implements Key {
@@ -76,6 +89,12 @@ public final class AnalyticsMetric {
         Series(String value) { this.value = value; }
 
         public String value() { return value; }
+
+        @JsonCreator
+        public static Series fromValue(String value) {
+            for (Series key : values()) if (key.value.equals(value)) return key;
+            throw new IllegalArgumentException("Unknown analytics series key: " + value);
+        }
     }
 
     public enum Comparison implements Key {
@@ -109,6 +128,12 @@ public final class AnalyticsMetric {
         Table(String value) { this.value = value; }
 
         public String value() { return value; }
+
+        @JsonCreator
+        public static Table fromValue(String value) {
+            for (Table key : values()) if (key.value.equals(value)) return key;
+            throw new IllegalArgumentException("Unknown analytics table key: " + value);
+        }
     }
 
     public enum Operational implements Key {
@@ -261,6 +286,12 @@ public final class AnalyticsMetric {
         Csv(String value) { this.value = value; }
 
         public String value() { return value; }
+
+        @JsonCreator
+        public static Csv fromValue(String value) {
+            for (Csv key : values()) if (key.value.equals(value)) return key;
+            throw new IllegalArgumentException("Unknown analytics CSV key: " + value);
+        }
     }
 
     public enum Historical implements Key {

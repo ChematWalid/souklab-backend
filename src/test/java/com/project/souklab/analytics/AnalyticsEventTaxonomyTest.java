@@ -9,8 +9,14 @@ import com.project.souklab.model.ReviewStatus;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsSortField;
 import com.project.souklab.dto.analytics.AnalyticsJobRequest;
+import com.project.souklab.dto.analytics.AnalyticsResult;
+import com.project.souklab.dto.common.PaginatedResponse;
+import com.project.souklab.model.analytics.AnalyticsBucket;
+import com.project.souklab.model.analytics.AnalyticsReportType;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,7 +79,7 @@ class AnalyticsEventTaxonomyTest {
 
     @Test
     void analyticsFilterEnumKeepsThePublicJsonKey() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
         String json = mapper.writeValueAsString(Map.of(
                 AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value()));
 
@@ -115,5 +121,31 @@ class AnalyticsEventTaxonomyTest {
         assertThat(mapper.writeValueAsString(EnrollmentStatus.CANCELLED)).isEqualTo("\"CANCELLED\"");
         assertThat(mapper.writeValueAsString(AccountRole.ARTISAN)).isEqualTo("\"ARTISAN\"");
         assertThat(mapper.writeValueAsString(ReviewStatus.PUBLISHED)).isEqualTo("\"PUBLISHED\"");
+    }
+
+    @Test
+    void analyticsResultKeepsTypedEnumMapKeysAcrossJsonRoundTrip() throws Exception {
+        ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+        AnalyticsResult result = new AnalyticsResult(
+                AnalyticsReportType.OVERVIEW,
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 1, 31),
+                AnalyticsBucket.DAY,
+                Map.of(AnalyticsMetric.Summary.NEW_REGISTRATIONS, 7L),
+                PaginatedResponse.<Map<AnalyticsMetric.Series, Object>>builder()
+                        .content(List.of(Map.of(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9L)))
+                        .pageNumber(0).pageSize(20).totalElements(1).totalPages(1).last(true).build(),
+                Map.of(AnalyticsMetric.Table.USERS,
+                        PaginatedResponse.<Map<AnalyticsMetric.Csv, Object>>builder()
+                                .content(List.of(Map.of(AnalyticsMetric.Csv.KEY, "ACTIVE", AnalyticsMetric.Csv.VALUE, 3L)))
+                                .pageNumber(0).pageSize(20).totalElements(1).totalPages(1).last(true).build()));
+
+        AnalyticsResult restored = mapper.readValue(mapper.writeValueAsBytes(result), AnalyticsResult.class);
+
+        assertThat(restored.summary()).containsEntry(AnalyticsMetric.Summary.NEW_REGISTRATIONS, 7);
+        assertThat(restored.series().getContent().getFirst()).containsEntry(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9);
+        assertThat(restored.tables()).containsKey(AnalyticsMetric.Table.USERS);
+        assertThat(restored.tables().get(AnalyticsMetric.Table.USERS).getContent().getFirst())
+                .containsEntry(AnalyticsMetric.Csv.KEY, "ACTIVE");
     }
 }
