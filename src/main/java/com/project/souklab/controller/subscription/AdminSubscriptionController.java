@@ -6,7 +6,8 @@ import com.project.souklab.dto.subscription.ManualSubscriptionGrantRequest;
 import com.project.souklab.dto.subscription.SubscriptionResponse;
 import com.project.souklab.dto.subscription.PaymentResponse;
 import com.project.souklab.dto.subscription.AdminWebhookLogResponse;
-import com.project.souklab.dto.subscription.FinancialStateCorrectionRequest;
+import com.project.souklab.dto.subscription.PaymentStateCorrectionRequest;
+import com.project.souklab.dto.subscription.SubscriptionStateCorrectionRequest;
 import com.project.souklab.dao.PaymentRepository;
 import com.project.souklab.dao.PaymentWebhookLogRepository;
 import org.springframework.data.domain.Pageable;
@@ -84,13 +85,13 @@ public class AdminSubscriptionController {
     }
 
     @PostMapping("/{id}/correct-state")
-    public ResponseEntity<ApiResponse<Void>> correctSubscriptionState(@PathVariable String id, @Valid @RequestBody FinancialStateCorrectionRequest request) {
+    public ResponseEntity<ApiResponse<Void>> correctSubscriptionState(@PathVariable String id, @Valid @RequestBody SubscriptionStateCorrectionRequest request) {
         subscriptionService.correctSubscription(id, request);
         return ResponseEntity.ok(ApiResponse.success(null, "Subscription state corrected"));
     }
 
     @PostMapping("/payments/{id}/correct-state")
-    public ResponseEntity<ApiResponse<Void>> correctPaymentState(@PathVariable String id, @Valid @RequestBody FinancialStateCorrectionRequest request) {
+    public ResponseEntity<ApiResponse<Void>> correctPaymentState(@PathVariable String id, @Valid @RequestBody PaymentStateCorrectionRequest request) {
         subscriptionService.correctPayment(id, request);
         return ResponseEntity.ok(ApiResponse.success(null, "Payment state corrected"));
     }

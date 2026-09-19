@@ -7,7 +7,7 @@ import com.project.souklab.dao.ClientSubscriptionRepository;
 import com.project.souklab.dao.PaymentRepository;
 import com.project.souklab.dao.SubscriptionPlanRepository;
 import com.project.souklab.dao.UserRepository;
-import com.project.souklab.dto.subscription.FinancialStateCorrectionRequest;
+import com.project.souklab.dto.subscription.PaymentStateCorrectionRequest;
 import com.project.souklab.model.Client;
 import com.project.souklab.model.ClientSubscription;
 import com.project.souklab.model.BillingPeriod;
@@ -62,8 +62,8 @@ class AdminSubscriptionServiceTest {
                 mock(SubscriptionPlanRepository.class), artisans, clients, payments, rules,
                 mock(AuditLogService.class), mock(NotificationService.class), new ObjectMapper(),
                 Clock.fixed(Instant.parse("2026-09-18T00:00:00Z"), ZoneOffset.UTC));
-        FinancialStateCorrectionRequest request = new FinancialStateCorrectionRequest();
-        request.setStatus("PAID");
+        PaymentStateCorrectionRequest request = new PaymentStateCorrectionRequest();
+        request.setStatus(PaymentStatus.PAID);
         request.setReason("Verified bank settlement");
 
         service.correctPayment("payment-1", request);

@@ -14,7 +14,8 @@ import com.project.souklab.dao.SubscriptionPlanRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dto.subscription.FinancialReasonRequest;
-import com.project.souklab.dto.subscription.FinancialStateCorrectionRequest;
+import com.project.souklab.dto.subscription.PaymentStateCorrectionRequest;
+import com.project.souklab.dto.subscription.SubscriptionStateCorrectionRequest;
 import com.project.souklab.dto.subscription.ManualSubscriptionGrantRequest;
 import com.project.souklab.dto.subscription.SubscriptionPlanSnapshot;
 import com.project.souklab.dto.subscription.SubscriptionResponse;
@@ -128,15 +129,10 @@ public class AdminSubscriptionService {
     }
 
     @Transactional
-    public void correctPayment(String paymentId, FinancialStateCorrectionRequest request) {
+    public void correctPayment(String paymentId, PaymentStateCorrectionRequest request) {
         User actor = currentUserProvider.requireCurrentUser();
         Payment payment = payments.findById(paymentId).orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-        PaymentStatus corrected;
-        try {
-            corrected = PaymentStatus.valueOf(request.getStatus().trim().toUpperCase());
-        } catch (IllegalArgumentException exception) {
-            throw new BadRequestException("Unsupported payment status");
-        }
+        PaymentStatus corrected = request.getStatus();
         String previous = payment.getStatus().value();
         payment.setStatus(corrected);
         recordPaymentTransition(payment, previous, corrected.value());
@@ -197,14 +193,9 @@ public class AdminSubscriptionService {
     }
 
     @Transactional
-    public void correctSubscription(String subscriptionId, FinancialStateCorrectionRequest request) {
+    public void correctSubscription(String subscriptionId, SubscriptionStateCorrectionRequest request) {
         User actor = currentUserProvider.requireCurrentUser();
-        SubscriptionStatus corrected;
-        try {
-            corrected = SubscriptionStatus.valueOf(request.getStatus().trim().toUpperCase());
-        } catch (IllegalArgumentException exception) {
-            throw new BadRequestException("Unsupported subscription status");
-        }
+        SubscriptionStatus corrected = request.getStatus();
         if (artisanSubscriptions.findWithLockById(subscriptionId).isPresent()) {
             ArtisanSubscription subscription = artisanSubscriptions.findWithLockById(subscriptionId).orElseThrow();
             String previous = subscription.getStatus().value();
