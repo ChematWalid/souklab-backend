@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.stream.StreamSupport;
 import com.project.souklab.service.subscription.AdminSubscriptionService;
+import com.project.souklab.service.subscription.ChargilyWebhookEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,9 @@ public class AdminSubscriptionController {
         List<AdminWebhookLogResponse> result = (query == null || query.isBlank()
                 ? webhookLogRepository.findAllByOrderByCreatedAtDesc(pageable)
                 : webhookLogRepository.findByProviderEventIdContainingIgnoreCaseOrEventTypeContainingIgnoreCaseOrProviderCheckoutIdContainingIgnoreCase(query, query, query, pageable)).stream().map(value -> AdminWebhookLogResponse.builder()
-                .id(value.getId()).providerEventId(value.getProviderEventId()).eventType(value.getEventType()).signatureValid(value.isSignatureValid())
+                .id(value.getId()).providerEventId(value.getProviderEventId())
+                .eventType(ChargilyWebhookEvent.Checkout.fromValueOrUnknown(value.getEventType()))
+                .signatureValid(value.isSignatureValid())
                 .status(value.getStatus()).providerCheckoutId(value.getProviderCheckoutId()).failureReason(value.getFailureReason()).createdAt(value.getCreatedAt()).build()).toList();
         return ResponseEntity.ok(ApiResponse.success(result));
     }
