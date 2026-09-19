@@ -29,7 +29,7 @@ public final class AnalyticsMetric {
 
         private static List<Key> all() {
             return Stream.of(
-                    User.all().toArray(Key[]::new), Engagement.values(), Content.values(), Formation.values(),
+                    User.all().toArray(Key[]::new), Engagement.all().toArray(Key[]::new), Content.values(), Formation.values(),
                     Moderation.values(), Report.values(), Payment.values(), Subscription.values(), General.values())
                     .flatMap(Arrays::stream)
                     .map(key -> (Key) key)
@@ -108,15 +108,94 @@ public final class AnalyticsMetric {
         }
 
         public enum Engagement implements Key {
-            ACTIVITY_EVENTS("activityEvents"), SUCCESSFUL_LOGINS("successfulLogins"),
-            PUBLISHED_POSTS("publishedPosts"), MESSAGES_SENT("messagesSent"), PROFILE_VIEWS("profileViews"),
-            REPORT_RESOLUTIONS("reportResolutions"), DAU("dau"), WAU("wau"), MAU("mau"),
-            BY_ACCOUNT_TYPE("engagementByAccountType"), BY_REGION("engagementByRegion"),
-            BY_CRAFT_CATEGORY("engagementByCraftCategory"), LOGIN_RETENTION_COHORTS("loginRetentionCohorts");
+            ;
 
-            private final String value;
-            Engagement(String value) { this.value = value; }
-            public String value() { return value; }
+            private Engagement() { }
+
+            private static List<Key> all() {
+                return Stream.of(Activity.values(), Login.values(), Post.values(), Message.values(),
+                                Profile.values(), Report.values(), Audience.values(), Dimension.values(),
+                                Dimension.Craft.values(), Retention.Login.values())
+                        .flatMap(Arrays::stream)
+                        .map(key -> (Key) key)
+                        .toList();
+            }
+
+            public enum Activity implements Key {
+                EVENTS("activityEvents");
+                private final String value;
+                Activity(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Login implements Key {
+                SUCCESSFUL("successfulLogins");
+                private final String value;
+                Login(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Post implements Key {
+                PUBLISHED("publishedPosts");
+                private final String value;
+                Post(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Message implements Key {
+                SENT("messagesSent");
+                private final String value;
+                Message(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Profile implements Key {
+                VIEWS("profileViews");
+                private final String value;
+                Profile(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Report implements Key {
+                RESOLUTIONS("reportResolutions");
+                private final String value;
+                Report(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Audience implements Key {
+                DAU("dau"), WAU("wau"), MAU("mau");
+                private final String value;
+                Audience(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Dimension implements Key {
+                ACCOUNT_TYPE("engagementByAccountType"), REGION("engagementByRegion");
+                private final String value;
+                Dimension(String value) { this.value = value; }
+                public String value() { return value; }
+
+                public enum Craft implements Key {
+                    CATEGORY("engagementByCraftCategory");
+                    private final String value;
+                    Craft(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+            }
+
+            public enum Retention implements Key {
+                ;
+
+                private Retention() { }
+
+                public enum Login implements Key {
+                    COHORTS("loginRetentionCohorts");
+                    private final String value;
+                    Login(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+            }
         }
 
         public enum Content implements Key {

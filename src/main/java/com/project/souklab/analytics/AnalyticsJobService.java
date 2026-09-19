@@ -223,32 +223,32 @@ public class AnalyticsJobService {
                     userStatuses.put(status, users.countByStatusAndDeletedAtIsNull(status));
                 }
                 summary.put(AnalyticsMetric.Summary.User.Status.ALL, userStatuses);
-                summary.put(AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, countFilteredEvents(job, from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Engagement.SUCCESSFUL_LOGINS, countFilteredEvent(job, AnalyticsEvent.Authentication.Login.SUCCEEDED, from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Engagement.PUBLISHED_POSTS, countFilteredEvent(job, AnalyticsEvent.Feed.Post.PUBLISHED, from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Engagement.MESSAGES_SENT, countFilteredEvent(job, AnalyticsEvent.Message.SENT, from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Engagement.PROFILE_VIEWS, countFilteredEvent(job, AnalyticsEvent.Profile.VIEW, from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Engagement.REPORT_RESOLUTIONS, countFilteredEvent(job, AnalyticsEvent.Report.RESOLVED, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Activity.EVENTS, countFilteredEvents(job, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Login.SUCCESSFUL, countFilteredEvent(job, AnalyticsEvent.Authentication.Login.SUCCEEDED, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Post.PUBLISHED, countFilteredEvent(job, AnalyticsEvent.Feed.Post.PUBLISHED, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Message.SENT, countFilteredEvent(job, AnalyticsEvent.Message.SENT, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Profile.VIEWS, countFilteredEvent(job, AnalyticsEvent.Profile.VIEW, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Report.RESOLUTIONS, countFilteredEvent(job, AnalyticsEvent.Report.RESOLVED, from, inclusiveTo));
                 LocalDateTime activityDayStart = utcStart(job.getToDate());
                 LocalDateTime activityWeekStart = utcStart(job.getToDate().minusDays(6));
                 LocalDateTime activityMonthStart = utcStart(job.getToDate().minusDays(29));
-                summary.put(AnalyticsMetric.Summary.Engagement.DAU, countFilteredDistinctActors(job, activityDayStart, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Engagement.WAU, countFilteredDistinctActors(job, activityWeekStart, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Engagement.MAU, countFilteredDistinctActors(job, activityMonthStart, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Audience.DAU, countFilteredDistinctActors(job, activityDayStart, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Audience.WAU, countFilteredDistinctActors(job, activityWeekStart, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.Engagement.Audience.MAU, countFilteredDistinctActors(job, activityMonthStart, inclusiveTo));
                 AnalyticsEvent.Type eventFilter = eventTypeFilter(job);
-                summary.put(AnalyticsMetric.Summary.Engagement.BY_ACCOUNT_TYPE, Map.of(
+                summary.put(AnalyticsMetric.Summary.Engagement.Dimension.ACCOUNT_TYPE, Map.of(
                         AnalyticsMetric.AccountType.ARTISAN, eventFilter == null
                                 ? events.countDistinctArtisanActorsByEventTimeBetween(from, inclusiveTo)
                                 : events.countDistinctArtisanActorsByTypeAndEventTimeBetween(eventFilter, from, inclusiveTo),
                         AnalyticsMetric.AccountType.CLIENT, eventFilter == null
                                 ? events.countDistinctClientActorsByEventTimeBetween(from, inclusiveTo)
                                 : events.countDistinctClientActorsByTypeAndEventTimeBetween(eventFilter, from, inclusiveTo)));
-                summary.put(AnalyticsMetric.Summary.Engagement.BY_REGION, dimensionCounts(
+                summary.put(AnalyticsMetric.Summary.Engagement.Dimension.REGION, dimensionCounts(
                         events.countDistinctActorsByRegionAndEventTimeBetween(eventFilter, from, inclusiveTo)));
-                summary.put(AnalyticsMetric.Summary.Engagement.BY_CRAFT_CATEGORY, dimensionCounts(
+                summary.put(AnalyticsMetric.Summary.Engagement.Dimension.Craft.CATEGORY, dimensionCounts(
                         events.countDistinctActorsByCraftCategoryAndEventTimeBetween(eventFilter, from, inclusiveTo)));
                 if (job.getReportType() == AnalyticsReportType.Growth.REPORT) {
-                    summary.put(AnalyticsMetric.Summary.Engagement.LOGIN_RETENTION_COHORTS, loginRetentionCohorts(from, inclusiveTo));
+                    summary.put(AnalyticsMetric.Summary.Engagement.Retention.Login.COHORTS, loginRetentionCohorts(from, inclusiveTo));
                 }
                 if (feedPosts != null) summary.put(AnalyticsMetric.Summary.Content.FEED_POSTS_CREATED, feedPosts.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (formations != null) {
@@ -400,7 +400,7 @@ public class AnalyticsJobService {
                 comparison.put(AnalyticsMetric.Summary.User.Registration.NEW, Map.of(
                         AnalyticsMetric.Comparison.CURRENT, users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo),
                         AnalyticsMetric.Comparison.PREVIOUS, users.countByCreatedAtBetweenAndDeletedAtIsNull(previousFrom, previousTo)));
-                comparison.put(AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, Map.of(
+                comparison.put(AnalyticsMetric.Summary.Engagement.Activity.EVENTS, Map.of(
                         AnalyticsMetric.Comparison.CURRENT, countFilteredEvents(job, from, inclusiveTo),
                         AnalyticsMetric.Comparison.PREVIOUS, countFilteredEvents(job, previousFrom, previousTo)));
                 summary.put(AnalyticsMetric.Summary.General.PERIOD_COMPARISON, comparison);
@@ -750,11 +750,11 @@ public class AnalyticsJobService {
                 }
             }
             case ENGAGEMENT, TIME_SERIES -> addStatusTable(tables, AnalyticsMetric.Table.Activity.EVENTS, Map.of(
-                    AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, 0L),
-                    AnalyticsMetric.Summary.Engagement.MESSAGES_SENT, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.MESSAGES_SENT, 0L),
-                    AnalyticsMetric.Summary.Engagement.PUBLISHED_POSTS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.PUBLISHED_POSTS, 0L),
-                    AnalyticsMetric.Summary.Engagement.PROFILE_VIEWS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.PROFILE_VIEWS, 0L),
-                    AnalyticsMetric.Summary.Engagement.REPORT_RESOLUTIONS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.REPORT_RESOLUTIONS, 0L)), job);
+                    AnalyticsMetric.Summary.Engagement.Activity.EVENTS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.Activity.EVENTS, 0L),
+                    AnalyticsMetric.Summary.Engagement.Message.SENT, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.Message.SENT, 0L),
+                    AnalyticsMetric.Summary.Engagement.Post.PUBLISHED, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.Post.PUBLISHED, 0L),
+                    AnalyticsMetric.Summary.Engagement.Profile.VIEWS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.Profile.VIEWS, 0L),
+                    AnalyticsMetric.Summary.Engagement.Report.RESOLUTIONS, summary.getOrDefault(AnalyticsMetric.Summary.Engagement.Report.RESOLUTIONS, 0L)), job);
             default -> { }
         }
         return tables;
