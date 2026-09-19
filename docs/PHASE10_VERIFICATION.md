@@ -11,7 +11,7 @@ Run on 2026-09-19 from the reviewed working tree:
 The verification harness provisioned isolated MariaDB 11.4, RabbitMQ 4.0,
 Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 
-- validated and applied Flyway migrations V1 through V12 to a fresh schema;
+- validated and applied Flyway migrations V1 through V13 to a fresh schema;
 - enabled the application analytics RabbitMQ connection and verified the
   durable exchange/queue, publisher confirms, consumer delivery, and
   idempotency marker persistence;
@@ -19,6 +19,8 @@ Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
   disabled-bucket request rejection;
 - verified analytics activity, moderation, instructor, and formation-utilization
   KPI code paths compile and load through the application context;
+- verified the moderation-resolution timestamp migration and fresh-schema
+  `resolved_at` invariant;
 - ran the MariaDB migration, RabbitMQ delivery, and Redis rate-limit integration tests;
 - exercised MinIO-backed storage tests;
 - ran the complete Maven test suite with JaCoCo reporting.
