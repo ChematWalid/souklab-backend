@@ -1,10 +1,15 @@
 package com.project.souklab.service.chat;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /** Canonical grouped taxonomy for chat and presence WebSocket events. */
 public final class ChatEventType {
     private ChatEventType() { }
 
-    public interface Type { String value(); }
+    public interface Type {
+        @JsonValue
+        String value();
+    }
 
     public enum Message implements Type {
         CREATED("MESSAGE_CREATED"), UPDATED("MESSAGE_UPDATED"), DELETED("MESSAGE_DELETED");
