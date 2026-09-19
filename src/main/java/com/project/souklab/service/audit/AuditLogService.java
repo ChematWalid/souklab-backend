@@ -4,6 +4,7 @@ import com.project.souklab.dao.AuditLogRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AuditLog;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.model.User;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,13 @@ public class AuditLogService {
     }
 
     @Transactional
+    public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation operation,
+                                   String previousState, String newState, String reason,
+                                   String paymentId, String subscriptionId) {
+        logFinancialAction(action, actor, targetAccountId, operation.value(), previousState, newState,
+                reason, paymentId, subscriptionId);
+    }
+
     public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, String operation,
                                    String previousState, String newState, String reason,
                                    String paymentId, String subscriptionId) {

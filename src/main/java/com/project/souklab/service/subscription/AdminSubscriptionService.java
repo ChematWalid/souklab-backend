@@ -21,6 +21,7 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.ArtisanSubscription;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.model.ClientSubscription;
 import com.project.souklab.model.Payment;
 import com.project.souklab.model.PaymentProvider;
@@ -98,7 +99,7 @@ public class AdminSubscriptionService {
         Payment payment = new Payment(); payment.setAccount(target); payment.setSubscriptionId(subscriptionId); payment.setProvider(PaymentProvider.CHARGILY);
         payment.setStatus(PaymentStatus.MANUALLY_GRANTED); payment.setManualGrant(true); payment.setAmount(plan.getAmount()); payment.setCurrency(plan.getCurrency());
         payment.setPlanSnapshot(snapshot); payment.setIdempotencyKey("manual-" + subscriptionId); payments.save(payment);
-        auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_GRANTED, actor, target.getId(), "MANUAL_GRANT", "NONE", "ACTIVE", request.getReason(), payment.getId(), subscriptionId);
+        auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_GRANTED, actor, target.getId(), FinancialAuditOperation.MANUAL_GRANT, "NONE", SubscriptionStatus.ACTIVE.value(), request.getReason(), payment.getId(), subscriptionId);
         notificationService.createForUser(target, "A subscription was manually granted to your account.", NotificationType.SUBSCRIPTION_MANUALLY_GRANTED, subscriptionId);
         return response;
     }
@@ -112,7 +113,7 @@ public class AdminSubscriptionService {
             recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.REVOKED);
             cancelPendingPayments(subscriptionId);
             if (subscription.getAccount().getArtisan() != null) subscription.getAccount().getArtisan().setPremium(false);
-            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), "REVOKE", previous, "REVOKED", request.getReason(), null, subscriptionId);
+            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), FinancialAuditOperation.REVOKE, previous, SubscriptionStatus.REVOKED.value(), request.getReason(), null, subscriptionId);
             notificationService.createForUser(subscription.getAccount(), "Your subscription was revoked.", NotificationType.SUBSCRIPTION_REVOKED, subscriptionId);
         }, () -> clientSubscriptions.findWithLockById(subscriptionId).ifPresentOrElse(subscription -> {
             rules.requireTransition(subscription.getStatus(), SubscriptionStatus.REVOKED);
@@ -120,7 +121,7 @@ public class AdminSubscriptionService {
             recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.REVOKED);
             cancelPendingPayments(subscriptionId);
             if (subscription.getAccount().getClient() != null) subscription.getAccount().getClient().setPremium(false);
-            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), "REVOKE", previous, "REVOKED", request.getReason(), null, subscriptionId);
+            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_REVOKED, actor, subscription.getAccount().getId(), FinancialAuditOperation.REVOKE, previous, SubscriptionStatus.REVOKED.value(), request.getReason(), null, subscriptionId);
             notificationService.createForUser(subscription.getAccount(), "Your subscription was revoked.", NotificationType.SUBSCRIPTION_REVOKED, subscriptionId);
         }, () -> { throw new ResourceNotFoundException("Subscription not found"); }));
     }
@@ -139,7 +140,7 @@ public class AdminSubscriptionService {
         payment.setStatus(corrected);
         recordPaymentTransition(payment, previous, corrected.value());
         synchronizeCorrectedPayment(payment, corrected);
-        auditLogService.logFinancialAction(AuditLogAction.PAYMENT_STATE_CORRECTED, actor, payment.getAccount().getId(), "STATE_CORRECTION", previous, corrected.value(), request.getReason(), payment.getId(), payment.getSubscriptionId());
+        auditLogService.logFinancialAction(AuditLogAction.PAYMENT_STATE_CORRECTED, actor, payment.getAccount().getId(), FinancialAuditOperation.STATE_CORRECTION, previous, corrected.value(), request.getReason(), payment.getId(), payment.getSubscriptionId());
     }
 
     private void synchronizeCorrectedPayment(Payment payment, PaymentStatus corrected) {
@@ -213,7 +214,7 @@ public class AdminSubscriptionService {
                 subscription.setExpiresAt(rules.expiryFrom(startsAt, subscription.getBillingPeriod()));
             }
             syncArtisanPremium(subscription);
-            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_STATE_CORRECTED, actor, subscription.getAccount().getId(), "STATE_CORRECTION", previous, corrected.value(), request.getReason(), null, subscriptionId);
+            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_STATE_CORRECTED, actor, subscription.getAccount().getId(), FinancialAuditOperation.STATE_CORRECTION, previous, corrected.value(), request.getReason(), null, subscriptionId);
             return;
         }
         ClientSubscription subscription = clientSubscriptions.findWithLockById(subscriptionId).orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
@@ -225,7 +226,7 @@ public class AdminSubscriptionService {
             subscription.setExpiresAt(rules.expiryFrom(startsAt, subscription.getBillingPeriod()));
         }
         syncClientPremium(subscription);
-            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_STATE_CORRECTED, actor, subscription.getAccount().getId(), "STATE_CORRECTION", previous, corrected.value(), request.getReason(), null, subscriptionId);
+            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_STATE_CORRECTED, actor, subscription.getAccount().getId(), FinancialAuditOperation.STATE_CORRECTION, previous, corrected.value(), request.getReason(), null, subscriptionId);
     }
 
     @Transactional
@@ -239,7 +240,7 @@ public class AdminSubscriptionService {
             recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.CANCELED);
             cancelPendingPayments(subscriptionId);
             syncArtisanPremium(subscription);
-            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_CANCELED, actor, subscription.getAccount().getId(), "CANCEL", previous, "CANCELED", request.getReason(), null, subscriptionId);
+            auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_CANCELED, actor, subscription.getAccount().getId(), FinancialAuditOperation.CANCEL, previous, SubscriptionStatus.CANCELED.value(), request.getReason(), null, subscriptionId);
             return;
         }
         ClientSubscription subscription = clientSubscriptions.findWithLockById(subscriptionId).orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
@@ -249,7 +250,7 @@ public class AdminSubscriptionService {
         recordSubscriptionEvent(subscription.getAccount(), subscription.getId(), AnalyticsEvent.Subscription.CANCELED);
         cancelPendingPayments(subscriptionId);
         syncClientPremium(subscription);
-        auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_CANCELED, actor, subscription.getAccount().getId(), "CANCEL", previous, "CANCELED", request.getReason(), null, subscriptionId);
+        auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_CANCELED, actor, subscription.getAccount().getId(), FinancialAuditOperation.CANCEL, previous, SubscriptionStatus.CANCELED.value(), request.getReason(), null, subscriptionId);
     }
 
     private void syncArtisanPremium(ArtisanSubscription subscription) {
