@@ -178,7 +178,7 @@ class FormationEnrollmentServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(artisan.getUser().getEmail());
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.FORMATIONS.authority());
+        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.FORMATIONS.value());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);

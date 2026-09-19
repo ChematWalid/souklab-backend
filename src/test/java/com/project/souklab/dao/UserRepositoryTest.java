@@ -49,12 +49,12 @@ class UserRepositoryTest {
     @DisplayName("findByEmail: loads user and eagerly fetches permissions after persistence context is cleared")
     void findByEmail_whenUserExists_returnsUserWithRolesEagerlyLoadedAfterContextCleared() {
         AuthorizationPermission profileRead = new AuthorizationPermission();
-        profileRead.setPermissionKey(Permission.Profile.READ.authority());
+        profileRead.setPermissionKey(Permission.Profile.READ.value());
         profileRead.setDescription("Read profiles");
         entityManager.persist(profileRead);
 
         AuthorizationPermission artisanContent = new AuthorizationPermission();
-        artisanContent.setPermissionKey(Permission.Artisan.CONTENT.authority());
+        artisanContent.setPermissionKey(Permission.Artisan.CONTENT.value());
         artisanContent.setDescription("Create artisan content");
         entityManager.persist(artisanContent);
 
@@ -78,7 +78,7 @@ class UserRepositoryTest {
         assertThat(detachedUser.getPermissions())
                 .hasSize(2)
                 .extracting(AuthorizationPermission::getPermissionKey)
-                .containsExactlyInAnyOrder(Permission.Profile.READ.authority(), Permission.Artisan.CONTENT.authority());
+                .containsExactlyInAnyOrder(Permission.Profile.READ.value(), Permission.Artisan.CONTENT.value());
     }
 
     /**
@@ -166,7 +166,7 @@ class UserRepositoryTest {
     @DisplayName("findByUsername: matches by email and eagerly loads permissions")
     void findByUsername_matchesByEmailAndEagerlyLoadsRoles() {
         AuthorizationPermission adminUsers = new AuthorizationPermission();
-        adminUsers.setPermissionKey(Permission.Admin.USERS.authority());
+        adminUsers.setPermissionKey(Permission.Admin.USERS.value());
         adminUsers.setDescription("Manage users");
         entityManager.persist(adminUsers);
 
@@ -186,7 +186,7 @@ class UserRepositoryTest {
         assertThat(found.get().getPermissions())
                 .hasSize(1)
                 .extracting(AuthorizationPermission::getPermissionKey)
-                .containsExactly(Permission.Admin.USERS.authority());
+                .containsExactly(Permission.Admin.USERS.value());
     }
 
     /**
@@ -346,12 +346,12 @@ class UserRepositoryTest {
     @DisplayName("findByPermissionKey: returns active users with role and excludes soft-deleted users")
     void findByPermissionKey_returnsActiveUsersWithRole_andExcludesSoftDeletedUsers() {
         AuthorizationPermission adminUsers = new AuthorizationPermission();
-        adminUsers.setPermissionKey(Permission.Admin.USERS.authority());
+        adminUsers.setPermissionKey(Permission.Admin.USERS.value());
         adminUsers.setDescription("Manage users");
         entityManager.persist(adminUsers);
 
         AuthorizationPermission profileRead = new AuthorizationPermission();
-        profileRead.setPermissionKey(Permission.Profile.READ.authority());
+        profileRead.setPermissionKey(Permission.Profile.READ.value());
         profileRead.setDescription("Read profiles");
         entityManager.persist(profileRead);
 
@@ -380,7 +380,7 @@ class UserRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        List<User> admins = userRepository.findByPermissionKey(Permission.Admin.USERS.authority());
+        List<User> admins = userRepository.findByPermissionKey(Permission.Admin.USERS.value());
 
         assertThat(admins)
                 .hasSize(1)

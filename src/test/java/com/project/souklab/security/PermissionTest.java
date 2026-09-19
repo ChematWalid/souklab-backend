@@ -11,7 +11,7 @@ class PermissionTest {
 
     @Test
     void permissionAuthoritiesAreNamespaced() {
-        assertThat(Permission.Admin.USERS.authority()).isEqualTo("permission:admin:users");
-        assertThat(Permission.Profile.READ.authority()).isEqualTo("permission:profile:read");
+        assertThat(Permission.Admin.USERS.value()).isEqualTo("permission:admin:users");
+        assertThat(Permission.Profile.READ.value()).isEqualTo("permission:profile:read");
     }
 }

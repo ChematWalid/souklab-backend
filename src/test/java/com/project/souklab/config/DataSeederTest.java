@@ -65,7 +65,7 @@ class DataSeederTest {
                 materialFamilyRepository, materialRepository, epoqueRepository, techniqueRepository);
 
         AuthorizationPermission permission = new AuthorizationPermission();
-        permission.setPermissionKey(Permission.Profile.READ.authority());
+        permission.setPermissionKey(Permission.Profile.READ.value());
         when(permissionRepository.findByPermissionKeyAndEnabledTrue(anyString())).thenReturn(Optional.of(permission));
         lenient().when(regionRepository.count()).thenReturn(1L);
         lenient().when(jobCategoryRepository.count()).thenReturn(1L);

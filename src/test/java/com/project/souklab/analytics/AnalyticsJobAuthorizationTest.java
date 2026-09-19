@@ -104,8 +104,8 @@ class AnalyticsJobAuthorizationTest {
         job.setId("job-1");
         job.setOwnerId("owner-1");
         job.setReportType(AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS);
-        job.setPermissionScope(Permission.Analytics.ADMIN.authority() + ","
-                + Permission.Financial.ADMIN.authority());
+        job.setPermissionScope(Permission.Analytics.ADMIN.value() + ","
+                + Permission.Financial.ADMIN.value());
         when(users.findByEmail("owner@example.com")).thenReturn(Optional.of(owner));
         when(jobs.findByIdAndOwnerId("job-1", "owner-1")).thenReturn(Optional.of(job));
 

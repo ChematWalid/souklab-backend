@@ -159,7 +159,7 @@ class AdminFormationServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ADMIN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Admin.FORMATIONS.authority());
+        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Admin.FORMATIONS.value());
         lenient().doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);

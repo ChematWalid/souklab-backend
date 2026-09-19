@@ -396,7 +396,7 @@ class NotificationServiceTest {
         User admin2 = User.builder().email("admin2@souklab.com").build();
         admin2.setId("admin-uuid-2");
 
-        when(userRepository.findByPermissionKey(Permission.Admin.USERS.authority())).thenReturn(List.of(admin1, admin2));
+        when(userRepository.findByPermissionKey(Permission.Admin.USERS.value())).thenReturn(List.of(admin1, admin2));
         when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
             Notification n = invocation.getArgument(0);
             n.setId("notif-admin-" + n.getUser().getId());
@@ -406,7 +406,7 @@ class NotificationServiceTest {
 
         notificationService.notifyAdmins("System maintenance scheduled");
 
-        verify(userRepository).findByPermissionKey(Permission.Admin.USERS.authority());
+        verify(userRepository).findByPermissionKey(Permission.Admin.USERS.value());
         verify(notificationRepository, times(2)).save(any(Notification.class));
         verify(messagingTemplate).convertAndSendToUser(eq("admin1@souklab.com"), eq("/queue/notifications"), any(NotificationResponseDTO.class));
         verify(messagingTemplate).convertAndSendToUser(eq("admin2@souklab.com"), eq("/queue/notifications"), any(NotificationResponseDTO.class));

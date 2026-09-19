@@ -98,7 +98,7 @@ class FeedPostServiceTest {
         Artisan artisan = Artisan.builder().id("artisan-1").user(user).isVerified(true).build();
         user.setArtisan(artisan);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.authority()))));
+                "artisan@example.com", "credentials", List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value()))));
         lenient().when(userRepository.findByEmail("artisan@example.com")).thenReturn(Optional.of(user));
         lenient().when(accessControlService.isAdmin(any())).thenReturn(false);
         lenient().when(accessControlService.canManageArtisanContent(any())).thenReturn(true);

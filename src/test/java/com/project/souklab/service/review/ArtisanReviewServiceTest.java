@@ -75,7 +75,7 @@ class ArtisanReviewServiceTest {
                 .formation(formation).artisan(reviewer).status(EnrollmentStatus.ATTENDED).build();
         enrollment.setId("enrollment");
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority(Permission.Artisan.REVIEWS.authority()))));
+                "reviewer@example.com", "credentials", List.of(new SimpleGrantedAuthority(Permission.Artisan.REVIEWS.value()))));
         when(artisanRepository.findByUserEmailIgnoreCase("reviewer@example.com")).thenReturn(Optional.of(reviewer));
     }
 

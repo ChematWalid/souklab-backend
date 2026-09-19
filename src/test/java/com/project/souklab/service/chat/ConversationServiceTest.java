@@ -602,14 +602,14 @@ class ConversationServiceTest {
     @Test
     void send_requiresEnabledMessagePermissionWithCorrectKey() {
         AuthorizationPermission wrongPermission = new AuthorizationPermission();
-        wrongPermission.setPermissionKey(Permission.Profile.READ.authority());
+        wrongPermission.setPermissionKey(Permission.Profile.READ.value());
         wrongPermission.setEnabled(true);
         sender.setPermissions(new HashSet<>(List.of(wrongPermission)));
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("wrong-key", "hello", List.of())))
                 .isInstanceOf(ForbiddenException.class);
 
         AuthorizationPermission disabledPermission = new AuthorizationPermission();
-        disabledPermission.setPermissionKey(Permission.Message.SEND.authority());
+        disabledPermission.setPermissionKey(Permission.Message.SEND.value());
         disabledPermission.setEnabled(false);
         sender.setPermissions(new HashSet<>(List.of(disabledPermission)));
         assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("disabled-key", "hello", List.of())))
@@ -651,7 +651,7 @@ class ConversationServiceTest {
                 .isInstanceOf(BadRequestException.class);
     }
 
-    private User user(String id, String email, AccountStatus status, boolean verified) { User user = new User(); user.setId(id); user.setEmail(email); user.setStatus(status); user.setEmailVerified(verified); AuthorizationPermission permission = new AuthorizationPermission(); permission.setPermissionKey(Permission.Message.SEND.authority()); permission.setEnabled(true); user.setPermissions(new HashSet<>(List.of(permission))); return user; }
+    private User user(String id, String email, AccountStatus status, boolean verified) { User user = new User(); user.setId(id); user.setEmail(email); user.setStatus(status); user.setEmailVerified(verified); AuthorizationPermission permission = new AuthorizationPermission(); permission.setPermissionKey(Permission.Message.SEND.value()); permission.setEnabled(true); user.setPermissions(new HashSet<>(List.of(permission))); return user; }
     private ConversationParticipant participant(User user) { ConversationParticipant p = new ConversationParticipant(); p.setUser(user); return p; }
     private Message message(String id, User author, String content) { Message m = new Message(); m.setId(id); m.setConversation(conversation); m.setAuthor(author); m.setContent(content); m.setCreatedAt(LocalDateTime.now(clock)); return m; }
 }

@@ -71,7 +71,7 @@ class UserManagementControllerTest {
                 .lastName("User")
                 .name("Sample User")
                 .status(status)
-                .permissions(Set.of(Permission.Profile.READ.authority()))
+                .permissions(Set.of(Permission.Profile.READ.value()))
                 .build();
     }
 

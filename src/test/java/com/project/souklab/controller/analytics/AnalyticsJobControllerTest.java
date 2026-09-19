@@ -117,12 +117,12 @@ class AnalyticsJobControllerTest {
 
     private RequestPostProcessor analyticsUser() {
         return user("analytics@example.com")
-                .authorities(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.authority()));
+                .authorities(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.value()));
     }
 
     private RequestPostProcessor financialAnalyticsUser() {
         return user("analytics@example.com")
-                .authorities(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.authority()),
-                        new SimpleGrantedAuthority(Permission.Financial.ADMIN.authority()));
+                .authorities(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.value()),
+                        new SimpleGrantedAuthority(Permission.Financial.ADMIN.value()));
     }
 }

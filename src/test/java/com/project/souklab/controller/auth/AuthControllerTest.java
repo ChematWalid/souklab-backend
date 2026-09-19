@@ -85,7 +85,7 @@ class AuthControllerTest {
                 .name("Karim Client")
                 .phone("+213555000111")
                 .accountStatus(status)
-                .permissions(Set.of(Permission.Profile.READ.authority()))
+                .permissions(Set.of(Permission.Profile.READ.value()))
                 .emailVerified(true)
                 .createdAt(LocalDateTime.of(2026, 9, 1, 10, 0))
                 .build();
@@ -100,7 +100,7 @@ class AuthControllerTest {
                 .name("Ahmed Artisan")
                 .phone("+213555222333")
                 .accountStatus(status)
-                .permissions(Set.of(Permission.Artisan.CONTENT.authority()))
+                .permissions(Set.of(Permission.Artisan.CONTENT.value()))
                 .emailVerified(false)
                 .teacher(false)
                 .verified(false)
@@ -115,7 +115,7 @@ class AuthControllerTest {
                 .tokenType("Bearer")
                 .expiresIn(900L)
                 .user(user)
-                .permissions(List.of(Permission.Profile.READ.authority()))
+                .permissions(List.of(Permission.Profile.READ.value()))
                 .build();
     }
 
@@ -868,7 +868,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.code").value(200))
                     .andExpect(jsonPath("$.data.id").value("user-1"))
                     .andExpect(jsonPath("$.data.email").value("karim@souklab.dz"))
-                    .andExpect(jsonPath("$.data.permissions[0]").value(Permission.Profile.READ.authority()));
+                    .andExpect(jsonPath("$.data.permissions[0]").value(Permission.Profile.READ.value()));
 
             verify(profileService).getCurrentUser();
         }

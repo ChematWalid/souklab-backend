@@ -563,7 +563,7 @@ class UserManagementServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         User user = createUser("u-permissions", "permissions@example.com", "With", "Roles", AccountStatus.ACTIVE);
         AuthorizationPermission artisanContent = new AuthorizationPermission();
-        artisanContent.setPermissionKey(Permission.Artisan.CONTENT.authority());
+        artisanContent.setPermissionKey(Permission.Artisan.CONTENT.value());
         user.setPermissions(Set.of(artisanContent));
 
         when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(user), pageable, 1));
@@ -571,7 +571,7 @@ class UserManagementServiceTest {
         PaginatedResponse<UserResponseDTO> response = userManagementService.getAllUsers(null, pageable);
 
         UserResponseDTO dto = response.getContent().get(0);
-        assertThat(dto.getPermissions()).containsExactly(Permission.Artisan.CONTENT.authority());
+        assertThat(dto.getPermissions()).containsExactly(Permission.Artisan.CONTENT.value());
     }
 
     /**
@@ -673,7 +673,7 @@ class UserManagementServiceTest {
         LocalDateTime updatedAt = LocalDateTime.of(2026, 9, 2, 14, 0);
 
         AuthorizationPermission profileRead = new AuthorizationPermission();
-        profileRead.setPermissionKey(Permission.Profile.READ.authority());
+        profileRead.setPermissionKey(Permission.Profile.READ.value());
 
         User user = User.builder()
                 .email("detailed@example.com")
@@ -708,7 +708,7 @@ class UserManagementServiceTest {
         assertThat(dto.getStatus()).isEqualTo(AccountStatus.SUSPENDED);
         assertThat(dto.isEmailVerified()).isTrue();
         assertThat(dto.getEmailVerifiedAt()).isEqualTo(verifiedAt);
-        assertThat(dto.getPermissions()).containsExactly(Permission.Profile.READ.authority());
+        assertThat(dto.getPermissions()).containsExactly(Permission.Profile.READ.value());
         assertThat(dto.getBannedUntil()).isEqualTo(bannedUntil);
         assertThat(dto.getBanReason()).isEqualTo("Temporary suspension");
         assertThat(dto.getLastLoginAt()).isEqualTo(lastLogin);

@@ -153,7 +153,7 @@ class FileAccessServiceTest {
         formation.setId("formation");
         FormationFile file = FormationFile.builder().formation(formation).storageKey("syllabus").build();
 
-        authenticate(authorUser, Permission.Artisan.FORMATIONS.authority());
+        authenticate(authorUser, Permission.Artisan.FORMATIONS.value());
         when(userRepository.findByEmail(authorUser.getEmail())).thenReturn(Optional.of(authorUser));
         when(formationFileRepository.findByStorageKeyAndDeletedAtIsNull("syllabus")).thenReturn(Optional.of(file));
         when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(true);
@@ -166,7 +166,7 @@ class FileAccessServiceTest {
 
         User participantUser = User.builder().email("participant@example.com").build();
         Artisan participant = Artisan.builder().id("participant-artisan").user(participantUser).build();
-        authenticate(participantUser, Permission.Artisan.FORMATIONS.authority());
+        authenticate(participantUser, Permission.Artisan.FORMATIONS.value());
         when(userRepository.findByEmail(participantUser.getEmail())).thenReturn(Optional.of(participantUser));
         when(artisanRepository.findByUserEmailIgnoreCase(participantUser.getEmail())).thenReturn(Optional.of(participant));
         when(formationEnrollmentRepository.existsByFormationIdAndArtisanIdAndStatus(
@@ -184,7 +184,7 @@ class FileAccessServiceTest {
         formation.setId("formation");
         FormationFile file = FormationFile.builder().formation(formation).storageKey("protected").build();
 
-        authenticate(user, Permission.Artisan.FORMATIONS.authority());
+        authenticate(user, Permission.Artisan.FORMATIONS.value());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(formationFileRepository.findByStorageKeyAndDeletedAtIsNull("protected")).thenReturn(Optional.of(file));
         when(accessControlService.hasPermission(any(), eq(Permission.File.READ))).thenReturn(true);

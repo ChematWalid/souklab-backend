@@ -75,6 +75,6 @@ public final class SecurityTestUtils {
     }
 
     private static SimpleGrantedAuthority authority(Permission permission) {
-        return new SimpleGrantedAuthority(permission.authority());
+        return new SimpleGrantedAuthority(permission.value());
     }
 }

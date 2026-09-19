@@ -203,7 +203,7 @@ import static org.mockito.Mockito.when;
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.FORMATIONS.authority());
+        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.FORMATIONS.value());
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);

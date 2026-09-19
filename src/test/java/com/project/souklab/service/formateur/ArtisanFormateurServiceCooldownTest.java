@@ -244,7 +244,7 @@ class ArtisanFormateurServiceCooldownTest {
         newlySavedRequest.setId("new-req-456");
 
         when(formateurRequestRepository.saveAndFlush(any(ArtisanFormateurRequest.class))).thenReturn(newlySavedRequest);
-        when(userRepository.findByPermissionKey(Permission.Admin.USERS.authority())).thenReturn(List.of(adminUser));
+        when(userRepository.findByPermissionKey(Permission.Admin.USERS.value())).thenReturn(List.of(adminUser));
 
         FormateurRequestDTO requestDTO = new FormateurRequestDTO();
         requestDTO.setMotivation("Reapplying after cooldown expired.");

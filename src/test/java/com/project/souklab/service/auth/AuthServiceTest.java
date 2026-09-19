@@ -143,11 +143,11 @@ class AuthServiceTest {
         appProperties.getAuth().getLockout().setDurationMinutes(15);
 
         artisanRole = new AuthorizationPermission();
-        artisanRole.setPermissionKey(Permission.Artisan.CONTENT.authority());
+        artisanRole.setPermissionKey(Permission.Artisan.CONTENT.value());
         artisanRole.setDescription("Artisan role");
 
         clientRole = new AuthorizationPermission();
-        clientRole.setPermissionKey(Permission.Profile.READ.authority());
+        clientRole.setPermissionKey(Permission.Profile.READ.value());
         clientRole.setDescription("Client role");
 
         lenient().when(permissionRepository.findByPermissionKeyInAndEnabledTrue(any())).thenAnswer(invocation -> {
@@ -157,7 +157,7 @@ class AuthServiceTest {
                 return List.of();
             }
             return keys.stream()
-                    .map(key -> key.equals(Permission.Artisan.CONTENT.authority()) ? artisanRole : clientRole)
+                    .map(key -> key.equals(Permission.Artisan.CONTENT.value()) ? artisanRole : clientRole)
                     .toList();
         });
 
@@ -971,7 +971,7 @@ class AuthServiceTest {
         assertThat(response.getRefreshToken()).isEqualTo("refresh-token-uuid");
         assertThat(response.getTokenType()).isEqualTo("Bearer");
         assertThat(response.getExpiresIn()).isEqualTo(900L);
-        assertThat(response.getPermissions()).containsExactly(Permission.Profile.READ.authority());
+        assertThat(response.getPermissions()).containsExactly(Permission.Profile.READ.value());
 
         assertThat(user.getFailedLoginAttempts()).isZero();
         assertThat(user.getLockedUntil()).isNull();
@@ -1071,7 +1071,7 @@ class AuthServiceTest {
 
         JwtResponseDTO response = authService.login(dto, null);
 
-        assertThat(response.getPermissions()).containsExactly(Permission.Artisan.CONTENT.authority());
+        assertThat(response.getPermissions()).containsExactly(Permission.Artisan.CONTENT.value());
     }
 
     /**

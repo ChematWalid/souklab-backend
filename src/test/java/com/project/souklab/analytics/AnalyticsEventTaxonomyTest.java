@@ -24,8 +24,8 @@ class AnalyticsEventTaxonomyTest {
 
     @Test
     void groupedPermissionEnumsExposeStableAuthorities() {
-        assertThat(Permission.Admin.USERS.authority()).isEqualTo("permission:admin:users");
-        assertThat(Permission.Analytics.ADMIN.authority()).isEqualTo("permission:analytics:admin");
-        assertThat(Permission.Financial.ADMIN.authority()).isEqualTo("permission:financial:admin");
+        assertThat(Permission.Admin.USERS.value()).isEqualTo("permission:admin:users");
+        assertThat(Permission.Analytics.ADMIN.value()).isEqualTo("permission:analytics:admin");
+        assertThat(Permission.Financial.ADMIN.value()).isEqualTo("permission:financial:admin");
     }
 }
