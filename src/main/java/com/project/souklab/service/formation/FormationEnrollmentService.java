@@ -178,7 +178,7 @@ public class FormationEnrollmentService {
 
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Formation.ENROLLMENT, artisan.getId(), formation.getId(),
-                    Map.of("status", enrollment.getStatus().name()));
+                    Map.of("status", enrollment.getStatus().value()));
         }
         return FormationEnrollmentResponseDTO.from(enrollment);
     }

@@ -1,6 +1,7 @@
 package com.project.souklab.analytics;
 
 import com.project.souklab.security.Permission;
+import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsSortField;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsFilterKey.fromKey("eventType")).contains(AnalyticsFilterKey.EVENT_TYPE);
         assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
         assertThat(AnalyticsSortField.fromField("activityEvents")).isEqualTo(AnalyticsSortField.ACTIVITY_EVENTS);
+        assertThat(EnrollmentStatus.ATTENDED.value()).isEqualTo("ATTENDED");
     }
 
     @Test

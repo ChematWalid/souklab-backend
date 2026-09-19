@@ -3,7 +3,7 @@ package com.project.souklab.model;
 /**
  * Administrative moderation decision on a submitted formation.
  */
-public enum FormationReviewDecision {
+public enum FormationReviewDecision implements EnumValue {
 
     /**
      * Formation content, schedule, and pricing approved for publishing.

@@ -124,7 +124,7 @@ public class AdminFormationService {
                 (dto.getDecision() == FormationReviewDecision.APPROVED
                         ? AnalyticsEvent.Formation.MODERATION_APPROVED
                         : AnalyticsEvent.Formation.MODERATION_REJECTED), admin.getId(), saved.getId(),
-                Map.of("decision", dto.getDecision().name()));
+                Map.of("decision", dto.getDecision().value()));
 
         dispatchReviewNotification(saved, dto);
         log.info("Admin '{}' reviewed formation '{}' with decision '{}'", admin.getEmail(), saved.getId(), dto.getDecision());

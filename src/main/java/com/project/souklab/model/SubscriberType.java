@@ -1,6 +1,6 @@
 package com.project.souklab.model;
 
-public enum SubscriberType {
+public enum SubscriberType implements EnumValue {
     ARTISAN,
     CLIENT
 }

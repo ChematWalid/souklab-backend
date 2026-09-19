@@ -1,6 +1,6 @@
 package com.project.souklab.model;
 
-public enum PaymentStatus {
+public enum PaymentStatus implements EnumValue {
     CREATED,
     PENDING,
     PAID,

@@ -21,7 +21,7 @@ public class WebhookEventClaimService {
     public boolean claim(String providerEventId, String eventType, String checkoutId, byte[] rawBody) {
         String encryptedPayload = securityService.encrypt(new String(rawBody, StandardCharsets.UTF_8));
         return repository.claimEvent(UUID.randomUUID().toString(), providerEventId, eventType, encryptedPayload,
-                WebhookProcessingStatus.RECEIVED.name(), checkoutId) == 1;
+                WebhookProcessingStatus.RECEIVED.value(), checkoutId) == 1;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

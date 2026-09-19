@@ -89,7 +89,7 @@ public class ContentReportService {
         ContentReport saved = reportRepository.save(report);
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Report.SUBMITTED, reporter.getId(), saved.getId(),
-                    Map.of("targetType", request.getTargetType().name()));
+                    Map.of("targetType", request.getTargetType().value()));
         }
         notificationService.notifyAdmins("New content report submitted.");
         return ContentReportResponseDTO.from(saved);
@@ -144,7 +144,7 @@ public class ContentReportService {
         ContentReportResponseDTO response = ContentReportResponseDTO.from(reportRepository.save(report));
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Report.RESOLVED, resolver.getId(), report.getId(),
-                    Map.of("status", report.getStatus().name(), "action", request.getAction().name()));
+                    Map.of("status", report.getStatus().value(), "action", request.getAction().value()));
         }
         return response;
     }

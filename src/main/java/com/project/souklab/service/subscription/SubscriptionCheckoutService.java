@@ -97,7 +97,7 @@ public class SubscriptionCheckoutService {
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Subscription.RENEWAL, user.getId(), subscriptionId,
-                    Map.of("planId", requestedPlan.getId(), "subscriberType", targetType.name()));
+                    Map.of("planId", requestedPlan.getId(), "subscriberType", targetType.value()));
         }
         return checkout(request, idempotencyKey);
     }
@@ -132,7 +132,7 @@ public class SubscriptionCheckoutService {
         Payment saved = paymentRepository.save(payment);
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Checkout.CREATED, user.getId(), saved.getId(),
-                    Map.of("paymentStatus", saved.getStatus().name(), "subscriberType", plan.getSubscriberType().name()));
+                Map.of("paymentStatus", saved.getStatus().value(), "subscriberType", plan.getSubscriberType().value()));
         }
         notificationService.createForUser(user, "Your subscription checkout was created.", NotificationType.CHECKOUT_CREATED, saved.getId());
         return toResponse(saved);

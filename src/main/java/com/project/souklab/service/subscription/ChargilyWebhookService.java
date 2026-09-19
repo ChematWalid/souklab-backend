@@ -128,7 +128,7 @@ public class ChargilyWebhookService {
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION, payment.getAccount().getId(), payment.getId(),
-                    Map.of("providerEvent", eventType, "status", payment.getStatus().name()));
+                    Map.of("providerEvent", eventType, "status", payment.getStatus().value()));
             if (payment.getStatus() == PaymentStatus.PAID) {
                 activityEventService.record(AnalyticsEvent.Subscription.ACTIVATED, payment.getAccount().getId(),
                         payment.getSubscriptionId(), Map.of("paymentId", payment.getId()));

@@ -3,7 +3,7 @@ package com.project.souklab.model;
 /**
  * Lifecycle states of an artisan formation or masterclass.
  */
-public enum FormationStatus {
+public enum FormationStatus implements EnumValue {
 
     /**
      * Initial draft created by the instructor artisan, not yet submitted for review.

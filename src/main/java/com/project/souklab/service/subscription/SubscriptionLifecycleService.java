@@ -85,7 +85,7 @@ public class SubscriptionLifecycleService {
             if (payment.getCreatedAt() != null && payment.getCreatedAt().isBefore(cutoff)) {
                 payment.setStatus(PaymentStatus.EXPIRED);
                 if (activityEventService != null) activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION,
-                        payment.getAccount().getId(), payment.getId(), Map.of("status", PaymentStatus.EXPIRED.name()));
+                        payment.getAccount().getId(), payment.getId(), Map.of("status", PaymentStatus.EXPIRED.value()));
                 expirePendingSubscription(payment.getSubscriptionId());
                 notificationService.createForUser(payment.getAccount(), "Your subscription checkout expired.", NotificationType.CHECKOUT_CANCELED, payment.getId());
             }
@@ -147,12 +147,12 @@ public class SubscriptionLifecycleService {
 
     private void recordSubscriptionExpiry(ArtisanSubscription subscription) {
         if (activityEventService != null && subscription.getAccount() != null) activityEventService.record(AnalyticsEvent.Subscription.EXPIRED, subscription.getAccount().getId(), subscription.getId(),
-                Map.of("status", SubscriptionStatus.EXPIRED.name()));
+                Map.of("status", SubscriptionStatus.EXPIRED.value()));
     }
 
     private void recordSubscriptionExpiry(ClientSubscription subscription) {
         if (activityEventService != null && subscription.getAccount() != null) activityEventService.record(AnalyticsEvent.Subscription.EXPIRED, subscription.getAccount().getId(), subscription.getId(),
-                Map.of("status", SubscriptionStatus.EXPIRED.name()));
+                Map.of("status", SubscriptionStatus.EXPIRED.value()));
     }
 
     private boolean sent(String value, long offset) {

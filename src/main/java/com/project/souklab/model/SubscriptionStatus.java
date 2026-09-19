@@ -1,6 +1,6 @@
 package com.project.souklab.model;
 
-public enum SubscriptionStatus {
+public enum SubscriptionStatus implements EnumValue {
     PENDING,
     ACTIVE,
     CANCELED,

@@ -216,7 +216,7 @@ public class AnalyticsJobService {
                 summary.put("moderationActivity", moderationActivity);
                 Map<String, Long> userStatuses = new LinkedHashMap<>();
                 for (AccountStatus status : AccountStatus.values()) {
-                    userStatuses.put(status.name(), users.countByStatus(status));
+                    userStatuses.put(status.value(), users.countByStatus(status));
                 }
                 summary.put("userStatuses", userStatuses);
                 summary.put("activityEvents", countFilteredEvents(job, from, inclusiveTo));
@@ -257,44 +257,44 @@ public class AnalyticsJobService {
                         FormateurRequestStatus.REJECTED, from, inclusiveTo));
                 Map<String, Long> formateurStatuses = new LinkedHashMap<>();
                 for (FormateurRequestStatus status : FormateurRequestStatus.values()) {
-                    formateurStatuses.put(status.name(), formateurRequests.countByStatusAndDeletedAtIsNull(status));
+                    formateurStatuses.put(status.value(), formateurRequests.countByStatusAndDeletedAtIsNull(status));
                 }
                 summary.put("formateurStatuses", formateurStatuses);
                 if (payments != null) summary.put("paymentsCreated", payments.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (feedPosts != null) {
                     Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (FeedPostStatus status : FeedPostStatus.values()) statuses.put(status.name(), feedPosts.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    for (FeedPostStatus status : FeedPostStatus.values()) statuses.put(status.value(), feedPosts.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put("feedPostsByStatus", statuses);
                 }
                 if (formations != null) {
                     Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (FormationStatus status : FormationStatus.values()) statuses.put(status.name(), formations.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    for (FormationStatus status : FormationStatus.values()) statuses.put(status.value(), formations.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put("formationsByStatus", statuses);
                 }
                 if (enrollments != null) {
                     Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (EnrollmentStatus status : EnrollmentStatus.values()) statuses.put(status.name(), enrollments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    for (EnrollmentStatus status : EnrollmentStatus.values()) statuses.put(status.value(), enrollments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put("enrollmentsByStatus", statuses);
                     long enrollmentTotal = statuses.values().stream().mapToLong(Long::longValue).sum();
-                    summary.put("formationCompletions", statuses.getOrDefault("ATTENDED", 0L));
+                    summary.put("formationCompletions", statuses.getOrDefault(EnrollmentStatus.ATTENDED.value(), 0L));
                     summary.put("enrollmentCancellationRate", enrollmentTotal == 0 ? 0.0
-                            : (double) statuses.getOrDefault("CANCELLED", 0L) / enrollmentTotal);
+                            : (double) statuses.getOrDefault(EnrollmentStatus.CANCELLED.value(), 0L) / enrollmentTotal);
                 }
                 if (reports != null) {
                     Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (ReportStatus status : ReportStatus.values()) statuses.put(status.name(), reports.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    for (ReportStatus status : ReportStatus.values()) statuses.put(status.value(), reports.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put("reportsByStatus", statuses);
                 }
                 if (payments != null) {
                     Map<String, Long> statuses = new LinkedHashMap<>();
                         for (PaymentStatus status : PaymentStatus.values()) {
-                        statuses.put(status.name(), payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                        statuses.put(status.value(), payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     }
                     summary.put("paymentsByStatus", statuses);
                     if (job.getReportType() == AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS) {
                         Map<String, Long> subscriptions = new LinkedHashMap<>();
                         for (SubscriptionStatus status : SubscriptionStatus.values()) {
-                            subscriptions.put(status.name(), artisanSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo)
+                            subscriptions.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo)
                                     + clientSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
                         }
                         summary.put("subscriptionsByStatus", subscriptions);
@@ -302,8 +302,8 @@ public class AnalyticsJobService {
                         Map<String, Long> artisanSubscriptionStatuses = new LinkedHashMap<>();
                         Map<String, Long> clientSubscriptionStatuses = new LinkedHashMap<>();
                             for (SubscriptionStatus status : SubscriptionStatus.values()) {
-                            artisanSubscriptionStatuses.put(status.name(), artisanSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
-                            clientSubscriptionStatuses.put(status.name(), clientSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
+                            artisanSubscriptionStatuses.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
+                            clientSubscriptionStatuses.put(status.value(), clientSubscriptions.countByStatusAndCreatedAtBetween(status, from, inclusiveTo));
                         }
                         subscriptionsBySubscriberType.put("artisan", artisanSubscriptionStatuses);
                         subscriptionsBySubscriberType.put("client", clientSubscriptionStatuses);

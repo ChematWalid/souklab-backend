@@ -3,7 +3,7 @@ package com.project.souklab.model;
 /**
  * Participation status of an artisan enrolled in a formation.
  */
-public enum EnrollmentStatus {
+public enum EnrollmentStatus implements EnumValue {
 
     /**
      * Enrollment is confirmed and seat is reserved.
