@@ -130,20 +130,51 @@ public final class AnalyticsMetric {
         }
     }
 
-    public enum Result implements Key {
-        REPORT_TYPE("reportType"), FROM_DATE("fromDate"), TO_DATE("toDate"), BUCKET("bucket"),
-        SUMMARY("summary"), TABLES("tables"), SERIES("series"), CONTENT("content");
+    public static final class Result {
+        private Result() { }
 
-        private final String value;
+        public interface Key extends AnalyticsMetric.Key { }
 
-        Result(String value) { this.value = value; }
-
-        public String value() { return value; }
-
-        @JsonCreator
-        public static Result fromValue(String value) {
-            for (Result key : values()) if (key.value.equals(value)) return key;
+        public static Key fromValue(String value) {
+            for (Key key : all()) {
+                if (key.value().equals(value)) return key;
+            }
             throw new IllegalArgumentException("Unknown analytics result key: " + value);
+        }
+
+        private static List<Key> all() {
+            return Stream.of(Report.values(), Date.values(), Request.values(), Content.values())
+                    .flatMap(Arrays::stream)
+                    .map(key -> (Key) key)
+                    .toList();
+        }
+
+        public enum Report implements Key {
+            TYPE("reportType");
+            private final String value;
+            Report(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Date implements Key {
+            FROM("fromDate"), TO("toDate");
+            private final String value;
+            Date(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Request implements Key {
+            BUCKET("bucket");
+            private final String value;
+            Request(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Content implements Key {
+            SUMMARY("summary"), TABLES("tables"), SERIES("series"), CONTENT("content");
+            private final String value;
+            Content(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 

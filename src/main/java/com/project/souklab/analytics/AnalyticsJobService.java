@@ -404,13 +404,13 @@ public class AnalyticsJobService {
                         AnalyticsMetric.Comparison.CURRENT, countFilteredEvents(job, from, inclusiveTo),
                         AnalyticsMetric.Comparison.PREVIOUS, countFilteredEvents(job, previousFrom, previousTo)));
                 summary.put(AnalyticsMetric.Summary.General.PERIOD_COMPARISON, comparison);
-                Map<AnalyticsMetric.Result, Object> result = new LinkedHashMap<>();
-                result.put(AnalyticsMetric.Result.REPORT_TYPE, job.getReportType());
-                result.put(AnalyticsMetric.Result.FROM_DATE, job.getFromDate());
-                result.put(AnalyticsMetric.Result.TO_DATE, job.getToDate());
-                result.put(AnalyticsMetric.Result.BUCKET, job.getBucket());
-                result.put(AnalyticsMetric.Result.SUMMARY, summary);
-                result.put(AnalyticsMetric.Result.TABLES, buildTables(job, summary));
+                Map<AnalyticsMetric.Result.Key, Object> result = new LinkedHashMap<>();
+                result.put(AnalyticsMetric.Result.Report.TYPE, job.getReportType());
+                result.put(AnalyticsMetric.Result.Date.FROM, job.getFromDate());
+                result.put(AnalyticsMetric.Result.Date.TO, job.getToDate());
+                result.put(AnalyticsMetric.Result.Request.BUCKET, job.getBucket());
+                result.put(AnalyticsMetric.Result.Content.SUMMARY, summary);
+                result.put(AnalyticsMetric.Result.Content.TABLES, buildTables(job, summary));
                 List<Map<AnalyticsMetric.Series.Key, Object>> allSeries = buildSeries(job, from, to);
                 sortSeries(allSeries, job);
                 if (allSeries.size() > jobProperties.getMaximumResultRows()) {
@@ -423,7 +423,7 @@ public class AnalyticsJobService {
                 int pageStart = requestedPageStart >= allSeries.size()
                         ? allSeries.size() : (int) requestedPageStart;
                 int pageEnd = Math.min(pageStart + job.getPageSize(), allSeries.size());
-                result.put(AnalyticsMetric.Result.SERIES, PaginatedResponse.<Map<AnalyticsMetric.Series.Key, Object>>builder()
+                result.put(AnalyticsMetric.Result.Content.SERIES, PaginatedResponse.<Map<AnalyticsMetric.Series.Key, Object>>builder()
                         .content(allSeries.subList(pageStart, pageEnd))
                         .pageNumber(job.getPageNumber())
                         .pageSize(job.getPageSize())
@@ -528,10 +528,10 @@ public class AnalyticsJobService {
     private String toCsv(String json) {
         try {
             var root = objectMapper.readTree(json);
-            var summary = root.path(AnalyticsMetric.Result.SUMMARY.value());
-            var series = root.path(AnalyticsMetric.Result.SERIES.value()).path(AnalyticsMetric.Result.CONTENT.value());
+            var summary = root.path(AnalyticsMetric.Result.Content.SUMMARY.value());
+            var series = root.path(AnalyticsMetric.Result.Content.SERIES.value()).path(AnalyticsMetric.Result.Content.CONTENT.value());
             StringBuilder csv = new StringBuilder("section,key,value\n");
-            summary.fields().forEachRemaining(e -> csv.append(csvCell(AnalyticsMetric.Result.SUMMARY.value())).append(',')
+            summary.fields().forEachRemaining(e -> csv.append(csvCell(AnalyticsMetric.Result.Content.SUMMARY.value())).append(',')
                     .append(csvCell(e.getKey())).append(',')
                     .append(csvCell(e.getValue().isContainerNode() ? e.getValue().toString() : e.getValue().asText()))
                     .append('\n'));
@@ -543,9 +543,9 @@ public class AnalyticsJobService {
                         .append(csvCell(e.getValue().isContainerNode() ? e.getValue().toString() : e.getValue().asText()))
                         .append('\n'));
             }
-            var tables = root.path(AnalyticsMetric.Result.TABLES.value());
+            var tables = root.path(AnalyticsMetric.Result.Content.TABLES.value());
             tables.fields().forEachRemaining(table -> {
-                var content = table.getValue().path(AnalyticsMetric.Result.CONTENT.value());
+                var content = table.getValue().path(AnalyticsMetric.Result.Content.CONTENT.value());
                 for (int index = 0; index < content.size(); index++) {
                     var row = content.get(index);
                     row.fields().forEachRemaining(entry -> csv.append(csvCell(AnalyticsMetric.Csv.TABLE_PREFIX.value() + table.getKey()))

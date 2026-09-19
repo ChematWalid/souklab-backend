@@ -47,6 +47,10 @@ if rg -n --pcre2 'AnalyticsMetric\.Series\.(?:START_DATE|END_DATE|ACTIVITY_EVENT
   echo 'flat analytics series references detected; use grouped series enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsMetric\.Result\.(?:REPORT_TYPE|FROM_DATE|TO_DATE|BUCKET|SUMMARY|TABLES|SERIES|CONTENT)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics result references detected; use grouped result enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 'DirectorySortOrder\.(?:RELEVANCE|RATING_DESC|REVIEWS_DESC|VIEWS_DESC|NEWEST)|DirectorySortOrder\.values\(' src/main/java src/test/java --glob '*.java'; then
   echo 'flat directory sort references detected; use grouped sort enums' >&2
   exit 1
