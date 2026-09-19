@@ -1,5 +1,6 @@
 package com.project.souklab.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import io.lettuce.core.RedisClient;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
@@ -25,10 +26,10 @@ public class RedisHealthIndicator implements HealthIndicator {
     public Health health() {
         try (var connection = client.connect()) {
             boolean available = "PONG".equalsIgnoreCase(connection.sync().ping());
-            metrics.setDependencyAvailability("redis", available);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS.value(), available);
             return available ? Health.up().build() : Health.down().build();
         } catch (RuntimeException exception) {
-            metrics.setDependencyAvailability("redis", false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS.value(), false);
             return Health.down().build();
         }
     }

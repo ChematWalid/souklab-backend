@@ -119,6 +119,82 @@ public final class AnalyticsMetric {
         Operational(String value) { this.value = value; }
 
         public String value() { return value; }
+
+        public enum Metric implements Key {
+            UPLOADS("souklab.uploads"), VIRUS_SCANS("souklab.virus.scans"),
+            SEARCH_REQUESTS("souklab.search.requests"), WEBSOCKET_CONNECTIONS("souklab.websocket.connections"),
+            RATE_LIMIT_REJECTIONS("souklab.rate_limit.rejections"), HTTP_REQUESTS("souklab.http.requests");
+
+            private final String value;
+
+            Metric(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Dependency implements Key {
+            ELASTICSEARCH("elasticsearch"), REDIS("redis"), RABBITMQ("rabbitmq"),
+            OBJECT_STORAGE("s3"), CLAMAV("clamav");
+
+            private final String value;
+
+            Dependency(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Component implements Key {
+            CLAMAV("clamav"), STOMP("stomp");
+
+            private final String value;
+
+            Component(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Operation implements Key {
+            AVATAR("avatar");
+
+            private final String value;
+
+            Operation(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Scope implements Key {
+            USER("user");
+
+            private final String value;
+
+            Scope(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Backend implements Key {
+            RELATIONAL("relational"), ELASTICSEARCH("elasticsearch");
+
+            private final String value;
+
+            Backend(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Outcome implements Key {
+            SUCCESS("success"), FAILURE("failure"), AUTHENTICATED("authenticated"),
+            REJECTED("rejected"), DISABLED("disabled"), FALLBACK("fallback"),
+            ERROR("error"), INFECTED("infected"), ERROR_ALLOWED("error_allowed"),
+            ERROR_REJECTED("error_rejected"), CLEAN("clean");
+
+            private final String value;
+
+            Outcome(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
     }
 
     public enum Retention implements Key {

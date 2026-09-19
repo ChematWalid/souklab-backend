@@ -1,5 +1,6 @@
 package com.project.souklab.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import lombok.extern.slf4j.Slf4j;
 import com.project.souklab.security.JwtUtils;
 import org.springframework.messaging.Message;
@@ -60,14 +61,14 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                         accessor.setUser(authentication);
-                        metrics.recordWebSocket("authenticated");
+                        metrics.recordWebSocket(AnalyticsMetric.Operational.Outcome.AUTHENTICATED.value());
                         return message;
                     }
                 } catch (Exception e) {
                     log.warn("WebSocket authentication failed");
                 }
             }
-            metrics.recordWebSocket("rejected");
+                        metrics.recordWebSocket(AnalyticsMetric.Operational.Outcome.REJECTED.value());
             throw new AccessDeniedException("A valid Bearer token is required to establish a WebSocket connection.");
         }
         return message;

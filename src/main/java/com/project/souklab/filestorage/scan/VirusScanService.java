@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.scan;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.filestorage.exception.VirusDetectedException;
@@ -135,12 +136,12 @@ public class VirusScanService {
         try {
             result = virusScanner.scan(content);
         } catch (RuntimeException ex) {
-            metrics.recordVirusScan("error");
+            metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR.value());
             throw ex;
         }
 
         if (result.isInfected()) {
-            metrics.recordVirusScan("infected");
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.INFECTED.value());
             log.error("Malware detected in upload '{}': virus='{}'", filename, result.virusName());
             throw new VirusDetectedException(result.virusName());
         }
@@ -148,17 +149,17 @@ public class VirusScanService {
         if (result.isError()) {
             boolean failOpen = properties.getVirusScan().isFailOpen();
             if (failOpen) {
-                metrics.recordVirusScan("error_allowed");
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_ALLOWED.value());
                 log.warn("Virus scanner communication failure for '{}': {}. Fail-open policy active: allowing upload to proceed.",
                         filename, result.message());
             } else {
-                metrics.recordVirusScan("error_rejected");
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_REJECTED.value());
                 log.error("Virus scanner communication failure for '{}': {}. Fail-closed policy active: rejecting upload.",
                         filename, result.message());
                 throw new VirusScanException("Virus scanning service unavailable: " + result.message());
             }
         } else {
-            metrics.recordVirusScan("clean");
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.CLEAN.value());
         }
     }
 }

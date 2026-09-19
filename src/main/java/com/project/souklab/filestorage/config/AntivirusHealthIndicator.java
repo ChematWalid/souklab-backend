@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.config.OperationalMetrics;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
@@ -30,10 +31,10 @@ public class AntivirusHealthIndicator implements HealthIndicator {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(properties.getHost(), properties.getPort()),
                     Math.toIntExact(properties.getConnectionTimeout().toMillis()));
-            metrics.setDependencyAvailability("clamav", true);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.CLAMAV.value(), true);
             return Health.up().build();
         } catch (IOException exception) {
-            metrics.setDependencyAvailability("clamav", false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.CLAMAV.value(), false);
             return Health.down().build();
         }
     }

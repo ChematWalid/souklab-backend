@@ -1,5 +1,6 @@
 package com.project.souklab.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.boot.health.contributor.Health;
@@ -45,10 +46,10 @@ public class ElasticsearchHealthIndicator implements HealthIndicator {
             }
             int status = client.send(request.build(), HttpResponse.BodyHandlers.discarding()).statusCode();
             boolean available = status >= 200 && status < 300;
-            metrics.setDependencyAvailability("elasticsearch", available);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ELASTICSEARCH.value(), available);
             return available ? Health.up().build() : Health.down().build();
         } catch (Exception exception) {
-            metrics.setDependencyAvailability("elasticsearch", false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ELASTICSEARCH.value(), false);
             return Health.down().build();
         }
     }

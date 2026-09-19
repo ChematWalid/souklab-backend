@@ -1,5 +1,6 @@
 package com.project.souklab.service.directory;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.dao.ArtisanRepository;
@@ -87,17 +88,20 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     @Transactional(readOnly = true)
     public PaginatedResponse<ArtisanDirectoryCardDTO> search(DirectorySearchFilterDTO filter) {
         if (!appProperties.getSearch().isEnabled()) {
-            metrics.recordSearch("relational", "disabled");
+            metrics.recordSearch(AnalyticsMetric.Operational.Backend.RELATIONAL.value(),
+                    AnalyticsMetric.Operational.Outcome.DISABLED.value());
             log.info("Hibernate Search is disabled; routing directory search to relational JPA fallback.");
             return searchRelationalFallback(filter);
         }
 
         try {
             PaginatedResponse<ArtisanDirectoryCardDTO> response = searchHibernateSearch(filter);
-            metrics.recordSearch("elasticsearch", "success");
+            metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH.value(),
+                    AnalyticsMetric.Operational.Outcome.SUCCESS.value());
             return response;
         } catch (Exception ex) {
-            metrics.recordSearch("elasticsearch", "fallback");
+            metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH.value(),
+                    AnalyticsMetric.Operational.Outcome.FALLBACK.value());
             log.warn("Hibernate Search query encountered an error; falling back to relational JPA specification: {}", ex.getMessage());
             return searchRelationalFallback(filter);
         }

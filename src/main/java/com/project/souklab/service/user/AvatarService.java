@@ -1,5 +1,6 @@
 package com.project.souklab.service.user;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.config.AvatarProperties;
@@ -261,10 +262,12 @@ public class AvatarService {
 
                 return mapToResponseDTO(savedAvatar);
             });
-            metrics.recordUpload("avatar", "success");
+            metrics.recordUpload(AnalyticsMetric.Operational.Operation.AVATAR.value(),
+                    AnalyticsMetric.Operational.Outcome.SUCCESS.value());
             return response;
         } catch (Exception ex) {
-            metrics.recordUpload("avatar", "failure");
+            metrics.recordUpload(AnalyticsMetric.Operational.Operation.AVATAR.value(),
+                    AnalyticsMetric.Operational.Outcome.FAILURE.value());
             log.error("Avatar upload pipeline failed for user {}. Initiating rollback compensation for {} stored keys: {}",
                     authenticatedUser.getId(), storedKeys.size(), storedKeys, ex);
             compensateStorageDeletions(storedKeys);

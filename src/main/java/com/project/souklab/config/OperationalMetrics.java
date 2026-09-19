@@ -1,5 +1,6 @@
 package com.project.souklab.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -37,27 +38,30 @@ public class OperationalMetrics {
     }
 
     public void recordUpload(String operation, String outcome) {
-        increment("souklab.uploads", operation, outcome);
+        increment(AnalyticsMetric.Operational.Metric.UPLOADS.value(), operation, outcome);
     }
 
     public void recordVirusScan(String outcome) {
-        increment("souklab.virus.scans", "clamav", outcome);
+        increment(AnalyticsMetric.Operational.Metric.VIRUS_SCANS.value(),
+                AnalyticsMetric.Operational.Component.CLAMAV.value(), outcome);
     }
 
     public void recordSearch(String backend, String outcome) {
-        increment("souklab.search.requests", backend, outcome);
+        increment(AnalyticsMetric.Operational.Metric.SEARCH_REQUESTS.value(), backend, outcome);
     }
 
     public void recordWebSocket(String outcome) {
-        increment("souklab.websocket.connections", "stomp", outcome);
+        increment(AnalyticsMetric.Operational.Metric.WEBSOCKET_CONNECTIONS.value(),
+                AnalyticsMetric.Operational.Component.STOMP.value(), outcome);
     }
 
     public void recordRateLimitRejection(String scope) {
-        increment("souklab.rate_limit.rejections", scope, "rejected");
+        increment(AnalyticsMetric.Operational.Metric.RATE_LIMIT_REJECTIONS.value(),
+                scope, AnalyticsMetric.Operational.Outcome.REJECTED.value());
     }
 
     public void recordRequest(String method, String outcome) {
-        increment("souklab.http.requests", method, outcome);
+        increment(AnalyticsMetric.Operational.Metric.HTTP_REQUESTS.value(), method, outcome);
     }
 
     /** Returns the current bounded counter snapshot for an operational report. */

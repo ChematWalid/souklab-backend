@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.config.OperationalMetrics;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
@@ -27,10 +28,10 @@ public class StorageHealthIndicator implements HealthIndicator {
     public Health health() {
         try {
             s3Client.headBucket(HeadBucketRequest.builder().bucket(properties.getS3().getBucket()).build());
-            metrics.setDependencyAvailability("s3", true);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.OBJECT_STORAGE.value(), true);
             return Health.up().build();
         } catch (RuntimeException exception) {
-            metrics.setDependencyAvailability("s3", false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.OBJECT_STORAGE.value(), false);
             return Health.down().withDetail("provider", "s3").build();
         }
     }

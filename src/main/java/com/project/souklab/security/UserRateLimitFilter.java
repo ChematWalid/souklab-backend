@@ -1,5 +1,6 @@
 package com.project.souklab.security;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import java.time.Duration;
 
 import com.project.souklab.config.AppProperties;
@@ -85,12 +86,12 @@ public class UserRateLimitFilter extends OncePerRequestFilter {
             String scope = ruleName(request);
             Bucket bucket = store.resolve("user:" + scope + ":" + authentication.getName(), capacity, refill);
             if (!bucket.tryConsume(1)) {
-                metrics.recordRateLimitRejection("user");
+                metrics.recordRateLimitRejection(AnalyticsMetric.Operational.Scope.USER.value());
                 reject(response);
                 return;
             }
         } catch (RuntimeException unavailable) {
-            metrics.recordRateLimitRejection("user");
+            metrics.recordRateLimitRejection(AnalyticsMetric.Operational.Scope.USER.value());
             reject(response);
             return;
         }

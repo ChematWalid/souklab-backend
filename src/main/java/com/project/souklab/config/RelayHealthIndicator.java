@@ -1,5 +1,6 @@
 package com.project.souklab.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.context.annotation.Profile;
@@ -29,10 +30,10 @@ public class RelayHealthIndicator implements HealthIndicator {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(properties.getHost(), properties.getPort()),
                     Math.toIntExact(healthProperties.getDependencyTimeout().toMillis()));
-            metrics.setDependencyAvailability("rabbitmq", true);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.RABBITMQ.value(), true);
             return Health.up().build();
         } catch (IOException exception) {
-            metrics.setDependencyAvailability("rabbitmq", false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.RABBITMQ.value(), false);
             return Health.down().build();
         }
     }
