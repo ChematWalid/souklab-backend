@@ -678,7 +678,7 @@ public class AnalyticsJobService {
         AnalyticsSeriesSorter.sort(series, job.getSortField(), job.getSortDirection());
     }
 
-    private List<Map<String, Object>> loginRetentionCohorts(LocalDateTime from, LocalDateTime to) {
+    private List<Map<AnalyticsMetric.Retention.Row, Object>> loginRetentionCohorts(LocalDateTime from, LocalDateTime to) {
         Map<String, LocalDateTime> firstRegistrationByActor = new LinkedHashMap<>();
         for (var event : events.findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(
                 AnalyticsEvent.Registration.CREATED, from, to)) {
@@ -705,16 +705,16 @@ public class AnalyticsJobService {
                         LinkedHashMap::new, Collectors.counting()));
         return cohortSizes.entrySet().stream().map(entry -> {
             long size = entry.getValue();
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put(AnalyticsMetric.Retention.COHORT_DATE.value(), entry.getKey());
-            row.put(AnalyticsMetric.Retention.COHORT_SIZE.value(), size);
+            Map<AnalyticsMetric.Retention.Row, Object> row = new LinkedHashMap<>();
+            row.put(AnalyticsMetric.Retention.Row.COHORT_DATE, entry.getKey());
+            row.put(AnalyticsMetric.Retention.Row.COHORT_SIZE, size);
             for (Map.Entry<AnalyticsMetric.Retention, Set<String>> window : retainedByWindow.entrySet()) {
                 long retained = window.getValue().stream()
                         .filter(firstRegistrationByActor::containsKey)
                         .filter(actor -> businessDate(firstRegistrationByActor.get(actor)).equals(entry.getKey()))
                         .count();
-                row.put(window.getKey().value() + AnalyticsMetric.Retention.RETAINED_SUFFIX.value(), retained);
-                row.put(window.getKey().value() + AnalyticsMetric.Retention.RATE_SUFFIX.value(), size == 0 ? 0.0 : (double) retained / size);
+                row.put(window.getKey().retainedRow(), retained);
+                row.put(window.getKey().rateRow(), size == 0 ? 0.0 : (double) retained / size);
             }
             return row;
         }).toList();

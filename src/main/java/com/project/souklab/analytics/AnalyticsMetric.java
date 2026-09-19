@@ -268,14 +268,44 @@ public final class AnalyticsMetric {
 
     public enum Retention implements Key {
         DAY_1("day1"), DAY_7("day7"), DAY_30("day30"),
-        COHORT_DATE("cohortDate"), COHORT_SIZE("cohortSize"),
-        RETAINED_SUFFIX("Retained"), RATE_SUFFIX("Rate");
+        COHORT_DATE("cohortDate"), COHORT_SIZE("cohortSize");
 
         private final String value;
 
         Retention(String value) { this.value = value; }
 
         public String value() { return value; }
+
+        public Row retainedRow() {
+            return switch (this) {
+                case DAY_1 -> Row.DAY_1_RETAINED;
+                case DAY_7 -> Row.DAY_7_RETAINED;
+                case DAY_30 -> Row.DAY_30_RETAINED;
+                default -> throw new IllegalStateException("Retention row is not a retention window: " + this);
+            };
+        }
+
+        public Row rateRow() {
+            return switch (this) {
+                case DAY_1 -> Row.DAY_1_RATE;
+                case DAY_7 -> Row.DAY_7_RATE;
+                case DAY_30 -> Row.DAY_30_RATE;
+                default -> throw new IllegalStateException("Retention row is not a retention window: " + this);
+            };
+        }
+
+        public enum Row implements Key {
+            COHORT_DATE("cohortDate"), COHORT_SIZE("cohortSize"),
+            DAY_1_RETAINED("day1Retained"), DAY_1_RATE("day1Rate"),
+            DAY_7_RETAINED("day7Retained"), DAY_7_RATE("day7Rate"),
+            DAY_30_RETAINED("day30Retained"), DAY_30_RATE("day30Rate");
+
+            private final String value;
+
+            Row(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
     }
 
     public enum Csv implements Key {

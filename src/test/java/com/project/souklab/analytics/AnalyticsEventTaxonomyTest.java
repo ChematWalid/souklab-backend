@@ -66,6 +66,10 @@ class AnalyticsEventTaxonomyTest {
                 .isEqualTo(AnalyticsMetric.Operational.HttpMethod.POST);
         assertThat(AnalyticsMetric.Operational.RequestOutcome.fromStatus(503))
                 .isEqualTo(AnalyticsMetric.Operational.RequestOutcome.SERVER_ERROR_5XX);
+        assertThat(AnalyticsMetric.Retention.DAY_7.retainedRow())
+                .isEqualTo(AnalyticsMetric.Retention.Row.DAY_7_RETAINED);
+        assertThat(AnalyticsMetric.Retention.DAY_7.rateRow())
+                .isEqualTo(AnalyticsMetric.Retention.Row.DAY_7_RATE);
     }
 
     @Test
