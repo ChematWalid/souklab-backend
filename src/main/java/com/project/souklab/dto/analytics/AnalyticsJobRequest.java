@@ -3,6 +3,7 @@ package com.project.souklab.dto.analytics;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsReportType;
+import com.project.souklab.model.analytics.AnalyticsSortDirection;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,6 +20,6 @@ public class AnalyticsJobRequest {
     private Integer pageNumber;
     private Integer pageSize;
     private String sortField;
-    private String sortDirection;
+    private AnalyticsSortDirection sortDirection;
     private AnalyticsOutputFormat outputFormat;
 }

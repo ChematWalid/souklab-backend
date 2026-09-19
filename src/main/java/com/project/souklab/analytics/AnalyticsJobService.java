@@ -46,6 +46,7 @@ import com.project.souklab.model.analytics.AnalyticsJobStatus;
 import com.project.souklab.model.analytics.AnalyticsJobArtifact;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
+import com.project.souklab.model.analytics.AnalyticsSortDirection;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsOutboxEvent;
 import com.project.souklab.dto.analytics.AnalyticsJobEvent;
@@ -601,7 +602,7 @@ public class AnalyticsJobService {
         int pageSize = r.getPageSize() == null ? properties.getDefaultPageSize() : r.getPageSize();
         if (pageSize < 1 || pageSize > properties.getMaximumPageSize()) throw new BadRequestException("Analytics page size is outside configured bounds");
         if (r.getPageNumber() != null && r.getPageNumber() < 0) throw new BadRequestException("Analytics page number must not be negative");
-        if (r.getReportType().name().equals("SUBSCRIPTIONS_PAYMENTS") && !financial) {
+        if (r.getReportType() == AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS && !financial) {
             throw new ForbiddenException("Financial analytics permission is required");
         }
         if (r.getOutputFormat() != null && r.getOutputFormat() != AnalyticsOutputFormat.JSON
@@ -609,9 +610,6 @@ public class AnalyticsJobService {
         if (r.getReportType() == AnalyticsReportType.CSV_EXPORT
                 && r.getOutputFormat() != AnalyticsOutputFormat.CSV) {
             throw new BadRequestException("CSV_EXPORT reports require CSV output format");
-        }
-        if (r.getSortDirection() != null && !List.of("ASC", "DESC").contains(r.getSortDirection().toUpperCase())) {
-            throw new BadRequestException("Sort direction must be ASC or DESC");
         }
         if (r.getSortField() != null && !List.of("startDate", "endDate", "activityEvents", "newRegistrations").contains(r.getSortField())) {
             throw new BadRequestException("Unsupported analytics sort field");
@@ -664,7 +662,7 @@ public class AnalyticsJobService {
                 }
                 return String.valueOf(a).compareTo(String.valueOf(b));
             };
-            if ("DESC".equalsIgnoreCase(job.getSortDirection())) comparator = comparator.reversed();
+            if (job.getSortDirection() == AnalyticsSortDirection.DESC) comparator = comparator.reversed();
             series.sort(comparator);
         }
         return series;

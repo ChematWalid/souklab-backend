@@ -27,7 +27,7 @@ public class AnalyticsJob extends BaseEntity {
     @Column(name = "page_number", nullable = false) private int pageNumber;
     @Column(name = "page_size", nullable = false) private int pageSize;
     @Column(name = "sort_field", length = 64) private String sortField;
-    @Column(name = "sort_direction", length = 8) private String sortDirection;
+    @Enumerated(EnumType.STRING) @Column(name = "sort_direction", length = 8) private AnalyticsSortDirection sortDirection;
     @Column(name = "filters_json", columnDefinition = "TEXT") private String filtersJson;
     @Column(name = "permission_scope", columnDefinition = "TEXT", nullable = false) private String permissionScope;
     @Enumerated(EnumType.STRING) @Column(name = "output_format", nullable = false, length = 8) private AnalyticsOutputFormat outputFormat;
