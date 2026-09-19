@@ -43,7 +43,7 @@ class AnalyticsJobControllerTest {
 
     @Test
     void statsAliasReturnsOwnerScopedJobStatus() throws Exception {
-        when(jobService.get(eq("job-1"), eq("analytics@example.com"), eq(true)))
+        when(jobService.get(eq("job-1"), eq("analytics@example.com")))
                 .thenReturn(response());
 
         mockMvc.perform(get("/api/v1/admin/stats/jobs/job-1")

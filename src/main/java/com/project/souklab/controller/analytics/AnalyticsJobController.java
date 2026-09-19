@@ -93,19 +93,19 @@ public class AnalyticsJobController {
     @GetMapping("/jobs/{id}")
     @Operation(summary = "Get analytics job status", description = "Returns status and failure metadata for an owned job.")
     public ResponseEntity<ApiResponse<AnalyticsJobResponse>> status(@PathVariable String id, Authentication authentication) {
-        return ResponseEntity.ok(ApiResponse.success(service.get(id, authentication.getName(), hasFinancialPermission(authentication))));
+        return ResponseEntity.ok(ApiResponse.success(service.get(id, authentication.getName())));
     }
 
     @GetMapping("/jobs/{id}/result")
     @Operation(summary = "Fetch an analytics result", description = "Returns the paginated result after the asynchronous job completes.")
     public ResponseEntity<ApiResponse<AnalyticsResult>> result(@PathVariable String id, Authentication authentication) {
-        return ResponseEntity.ok(ApiResponse.success(service.result(id, authentication.getName(), hasFinancialPermission(authentication))));
+        return ResponseEntity.ok(ApiResponse.success(service.result(id, authentication.getName())));
     }
 
     @GetMapping("/jobs/{id}/download")
     @Operation(summary = "Download an analytics result", description = "Downloads an owned JSON or CSV artifact using the permission scope captured at submission.")
     public ResponseEntity<byte[]> download(@PathVariable String id, Authentication authentication) {
-        var download = service.download(id, authentication.getName(), hasFinancialPermission(authentication));
+        var download = service.download(id, authentication.getName());
         byte[] content = download.content().getBytes(StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(download.csv() ? MediaType.parseMediaType("text/csv") : MediaType.APPLICATION_JSON);
@@ -116,7 +116,7 @@ public class AnalyticsJobController {
     @DeleteMapping("/jobs/{id}")
     @Operation(summary = "Delete an analytics job", description = "Deletes an owned job and its stored artifact when available.")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id, Authentication authentication) {
-        service.delete(id, authentication.getName(), hasFinancialPermission(authentication));
+        service.delete(id, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success(null, "Analytics job deleted."));
     }
 

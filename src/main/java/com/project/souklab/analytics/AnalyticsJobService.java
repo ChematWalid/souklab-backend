@@ -436,13 +436,13 @@ public class AnalyticsJobService {
     }
 
     @Transactional(readOnly = true)
-    public AnalyticsJobResponse get(String id, String username, boolean financial) {
-        return response(ownerJob(id, username, financial));
+    public AnalyticsJobResponse get(String id, String username) {
+        return response(ownerJob(id, username));
     }
 
     @Transactional(readOnly = true)
-    public AnalyticsResult result(String id, String username, boolean financial) {
-        AnalyticsJob job = ownerJob(id, username, financial);
+    public AnalyticsResult result(String id, String username) {
+        AnalyticsJob job = ownerJob(id, username);
         if (job.getStatus() != AnalyticsJobStatus.COMPLETED || job.getResultJson() == null) {
             throw new BadRequestException("Analytics result is not ready");
         }
@@ -455,8 +455,8 @@ public class AnalyticsJobService {
     }
 
     @Transactional(readOnly = true)
-    public Download download(String id, String username, boolean financial) {
-        AnalyticsJob job = ownerJob(id, username, financial);
+    public Download download(String id, String username) {
+        AnalyticsJob job = ownerJob(id, username);
         if (job.getStatus() != AnalyticsJobStatus.COMPLETED || job.getResultJson() == null) {
             throw new BadRequestException("Analytics result is not ready");
         }
@@ -536,8 +536,8 @@ public class AnalyticsJobService {
     public record Download(String content, boolean csv) { }
 
     @Transactional
-    public void delete(String id, String username, boolean financial) {
-        AnalyticsJob job = ownerJob(id, username, financial);
+    public void delete(String id, String username) {
+        AnalyticsJob job = ownerJob(id, username);
         artifacts.findFirstByJobIdOrderByCreatedAtDesc(job.getId()).ifPresent(artifact -> {
             if (storageService != null) {
                 try { storageService.delete(artifact.getStorageKey()); }
@@ -548,16 +548,11 @@ public class AnalyticsJobService {
         jobs.delete(job);
     }
 
-    private AnalyticsJob ownerJob(String id, String username, boolean financial) {
+    private AnalyticsJob ownerJob(String id, String username) {
         String owner = users.findByEmail(username).map(u -> u.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated administrator not found"));
         AnalyticsJob job = jobs.findByIdAndOwnerId(id, owner)
                 .orElseThrow(() -> new ResourceNotFoundException("Analytics job not found"));
-        if (job.getPermissionScope() != null
-                && job.getPermissionScope().contains(Permission.Financial.ADMIN.authority())
-                && !financial) {
-            throw new ForbiddenException("Financial analytics permission is required for this job");
-        }
         return job;
     }
 
