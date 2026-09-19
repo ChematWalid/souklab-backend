@@ -2,6 +2,10 @@ package com.project.souklab.analytics;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.project.souklab.model.EnumValue;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 /**
  * Stable keys used by the analytics result and rollup contracts.
  *
@@ -13,50 +17,116 @@ public final class AnalyticsMetric {
 
     public interface Key extends EnumValue { }
 
-    public enum Summary implements Key {
-        TOTAL_USERS("totalUsers"), NEW_REGISTRATIONS("newRegistrations"),
-        VERIFIED_REGISTRATIONS("verifiedRegistrations"), ACTIVATION_RATE("activationRate"),
-        VERIFIED_USERS("verifiedUsers"), ARTISAN_PROFILES("artisanProfiles"),
-        CLIENT_PROFILES("clientProfiles"), ACTIVE_ARTISAN_PROFILES("activeArtisanProfiles"),
-        ACTIVE_CLIENT_PROFILES("activeClientProfiles"), ACTIVE_USERS("activeUsers"),
-        PENDING_USERS("pendingUsers"), SUSPENDED_USERS("suspendedUsers"),
-        PENDING_USER_APPROVALS("pendingUserApprovals"), MODERATION_ACTIVITY("moderationActivity"),
-        USER_STATUSES("userStatuses"), ACTIVITY_EVENTS("activityEvents"),
-        SUCCESSFUL_LOGINS("successfulLogins"), PUBLISHED_POSTS("publishedPosts"),
-        MESSAGES_SENT("messagesSent"), PROFILE_VIEWS("profileViews"),
-        REPORT_RESOLUTIONS("reportResolutions"), AVERAGE_REPORT_RESOLUTION_SECONDS("averageReportResolutionSeconds"),
-        DAU("dau"), WAU("wau"), MAU("mau"),
-        ENGAGEMENT_BY_ACCOUNT_TYPE("engagementByAccountType"),
-        ENGAGEMENT_BY_REGION("engagementByRegion"),
-        ENGAGEMENT_BY_CRAFT_CATEGORY("engagementByCraftCategory"),
-        LOGIN_RETENTION_COHORTS("loginRetentionCohorts"), FEED_POSTS_CREATED("feedPostsCreated"),
-        FORMATIONS_CREATED("formationsCreated"), FORMATION_ENROLLMENTS("formationEnrollments"),
-        ACTIVE_INSTRUCTORS("activeInstructors"), FORMATION_UTILIZATION_RATE("formationUtilizationRate"),
-        REVIEWS_SUBMITTED("reviewsSubmitted"), PUBLISHED_REVIEWS("publishedReviews"),
-        AVERAGE_PUBLISHED_RATING("averagePublishedRating"), REPORTS_SUBMITTED("reportsSubmitted"),
-        FORMATEUR_PENDING("formateurPending"), FORMATEUR_APPROVED_IN_RANGE("formateurApprovedInRange"),
-        FORMATEUR_REJECTED_IN_RANGE("formateurRejectedInRange"), FORMATEUR_STATUSES("formateurStatuses"),
-        PAYMENTS_CREATED("paymentsCreated"), FEED_POSTS_BY_STATUS("feedPostsByStatus"),
-        FORMATIONS_BY_STATUS("formationsByStatus"), ENROLLMENTS_BY_STATUS("enrollmentsByStatus"),
-        FORMATION_COMPLETIONS("formationCompletions"), ENROLLMENT_CANCELLATION_RATE("enrollmentCancellationRate"),
-        REPORTS_BY_STATUS("reportsByStatus"), PAYMENTS_BY_STATUS("paymentsByStatus"),
-        SUBSCRIPTIONS_BY_STATUS("subscriptionsByStatus"), SUBSCRIPTIONS_BY_SUBSCRIBER_TYPE("subscriptionsBySubscriberType"),
-        SUBSCRIPTION_LIFECYCLE_EVENTS("subscriptionLifecycleEvents"), CHECKOUT_CREATED("checkoutCreated"),
-        PAYMENT_STATE_TRANSITIONS("paymentStateTransitions"), GROSS_COLLECTED_DZD("grossCollectedDzd"),
-        PROVIDER_FEES_DZD("providerFeesDzd"), NET_COLLECTED_DZD("netCollectedDzd"),
-        PAYMENT_CONVERSION_RATE("paymentConversionRate"), MANUAL_GRANTS("manualGrants"),
-        OPERATIONAL("operational"), PERIOD_COMPARISON("periodComparison");
+    public static final class Summary {
+        private Summary() { }
 
-        private final String value;
-
-        Summary(String value) { this.value = value; }
-
-        public String value() { return value; }
-
-        @JsonCreator
-        public static Summary fromValue(String value) {
-            for (Summary key : values()) if (key.value.equals(value)) return key;
+        public static Key fromValue(String value) {
+            for (Key key : all()) {
+                if (key.value().equals(value)) return key;
+            }
             throw new IllegalArgumentException("Unknown analytics summary key: " + value);
+        }
+
+        private static List<Key> all() {
+            return Stream.of(
+                    User.values(), Engagement.values(), Content.values(), Formation.values(),
+                    Moderation.values(), Report.values(), Payment.values(), Subscription.values(), General.values())
+                    .flatMap(Arrays::stream)
+                    .map(key -> (Key) key)
+                    .toList();
+        }
+
+        public enum User implements Key {
+            TOTAL("totalUsers"), NEW_REGISTRATIONS("newRegistrations"),
+            VERIFIED_REGISTRATIONS("verifiedRegistrations"), ACTIVATION_RATE("activationRate"),
+            VERIFIED("verifiedUsers"), ARTISAN_PROFILES("artisanProfiles"), CLIENT_PROFILES("clientProfiles"),
+            ACTIVE_ARTISAN_PROFILES("activeArtisanProfiles"), ACTIVE_CLIENT_PROFILES("activeClientProfiles"),
+            ACTIVE("activeUsers"), PENDING("pendingUsers"), SUSPENDED("suspendedUsers"),
+            PENDING_APPROVALS("pendingUserApprovals"), STATUSES("userStatuses");
+
+            private final String value;
+            User(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Engagement implements Key {
+            ACTIVITY_EVENTS("activityEvents"), SUCCESSFUL_LOGINS("successfulLogins"),
+            PUBLISHED_POSTS("publishedPosts"), MESSAGES_SENT("messagesSent"), PROFILE_VIEWS("profileViews"),
+            REPORT_RESOLUTIONS("reportResolutions"), DAU("dau"), WAU("wau"), MAU("mau"),
+            BY_ACCOUNT_TYPE("engagementByAccountType"), BY_REGION("engagementByRegion"),
+            BY_CRAFT_CATEGORY("engagementByCraftCategory"), LOGIN_RETENTION_COHORTS("loginRetentionCohorts");
+
+            private final String value;
+            Engagement(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Content implements Key {
+            FEED_POSTS_CREATED("feedPostsCreated"), FEED_POSTS_BY_STATUS("feedPostsByStatus"),
+            REVIEWS_SUBMITTED("reviewsSubmitted"), PUBLISHED_REVIEWS("publishedReviews"),
+            AVERAGE_PUBLISHED_RATING("averagePublishedRating");
+
+            private final String value;
+            Content(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Formation implements Key {
+            CREATED("formationsCreated"), ENROLLMENTS("formationEnrollments"), ACTIVE_INSTRUCTORS("activeInstructors"),
+            UTILIZATION_RATE("formationUtilizationRate"), BY_STATUS("formationsByStatus"),
+            COMPLETIONS("formationCompletions"), ENROLLMENT_CANCELLATION_RATE("enrollmentCancellationRate"),
+            ENROLLMENTS_BY_STATUS("enrollmentsByStatus");
+
+            private final String value;
+            Formation(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Moderation implements Key {
+            ACTIVITY("moderationActivity"), FORMATEUR_PENDING("formateurPending"),
+            FORMATEUR_APPROVED_IN_RANGE("formateurApprovedInRange"), FORMATEUR_REJECTED_IN_RANGE("formateurRejectedInRange"),
+            FORMATEUR_STATUSES("formateurStatuses");
+
+            private final String value;
+            Moderation(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Report implements Key {
+            SUBMITTED("reportsSubmitted"), AVERAGE_RESOLUTION_SECONDS("averageReportResolutionSeconds"),
+            BY_STATUS("reportsByStatus");
+
+            private final String value;
+            Report(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Payment implements Key {
+            CREATED("paymentsCreated"), BY_STATUS("paymentsByStatus"), CHECKOUT_CREATED("checkoutCreated"),
+            STATE_TRANSITIONS("paymentStateTransitions"), GROSS_COLLECTED_DZD("grossCollectedDzd"),
+            PROVIDER_FEES_DZD("providerFeesDzd"), NET_COLLECTED_DZD("netCollectedDzd"),
+            CONVERSION_RATE("paymentConversionRate"), MANUAL_GRANTS("manualGrants");
+
+            private final String value;
+            Payment(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Subscription implements Key {
+            BY_STATUS("subscriptionsByStatus"), BY_SUBSCRIBER_TYPE("subscriptionsBySubscriberType"),
+            LIFECYCLE_EVENTS("subscriptionLifecycleEvents");
+
+            private final String value;
+            Subscription(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum General implements Key {
+            OPERATIONAL("operational"), PERIOD_COMPARISON("periodComparison");
+
+            private final String value;
+            General(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 

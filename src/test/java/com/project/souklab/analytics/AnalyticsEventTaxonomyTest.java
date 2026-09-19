@@ -55,7 +55,7 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Comparison.CURRENT.value()).isEqualTo("current");
         assertThat(AnalyticsMetric.Comparison.PREVIOUS.value()).isEqualTo("previous");
         assertThat(AnalyticsMetric.Historical.REGISTRATIONS.value()).isEqualTo("historical.registrations");
-        assertThat(AnalyticsMetric.Summary.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
+        assertThat(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.Series.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.EventRollup.SEPARATOR.value()).isEqualTo("\u0000");
         assertThat(AnalyticsMetric.Operational.Metric.Request.COUNTERS.value()).isEqualTo("souklab.http.requests");
@@ -111,7 +111,7 @@ class AnalyticsEventTaxonomyTest {
         ObjectMapper mapper = new ObjectMapper();
 
         String json = mapper.writeValueAsString(Map.of(
-                AnalyticsMetric.Summary.PERIOD_COMPARISON, Map.of(
+                AnalyticsMetric.Summary.General.PERIOD_COMPARISON, Map.of(
                         AnalyticsMetric.Comparison.CURRENT, 4,
                         AnalyticsMetric.Comparison.PREVIOUS, 2)));
 
@@ -147,7 +147,7 @@ class AnalyticsEventTaxonomyTest {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 31),
                 AnalyticsBucket.DAY,
-                Map.of(AnalyticsMetric.Summary.NEW_REGISTRATIONS, 7L),
+                Map.of(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS, 7L),
                 PaginatedResponse.<Map<AnalyticsMetric.Series, Object>>builder()
                         .content(List.of(Map.of(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9L)))
                         .pageNumber(0).pageSize(20).totalElements(1).totalPages(1).last(true).build(),
@@ -158,7 +158,7 @@ class AnalyticsEventTaxonomyTest {
 
         AnalyticsResult restored = mapper.readValue(mapper.writeValueAsBytes(result), AnalyticsResult.class);
 
-        assertThat(restored.summary()).containsEntry(AnalyticsMetric.Summary.NEW_REGISTRATIONS, 7);
+        assertThat(restored.summary()).containsEntry(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS, 7);
         assertThat(restored.series().getContent().getFirst()).containsEntry(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9);
         assertThat(restored.tables()).containsKey(AnalyticsMetric.Table.USERS);
         assertThat(restored.tables().get(AnalyticsMetric.Table.USERS).getContent().getFirst())
