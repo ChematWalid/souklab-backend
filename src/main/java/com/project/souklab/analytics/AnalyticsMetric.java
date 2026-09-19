@@ -147,20 +147,51 @@ public final class AnalyticsMetric {
         }
     }
 
-    public enum Series implements Key {
-        START_DATE("startDate"), END_DATE("endDate"), ACTIVITY_EVENTS("activityEvents"),
-        UNIQUE_ACTORS("uniqueActors"), NEW_REGISTRATIONS("newRegistrations");
+    public static final class Series {
+        private Series() { }
 
-        private final String value;
+        public interface Key extends AnalyticsMetric.Key { }
 
-        Series(String value) { this.value = value; }
-
-        public String value() { return value; }
-
-        @JsonCreator
-        public static Series fromValue(String value) {
-            for (Series key : values()) if (key.value.equals(value)) return key;
+        public static Key fromValue(String value) {
+            for (Key key : all()) {
+                if (key.value().equals(value)) return key;
+            }
             throw new IllegalArgumentException("Unknown analytics series key: " + value);
+        }
+
+        private static List<Key> all() {
+            return Stream.of(Date.values(), Activity.values(), Actor.values(), Registration.values())
+                    .flatMap(Arrays::stream)
+                    .map(key -> (Key) key)
+                    .toList();
+        }
+
+        public enum Date implements Key {
+            START("startDate"), END("endDate");
+            private final String value;
+            Date(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Activity implements Key {
+            EVENTS("activityEvents");
+            private final String value;
+            Activity(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Actor implements Key {
+            UNIQUE("uniqueActors");
+            private final String value;
+            Actor(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Registration implements Key {
+            NEW("newRegistrations");
+            private final String value;
+            Registration(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 

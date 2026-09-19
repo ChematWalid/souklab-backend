@@ -38,7 +38,7 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsFilterKey.fromKey(AnalyticsMetric.Payload.EVENT_TYPE.value()))
                 .contains(AnalyticsFilterKey.EVENT_TYPE);
         assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
-        assertThat(AnalyticsSortField.fromField(AnalyticsMetric.Series.ACTIVITY_EVENTS.value()))
+        assertThat(AnalyticsSortField.fromField(AnalyticsMetric.Series.Activity.EVENTS.value()))
                 .isEqualTo(AnalyticsSortField.Activity.EVENTS);
         assertThat(EnrollmentStatus.ATTENDED.value()).isEqualTo("ATTENDED");
     }
@@ -56,7 +56,7 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Comparison.PREVIOUS.value()).isEqualTo("previous");
         assertThat(AnalyticsMetric.Historical.REGISTRATIONS.value()).isEqualTo("historical.registrations");
         assertThat(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
-        assertThat(AnalyticsMetric.Series.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
+        assertThat(AnalyticsMetric.Series.Registration.NEW.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.EventRollup.SEPARATOR.value()).isEqualTo("\u0000");
         assertThat(AnalyticsMetric.Operational.Metric.Request.COUNTERS.value()).isEqualTo("souklab.http.requests");
         assertThat(AnalyticsMetric.Operational.Metric.Virus.SCANS.value()).isEqualTo("souklab.virus.scans");
@@ -148,8 +148,8 @@ class AnalyticsEventTaxonomyTest {
                 LocalDate.of(2026, 1, 31),
                 AnalyticsBucket.DAY,
                 Map.of(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS, 7L),
-                PaginatedResponse.<Map<AnalyticsMetric.Series, Object>>builder()
-                        .content(List.of(Map.of(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9L)))
+                PaginatedResponse.<Map<AnalyticsMetric.Series.Key, Object>>builder()
+                        .content(List.of(Map.of(AnalyticsMetric.Series.Activity.EVENTS, 9L)))
                         .pageNumber(0).pageSize(20).totalElements(1).totalPages(1).last(true).build(),
                 Map.of(AnalyticsMetric.Table.User.USERS,
                         PaginatedResponse.<Map<AnalyticsMetric.Csv, Object>>builder()
@@ -159,7 +159,7 @@ class AnalyticsEventTaxonomyTest {
         AnalyticsResult restored = mapper.readValue(mapper.writeValueAsBytes(result), AnalyticsResult.class);
 
         assertThat(restored.summary()).containsEntry(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS, 7);
-        assertThat(restored.series().getContent().getFirst()).containsEntry(AnalyticsMetric.Series.ACTIVITY_EVENTS, 9);
+        assertThat(restored.series().getContent().getFirst()).containsEntry(AnalyticsMetric.Series.Activity.EVENTS, 9);
         assertThat(restored.tables()).containsKey(AnalyticsMetric.Table.User.USERS);
         assertThat(restored.tables().get(AnalyticsMetric.Table.User.USERS).getContent().getFirst())
                 .containsEntry(AnalyticsMetric.Csv.KEY, "ACTIVE");

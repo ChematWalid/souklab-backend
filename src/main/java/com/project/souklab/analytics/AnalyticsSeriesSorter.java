@@ -13,7 +13,7 @@ public final class AnalyticsSeriesSorter {
     private AnalyticsSeriesSorter() {
     }
 
-    public static void sort(List<Map<AnalyticsMetric.Series, Object>> series,
+    public static void sort(List<Map<AnalyticsMetric.Series.Key, Object>> series,
                             AnalyticsSortField.Key field,
                             AnalyticsSortDirection direction) {
         if (field == null) {
@@ -22,7 +22,7 @@ public final class AnalyticsSeriesSorter {
         series.sort(comparator(field, direction));
     }
 
-    private static Comparator<Map<AnalyticsMetric.Series, Object>> comparator(AnalyticsSortField.Key field,
+    private static Comparator<Map<AnalyticsMetric.Series.Key, Object>> comparator(AnalyticsSortField.Key field,
                                                                AnalyticsSortDirection direction) {
         return (left, right) -> {
             Object leftValue = left.get(field.seriesField());

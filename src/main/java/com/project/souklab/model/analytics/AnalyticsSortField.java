@@ -10,7 +10,7 @@ public final class AnalyticsSortField {
 
     @JsonDeserialize(using = AnalyticsSortFieldValueDeserializer.class)
     public interface Key extends EnumValue {
-        AnalyticsMetric.Series seriesField();
+        AnalyticsMetric.Series.Key seriesField();
     }
 
     public static Key fromField(String field) {
@@ -25,42 +25,42 @@ public final class AnalyticsSortField {
     }
 
     public enum Date implements Key {
-        START(AnalyticsMetric.Series.START_DATE), END(AnalyticsMetric.Series.END_DATE);
+        START(AnalyticsMetric.Series.Date.START), END(AnalyticsMetric.Series.Date.END);
 
-        private final AnalyticsMetric.Series field;
+        private final AnalyticsMetric.Series.Key field;
 
-        Date(AnalyticsMetric.Series field) { this.field = field; }
+        Date(AnalyticsMetric.Series.Key field) { this.field = field; }
 
         @Override
-        public AnalyticsMetric.Series seriesField() { return field; }
+        public AnalyticsMetric.Series.Key seriesField() { return field; }
 
         @Override
         public String value() { return field.value(); }
     }
 
     public enum Activity implements Key {
-        EVENTS(AnalyticsMetric.Series.ACTIVITY_EVENTS);
+        EVENTS(AnalyticsMetric.Series.Activity.EVENTS);
 
-        private final AnalyticsMetric.Series field;
+        private final AnalyticsMetric.Series.Key field;
 
-        Activity(AnalyticsMetric.Series field) { this.field = field; }
+        Activity(AnalyticsMetric.Series.Key field) { this.field = field; }
 
         @Override
-        public AnalyticsMetric.Series seriesField() { return field; }
+        public AnalyticsMetric.Series.Key seriesField() { return field; }
 
         @Override
         public String value() { return field.value(); }
     }
 
     public enum Registration implements Key {
-        NEW(AnalyticsMetric.Series.NEW_REGISTRATIONS);
+        NEW(AnalyticsMetric.Series.Registration.NEW);
 
-        private final AnalyticsMetric.Series field;
+        private final AnalyticsMetric.Series.Key field;
 
-        Registration(AnalyticsMetric.Series field) { this.field = field; }
+        Registration(AnalyticsMetric.Series.Key field) { this.field = field; }
 
         @Override
-        public AnalyticsMetric.Series seriesField() { return field; }
+        public AnalyticsMetric.Series.Key seriesField() { return field; }
 
         @Override
         public String value() { return field.value(); }

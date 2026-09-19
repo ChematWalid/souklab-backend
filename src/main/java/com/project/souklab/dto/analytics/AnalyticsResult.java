@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.analytics.AnalyticsMetricSummaryKeyDeserializer;
 import com.project.souklab.analytics.AnalyticsMetricTableKeyDeserializer;
+import com.project.souklab.analytics.AnalyticsSeriesPageDeserializer;
 import com.project.souklab.model.analytics.AnalyticsReportTypeDeserializer;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
@@ -19,6 +20,7 @@ public record AnalyticsResult(
         AnalyticsBucket bucket,
         @JsonDeserialize(keyUsing = AnalyticsMetricSummaryKeyDeserializer.class)
         Map<AnalyticsMetric.Key, Object> summary,
-        PaginatedResponse<Map<AnalyticsMetric.Series, Object>> series,
+        @JsonDeserialize(using = AnalyticsSeriesPageDeserializer.class)
+        PaginatedResponse<Map<AnalyticsMetric.Series.Key, Object>> series,
         @JsonDeserialize(keyUsing = AnalyticsMetricTableKeyDeserializer.class)
         Map<AnalyticsMetric.Key, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables) { }

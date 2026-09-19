@@ -411,7 +411,7 @@ public class AnalyticsJobService {
                 result.put(AnalyticsMetric.Result.BUCKET, job.getBucket());
                 result.put(AnalyticsMetric.Result.SUMMARY, summary);
                 result.put(AnalyticsMetric.Result.TABLES, buildTables(job, summary));
-                List<Map<AnalyticsMetric.Series, Object>> allSeries = buildSeries(job, from, to);
+                List<Map<AnalyticsMetric.Series.Key, Object>> allSeries = buildSeries(job, from, to);
                 sortSeries(allSeries, job);
                 if (allSeries.size() > jobProperties.getMaximumResultRows()) {
                     throw new BadRequestException("Analytics result exceeds configured row limit");
@@ -423,7 +423,7 @@ public class AnalyticsJobService {
                 int pageStart = requestedPageStart >= allSeries.size()
                         ? allSeries.size() : (int) requestedPageStart;
                 int pageEnd = Math.min(pageStart + job.getPageSize(), allSeries.size());
-                result.put(AnalyticsMetric.Result.SERIES, PaginatedResponse.<Map<AnalyticsMetric.Series, Object>>builder()
+                result.put(AnalyticsMetric.Result.SERIES, PaginatedResponse.<Map<AnalyticsMetric.Series.Key, Object>>builder()
                         .content(allSeries.subList(pageStart, pageEnd))
                         .pageNumber(job.getPageNumber())
                         .pageSize(job.getPageSize())
@@ -640,8 +640,8 @@ public class AnalyticsJobService {
         }
     }
 
-    private List<Map<AnalyticsMetric.Series, Object>> buildSeries(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {
-        List<Map<AnalyticsMetric.Series, Object>> series = new ArrayList<>();
+    private List<Map<AnalyticsMetric.Series.Key, Object>> buildSeries(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {
+        List<Map<AnalyticsMetric.Series.Key, Object>> series = new ArrayList<>();
         Map<AnalyticsFilterKey, String> filters = readFilters(job);
         LocalDate cursor = firstBucketDate(job.getFromDate(), job.getBucket());
         while (!cursor.isAfter(job.getToDate())) {
@@ -655,27 +655,27 @@ public class AnalyticsJobService {
             LocalDate end = next.minusDays(1).isAfter(job.getToDate()) ? job.getToDate() : next.minusDays(1);
             LocalDateTime bucketFrom = utcStart(start);
             LocalDateTime bucketTo = utcStart(end.plusDays(1));
-            Map<AnalyticsMetric.Series, Object> point = new LinkedHashMap<>();
-            point.put(AnalyticsMetric.Series.START_DATE, start);
-            point.put(AnalyticsMetric.Series.END_DATE, end);
+            Map<AnalyticsMetric.Series.Key, Object> point = new LinkedHashMap<>();
+            point.put(AnalyticsMetric.Series.Date.START, start);
+            point.put(AnalyticsMetric.Series.Date.END, end);
             String eventTypeValue = filters.get(AnalyticsFilterKey.EVENT_TYPE);
             AnalyticsEvent.Type eventType = eventTypeValue == null
                     ? null : AnalyticsEvent.fromValue(eventTypeValue).orElse(null);
             LocalDateTime inclusiveBucketTo = bucketTo.minusNanos(1);
-            point.put(AnalyticsMetric.Series.ACTIVITY_EVENTS, eventType == null
+            point.put(AnalyticsMetric.Series.Activity.EVENTS, eventType == null
                     ? events.countByEventTimeBetween(bucketFrom, inclusiveBucketTo)
                     : events.countByEventTypeAndEventTimeBetween(eventType, bucketFrom, inclusiveBucketTo));
-            point.put(AnalyticsMetric.Series.UNIQUE_ACTORS, eventType == null
+            point.put(AnalyticsMetric.Series.Actor.UNIQUE, eventType == null
                     ? events.countDistinctActorsByEventTimeBetween(bucketFrom, inclusiveBucketTo)
                     : events.countDistinctActorsByTypeAndEventTimeBetween(eventType, bucketFrom, inclusiveBucketTo));
-            point.put(AnalyticsMetric.Series.NEW_REGISTRATIONS, users.countByCreatedAtBetweenAndDeletedAtIsNull(bucketFrom, inclusiveBucketTo));
+            point.put(AnalyticsMetric.Series.Registration.NEW, users.countByCreatedAtBetweenAndDeletedAtIsNull(bucketFrom, inclusiveBucketTo));
             series.add(point);
             cursor = next;
         }
         return series;
     }
 
-    private void sortSeries(List<Map<AnalyticsMetric.Series, Object>> series, AnalyticsJob job) {
+    private void sortSeries(List<Map<AnalyticsMetric.Series.Key, Object>> series, AnalyticsJob job) {
         AnalyticsSeriesSorter.sort(series, job.getSortField(), job.getSortDirection());
     }
 

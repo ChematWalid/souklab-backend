@@ -43,6 +43,10 @@ if rg -n --pcre2 'AnalyticsReportType\.(?:OVERVIEW|GROWTH|ENGAGEMENT|MODERATION|
   echo 'flat analytics report type references detected; use grouped report enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsMetric\.Series\.(?:START_DATE|END_DATE|ACTIVITY_EVENTS|UNIQUE_ACTORS|NEW_REGISTRATIONS)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics series references detected; use grouped series enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 '"(?:PLAN_(?:CREATE|UPDATE|DEACTIVATE)|REFUND_REQUEST)"' src/main/java src/test/java --glob '*.java' \
     --glob '!FinancialAuditOperation.java'; then
   echo 'raw financial audit operation literals detected; use FinancialAuditOperation grouped enums' >&2
