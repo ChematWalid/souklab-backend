@@ -1,5 +1,10 @@
 # Production release checklist
 
+Local Phase 10 acceptance evidence is recorded in
+[`PHASE10_VERIFICATION.md`](PHASE10_VERIFICATION.md). The boxes below remain
+release gates and must be checked only when the corresponding production or CI
+evidence exists.
+
 - [ ] Hosted CI is green, including integration tests and dependency scan.
 - [ ] Working tree is clean and image is built from the reviewed commit.
 - [ ] Flyway migrations reviewed and upgrade path verified.
