@@ -1,5 +1,6 @@
 package com.project.souklab.analytics;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Stable keys used by the analytics result and rollup contracts.
  *
@@ -10,6 +11,7 @@ public final class AnalyticsMetric {
     private AnalyticsMetric() { }
 
     public interface Key {
+        @JsonValue
         String value();
     }
 

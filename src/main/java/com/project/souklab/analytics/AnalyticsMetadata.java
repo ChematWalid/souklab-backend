@@ -1,5 +1,6 @@
 package com.project.souklab.analytics;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Stable keys used in activity-event metadata.
  *
@@ -12,6 +13,7 @@ public final class AnalyticsMetadata {
     }
 
     public interface Key {
+        @JsonValue
         String value();
     }
 

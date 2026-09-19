@@ -1,5 +1,6 @@
 package com.project.souklab.analytics;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ public final class AnalyticsEvent {
     private AnalyticsEvent() { }
 
     public interface Type {
+        @JsonValue
         String value();
     }
 
@@ -40,6 +42,7 @@ public final class AnalyticsEvent {
     }
 
     public interface SourceValue {
+        @JsonValue
         String value();
     }
 
