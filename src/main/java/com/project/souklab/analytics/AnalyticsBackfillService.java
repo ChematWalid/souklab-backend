@@ -51,19 +51,19 @@ public class AnalyticsBackfillService {
             LocalDateTime start = utcStart(day);
             LocalDateTime end = utcStart(day.plusDays(1));
             LocalDateTime inclusiveEnd = end.minusNanos(1);
-            Map<String, Long> metrics = new LinkedHashMap<>();
-            metrics.put(AnalyticsMetric.Historical.REGISTRATIONS.value(), users.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
-            metrics.put(AnalyticsMetric.Historical.FEED_POSTS.value(), feedPosts.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
-            metrics.put(AnalyticsMetric.Historical.FORMATIONS.value(), formations.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
-            metrics.put(AnalyticsMetric.Historical.ENROLLMENTS.value(), enrollments.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
-            metrics.put(AnalyticsMetric.Historical.REVIEWS.value(), reviews.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
-            metrics.put(AnalyticsMetric.Historical.REPORTS.value(), reports.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
-            metrics.put(AnalyticsMetric.Historical.PAYMENTS.value(), payments.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
-            for (Map.Entry<String, Long> metric : metrics.entrySet()) {
+            Map<AnalyticsMetric.Historical, Long> metrics = new LinkedHashMap<>();
+            metrics.put(AnalyticsMetric.Historical.REGISTRATIONS, users.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
+            metrics.put(AnalyticsMetric.Historical.FEED_POSTS, feedPosts.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
+            metrics.put(AnalyticsMetric.Historical.FORMATIONS, formations.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
+            metrics.put(AnalyticsMetric.Historical.ENROLLMENTS, enrollments.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
+            metrics.put(AnalyticsMetric.Historical.REVIEWS, reviews.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
+            metrics.put(AnalyticsMetric.Historical.REPORTS, reports.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
+            metrics.put(AnalyticsMetric.Historical.PAYMENTS, payments.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
+            for (Map.Entry<AnalyticsMetric.Historical, Long> metric : metrics.entrySet()) {
                 if (metric.getValue() == 0) continue;
                 DailyKpiRollup rollup = new DailyKpiRollup();
                 rollup.setRollupDate(day);
-                rollup.setKpiKey(metric.getKey());
+                rollup.setKpiKey(metric.getKey().value());
                 rollup.setValue(metric.getValue());
                 rollup.setSourceVersion(2);
                 rollups.save(rollup);
