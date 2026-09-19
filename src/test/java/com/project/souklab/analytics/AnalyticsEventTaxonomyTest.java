@@ -35,9 +35,9 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsEvent.Subscription.RENEWAL.status().value()).isEqualTo("RENEWAL");
         assertThat(AnalyticsEvent.fromValue("REPORT_RESOLVED")).contains(AnalyticsEvent.Report.RESOLVED);
         assertThat(AnalyticsEvent.fromValue("unknown_event")).isEmpty();
-        assertThat(AnalyticsFilterKey.fromKey(AnalyticsMetric.Payload.Event.TYPE.value()))
-                .contains(AnalyticsFilterKey.EVENT_TYPE);
-        assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
+        assertThat(AnalyticsFilterKey.Event.fromKey(AnalyticsMetric.Payload.Event.TYPE.value()))
+                .contains(AnalyticsFilterKey.Event.TYPE);
+        assertThat(AnalyticsFilterKey.Event.fromKey("unknown")).isEmpty();
         assertThat(AnalyticsSortField.fromField(AnalyticsMetric.Series.Activity.EVENTS.value()))
                 .isEqualTo(AnalyticsSortField.Activity.EVENTS);
         assertThat(EnrollmentStatus.ATTENDED.value()).isEqualTo("ATTENDED");
@@ -95,15 +95,15 @@ class AnalyticsEventTaxonomyTest {
     void analyticsFilterEnumKeepsThePublicJsonKey() throws Exception {
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
         String json = mapper.writeValueAsString(Map.of(
-                AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value()));
+                AnalyticsFilterKey.Event.TYPE, AnalyticsEvent.Report.RESOLVED.value()));
 
         assertThat(json).isEqualTo("{\"eventType\":\"REPORT_RESOLVED\"}");
         AnalyticsJobRequest request = mapper.readValue(
                 "{\"filters\":{\"eventType\":\"REPORT_RESOLVED\"}}", AnalyticsJobRequest.class);
         assertThat(request.getFilters()).containsEntry(
-                AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value());
-        Map<AnalyticsFilterKey, String> persisted = mapper.readValue(json, new AnalyticsFiltersTypeReference());
-        assertThat(persisted).containsEntry(AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value());
+                AnalyticsFilterKey.Event.TYPE, AnalyticsEvent.Report.RESOLVED.value());
+        Map<AnalyticsFilterKey.Event, String> persisted = mapper.readValue(json, new AnalyticsFiltersTypeReference());
+        assertThat(persisted).containsEntry(AnalyticsFilterKey.Event.TYPE, AnalyticsEvent.Report.RESOLVED.value());
     }
 
     @Test

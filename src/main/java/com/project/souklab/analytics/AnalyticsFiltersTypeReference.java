@@ -6,5 +6,5 @@ import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import java.util.Map;
 
 /** Named Jackson type token for persisted analytics filters. */
-public final class AnalyticsFiltersTypeReference extends TypeReference<Map<AnalyticsFilterKey, String>> {
+public final class AnalyticsFiltersTypeReference extends TypeReference<Map<AnalyticsFilterKey.Event, String>> {
 }

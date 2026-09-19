@@ -634,15 +634,15 @@ public class AnalyticsJobService {
                 && r.getOutputFormat() != AnalyticsOutputFormat.CSV) {
             throw new BadRequestException("CSV_EXPORT reports require CSV output format");
         }
-        if (r.getFilters() != null && r.getFilters().containsKey(AnalyticsFilterKey.EVENT_TYPE)
-                && AnalyticsEvent.fromValue(r.getFilters().get(AnalyticsFilterKey.EVENT_TYPE)).isEmpty()) {
+        if (r.getFilters() != null && r.getFilters().containsKey(AnalyticsFilterKey.Event.TYPE)
+                && AnalyticsEvent.fromValue(r.getFilters().get(AnalyticsFilterKey.Event.TYPE)).isEmpty()) {
             throw new BadRequestException("Unsupported analytics event type filter");
         }
     }
 
     private List<Map<AnalyticsMetric.Series.Key, Object>> buildSeries(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {
         List<Map<AnalyticsMetric.Series.Key, Object>> series = new ArrayList<>();
-        Map<AnalyticsFilterKey, String> filters = readFilters(job);
+        Map<AnalyticsFilterKey.Event, String> filters = readFilters(job);
         LocalDate cursor = firstBucketDate(job.getFromDate(), job.getBucket());
         while (!cursor.isAfter(job.getToDate())) {
             LocalDate next = switch (job.getBucket()) {
@@ -658,7 +658,7 @@ public class AnalyticsJobService {
             Map<AnalyticsMetric.Series.Key, Object> point = new LinkedHashMap<>();
             point.put(AnalyticsMetric.Series.Date.START, start);
             point.put(AnalyticsMetric.Series.Date.END, end);
-            String eventTypeValue = filters.get(AnalyticsFilterKey.EVENT_TYPE);
+            String eventTypeValue = filters.get(AnalyticsFilterKey.Event.TYPE);
             AnalyticsEvent.Type eventType = eventTypeValue == null
                     ? null : AnalyticsEvent.fromValue(eventTypeValue).orElse(null);
             LocalDateTime inclusiveBucketTo = bucketTo.minusNanos(1);
@@ -793,7 +793,7 @@ public class AnalyticsJobService {
         return result;
     }
 
-    private Map<AnalyticsFilterKey, String> readFilters(AnalyticsJob job) {
+    private Map<AnalyticsFilterKey.Event, String> readFilters(AnalyticsJob job) {
         try {
             if (job.getFiltersJson() == null || job.getFiltersJson().isBlank()) return Map.of();
             return objectMapper.readValue(job.getFiltersJson(), new AnalyticsFiltersTypeReference());
@@ -803,7 +803,7 @@ public class AnalyticsJobService {
     }
 
     private AnalyticsEvent.Type eventTypeFilter(AnalyticsJob job) {
-        String value = readFilters(job).get(AnalyticsFilterKey.EVENT_TYPE);
+        String value = readFilters(job).get(AnalyticsFilterKey.Event.TYPE);
         return value == null ? null : AnalyticsEvent.fromValue(value).orElseThrow();
     }
 

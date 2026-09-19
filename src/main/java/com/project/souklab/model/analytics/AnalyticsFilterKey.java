@@ -8,31 +8,35 @@ import com.project.souklab.model.EnumValue;
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum AnalyticsFilterKey implements EnumValue {
-    EVENT_TYPE(AnalyticsMetric.Payload.Event.TYPE);
+public final class AnalyticsFilterKey {
+    private AnalyticsFilterKey() { }
 
-    private final AnalyticsMetric.Key key;
+    public enum Event implements EnumValue {
+        TYPE(AnalyticsMetric.Payload.Event.TYPE);
 
-    AnalyticsFilterKey(AnalyticsMetric.Key key) {
-        this.key = key;
-    }
+        private final AnalyticsMetric.Key key;
 
-    public AnalyticsMetric.Key metricKey() {
-        return key;
-    }
+        Event(AnalyticsMetric.Key key) {
+            this.key = key;
+        }
 
-    @Override
-    @JsonValue
-    public String value() {
-        return key.value();
-    }
+        public AnalyticsMetric.Key metricKey() {
+            return key;
+        }
 
-    @JsonCreator
-    public static AnalyticsFilterKey fromJson(String key) {
-        return fromKey(key).orElseThrow(() -> new IllegalArgumentException("Unsupported analytics filter: " + key));
-    }
+        @Override
+        @JsonValue
+        public String value() {
+            return key.value();
+        }
 
-    public static Optional<AnalyticsFilterKey> fromKey(String key) {
-        return Arrays.stream(values()).filter(filter -> filter.value().equals(key)).findFirst();
+        @JsonCreator
+        public static Event fromJson(String key) {
+            return fromKey(key).orElseThrow(() -> new IllegalArgumentException("Unsupported analytics filter: " + key));
+        }
+
+        public static Optional<Event> fromKey(String key) {
+            return Arrays.stream(values()).filter(filter -> filter.value().equals(key)).findFirst();
+        }
     }
 }

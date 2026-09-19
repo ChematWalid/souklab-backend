@@ -21,7 +21,7 @@ public class AnalyticsJobRequest {
     @NotNull private LocalDate fromDate;
     @NotNull private LocalDate toDate;
     @NotNull private AnalyticsBucket bucket;
-    private Map<AnalyticsFilterKey, String> filters;
+    private Map<AnalyticsFilterKey.Event, String> filters;
     private Integer pageNumber;
     private Integer pageSize;
     @JsonDeserialize(using = AnalyticsSortFieldDeserializer.class)
