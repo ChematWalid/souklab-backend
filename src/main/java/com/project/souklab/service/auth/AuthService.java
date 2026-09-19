@@ -173,7 +173,7 @@ public class AuthService {
         User savedUser = userRepository.save(buildNewUser(dto, email, permissions, initialStatus));
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Registration.CREATED, savedUser.getId(), savedUser.getId(),
-                    Map.of(AnalyticsMetadata.Account.TYPE, dto.getAccountType()));
+                    Map.of(AnalyticsMetadata.Account.TYPE, role));
         }
 
         try {

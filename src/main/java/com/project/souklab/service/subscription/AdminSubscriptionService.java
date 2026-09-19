@@ -133,11 +133,11 @@ public class AdminSubscriptionService {
         User actor = currentUserProvider.requireCurrentUser();
         Payment payment = payments.findById(paymentId).orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
         PaymentStatus corrected = request.getStatus();
-        String previous = payment.getStatus().value();
+        PaymentStatus previous = payment.getStatus();
         payment.setStatus(corrected);
-        recordPaymentTransition(payment, previous, corrected.value());
+        recordPaymentTransition(payment, previous, corrected);
         synchronizeCorrectedPayment(payment, corrected);
-        auditLogService.logFinancialAction(AuditLogAction.PAYMENT_STATE_CORRECTED, actor, payment.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous, corrected.value(), request.getReason(), payment.getId(), payment.getSubscriptionId());
+        auditLogService.logFinancialAction(AuditLogAction.PAYMENT_STATE_CORRECTED, actor, payment.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous.value(), corrected.value(), request.getReason(), payment.getId(), payment.getSubscriptionId());
     }
 
     private void synchronizeCorrectedPayment(Payment payment, PaymentStatus corrected) {
@@ -262,17 +262,17 @@ public class AdminSubscriptionService {
                 .forEach(payment -> payment.setStatus(PaymentStatus.CANCELED));
     }
 
-    private void recordPaymentTransition(Payment payment, String previous, String current) {
+    private void recordPaymentTransition(Payment payment, PaymentStatus previous, PaymentStatus current) {
         if (activityEventService != null && payment.getAccount() != null) {
             activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION, payment.getAccount().getId(), payment.getId(),
-                    Map.of(AnalyticsMetadata.Subscription.PREVIOUS_STATUS, previous, AnalyticsMetadata.State.STATUS, current, AnalyticsMetadata.Subscription.SOURCE, AnalyticsEvent.Source.Admin.CORRECTION.value()));
+                    Map.of(AnalyticsMetadata.Subscription.PREVIOUS_STATUS, previous, AnalyticsMetadata.State.STATUS, current, AnalyticsMetadata.Subscription.SOURCE, AnalyticsEvent.Source.Admin.CORRECTION));
         }
     }
 
     private void recordSubscriptionEvent(User account, String subscriptionId, AnalyticsEvent.Subscription eventType) {
         if (activityEventService != null && account != null) {
             activityEventService.record(eventType, account.getId(), subscriptionId,
-                    Map.of(AnalyticsMetadata.State.STATUS, eventType.status().value(), AnalyticsMetadata.Subscription.SOURCE, AnalyticsEvent.Source.Admin.ACTION.value()));
+                    Map.of(AnalyticsMetadata.State.STATUS, eventType.status(), AnalyticsMetadata.Subscription.SOURCE, AnalyticsEvent.Source.Admin.ACTION));
         }
     }
 

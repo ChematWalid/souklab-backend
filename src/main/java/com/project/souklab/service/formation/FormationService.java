@@ -301,7 +301,7 @@ public class FormationService {
 
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Formation.SUBMITTED, artisan.getId(), saved.getId(),
-                Map.of(AnalyticsMetadata.State.STATUS, saved.getStatus().value()));
+                Map.of(AnalyticsMetadata.State.STATUS, saved.getStatus()));
         }
 
         notificationService.notifyAdmins("New formation submitted for review: " + saved.getTitle());

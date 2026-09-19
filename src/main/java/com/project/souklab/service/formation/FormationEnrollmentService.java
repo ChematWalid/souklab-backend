@@ -179,7 +179,7 @@ public class FormationEnrollmentService {
 
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Formation.ENROLLMENT, artisan.getId(), formation.getId(),
-                    Map.of(AnalyticsMetadata.State.STATUS, enrollment.getStatus().value()));
+                    Map.of(AnalyticsMetadata.State.STATUS, enrollment.getStatus()));
         }
         return FormationEnrollmentResponseDTO.from(enrollment);
     }
