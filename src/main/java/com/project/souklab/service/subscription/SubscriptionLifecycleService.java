@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
@@ -85,7 +86,7 @@ public class SubscriptionLifecycleService {
             if (payment.getCreatedAt() != null && payment.getCreatedAt().isBefore(cutoff)) {
                 payment.setStatus(PaymentStatus.EXPIRED);
                 if (activityEventService != null) activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION,
-                        payment.getAccount().getId(), payment.getId(), Map.of("status", PaymentStatus.EXPIRED.value()));
+                        payment.getAccount().getId(), payment.getId(), Map.of(AnalyticsMetadata.State.STATUS.value(), PaymentStatus.EXPIRED.value()));
                 expirePendingSubscription(payment.getSubscriptionId());
                 notificationService.createForUser(payment.getAccount(), "Your subscription checkout expired.", NotificationType.CHECKOUT_CANCELED, payment.getId());
             }
@@ -147,12 +148,12 @@ public class SubscriptionLifecycleService {
 
     private void recordSubscriptionExpiry(ArtisanSubscription subscription) {
         if (activityEventService != null && subscription.getAccount() != null) activityEventService.record(AnalyticsEvent.Subscription.EXPIRED, subscription.getAccount().getId(), subscription.getId(),
-                Map.of("status", SubscriptionStatus.EXPIRED.value()));
+                Map.of(AnalyticsMetadata.State.STATUS.value(), SubscriptionStatus.EXPIRED.value()));
     }
 
     private void recordSubscriptionExpiry(ClientSubscription subscription) {
         if (activityEventService != null && subscription.getAccount() != null) activityEventService.record(AnalyticsEvent.Subscription.EXPIRED, subscription.getAccount().getId(), subscription.getId(),
-                Map.of("status", SubscriptionStatus.EXPIRED.value()));
+                Map.of(AnalyticsMetadata.State.STATUS.value(), SubscriptionStatus.EXPIRED.value()));
     }
 
     private boolean sent(String value, long offset) {

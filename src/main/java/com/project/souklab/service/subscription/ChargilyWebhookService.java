@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.project.souklab.model.User;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -127,10 +128,10 @@ public class ChargilyWebhookService {
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION, payment.getAccount().getId(), payment.getId(),
-                    Map.of("providerEvent", eventType.value(), "status", payment.getStatus().value()));
+                    Map.of(AnalyticsMetadata.Payment.PROVIDER_EVENT.value(), eventType.value(), AnalyticsMetadata.State.STATUS.value(), payment.getStatus().value()));
             if (payment.getStatus() == PaymentStatus.PAID) {
                 activityEventService.record(AnalyticsEvent.Subscription.ACTIVATED, payment.getAccount().getId(),
-                        payment.getSubscriptionId(), Map.of("paymentId", payment.getId()));
+                        payment.getSubscriptionId(), Map.of(AnalyticsMetadata.Payment.ID.value(), payment.getId()));
             }
         }
         log.setStatus(WebhookProcessingStatus.PROCESSED);
@@ -156,7 +157,7 @@ public class ChargilyWebhookService {
     private void recordSubscriptionCancellation(User account, String subscriptionId) {
         if (activityEventService != null && account != null) {
             activityEventService.record(AnalyticsEvent.Subscription.CANCELED, account.getId(), subscriptionId,
-                    Map.of("status", SubscriptionStatus.CANCELED.value(), "source", AnalyticsEvent.Source.Payment.WEBHOOK.value()));
+                    Map.of(AnalyticsMetadata.State.STATUS.value(), SubscriptionStatus.CANCELED.value(), AnalyticsMetadata.Subscription.SOURCE.value(), AnalyticsEvent.Source.Payment.WEBHOOK.value()));
         }
     }
 

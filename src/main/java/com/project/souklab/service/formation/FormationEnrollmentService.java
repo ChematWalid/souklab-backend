@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
@@ -178,7 +179,7 @@ public class FormationEnrollmentService {
 
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Formation.ENROLLMENT, artisan.getId(), formation.getId(),
-                    Map.of("status", enrollment.getStatus().value()));
+                    Map.of(AnalyticsMetadata.State.STATUS.value(), enrollment.getStatus().value()));
         }
         return FormationEnrollmentResponseDTO.from(enrollment);
     }

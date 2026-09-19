@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.analytics.ActivityEventService;
@@ -135,7 +136,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: " + userId + ". Reason: " + reason);
-        recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of("reasonPresent", reason != null && !reason.isBlank()));
+        recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of(AnalyticsMetadata.Moderation.REASON_PRESENT.value(), reason != null && !reason.isBlank()));
         notificationService.createForUser(user, "Your account has been permanently suspended. Reason: " + reason, NotificationType.ACCOUNT_SUSPENDED, user.getId());
     }
 
@@ -166,7 +167,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
-        recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of("minutes", minutes));
+        recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of(AnalyticsMetadata.Moderation.MINUTES.value(), minutes));
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.ACCOUNT_SUSPENDED, user.getId());
     }
 

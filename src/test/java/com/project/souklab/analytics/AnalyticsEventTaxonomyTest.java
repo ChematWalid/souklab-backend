@@ -42,4 +42,13 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Summary.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.Series.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
     }
+
+    @Test
+    void groupedMetadataEnumsExposeStableEventKeys() {
+        assertThat(AnalyticsMetadata.State.STATUS.value()).isEqualTo("status");
+        assertThat(AnalyticsMetadata.Subscription.SOURCE.value()).isEqualTo("source");
+        assertThat(AnalyticsMetadata.Payment.PROVIDER_EVENT.value()).isEqualTo("providerEvent");
+        assertThat(AnalyticsMetadata.Payment.ID.value()).isEqualTo("payment_id");
+        assertThat(AnalyticsMetadata.Provider.SUBSCRIPTION_ID.value()).isEqualTo("subscription_id");
+    }
 }

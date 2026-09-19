@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
@@ -124,7 +125,7 @@ public class AdminFormationService {
                 (dto.getDecision() == FormationReviewDecision.APPROVED
                         ? AnalyticsEvent.Formation.Moderation.APPROVED
                         : AnalyticsEvent.Formation.Moderation.REJECTED), admin.getId(), saved.getId(),
-                Map.of("decision", dto.getDecision().value()));
+                Map.of(AnalyticsMetadata.Moderation.DECISION.value(), dto.getDecision().value()));
 
         dispatchReviewNotification(saved, dto);
         log.info("Admin '{}' reviewed formation '{}' with decision '{}'", admin.getEmail(), saved.getId(), dto.getDecision());

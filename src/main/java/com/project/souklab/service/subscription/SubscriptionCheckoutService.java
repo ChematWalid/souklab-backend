@@ -3,6 +3,7 @@ package com.project.souklab.service.subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -97,7 +98,7 @@ public class SubscriptionCheckoutService {
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Subscription.RENEWAL, user.getId(), subscriptionId,
-                    Map.of("planId", requestedPlan.getId(), "subscriberType", targetType.value()));
+                    Map.of(AnalyticsMetadata.Subscription.PLAN_ID.value(), requestedPlan.getId(), AnalyticsMetadata.Account.SUBSCRIBER_TYPE.value(), targetType.value()));
         }
         return checkout(request, idempotencyKey);
     }
@@ -121,7 +122,7 @@ public class SubscriptionCheckoutService {
         ChargilyCheckoutResponse provider = chargilyCheckoutClient.createCheckout(ChargilyCheckoutRequest.builder()
                 .amount(plan.getAmount()).currency(plan.getCurrency()).successUrl(resolve(request.getSuccessUrl(), config.getSuccessUrl()))
                 .failureUrl(resolve(request.getFailureUrl(), config.getFailureUrl())).webhookUrl(config.getWebhookUrl()).locale(config.getLocale())
-                .feeAllocation(config.getFeeAllocation()).metadata(Map.of("payment_id", payment.getId(), "subscription_id", subscriptionId)).build());
+                .feeAllocation(config.getFeeAllocation()).metadata(Map.of(AnalyticsMetadata.Payment.ID.value(), payment.getId(), AnalyticsMetadata.Provider.SUBSCRIPTION_ID.value(), subscriptionId)).build());
         payment.setStatus(PaymentStatus.PENDING); payment.setProviderCheckoutId(provider.getId()); payment.setCheckoutUrl(provider.getCheckoutUrl());
         payment.setProviderCustomerId(provider.getCustomerId()); payment.setProviderInvoiceId(provider.getInvoiceId());
         try {
@@ -132,7 +133,7 @@ public class SubscriptionCheckoutService {
         Payment saved = paymentRepository.save(payment);
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Checkout.CREATED, user.getId(), saved.getId(),
-                Map.of("paymentStatus", saved.getStatus().value(), "subscriberType", plan.getSubscriberType().value()));
+                    Map.of(AnalyticsMetadata.Payment.STATUS.value(), saved.getStatus().value(), AnalyticsMetadata.Account.SUBSCRIBER_TYPE.value(), plan.getSubscriberType().value()));
         }
         notificationService.createForUser(user, "Your subscription checkout was created.", NotificationType.CHECKOUT_CREATED, saved.getId());
         return toResponse(saved);

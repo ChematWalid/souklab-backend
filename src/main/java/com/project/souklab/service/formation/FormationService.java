@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
@@ -300,7 +301,7 @@ public class FormationService {
 
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Formation.SUBMITTED, artisan.getId(), saved.getId(),
-                    Map.of("status", saved.getStatus().value()));
+                    Map.of(AnalyticsMetadata.State.STATUS.value(), saved.getStatus().value()));
         }
 
         notificationService.notifyAdmins("New formation submitted for review: " + saved.getTitle());

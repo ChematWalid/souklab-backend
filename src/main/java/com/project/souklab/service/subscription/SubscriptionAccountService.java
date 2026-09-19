@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.dao.ArtisanSubscriptionRepository;
 import com.project.souklab.analytics.ActivityEventService;
@@ -110,7 +111,7 @@ public class SubscriptionAccountService {
     private void recordCancellation(User account, String subscriptionId) {
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Subscription.CANCELED, account.getId(), subscriptionId,
-                    Map.of("status", SubscriptionStatus.CANCELED.value(), "source", AnalyticsEvent.Source.Account.ACTION.value()));
+                    Map.of(AnalyticsMetadata.State.STATUS.value(), SubscriptionStatus.CANCELED.value(), AnalyticsMetadata.Subscription.SOURCE.value(), AnalyticsEvent.Source.Account.ACTION.value()));
         }
     }
 

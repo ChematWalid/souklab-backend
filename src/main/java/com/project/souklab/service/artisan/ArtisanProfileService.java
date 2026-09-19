@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.dao.ArtisanCertificationRepository;
 import com.project.souklab.dao.ArtisanGalleryImageRepository;
@@ -204,7 +205,7 @@ public class ArtisanProfileService {
             artisanProfileViewRepository.save(view);
             if (activityEventService != null) {
                 activityEventService.record(AnalyticsEvent.Profile.VIEW, viewer.getId(), artisan.getId(),
-                        Map.of("viewerType", viewer.getArtisan() != null
+                        Map.of(AnalyticsMetadata.Account.TYPE.value(), viewer.getArtisan() != null
                                 ? AccountRole.ARTISAN.value() : AccountRole.CLIENT.value()));
             }
             artisan.setViewsCount(artisan.getViewsCount() + 1);

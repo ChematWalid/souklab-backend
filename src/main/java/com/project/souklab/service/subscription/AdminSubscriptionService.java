@@ -3,6 +3,7 @@ package com.project.souklab.service.subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -273,14 +274,14 @@ public class AdminSubscriptionService {
     private void recordPaymentTransition(Payment payment, String previous, String current) {
         if (activityEventService != null && payment.getAccount() != null) {
             activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION, payment.getAccount().getId(), payment.getId(),
-                    Map.of("previousStatus", previous, "status", current, "source", AnalyticsEvent.Source.Admin.CORRECTION.value()));
+                    Map.of(AnalyticsMetadata.Subscription.PREVIOUS_STATUS.value(), previous, AnalyticsMetadata.State.STATUS.value(), current, AnalyticsMetadata.Subscription.SOURCE.value(), AnalyticsEvent.Source.Admin.CORRECTION.value()));
         }
     }
 
     private void recordSubscriptionEvent(User account, String subscriptionId, AnalyticsEvent.Type eventType) {
         if (activityEventService != null && account != null) {
             activityEventService.record(eventType, account.getId(), subscriptionId,
-                    Map.of("status", eventType.value().substring(AnalyticsEvent.Subscription.prefix().length()), "source", AnalyticsEvent.Source.Admin.ACTION.value()));
+                    Map.of(AnalyticsMetadata.State.STATUS.value(), eventType.value().substring(AnalyticsEvent.Subscription.prefix().length()), AnalyticsMetadata.Subscription.SOURCE.value(), AnalyticsEvent.Source.Admin.ACTION.value()));
         }
     }
 

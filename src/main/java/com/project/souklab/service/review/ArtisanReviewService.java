@@ -4,6 +4,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.ArtisanRepository;
@@ -100,7 +101,7 @@ public class ArtisanReviewService {
         ArtisanReview saved = reviewRepository.save(review);
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Review.SUBMITTED, reviewer.getId(), saved.getId(),
-                    Map.of("formationId", formationId, "rating", saved.getRating()));
+                    Map.of(AnalyticsMetadata.Content.FORMATION_ID.value(), formationId, AnalyticsMetadata.Content.RATING.value(), saved.getRating()));
         }
         recalculate(subject);
         notificationService.createForUser(subject.getUser(), "You received a new artisan review.", NotificationType.NEW_REVIEW, saved.getId());

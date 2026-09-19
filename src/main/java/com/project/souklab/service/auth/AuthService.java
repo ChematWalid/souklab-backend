@@ -4,6 +4,7 @@ import java.util.Map;
 import com.project.souklab.service.profile.ProfileService;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.OAuthIdentityRepository;
@@ -171,7 +172,7 @@ public class AuthService {
         User savedUser = userRepository.save(buildNewUser(dto, email, permissions, initialStatus));
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Registration.CREATED, savedUser.getId(), savedUser.getId(),
-                    Map.of("accountType", dto.getAccountType()));
+                    Map.of(AnalyticsMetadata.Account.TYPE.value(), dto.getAccountType()));
         }
 
         try {
