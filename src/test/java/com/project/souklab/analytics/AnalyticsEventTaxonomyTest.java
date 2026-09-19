@@ -3,6 +3,7 @@ package com.project.souklab.analytics;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.security.Permission;
 import com.project.souklab.model.EnrollmentStatus;
+import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsSortField;
 import com.project.souklab.dto.analytics.AnalyticsJobRequest;
@@ -102,5 +103,13 @@ class AnalyticsEventTaxonomyTest {
                 AnalyticsMetric.Payload.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value()));
 
         assertThat(json).contains("\"eventId\":\"event-1\"", "\"eventType\":\"REPORT_RESOLVED\"");
+    }
+
+    @Test
+    void domainEnumValuesSerializeThroughTheSharedJsonValueContract() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        assertThat(mapper.writeValueAsString(AccountStatus.ACTIVE)).isEqualTo("\"ACTIVE\"");
+        assertThat(mapper.writeValueAsString(EnrollmentStatus.CANCELLED)).isEqualTo("\"CANCELLED\"");
     }
 }
