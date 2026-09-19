@@ -17,7 +17,7 @@ class AccessControlServiceTest {
     @Test
     void grantsOnlyExplicitPermission() {
         Authentication authentication = new TestingAuthenticationToken("user", "credentials",
-                new SimpleGrantedAuthority(Permission.Admin.USERS.value()));
+                Permission.Admin.USERS);
 
         assertThat(service.isAdmin(authentication)).isTrue();
         assertThat(service.isArtisan(authentication)).isFalse();
@@ -32,7 +32,7 @@ class AccessControlServiceTest {
     @Test
     void keepsAdministrativeCapabilitiesIndependent() {
         Authentication feedModerator = new TestingAuthenticationToken("user", "credentials",
-                new SimpleGrantedAuthority(Permission.Admin.FEED.value()));
+                Permission.Admin.FEED);
 
         assertThat(service.canModerateFeed(feedModerator)).isTrue();
         assertThat(service.canManageUsers(feedModerator)).isFalse();

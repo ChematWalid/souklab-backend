@@ -141,7 +141,7 @@ class ArtisanCertificationServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn(ARTISAN_EMAIL);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value());
+        GrantedAuthority authority = Permission.Artisan.CONTENT;
         doReturn(List.of(authority)).when(authentication).getAuthorities();
 
         SecurityContextHolder.setContext(securityContext);
@@ -511,7 +511,7 @@ class ArtisanCertificationServiceTest {
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.isAuthenticated()).thenReturn(true);
 
-            GrantedAuthority clientAuthority = new SimpleGrantedAuthority(Permission.Profile.READ.value());
+            GrantedAuthority clientAuthority = Permission.Profile.READ;
             doReturn(List.of(clientAuthority)).when(authentication).getAuthorities();
 
             SecurityContextHolder.setContext(securityContext);

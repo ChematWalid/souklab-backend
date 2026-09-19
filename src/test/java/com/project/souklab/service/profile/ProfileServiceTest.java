@@ -162,7 +162,7 @@ class ProfileServiceTest {
     void getCurrentUser_withAuthenticatedArtisan_returnsArtisanProfileResponse() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         Artisan artisan = Artisan.builder()
@@ -207,7 +207,7 @@ class ProfileServiceTest {
     void getCurrentUser_withAuthenticatedClient_returnsClientProfileResponse() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         Client client = Client.builder()
@@ -276,7 +276,7 @@ class ProfileServiceTest {
     void completeProfile_forExistingArtisan_updatesAllFieldsAndReturnsProfile() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -330,7 +330,7 @@ class ProfileServiceTest {
     void completeProfile_forNewArtisan_createsProfileAndReturnsProfile() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -369,7 +369,7 @@ class ProfileServiceTest {
     void completeProfile_forArtisan_whenRegionNotFound_throwsResourceNotFoundException() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -401,7 +401,7 @@ class ProfileServiceTest {
     void completeProfile_forArtisan_whenSubCategoryNotFound_throwsResourceNotFoundException() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -433,7 +433,7 @@ class ProfileServiceTest {
     void completeProfile_forArtisan_withMaterialsTechniquesEpoques_success() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -488,7 +488,7 @@ class ProfileServiceTest {
     void completeProfile_forArtisan_whenMaterialNotFound_throwsResourceNotFoundException() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -523,7 +523,7 @@ class ProfileServiceTest {
     void completeProfile_forExistingClient_updatesAllFieldsAndReturnsProfile() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -568,7 +568,7 @@ class ProfileServiceTest {
     void completeProfile_forNewClient_createsProfileAndReturnsProfile() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -606,7 +606,7 @@ class ProfileServiceTest {
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("admin@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Admin.USERS.value())))
+                        List.of(Permission.Admin.USERS))
         );
 
         User user = User.builder()
@@ -632,7 +632,7 @@ class ProfileServiceTest {
     void completeProfile_forArtisan_withNullOptionalFields_preservesExistingValues() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -668,7 +668,7 @@ class ProfileServiceTest {
     void completeProfile_forClient_withNullOptionalFields_preservesExistingValues() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -737,7 +737,7 @@ class ProfileServiceTest {
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("admin@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Admin.USERS.value())))
+                        List.of(Permission.Admin.USERS))
         );
 
         User user = User.builder()
@@ -760,7 +760,7 @@ class ProfileServiceTest {
     void patchCurrentUser_whenPayloadIsNull_returnsProfileWithoutModifications() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -784,7 +784,7 @@ class ProfileServiceTest {
     void patchCurrentUser_whenPayloadIsNullNode_returnsProfileWithoutModifications() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -808,7 +808,7 @@ class ProfileServiceTest {
     void patchCurrentUser_whenPayloadIsEmpty_returnsProfileWithoutModifications() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -832,7 +832,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_whenFieldsUndefined_leavesFieldsUnchanged() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -870,7 +870,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_whenEmptyCollections_clearsCollections() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -910,7 +910,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_withValidFields_updatesFieldsAndSaves() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -960,7 +960,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_withExplicitNullFields_clearsFieldsAndSaves() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -1010,7 +1010,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_withRegionFallback_updatesRegionId() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -1045,7 +1045,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_withExplicitNullRegion_clearsRegionId() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -1076,7 +1076,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_withMaterialsTechniquesEpoques_updatesCollections() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -1123,7 +1123,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_whenMaterialNotFound_throwsResourceNotFoundException() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -1152,7 +1152,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_whenTechniqueOrEpoqueNotFound_throwsResourceNotFoundException() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value()))));
+                        List.of(Permission.Artisan.CONTENT)));
         User user = User.builder().email("artisan@example.com")
                 .permissions(new HashSet<>(Set.of(artisanRole))).build();
         user.setId("artisan-id-patch-taxonomy-404");
@@ -1181,7 +1181,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forClient_whenFieldsUndefined_leavesFieldsUnchanged() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -1220,7 +1220,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forClient_whenSpecificFieldProvided_updatesOnlySpecifiedField() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -1257,7 +1257,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forClient_withValidFields_updatesFieldsAndSaves() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -1300,7 +1300,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forClient_withExplicitNullFields_clearsFieldsAndSaves() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -1350,7 +1350,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forClient_withRegionFallback_updatesRegionId() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -1381,7 +1381,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forClient_withExplicitNullRegion_clearsRegionId() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -1412,7 +1412,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forArtisan_withoutRegionFields_leavesRegionUnchanged() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                        List.of(Permission.Artisan.CONTENT))
         );
 
         User user = User.builder()
@@ -1449,7 +1449,7 @@ class ProfileServiceTest {
     void patchCurrentUser_forClient_withoutRegionFields_leavesRegionUnchanged() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("client@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                        List.of(Permission.Profile.READ))
         );
 
         User user = User.builder()
@@ -1482,7 +1482,7 @@ class ProfileServiceTest {
     void completeAndPatchArtisanHandleEmptyAndBlankOptionalValues() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("artisan@example.com", "cred",
-                        List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value()))));
+                        List.of(Permission.Artisan.CONTENT)));
         User user = User.builder().email("artisan@example.com")
                 .permissions(new HashSet<>(Set.of(artisanRole))).build();
         user.setId("artisan-edge");

@@ -154,7 +154,7 @@ class FileRateLimitFilterTest {
     @DisplayName("Authenticated users have independent rate-limiting buckets")
     void authenticatedUsers_haveIndependentBuckets() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(Permission.Profile.READ.value())))
+                new UsernamePasswordAuthenticationToken("userA@souklab.dz", "pass", List.of(Permission.Profile.READ))
         );
 
         for (int i = 0; i < 2; i++) {
@@ -170,7 +170,7 @@ class FileRateLimitFilterTest {
         assertThat(resExceeded.getStatus()).isEqualTo(429);
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(new SimpleGrantedAuthority(Permission.Artisan.CONTENT.value())))
+                new UsernamePasswordAuthenticationToken("userB@souklab.dz", "pass", List.of(Permission.Artisan.CONTENT))
         );
 
         MockHttpServletRequest reqUserB = new MockHttpServletRequest("GET", "/api/v1/files/avatar.jpg");
