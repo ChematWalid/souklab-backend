@@ -24,8 +24,10 @@ public interface Permission extends EnumValue, GrantedAuthority {
     }
 
     default boolean matches(GrantedAuthority grantedAuthority) {
-        return grantedAuthority != null
-                && (grantedAuthority == this || value().equals(grantedAuthority.getAuthority()));
+        if (grantedAuthority instanceof Permission permission) {
+            return permission == this;
+        }
+        return grantedAuthority != null && value().equals(grantedAuthority.getAuthority());
     }
 
     default boolean matches(String permissionKey) {
