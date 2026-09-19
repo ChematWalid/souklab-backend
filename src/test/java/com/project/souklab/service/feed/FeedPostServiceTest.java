@@ -126,7 +126,7 @@ class FeedPostServiceTest {
 
         var response = service.create(request);
 
-        assertThat(response.getStatus()).isEqualTo(FeedPostStatus.PENDING.value());
+        assertThat(response.getStatus()).isEqualTo(FeedPostStatus.PENDING);
         assertThat(response.getTitle()).isEqualTo("Title");
     }
 
@@ -146,7 +146,7 @@ class FeedPostServiceTest {
         when(postRepository.findByIdAndDeletedAtIsNull("p1")).thenReturn(Optional.of(post));
         assertThat(service.listPublic(null, PageRequest.of(0, 10))).hasSize(1);
         assertThat(service.listPublic(FeedPostType.ACTUALITE, PageRequest.of(0, 10))).hasSize(1);
-        assertThat(service.getPublic("p1").getStatus()).isEqualTo("PUBLISHED");
+        assertThat(service.getPublic("p1").getStatus()).isEqualTo(FeedPostStatus.PUBLISHED);
         post.setStatus(FeedPostStatus.HIDDEN);
         assertThatThrownBy(() -> service.getPublic("p1")).isInstanceOf(ResourceNotFoundException.class);
     }
