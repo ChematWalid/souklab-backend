@@ -41,8 +41,7 @@ public class AnalyticsEventConsumer {
         if (processed.existsByEventId(id)) return;
         LocalDate day = LocalDateTime.parse(event.path(AnalyticsMetric.Payload.EVENT_TIME.value()).asText()).atOffset(ZoneOffset.UTC)
                 .atZoneSameInstant(ZoneId.of(properties.getBusinessTimeZone())).toLocalDate();
-        String key = AnalyticsMetric.EventRollup.PREFIX.value() + type.value();
-        rollups.incrementEventKpi(day, key);
+        rollups.incrementEventKpi(day, new AnalyticsEventRollupKey(day, type).databaseKey());
         AnalyticsProcessedEvent marker = new AnalyticsProcessedEvent(); marker.setEventId(id); processed.save(marker);
     }
 }
