@@ -112,7 +112,7 @@ class ContentReportServiceTest {
         });
 
         for (ReportTargetType type : ReportTargetType.values()) {
-            String target = "target-" + type.name().toLowerCase();
+            String target = "target-" + type.value().toLowerCase();
             assertThatCode(() -> service.create(new ContentReportRequestDTO(type, target, " reason ", " details ")))
                     .doesNotThrowAnyException();
         }

@@ -179,7 +179,7 @@ class ImageProcessingVerificationTest {
                     .isEqualTo(80);
             assertThat(variant.contentType()).isEqualTo("image/png");
 
-            Path diskPath = outputDir.resolve("v2_" + tier.name().toLowerCase() + ".png");
+            Path diskPath = outputDir.resolve("v2_" + tier.value().toLowerCase() + ".png");
             writeBytesToFile(diskPath, variant.bytes());
             BufferedImage diskImage = ImageIO.read(diskPath.toFile());
             assertThat(diskImage).isNotNull();

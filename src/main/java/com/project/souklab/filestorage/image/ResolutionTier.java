@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.image;
 
+import com.project.souklab.model.EnumValue;
 import lombok.Getter;
 
 /**
@@ -8,7 +9,7 @@ import lombok.Getter;
  * Original aspect ratio is preserved across all tiers, and no upscaling is performed.
  */
 @Getter
-public enum ResolutionTier {
+public enum ResolutionTier implements EnumValue {
 
     /**
      * Thumbnail tier: maximum 150px on the longest side.

@@ -126,7 +126,7 @@ class FeedPostServiceTest {
 
         var response = service.create(request);
 
-        assertThat(response.getStatus()).isEqualTo(FeedPostStatus.PENDING.name());
+        assertThat(response.getStatus()).isEqualTo(FeedPostStatus.PENDING.value());
         assertThat(response.getTitle()).isEqualTo("Title");
     }
 
