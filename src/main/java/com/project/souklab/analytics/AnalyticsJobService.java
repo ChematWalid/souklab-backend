@@ -729,29 +729,29 @@ public class AnalyticsJobService {
         Map<AnalyticsMetric.Table, PaginatedResponse<Map<String, Object>>> tables = new LinkedHashMap<>();
         switch (job.getReportType()) {
             case MODERATION -> {
-                addStatusTable(tables, AnalyticsMetric.Table.USERS, summary.get(AnalyticsMetric.Summary.USER_STATUSES.value()), job);
-                addStatusTable(tables, AnalyticsMetric.Table.FORMATEUR_REQUESTS, summary.get(AnalyticsMetric.Summary.FORMATEUR_STATUSES.value()), job);
-                addStatusTable(tables, AnalyticsMetric.Table.REPORTS, summary.get(AnalyticsMetric.Summary.REPORTS_BY_STATUS.value()), job);
+                addStatusTable(tables, AnalyticsMetric.Table.USERS, summary.get(AnalyticsMetric.Summary.USER_STATUSES), job);
+                addStatusTable(tables, AnalyticsMetric.Table.FORMATEUR_REQUESTS, summary.get(AnalyticsMetric.Summary.FORMATEUR_STATUSES), job);
+                addStatusTable(tables, AnalyticsMetric.Table.REPORTS, summary.get(AnalyticsMetric.Summary.REPORTS_BY_STATUS), job);
             }
             case CONTENT_LEARNING -> {
-                addStatusTable(tables, AnalyticsMetric.Table.FEED_POSTS, summary.get(AnalyticsMetric.Summary.FEED_POSTS_BY_STATUS.value()), job);
-                addStatusTable(tables, AnalyticsMetric.Table.FORMATIONS, summary.get(AnalyticsMetric.Summary.FORMATIONS_BY_STATUS.value()), job);
-                addStatusTable(tables, AnalyticsMetric.Table.ENROLLMENTS, summary.get(AnalyticsMetric.Summary.ENROLLMENTS_BY_STATUS.value()), job);
+                addStatusTable(tables, AnalyticsMetric.Table.FEED_POSTS, summary.get(AnalyticsMetric.Summary.FEED_POSTS_BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.FORMATIONS, summary.get(AnalyticsMetric.Summary.FORMATIONS_BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.ENROLLMENTS, summary.get(AnalyticsMetric.Summary.ENROLLMENTS_BY_STATUS), job);
             }
             case SUBSCRIPTIONS_PAYMENTS -> {
-                addStatusTable(tables, AnalyticsMetric.Table.PAYMENTS, summary.get(AnalyticsMetric.Summary.PAYMENTS_BY_STATUS.value()), job);
-                addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS, summary.get(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_STATUS.value()), job);
-                if (summary.get(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_SUBSCRIBER_TYPE.value()) instanceof Map<?, ?> byType) {
+                addStatusTable(tables, AnalyticsMetric.Table.PAYMENTS, summary.get(AnalyticsMetric.Summary.PAYMENTS_BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS, summary.get(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_STATUS), job);
+                if (summary.get(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_SUBSCRIBER_TYPE) instanceof Map<?, ?> byType) {
                     addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_ARTISAN, byType.get(AnalyticsMetric.AccountType.ARTISAN), job);
                     addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_CLIENT, byType.get(AnalyticsMetric.AccountType.CLIENT), job);
                 }
             }
             case ENGAGEMENT, TIME_SERIES -> addStatusTable(tables, AnalyticsMetric.Table.ACTIVITY, Map.of(
-                    AnalyticsMetric.Summary.ACTIVITY_EVENTS.value(), summary.getOrDefault(AnalyticsMetric.Summary.ACTIVITY_EVENTS.value(), 0L),
-                    AnalyticsMetric.Summary.MESSAGES_SENT.value(), summary.getOrDefault(AnalyticsMetric.Summary.MESSAGES_SENT.value(), 0L),
-                    AnalyticsMetric.Summary.PUBLISHED_POSTS.value(), summary.getOrDefault(AnalyticsMetric.Summary.PUBLISHED_POSTS.value(), 0L),
-                    AnalyticsMetric.Summary.PROFILE_VIEWS.value(), summary.getOrDefault(AnalyticsMetric.Summary.PROFILE_VIEWS.value(), 0L),
-                    AnalyticsMetric.Summary.REPORT_RESOLUTIONS.value(), summary.getOrDefault(AnalyticsMetric.Summary.REPORT_RESOLUTIONS.value(), 0L)), job);
+                    AnalyticsMetric.Summary.ACTIVITY_EVENTS, summary.getOrDefault(AnalyticsMetric.Summary.ACTIVITY_EVENTS, 0L),
+                    AnalyticsMetric.Summary.MESSAGES_SENT, summary.getOrDefault(AnalyticsMetric.Summary.MESSAGES_SENT, 0L),
+                    AnalyticsMetric.Summary.PUBLISHED_POSTS, summary.getOrDefault(AnalyticsMetric.Summary.PUBLISHED_POSTS, 0L),
+                    AnalyticsMetric.Summary.PROFILE_VIEWS, summary.getOrDefault(AnalyticsMetric.Summary.PROFILE_VIEWS, 0L),
+                    AnalyticsMetric.Summary.REPORT_RESOLUTIONS, summary.getOrDefault(AnalyticsMetric.Summary.REPORT_RESOLUTIONS, 0L)), job);
             default -> { }
         }
         return tables;
