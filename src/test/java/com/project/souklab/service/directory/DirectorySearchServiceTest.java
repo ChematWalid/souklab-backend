@@ -232,13 +232,13 @@ class DirectorySearchServiceTest {
             assertThat(response.getContent().get(0).getArtisanName()).isEqualTo("Djamel Amrani");
             verify(artisanRepository, never()).findAll(any(Specification.class), any(Pageable.class));
 
-            for (DirectorySortOrder sortOrder : DirectorySortOrder.values()) {
+            for (DirectorySortOrder.Key sortOrder : DirectorySortOrder.all()) {
                 filter.setSortBy(sortOrder);
                 directorySearchService.search(filter);
             }
 
             filter.setKeyword(null);
-            filter.setSortBy(DirectorySortOrder.RELEVANCE);
+            filter.setSortBy(DirectorySortOrder.Relevance.DEFAULT);
             directorySearchService.search(filter);
 
             when(totalResult.hitCount()).thenReturn(25L);
@@ -261,14 +261,14 @@ class DirectorySearchServiceTest {
     })
     @DisplayName("searchRelationalFallback: translates each DirectorySortOrder into expected Spring Data Sort")
     @SuppressWarnings("unchecked")
-    void searchRelationalFallback_sortOrderMapping(DirectorySortOrder sortOrder, String primaryProperty, Sort.Direction direction) {
+    void searchRelationalFallback_sortOrderMapping(String sortOrderValue, String primaryProperty, Sort.Direction direction) {
         when(artisanRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(createSampleArtisan())));
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
         DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder()
-                .sortBy(sortOrder)
+                .sortBy(DirectorySortOrder.fromValue(sortOrderValue))
                 .page(0)
                 .size(10)
                 .build();
@@ -309,7 +309,7 @@ class DirectorySearchServiceTest {
                 .verifiedOnly(true)
                 .premiumOnly(true)
                 .teacherOnly(true)
-                .sortBy(DirectorySortOrder.RATING_DESC)
+                .sortBy(DirectorySortOrder.Rating.DESC)
                 .page(1)
                 .size(15)
                 .build();
@@ -520,7 +520,7 @@ class DirectorySearchServiceTest {
         Mockito.doReturn(typedSortFactory).when(scoreStep).then();
 
         DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder().keyword("poterie").build();
-        for (DirectorySortOrder order : DirectorySortOrder.values()) {
+        for (DirectorySortOrder.Key order : DirectorySortOrder.all()) {
             filter.setSortBy(order);
             Object sort = ReflectionTestUtils.invokeMethod(directorySearchService, "buildSort", sortFactory, filter);
             assertThat(sort).isNotNull();

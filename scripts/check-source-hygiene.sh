@@ -47,6 +47,10 @@ if rg -n --pcre2 'AnalyticsMetric\.Series\.(?:START_DATE|END_DATE|ACTIVITY_EVENT
   echo 'flat analytics series references detected; use grouped series enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'DirectorySortOrder\.(?:RELEVANCE|RATING_DESC|REVIEWS_DESC|VIEWS_DESC|NEWEST)|DirectorySortOrder\.values\(' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat directory sort references detected; use grouped sort enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 '"(?:PLAN_(?:CREATE|UPDATE|DEACTIVATE)|REFUND_REQUEST)"' src/main/java src/test/java --glob '*.java' \
     --glob '!FinancialAuditOperation.java'; then
   echo 'raw financial audit operation literals detected; use FinancialAuditOperation grouped enums' >&2

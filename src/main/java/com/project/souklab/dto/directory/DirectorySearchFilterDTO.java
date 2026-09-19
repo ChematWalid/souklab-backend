@@ -1,5 +1,6 @@
 package com.project.souklab.dto.directory;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -100,10 +101,11 @@ public class DirectorySearchFilterDTO {
     private Boolean teacherOnly;
 
     /**
-     * Desired sort order for directory search hits. Defaults to {@link DirectorySortOrder#RELEVANCE}.
+     * Desired sort order for directory search hits. Defaults to {@link DirectorySortOrder.Relevance#DEFAULT}.
      */
     @Builder.Default
-    private DirectorySortOrder sortBy = DirectorySortOrder.RELEVANCE;
+    @JsonDeserialize(using = DirectorySortOrderDeserializer.class)
+    private DirectorySortOrder.Key sortBy = DirectorySortOrder.Relevance.DEFAULT;
 
     /**
      * Zero-based page index for pagination.
@@ -185,10 +187,10 @@ public class DirectorySearchFilterDTO {
     /**
      * Safe null-coalescing sort order accessor defaulting to RELEVANCE.
      *
-     * @return resolved DirectorySortOrder
+     * @return resolved directory sort order
      */
-    public DirectorySortOrder resolveSortBy() {
-        return sortBy != null ? sortBy : DirectorySortOrder.RELEVANCE;
+    public DirectorySortOrder.Key resolveSortBy() {
+        return sortBy != null ? sortBy : DirectorySortOrder.Relevance.DEFAULT;
     }
 
     /**

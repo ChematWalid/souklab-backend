@@ -73,7 +73,7 @@ class DirectoryControllerTest {
         DirectorySearchFilterDTO capturedFilter = filterCaptor.getValue();
         assertThat(capturedFilter.resolvePage()).isZero();
         assertThat(capturedFilter.resolveSize()).isEqualTo(20);
-        assertThat(capturedFilter.resolveSortBy()).isEqualTo(DirectorySortOrder.RELEVANCE);
+        assertThat(capturedFilter.resolveSortBy()).isEqualTo(DirectorySortOrder.Relevance.DEFAULT);
     }
 
     /**
@@ -147,7 +147,7 @@ class DirectoryControllerTest {
         assertThat(captured.getVerifiedOnly()).isTrue();
         assertThat(captured.getPremiumOnly()).isTrue();
         assertThat(captured.getTeacherOnly()).isTrue();
-        assertThat(captured.getSortBy()).isEqualTo(DirectorySortOrder.RATING_DESC);
+        assertThat(captured.getSortBy()).isEqualTo(DirectorySortOrder.Rating.DESC);
         assertThat(captured.getPage()).isEqualTo(2);
         assertThat(captured.getSize()).isEqualTo(15);
     }

@@ -10,4 +10,4 @@ Data Transfer Objects and enumerations for public artisan directory queries, mul
 | :--- | :---: | :--- |
 | [`ArtisanDirectoryCardDTO`](ArtisanDirectoryCardDTO.java) | Outbound DTO | Public search result card representing an artisan with bio snippet, rating, craft taxonomies, and location. |
 | [`DirectorySearchFilterDTO`](DirectorySearchFilterDTO.java) | Inbound DTO | Validated search criteria encapsulation including keyword, Wilaya, category, materials, epoques, and sort options. |
-| [`DirectorySortOrder`](DirectorySortOrder.java) | Enum | Supported search ranking orders (`RELEVANCE`, `RATING_DESC`, `REVIEWS_DESC`, `VIEWS_DESC`, `NAME_ASC`). |
+| [`DirectorySortOrder`](DirectorySortOrder.java) | Grouped enums | Supported search ranking orders (`DirectorySortOrder.Relevance.DEFAULT`, `DirectorySortOrder.Rating.DESC`, `DirectorySortOrder.Reviews.DESC`, `DirectorySortOrder.Views.DESC`, `DirectorySortOrder.Newest.FIRST`). |

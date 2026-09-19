@@ -116,10 +116,10 @@ class DirectorySearchFilterDTOTest {
     @DisplayName("resolveSortBy: should default null sortBy to RELEVANCE")
     void resolveSortBy_handling() {
         DirectorySearchFilterDTO nullSort = DirectorySearchFilterDTO.builder().sortBy(null).build();
-        assertThat(nullSort.resolveSortBy()).isEqualTo(DirectorySortOrder.RELEVANCE);
+        assertThat(nullSort.resolveSortBy()).isEqualTo(DirectorySortOrder.Relevance.DEFAULT);
 
-        DirectorySearchFilterDTO explicitSort = DirectorySearchFilterDTO.builder().sortBy(DirectorySortOrder.RATING_DESC).build();
-        assertThat(explicitSort.resolveSortBy()).isEqualTo(DirectorySortOrder.RATING_DESC);
+        DirectorySearchFilterDTO explicitSort = DirectorySearchFilterDTO.builder().sortBy(DirectorySortOrder.Rating.DESC).build();
+        assertThat(explicitSort.resolveSortBy()).isEqualTo(DirectorySortOrder.Rating.DESC);
     }
 
     @Test
@@ -146,7 +146,7 @@ class DirectorySearchFilterDTOTest {
                 .verifiedOnly(true)
                 .premiumOnly(false)
                 .teacherOnly(true)
-                .sortBy(DirectorySortOrder.VIEWS_DESC)
+                .sortBy(DirectorySortOrder.Views.DESC)
                 .page(0)
                 .size(25)
                 .build();

@@ -267,23 +267,17 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
      * @return search sort
      */
     private SortFinalStep buildSort(SearchSortFactory f, DirectorySearchFilterDTO filter) {
-        DirectorySortOrder sortOrder = filter.resolveSortBy();
-        return switch (sortOrder) {
-            case RATING_DESC -> f.field(FIELD_RATING).desc()
-                    .then().field(FIELD_REVIEWS_COUNT).desc();
-            case REVIEWS_DESC -> f.field(FIELD_REVIEWS_COUNT).desc()
-                    .then().field(FIELD_RATING).desc();
-            case VIEWS_DESC -> f.field(FIELD_VIEWS_COUNT).desc();
-            case NEWEST -> f.field(FIELD_CREATED_AT).desc();
-            case RELEVANCE -> {
-                if (filter.hasKeyword()) {
-                    yield f.score()
-                            .then().field(FIELD_RATING).desc();
-                } else {
-                    yield f.field(FIELD_RATING).desc();
-                }
-            }
-        };
+        DirectorySortOrder.Key sortOrder = filter.resolveSortBy();
+        if (sortOrder == DirectorySortOrder.Rating.DESC) {
+            return f.field(FIELD_RATING).desc().then().field(FIELD_REVIEWS_COUNT).desc();
+        }
+        if (sortOrder == DirectorySortOrder.Reviews.DESC) {
+            return f.field(FIELD_REVIEWS_COUNT).desc().then().field(FIELD_RATING).desc();
+        }
+        if (sortOrder == DirectorySortOrder.Views.DESC) return f.field(FIELD_VIEWS_COUNT).desc();
+        if (sortOrder == DirectorySortOrder.Newest.FIRST) return f.field(FIELD_CREATED_AT).desc();
+        if (filter.hasKeyword()) return f.score().then().field(FIELD_RATING).desc();
+        return f.field(FIELD_RATING).desc();
     }
 
     /**
@@ -472,16 +466,18 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
      * @return relational sort order
      */
     private Sort buildRelationalSort(DirectorySearchFilterDTO filter) {
-        DirectorySortOrder sortOrder = filter.resolveSortBy();
-        return switch (sortOrder) {
-            case RATING_DESC -> Sort.by(Sort.Direction.DESC, FIELD_RATING)
+        DirectorySortOrder.Key sortOrder = filter.resolveSortBy();
+        if (sortOrder == DirectorySortOrder.Rating.DESC) {
+            return Sort.by(Sort.Direction.DESC, FIELD_RATING)
                     .and(Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT));
-            case REVIEWS_DESC -> Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT)
+        }
+        if (sortOrder == DirectorySortOrder.Reviews.DESC) {
+            return Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT)
                     .and(Sort.by(Sort.Direction.DESC, FIELD_RATING));
-            case VIEWS_DESC -> Sort.by(Sort.Direction.DESC, FIELD_VIEWS_COUNT);
-            case NEWEST -> Sort.by(Sort.Direction.DESC, FIELD_CREATED_AT);
-            case RELEVANCE -> Sort.by(Sort.Direction.DESC, FIELD_RATING)
-                    .and(Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT));
-        };
+        }
+        if (sortOrder == DirectorySortOrder.Views.DESC) return Sort.by(Sort.Direction.DESC, FIELD_VIEWS_COUNT);
+        if (sortOrder == DirectorySortOrder.Newest.FIRST) return Sort.by(Sort.Direction.DESC, FIELD_CREATED_AT);
+        return Sort.by(Sort.Direction.DESC, FIELD_RATING)
+                .and(Sort.by(Sort.Direction.DESC, FIELD_REVIEWS_COUNT));
     }
 }
