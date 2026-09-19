@@ -12,8 +12,6 @@ import java.util.List;
 public interface Permission {
     String value();
 
-    default String authority() { return value(); }
-
     default boolean matches(GrantedAuthority grantedAuthority) {
         return grantedAuthority != null && value().equals(grantedAuthority.getAuthority());
     }
