@@ -370,7 +370,9 @@ public class AnalyticsJobService {
                 LocalDateTime previousFrom = from.minusDays(rangeDays);
                 LocalDateTime previousTo = from.minusNanos(1);
                 Map<String, Object> comparison = new LinkedHashMap<>();
-                comparison.put("newRegistrations", Map.of("current", users.countByCreatedAtBetween(from, inclusiveTo), "previous", users.countByCreatedAtBetween(previousFrom, previousTo)));
+                comparison.put("newRegistrations", Map.of(
+                        "current", users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo),
+                        "previous", users.countByCreatedAtBetweenAndDeletedAtIsNull(previousFrom, previousTo)));
                 comparison.put("activityEvents", Map.of("current", countFilteredEvents(job, from, inclusiveTo), "previous", countFilteredEvents(job, previousFrom, previousTo)));
                 summary.put("periodComparison", comparison);
                 Map<String, Object> result = new LinkedHashMap<>();
