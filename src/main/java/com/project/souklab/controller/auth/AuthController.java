@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.project.souklab.model.AccountRole;
 
 import java.io.IOException;
 
@@ -46,8 +47,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private static final String ARTISAN_SIGNUP_INTENT = "ARTISAN";
-    private static final String CLIENT_SIGNUP_INTENT = "CLIENT";
+    private static final String ARTISAN_SIGNUP_INTENT = AccountRole.ARTISAN.value();
+    private static final String CLIENT_SIGNUP_INTENT = AccountRole.CLIENT.value();
     private static final String OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI = "/oauth2/authorization/google";
 
     private final AuthService authService;

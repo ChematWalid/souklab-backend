@@ -26,6 +26,7 @@ import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.OAuthIdentity;
 import com.project.souklab.model.RefreshToken;
@@ -162,9 +163,9 @@ public class AuthService {
             throw new ConflictException("Email is already registered: " + email);
         }
 
-        Set<AuthorizationPermission> permissions = validateRegistrationAccountType(dto.getAccountType());
-        boolean isArtisan = "ARTISAN".equalsIgnoreCase(dto.getAccountType());
-        AccountStatus initialStatus = isArtisan ? AccountStatus.PENDING : AccountStatus.ACTIVE;
+        AccountRole role = parseRegistrationRole(dto.getAccountType());
+        Set<AuthorizationPermission> permissions = permissionsForRegistration(role == AccountRole.ARTISAN);
+        AccountStatus initialStatus = role == AccountRole.ARTISAN ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
         User savedUser = userRepository.save(buildNewUser(dto, email, permissions, initialStatus));
         if (activityEventService != null) {
@@ -179,7 +180,7 @@ public class AuthService {
             log.warn("Could not issue or send verification code to {}: {}", savedUser.getEmail(), e.getMessage());
         }
 
-        if (isArtisan) {
+        if (role == AccountRole.ARTISAN) {
             try {
                 notificationService.notifyAdmins("New artisan registration pending approval: " + savedUser.getEmail());
             } catch (Exception e) {
@@ -531,14 +532,13 @@ public class AuthService {
      * @throws BadRequestException       if the role is ADMIN or not one of ARTISAN / CLIENT
      * @throws ResourceNotFoundException if the role does not exist in the database
      */
-    private Set<AuthorizationPermission> validateRegistrationAccountType(String accountTypeInput) {
-        if ("ADMIN".equalsIgnoreCase(accountTypeInput)) {
+    private AccountRole parseRegistrationRole(String accountTypeInput) {
+        AccountRole role = AccountRole.fromInput(accountTypeInput).orElseThrow(
+                () -> new BadRequestException("Invalid account type. Allowed values are ARTISAN or CLIENT."));
+        if (role == AccountRole.ADMIN) {
             throw new BadRequestException("Administrator registration is not permitted via public registration.");
         }
-        if (!"ARTISAN".equalsIgnoreCase(accountTypeInput) && !"CLIENT".equalsIgnoreCase(accountTypeInput)) {
-            throw new BadRequestException("Invalid account type. Allowed values are ARTISAN or CLIENT.");
-        }
-        return permissionsForRegistration("ARTISAN".equalsIgnoreCase(accountTypeInput));
+        return role;
     }
 
     private Set<AuthorizationPermission> permissionsForRegistration(boolean artisan) {
@@ -720,18 +720,12 @@ public class AuthService {
             throw new BadRequestException("OAuth registration intent not found or expired. Please initiate registration from the artisan or client signup page.");
         }
 
-        String normalizedIntent = intentRole.trim().toUpperCase();
-        boolean artisan;
-        AccountStatus initialStatus;
-        if (normalizedIntent.contains("ARTISAN")) {
-            artisan = true;
-            initialStatus = AccountStatus.PENDING;
-        } else if (normalizedIntent.contains("CLIENT")) {
-            artisan = false;
-            initialStatus = AccountStatus.ACTIVE;
-        } else {
+        AccountRole role = AccountRole.fromInput(intentRole).orElse(null);
+        if (role != AccountRole.ARTISAN && role != AccountRole.CLIENT) {
             throw new BadRequestException("Invalid OAuth registration role intent: " + intentRole);
         }
+        boolean artisan = role == AccountRole.ARTISAN;
+        AccountStatus initialStatus = artisan ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
         User user = User.builder()
                 .email(email)
