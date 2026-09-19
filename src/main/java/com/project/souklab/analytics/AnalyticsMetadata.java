@@ -1,6 +1,6 @@
 package com.project.souklab.analytics;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.project.souklab.model.EnumValue;
 /**
  * Stable keys used in activity-event metadata.
  *
@@ -12,10 +12,7 @@ public final class AnalyticsMetadata {
     private AnalyticsMetadata() {
     }
 
-    public interface Key {
-        @JsonValue
-        String value();
-    }
+    public interface Key extends EnumValue { }
 
     public enum Account implements Key {
         TYPE("accountType"),

@@ -40,7 +40,7 @@ public class ActivityEventService {
         outbox.setNextAttemptAt(LocalDateTime.now(clock));
         Map<AnalyticsMetric.Payload, Object> payload = new LinkedHashMap<>();
         payload.put(AnalyticsMetric.Payload.EVENT_ID, saved.getId());
-        payload.put(AnalyticsMetric.Payload.EVENT_TYPE, type.value());
+        payload.put(AnalyticsMetric.Payload.EVENT_TYPE, type);
         payload.put(AnalyticsMetric.Payload.ACTOR_ID, actorId == null ? "" : actorId);
         payload.put(AnalyticsMetric.Payload.SUBJECT_ID, subjectId == null ? "" : subjectId);
         payload.put(AnalyticsMetric.Payload.EVENT_TIME, saved.getEventTime());
