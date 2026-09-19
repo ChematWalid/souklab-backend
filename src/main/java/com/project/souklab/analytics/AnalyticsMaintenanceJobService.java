@@ -51,7 +51,7 @@ public class AnalyticsMaintenanceJobService {
         job.setStatus(AnalyticsJobStatus.QUEUED);
         job.setFromDate(request.fromDate());
         job.setToDate(request.toDate());
-        job.setPermissionScope(Permission.Analytics.ADMIN.authority());
+        job.setPermissionScope(Permission.Analytics.ADMIN.value());
         job.setExpiresAt(LocalDateTime.now(clock).plus(properties.getJobRetention()));
         AnalyticsMaintenanceJob saved = jobs.saveAndFlush(job);
         auditLogService.logAction(AuditLogAction.ANALYTICS_REBUILD,

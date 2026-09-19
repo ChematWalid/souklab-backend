@@ -136,7 +136,7 @@ public class NotificationService {
      */
     @Transactional
     public void notifyAdmins(String message) {
-        List<User> admins = userRepository.findByPermissionKey(Permission.Admin.USERS.authority());
+        List<User> admins = userRepository.findByPermissionKey(Permission.Admin.USERS.value());
         for (User admin : admins) {
             createForUser(admin, message);
         }

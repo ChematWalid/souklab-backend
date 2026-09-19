@@ -10,18 +10,20 @@ import java.util.List;
  * constants are exposed.
  */
 public interface Permission {
-    String authority();
+    String value();
+
+    default String authority() { return value(); }
 
     default boolean matches(GrantedAuthority grantedAuthority) {
-        return grantedAuthority != null && authority().equals(grantedAuthority.getAuthority());
+        return grantedAuthority != null && value().equals(grantedAuthority.getAuthority());
     }
 
     default boolean matches(String permissionKey) {
-        return permissionKey != null && authority().equals(permissionKey);
+        return permissionKey != null && value().equals(permissionKey);
     }
 
     default String description() {
-        return authority();
+        return value();
     }
 
     /** Complete permission catalog used by reference-data seeding and tooling. */
@@ -38,58 +40,58 @@ public interface Permission {
     enum Admin implements Permission {
         USERS("permission:admin:users"), FORMATIONS("permission:admin:formations"),
         FEED("permission:admin:feed"), REPORTS("permission:admin:reports");
-        private final String authority;
-        Admin(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        Admin(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     enum Artisan implements Permission {
         FORMATIONS("permission:artisan:formations"), CONTENT("permission:artisan:content"),
         REVIEWS("permission:artisan:reviews");
-        private final String authority;
-        Artisan(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        Artisan(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     enum Profile implements Permission {
         READ("permission:profile:read"), WRITE("permission:profile:write");
-        private final String authority;
-        Profile(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        Profile(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     enum Report implements Permission {
         CREATE("permission:report:create");
-        private final String authority;
-        Report(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        Report(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     enum File implements Permission {
         READ("permission:file:read");
-        private final String authority;
-        File(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        File(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     enum Message implements Permission {
         SEND("permission:message:send");
-        private final String authority;
-        Message(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        Message(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     enum Analytics implements Permission {
         ADMIN("permission:analytics:admin");
-        private final String authority;
-        Analytics(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        Analytics(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     enum Financial implements Permission {
         ADMIN("permission:financial:admin");
-        private final String authority;
-        Financial(String authority) { this.authority = authority; }
-        public String authority() { return authority; }
+        private final String value;
+        Financial(String value) { this.value = value; }
+        public String value() { return value; }
     }
 }

@@ -48,7 +48,7 @@ public final class ArtisanSecurityUtils {
         boolean hasArtisanPermission = authentication.getAuthorities().stream()
                 .anyMatch(requiredPermission::matches);
         if (!hasArtisanPermission) {
-            throw new ForbiddenException("Access denied: " + requiredPermission.authority() + " permission required.");
+            throw new ForbiddenException("Access denied: " + requiredPermission.value() + " permission required.");
         }
 
         String username = SecurityUtils.getCurrentUsername();

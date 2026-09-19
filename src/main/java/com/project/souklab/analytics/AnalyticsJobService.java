@@ -160,8 +160,8 @@ public class AnalyticsJobService {
         job.setOutputFormat(request.getOutputFormat() == null ? AnalyticsOutputFormat.JSON : request.getOutputFormat());
         job.setStatus(AnalyticsJobStatus.QUEUED);
         job.setPermissionScope(financial
-                ? Permission.Analytics.ADMIN.authority() + "," + Permission.Financial.ADMIN.authority()
-                : Permission.Analytics.ADMIN.authority());
+                ? Permission.Analytics.ADMIN.value() + "," + Permission.Financial.ADMIN.value()
+                : Permission.Analytics.ADMIN.value());
         try { job.setFiltersJson(objectMapper.writeValueAsString(request.getFilters() == null ? Map.of() : request.getFilters())); }
         catch (JsonProcessingException e) { throw new BadRequestException("Invalid analytics filters", e); }
         job.setExpiresAt(LocalDateTime.now(clock).plus(properties.getJobRetention()));
