@@ -29,7 +29,6 @@ public class JwtUtils {
 
     private static final String ERROR_UNEXPECTED_PRINCIPAL_TYPE_PREFIX = "Expected principal of type UserDetails, but found: ";
     public static final int AUTHORIZATION_SCHEMA_VERSION = 2;
-    private static final String AUTHORIZATION_VERSION_CLAIM = "authz_version";
 
     private final AppProperties appProperties;
     private final Clock clock;
@@ -79,7 +78,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(username)
                 .setId(UUID.randomUUID().toString())
-                .claim(AUTHORIZATION_VERSION_CLAIM, AUTHORIZATION_SCHEMA_VERSION)
+                .claim(JwtClaim.Authorization.VERSION.value(), AUTHORIZATION_SCHEMA_VERSION)
                 .setIssuedAt(Date.from(Instant.now(clock)))
                 .setExpiration(Date.from(Instant.now(clock).plusMillis(expirationMs)))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -101,7 +100,7 @@ public class JwtUtils {
                     .setClock(() -> Date.from(clock.instant()))
                     .build()
                     .parseClaimsJws(authToken).getBody();
-            Object version = claims.get(AUTHORIZATION_VERSION_CLAIM);
+            Object version = claims.get(JwtClaim.Authorization.VERSION.value());
             if (!(version instanceof Number number) || number.intValue() != AUTHORIZATION_SCHEMA_VERSION) {
                 log.warn("Rejected JWT with obsolete authorization schema version");
                 return false;

@@ -142,7 +142,7 @@ class SecurityPrincipalGuardsTest {
         JwtResponseDTO tokens = JwtResponseDTO.builder().accessToken("access").refreshToken("refresh").build();
         when(authService.processOAuth2Success(eq(principal), eq("ARTISAN"), any())).thenReturn(tokens);
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setCookies(new Cookie(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, "ARTISAN"));
+        request.setCookies(new Cookie(OAuthCookie.Intent.NAME.value(), "ARTISAN"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         handler.onAuthenticationSuccess(request, response, new TestingAuthenticationToken(principal, "credentials"));
@@ -160,13 +160,13 @@ class SecurityPrincipalGuardsTest {
         OAuth2User principal = Mockito.mock(OAuth2User.class);
         when(authService.processOAuth2Success(eq(principal), any(), any())).thenReturn(new JwtResponseDTO());
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.getSession().setAttribute(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, "CLIENT");
+        request.getSession().setAttribute(OAuthCookie.Intent.NAME.value(), "CLIENT");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         handler.onAuthenticationSuccess(request, response, new TestingAuthenticationToken(principal, "credentials"));
 
         verify(authService).processOAuth2Success(eq(principal), eq("CLIENT"), eq(request));
-        assertThat(request.getSession().getAttribute(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME)).isNull();
+        assertThat(request.getSession().getAttribute(OAuthCookie.Intent.NAME.value())).isNull();
 
         MockHttpServletRequest noIntentRequest = new MockHttpServletRequest();
         handler.onAuthenticationSuccess(noIntentRequest, new MockHttpServletResponse(), new TestingAuthenticationToken(principal, "credentials"));

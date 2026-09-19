@@ -16,6 +16,7 @@ import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.dto.profile.UserPatchDTO;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
+import com.project.souklab.security.OAuthCookie;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -198,7 +199,7 @@ public class AuthController {
      * @param intentRole the account-type signup intent (for example, {@code "ARTISAN"})
      */
     private void setIntentCookie(HttpServletResponse response, AccountRole intentRole) {
-        ResponseCookie cookie = ResponseCookie.from(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, intentRole.value())
+        ResponseCookie cookie = ResponseCookie.from(OAuthCookie.Intent.NAME.value(), intentRole.value())
                 .path("/")
                 .httpOnly(true)
                 .sameSite("Lax")
