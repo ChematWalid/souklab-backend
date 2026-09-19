@@ -3,6 +3,7 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.OAuthIdentity;
+import com.project.souklab.model.OAuthProvider;
 import com.project.souklab.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ class OAuthIdentityRepositoryTest {
     /**
      * Persists an OAuthIdentity for the given user.
      */
-    private OAuthIdentity persistIdentity(User user, String provider, String providerUserId, String email) {
+    private OAuthIdentity persistIdentity(User user, OAuthProvider provider, String providerUserId, String email) {
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(user)
                 .provider(provider)
@@ -71,10 +72,10 @@ class OAuthIdentityRepositoryTest {
         User user1 = persistUser("oauth_user1@souklab.com");
         User user2 = persistUser("oauth_user2@souklab.com");
 
-        persistIdentity(user1, "google", "sub-123456", "oauth_user1@souklab.com");
+        persistIdentity(user1, OAuthProvider.GOOGLE, "sub-123456", "oauth_user1@souklab.com");
         entityManager.flush();
 
-        persistIdentity(user2, "google", "sub-123456", "oauth_user2@souklab.com");
+        persistIdentity(user2, OAuthProvider.GOOGLE, "sub-123456", "oauth_user2@souklab.com");
 
         assertThatThrownBy(() -> entityManager.flush())
                 .isInstanceOf(ConstraintViolationException.class);
@@ -88,20 +89,20 @@ class OAuthIdentityRepositoryTest {
     @DisplayName("findByProviderAndProviderUserId: returns identity when matching, empty Optional when absent")
     void findByProviderAndProviderUserId_verifiesFoundAndNotFound() {
         User user = persistUser("oauth_find@souklab.com");
-        OAuthIdentity identity = persistIdentity(user, "google", "sub-google-999", "oauth_find@souklab.com");
+        OAuthIdentity identity = persistIdentity(user, OAuthProvider.GOOGLE, "sub-google-999", "oauth_find@souklab.com");
 
         entityManager.flush();
         entityManager.clear();
 
-        Optional<OAuthIdentity> found = oAuthIdentityRepository.findByProviderAndProviderUserId("google", "sub-google-999");
+        Optional<OAuthIdentity> found = oAuthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "sub-google-999");
         assertThat(found).isPresent();
         assertThat(found.get().getId()).isEqualTo(identity.getId());
         assertThat(found.get().getEmail()).isEqualTo("oauth_find@souklab.com");
 
-        Optional<OAuthIdentity> wrongProvider = oAuthIdentityRepository.findByProviderAndProviderUserId("facebook", "sub-google-999");
+        Optional<OAuthIdentity> wrongProvider = oAuthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GITHUB, "sub-google-999");
         assertThat(wrongProvider).isEmpty();
 
-        Optional<OAuthIdentity> wrongSub = oAuthIdentityRepository.findByProviderAndProviderUserId("google", "non-existent-sub");
+        Optional<OAuthIdentity> wrongSub = oAuthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "non-existent-sub");
         assertThat(wrongSub).isEmpty();
     }
 
@@ -116,9 +117,9 @@ class OAuthIdentityRepositoryTest {
         User userWithNone = persistUser("no_oauth@souklab.com");
         User otherUser = persistUser("other_oauth@souklab.com");
 
-        OAuthIdentity googleIdentity = persistIdentity(userWithTwo, "google", "sub-google-001", "multi_oauth@souklab.com");
-        OAuthIdentity githubIdentity = persistIdentity(userWithTwo, "github", "sub-github-002", "multi_oauth@souklab.com");
-        persistIdentity(otherUser, "google", "sub-google-003", "other_oauth@souklab.com");
+        OAuthIdentity googleIdentity = persistIdentity(userWithTwo, OAuthProvider.GOOGLE, "sub-google-001", "multi_oauth@souklab.com");
+        OAuthIdentity githubIdentity = persistIdentity(userWithTwo, OAuthProvider.GITHUB, "sub-github-002", "multi_oauth@souklab.com");
+        persistIdentity(otherUser, OAuthProvider.GOOGLE, "sub-google-003", "other_oauth@souklab.com");
 
         entityManager.flush();
         entityManager.clear();
@@ -141,20 +142,20 @@ class OAuthIdentityRepositoryTest {
     @DisplayName("findByProviderAndEmail: returns identity matching provider and email, empty Optional when absent")
     void findByProviderAndEmail_verifiesFoundAndNotFound() {
         User user = persistUser("email_oauth@souklab.com");
-        OAuthIdentity identity = persistIdentity(user, "google", "sub-email-777", "email_oauth@souklab.com");
+        OAuthIdentity identity = persistIdentity(user, OAuthProvider.GOOGLE, "sub-email-777", "email_oauth@souklab.com");
 
         entityManager.flush();
         entityManager.clear();
 
-        Optional<OAuthIdentity> found = oAuthIdentityRepository.findByProviderAndEmail("google", "email_oauth@souklab.com");
+        Optional<OAuthIdentity> found = oAuthIdentityRepository.findByProviderAndEmail(OAuthProvider.GOOGLE, "email_oauth@souklab.com");
         assertThat(found).isPresent();
         assertThat(found.get().getId()).isEqualTo(identity.getId());
         assertThat(found.get().getProviderUserId()).isEqualTo("sub-email-777");
 
-        Optional<OAuthIdentity> wrongProvider = oAuthIdentityRepository.findByProviderAndEmail("facebook", "email_oauth@souklab.com");
+        Optional<OAuthIdentity> wrongProvider = oAuthIdentityRepository.findByProviderAndEmail(OAuthProvider.GITHUB, "email_oauth@souklab.com");
         assertThat(wrongProvider).isEmpty();
 
-        Optional<OAuthIdentity> wrongEmail = oAuthIdentityRepository.findByProviderAndEmail("google", "nonexistent@souklab.com");
+        Optional<OAuthIdentity> wrongEmail = oAuthIdentityRepository.findByProviderAndEmail(OAuthProvider.GOOGLE, "nonexistent@souklab.com");
         assertThat(wrongEmail).isEmpty();
     }
 }

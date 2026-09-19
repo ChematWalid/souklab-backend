@@ -476,7 +476,7 @@ public class AuthService {
         String lastName = oAuth2User.getAttribute("family_name");
         String picture = oAuth2User.getAttribute("picture");
 
-        var existingIdentity = oauthIdentityRepository.findByProviderAndProviderUserId(provider.value(), providerUserId);
+        var existingIdentity = oauthIdentityRepository.findByProviderAndProviderUserId(provider, providerUserId);
 
         User user;
         if (existingIdentity.isPresent()) {
@@ -697,7 +697,7 @@ public class AuthService {
     private User autoLinkByVerifiedEmail(User user, OAuthProvider provider, String providerUserId, String email) {
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(user)
-                .provider(provider.value())
+                .provider(provider)
                 .providerUserId(providerUserId)
                 .email(email)
                 .build();
@@ -742,7 +742,7 @@ public class AuthService {
 
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(user)
-                .provider(provider.value())
+                .provider(provider)
                 .providerUserId(providerUserId)
                 .email(email)
                 .build();

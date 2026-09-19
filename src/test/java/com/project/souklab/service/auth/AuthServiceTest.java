@@ -28,6 +28,7 @@ import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.OAuthIdentity;
+import com.project.souklab.model.OAuthProvider;
 import com.project.souklab.model.RefreshToken;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.User;
@@ -1244,7 +1245,7 @@ class AuthServiceTest {
         OAuth2User oAuth2User = mock(OAuth2User.class);
         when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-existing-unverified");
         when(oAuth2User.getAttribute("email")).thenReturn("unverified@example.com");
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-existing-unverified"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-existing-unverified"))
                 .thenReturn(Optional.empty());
         User existing = User.builder()
                 .email("unverified@example.com")
@@ -1276,11 +1277,11 @@ class AuthServiceTest {
 
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(existingUser)
-                .provider("GOOGLE")
+                .provider(OAuthProvider.GOOGLE)
                 .providerUserId("google-sub-123")
                 .build();
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-123"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-123"))
                 .thenReturn(Optional.of(identity));
         when(jwtUtils.generateAccessToken("existing@example.com")).thenReturn("access-token-oauth");
         when(refreshTokenService.createRefreshTokenForUser(existingUser))
@@ -1312,11 +1313,11 @@ class AuthServiceTest {
 
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(existingUser)
-                .provider("GOOGLE")
+                .provider(OAuthProvider.GOOGLE)
                 .providerUserId("google-name-456")
                 .build();
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-name-456"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-name-456"))
                 .thenReturn(Optional.of(identity));
         when(jwtUtils.generateAccessToken("existing@example.com")).thenReturn("access-token-oauth");
         when(refreshTokenService.createRefreshTokenForUser(existingUser))
@@ -1344,7 +1345,7 @@ class AuthServiceTest {
                 .permissions(new HashSet<>(Set.of(clientRole)))
                 .build();
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-new"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-new"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmail("match@example.com")).thenReturn(Optional.of(existingUser));
         when(jwtUtils.generateAccessToken("match@example.com")).thenReturn("access-token-match");
@@ -1357,7 +1358,7 @@ class AuthServiceTest {
         ArgumentCaptor<OAuthIdentity> captor = ArgumentCaptor.forClass(OAuthIdentity.class);
         verify(oauthIdentityRepository).save(captor.capture());
         OAuthIdentity linked = captor.getValue();
-        assertThat(linked.getProvider()).isEqualTo("GOOGLE");
+        assertThat(linked.getProvider()).isEqualTo(OAuthProvider.GOOGLE);
         assertThat(linked.getProviderUserId()).isEqualTo("google-sub-new");
         assertThat(linked.getUser()).isEqualTo(existingUser);
     }
@@ -1372,7 +1373,7 @@ class AuthServiceTest {
         when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-999");
         when(oAuth2User.getAttribute("email")).thenReturn("newuser@example.com");
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-999"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-999"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmail("newuser@example.com")).thenReturn(Optional.empty());
 
@@ -1391,7 +1392,7 @@ class AuthServiceTest {
         when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-999");
         when(oAuth2User.getAttribute("email")).thenReturn("newuser@example.com");
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-999"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-999"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmail("newuser@example.com")).thenReturn(Optional.empty());
 
@@ -1417,7 +1418,7 @@ class AuthServiceTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRemoteAddr("10.0.0.1");
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-artisan"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-artisan"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmail("newartisan@example.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -1440,7 +1441,7 @@ class AuthServiceTest {
         ArgumentCaptor<OAuthIdentity> identityCaptor = ArgumentCaptor.forClass(OAuthIdentity.class);
         verify(oauthIdentityRepository).save(identityCaptor.capture());
         OAuthIdentity savedIdentity = identityCaptor.getValue();
-        assertThat(savedIdentity.getProvider()).isEqualTo("GOOGLE");
+        assertThat(savedIdentity.getProvider()).isEqualTo(OAuthProvider.GOOGLE);
         assertThat(savedIdentity.getProviderUserId()).isEqualTo("google-sub-artisan");
         assertThat(savedIdentity.getEmail()).isEqualTo("newartisan@example.com");
         assertThat(savedIdentity.getUser()).isEqualTo(savedUser);
@@ -1460,7 +1461,7 @@ class AuthServiceTest {
         when(oAuth2User.getAttribute("family_name")).thenReturn("Fassi");
         when(oAuth2User.getAttribute("picture")).thenReturn(null);
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-client"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-client"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmail("newclient@example.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -1483,7 +1484,7 @@ class AuthServiceTest {
         ArgumentCaptor<OAuthIdentity> identityCaptor = ArgumentCaptor.forClass(OAuthIdentity.class);
         verify(oauthIdentityRepository).save(identityCaptor.capture());
         OAuthIdentity savedIdentity = identityCaptor.getValue();
-        assertThat(savedIdentity.getProvider()).isEqualTo("GOOGLE");
+        assertThat(savedIdentity.getProvider()).isEqualTo(OAuthProvider.GOOGLE);
         assertThat(savedIdentity.getProviderUserId()).isEqualTo("google-sub-client");
         assertThat(savedIdentity.getEmail()).isEqualTo("newclient@example.com");
         assertThat(savedIdentity.getUser()).isEqualTo(savedUser);
@@ -1499,7 +1500,7 @@ class AuthServiceTest {
         when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-role-missing");
         when(oAuth2User.getAttribute("email")).thenReturn("norole@example.com");
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-role-missing"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-role-missing"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmail("norole@example.com")).thenReturn(Optional.empty());
         lenient().when(permissionRepository.findByPermissionKeyInAndEnabledTrue(any())).thenReturn(List.of());
@@ -2253,11 +2254,11 @@ class AuthServiceTest {
 
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(existingUser)
-                .provider("GOOGLE")
+                .provider(OAuthProvider.GOOGLE)
                 .providerUserId("google-name-null-sub")
                 .build();
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-name-null-sub"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-name-null-sub"))
                 .thenReturn(Optional.of(identity));
         when(jwtUtils.generateAccessToken("existing@example.com")).thenReturn("access-token-oauth");
         when(refreshTokenService.createRefreshTokenForUser(existingUser))
@@ -2293,7 +2294,7 @@ class AuthServiceTest {
         when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-intent-blank");
         when(oAuth2User.getAttribute("email")).thenReturn("brandnew@example.com");
 
-        when(oauthIdentityRepository.findByProviderAndProviderUserId("GOOGLE", "google-sub-intent-blank"))
+        when(oauthIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.GOOGLE, "google-sub-intent-blank"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmail("brandnew@example.com")).thenReturn(Optional.empty());
 

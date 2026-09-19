@@ -1,7 +1,8 @@
 package com.project.souklab.model;
 
 public enum OAuthProvider implements EnumValue {
-    GOOGLE("GOOGLE");
+    GOOGLE("GOOGLE"),
+    GITHUB("GITHUB");
 
     private final String value;
 

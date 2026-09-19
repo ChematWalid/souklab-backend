@@ -2,6 +2,8 @@ package com.project.souklab.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -36,8 +38,9 @@ public class OAuthIdentity extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String provider;
+    private OAuthProvider provider;
 
     @Column(name = "provider_user_id", nullable = false)
     private String providerUserId;
