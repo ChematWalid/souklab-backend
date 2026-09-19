@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.exception;
 
+import com.project.souklab.dto.common.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -8,6 +9,6 @@ import org.springframework.http.HttpStatus;
 public class InvalidFilenameException extends StorageException {
 
     public InvalidFilenameException(String message) {
-        super(HttpStatus.BAD_REQUEST, "INVALID_FILENAME", message);
+        super(HttpStatus.BAD_REQUEST, ApiErrorCode.INVALID_FILENAME, message);
     }
 }

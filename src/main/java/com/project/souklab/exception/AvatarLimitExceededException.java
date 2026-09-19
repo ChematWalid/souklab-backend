@@ -1,5 +1,6 @@
 package com.project.souklab.exception;
 
+import com.project.souklab.dto.common.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -13,6 +14,6 @@ public class AvatarLimitExceededException extends AppException {
      * @param message human-readable description of the quota violation
      */
     public AvatarLimitExceededException(String message) {
-        super(HttpStatus.CONFLICT, "AVATAR_LIMIT_EXCEEDED", message);
+        super(HttpStatus.CONFLICT, ApiErrorCode.AVATAR_LIMIT_EXCEEDED, message);
     }
 }

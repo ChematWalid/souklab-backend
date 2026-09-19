@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.exception;
 
+import com.project.souklab.dto.common.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -8,15 +9,13 @@ import org.springframework.http.HttpStatus;
  */
 public class UnsupportedImageFormatException extends StorageException {
 
-    private static final String DEFAULT_ERROR_CODE = "UNSUPPORTED_IMAGE_FORMAT";
-
     /**
      * Constructs an exception for an unsupported image MIME type.
      *
      * @param contentType the unsupported content type
      */
     public UnsupportedImageFormatException(String contentType) {
-        super(HttpStatus.BAD_REQUEST, DEFAULT_ERROR_CODE,
+        super(HttpStatus.BAD_REQUEST, ApiErrorCode.UNSUPPORTED_IMAGE_FORMAT,
                 String.format("Content type '%s' is not supported for image processing", contentType));
     }
 
@@ -27,6 +26,6 @@ public class UnsupportedImageFormatException extends StorageException {
      * @param cause underlying cause
      */
     public UnsupportedImageFormatException(String message, Throwable cause) {
-        super(HttpStatus.BAD_REQUEST, DEFAULT_ERROR_CODE, message, cause);
+        super(HttpStatus.BAD_REQUEST, ApiErrorCode.UNSUPPORTED_IMAGE_FORMAT, message, cause);
     }
 }

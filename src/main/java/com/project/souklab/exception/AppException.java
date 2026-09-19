@@ -1,5 +1,6 @@
 package com.project.souklab.exception;
 
+import com.project.souklab.dto.common.ApiErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -18,6 +19,14 @@ public class AppException extends RuntimeException {
         super(message, cause);
         this.status = status;
         this.errorCode = errorCode;
+    }
+
+    public AppException(HttpStatus status, ApiErrorCode errorCode, String message) {
+        this(status, errorCode.value(), message);
+    }
+
+    public AppException(HttpStatus status, ApiErrorCode errorCode, String message, Throwable cause) {
+        this(status, errorCode.value(), message, cause);
     }
 
     public AppException(HttpStatus status, String message) {

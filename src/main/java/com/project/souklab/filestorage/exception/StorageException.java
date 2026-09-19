@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.exception;
 
+import com.project.souklab.dto.common.ApiErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -25,12 +26,19 @@ public class StorageException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
+    public StorageException(HttpStatus status, ApiErrorCode errorCode, String message) {
+        this(status, errorCode.value(), message);
+    }
+
+    public StorageException(HttpStatus status, ApiErrorCode errorCode, String message, Throwable cause) {
+        this(status, errorCode.value(), message, cause);
+    }
+
     public StorageException(String message) {
-        this(HttpStatus.INTERNAL_SERVER_ERROR, "STORAGE_ERROR", message);
+        this(HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorCode.STORAGE_ERROR, message);
     }
 
     public StorageException(String message, Throwable cause) {
-        this(HttpStatus.INTERNAL_SERVER_ERROR, "STORAGE_ERROR", message, cause);
+        this(HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorCode.STORAGE_ERROR, message, cause);
     }
 }
-

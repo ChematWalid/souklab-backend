@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.exception;
 
+import com.project.souklab.dto.common.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -8,6 +9,6 @@ import org.springframework.http.HttpStatus;
 public class FileNotFoundStorageException extends StorageException {
 
     public FileNotFoundStorageException(String key) {
-        super(HttpStatus.NOT_FOUND, "FILE_NOT_FOUND", String.format("File not found for key: %s", key));
+        super(HttpStatus.NOT_FOUND, ApiErrorCode.FILE_NOT_FOUND, String.format("File not found for key: %s", key));
     }
 }
