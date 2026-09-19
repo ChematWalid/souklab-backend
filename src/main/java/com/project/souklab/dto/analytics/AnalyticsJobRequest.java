@@ -6,6 +6,8 @@ import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.model.analytics.AnalyticsSortDirection;
 import com.project.souklab.model.analytics.AnalyticsSortField;
+import com.project.souklab.model.analytics.AnalyticsSortFieldDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -21,7 +23,8 @@ public class AnalyticsJobRequest {
     private Map<AnalyticsFilterKey, String> filters;
     private Integer pageNumber;
     private Integer pageSize;
-    private AnalyticsSortField sortField;
+    @JsonDeserialize(using = AnalyticsSortFieldDeserializer.class)
+    private AnalyticsSortField.Key sortField;
     private AnalyticsSortDirection sortDirection;
     private AnalyticsOutputFormat outputFormat;
 }

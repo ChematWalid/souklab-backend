@@ -2,38 +2,65 @@ package com.project.souklab.model.analytics;
 
 import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.model.EnumValue;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Arrays;
+/** Typed analytics series fields grouped by their semantic dimension. */
+public final class AnalyticsSortField {
+    private AnalyticsSortField() { }
 
-public enum AnalyticsSortField implements EnumValue {
-    START_DATE(AnalyticsMetric.Series.START_DATE),
-    END_DATE(AnalyticsMetric.Series.END_DATE),
-    ACTIVITY_EVENTS(AnalyticsMetric.Series.ACTIVITY_EVENTS),
-    NEW_REGISTRATIONS(AnalyticsMetric.Series.NEW_REGISTRATIONS);
-
-    private final AnalyticsMetric.Series field;
-
-    AnalyticsSortField(AnalyticsMetric.Series field) {
-        this.field = field;
+    public interface Key extends EnumValue {
+        AnalyticsMetric.Series seriesField();
     }
 
-    public AnalyticsMetric.Series seriesField() {
-        return field;
+    public static Key fromField(String field) {
+        for (Key key : all()) {
+            if (key.value().equals(field)) return key;
+        }
+        throw new IllegalArgumentException("Unsupported analytics sort field: " + field);
     }
 
-    @Override
-    @JsonValue
-    public String value() {
-        return field.value();
+    private static Key[] all() {
+        return new Key[]{Date.START, Date.END, Activity.EVENTS, Registration.NEW};
     }
 
-    @JsonCreator
-    public static AnalyticsSortField fromField(String field) {
-        return Arrays.stream(values())
-                .filter(sortField -> sortField.value().equals(field))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported analytics sort field: " + field));
+    public enum Date implements Key {
+        START(AnalyticsMetric.Series.START_DATE), END(AnalyticsMetric.Series.END_DATE);
+
+        private final AnalyticsMetric.Series field;
+
+        Date(AnalyticsMetric.Series field) { this.field = field; }
+
+        @Override
+        public AnalyticsMetric.Series seriesField() { return field; }
+
+        @Override
+        public String value() { return field.value(); }
+    }
+
+    public enum Activity implements Key {
+        EVENTS(AnalyticsMetric.Series.ACTIVITY_EVENTS);
+
+        private final AnalyticsMetric.Series field;
+
+        Activity(AnalyticsMetric.Series field) { this.field = field; }
+
+        @Override
+        public AnalyticsMetric.Series seriesField() { return field; }
+
+        @Override
+        public String value() { return field.value(); }
+    }
+
+    public enum Registration implements Key {
+        NEW(AnalyticsMetric.Series.NEW_REGISTRATIONS);
+
+        private final AnalyticsMetric.Series field;
+
+        Registration(AnalyticsMetric.Series field) { this.field = field; }
+
+        @Override
+        public AnalyticsMetric.Series seriesField() { return field; }
+
+        @Override
+        public String value() { return field.value(); }
     }
 }

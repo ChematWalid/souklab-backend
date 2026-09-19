@@ -39,7 +39,7 @@ class AnalyticsEventTaxonomyTest {
                 .contains(AnalyticsFilterKey.EVENT_TYPE);
         assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
         assertThat(AnalyticsSortField.fromField(AnalyticsMetric.Series.ACTIVITY_EVENTS.value()))
-                .isEqualTo(AnalyticsSortField.ACTIVITY_EVENTS);
+                .isEqualTo(AnalyticsSortField.Activity.EVENTS);
         assertThat(EnrollmentStatus.ATTENDED.value()).isEqualTo("ATTENDED");
     }
 
