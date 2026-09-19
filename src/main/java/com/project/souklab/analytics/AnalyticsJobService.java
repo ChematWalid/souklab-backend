@@ -47,6 +47,7 @@ import com.project.souklab.model.analytics.AnalyticsJobArtifact;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.model.analytics.AnalyticsSortDirection;
+import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsOutboxEvent;
 import com.project.souklab.dto.analytics.AnalyticsJobEvent;
@@ -598,11 +599,11 @@ public class AnalyticsJobService {
             throw new BadRequestException("Unsupported analytics sort field");
         }
         if (r.getFilters() != null && r.getFilters().keySet().stream()
-                .anyMatch(key -> !List.of("eventType").contains(key))) {
+                .anyMatch(key -> AnalyticsFilterKey.fromKey(key).isEmpty())) {
             throw new BadRequestException("Unsupported analytics filter");
         }
-        if (r.getFilters() != null && r.getFilters().containsKey("eventType")
-                && AnalyticsEvent.fromValue(r.getFilters().get("eventType")).isEmpty()) {
+        if (r.getFilters() != null && r.getFilters().containsKey(AnalyticsFilterKey.EVENT_TYPE.key())
+                && AnalyticsEvent.fromValue(r.getFilters().get(AnalyticsFilterKey.EVENT_TYPE.key())).isEmpty()) {
             throw new BadRequestException("Unsupported analytics event type filter");
         }
     }
@@ -758,7 +759,7 @@ public class AnalyticsJobService {
     }
 
     private String eventTypeFilter(AnalyticsJob job) {
-        return readFilters(job).get("eventType");
+        return readFilters(job).get(AnalyticsFilterKey.EVENT_TYPE.key());
     }
 
     private long countFilteredEvents(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {

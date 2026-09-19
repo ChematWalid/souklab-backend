@@ -1,6 +1,7 @@
 package com.project.souklab.analytics;
 
 import com.project.souklab.security.Permission;
+import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,6 +14,8 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsEvent.Subscription.RENEWAL.value()).isEqualTo("SUBSCRIPTION_RENEWAL");
         assertThat(AnalyticsEvent.fromValue("REPORT_RESOLVED")).contains(AnalyticsEvent.Report.RESOLVED);
         assertThat(AnalyticsEvent.fromValue("unknown_event")).isEmpty();
+        assertThat(AnalyticsFilterKey.fromKey("eventType")).contains(AnalyticsFilterKey.EVENT_TYPE);
+        assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
     }
 
     @Test
