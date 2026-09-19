@@ -15356,6 +15356,69 @@
           }
         },
         {
+          "name": "Submit Growth Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"GROWTH\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-03-31\",\"bucket\":\"WEEK\",\"pageNumber\":0,\"pageSize\":20,\"outputFormat\":\"JSON\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
+          "name": "Submit Engagement Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"ENGAGEMENT\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\",\"bucket\":\"DAY\",\"filters\":{\"eventType\":\"MESSAGE_SENT\"},\"pageNumber\":0,\"pageSize\":20,\"outputFormat\":\"JSON\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
+          "name": "Submit Moderation Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"MODERATION\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\",\"bucket\":\"DAY\",\"pageNumber\":0,\"pageSize\":20,\"outputFormat\":\"JSON\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
+          "name": "Submit Content Learning Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"CONTENT_LEARNING\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\",\"bucket\":\"DAY\",\"pageNumber\":0,\"pageSize\":20,\"outputFormat\":\"JSON\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
+          "name": "Submit Operational Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"OPERATIONAL\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-01\",\"bucket\":\"DAY\",\"pageNumber\":0,\"pageSize\":20,\"outputFormat\":\"JSON\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
+          "name": "Submit Time Series Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"TIME_SERIES\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\",\"bucket\":\"DAY\",\"sortField\":\"activityEvents\",\"sortDirection\":\"DESC\",\"pageNumber\":0,\"pageSize\":20,\"outputFormat\":\"JSON\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
+          "name": "Submit CSV Export Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"CSV_EXPORT\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\",\"bucket\":\"DAY\",\"pageNumber\":0,\"pageSize\":100,\"outputFormat\":\"CSV\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
           "name": "Queue Rollup Rebuild",
           "request": {
             "method": "POST",
