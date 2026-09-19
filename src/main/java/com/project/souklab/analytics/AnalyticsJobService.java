@@ -632,12 +632,8 @@ public class AnalyticsJobService {
                 && r.getOutputFormat() != AnalyticsOutputFormat.CSV) {
             throw new BadRequestException("CSV_EXPORT reports require CSV output format");
         }
-        if (r.getFilters() != null && r.getFilters().keySet().stream()
-                .anyMatch(key -> AnalyticsFilterKey.fromKey(key).isEmpty())) {
-            throw new BadRequestException("Unsupported analytics filter");
-        }
-        if (r.getFilters() != null && r.getFilters().containsKey(AnalyticsFilterKey.EVENT_TYPE.key())
-                && AnalyticsEvent.fromValue(r.getFilters().get(AnalyticsFilterKey.EVENT_TYPE.key())).isEmpty()) {
+        if (r.getFilters() != null && r.getFilters().containsKey(AnalyticsFilterKey.EVENT_TYPE)
+                && AnalyticsEvent.fromValue(r.getFilters().get(AnalyticsFilterKey.EVENT_TYPE)).isEmpty()) {
             throw new BadRequestException("Unsupported analytics event type filter");
         }
     }

@@ -1,5 +1,7 @@
 package com.project.souklab.model.analytics;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.project.souklab.analytics.AnalyticsMetric;
 
 import java.util.Arrays;
@@ -14,8 +16,14 @@ public enum AnalyticsFilterKey {
         this.key = key;
     }
 
+    @JsonValue
     public String key() {
         return key.value();
+    }
+
+    @JsonCreator
+    public static AnalyticsFilterKey fromJson(String key) {
+        return fromKey(key).orElseThrow(() -> new IllegalArgumentException("Unsupported analytics filter: " + key));
     }
 
     public static Optional<AnalyticsFilterKey> fromKey(String key) {

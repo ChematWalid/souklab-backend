@@ -1,6 +1,7 @@
 package com.project.souklab.dto.analytics;
 
 import com.project.souklab.model.analytics.AnalyticsBucket;
+import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.model.analytics.AnalyticsSortDirection;
@@ -17,7 +18,7 @@ public class AnalyticsJobRequest {
     @NotNull private LocalDate fromDate;
     @NotNull private LocalDate toDate;
     @NotNull private AnalyticsBucket bucket;
-    private Map<String, String> filters;
+    private Map<AnalyticsFilterKey, String> filters;
     private Integer pageNumber;
     private Integer pageSize;
     private AnalyticsSortField sortField;

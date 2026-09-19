@@ -1,10 +1,14 @@
 package com.project.souklab.analytics;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.security.Permission;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsSortField;
+import com.project.souklab.dto.analytics.AnalyticsJobRequest;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,5 +66,18 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetadata.Payment.PROVIDER_EVENT.value()).isEqualTo("providerEvent");
         assertThat(AnalyticsMetadata.Payment.ID.value()).isEqualTo("payment_id");
         assertThat(AnalyticsMetadata.Provider.SUBSCRIPTION_ID.value()).isEqualTo("subscription_id");
+    }
+
+    @Test
+    void analyticsFilterEnumKeepsThePublicJsonKey() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(Map.of(
+                AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value()));
+
+        assertThat(json).isEqualTo("{\"eventType\":\"REPORT_RESOLVED\"}");
+        AnalyticsJobRequest request = mapper.readValue(
+                "{\"filters\":{\"eventType\":\"REPORT_RESOLVED\"}}", AnalyticsJobRequest.class);
+        assertThat(request.getFilters()).containsEntry(
+                AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value());
     }
 }
