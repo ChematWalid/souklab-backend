@@ -71,6 +71,10 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> error(ApiErrorCode errorCode, String message) {
+        return error(errorCode.value(), message);
+    }
+
     public static <T> ApiResponse<T> validationError(Map<String, String> errors) {
         return ApiResponse.<T>builder()
                 .success(false)

@@ -1,6 +1,7 @@
 package com.project.souklab.security;
 
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.util.ServletResponseUtil;
 import jakarta.servlet.FilterChain;
@@ -52,7 +53,7 @@ public class AvatarUploadSizeFilter extends OncePerRequestFilter {
                             contentLength, maxAllowedRequestBytes);
 
                     ApiResponse<Void> apiResponse = ApiResponse.error(
-                            "FILE_TOO_LARGE",
+                            ApiErrorCode.FILE_TOO_LARGE,
                             String.format("Avatar upload exceeds maximum permitted file size of %d bytes", maxFileBytes)
                     );
                     servletResponseUtil.writeResponse(response, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, apiResponse);

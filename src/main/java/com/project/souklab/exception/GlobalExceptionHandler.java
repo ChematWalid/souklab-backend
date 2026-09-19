@@ -1,6 +1,7 @@
 package com.project.souklab.exception;
 
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.filestorage.exception.StorageException;
 import com.project.souklab.filestorage.exception.VirusDetectedException;
 import com.project.souklab.filestorage.exception.VirusScanException;
@@ -53,7 +54,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleVirusDetectedException(VirusDetectedException ex) {
         log.warn("VirusDetectedException [VIRUS_DETECTED]: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT)
-                .body(ApiResponse.error("VIRUS_DETECTED", ex.getMessage()));
+                .body(ApiResponse.error(ApiErrorCode.VIRUS_DETECTED, ex.getMessage()));
     }
 
     /**
@@ -63,7 +64,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleVirusScanException(VirusScanException ex) {
         log.error("VirusScanException [VIRUS_SCAN_UNAVAILABLE]: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(ApiResponse.error("VIRUS_SCAN_UNAVAILABLE", VIRUS_SCAN_UNAVAILABLE_MESSAGE));
+                .body(ApiResponse.error(ApiErrorCode.VIRUS_SCAN_UNAVAILABLE, VIRUS_SCAN_UNAVAILABLE_MESSAGE));
     }
 
     /**
@@ -145,7 +146,7 @@ public class GlobalExceptionHandler {
         String username = SecurityUtils.getCurrentUsername();
         log.warn("AccessDeniedException for user [{}]: {}", username != null ? username : "anonymous", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("FORBIDDEN", "You do not have permission to perform this action."));
+                .body(ApiResponse.error(ApiErrorCode.FORBIDDEN, "You do not have permission to perform this action."));
     }
 
     /**
