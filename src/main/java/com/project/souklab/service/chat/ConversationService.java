@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.config.AppProperties;
@@ -132,7 +133,7 @@ public class ConversationService {
             Message saved = messageRepository.save(message);
             if (activityEventService != null) {
                 activityEventService.record(AnalyticsEvent.Message.SENT, current.getId(), saved.getId(),
-                        Map.of("conversationId", c.getId()));
+                        Map.of(AnalyticsMetadata.Message.CONVERSATION_ID, c.getId()));
             }
             c.setUpdatedAt(LocalDateTime.now(clock));
             User recipient = otherParticipant(c, current).getUser();

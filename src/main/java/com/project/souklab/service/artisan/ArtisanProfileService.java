@@ -205,7 +205,7 @@ public class ArtisanProfileService {
             artisanProfileViewRepository.save(view);
             if (activityEventService != null) {
                 activityEventService.record(AnalyticsEvent.Profile.VIEW, viewer.getId(), artisan.getId(),
-                        Map.of(AnalyticsMetadata.Account.TYPE.value(), viewer.getArtisan() != null
+                        Map.of(AnalyticsMetadata.Account.TYPE, viewer.getArtisan() != null
                                 ? AccountRole.ARTISAN.value() : AccountRole.CLIENT.value()));
             }
             artisan.setViewsCount(artisan.getViewsCount() + 1);

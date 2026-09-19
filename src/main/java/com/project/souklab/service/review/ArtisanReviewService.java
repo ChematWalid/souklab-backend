@@ -101,7 +101,7 @@ public class ArtisanReviewService {
         ArtisanReview saved = reviewRepository.save(review);
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Review.SUBMITTED, reviewer.getId(), saved.getId(),
-                    Map.of(AnalyticsMetadata.Content.FORMATION_ID.value(), formationId, AnalyticsMetadata.Content.RATING.value(), saved.getRating()));
+                    Map.of(AnalyticsMetadata.Content.FORMATION_ID, formationId, AnalyticsMetadata.Content.RATING, saved.getRating()));
         }
         recalculate(subject);
         notificationService.createForUser(subject.getUser(), "You received a new artisan review.", NotificationType.NEW_REVIEW, saved.getId());

@@ -67,6 +67,21 @@ public final class AnalyticsMetadata {
         }
     }
 
+    public enum Message implements Key {
+        CONVERSATION_ID("conversationId");
+
+        private final String value;
+
+        Message(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String value() {
+            return value;
+        }
+    }
+
     public enum State implements Key {
         STATUS("status");
 

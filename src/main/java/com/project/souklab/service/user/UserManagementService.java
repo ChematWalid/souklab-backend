@@ -136,7 +136,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: " + userId + ". Reason: " + reason);
-        recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of(AnalyticsMetadata.Moderation.REASON_PRESENT.value(), reason != null && !reason.isBlank()));
+        recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of(AnalyticsMetadata.Moderation.REASON_PRESENT, reason != null && !reason.isBlank()));
         notificationService.createForUser(user, "Your account has been permanently suspended. Reason: " + reason, NotificationType.ACCOUNT_SUSPENDED, user.getId());
     }
 
@@ -167,7 +167,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
-        recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of(AnalyticsMetadata.Moderation.MINUTES.value(), minutes));
+        recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of(AnalyticsMetadata.Moderation.MINUTES, minutes));
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.ACCOUNT_SUSPENDED, user.getId());
     }
 
@@ -197,7 +197,8 @@ public class UserManagementService {
         notificationService.createForUser(user, "Your account suspension has been lifted and your access has been restored.", NotificationType.ACCOUNT_REINSTATED, user.getId());
     }
 
-    private void recordModeration(AnalyticsEvent.Type type, User user, Map<String, ?> metadata) {
+    private void recordModeration(AnalyticsEvent.Type type, User user,
+                                  Map<? extends AnalyticsMetadata.Key, ?> metadata) {
         if (activityEventService != null) activityEventService.record(type, user.getId(), user.getId(), metadata);
     }
 
