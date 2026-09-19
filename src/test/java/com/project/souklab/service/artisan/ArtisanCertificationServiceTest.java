@@ -519,7 +519,7 @@ class ArtisanCertificationServiceTest {
 
             assertThatThrownBy(() -> certificationService.uploadCertification(file, "Title", "Issuer", null, null))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("Access denied: permission:artisan:content permission required.");
+                    .hasMessageContaining("Access denied: " + Permission.Artisan.CONTENT.value() + " permission required.");
         }
     }
 

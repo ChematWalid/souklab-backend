@@ -442,7 +442,7 @@ class ArtisanGalleryServiceTest {
 
             assertThatThrownBy(() -> galleryService.uploadImage(file, "Title", "Caption"))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("Access denied: permission:artisan:content permission required.");
+                    .hasMessageContaining("Access denied: " + Permission.Artisan.CONTENT.value() + " permission required.");
         }
     }
 

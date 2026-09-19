@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -109,18 +108,18 @@ class ArtisanFormateurControllerTest {
     }
 
     /**
-     * Verifies that @WithMockUser annotation form works identically to programmatic post-processor.
+     * Verifies that the typed permission post-processor authorizes the request.
      */
     @Test
-    @WithMockUser(authorities = "permission:artisan:content")
-    @DisplayName("submitRequest: permission authority returns 201 Created")
-    void submitRequest_withMockUserAnnotation_shouldReturn201Created() throws Exception {
+    @DisplayName("submitRequest: typed permission authority returns 201 Created")
+    void submitRequest_withTypedPermission_shouldReturn201Created() throws Exception {
         FormateurRequestResponseDTO mockResponse = FormateurRequestResponseDTO.builder()
                 .id("req-103")
                 .build();
         when(artisanFormateurService.submitRequest(any(FormateurRequestDTO.class))).thenReturn(mockResponse);
 
         mockMvc.perform(post("/api/v1/artisan/formateur-request")
+                        .with(artisan())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isCreated())
