@@ -69,6 +69,16 @@ class AnalyticsEventTaxonomyTest {
     }
 
     @Test
+    void eventRollupUsesTypedCompositeKeyUntilDatabaseBoundary() {
+        AnalyticsEventRollupKey key = new AnalyticsEventRollupKey(
+                LocalDate.of(2026, 1, 2), AnalyticsEvent.Report.RESOLVED);
+
+        assertThat(key.rollupDate()).isEqualTo(LocalDate.of(2026, 1, 2));
+        assertThat(key.eventType()).isEqualTo(AnalyticsEvent.Report.RESOLVED);
+        assertThat(key.databaseKey()).isEqualTo("event.REPORT_RESOLVED");
+    }
+
+    @Test
     void groupedMetadataEnumsExposeStableEventKeys() {
         assertThat(AnalyticsMetadata.State.STATUS.value()).isEqualTo("status");
         assertThat(AnalyticsMetadata.Subscription.SOURCE.value()).isEqualTo("source");

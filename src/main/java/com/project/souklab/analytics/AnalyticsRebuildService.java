@@ -40,7 +40,7 @@ public class AnalyticsRebuildService {
         LocalDateTime start = from.atStartOfDay(businessZone).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
         LocalDateTime end = to.plusDays(1).atStartOfDay(businessZone).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
         rollups.deleteAll(rollups.findByRollupDateBetween(from, to));
-        Map<String, Long> counts = new HashMap<>();
+        Map<AnalyticsEventRollupKey, Long> counts = new HashMap<>();
         int pageNumber = 0;
         int sourceCount = 0;
         List<ActivityEvent> source;
@@ -51,16 +51,14 @@ public class AnalyticsRebuildService {
             for (ActivityEvent event : source) {
                 LocalDate eventDay = event.getEventTime().toInstant(ZoneOffset.UTC)
                         .atZone(businessZone).toLocalDate();
-                String key = eventDay + AnalyticsMetric.EventRollup.SEPARATOR.value() + AnalyticsMetric.EventRollup.PREFIX.value()
-                        + event.getEventType().value();
-                counts.merge(key, 1L, Long::sum);
+                counts.merge(new AnalyticsEventRollupKey(eventDay, event.getEventType()), 1L, Long::sum);
             }
         } while (source.size() == properties.getRollupBatchSize());
         int written = 0;
-        for (Map.Entry<String, Long> entry : counts.entrySet()) {
-            String[] parts = entry.getKey().split(AnalyticsMetric.EventRollup.SEPARATOR.value(), 2);
+        for (Map.Entry<AnalyticsEventRollupKey, Long> entry : counts.entrySet()) {
             DailyKpiRollup rollup = new DailyKpiRollup();
-            rollup.setRollupDate(LocalDate.parse(parts[0])); rollup.setKpiKey(parts[1]);
+            rollup.setRollupDate(entry.getKey().rollupDate());
+            rollup.setKpiKey(entry.getKey().databaseKey());
             rollup.setValue(entry.getValue()); rollup.setSourceVersion(1);
             rollups.save(rollup); written++;
         }
