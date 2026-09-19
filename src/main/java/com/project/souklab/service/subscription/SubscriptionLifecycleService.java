@@ -137,13 +137,13 @@ public class SubscriptionLifecycleService {
     private void remind(ArtisanSubscription subscription, long offset, LocalDateTime now) {
         if (subscription.getExpiresAt() == null || subscription.getExpiresAt().isBefore(now) || sent(subscription.getReminderOffsetsSent(), offset)) return;
         subscription.setReminderOffsetsSent(append(subscription.getReminderOffsetsSent(), offset));
-        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.Subscription.RENEWAL_REMINDER, subscription.getId());
+        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.Subscription.Renewal.REMINDER, subscription.getId());
     }
 
     private void remind(ClientSubscription subscription, long offset, LocalDateTime now) {
         if (subscription.getExpiresAt() == null || subscription.getExpiresAt().isBefore(now) || sent(subscription.getReminderOffsetsSent(), offset)) return;
         subscription.setReminderOffsetsSent(append(subscription.getReminderOffsetsSent(), offset));
-        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.Subscription.RENEWAL_REMINDER, subscription.getId());
+        notificationService.createForUser(subscription.getAccount(), "Your subscription expires in " + offset + " day(s).", NotificationType.Subscription.Renewal.REMINDER, subscription.getId());
     }
 
     private void recordSubscriptionExpiry(ArtisanSubscription subscription) {

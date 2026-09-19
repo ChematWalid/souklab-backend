@@ -79,6 +79,10 @@ if rg -n --pcre2 'AnalyticsEvent\.User\.TIMED_OUT' src/main/java src/test/java -
   echo 'flat analytics timeout event references detected; use grouped event enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'NotificationType\.(?:Subscription\.(?:RENEWAL_REMINDER|MANUALLY_GRANTED)|Refund\.REQUEST_UNAVAILABLE|Formateur\.REQUEST_SUBMITTED)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat notification references detected; use grouped notification enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 'DirectorySortOrder\.(?:RELEVANCE|RATING_DESC|REVIEWS_DESC|VIEWS_DESC|NEWEST)|DirectorySortOrder\.values\(' src/main/java src/test/java --glob '*.java'; then
   echo 'flat directory sort references detected; use grouped sort enums' >&2
   exit 1

@@ -109,7 +109,7 @@ public class ArtisanFormateurService {
                 + (dto != null && dto.getMotivation() != null && !dto.getMotivation().isBlank()
                         ? ": \"" + dto.getMotivation() + "\"" : "");
         for (User admin : admins) {
-            notificationService.createForUser(admin, notifMsg, NotificationType.Formateur.REQUEST_SUBMITTED, saved.getId());
+            notificationService.createForUser(admin, notifMsg, NotificationType.Formateur.Request.SUBMITTED, saved.getId());
             emailUtil.sendFormateurRequestSubmittedNoticeToAdmin(admin.getEmail(), user.getEmail(), artisanName, dto != null ? dto.getMotivation() : null);
         }
 

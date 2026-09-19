@@ -129,7 +129,7 @@ class ArtisanFormateurServiceNotificationTest {
         artisanFormateurService.submitRequest(dto);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(admin), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("req-1"));
+        verify(notificationService).createForUser(eq(admin), notifCaptor.capture(), eq(NotificationType.Formateur.Request.SUBMITTED), eq("req-1"));
         assertThat(notifCaptor.getValue())
                 .isEqualTo("New artisan formateur request submitted by John Doe (artisan@example.com): \"I want to teach pottery\"");
 
@@ -182,7 +182,7 @@ class ArtisanFormateurServiceNotificationTest {
         artisanFormateurService.submitRequest(null);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(admin), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("req-2"));
+        verify(notificationService).createForUser(eq(admin), notifCaptor.capture(), eq(NotificationType.Formateur.Request.SUBMITTED), eq("req-2"));
         assertThat(notifCaptor.getValue())
                 .isEqualTo("New artisan formateur request submitted by artisan@example.com");
 

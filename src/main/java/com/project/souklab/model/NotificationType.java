@@ -16,10 +16,10 @@ public final class NotificationType {
                 Account.VALIDATED, Account.REJECTED, Account.SUSPENDED, Account.REINSTATED,
                 Formation.APPROVED, Formation.REJECTED, Formation.NEW,
                 Message.NEW, Subscription.RENEWED, Subscription.EXPIRED,
-                Subscription.RENEWAL_REMINDER, Subscription.MANUALLY_GRANTED, Subscription.REVOKED,
+                Subscription.Renewal.REMINDER, Subscription.Grant.MANUAL, Subscription.REVOKED,
                 Payment.SUCCESS, Payment.FAILED, Checkout.CREATED, Checkout.CANCELED,
-                Refund.REQUEST_UNAVAILABLE, Report.NEW, Review.NEW,
-                Formateur.REQUEST_SUBMITTED, Formateur.APPROVED, Formateur.GRANTED,
+                Refund.Request.UNAVAILABLE, Report.NEW, Review.NEW,
+                Formateur.Request.SUBMITTED, Formateur.APPROVED, Formateur.GRANTED,
                 Formateur.REJECTED, Formateur.REVOKED);
     }
 
@@ -54,11 +54,24 @@ public final class NotificationType {
 
     public enum Subscription implements Key {
         RENEWED("SUBSCRIPTION_RENEWED"), EXPIRED("SUBSCRIPTION_EXPIRED"),
-        RENEWAL_REMINDER("SUBSCRIPTION_RENEWAL_REMINDER"),
-        MANUALLY_GRANTED("SUBSCRIPTION_MANUALLY_GRANTED"), REVOKED("SUBSCRIPTION_REVOKED");
+        REVOKED("SUBSCRIPTION_REVOKED");
         private final String value;
         Subscription(String value) { this.value = value; }
         public String value() { return value; }
+
+        public enum Renewal implements Key {
+            REMINDER("SUBSCRIPTION_RENEWAL_REMINDER");
+            private final String value;
+            Renewal(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Grant implements Key {
+            MANUAL("SUBSCRIPTION_MANUALLY_GRANTED");
+            private final String value;
+            Grant(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum Payment implements Key {
@@ -76,10 +89,15 @@ public final class NotificationType {
     }
 
     public enum Refund implements Key {
-        REQUEST_UNAVAILABLE("REFUND_REQUEST_UNAVAILABLE");
-        private final String value;
-        Refund(String value) { this.value = value; }
-        public String value() { return value; }
+        ;
+        private Refund() { }
+
+        public enum Request implements Key {
+            UNAVAILABLE("REFUND_REQUEST_UNAVAILABLE");
+            private final String value;
+            Request(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum Report implements Key {
@@ -97,10 +115,17 @@ public final class NotificationType {
     }
 
     public enum Formateur implements Key {
-        REQUEST_SUBMITTED("FORMATEUR_REQUEST_SUBMITTED"), APPROVED("FORMATEUR_APPROVED"),
+        APPROVED("FORMATEUR_APPROVED"),
         GRANTED("FORMATEUR_GRANTED"), REJECTED("FORMATEUR_REJECTED"), REVOKED("FORMATEUR_REVOKED");
         private final String value;
         Formateur(String value) { this.value = value; }
         public String value() { return value; }
+
+        public enum Request implements Key {
+            SUBMITTED("FORMATEUR_REQUEST_SUBMITTED");
+            private final String value;
+            Request(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 }

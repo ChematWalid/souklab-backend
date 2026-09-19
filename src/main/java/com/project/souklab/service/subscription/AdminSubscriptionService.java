@@ -103,7 +103,7 @@ public class AdminSubscriptionService {
         payment.setStatus(PaymentStatus.MANUALLY_GRANTED); payment.setManualGrant(true); payment.setAmount(plan.getAmount()); payment.setCurrency(plan.getCurrency());
         payment.setPlanSnapshot(snapshot); payment.setIdempotencyKey("manual-" + subscriptionId); payments.save(payment);
         auditLogService.logFinancialState(AuditLogAction.Subscription.GRANTED, actor, target.getId(), FinancialAuditOperation.Manual.GRANT, FinancialAuditState.NONE, SubscriptionStatus.ACTIVE, request.getReason(), payment.getId(), subscriptionId);
-        notificationService.createForUser(target, "A subscription was manually granted to your account.", NotificationType.Subscription.MANUALLY_GRANTED, subscriptionId);
+        notificationService.createForUser(target, "A subscription was manually granted to your account.", NotificationType.Subscription.Grant.MANUAL, subscriptionId);
         return response;
     }
 

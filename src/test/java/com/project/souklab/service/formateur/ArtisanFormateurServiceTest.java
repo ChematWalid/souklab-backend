@@ -331,7 +331,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(dto);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("saved-req-blank"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.Request.SUBMITTED), eq("saved-req-blank"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Karim Bensaid (artisan@example.com)");
     }
 
@@ -362,7 +362,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(dto);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("saved-req-null-mot"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.Request.SUBMITTED), eq("saved-req-null-mot"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Karim Bensaid (artisan@example.com)");
     }
 
@@ -393,7 +393,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(null);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("req-single-name"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.Request.SUBMITTED), eq("req-single-name"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Karim (artisan@example.com)");
     }
 
@@ -424,7 +424,7 @@ class ArtisanFormateurServiceTest {
         artisanFormateurService.submitRequest(null);
 
         ArgumentCaptor<String> notifCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.REQUEST_SUBMITTED), eq("req-single-last"));
+        verify(notificationService).createForUser(eq(adminUser), notifCaptor.capture(), eq(NotificationType.Formateur.Request.SUBMITTED), eq("req-single-last"));
         assertThat(notifCaptor.getValue()).isEqualTo("New artisan formateur request submitted by Bensaid (artisan@example.com)");
     }
 
