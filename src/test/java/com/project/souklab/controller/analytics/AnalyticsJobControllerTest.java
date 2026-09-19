@@ -13,6 +13,7 @@ import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsJobStatus;
 import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
+import com.project.souklab.security.Permission;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -116,12 +117,12 @@ class AnalyticsJobControllerTest {
 
     private RequestPostProcessor analyticsUser() {
         return user("analytics@example.com")
-                .authorities(new SimpleGrantedAuthority("permission:analytics:admin"));
+                .authorities(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.authority()));
     }
 
     private RequestPostProcessor financialAnalyticsUser() {
         return user("analytics@example.com")
-                .authorities(new SimpleGrantedAuthority("permission:analytics:admin"),
-                        new SimpleGrantedAuthority("permission:financial:admin"));
+                .authorities(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.authority()),
+                        new SimpleGrantedAuthority(Permission.Financial.ADMIN.authority()));
     }
 }

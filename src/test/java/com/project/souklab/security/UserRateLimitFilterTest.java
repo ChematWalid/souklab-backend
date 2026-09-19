@@ -53,7 +53,7 @@ class UserRateLimitFilterTest {
         filter.setEndpointProperties(endpoints);
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("admin@example.com", "n/a",
-                        List.of(new SimpleGrantedAuthority("permission:analytics:admin"))));
+                        List.of(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.authority()))));
 
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/admin/analytics/rollups/jobs/rebuild");
         MockHttpServletResponse firstResponse = new MockHttpServletResponse();

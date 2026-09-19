@@ -15,7 +15,7 @@ The JPA classes under `src/main/java/com/project/souklab/model` are the authorit
 | Catalog | `Region`, `JobCategory`, `JobSubCategory`, `MaterialFamily`, `Material`, `Epoque`, `Technique` |
 | Formations | `Formation`, `FormationFile`, `FormationEnrollment`, `FormationReview` |
 | Operations | `Notification`, `AuditLog` |
-| Monetization | `ArtisanSubscription`, `ClientSubscription`, `SubscriptionPricing`, `SubscriptionPlanEntitlement`, `Payment`, `PaymentWebhookLog` |
+| Monetization | `ArtisanSubscription`, `ClientSubscription`, `SubscriptionPlan`, `SubscriptionPlanEntitlement`, `Payment`, `PaymentWebhookLog` |
 | Analytics | `ActivityEvent`, `AnalyticsOutboxEvent`, `AnalyticsProcessedEvent`, `AnalyticsJob`, `AnalyticsJobArtifact`, `DailyKpiRollup`, `AnalyticsMaintenanceJob` |
 
 ## Important invariants
