@@ -434,7 +434,7 @@ class UserManagementServiceTest {
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
         verify(auditLogService).logAction(
-                AuditLogAction.User.TIMED_OUT,
+                AuditLogAction.User.Timeout.VALUE,
                 "Timed out user ID: u-timeout for 120 minutes. Reason: Spamming chat"
         );
         verify(notificationService).createForUser(
@@ -465,7 +465,7 @@ class UserManagementServiceTest {
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
         verify(auditLogService).logAction(
-                AuditLogAction.User.TIMED_OUT,
+                AuditLogAction.User.Timeout.VALUE,
                 "Timed out user ID: u-timeout2 for 30 minutes. Reason: null"
         );
         verify(notificationService).createForUser(

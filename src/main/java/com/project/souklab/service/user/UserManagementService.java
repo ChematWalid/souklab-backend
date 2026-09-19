@@ -168,7 +168,7 @@ public class UserManagementService {
 
         refreshTokenService.deleteByUser(user);
 
-        auditLogService.logAction(AuditLogAction.User.TIMED_OUT, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
+        auditLogService.logAction(AuditLogAction.User.Timeout.VALUE, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
         recordModeration(AnalyticsEvent.User.Timeout.EVENT, user, Map.of(AnalyticsMetadata.Moderation.Duration.MINUTES, minutes));
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.Account.SUSPENDED, user.getId());
     }

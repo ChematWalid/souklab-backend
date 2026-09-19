@@ -313,7 +313,7 @@ public class AuthService {
         user.setEmailVerifiedAt(LocalDateTime.now(clock));
         userRepository.save(user);
 
-        auditLogService.logAction(AuditLogAction.Authentication.EMAIL_VERIFIED, "Email verified for user: " + user.getEmail(), user.getEmail());
+        auditLogService.logAction(AuditLogAction.Authentication.Email.VERIFIED, "Email verified for user: " + user.getEmail(), user.getEmail());
     }
 
     /**
@@ -386,7 +386,7 @@ public class AuthService {
 
         refreshTokenService.deleteByUser(user);
 
-        auditLogService.logAction(AuditLogAction.Authentication.PASSWORD_RESET_COMPLETED, "Password reset completed for user: " + user.getEmail(), user.getEmail());
+        auditLogService.logAction(AuditLogAction.Authentication.Password.Reset.COMPLETED, "Password reset completed for user: " + user.getEmail(), user.getEmail());
     }
 
     /**
@@ -436,7 +436,7 @@ public class AuthService {
             log.warn("Failed to send password changed notice email for {}: {}", user.getEmail(), e.getMessage());
         }
 
-        auditLogService.logAction(AuditLogAction.Authentication.PASSWORD_CHANGED, "Password changed for user: " + user.getEmail(), user.getEmail());
+        auditLogService.logAction(AuditLogAction.Authentication.Password.Changed.VALUE, "Password changed for user: " + user.getEmail(), user.getEmail());
     }
 
     /**

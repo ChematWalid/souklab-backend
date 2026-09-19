@@ -25,7 +25,7 @@ public class AdminRefundService {
 
     @Transactional(noRollbackFor = BadRequestException.class)
     public void reject(Payment payment, FinancialReasonRequest request) {
-        auditLogService.logFinancialAction(AuditLogAction.Refund.REQUEST_REJECTED,
+        auditLogService.logFinancialAction(AuditLogAction.Refund.Request.REJECTED,
                 currentUserProvider.requireCurrentUser(), payment.getAccount().getId(), FinancialAuditOperation.Refund.REQUEST,
                 payment.getStatus().value(), payment.getStatus().value(), request.getReason(), payment.getId(), payment.getSubscriptionId());
         notificationService.createForUser(payment.getAccount(),

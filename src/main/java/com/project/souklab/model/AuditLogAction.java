@@ -13,15 +13,15 @@ public final class AuditLogAction {
 
     public static List<Key> all() {
         return List.of(
-                Authentication.EMAIL_VERIFIED, Authentication.PASSWORD_RESET_COMPLETED,
-                Authentication.PASSWORD_CHANGED, Permission.ASSIGN_ROLE, Permission.ASSIGN_BULK,
-                Permission.GRANTED, Permission.REVOKED, User.APPROVED, User.BANNED,
-                User.TIMED_OUT, User.UNBANNED, Artisan.APPROVED, Artisan.REJECTED,
+                Authentication.Email.VERIFIED, Authentication.Password.Reset.COMPLETED,
+                Authentication.Password.Changed.VALUE, Permission.Assignment.ROLE, Permission.Assignment.BULK,
+                Permission.Grant.VALUE, Permission.Revoke.VALUE, User.APPROVED, User.BANNED,
+                User.Timeout.VALUE, User.UNBANNED, Artisan.APPROVED, Artisan.REJECTED,
                 Formation.APPROVED, Formation.REJECTED, Report.RESOLVED, Report.DISMISSED,
                 Subscription.GRANTED, Subscription.CANCELED, Subscription.REVOKED,
-                Subscription.STATE_CORRECTED, Subscription.PLAN_CREATED, Subscription.PLAN_UPDATED,
-                Subscription.PLAN_DEACTIVATED, Payment.STATE_CORRECTED, Refund.REQUEST_REJECTED,
-                Analytics.REBUILD, Analytics.JOB_SUBMITTED, Analytics.RESULT_READ, Analytics.EXPORT);
+                Subscription.State.CORRECTED, Subscription.Plan.CREATED, Subscription.Plan.UPDATED,
+                Subscription.Plan.DEACTIVATED, Payment.State.CORRECTED, Refund.Request.REJECTED,
+                Analytics.REBUILD, Analytics.Job.SUBMITTED, Analytics.Result.READ, Analytics.EXPORT);
     }
 
     public static Key fromValue(String value) {
@@ -31,28 +31,73 @@ public final class AuditLogAction {
                 .orElseThrow(() -> new IllegalArgumentException("Unsupported audit action: " + value));
     }
 
-    public enum Authentication implements Key {
-        EMAIL_VERIFIED("EMAIL_VERIFIED"), PASSWORD_RESET_COMPLETED("PASSWORD_RESET_COMPLETED"),
-        PASSWORD_CHANGED("PASSWORD_CHANGED");
-        private final String value;
-        Authentication(String value) { this.value = value; }
-        public String value() { return value; }
+    public static final class Authentication {
+        private Authentication() { }
+
+        public enum Email implements Key {
+            VERIFIED("EMAIL_VERIFIED");
+            private final String value;
+            Email(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public static final class Password {
+            private Password() { }
+
+            public enum Reset implements Key {
+                COMPLETED("PASSWORD_RESET_COMPLETED");
+                private final String value;
+                Reset(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Changed implements Key {
+                VALUE("PASSWORD_CHANGED");
+                private final String value;
+                Changed(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+        }
     }
 
-    public enum Permission implements Key {
-        ASSIGN_ROLE("ASSIGN_ROLE"), ASSIGN_BULK("ASSIGN_PERMISSION_BULK"),
-        GRANTED("PERMISSION_GRANTED"), REVOKED("PERMISSION_REVOKED");
-        private final String value;
-        Permission(String value) { this.value = value; }
-        public String value() { return value; }
+    public static final class Permission {
+        private Permission() { }
+
+        public enum Assignment implements Key {
+            ROLE("ASSIGN_ROLE"), BULK("ASSIGN_PERMISSION_BULK");
+            private final String value;
+            Assignment(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Grant implements Key {
+            VALUE("PERMISSION_GRANTED");
+            private final String value;
+            Grant(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Revoke implements Key {
+            VALUE("PERMISSION_REVOKED");
+            private final String value;
+            Revoke(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum User implements Key {
-        APPROVED("APPROVE_USER"), BANNED("BAN_USER"), TIMED_OUT("TIMEOUT_USER"),
-        UNBANNED("UNBAN_USER");
+        APPROVED("APPROVE_USER"), BANNED("BAN_USER"), UNBANNED("UNBAN_USER");
         private final String value;
         User(String value) { this.value = value; }
         public String value() { return value; }
+
+        public enum Timeout implements Key {
+            VALUE("TIMEOUT_USER");
+            private final String value;
+            Timeout(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
     }
 
     public enum Artisan implements Key {
@@ -77,34 +122,67 @@ public final class AuditLogAction {
     }
 
     public enum Subscription implements Key {
-        GRANTED("SUBSCRIPTION_GRANTED"), CANCELED("SUBSCRIPTION_CANCELED"),
-        REVOKED("SUBSCRIPTION_REVOKED"), STATE_CORRECTED("SUBSCRIPTION_STATE_CORRECTED"),
-        PLAN_CREATED("SUBSCRIPTION_PLAN_CREATED"), PLAN_UPDATED("SUBSCRIPTION_PLAN_UPDATED"),
-        PLAN_DEACTIVATED("SUBSCRIPTION_PLAN_DEACTIVATED");
+        GRANTED("SUBSCRIPTION_GRANTED"), CANCELED("SUBSCRIPTION_CANCELED"), REVOKED("SUBSCRIPTION_REVOKED");
         private final String value;
         Subscription(String value) { this.value = value; }
         public String value() { return value; }
+
+        public enum State implements Key {
+            CORRECTED("SUBSCRIPTION_STATE_CORRECTED");
+            private final String value;
+            State(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Plan implements Key {
+            CREATED("SUBSCRIPTION_PLAN_CREATED"), UPDATED("SUBSCRIPTION_PLAN_UPDATED"),
+            DEACTIVATED("SUBSCRIPTION_PLAN_DEACTIVATED");
+            private final String value;
+            Plan(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
-    public enum Payment implements Key {
-        STATE_CORRECTED("PAYMENT_STATE_CORRECTED");
-        private final String value;
-        Payment(String value) { this.value = value; }
-        public String value() { return value; }
+    public static final class Payment {
+        private Payment() { }
+
+        public enum State implements Key {
+            CORRECTED("PAYMENT_STATE_CORRECTED");
+            private final String value;
+            State(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
-    public enum Refund implements Key {
-        REQUEST_REJECTED("REFUND_REQUEST_REJECTED");
-        private final String value;
-        Refund(String value) { this.value = value; }
-        public String value() { return value; }
+    public static final class Refund {
+        private Refund() { }
+
+        public enum Request implements Key {
+            REJECTED("REFUND_REQUEST_REJECTED");
+            private final String value;
+            Request(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum Analytics implements Key {
-        REBUILD("ANALYTICS_REBUILD"), JOB_SUBMITTED("ANALYTICS_JOB_SUBMITTED"),
-        RESULT_READ("ANALYTICS_RESULT_READ"), EXPORT("ANALYTICS_EXPORT");
+        REBUILD("ANALYTICS_REBUILD"), EXPORT("ANALYTICS_EXPORT");
         private final String value;
         Analytics(String value) { this.value = value; }
         public String value() { return value; }
+
+        public enum Job implements Key {
+            SUBMITTED("ANALYTICS_JOB_SUBMITTED");
+            private final String value;
+            Job(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Result implements Key {
+            READ("ANALYTICS_RESULT_READ");
+            private final String value;
+            Result(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 }

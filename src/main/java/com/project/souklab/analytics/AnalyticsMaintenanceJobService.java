@@ -93,7 +93,7 @@ public class AnalyticsMaintenanceJobService {
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated administrator not found")).getId();
         AnalyticsMaintenanceJob job = jobs.findByIdAndOwnerId(id, ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Analytics maintenance job not found"));
-        auditLogService.logAction(AuditLogAction.Analytics.RESULT_READ,
+        auditLogService.logAction(AuditLogAction.Analytics.Result.READ,
                 AnalyticsMetadata.Audit.MaintenanceJob.ID.value() + "=" + job.getId()
                         + "," + AnalyticsMetadata.Audit.Operation.VALUE.value() + "=" + job.getOperation()
                         + "," + AnalyticsMetadata.Audit.Range.VALUE.value() + "=" + job.getFromDate() + ".." + job.getToDate()

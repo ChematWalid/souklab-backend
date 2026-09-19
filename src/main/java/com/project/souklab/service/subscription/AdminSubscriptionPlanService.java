@@ -37,7 +37,7 @@ public class AdminSubscriptionPlanService {
         SubscriptionPlan plan = new SubscriptionPlan();
         apply(plan, request);
         SubscriptionPlan saved = planRepository.save(plan);
-        auditLogService.logFinancialAction(AuditLogAction.Subscription.PLAN_CREATED, currentUserProvider.requireCurrentUser(), null,
+        auditLogService.logFinancialAction(AuditLogAction.Subscription.Plan.CREATED, currentUserProvider.requireCurrentUser(), null,
                 FinancialAuditOperation.Plan.CREATE, saved.getId(), "NONE", saved.getName(), request.getReason(), null, null);
         return toResponse(saved);
     }
@@ -47,7 +47,7 @@ public class AdminSubscriptionPlanService {
         SubscriptionPlan plan = planRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Subscription plan not found"));
         String previous = plan.getName() + ":" + plan.getAmount() + ":" + plan.getCurrency();
         apply(plan, request);
-        auditLogService.logFinancialAction(AuditLogAction.Subscription.PLAN_UPDATED, currentUserProvider.requireCurrentUser(), null,
+        auditLogService.logFinancialAction(AuditLogAction.Subscription.Plan.UPDATED, currentUserProvider.requireCurrentUser(), null,
                 FinancialAuditOperation.Plan.UPDATE, id, previous, plan.getName() + ":" + plan.getAmount() + ":" + plan.getCurrency(), request.getReason(), null, null);
         return toResponse(plan);
     }
@@ -57,7 +57,7 @@ public class AdminSubscriptionPlanService {
         SubscriptionPlan plan = planRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Subscription plan not found"));
         String previous = Boolean.toString(plan.isActive());
         plan.setActive(false);
-        auditLogService.logFinancialAction(AuditLogAction.Subscription.PLAN_DEACTIVATED, currentUserProvider.requireCurrentUser(), null,
+        auditLogService.logFinancialAction(AuditLogAction.Subscription.Plan.DEACTIVATED, currentUserProvider.requireCurrentUser(), null,
                 FinancialAuditOperation.Plan.DEACTIVATE, id, previous, "false", request.getReason(), null, null);
     }
 

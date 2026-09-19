@@ -175,7 +175,7 @@ public class AnalyticsJobService {
         } else {
             processAsync(saved.getId());
         }
-        audit(AuditLogAction.Analytics.JOB_SUBMITTED, saved, AnalyticsAuditOutcome.ACCEPTED);
+        audit(AuditLogAction.Analytics.Job.SUBMITTED, saved, AnalyticsAuditOutcome.ACCEPTED);
         return response(saved);
     }
 
@@ -472,7 +472,7 @@ public class AnalyticsJobService {
     @Transactional(readOnly = true)
     public AnalyticsJobResponse get(String id, String username) {
         AnalyticsJob job = ownerJob(id, username);
-        audit(AuditLogAction.Analytics.RESULT_READ, job, AnalyticsAuditOutcome.STATUS);
+        audit(AuditLogAction.Analytics.Result.READ, job, AnalyticsAuditOutcome.STATUS);
         return response(job);
     }
 
@@ -482,7 +482,7 @@ public class AnalyticsJobService {
         if (job.getStatus() != AnalyticsJobStatus.COMPLETED || job.getResultJson() == null) {
             throw new BadRequestException("Analytics result is not ready");
         }
-        audit(AuditLogAction.Analytics.RESULT_READ, job, AnalyticsAuditOutcome.SUCCESS);
+        audit(AuditLogAction.Analytics.Result.READ, job, AnalyticsAuditOutcome.SUCCESS);
         try {
             return objectMapper.readValue(job.getResultJson(), AnalyticsResult.class);
         } catch (JsonProcessingException ex) {

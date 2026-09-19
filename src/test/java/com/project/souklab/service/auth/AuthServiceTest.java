@@ -1591,7 +1591,7 @@ class AuthServiceTest {
         assertThat(user.isEmailVerified()).isTrue();
         assertThat(user.getEmailVerifiedAt()).isEqualTo(fixedNow);
         verify(userRepository).save(user);
-        verify(auditLogService).logAction(AuditLogAction.Authentication.EMAIL_VERIFIED,
+        verify(auditLogService).logAction(AuditLogAction.Authentication.Email.VERIFIED,
                 "Email verified for user: user@example.com", "user@example.com");
     }
 
@@ -1863,7 +1863,7 @@ class AuthServiceTest {
         assertThat(user.getPassword()).isEqualTo("newlyHashedPassword");
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
-        verify(auditLogService).logAction(AuditLogAction.Authentication.PASSWORD_RESET_COMPLETED,
+        verify(auditLogService).logAction(AuditLogAction.Authentication.Password.Reset.COMPLETED,
                 "Password reset completed for user: user@example.com", "user@example.com");
     }
 
@@ -2019,7 +2019,7 @@ class AuthServiceTest {
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
         verify(emailUtil).sendPasswordChangedNotice("user@example.com");
-        verify(auditLogService).logAction(AuditLogAction.Authentication.PASSWORD_CHANGED,
+        verify(auditLogService).logAction(AuditLogAction.Authentication.Password.Changed.VALUE,
                 "Password changed for user: user@example.com", "user@example.com");
     }
 
@@ -2051,7 +2051,7 @@ class AuthServiceTest {
 
         authService.changePassword(request);
 
-        verify(auditLogService).logAction(AuditLogAction.Authentication.PASSWORD_CHANGED,
+        verify(auditLogService).logAction(AuditLogAction.Authentication.Password.Changed.VALUE,
                 "Password changed for user: user@example.com", "user@example.com");
     }
 

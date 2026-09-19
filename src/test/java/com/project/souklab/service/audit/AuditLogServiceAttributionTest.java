@@ -99,10 +99,10 @@ class AuditLogServiceAttributionTest {
     @Test
     @DisplayName("3-arg logAction persists with the supplied username attribution")
     void testLogActionWithUsername_persistsAuditEntry() {
-        auditLogService.logAction(AuditLogAction.Permission.GRANTED, "Granted permission", "admin@souklab.com");
+        auditLogService.logAction(AuditLogAction.Permission.Grant.VALUE, "Granted permission", "admin@souklab.com");
 
         verify(auditLogRepository).save(argThat(log ->
-                log.getAction() == AuditLogAction.Permission.GRANTED
+                log.getAction() == AuditLogAction.Permission.Grant.VALUE
                         && "Granted permission".equals(log.getDetails())));
         verify(userRepository).findByEmail("admin@souklab.com");
     }

@@ -138,7 +138,7 @@ public class AdminSubscriptionService {
         payment.setStatus(corrected);
         recordPaymentTransition(payment, previous, corrected);
         synchronizeCorrectedPayment(payment, corrected);
-        auditLogService.logFinancialState(AuditLogAction.Payment.STATE_CORRECTED, actor, payment.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous, corrected, request.getReason(), payment.getId(), payment.getSubscriptionId());
+        auditLogService.logFinancialState(AuditLogAction.Payment.State.CORRECTED, actor, payment.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous, corrected, request.getReason(), payment.getId(), payment.getSubscriptionId());
     }
 
     private void synchronizeCorrectedPayment(Payment payment, PaymentStatus corrected) {
@@ -207,7 +207,7 @@ public class AdminSubscriptionService {
                 subscription.setExpiresAt(rules.expiryFrom(startsAt, subscription.getBillingPeriod()));
             }
             syncArtisanPremium(subscription);
-            auditLogService.logFinancialState(AuditLogAction.Subscription.STATE_CORRECTED, actor, subscription.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous, corrected, request.getReason(), null, subscriptionId);
+            auditLogService.logFinancialState(AuditLogAction.Subscription.State.CORRECTED, actor, subscription.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous, corrected, request.getReason(), null, subscriptionId);
             return;
         }
         ClientSubscription subscription = clientSubscriptions.findWithLockById(subscriptionId).orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
@@ -219,7 +219,7 @@ public class AdminSubscriptionService {
             subscription.setExpiresAt(rules.expiryFrom(startsAt, subscription.getBillingPeriod()));
         }
         syncClientPremium(subscription);
-            auditLogService.logFinancialState(AuditLogAction.Subscription.STATE_CORRECTED, actor, subscription.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous, corrected, request.getReason(), null, subscriptionId);
+            auditLogService.logFinancialState(AuditLogAction.Subscription.State.CORRECTED, actor, subscription.getAccount().getId(), FinancialAuditOperation.State.CORRECTION, previous, corrected, request.getReason(), null, subscriptionId);
     }
 
     @Transactional
