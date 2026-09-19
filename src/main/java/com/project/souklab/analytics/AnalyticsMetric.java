@@ -111,7 +111,8 @@ public final class AnalyticsMetric {
         MAINTENANCE_JOBS_COMPLETED("maintenanceJobsCompleted"), MAINTENANCE_JOBS_FAILED("maintenanceJobsFailed"),
         OUTBOX_PENDING("outboxPending"), OUTBOX_PUBLISHED("outboxPublished"), OUTBOX_DEAD_LETTER("outboxDeadLetter"),
         APPLICATION_HEALTH("applicationHealth"), HEALTH_COMPONENTS("healthComponents"),
-        REQUEST_COUNTERS("requestCounters"), RATE_LIMIT_REJECTIONS("rateLimitRejections");
+        REQUEST_COUNTERS("requestCounters"), RATE_LIMIT_REJECTIONS("rateLimitRejections"),
+        REQUEST_COUNTER_METRIC("souklab.http.requests"), RATE_LIMIT_REJECTION_METRIC("souklab.rate_limit.rejections");
 
         private final String value;
 
@@ -155,7 +156,7 @@ public final class AnalyticsMetric {
     }
 
     public enum EventRollup implements Key {
-        PREFIX("event.");
+        PREFIX("event."), SEPARATOR("\u0000");
 
         private final String value;
 

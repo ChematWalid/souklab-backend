@@ -42,6 +42,8 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Historical.REGISTRATIONS.value()).isEqualTo("historical.registrations");
         assertThat(AnalyticsMetric.Summary.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.Series.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
+        assertThat(AnalyticsMetric.EventRollup.SEPARATOR.value()).isEqualTo("\u0000");
+        assertThat(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC.value()).isEqualTo("souklab.http.requests");
     }
 
     @Test

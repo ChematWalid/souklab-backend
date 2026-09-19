@@ -51,14 +51,14 @@ public class AnalyticsRebuildService {
             for (ActivityEvent event : source) {
                 LocalDate eventDay = event.getEventTime().toInstant(ZoneOffset.UTC)
                         .atZone(businessZone).toLocalDate();
-                String key = eventDay + "\u0000" + AnalyticsMetric.EventRollup.PREFIX.value()
+                String key = eventDay + AnalyticsMetric.EventRollup.SEPARATOR.value() + AnalyticsMetric.EventRollup.PREFIX.value()
                         + event.getEventType().value();
                 counts.merge(key, 1L, Long::sum);
             }
         } while (source.size() == properties.getRollupBatchSize());
         int written = 0;
         for (Map.Entry<String, Long> entry : counts.entrySet()) {
-            String[] parts = entry.getKey().split("\u0000", 2);
+            String[] parts = entry.getKey().split(AnalyticsMetric.EventRollup.SEPARATOR.value(), 2);
             DailyKpiRollup rollup = new DailyKpiRollup();
             rollup.setRollupDate(LocalDate.parse(parts[0])); rollup.setKpiKey(parts[1]);
             rollup.setValue(entry.getValue()); rollup.setSourceVersion(1);

@@ -319,10 +319,11 @@ public class AnalyticsJobService {
                         summary.put(AnalyticsMetric.Summary.SUBSCRIPTION_LIFECYCLE_EVENTS.value(), lifecycleEvents);
                         summary.put(AnalyticsMetric.Summary.CHECKOUT_CREATED.value(), countFilteredEvent(job, AnalyticsEvent.Checkout.CREATED, from, inclusiveTo));
                         summary.put(AnalyticsMetric.Summary.PAYMENT_STATE_TRANSITIONS.value(), countFilteredEvent(job, AnalyticsEvent.Payment.State.TRANSITION, from, inclusiveTo));
+                        String collectedCurrency = appProperties.getSubscription().getCurrency();
                         long grossCollected = payments.sumAmountByStatusAndCurrencyAndCreatedAtBetween(
-                                PaymentStatus.PAID, "DZD", from, to);
+                                PaymentStatus.PAID, collectedCurrency, from, to);
                         long providerFees = payments.sumFeesByStatusAndCurrencyAndCreatedAtBetween(
-                                PaymentStatus.PAID, "DZD", from, to);
+                                PaymentStatus.PAID, collectedCurrency, from, to);
                         summary.put(AnalyticsMetric.Summary.GROSS_COLLECTED_DZD.value(), grossCollected);
                         summary.put(AnalyticsMetric.Summary.PROVIDER_FEES_DZD.value(), providerFees);
                         summary.put(AnalyticsMetric.Summary.NET_COLLECTED_DZD.value(), grossCollected - providerFees);
@@ -361,8 +362,8 @@ public class AnalyticsJobService {
                         operational.put(AnalyticsMetric.Operational.HEALTH_COMPONENTS.value(), healthComponentStatuses(health));
                     }
                     if (operationalMetrics != null) {
-                        operational.put(AnalyticsMetric.Operational.REQUEST_COUNTERS.value(), operationalMetrics.snapshot("souklab.http.requests"));
-                        operational.put(AnalyticsMetric.Operational.RATE_LIMIT_REJECTIONS.value(), operationalMetrics.snapshot("souklab.rate_limit.rejections"));
+                        operational.put(AnalyticsMetric.Operational.REQUEST_COUNTERS.value(), operationalMetrics.snapshot(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC.value()));
+                        operational.put(AnalyticsMetric.Operational.RATE_LIMIT_REJECTIONS.value(), operationalMetrics.snapshot(AnalyticsMetric.Operational.RATE_LIMIT_REJECTION_METRIC.value()));
                     }
                     summary.put(AnalyticsMetric.Summary.OPERATIONAL.value(), operational);
                 }
