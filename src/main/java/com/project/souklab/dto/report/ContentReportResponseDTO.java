@@ -25,6 +25,7 @@ public class ContentReportResponseDTO {
     ReportResolutionAction resolutionAction;
     String resolverId;
     String resolutionNote;
+    LocalDateTime resolvedAt;
     LocalDateTime createdAt;
 
     /**
@@ -45,6 +46,7 @@ public class ContentReportResponseDTO {
                 .resolutionAction(report.getResolutionAction())
                 .resolverId(report.getResolver() == null ? null : report.getResolver().getId())
                 .resolutionNote(report.getResolutionNote())
+                .resolvedAt(report.getResolvedAt())
                 .createdAt(report.getCreatedAt())
                 .build();
     }

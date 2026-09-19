@@ -259,6 +259,11 @@ public class AnalyticsJobService {
                     summary.put(AnalyticsMetric.Summary.AVERAGE_PUBLISHED_RATING.value(), averageRating == null ? BigDecimal.ZERO : averageRating);
                 }
                 if (reports != null) summary.put(AnalyticsMetric.Summary.REPORTS_SUBMITTED.value(), reports.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
+                if (reports != null) {
+                    Double averageResolutionSeconds = reports.averageResolutionSecondsByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo);
+                    summary.put(AnalyticsMetric.Summary.AVERAGE_REPORT_RESOLUTION_SECONDS.value(),
+                            averageResolutionSeconds == null ? 0.0 : averageResolutionSeconds);
+                }
                 summary.put(AnalyticsMetric.Summary.FORMATEUR_PENDING.value(), formateurRequests.countByStatusAndDeletedAtIsNull(FormateurRequestStatus.PENDING));
                 summary.put(AnalyticsMetric.Summary.FORMATEUR_APPROVED_IN_RANGE.value(), formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
                         FormateurRequestStatus.APPROVED, from, inclusiveTo));

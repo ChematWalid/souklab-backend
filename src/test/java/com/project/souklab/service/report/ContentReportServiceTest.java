@@ -36,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -140,10 +141,13 @@ class ContentReportServiceTest {
     @Test
     void resolvesDismissHideAndRemoveForUserAndPost() {
         allowAdmin();
-        when(reportRepository.findById(any())).thenAnswer(invocation -> Optional.of(report("r", ReportTargetType.USER, "target")));
+        ContentReport dismissed = report("r", ReportTargetType.USER, "target");
+        when(reportRepository.findById(any())).thenAnswer(invocation -> Optional.of(dismissed));
         when(reportRepository.save(any(ContentReport.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(userRepository.findById("target")).thenReturn(Optional.of(User.builder().email("target@test").build()));
         service.resolve("r", new ReportResolutionRequestDTO(ReportResolutionAction.DISMISS, "dismiss"));
+        assertThat(dismissed.getResolvedAt())
+                .isEqualTo(LocalDateTime.of(2026, 1, 1, 0, 0));
 
         ContentReport userHide = report("r2", ReportTargetType.USER, "target");
         when(reportRepository.findById("r2")).thenReturn(Optional.of(userHide));

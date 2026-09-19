@@ -15,6 +15,7 @@ All analytics calendar boundaries use `app.analytics.business-time-zone`; persis
 | `messagesSent` | `MESSAGE_SENT` events in range | `activity_events.event_type` | explicit events only |
 | `profileViews` | `PROFILE_VIEW` events in range | `activity_events.event_type` | explicit events only; zero when no views exist |
 | `reportResolutions` | `REPORT_RESOLVED` events in range | `activity_events.event_type` | explicit moderation events only; zero when no resolutions exist |
+| `averageReportResolutionSeconds` | average `resolved_at - created_at` for resolved or dismissed reports created in range | `content_reports.created_at`, `resolved_at` | soft-deleted and unresolved reports excluded; zero when no report has been resolved |
 | `dau` / `wau` / `mau` | distinct non-null event actors on the end date / trailing 7 / trailing 30 business-calendar days | `activity_events.actor_id`, `event_time` | system events without an actor are excluded; zero when no actors exist |
 | `engagementByAccountType` | distinct event actors joined to an artisan or client profile | `activity_events.actor_id` joined to `users.artisan` / `users.client` | only persisted profile relations are counted; an actor may be absent from both segments |
 | `loginRetentionCohorts` | registration cohort actors with a recorded successful login in the D1, D7, or D30 calendar windows | `REGISTRATION_CREATED` and `LOGIN_SUCCEEDED` events | cohorts are only built from stored events; missing historical interaction data is not inferred; zero rates when a cohort is empty |

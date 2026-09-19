@@ -141,7 +141,9 @@ public class ContentReportService {
         report.setResolutionAction(request.getAction());
         report.setResolutionNote(request.getNote().trim());
         report.setStatus(request.getAction() == ReportResolutionAction.DISMISS ? ReportStatus.DISMISSED : ReportStatus.RESOLVED);
-        report.setUpdatedAt(LocalDateTime.now(clock));
+        LocalDateTime resolvedAt = LocalDateTime.now(clock);
+        report.setResolvedAt(resolvedAt);
+        report.setUpdatedAt(resolvedAt);
         ContentReportResponseDTO response = ContentReportResponseDTO.from(reportRepository.save(report));
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Report.RESOLVED, resolver.getId(), report.getId(),
