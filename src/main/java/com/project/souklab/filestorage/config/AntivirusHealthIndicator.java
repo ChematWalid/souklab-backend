@@ -31,10 +31,10 @@ public class AntivirusHealthIndicator implements HealthIndicator {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(properties.getHost(), properties.getPort()),
                     Math.toIntExact(properties.getConnectionTimeout().toMillis()));
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.CLAMAV.value(), true);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.CLAMAV, true);
             return Health.up().build();
         } catch (IOException exception) {
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.CLAMAV.value(), false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.CLAMAV, false);
             return Health.down().build();
         }
     }

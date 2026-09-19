@@ -26,10 +26,10 @@ public class RedisHealthIndicator implements HealthIndicator {
     public Health health() {
         try (var connection = client.connect()) {
             boolean available = "PONG".equalsIgnoreCase(connection.sync().ping());
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS.value(), available);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS, available);
             return available ? Health.up().build() : Health.down().build();
         } catch (RuntimeException exception) {
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS.value(), false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS, false);
             return Health.down().build();
         }
     }

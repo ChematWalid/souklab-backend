@@ -387,8 +387,8 @@ public class AnalyticsJobService {
                         operational.put(AnalyticsMetric.Operational.HEALTH_COMPONENTS, healthComponentStatuses(health));
                     }
                     if (operationalMetrics != null) {
-                        operational.put(AnalyticsMetric.Operational.REQUEST_COUNTERS, operationalMetrics.snapshot(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC.value()));
-                        operational.put(AnalyticsMetric.Operational.RATE_LIMIT_REJECTIONS, operationalMetrics.snapshot(AnalyticsMetric.Operational.RATE_LIMIT_REJECTION_METRIC.value()));
+                        operational.put(AnalyticsMetric.Operational.REQUEST_COUNTERS, operationalMetrics.snapshot(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC));
+                        operational.put(AnalyticsMetric.Operational.RATE_LIMIT_REJECTIONS, operationalMetrics.snapshot(AnalyticsMetric.Operational.RATE_LIMIT_REJECTION_METRIC));
                     }
                     summary.put(AnalyticsMetric.Summary.OPERATIONAL, operational);
                 }

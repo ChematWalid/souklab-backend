@@ -46,10 +46,10 @@ public class ElasticsearchHealthIndicator implements HealthIndicator {
             }
             int status = client.send(request.build(), HttpResponse.BodyHandlers.discarding()).statusCode();
             boolean available = status >= 200 && status < 300;
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ELASTICSEARCH.value(), available);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ELASTICSEARCH, available);
             return available ? Health.up().build() : Health.down().build();
         } catch (Exception exception) {
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ELASTICSEARCH.value(), false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ELASTICSEARCH, false);
             return Health.down().build();
         }
     }

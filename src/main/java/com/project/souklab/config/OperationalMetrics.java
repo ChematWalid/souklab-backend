@@ -68,9 +68,9 @@ public class OperationalMetrics {
     }
 
     /** Returns the current bounded counter snapshot for an operational report. */
-    public Map<String, Double> snapshot(String metricName) {
+    public Map<String, Double> snapshot(AnalyticsMetric.Key metric) {
         Map<String, Double> snapshot = new LinkedHashMap<>();
-        registry.find(metricName).counters().forEach(counter -> {
+        registry.find(metric.value()).counters().forEach(counter -> {
             String key = counter.getId().getTags().stream()
                     .map(tag -> tag.getKey() + "=" + tag.getValue())
                     .sorted()
@@ -85,8 +85,8 @@ public class OperationalMetrics {
      * Publishes the latest result of a mandatory dependency readiness probe.
      * The dependency names are fixed by the health-indicator call sites.
      */
-    public void setDependencyAvailability(String dependency, boolean available) {
-        AtomicInteger state = dependencyAvailability.computeIfAbsent(dependency, name -> {
+    public void setDependencyAvailability(AnalyticsMetric.Operational.Dependency dependency, boolean available) {
+        AtomicInteger state = dependencyAvailability.computeIfAbsent(dependency.value(), name -> {
             AtomicInteger value = new AtomicInteger();
             Gauge.builder("souklab.dependency.available", value, AtomicInteger::get)
                     .description("Whether a mandatory production dependency answered its readiness probe")
