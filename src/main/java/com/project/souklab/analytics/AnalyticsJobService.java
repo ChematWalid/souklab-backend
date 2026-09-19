@@ -224,6 +224,8 @@ public class AnalyticsJobService {
                 summary.put(AnalyticsMetric.Summary.SUCCESSFUL_LOGINS.value(), countFilteredEvent(job, AnalyticsEvent.Authentication.Login.SUCCEEDED, from, inclusiveTo));
                 summary.put(AnalyticsMetric.Summary.PUBLISHED_POSTS.value(), countFilteredEvent(job, AnalyticsEvent.Feed.Post.PUBLISHED, from, inclusiveTo));
                 summary.put(AnalyticsMetric.Summary.MESSAGES_SENT.value(), countFilteredEvent(job, AnalyticsEvent.Message.SENT, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.PROFILE_VIEWS.value(), countFilteredEvent(job, AnalyticsEvent.Profile.VIEW, from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.REPORT_RESOLUTIONS.value(), countFilteredEvent(job, AnalyticsEvent.Report.RESOLVED, from, inclusiveTo));
                 LocalDateTime activityDayStart = utcStart(job.getToDate());
                 LocalDateTime activityWeekStart = utcStart(job.getToDate().minusDays(6));
                 LocalDateTime activityMonthStart = utcStart(job.getToDate().minusDays(29));
@@ -728,7 +730,9 @@ public class AnalyticsJobService {
             case ENGAGEMENT, TIME_SERIES -> addStatusTable(tables, AnalyticsMetric.Table.ACTIVITY, Map.of(
                     AnalyticsMetric.Summary.ACTIVITY_EVENTS.value(), summary.getOrDefault(AnalyticsMetric.Summary.ACTIVITY_EVENTS.value(), 0L),
                     AnalyticsMetric.Summary.MESSAGES_SENT.value(), summary.getOrDefault(AnalyticsMetric.Summary.MESSAGES_SENT.value(), 0L),
-                    AnalyticsMetric.Summary.PUBLISHED_POSTS.value(), summary.getOrDefault(AnalyticsMetric.Summary.PUBLISHED_POSTS.value(), 0L)), job);
+                    AnalyticsMetric.Summary.PUBLISHED_POSTS.value(), summary.getOrDefault(AnalyticsMetric.Summary.PUBLISHED_POSTS.value(), 0L),
+                    AnalyticsMetric.Summary.PROFILE_VIEWS.value(), summary.getOrDefault(AnalyticsMetric.Summary.PROFILE_VIEWS.value(), 0L),
+                    AnalyticsMetric.Summary.REPORT_RESOLUTIONS.value(), summary.getOrDefault(AnalyticsMetric.Summary.REPORT_RESOLUTIONS.value(), 0L)), job);
             default -> { }
         }
         return tables;
