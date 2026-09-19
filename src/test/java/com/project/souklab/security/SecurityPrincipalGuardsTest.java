@@ -149,7 +149,7 @@ class SecurityPrincipalGuardsTest {
 
         verify(authService).processOAuth2Success(eq(principal), eq("ARTISAN"), eq(request));
         verify(responseUtil).writeResponse(eq(response), eq(200), any());
-        assertThat(response.getHeader("Set-Cookie")).contains("SOUKLAB_OAUTH_INTENT=", "Max-Age=0");
+        assertThat(response.getHeader("Set-Cookie")).contains(OAuthCookie.Intent.NAME.value() + "=", "Max-Age=0");
     }
 
     @Test

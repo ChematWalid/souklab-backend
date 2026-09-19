@@ -24,6 +24,7 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AccountRole;
 import com.project.souklab.security.Permission;
+import com.project.souklab.security.OAuthCookie;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
 import org.junit.jupiter.api.DisplayName;
@@ -1055,7 +1056,7 @@ class AuthControllerTest {
             mockMvc.perform(get("/api/v1/auth/oauth/google/artisan"))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/oauth2/authorization/google"))
-                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SOUKLAB_OAUTH_INTENT=ARTISAN")))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(OAuthCookie.Intent.NAME.value() + "=ARTISAN")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Path=/")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SameSite=Lax")))
@@ -1077,7 +1078,7 @@ class AuthControllerTest {
             mockMvc.perform(get("/api/v1/auth/oauth/google/client"))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/oauth2/authorization/google"))
-                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SOUKLAB_OAUTH_INTENT=CLIENT")))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(OAuthCookie.Intent.NAME.value() + "=CLIENT")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Path=/")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
                     .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SameSite=Lax")))

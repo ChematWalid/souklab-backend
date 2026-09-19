@@ -298,7 +298,7 @@ class JwtUtilsTest {
     void rejectsTokenWithWrongAuthorizationSchemaNumber() {
         String token = Jwts.builder()
                 .setSubject("wrong-version@example.com")
-                .claim("authz_version", 1)
+                .claim(JwtClaim.Authorization.VERSION.value(), 1)
                 .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
         assertThat(jwtUtils.validateJwtToken(token)).isFalse();
