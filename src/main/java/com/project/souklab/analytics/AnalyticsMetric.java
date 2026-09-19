@@ -195,6 +195,43 @@ public final class AnalyticsMetric {
 
             public String value() { return value; }
         }
+
+        public enum HttpMethod implements Key {
+            GET("GET"), POST("POST"), PUT("PUT"), PATCH("PATCH"), DELETE("DELETE"),
+            HEAD("HEAD"), OPTIONS("OPTIONS"), TRACE("TRACE"), CONNECT("CONNECT"),
+            UNKNOWN("UNKNOWN");
+
+            private final String value;
+
+            HttpMethod(String value) { this.value = value; }
+
+            public String value() { return value; }
+
+            public static HttpMethod fromValue(String value) {
+                for (HttpMethod method : values()) {
+                    if (method.value.equalsIgnoreCase(value)) return method;
+                }
+                return UNKNOWN;
+            }
+        }
+
+        public enum RequestOutcome implements Key {
+            SUCCESS_2XX("2xx"), REDIRECT_3XX("3xx"), CLIENT_ERROR_4XX("4xx"),
+            SERVER_ERROR_5XX("5xx"), ERROR("error");
+
+            private final String value;
+
+            RequestOutcome(String value) { this.value = value; }
+
+            public String value() { return value; }
+
+            public static RequestOutcome fromStatus(int status) {
+                if (status >= 500) return SERVER_ERROR_5XX;
+                if (status >= 400) return CLIENT_ERROR_4XX;
+                if (status >= 300) return REDIRECT_3XX;
+                return SUCCESS_2XX;
+            }
+        }
     }
 
     public enum Retention implements Key {

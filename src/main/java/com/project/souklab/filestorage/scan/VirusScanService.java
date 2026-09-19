@@ -136,12 +136,12 @@ public class VirusScanService {
         try {
             result = virusScanner.scan(content);
         } catch (RuntimeException ex) {
-            metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR.value());
+            metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR);
             throw ex;
         }
 
         if (result.isInfected()) {
-                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.INFECTED.value());
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.INFECTED);
             log.error("Malware detected in upload '{}': virus='{}'", filename, result.virusName());
             throw new VirusDetectedException(result.virusName());
         }
@@ -149,17 +149,17 @@ public class VirusScanService {
         if (result.isError()) {
             boolean failOpen = properties.getVirusScan().isFailOpen();
             if (failOpen) {
-                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_ALLOWED.value());
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_ALLOWED);
                 log.warn("Virus scanner communication failure for '{}': {}. Fail-open policy active: allowing upload to proceed.",
                         filename, result.message());
             } else {
-                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_REJECTED.value());
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_REJECTED);
                 log.error("Virus scanner communication failure for '{}': {}. Fail-closed policy active: rejecting upload.",
                         filename, result.message());
                 throw new VirusScanException("Virus scanning service unavailable: " + result.message());
             }
         } else {
-                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.CLEAN.value());
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.CLEAN);
         }
     }
 }

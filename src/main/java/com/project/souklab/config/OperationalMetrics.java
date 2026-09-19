@@ -37,31 +37,34 @@ public class OperationalMetrics {
         return NOOP;
     }
 
-    public void recordUpload(String operation, String outcome) {
-        increment(AnalyticsMetric.Operational.Metric.UPLOADS.value(), operation, outcome);
+    public void recordUpload(AnalyticsMetric.Operational.Operation operation,
+                             AnalyticsMetric.Operational.Outcome outcome) {
+        increment(AnalyticsMetric.Operational.Metric.UPLOADS, operation, outcome);
     }
 
-    public void recordVirusScan(String outcome) {
-        increment(AnalyticsMetric.Operational.Metric.VIRUS_SCANS.value(),
-                AnalyticsMetric.Operational.Component.CLAMAV.value(), outcome);
+    public void recordVirusScan(AnalyticsMetric.Operational.Outcome outcome) {
+        increment(AnalyticsMetric.Operational.Metric.VIRUS_SCANS,
+                AnalyticsMetric.Operational.Component.CLAMAV, outcome);
     }
 
-    public void recordSearch(String backend, String outcome) {
-        increment(AnalyticsMetric.Operational.Metric.SEARCH_REQUESTS.value(), backend, outcome);
+    public void recordSearch(AnalyticsMetric.Operational.Backend backend,
+                             AnalyticsMetric.Operational.Outcome outcome) {
+        increment(AnalyticsMetric.Operational.Metric.SEARCH_REQUESTS, backend, outcome);
     }
 
-    public void recordWebSocket(String outcome) {
-        increment(AnalyticsMetric.Operational.Metric.WEBSOCKET_CONNECTIONS.value(),
-                AnalyticsMetric.Operational.Component.STOMP.value(), outcome);
+    public void recordWebSocket(AnalyticsMetric.Operational.Outcome outcome) {
+        increment(AnalyticsMetric.Operational.Metric.WEBSOCKET_CONNECTIONS,
+                AnalyticsMetric.Operational.Component.STOMP, outcome);
     }
 
-    public void recordRateLimitRejection(String scope) {
-        increment(AnalyticsMetric.Operational.Metric.RATE_LIMIT_REJECTIONS.value(),
-                scope, AnalyticsMetric.Operational.Outcome.REJECTED.value());
+    public void recordRateLimitRejection(AnalyticsMetric.Key scope) {
+        increment(AnalyticsMetric.Operational.Metric.RATE_LIMIT_REJECTIONS,
+                scope, AnalyticsMetric.Operational.Outcome.REJECTED);
     }
 
-    public void recordRequest(String method, String outcome) {
-        increment(AnalyticsMetric.Operational.Metric.HTTP_REQUESTS.value(), method, outcome);
+    public void recordRequest(AnalyticsMetric.Operational.HttpMethod method,
+                              AnalyticsMetric.Operational.RequestOutcome outcome) {
+        increment(AnalyticsMetric.Operational.Metric.HTTP_REQUESTS, method, outcome);
     }
 
     /** Returns the current bounded counter snapshot for an operational report. */
@@ -92,6 +95,11 @@ public class OperationalMetrics {
             return value;
         });
         state.set(available ? 1 : 0);
+    }
+
+    private void increment(AnalyticsMetric.Key metric, AnalyticsMetric.Key operation,
+                           AnalyticsMetric.Key outcome) {
+        increment(metric.value(), operation.value(), outcome.value());
     }
 
     private void increment(String metricName, String operation, String outcome) {

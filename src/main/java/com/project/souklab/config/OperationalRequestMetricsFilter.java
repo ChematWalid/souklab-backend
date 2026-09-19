@@ -1,5 +1,6 @@
 package com.project.souklab.config;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,21 +23,14 @@ public class OperationalRequestMetricsFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String outcome = "error";
+        AnalyticsMetric.Operational.RequestOutcome outcome = AnalyticsMetric.Operational.RequestOutcome.ERROR;
         try {
             filterChain.doFilter(request, response);
-            outcome = statusClass(response.getStatus());
+            outcome = AnalyticsMetric.Operational.RequestOutcome.fromStatus(response.getStatus());
         } catch (IOException | ServletException | RuntimeException exception) {
-            metrics.recordRequest(request.getMethod(), outcome);
+            metrics.recordRequest(AnalyticsMetric.Operational.HttpMethod.fromValue(request.getMethod()), outcome);
             throw exception;
         }
-        metrics.recordRequest(request.getMethod(), outcome);
-    }
-
-    private String statusClass(int status) {
-        if (status >= 500) return "5xx";
-        if (status >= 400) return "4xx";
-        if (status >= 300) return "3xx";
-        return "2xx";
+        metrics.recordRequest(AnalyticsMetric.Operational.HttpMethod.fromValue(request.getMethod()), outcome);
     }
 }

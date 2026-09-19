@@ -61,14 +61,14 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                         accessor.setUser(authentication);
-                        metrics.recordWebSocket(AnalyticsMetric.Operational.Outcome.AUTHENTICATED.value());
+                        metrics.recordWebSocket(AnalyticsMetric.Operational.Outcome.AUTHENTICATED);
                         return message;
                     }
                 } catch (Exception e) {
                     log.warn("WebSocket authentication failed");
                 }
             }
-                        metrics.recordWebSocket(AnalyticsMetric.Operational.Outcome.REJECTED.value());
+                        metrics.recordWebSocket(AnalyticsMetric.Operational.Outcome.REJECTED);
             throw new AccessDeniedException("A valid Bearer token is required to establish a WebSocket connection.");
         }
         return message;

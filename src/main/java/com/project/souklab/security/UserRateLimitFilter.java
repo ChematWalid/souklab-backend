@@ -83,15 +83,15 @@ public class UserRateLimitFilter extends OncePerRequestFilter {
                     ? rule.getUserCapacity() : global.getUserCapacity();
             Duration refill = rule != null && rule.getUserRefillDuration() != null
                     ? rule.getUserRefillDuration() : global.getUserRefillDuration();
-            String scope = ruleName(request);
-            Bucket bucket = store.resolve("user:" + scope + ":" + authentication.getName(), capacity, refill);
+            RateLimitScope.Endpoint scope = ruleName(request);
+            Bucket bucket = store.resolve("user:" + scope.value() + ":" + authentication.getName(), capacity, refill);
             if (!bucket.tryConsume(1)) {
-                metrics.recordRateLimitRejection(AnalyticsMetric.Operational.Scope.USER.value());
+                metrics.recordRateLimitRejection(AnalyticsMetric.Operational.Scope.USER);
                 reject(response);
                 return;
             }
         } catch (RuntimeException unavailable) {
-            metrics.recordRateLimitRejection(AnalyticsMetric.Operational.Scope.USER.value());
+            metrics.recordRateLimitRejection(AnalyticsMetric.Operational.Scope.USER);
             reject(response);
             return;
         }
@@ -112,13 +112,13 @@ public class UserRateLimitFilter extends OncePerRequestFilter {
         return endpointProperties.getPublicApi();
     }
 
-    private String ruleName(HttpServletRequest request) {
+    private RateLimitScope.Endpoint ruleName(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (path.contains("/download")) return "csv";
-        if (isAnalyticsJobPath(path)) return "analytics";
-        if (path.startsWith("/api/v1/auth/")) return "auth";
-        if (path.startsWith("/api/v1/admin/")) return "admin";
-        return "public";
+        if (path.contains("/download")) return RateLimitScope.Endpoint.CSV_EXPORTS;
+        if (isAnalyticsJobPath(path)) return RateLimitScope.Endpoint.ANALYTICS;
+        if (path.startsWith("/api/v1/auth/")) return RateLimitScope.Endpoint.AUTHENTICATION;
+        if (path.startsWith("/api/v1/admin/")) return RateLimitScope.Endpoint.ADMINISTRATION;
+        return RateLimitScope.Endpoint.PUBLIC_API;
     }
 
     private boolean isAnalyticsJobPath(String path) {

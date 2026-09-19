@@ -262,12 +262,12 @@ public class AvatarService {
 
                 return mapToResponseDTO(savedAvatar);
             });
-            metrics.recordUpload(AnalyticsMetric.Operational.Operation.AVATAR.value(),
-                    AnalyticsMetric.Operational.Outcome.SUCCESS.value());
+            metrics.recordUpload(AnalyticsMetric.Operational.Operation.AVATAR,
+                    AnalyticsMetric.Operational.Outcome.SUCCESS);
             return response;
         } catch (Exception ex) {
-            metrics.recordUpload(AnalyticsMetric.Operational.Operation.AVATAR.value(),
-                    AnalyticsMetric.Operational.Outcome.FAILURE.value());
+            metrics.recordUpload(AnalyticsMetric.Operational.Operation.AVATAR,
+                    AnalyticsMetric.Operational.Outcome.FAILURE);
             log.error("Avatar upload pipeline failed for user {}. Initiating rollback compensation for {} stored keys: {}",
                     authenticatedUser.getId(), storedKeys.size(), storedKeys, ex);
             compensateStorageDeletions(storedKeys);

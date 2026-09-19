@@ -88,20 +88,20 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     @Transactional(readOnly = true)
     public PaginatedResponse<ArtisanDirectoryCardDTO> search(DirectorySearchFilterDTO filter) {
         if (!appProperties.getSearch().isEnabled()) {
-            metrics.recordSearch(AnalyticsMetric.Operational.Backend.RELATIONAL.value(),
-                    AnalyticsMetric.Operational.Outcome.DISABLED.value());
+            metrics.recordSearch(AnalyticsMetric.Operational.Backend.RELATIONAL,
+                    AnalyticsMetric.Operational.Outcome.DISABLED);
             log.info("Hibernate Search is disabled; routing directory search to relational JPA fallback.");
             return searchRelationalFallback(filter);
         }
 
         try {
             PaginatedResponse<ArtisanDirectoryCardDTO> response = searchHibernateSearch(filter);
-            metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH.value(),
-                    AnalyticsMetric.Operational.Outcome.SUCCESS.value());
+            metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH,
+                    AnalyticsMetric.Operational.Outcome.SUCCESS);
             return response;
         } catch (Exception ex) {
-            metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH.value(),
-                    AnalyticsMetric.Operational.Outcome.FALLBACK.value());
+            metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH,
+                    AnalyticsMetric.Operational.Outcome.FALLBACK);
             log.warn("Hibernate Search query encountered an error; falling back to relational JPA specification: {}", ex.getMessage());
             return searchRelationalFallback(filter);
         }

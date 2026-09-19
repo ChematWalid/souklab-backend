@@ -60,7 +60,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
         AppProperties.RateLimit global = appProperties.getRateLimit();
         RateLimitRule rule = selectRule(request);
         if (rule == null || !rule.isEnabled()) return resolveBucket(request.getRemoteAddr());
-        return bucketStore.resolve("api:" + ruleName(request) + ":" + request.getRemoteAddr(), rule.getCapacity(), rule.getRefillDuration());
+        return bucketStore.resolve("api:" + ruleName(request).value() + ":" + request.getRemoteAddr(),
+                rule.getCapacity(), rule.getRefillDuration());
     }
 
     private RateLimitRule selectRule(HttpServletRequest request) {
@@ -77,13 +78,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return endpointProperties.getPublicApi();
     }
 
-    private String ruleName(HttpServletRequest request) {
+    private RateLimitScope.Endpoint ruleName(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (path.contains("/download")) return "csv";
-        if (isAnalyticsJobPath(path)) return "analytics";
-        if (path.startsWith("/api/v1/auth/")) return "auth";
-        if (path.startsWith("/api/v1/admin/")) return "admin";
-        return "public";
+        if (path.contains("/download")) return RateLimitScope.Endpoint.CSV_EXPORTS;
+        if (isAnalyticsJobPath(path)) return RateLimitScope.Endpoint.ANALYTICS;
+        if (path.startsWith("/api/v1/auth/")) return RateLimitScope.Endpoint.AUTHENTICATION;
+        if (path.startsWith("/api/v1/admin/")) return RateLimitScope.Endpoint.ADMINISTRATION;
+        return RateLimitScope.Endpoint.PUBLIC_API;
     }
 
     private boolean isAnalyticsJobPath(String path) {

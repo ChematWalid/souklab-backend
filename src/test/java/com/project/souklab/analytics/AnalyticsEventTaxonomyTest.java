@@ -47,6 +47,10 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Operational.Metric.VIRUS_SCANS.value()).isEqualTo("souklab.virus.scans");
         assertThat(AnalyticsMetric.Operational.Dependency.RABBITMQ.value()).isEqualTo("rabbitmq");
         assertThat(AnalyticsMetric.Operational.Outcome.ERROR_REJECTED.value()).isEqualTo("error_rejected");
+        assertThat(AnalyticsMetric.Operational.HttpMethod.fromValue("post"))
+                .isEqualTo(AnalyticsMetric.Operational.HttpMethod.POST);
+        assertThat(AnalyticsMetric.Operational.RequestOutcome.fromStatus(503))
+                .isEqualTo(AnalyticsMetric.Operational.RequestOutcome.SERVER_ERROR_5XX);
     }
 
     @Test
