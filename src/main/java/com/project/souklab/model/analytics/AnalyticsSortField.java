@@ -12,10 +12,14 @@ public enum AnalyticsSortField {
     ACTIVITY_EVENTS(AnalyticsMetric.Series.ACTIVITY_EVENTS),
     NEW_REGISTRATIONS(AnalyticsMetric.Series.NEW_REGISTRATIONS);
 
-    private final AnalyticsMetric.Key field;
+    private final AnalyticsMetric.Series field;
 
-    AnalyticsSortField(AnalyticsMetric.Key field) {
+    AnalyticsSortField(AnalyticsMetric.Series field) {
         this.field = field;
+    }
+
+    public AnalyticsMetric.Series seriesField() {
+        return field;
     }
 
     @JsonValue
