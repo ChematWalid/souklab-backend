@@ -1,14 +1,39 @@
 package com.project.souklab.model;
 
-public enum FinancialAuditOperation {
-    MANUAL_GRANT("MANUAL_GRANT"),
-    REVOKE("REVOKE"),
-    STATE_CORRECTION("STATE_CORRECTION"),
-    CANCEL("CANCEL");
+public final class FinancialAuditOperation {
+    private FinancialAuditOperation() { }
 
-    private final String value;
+    public interface Type {
+        String value();
+    }
 
-    FinancialAuditOperation(String value) { this.value = value; }
+    public enum Manual implements Type {
+        GRANT("MANUAL_GRANT");
 
-    public String value() { return value; }
+        private final String value;
+
+        Manual(String value) { this.value = value; }
+
+        public String value() { return value; }
+    }
+
+    public enum State implements Type {
+        CORRECTION("STATE_CORRECTION");
+
+        private final String value;
+
+        State(String value) { this.value = value; }
+
+        public String value() { return value; }
+    }
+
+    public enum Subscription implements Type {
+        REVOKE("REVOKE"), CANCEL("CANCEL");
+
+        private final String value;
+
+        Subscription(String value) { this.value = value; }
+
+        public String value() { return value; }
+    }
 }

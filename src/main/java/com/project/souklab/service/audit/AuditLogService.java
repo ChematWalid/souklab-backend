@@ -52,7 +52,7 @@ public class AuditLogService {
     }
 
     @Transactional
-    public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation operation,
+    public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
                                    String previousState, String newState, String reason,
                                    String paymentId, String subscriptionId) {
         logFinancialAction(action, actor, targetAccountId, operation.value(), previousState, newState,
