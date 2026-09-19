@@ -34,6 +34,14 @@ jobs:
           ./scripts/check-source-hygiene.sh
           ./mvnw --batch-mode --no-transfer-progress -DskipTests validate
 
+      - name: Validate current Postman analytics collection
+        run: |
+          python3 -m json.tool .postman/souklab.postman_collection.json >/dev/null
+          grep -q 'Phase 10 — Admin Analytics' .postman/souklab.postman_collection.json
+          grep -q '/api/v1/admin/analytics/jobs' .postman/souklab.postman_collection.json
+          grep -q '/api/v1/admin/stats/jobs' .postman/souklab.postman_collection.json
+          grep -q '/api/v1/admin/analytics/rollups/jobs/rebuild' .postman/souklab.postman_collection.json
+
       - name: Validate production deployment manifests
         run: |
           bash -n scripts/backup-production.sh scripts/validate-production-env.sh scripts/verify-flyway.sh

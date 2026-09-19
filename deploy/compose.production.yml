@@ -11,6 +11,8 @@ services:
       ELASTICSEARCH_URIS: http://elasticsearch:9200
       STORAGE_VIRUS_SCAN_HOST: clamav
       RELAY_HOST: rabbitmq
+      ANALYTICS_RABBIT_ENABLED: "true"
+      ANALYTICS_RABBIT_HOST: rabbitmq
       REDIS_HOST: redis
       APP_RATE_LIMIT_BACKEND: redis
       FLYWAY_ENABLED: "true"
@@ -46,6 +48,8 @@ services:
       ELASTICSEARCH_URIS: http://elasticsearch:9200
       STORAGE_VIRUS_SCAN_HOST: clamav
       RELAY_HOST: rabbitmq
+      ANALYTICS_RABBIT_ENABLED: "true"
+      ANALYTICS_RABBIT_HOST: rabbitmq
       REDIS_HOST: redis
       APP_RATE_LIMIT_BACKEND: redis
       FLYWAY_ENABLED: "true"

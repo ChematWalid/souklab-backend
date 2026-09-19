@@ -81,6 +81,9 @@ export ELASTICSEARCH_VERSION="8.15"
 export ELASTICSEARCH_VERSION_CHECK_ENABLED="false"
 export HIBERNATE_SEARCH_SCHEMA_MANAGEMENT="create-or-update"
 export SEARCH_SYNC_ON_STARTUP="true"
+export PHASE10_MARIADB_INTEGRATION="${PHASE10_MARIADB_INTEGRATION:-true}"
+export PHASE10_RABBIT_INTEGRATION="${PHASE10_RABBIT_INTEGRATION:-true}"
+export PHASE10_REDIS_INTEGRATION="${PHASE10_REDIS_INTEGRATION:-true}"
 
 cleanup() {
   # This project name is dedicated to verification; remove only its containers,

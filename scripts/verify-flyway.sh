@@ -18,8 +18,25 @@ flyway_args=(
   "-Dflyway.locations=filesystem:${project_dir}/src/main/resources/db/migration"
 )
 
-./mvnw --batch-mode --no-transfer-progress \
-  "org.flywaydb:flyway-maven-plugin:${flyway_version}:migrate" "${flyway_args[@]}"
-./mvnw --batch-mode --no-transfer-progress \
-  "org.flywaydb:flyway-maven-plugin:${flyway_version}:validate" "${flyway_args[@]}"
+run_flyway() {
+  local goal="$1"
+  ./mvnw --batch-mode --no-transfer-progress \
+    "org.flywaydb:flyway-maven-plugin:${flyway_version}:${goal}" "${flyway_args[@]}"
+}
+
+# mariadb-admin reports readiness slightly before the server is consistently
+# accepting external JDBC sessions on a cold volume. Retry the migration
+# itself so a transient socket close does not invalidate release evidence.
+for attempt in 1 2 3; do
+  if run_flyway migrate; then
+    break
+  fi
+  if [ "$attempt" -eq 3 ]; then
+    echo "Flyway migration failed after ${attempt} attempts" >&2
+    exit 1
+  fi
+  echo "Flyway migration attempt ${attempt} failed; retrying after database stabilization" >&2
+  sleep 5
+done
+run_flyway validate
 echo "Flyway migration and validation passed: ${flyway_database}"

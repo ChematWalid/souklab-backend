@@ -10,6 +10,15 @@ if rg -n $'\t' src/main/java src/test/java scripts; then
   echo 'tab indentation detected' >&2
   exit 1
 fi
+if rg -n --pcre2 '(?<![\w.])(?:java|org|jakarta|lombok|com)(?:\.[A-Za-z_][\w$]*){2,}' src/main/java src/test/java --glob '*.java' \
+    | rg -v ':package |:import '; then
+  echo 'inline fully qualified Java references detected; import types at the top of the file' >&2
+  exit 1
+fi
+if rg -n --pcre2 'Permission\.(?:ADMIN_USERS|ADMIN_FORMATIONS|ADMIN_FEED|ADMIN_REPORTS|FINANCIAL_ADMIN|ARTISAN_FORMATIONS|ARTISAN_CONTENT|ARTISAN_REVIEWS|PROFILE_READ|PROFILE_WRITE|REPORT_CREATE|FILE_READ|MESSAGE_SEND|ANALYTICS_ADMIN)|Permission\.values\(|Permission\.valueOf\(' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat permission enum references detected; use grouped Permission enums' >&2
+  exit 1
+fi
 
 mapfile -t migrations < <(find src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' -printf '%f\n' | sort -V)
 test "${#migrations[@]}" -gt 0 || { echo 'no Flyway migrations found' >&2; exit 1; }
