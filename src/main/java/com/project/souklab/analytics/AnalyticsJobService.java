@@ -236,10 +236,10 @@ public class AnalyticsJobService {
                 summary.put(AnalyticsMetric.Summary.MAU.value(), countFilteredDistinctActors(job, activityMonthStart, inclusiveTo));
                 AnalyticsEvent.Type eventFilter = eventTypeFilter(job);
                 summary.put(AnalyticsMetric.Summary.ENGAGEMENT_BY_ACCOUNT_TYPE.value(), Map.of(
-                        AnalyticsMetric.AccountType.ARTISAN.value(), eventFilter == null
+                        AnalyticsMetric.AccountType.ARTISAN, eventFilter == null
                                 ? events.countDistinctArtisanActorsByEventTimeBetween(from, inclusiveTo)
                                 : events.countDistinctArtisanActorsByTypeAndEventTimeBetween(eventFilter, from, inclusiveTo),
-                        AnalyticsMetric.AccountType.CLIENT.value(), eventFilter == null
+                        AnalyticsMetric.AccountType.CLIENT, eventFilter == null
                                 ? events.countDistinctClientActorsByEventTimeBetween(from, inclusiveTo)
                                 : events.countDistinctClientActorsByTypeAndEventTimeBetween(eventFilter, from, inclusiveTo)));
                 summary.put(AnalyticsMetric.Summary.ENGAGEMENT_BY_REGION.value(), dimensionCounts(
@@ -326,15 +326,15 @@ public class AnalyticsJobService {
                                     + clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                         }
                         summary.put(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_STATUS.value(), subscriptions);
-                        Map<String, Map<?, Long>> subscriptionsBySubscriberType = new LinkedHashMap<>();
+                        Map<AnalyticsMetric.AccountType, Map<?, Long>> subscriptionsBySubscriberType = new LinkedHashMap<>();
                         Map<SubscriptionStatus, Long> artisanSubscriptionStatuses = new LinkedHashMap<>();
                         Map<SubscriptionStatus, Long> clientSubscriptionStatuses = new LinkedHashMap<>();
                             for (SubscriptionStatus status : SubscriptionStatus.values()) {
                             artisanSubscriptionStatuses.put(status, artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                             clientSubscriptionStatuses.put(status, clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                         }
-                        subscriptionsBySubscriberType.put(AnalyticsMetric.AccountType.ARTISAN.value(), artisanSubscriptionStatuses);
-                        subscriptionsBySubscriberType.put(AnalyticsMetric.AccountType.CLIENT.value(), clientSubscriptionStatuses);
+                        subscriptionsBySubscriberType.put(AnalyticsMetric.AccountType.ARTISAN, artisanSubscriptionStatuses);
+                        subscriptionsBySubscriberType.put(AnalyticsMetric.AccountType.CLIENT, clientSubscriptionStatuses);
                         summary.put(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_SUBSCRIBER_TYPE.value(), subscriptionsBySubscriberType);
                         Map<AnalyticsEvent.Type, Long> lifecycleEvents = new LinkedHashMap<>();
                         for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.Subscription.ACTIVATED, AnalyticsEvent.Subscription.EXPIRED,
@@ -742,8 +742,8 @@ public class AnalyticsJobService {
                 addStatusTable(tables, AnalyticsMetric.Table.PAYMENTS, summary.get(AnalyticsMetric.Summary.PAYMENTS_BY_STATUS.value()), job);
                 addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS, summary.get(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_STATUS.value()), job);
                 if (summary.get(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_SUBSCRIBER_TYPE.value()) instanceof Map<?, ?> byType) {
-                    addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_ARTISAN, byType.get(AnalyticsMetric.AccountType.ARTISAN.value()), job);
-                    addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_CLIENT, byType.get(AnalyticsMetric.AccountType.CLIENT.value()), job);
+                    addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_ARTISAN, byType.get(AnalyticsMetric.AccountType.ARTISAN), job);
+                    addStatusTable(tables, AnalyticsMetric.Table.SUBSCRIPTIONS_CLIENT, byType.get(AnalyticsMetric.AccountType.CLIENT), job);
                 }
             }
             case ENGAGEMENT, TIME_SERIES -> addStatusTable(tables, AnalyticsMetric.Table.ACTIVITY, Map.of(
