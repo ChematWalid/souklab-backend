@@ -724,9 +724,9 @@ public class AnalyticsJobService {
                 .toLocalDate();
     }
 
-    private Map<String, PaginatedResponse<Map<String, Object>>> buildTables(AnalyticsJob job,
-                                                                              Map<String, Object> summary) {
-        Map<String, PaginatedResponse<Map<String, Object>>> tables = new LinkedHashMap<>();
+    private Map<AnalyticsMetric.Table, PaginatedResponse<Map<String, Object>>> buildTables(AnalyticsJob job,
+                                                                                             Map<String, Object> summary) {
+        Map<AnalyticsMetric.Table, PaginatedResponse<Map<String, Object>>> tables = new LinkedHashMap<>();
         switch (job.getReportType()) {
             case MODERATION -> {
                 addStatusTable(tables, AnalyticsMetric.Table.USERS, summary.get(AnalyticsMetric.Summary.USER_STATUSES.value()), job);
@@ -757,7 +757,7 @@ public class AnalyticsJobService {
         return tables;
     }
 
-    private void addStatusTable(Map<String, PaginatedResponse<Map<String, Object>>> tables,
+    private void addStatusTable(Map<AnalyticsMetric.Table, PaginatedResponse<Map<String, Object>>> tables,
                                  AnalyticsMetric.Table table, Object source, AnalyticsJob job) {
         if (!(source instanceof Map<?, ?> values)) return;
         List<Map<String, Object>> rows = values.entrySet().stream()
@@ -769,7 +769,7 @@ public class AnalyticsJobService {
         long requestedStart = (long) job.getPageNumber() * pageSize;
         int start = requestedStart >= rows.size() ? rows.size() : (int) requestedStart;
         int end = Math.min(start + pageSize, rows.size());
-        tables.put(table.value(), PaginatedResponse.<Map<String, Object>>builder()
+        tables.put(table, PaginatedResponse.<Map<String, Object>>builder()
                 .content(rows.subList(start, end)).pageNumber(job.getPageNumber()).pageSize(pageSize)
                 .totalElements(rows.size()).totalPages(rows.isEmpty() ? 0 : (rows.size() + pageSize - 1) / pageSize)
                 .last(end >= rows.size()).build());
