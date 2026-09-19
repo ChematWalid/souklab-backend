@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "souklab-e2e-collection-v2-1",
     "name": "Souklab API (E2E Test Suite)",
-    "description": "ARCHIVAL COLLECTION: these generated scenarios predate the database-backed permission migration and must be regenerated before execution against the current API. Use docs/API_SPEC.md and docs/AUTHORIZATION_MATRIX.md as the current contract. Legacy role/roles/ROLE_* fields in these historical scenarios are not accepted by the current API.\n\nNote on OAuth2: Endpoints GET /api/v1/auth/oauth/google/artisan and GET /api/v1/auth/oauth/google/client require interactive browser navigation and Google consent redirects, so they cannot be executed via automated Postman requests.",
+    "description": "Most historical scenarios in this collection predate the database-backed permission migration; use docs/API_SPEC.md and docs/AUTHORIZATION_MATRIX.md for those legacy flows. The current Phase 10 Admin Analytics folder is executable against the current permission-based API.\n\nNote on OAuth2: Endpoints GET /api/v1/auth/oauth/google/artisan and GET /api/v1/auth/oauth/google/client require interactive browser navigation and Google consent redirects, so they cannot be executed via automated Postman requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -15305,6 +15305,82 @@
             "description": "Verifies that clients (ROLE_CLIENT) are strictly forbidden from participating in peer artisan masterclass routes."
           },
           "response": []
+        }
+      ]
+    },
+    {
+      "name": "Phase 10 — Admin Analytics",
+      "description": "Current analytics contracts. Requires an administrator token with permission:analytics:admin; subscription/payment requests additionally require permission:financial:admin.",
+      "item": [
+        {
+          "name": "Submit Overview Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\n  \"reportType\": \"OVERVIEW\",\n  \"fromDate\": \"2026-01-01\",\n  \"toDate\": \"2026-01-31\",\n  \"bucket\": \"DAY\",\n  \"pageNumber\": 0,\n  \"pageSize\": 20,\n  \"outputFormat\": \"JSON\"\n}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          },
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Queued', () => pm.expect(pm.response.code).to.eql(202));", "pm.environment.set('analyticsJobId', pm.response.json().data.id);"]}}]
+        },
+        {
+          "name": "Get Job Status (stats alias)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "url": "{{baseUrl}}/api/v1/admin/stats/jobs/{{analyticsJobId}}"
+          }
+        },
+        {
+          "name": "Get Job Result",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs/{{analyticsJobId}}/result"
+          }
+        },
+        {
+          "name": "Download CSV Export",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}, {"key": "Accept", "value": "text/csv"}],
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs/{{analyticsJobId}}/download"
+          }
+        },
+        {
+          "name": "Submit Financial Payments Job",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"reportType\":\"SUBSCRIPTIONS_PAYMENTS\",\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\",\"bucket\":\"DAY\",\"pageNumber\":0,\"pageSize\":20,\"outputFormat\":\"JSON\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/jobs"
+          }
+        },
+        {
+          "name": "Queue Rollup Rebuild",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/rollups/jobs/rebuild"
+          },
+          "event": [{"listen": "test", "script": {"type": "text", "exec": ["pm.test('Maintenance job queued', () => pm.expect(pm.response.code).to.eql(202));", "pm.environment.set('analyticsMaintenanceJobId', pm.response.json().data.id);"]}}]
+        },
+        {
+          "name": "Queue Historical Backfill",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "body": {"mode": "raw", "raw": "{\"fromDate\":\"2026-01-01\",\"toDate\":\"2026-01-31\"}", "options": {"raw": {"language": "json"}}},
+            "url": "{{baseUrl}}/api/v1/admin/analytics/rollups/jobs/backfill"
+          }
+        },
+        {
+          "name": "Get Maintenance Job Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminAccessToken}}"}],
+            "url": "{{baseUrl}}/api/v1/admin/analytics/rollups/jobs/{{analyticsMaintenanceJobId}}"
+          }
         }
       ]
     }

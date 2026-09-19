@@ -4,7 +4,104 @@
 
 This document provides the historical specification for requests, headers, request bodies, and responses captured in the **Souklab Postman Collection** (`.postman/souklab.postman_collection.json`).
 
+The collection includes a current `Phase 10 — Admin Analytics` folder with
+executable job, alias, download, financial, rebuild, and backfill requests.
+
 > Authorization contract: registration accepts `accountType` (`CLIENT` or `ARTISAN`) only. Responses expose database-backed `permissions` such as `permission:artisan:content`; legacy `role`, `roles`, and `ROLE_*` fields are obsolete and must not be sent or expected.
+
+## Phase 10 analytics jobs
+
+Analytics requires `permission:analytics:admin`; job status, results, and
+downloads are owner-scoped. `/api/v1/admin/stats/jobs` is an alias for the
+analytics route. Financial reports additionally require
+`permission:financial:admin`.
+
+```http
+POST /api/v1/admin/analytics/jobs
+Content-Type: application/json
+
+{"reportType":"ENGAGEMENT","fromDate":"2026-01-01","toDate":"2026-01-31","bucket":"DAY","filters":{"eventType":"MESSAGE_SENT"},"pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+```
+
+The same job contract is used by every report family:
+
+| Family | Example `reportType` | Additional permission |
+|---|---|---|
+| Platform overview | `OVERVIEW` | analytics |
+| Growth and retention | `GROWTH` | analytics |
+| Engagement | `ENGAGEMENT` | analytics |
+| Moderation | `MODERATION` | analytics |
+| Content and learning | `CONTENT_LEARNING` | analytics |
+| Subscriptions and payments | `SUBSCRIPTIONS_PAYMENTS` | financial |
+| Operational | `OPERATIONAL` | analytics |
+| Time series | `TIME_SERIES` | analytics |
+| CSV export | `CSV_EXPORT` with `outputFormat: CSV` | source report permissions |
+
+Example family requests:
+
+```json
+{"reportType":"OVERVIEW","fromDate":"2026-01-01","toDate":"2026-01-31","bucket":"MONTH","pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+{"reportType":"GROWTH","fromDate":"2026-01-01","toDate":"2026-03-31","bucket":"WEEK","pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+{"reportType":"MODERATION","fromDate":"2026-01-01","toDate":"2026-01-31","bucket":"DAY","pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+{"reportType":"CONTENT_LEARNING","fromDate":"2026-01-01","toDate":"2026-01-31","bucket":"DAY","pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+{"reportType":"SUBSCRIPTIONS_PAYMENTS","fromDate":"2026-01-01","toDate":"2026-01-31","bucket":"DAY","pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+{"reportType":"OPERATIONAL","fromDate":"2026-01-01","toDate":"2026-01-01","bucket":"DAY","pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+{"reportType":"TIME_SERIES","fromDate":"2026-01-01","toDate":"2026-01-31","bucket":"DAY","pageNumber":0,"pageSize":20,"outputFormat":"JSON"}
+{"reportType":"CSV_EXPORT","fromDate":"2026-01-01","toDate":"2026-01-31","bucket":"DAY","pageNumber":0,"pageSize":100,"outputFormat":"CSV"}
+```
+
+Supported `eventType` filters are the persisted activity taxonomy values in
+`ANALYTICS_KPI_CATALOG.md`; unknown values are rejected during submission.
+
+Poll `GET /api/v1/admin/analytics/jobs/{id}`, then fetch the result or the
+authenticated `/download` endpoint. CSV downloads use `text/csv`.
+JSON results expose the bucketed `series` through the standard
+`PaginatedResponse` shape (`content`, `pageNumber`, `pageSize`,
+`totalElements`, `totalPages`, and `last`).
+Family-specific status aggregates are also exposed as independently paginated
+`tables` (for example `feedPosts`, `formations`, `reports`, `payments`, and
+`subscriptions`) using the same response shape.
+
+Completion and failure notifications are sent to the submitting administrator's
+private STOMP notification destination and contain metadata only; clients fetch
+the actual result through the authenticated REST endpoints.
+
+Jobs are dispatched to the configured application executor after the submission
+transaction commits. Analytics outbox delivery uses persisted retry timing and
+publisher confirms; exhausted messages are sent to the configured RabbitMQ
+dead-letter exchange before being marked dead-lettered in MariaDB.
+
+Administrators with analytics permission can rebuild bounded historical event
+rollups. For asynchronous maintenance, submit one of the following and poll
+the owner-scoped status endpoint:
+
+```http
+POST /api/v1/admin/analytics/rollups/jobs/rebuild
+POST /api/v1/admin/analytics/rollups/jobs/backfill
+GET  /api/v1/admin/analytics/rollups/jobs/{id}
+```
+
+The legacy route names below remain available as asynchronous compatibility
+aliases; they return the same persisted maintenance-job response and must be
+polled through the status endpoint.
+
+```http
+POST /api/v1/admin/analytics/rollups/rebuild
+{"fromDate":"2026-01-01","toDate":"2026-01-31"}
+```
+
+The response is queued with HTTP 202. Rebuilds are audited and replace only
+the requested date window.
+
+Historical source backfill uses the same bounded request shape:
+
+```http
+POST /api/v1/admin/analytics/rollups/backfill
+{"fromDate":"2026-01-01","toDate":"2026-01-31"}
+```
+
+Backfill also returns HTTP 202 and derives only metrics supported by stored
+source timestamps; it does not invent historical login or interaction events.
 
 ## Table of Contents
 1. [Auth — Client](#1-auth--client)

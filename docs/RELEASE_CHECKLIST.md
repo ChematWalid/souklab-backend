@@ -3,6 +3,7 @@
 - [ ] Hosted CI is green, including integration tests and dependency scan.
 - [ ] Working tree is clean and image is built from the reviewed commit.
 - [ ] Flyway migrations reviewed and upgrade path verified.
+- [ ] Opt-in `Phase10MariaDbMigrationTest` passes with `PHASE10_MARIADB_INTEGRATION=true`.
 - [ ] Fresh Elasticsearch bootstrap profile completed, then normal app schema validation verified.
 - [ ] No unresolved critical/high dependency vulnerability.
 - [ ] Production env file is secret-backed, mode 600, and absent from Git.
@@ -12,3 +13,9 @@
 - [ ] Immutable image digest recorded.
 - [ ] Readiness returns HTTP 200 after deployment.
 - [ ] Prometheus scrape is up and critical flows pass.
+- [ ] V6-V12 analytics migrations applied and analytics permission assigned only to approved administrators.
+- [ ] Analytics job owner isolation, financial permission split, CSV download, and `/admin/stats` alias verified.
+- [ ] Activity-event retention and bounded backfill/rollup evidence recorded before enabling historical exports.
+- [ ] RabbitMQ analytics exchange/queue/DLQ delivery, persisted retry backoff, publisher confirms, and duplicate-event idempotency verified with the feature enabled.
+- [ ] Private `/v3/api-docs` and Swagger UI authenticated access verified.
+- [ ] Per-IP and authenticated per-user rate-limit behavior verified across application instances.

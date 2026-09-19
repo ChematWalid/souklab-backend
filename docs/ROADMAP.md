@@ -96,10 +96,10 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 ---
 
 ## 📍 Phase 9: Monetization, Subscriptions & Chargily Pay V2
-- [ ] **Step 9.1**: Implement `SubscriptionPricing`, `ArtisanSubscription`, `ClientSubscription`, `Payment`, `PaymentWebhookLog`.
-- [ ] **Step 9.2**: Re-enable `WebClientConfig` and build `ChargilyClient` for checkout session creation.
-- [ ] **Step 9.3**: Implement secure webhook handler (`POST /api/v1/subscription/webhook`) with HMAC-SHA256 signature verification and idempotency.
-- [ ] **Step 9.4**: Implement automated subscription lifecycle manager (renewal, expiry cron job).
+- [x] **Step 9.1**: Implement `SubscriptionPricing`, `ArtisanSubscription`, `ClientSubscription`, `Payment`, `PaymentWebhookLog`.
+- [x] **Step 9.2**: Re-enable `WebClientConfig` and build `ChargilyClient` for checkout session creation.
+- [x] **Step 9.3**: Implement secure webhook handler (`POST /api/v1/subscription/webhook`) with HMAC-SHA256 signature verification and idempotency.
+- [x] **Step 9.4**: Implement automated subscription lifecycle manager (renewal, expiry cron job).
 
 ---
 
@@ -115,5 +115,5 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
   - Unit and MVC slice tests are present across domain services and controllers.
   - Postman collections document the endpoint verification scenarios.
   - Execute the Maven test profile with a supported JDK and the required external services before release; CI results are the authoritative pass count.
-- [ ] **Step 10.2**: Implement platform analytics & KPI aggregation (`/api/v1/admin/stats`).
-- [ ] **Step 10.3**: Actuator monitoring, health checks, rate-limit fine-tuning, and Swagger/OpenAPI documentation.
+- [x] **Step 10.2**: Implement platform analytics & KPI aggregation (`/api/v1/admin/stats`) with asynchronous owner-scoped jobs, rollups, exports, audit records, and event-driven KPI tracking.
+- [x] **Step 10.3**: Implement actuator monitoring, feature-aware readiness, configurable per-IP/per-user rate limits, and private Swagger/OpenAPI documentation. Production evidence remains tracked in the release checklist.

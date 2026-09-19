@@ -386,7 +386,10 @@ This module is planned and is not exposed by the current source tree. There are 
 - `POST /api/v1/admin/users/{id}/unban`: Reinstate a banned or timed-out account.
 - `GET /api/v1/admin/users/audit-logs`: Query administrative audit logs.
 - `GET/POST/DELETE /api/v1/admin/users/{userId}/permissions`: List, assign, or revoke enabled permissions.
-Platform KPI statistics are planned and no `/api/v1/admin/stats` endpoint is currently exposed.
+Platform KPI statistics are exposed asynchronously through `/api/v1/admin/analytics/jobs` and the
+compatibility alias `/api/v1/admin/stats/jobs`. Results are owner-scoped and retrieved through
+the corresponding status, result, and download endpoints; financial reports require the
+financial administrator permission in addition to analytics permission.
 - `GET /api/v1/admin/formations/pending`: Paginated queue of formations awaiting administrative review.
 - `POST /api/v1/admin/formations/{id}/review`: Approve or reject workshop curriculum.
 - `POST /api/v1/admin/formations/{id}/publish`: Publish approved workshop to public catalog.
