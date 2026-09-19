@@ -34,12 +34,10 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ChargilyWebhookService {
-    private static final Set<String> ALLOWED_EVENTS = Set.of("checkout.paid", "checkout.failed", "checkout.canceled");
     private final ObjectMapper objectMapper;
     private final WebhookSecurityService webhookSecurityService;
     private final PaymentWebhookLogRepository webhookLogRepository;
@@ -62,7 +60,8 @@ public class ChargilyWebhookService {
             throw new InvalidWebhookSignatureException();
         }
         ChargilyWebhookPayload payload = parse(rawBody);
-        if (payload.getId() == null || payload.getId().isBlank() || !ALLOWED_EVENTS.contains(payload.getType())
+        ChargilyWebhookEvent.Checkout eventType = ChargilyWebhookEvent.Checkout.fromValue(payload.getType()).orElse(null);
+        if (payload.getId() == null || payload.getId().isBlank() || eventType == null
                 || payload.getData() == null || !payload.getData().isObject() || payload.getCreatedAt() == null) {
             throw new MalformedWebhookException("Unsupported or incomplete webhook event");
         }
@@ -80,7 +79,7 @@ public class ChargilyWebhookService {
         if (checkoutId == null || checkoutId.isBlank()) {
             throw new MalformedWebhookException("Webhook checkout identifier is missing");
         }
-        boolean claimed = webhookEventClaimService.claim(payload.getId(), payload.getType(), checkoutId, rawBody);
+        boolean claimed = webhookEventClaimService.claim(payload.getId(), eventType.value(), checkoutId, rawBody);
         if (!claimed) {
             PaymentWebhookLog existing = webhookLogRepository.findByProviderEventId(payload.getId()).orElse(null);
             if (existing == null || existing.getStatus() != WebhookProcessingStatus.FAILED) {
@@ -94,7 +93,7 @@ public class ChargilyWebhookService {
         PaymentWebhookLog log = webhookLogRepository.findByProviderEventId(payload.getId()).orElseThrow();
         log.setStatus(WebhookProcessingStatus.PROCESSING);
         try {
-            paymentRepository.findByProviderCheckoutId(checkoutId).ifPresent(payment -> apply(payment, payload.getType(), log));
+            paymentRepository.findByProviderCheckoutId(checkoutId).ifPresent(payment -> apply(payment, eventType, log));
             if (log.getStatus() == WebhookProcessingStatus.PROCESSING) {
                 log.setStatus(WebhookProcessingStatus.IGNORED);
             }
@@ -104,7 +103,7 @@ public class ChargilyWebhookService {
         }
     }
 
-    private void apply(Payment payment, String eventType, PaymentWebhookLog log) {
+    private void apply(Payment payment, ChargilyWebhookEvent.Checkout eventType, PaymentWebhookLog log) {
         if (payment.getStatus() == PaymentStatus.PAID
                 || payment.getStatus() == PaymentStatus.FAILED
                 || payment.getStatus() == PaymentStatus.CANCELED
@@ -113,11 +112,11 @@ public class ChargilyWebhookService {
             log.setStatus(WebhookProcessingStatus.PROCESSED);
             return;
         }
-        if ("checkout.paid".equals(eventType)) {
+        if (eventType == ChargilyWebhookEvent.Checkout.PAID) {
             payment.setStatus(PaymentStatus.PAID);
             activateSubscription(payment);
             notificationService.createForUser(payment.getAccount(), "Your subscription payment was successful.", NotificationType.PAYMENT_SUCCESS, payment.getId());
-        } else if ("checkout.failed".equals(eventType)) {
+        } else if (eventType == ChargilyWebhookEvent.Checkout.FAILED) {
             payment.setStatus(PaymentStatus.FAILED);
             cancelPendingSubscription(payment);
             notificationService.createForUser(payment.getAccount(), "Your subscription payment failed.", NotificationType.PAYMENT_FAILED, payment.getId());
@@ -128,7 +127,7 @@ public class ChargilyWebhookService {
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION, payment.getAccount().getId(), payment.getId(),
-                    Map.of("providerEvent", eventType, "status", payment.getStatus().value()));
+                    Map.of("providerEvent", eventType.value(), "status", payment.getStatus().value()));
             if (payment.getStatus() == PaymentStatus.PAID) {
                 activityEventService.record(AnalyticsEvent.Subscription.ACTIVATED, payment.getAccount().getId(),
                         payment.getSubscriptionId(), Map.of("paymentId", payment.getId()));
