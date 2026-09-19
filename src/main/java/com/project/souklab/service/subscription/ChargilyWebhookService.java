@@ -156,7 +156,7 @@ public class ChargilyWebhookService {
     private void recordSubscriptionCancellation(User account, String subscriptionId) {
         if (activityEventService != null && account != null) {
             activityEventService.record(AnalyticsEvent.Subscription.CANCELED, account.getId(), subscriptionId,
-                    Map.of("status", "CANCELED", "source", AnalyticsEvent.Source.PAYMENT_WEBHOOK.value()));
+                    Map.of("status", SubscriptionStatus.CANCELED.value(), "source", AnalyticsEvent.Source.PAYMENT_WEBHOOK.value()));
         }
     }
 
