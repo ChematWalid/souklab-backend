@@ -20,5 +20,5 @@ Core authentication workflows, credential hashing, registration state machines, 
 | Service Class | Responsibility |
 | :--- | :--- |
 | [`AuthService`](AuthService.java) | Handles `registerUser`, `login`, `logout`, `refreshToken`, `verifyEmail`, `resendVerification`, `forgotPassword`, `resetPassword`, and `changePassword`. Profile operations are owned by `ProfileService`. |
-| [`PermissionManagementService`](PermissionManagementService.java) | Adds and removes enabled database-backed capabilities for users after administrator authorization. |
+| [`PermissionManagementService`](PermissionManagementService.java) | Adds and removes enabled permissions from the canonical grouped `Permission` enum catalog after administrator authorization. |
 | [`CustomUserDetailsService`](CustomUserDetailsService.java) | Implements Spring Security's `UserDetailsService`, loading users by email with enabled permission authorities. |

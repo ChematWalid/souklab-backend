@@ -2,6 +2,7 @@ package com.project.souklab.controller.user;
 import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.auth.PermissionManagementService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +35,18 @@ class PermissionManagementControllerTest {
 
     @Test
     void adminCanListGrantAndRevokePermissions() throws Exception {
-        when(permissionManagementService.list("user-1")).thenReturn(Set.of("permission:user:read"));
-        when(permissionManagementService.grant(eq("user-1"), any())).thenReturn(Set.of("permission:user:read", "permission:user:write"));
-        when(permissionManagementService.revoke(eq("user-1"), any())).thenReturn(Set.of("permission:user:read"));
+        when(permissionManagementService.list("user-1")).thenReturn(Set.of(Permission.Profile.READ.value()));
+        when(permissionManagementService.grant(eq("user-1"), any())).thenReturn(Set.of(Permission.Profile.READ.value(), Permission.Profile.WRITE.value()));
+        when(permissionManagementService.revoke(eq("user-1"), any())).thenReturn(Set.of(Permission.Profile.READ.value()));
 
         mockMvc.perform(get("/api/v1/admin/users/user-1/permissions").with(admin()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0]").value("permission:user:read"));
-        String request = "{\"permissionKey\":\"permission:user:write\"}";
+                .andExpect(jsonPath("$.data[0]").value(Permission.Profile.READ.value()));
+        String request = "{\"permissionKey\":\"" + Permission.Profile.WRITE.value() + "\"}";
         mockMvc.perform(post("/api/v1/admin/users/user-1/permissions").with(admin())
                         .contentType(MediaType.APPLICATION_JSON).content(request))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasItem("permission:user:write")));
+                .andExpect(jsonPath("$.data", hasItem(Permission.Profile.WRITE.value())));
         mockMvc.perform(delete("/api/v1/admin/users/user-1/permissions").with(admin())
                         .contentType(MediaType.APPLICATION_JSON).content(request))
                 .andExpect(status().isOk())

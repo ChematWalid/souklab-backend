@@ -3,6 +3,7 @@ package com.project.souklab.security;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Canonical permission contract. Each permission is represented by a grouped
@@ -33,6 +34,10 @@ public interface Permission {
                 Profile.READ, Profile.WRITE,
                 Report.CREATE, File.READ, Message.SEND,
                 Analytics.ADMIN);
+    }
+
+    static Optional<Permission> fromValue(String value) {
+        return all().stream().filter(permission -> permission.value().equals(value)).findFirst();
     }
 
     enum Admin implements Permission {

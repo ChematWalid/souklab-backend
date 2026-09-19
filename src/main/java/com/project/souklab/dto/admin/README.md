@@ -9,4 +9,4 @@ Data representations for administrative monitoring, auditing, and platform manag
 | Class | Type | Description |
 | :--- | :--- | :--- |
 | [`AuditLogDTO`](AuditLogDTO.java) | DTO Class | Serializes platform audit log entries including `action`, `performedBy`, `details`, and `createdAt` timestamp. |
-| [`PermissionAssignmentRequestDTO`](PermissionAssignmentRequestDTO.java) | Request DTO | Carries a permission key for administrator capability assignment or revocation. |
+| [`PermissionAssignmentRequestDTO`](PermissionAssignmentRequestDTO.java) | Request DTO | Carries the persisted value of one canonical grouped `Permission` enum for administrator assignment or revocation. |

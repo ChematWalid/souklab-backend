@@ -9,13 +9,15 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.User;
-import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.security.AccessControlService;
+import com.project.souklab.security.Permission;
+import com.project.souklab.service.audit.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,6 +68,9 @@ public class PermissionManagementService {
     private Set<String> listWithoutAuthorization(User user) {
         return user.getPermissions().stream().filter(AuthorizationPermission::isEnabled)
                 .map(AuthorizationPermission::getPermissionKey)
+                .map(Permission::fromValue)
+                .flatMap(Optional::stream)
+                .map(Permission::value)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -74,7 +79,9 @@ public class PermissionManagementService {
     }
 
     private AuthorizationPermission findPermission(String key) {
-        return permissionRepository.findByPermissionKeyAndEnabledTrue(key.trim())
+        Permission permission = Permission.fromValue(key.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Permission not found."));
+        return permissionRepository.findByPermissionKeyAndEnabledTrue(permission.value())
                 .orElseThrow(() -> new ResourceNotFoundException("Permission not found."));
     }
 
