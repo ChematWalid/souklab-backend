@@ -133,21 +133,64 @@ public final class AnalyticsMetric {
         }
     }
 
-    public enum Operational implements Key {
-        ANALYTICS_JOBS_QUEUED("analyticsJobsQueued"), ANALYTICS_JOBS_RUNNING("analyticsJobsRunning"),
-        ANALYTICS_JOBS_COMPLETED("analyticsJobsCompleted"), ANALYTICS_JOBS_FAILED("analyticsJobsFailed"),
-        MAINTENANCE_JOBS_QUEUED("maintenanceJobsQueued"), MAINTENANCE_JOBS_RUNNING("maintenanceJobsRunning"),
-        MAINTENANCE_JOBS_COMPLETED("maintenanceJobsCompleted"), MAINTENANCE_JOBS_FAILED("maintenanceJobsFailed"),
-        OUTBOX_PENDING("outboxPending"), OUTBOX_PUBLISHED("outboxPublished"), OUTBOX_DEAD_LETTER("outboxDeadLetter"),
-        APPLICATION_HEALTH("applicationHealth"), HEALTH_COMPONENTS("healthComponents"),
-        REQUEST_COUNTERS("requestCounters"), RATE_LIMIT_REJECTIONS("rateLimitRejections"),
-        REQUEST_COUNTER_METRIC("souklab.http.requests"), RATE_LIMIT_REJECTION_METRIC("souklab.rate_limit.rejections");
+    public static final class Operational {
+        private Operational() { }
 
-        private final String value;
+        public static final class Job {
+            private Job() { }
 
-        Operational(String value) { this.value = value; }
+            public enum Analytics implements Key {
+                QUEUED("analyticsJobsQueued"), RUNNING("analyticsJobsRunning"),
+                COMPLETED("analyticsJobsCompleted"), FAILED("analyticsJobsFailed");
 
-        public String value() { return value; }
+                private final String value;
+
+                Analytics(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
+
+            public enum Maintenance implements Key {
+                QUEUED("maintenanceJobsQueued"), RUNNING("maintenanceJobsRunning"),
+                COMPLETED("maintenanceJobsCompleted"), FAILED("maintenanceJobsFailed");
+
+                private final String value;
+
+                Maintenance(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
+        }
+
+        public enum Outbox implements Key {
+            PENDING("outboxPending"), PUBLISHED("outboxPublished"), DEAD_LETTER("outboxDeadLetter");
+
+            private final String value;
+
+            Outbox(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Health implements Key {
+            APPLICATION("applicationHealth"), COMPONENTS("healthComponents");
+
+            private final String value;
+
+            Health(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Request implements Key {
+            COUNTERS("requestCounters"), RATE_LIMIT_REJECTIONS("rateLimitRejections");
+
+            private final String value;
+
+            Request(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
 
         public enum Metric implements Key {
             UPLOADS("souklab.uploads"), VIRUS_SCANS("souklab.virus.scans"),
@@ -159,6 +202,26 @@ public final class AnalyticsMetric {
             Metric(String value) { this.value = value; }
 
             public String value() { return value; }
+
+            public enum Request implements Key {
+                COUNTERS("souklab.http.requests");
+
+                private final String value;
+
+                Request(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
+
+            public enum RateLimit implements Key {
+                REJECTIONS("souklab.rate_limit.rejections");
+
+                private final String value;
+
+                RateLimit(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
         }
 
         public enum Dependency implements Key {

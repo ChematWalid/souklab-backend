@@ -18,7 +18,7 @@ class OperationalMetricsTest {
                 AnalyticsMetric.Operational.RequestOutcome.Status.SUCCESS);
         metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS, true);
 
-        Map<String, Double> snapshot = metrics.snapshot(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC);
+        Map<String, Double> snapshot = metrics.snapshot(AnalyticsMetric.Operational.Metric.Request.COUNTERS);
 
         assertThat(snapshot).containsEntry("operation=GET,outcome=2xx", 1.0);
         assertThat(registry.get("souklab.dependency.available")

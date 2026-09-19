@@ -58,7 +58,7 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Summary.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.Series.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.EventRollup.SEPARATOR.value()).isEqualTo("\u0000");
-        assertThat(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC.value()).isEqualTo("souklab.http.requests");
+        assertThat(AnalyticsMetric.Operational.Metric.Request.COUNTERS.value()).isEqualTo("souklab.http.requests");
         assertThat(AnalyticsMetric.Operational.Metric.VIRUS_SCANS.value()).isEqualTo("souklab.virus.scans");
         assertThat(AnalyticsMetric.Operational.Dependency.RABBITMQ.value()).isEqualTo("rabbitmq");
         assertThat(AnalyticsMetric.Operational.Outcome.Error.REJECTED.value()).isEqualTo("error_rejected");
