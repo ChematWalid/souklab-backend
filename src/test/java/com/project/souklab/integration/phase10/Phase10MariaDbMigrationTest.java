@@ -31,7 +31,7 @@ class Phase10MariaDbMigrationTest {
                     .migrate();
 
             try (Connection connection = database.createConnection(""); Statement statement = connection.createStatement()) {
-                assertThat(migrationVersion(statement)).isEqualTo("12");
+                assertThat(migrationVersion(statement)).isEqualTo("13");
                 assertThat(tableExists(statement, "activity_events")).isTrue();
                 assertThat(tableExists(statement, "analytics_outbox_events")).isTrue();
                 assertThat(tableExists(statement, "analytics_processed_events")).isTrue();
@@ -39,6 +39,7 @@ class Phase10MariaDbMigrationTest {
                 assertThat(tableExists(statement, "analytics_jobs")).isTrue();
                 assertThat(tableExists(statement, "analytics_job_artifacts")).isTrue();
                 assertThat(tableExists(statement, "analytics_maintenance_jobs")).isTrue();
+                assertThat(columnExists(statement, "content_reports", "resolved_at")).isTrue();
                 assertThat(columnExists(statement, "payments", "manual_grant")).isTrue();
                 assertThat(columnExists(statement, "analytics_outbox_events", "next_attempt_at")).isTrue();
                 assertThat(tableContains(statement, "permissions", "permission_key", Permission.Analytics.ADMIN.value())).isTrue();
