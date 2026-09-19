@@ -25,7 +25,8 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsFilterKey.fromKey(AnalyticsMetric.Payload.EVENT_TYPE.value()))
                 .contains(AnalyticsFilterKey.EVENT_TYPE);
         assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
-        assertThat(AnalyticsSortField.fromField("activityEvents")).isEqualTo(AnalyticsSortField.ACTIVITY_EVENTS);
+        assertThat(AnalyticsSortField.fromField(AnalyticsMetric.Series.ACTIVITY_EVENTS.value()))
+                .isEqualTo(AnalyticsSortField.ACTIVITY_EVENTS);
         assertThat(EnrollmentStatus.ATTENDED.value()).isEqualTo("ATTENDED");
     }
 

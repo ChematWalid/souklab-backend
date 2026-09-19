@@ -17,34 +17,34 @@ class AnalyticsSeriesSorterTest {
     @Test
     void sortsNumericSeriesInBothDirectionsAndKeepsNullsLast() {
         List<Map<String, Object>> series = new ArrayList<>(List.of(
-                point("activityEvents", 4L),
-                point("activityEvents", null),
-                point("activityEvents", 1L)));
+                point(AnalyticsMetric.Series.ACTIVITY_EVENTS, 4L),
+                point(AnalyticsMetric.Series.ACTIVITY_EVENTS, null),
+                point(AnalyticsMetric.Series.ACTIVITY_EVENTS, 1L)));
 
         AnalyticsSeriesSorter.sort(series, AnalyticsSortField.ACTIVITY_EVENTS, AnalyticsSortDirection.ASC);
-        assertThat(series).extracting(point -> point.get("activityEvents"))
+        assertThat(series).extracting(point -> point.get(AnalyticsMetric.Series.ACTIVITY_EVENTS.value()))
                 .containsExactly(1L, 4L, null);
 
         AnalyticsSeriesSorter.sort(series, AnalyticsSortField.ACTIVITY_EVENTS, AnalyticsSortDirection.DESC);
-        assertThat(series).extracting(point -> point.get("activityEvents"))
+        assertThat(series).extracting(point -> point.get(AnalyticsMetric.Series.ACTIVITY_EVENTS.value()))
                 .containsExactly(4L, 1L, null);
     }
 
     @Test
     void sortsDateSeriesUsingTheTypedExternalFieldKey() {
         List<Map<String, Object>> series = new ArrayList<>(List.of(
-                point("startDate", LocalDate.of(2026, 3, 2)),
-                point("startDate", LocalDate.of(2026, 1, 1))));
+                point(AnalyticsMetric.Series.START_DATE, LocalDate.of(2026, 3, 2)),
+                point(AnalyticsMetric.Series.START_DATE, LocalDate.of(2026, 1, 1))));
 
         AnalyticsSeriesSorter.sort(series, AnalyticsSortField.START_DATE, AnalyticsSortDirection.ASC);
 
-        assertThat(series).extracting(point -> point.get("startDate"))
+        assertThat(series).extracting(point -> point.get(AnalyticsMetric.Series.START_DATE.value()))
                 .containsExactly(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 2));
     }
 
-    private static Map<String, Object> point(String key, Object value) {
+    private static Map<String, Object> point(AnalyticsMetric.Key key, Object value) {
         Map<String, Object> point = new LinkedHashMap<>();
-        point.put(key, value);
+        point.put(key.value(), value);
         return point;
     }
 }
