@@ -455,7 +455,7 @@ public class AuthService {
      */
     @Transactional
     public JwtResponseDTO processOAuth2Success(OAuth2User oAuth2User, String intentRole, HttpServletRequest request) {
-        String provider = OAuthProvider.GOOGLE.value();
+        OAuthProvider provider = OAuthProvider.GOOGLE;
         String providerUserId = oAuth2User.getAttribute("sub");
         if (providerUserId == null || providerUserId.isBlank()) {
             providerUserId = oAuth2User.getName();
@@ -476,7 +476,7 @@ public class AuthService {
         String lastName = oAuth2User.getAttribute("family_name");
         String picture = oAuth2User.getAttribute("picture");
 
-        var existingIdentity = oauthIdentityRepository.findByProviderAndProviderUserId(provider, providerUserId);
+        var existingIdentity = oauthIdentityRepository.findByProviderAndProviderUserId(provider.value(), providerUserId);
 
         User user;
         if (existingIdentity.isPresent()) {
@@ -674,7 +674,7 @@ public class AuthService {
      * @throws BadRequestException       if the intent role is missing or invalid
      * @throws ResourceNotFoundException if the resolved role does not exist in the database
      */
-    private User linkOrAuthenticateExistingIdentity(String email, String provider, String providerUserId,
+    private User linkOrAuthenticateExistingIdentity(String email, OAuthProvider provider, String providerUserId,
                                                     String firstName, String lastName, String picture,
                                                     String intentRole) {
         var existingUserByEmail = userRepository.findByEmail(email);
@@ -699,10 +699,10 @@ public class AuthService {
      * @param email          the normalised email address
      * @return the same {@link User} instance with the new identity persisted
      */
-    private User autoLinkByVerifiedEmail(User user, String provider, String providerUserId, String email) {
+    private User autoLinkByVerifiedEmail(User user, OAuthProvider provider, String providerUserId, String email) {
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(user)
-                .provider(provider)
+                .provider(provider.value())
                 .providerUserId(providerUserId)
                 .email(email)
                 .build();
@@ -725,7 +725,7 @@ public class AuthService {
      * @throws BadRequestException       if the intent role is blank or does not match ARTISAN or CLIENT
      * @throws ResourceNotFoundException if the resolved role does not exist in the database
      */
-    private User createOAuthUserAndProfile(String email, String provider, String providerUserId,
+    private User createOAuthUserAndProfile(String email, OAuthProvider provider, String providerUserId,
                                            String firstName, String lastName, String picture,
                                            String intentRole) {
         if (intentRole == null || intentRole.isBlank()) {
@@ -755,7 +755,7 @@ public class AuthService {
 
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(user)
-                .provider(provider)
+                .provider(provider.value())
                 .providerUserId(providerUserId)
                 .email(email)
                 .build();
