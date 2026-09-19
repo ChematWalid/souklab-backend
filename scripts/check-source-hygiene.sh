@@ -40,6 +40,10 @@ if rg -n '\.authority\(\)' src/main/java src/test/java --glob '*.java'; then
   echo 'string authority adapter usage detected; use grouped Permission values and matches' >&2
   exit 1
 fi
+if rg -n '\.name\(\)' src/main/java src/test/java --glob '*.java'; then
+  echo 'enum name string conversion detected; use typed enum values or an explicit boundary adapter' >&2
+  exit 1
+fi
 if rg -n 'private String permissionKey' src/main/java/com/project/souklab/dto src/test/java --glob '*.java'; then
   echo 'permission request fields must use grouped Permission enums' >&2
   exit 1
