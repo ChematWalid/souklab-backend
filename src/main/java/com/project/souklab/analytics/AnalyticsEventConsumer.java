@@ -34,13 +34,14 @@ public class AnalyticsEventConsumer {
     public void consume(String payload) throws Exception {
         JsonNode event = objectMapper.readTree(payload);
         String id = event.path(AnalyticsMetric.Payload.EVENT_ID.value()).asText(null);
-        String type = event.path(AnalyticsMetric.Payload.EVENT_TYPE.value()).asText(null);
-        if (id == null || type == null) throw new IllegalArgumentException("Analytics event lacks identity or type");
-        if (AnalyticsEvent.fromValue(type).isEmpty()) throw new IllegalArgumentException("Analytics event type is not registered");
+        String typeValue = event.path(AnalyticsMetric.Payload.EVENT_TYPE.value()).asText(null);
+        if (id == null || typeValue == null) throw new IllegalArgumentException("Analytics event lacks identity or type");
+        AnalyticsEvent.Type type = AnalyticsEvent.fromValue(typeValue)
+                .orElseThrow(() -> new IllegalArgumentException("Analytics event type is not registered"));
         if (processed.existsByEventId(id)) return;
         LocalDate day = LocalDateTime.parse(event.path(AnalyticsMetric.Payload.EVENT_TIME.value()).asText()).atOffset(ZoneOffset.UTC)
                 .atZoneSameInstant(ZoneId.of(properties.getBusinessTimeZone())).toLocalDate();
-        String key = AnalyticsMetric.EventRollup.PREFIX.value() + type;
+        String key = AnalyticsMetric.EventRollup.PREFIX.value() + type.value();
         rollups.incrementEventKpi(day, key);
         AnalyticsProcessedEvent marker = new AnalyticsProcessedEvent(); marker.setEventId(id); processed.save(marker);
     }

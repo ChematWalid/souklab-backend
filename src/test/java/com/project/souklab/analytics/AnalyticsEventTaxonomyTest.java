@@ -22,7 +22,8 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsEvent.Subscription.RENEWAL.status().value()).isEqualTo("RENEWAL");
         assertThat(AnalyticsEvent.fromValue("REPORT_RESOLVED")).contains(AnalyticsEvent.Report.RESOLVED);
         assertThat(AnalyticsEvent.fromValue("unknown_event")).isEmpty();
-        assertThat(AnalyticsFilterKey.fromKey("eventType")).contains(AnalyticsFilterKey.EVENT_TYPE);
+        assertThat(AnalyticsFilterKey.fromKey(AnalyticsMetric.Payload.EVENT_TYPE.value()))
+                .contains(AnalyticsFilterKey.EVENT_TYPE);
         assertThat(AnalyticsFilterKey.fromKey("unknown")).isEmpty();
         assertThat(AnalyticsSortField.fromField("activityEvents")).isEqualTo(AnalyticsSortField.ACTIVITY_EVENTS);
         assertThat(EnrollmentStatus.ATTENDED.value()).isEqualTo("ATTENDED");
