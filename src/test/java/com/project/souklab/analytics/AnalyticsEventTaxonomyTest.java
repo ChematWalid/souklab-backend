@@ -92,4 +92,15 @@ class AnalyticsEventTaxonomyTest {
 
         assertThat(json).contains("\"periodComparison\"", "\"current\":4", "\"previous\":2");
     }
+
+    @Test
+    void groupedPayloadEnumsKeepStableJsonObjectKeys() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        String json = mapper.writeValueAsString(Map.of(
+                AnalyticsMetric.Payload.EVENT_ID, "event-1",
+                AnalyticsMetric.Payload.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value()));
+
+        assertThat(json).contains("\"eventId\":\"event-1\"", "\"eventType\":\"REPORT_RESOLVED\"");
+    }
 }
