@@ -126,7 +126,7 @@ public class ChargilyWebhookService {
             notificationService.createForUser(payment.getAccount(), "Your subscription checkout was canceled.", NotificationType.CHECKOUT_CANCELED, payment.getId());
         }
         if (activityEventService != null) {
-            activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION, payment.getAccount().getId(), payment.getId(),
+            activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION, payment.getAccount().getId(), payment.getId(),
                     Map.of("providerEvent", eventType.value(), "status", payment.getStatus().value()));
             if (payment.getStatus() == PaymentStatus.PAID) {
                 activityEventService.record(AnalyticsEvent.Subscription.ACTIVATED, payment.getAccount().getId(),

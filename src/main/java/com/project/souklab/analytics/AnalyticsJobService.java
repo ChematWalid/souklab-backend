@@ -210,7 +210,7 @@ public class AnalyticsJobService {
                 Map<String, Long> moderationActivity = new LinkedHashMap<>();
                 for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.User.APPROVED, AnalyticsEvent.User.SUSPENDED,
                         AnalyticsEvent.User.TIMED_OUT, AnalyticsEvent.User.REINSTATED,
-                        AnalyticsEvent.Formation.MODERATION_APPROVED, AnalyticsEvent.Formation.MODERATION_REJECTED,
+                        AnalyticsEvent.Formation.Moderation.APPROVED, AnalyticsEvent.Formation.Moderation.REJECTED,
                         AnalyticsEvent.Report.RESOLVED)) {
                     moderationActivity.put(eventType.value(), countFilteredEvent(job, eventType, from, inclusiveTo));
                 }
@@ -221,8 +221,8 @@ public class AnalyticsJobService {
                 }
                 summary.put("userStatuses", userStatuses);
                 summary.put("activityEvents", countFilteredEvents(job, from, inclusiveTo));
-                summary.put("successfulLogins", countFilteredEvent(job, AnalyticsEvent.Authentication.LOGIN_SUCCEEDED, from, inclusiveTo));
-                summary.put("publishedPosts", countFilteredEvent(job, AnalyticsEvent.Feed.POST_PUBLISHED, from, inclusiveTo));
+                summary.put("successfulLogins", countFilteredEvent(job, AnalyticsEvent.Authentication.Login.SUCCEEDED, from, inclusiveTo));
+                summary.put("publishedPosts", countFilteredEvent(job, AnalyticsEvent.Feed.Post.PUBLISHED, from, inclusiveTo));
                 summary.put("messagesSent", countFilteredEvent(job, AnalyticsEvent.Message.SENT, from, inclusiveTo));
                 LocalDateTime activityDayStart = utcStart(job.getToDate());
                 LocalDateTime activityWeekStart = utcStart(job.getToDate().minusDays(6));
@@ -316,7 +316,7 @@ public class AnalyticsJobService {
                         }
                         summary.put("subscriptionLifecycleEvents", lifecycleEvents);
                         summary.put("checkoutCreated", countFilteredEvent(job, AnalyticsEvent.Checkout.CREATED, from, inclusiveTo));
-                        summary.put("paymentStateTransitions", countFilteredEvent(job, AnalyticsEvent.Payment.STATE_TRANSITION, from, inclusiveTo));
+                        summary.put("paymentStateTransitions", countFilteredEvent(job, AnalyticsEvent.Payment.State.TRANSITION, from, inclusiveTo));
                         long grossCollected = payments.sumAmountByStatusAndCurrencyAndCreatedAtBetween(
                                 PaymentStatus.PAID, "DZD", from, to);
                         long providerFees = payments.sumFeesByStatusAndCurrencyAndCreatedAtBetween(
@@ -655,7 +655,7 @@ public class AnalyticsJobService {
         retainedByWindow.put("day7", new HashSet<>());
         retainedByWindow.put("day30", new HashSet<>());
         for (var event : events.findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(
-                AnalyticsEvent.Authentication.LOGIN_SUCCEEDED, from, to.plusDays(30))) {
+                AnalyticsEvent.Authentication.Login.SUCCEEDED, from, to.plusDays(30))) {
             LocalDateTime cohort = firstRegistrationByActor.get(event.getActorId());
             if (cohort == null) continue;
             long age = ChronoUnit.DAYS.between(businessDate(cohort), businessDate(event.getEventTime()));

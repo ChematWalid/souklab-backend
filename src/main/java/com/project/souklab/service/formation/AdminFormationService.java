@@ -122,8 +122,8 @@ public class AdminFormationService {
         Formation saved = formationRepository.save(formation);
         if (activityEventService != null) activityEventService.record(
                 (dto.getDecision() == FormationReviewDecision.APPROVED
-                        ? AnalyticsEvent.Formation.MODERATION_APPROVED
-                        : AnalyticsEvent.Formation.MODERATION_REJECTED), admin.getId(), saved.getId(),
+                        ? AnalyticsEvent.Formation.Moderation.APPROVED
+                        : AnalyticsEvent.Formation.Moderation.REJECTED), admin.getId(), saved.getId(),
                 Map.of("decision", dto.getDecision().value()));
 
         dispatchReviewNotification(saved, dto);

@@ -268,7 +268,7 @@ public class FeedPostService {
         FeedPost saved = postRepository.save(post);
         if (activityEventService != null) {
             User moderator = currentUser();
-            activityEventService.record(AnalyticsEvent.Feed.POST_PUBLISHED, moderator.getId(), saved.getId(),
+            activityEventService.record(AnalyticsEvent.Feed.Post.PUBLISHED, moderator.getId(), saved.getId(),
                     Map.of("postType", saved.getType().value()));
         }
         if (saved.getType() == FeedPostType.FORMATION) {

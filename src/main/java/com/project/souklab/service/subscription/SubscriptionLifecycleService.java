@@ -84,7 +84,7 @@ public class SubscriptionLifecycleService {
         for (Payment payment : paymentRepository.findByStatusOrderByCreatedAtAsc(PaymentStatus.PENDING, PageRequest.of(0, batchSize))) {
             if (payment.getCreatedAt() != null && payment.getCreatedAt().isBefore(cutoff)) {
                 payment.setStatus(PaymentStatus.EXPIRED);
-                if (activityEventService != null) activityEventService.record(AnalyticsEvent.Payment.STATE_TRANSITION,
+                if (activityEventService != null) activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION,
                         payment.getAccount().getId(), payment.getId(), Map.of("status", PaymentStatus.EXPIRED.value()));
                 expirePendingSubscription(payment.getSubscriptionId());
                 notificationService.createForUser(payment.getAccount(), "Your subscription checkout expired.", NotificationType.CHECKOUT_CANCELED, payment.getId());

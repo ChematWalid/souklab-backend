@@ -105,7 +105,7 @@ class AnalyticsOutboxRelayTest {
         AnalyticsOutboxEvent event = new AnalyticsOutboxEvent();
         event.setId("event-1");
         event.setEventId("event-1");
-        event.setEventType(AnalyticsEvent.Authentication.LOGIN_SUCCEEDED);
+        event.setEventType(AnalyticsEvent.Authentication.Login.SUCCEEDED);
         event.setPayloadJson("{}");
         event.setStatus(OutboxStatus.PENDING);
         event.setNextAttemptAt(LocalDateTime.of(2026, 1, 1, 0, 0));

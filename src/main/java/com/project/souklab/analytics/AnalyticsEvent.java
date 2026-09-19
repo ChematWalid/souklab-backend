@@ -29,13 +29,13 @@ public final class AnalyticsEvent {
 
     public static List<Type> all() {
         return List.of(
-                Registration.CREATED, Authentication.LOGIN_SUCCEEDED,
+                Registration.CREATED, Authentication.Login.SUCCEEDED,
                 User.APPROVED, User.SUSPENDED, User.TIMED_OUT, User.REINSTATED,
                 Profile.VIEW, Message.SENT,
-                Formation.SUBMITTED, Formation.MODERATION_APPROVED, Formation.MODERATION_REJECTED,
+                Formation.SUBMITTED, Formation.Moderation.APPROVED, Formation.Moderation.REJECTED,
                 Formation.PUBLISHED, Formation.ENROLLMENT,
                 Review.SUBMITTED, Report.SUBMITTED, Report.RESOLVED,
-                Feed.POST_PUBLISHED, Checkout.CREATED, Payment.STATE_TRANSITION,
+                Feed.Post.PUBLISHED, Checkout.CREATED, Payment.State.TRANSITION,
                 Subscription.ACTIVATED, Subscription.EXPIRED, Subscription.CANCELED,
                 Subscription.REVOKED, Subscription.RENEWAL);
     }
@@ -51,11 +51,15 @@ public final class AnalyticsEvent {
         public String value() { return value; }
     }
 
-    public enum Authentication implements Type {
-        LOGIN_SUCCEEDED("LOGIN_SUCCEEDED");
-        private final String value;
-        Authentication(String value) { this.value = value; }
-        public String value() { return value; }
+    public static final class Authentication {
+        private Authentication() { }
+
+        public enum Login implements Type {
+            SUCCEEDED("LOGIN_SUCCEEDED");
+            private final String value;
+            Login(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum User implements Type {
@@ -82,12 +86,18 @@ public final class AnalyticsEvent {
 
     public enum Formation implements Type {
         SUBMITTED("FORMATION_SUBMITTED"),
-        MODERATION_APPROVED("FORMATION_MODERATION_APPROVED"),
-        MODERATION_REJECTED("FORMATION_MODERATION_REJECTED"),
         PUBLISHED("FORMATION_PUBLISHED"), ENROLLMENT("FORMATION_ENROLLMENT");
         private final String value;
         Formation(String value) { this.value = value; }
         public String value() { return value; }
+
+        public enum Moderation implements Type {
+            APPROVED("FORMATION_MODERATION_APPROVED"),
+            REJECTED("FORMATION_MODERATION_REJECTED");
+            private final String value;
+            Moderation(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum Review implements Type {
@@ -104,11 +114,15 @@ public final class AnalyticsEvent {
         public String value() { return value; }
     }
 
-    public enum Feed implements Type {
-        POST_PUBLISHED("FEED_POST_PUBLISHED");
-        private final String value;
-        Feed(String value) { this.value = value; }
-        public String value() { return value; }
+    public static final class Feed {
+        private Feed() { }
+
+        public enum Post implements Type {
+            PUBLISHED("FEED_POST_PUBLISHED");
+            private final String value;
+            Post(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum Checkout implements Type {
@@ -118,11 +132,15 @@ public final class AnalyticsEvent {
         public String value() { return value; }
     }
 
-    public enum Payment implements Type {
-        STATE_TRANSITION("PAYMENT_STATE_TRANSITION");
-        private final String value;
-        Payment(String value) { this.value = value; }
-        public String value() { return value; }
+    public static final class Payment {
+        private Payment() { }
+
+        public enum State implements Type {
+            TRANSITION("PAYMENT_STATE_TRANSITION");
+            private final String value;
+            State(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum Subscription implements Type {

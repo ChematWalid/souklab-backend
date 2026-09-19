@@ -32,7 +32,7 @@ class AnalyticsEventConsumerTest {
         AnalyticsEventConsumer consumer = new AnalyticsEventConsumer(
                 new ObjectMapper(), processed, rollups, properties);
 
-        consumer.consume("{\"eventId\":\"event-1\",\"eventType\":\"" + AnalyticsEvent.Authentication.LOGIN_SUCCEEDED.value() + "\","
+        consumer.consume("{\"eventId\":\"event-1\",\"eventType\":\"" + AnalyticsEvent.Authentication.Login.SUCCEEDED.value() + "\","
                 + "\"eventTime\":\"2026-01-01T23:30:00\"}");
 
         verify(rollups).incrementEventKpi(LocalDate.of(2026, 1, 2), "event.LOGIN_SUCCEEDED");
@@ -47,7 +47,7 @@ class AnalyticsEventConsumerTest {
         AnalyticsEventConsumer consumer = new AnalyticsEventConsumer(
                 new ObjectMapper(), processed, rollups, properties);
 
-        consumer.consume("{\"eventId\":\"event-1\",\"eventType\":\"" + AnalyticsEvent.Authentication.LOGIN_SUCCEEDED.value() + "\","
+        consumer.consume("{\"eventId\":\"event-1\",\"eventType\":\"" + AnalyticsEvent.Authentication.Login.SUCCEEDED.value() + "\","
                 + "\"eventTime\":\"2026-01-01T12:00:00\"}");
 
         verify(rollups, never()).incrementEventKpi(any(), any());

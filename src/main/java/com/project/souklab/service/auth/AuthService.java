@@ -241,7 +241,7 @@ public class AuthService {
         }
         userRepository.save(user);
         if (activityEventService != null) {
-            activityEventService.record(AnalyticsEvent.Authentication.LOGIN_SUCCEEDED, user.getId(), user.getId(), Map.of());
+            activityEventService.record(AnalyticsEvent.Authentication.Login.SUCCEEDED, user.getId(), user.getId(), Map.of());
         }
 
         return generateJwtResponse(user);
