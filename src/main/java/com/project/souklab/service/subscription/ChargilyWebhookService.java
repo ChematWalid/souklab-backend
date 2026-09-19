@@ -129,10 +129,10 @@ public class ChargilyWebhookService {
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION, payment.getAccount().getId(), payment.getId(),
-                    Map.of(AnalyticsMetadata.Payment.PROVIDER_EVENT, eventType, AnalyticsMetadata.State.STATUS, payment.getStatus()));
+                    Map.of(AnalyticsMetadata.Payment.Provider.EVENT, eventType, AnalyticsMetadata.State.STATUS, payment.getStatus()));
             if (payment.getStatus() == PaymentStatus.PAID) {
                 activityEventService.record(AnalyticsEvent.Subscription.ACTIVATED, payment.getAccount().getId(),
-                        payment.getSubscriptionId(), Map.of(AnalyticsMetadata.Payment.ID, payment.getId()));
+                        payment.getSubscriptionId(), Map.of(AnalyticsMetadata.Payment.Identifier.ID, payment.getId()));
             }
         }
         log.setStatus(WebhookProcessingStatus.PROCESSED);
@@ -158,7 +158,7 @@ public class ChargilyWebhookService {
     private void recordSubscriptionCancellation(User account, String subscriptionId) {
         if (activityEventService != null && account != null) {
             activityEventService.record(AnalyticsEvent.Subscription.CANCELED, account.getId(), subscriptionId,
-                    Map.of(AnalyticsMetadata.State.STATUS, SubscriptionStatus.CANCELED, AnalyticsMetadata.Subscription.SOURCE, AnalyticsEvent.Source.Payment.WEBHOOK));
+                    Map.of(AnalyticsMetadata.State.STATUS, SubscriptionStatus.CANCELED, AnalyticsMetadata.Subscription.Source.VALUE, AnalyticsEvent.Source.Payment.WEBHOOK));
         }
     }
 

@@ -598,12 +598,12 @@ public class AnalyticsJobService {
     }
 
     private String auditDetails(AnalyticsJob job, AnalyticsAuditOutcome outcome) {
-        return AnalyticsMetadata.Audit.JOB_ID.value() + "=" + job.getId()
-                + "," + AnalyticsMetadata.Audit.REPORT_TYPE.value() + "=" + job.getReportType()
-                + "," + AnalyticsMetadata.Audit.RANGE.value() + "=" + job.getFromDate() + ".." + job.getToDate()
-                + "," + AnalyticsMetadata.Audit.FILTERS.value() + "=" + (job.getFiltersJson() == null ? "{}" : job.getFiltersJson())
-                + "," + AnalyticsMetadata.Audit.PERMISSION_SCOPE.value() + "=" + job.getPermissionScope()
-                + "," + AnalyticsMetadata.Audit.OUTCOME.value() + "=" + outcome.value();
+        return AnalyticsMetadata.Audit.Job.ID.value() + "=" + job.getId()
+                + "," + AnalyticsMetadata.Audit.Report.TYPE.value() + "=" + job.getReportType()
+                + "," + AnalyticsMetadata.Audit.Range.VALUE.value() + "=" + job.getFromDate() + ".." + job.getToDate()
+                + "," + AnalyticsMetadata.Audit.Filter.VALUE.value() + "=" + (job.getFiltersJson() == null ? "{}" : job.getFiltersJson())
+                + "," + AnalyticsMetadata.Audit.Permission.SCOPE.value() + "=" + job.getPermissionScope()
+                + "," + AnalyticsMetadata.Audit.Outcome.VALUE.value() + "=" + outcome.value();
     }
 
     private void validate(AnalyticsJobRequest r, boolean financial) {

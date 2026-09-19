@@ -68,11 +68,11 @@ public class AnalyticsMaintenanceJobService {
         job.setExpiresAt(LocalDateTime.now(clock).plus(properties.getJobRetention()));
         AnalyticsMaintenanceJob saved = jobs.saveAndFlush(job);
         auditLogService.logAction(AuditLogAction.Analytics.REBUILD,
-                AnalyticsMetadata.Audit.MAINTENANCE_JOB_ID.value() + "=" + saved.getId()
-                        + "," + AnalyticsMetadata.Audit.OPERATION.value() + "=" + operation
-                        + "," + AnalyticsMetadata.Audit.RANGE.value() + "=" + request.fromDate() + ".." + request.toDate()
-                        + "," + AnalyticsMetadata.Audit.PERMISSION_SCOPE.value() + "=" + job.getPermissionScope()
-                        + "," + AnalyticsMetadata.Audit.OUTCOME.value() + "=" + AnalyticsAuditOutcome.ACCEPTED.value());
+                AnalyticsMetadata.Audit.MaintenanceJob.ID.value() + "=" + saved.getId()
+                        + "," + AnalyticsMetadata.Audit.Operation.VALUE.value() + "=" + operation
+                        + "," + AnalyticsMetadata.Audit.Range.VALUE.value() + "=" + request.fromDate() + ".." + request.toDate()
+                        + "," + AnalyticsMetadata.Audit.Permission.SCOPE.value() + "=" + job.getPermissionScope()
+                        + "," + AnalyticsMetadata.Audit.Outcome.VALUE.value() + "=" + AnalyticsAuditOutcome.ACCEPTED.value());
         applicationTaskExecutor.execute(() -> process(saved.getId()));
         return response(saved);
     }
@@ -94,11 +94,11 @@ public class AnalyticsMaintenanceJobService {
         AnalyticsMaintenanceJob job = jobs.findByIdAndOwnerId(id, ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Analytics maintenance job not found"));
         auditLogService.logAction(AuditLogAction.Analytics.RESULT_READ,
-                AnalyticsMetadata.Audit.MAINTENANCE_JOB_ID.value() + "=" + job.getId()
-                        + "," + AnalyticsMetadata.Audit.OPERATION.value() + "=" + job.getOperation()
-                        + "," + AnalyticsMetadata.Audit.RANGE.value() + "=" + job.getFromDate() + ".." + job.getToDate()
-                        + "," + AnalyticsMetadata.Audit.PERMISSION_SCOPE.value() + "=" + job.getPermissionScope()
-                        + "," + AnalyticsMetadata.Audit.OUTCOME.value() + "=" + AnalyticsAuditOutcome.STATUS.value());
+                AnalyticsMetadata.Audit.MaintenanceJob.ID.value() + "=" + job.getId()
+                        + "," + AnalyticsMetadata.Audit.Operation.VALUE.value() + "=" + job.getOperation()
+                        + "," + AnalyticsMetadata.Audit.Range.VALUE.value() + "=" + job.getFromDate() + ".." + job.getToDate()
+                        + "," + AnalyticsMetadata.Audit.Permission.SCOPE.value() + "=" + job.getPermissionScope()
+                        + "," + AnalyticsMetadata.Audit.Outcome.VALUE.value() + "=" + AnalyticsAuditOutcome.STATUS.value());
         return response(job);
     }
 

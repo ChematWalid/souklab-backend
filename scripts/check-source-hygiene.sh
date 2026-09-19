@@ -63,6 +63,10 @@ if rg -n --pcre2 'AnalyticsMetric\.Summary\.(?:Content|Formation|Moderation|Repo
   echo 'flat analytics summary references detected; use grouped summary enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsMetadata\.(?:Account\.SUBSCRIBER_TYPE|Moderation\.(?:REASON_PRESENT|MINUTES|DECISION)|Content\.(?:POST_TYPE|FORMATION_ID|TARGET_TYPE|ACTION|RATING)|Message\.CONVERSATION_ID|Subscription\.(?:PLAN_ID|PREVIOUS_STATUS|SOURCE)|Payment\.(?:STATUS|PROVIDER_EVENT|ID)|Provider\.SUBSCRIPTION_ID|Audit\.(?:JOB_ID|MAINTENANCE_JOB_ID|REPORT_TYPE|OPERATION|RANGE|FILTERS|PERMISSION_SCOPE|OUTCOME))' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics metadata references detected; use grouped metadata enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 'DirectorySortOrder\.(?:RELEVANCE|RATING_DESC|REVIEWS_DESC|VIEWS_DESC|NEWEST)|DirectorySortOrder\.values\(' src/main/java src/test/java --glob '*.java'; then
   echo 'flat directory sort references detected; use grouped sort enums' >&2
   exit 1

@@ -85,10 +85,10 @@ class AnalyticsEventTaxonomyTest {
     @Test
     void groupedMetadataEnumsExposeStableEventKeys() {
         assertThat(AnalyticsMetadata.State.STATUS.value()).isEqualTo("status");
-        assertThat(AnalyticsMetadata.Subscription.SOURCE.value()).isEqualTo("source");
-        assertThat(AnalyticsMetadata.Payment.PROVIDER_EVENT.value()).isEqualTo("providerEvent");
-        assertThat(AnalyticsMetadata.Payment.ID.value()).isEqualTo("payment_id");
-        assertThat(AnalyticsMetadata.Provider.SUBSCRIPTION_ID.value()).isEqualTo("subscription_id");
+        assertThat(AnalyticsMetadata.Subscription.Source.VALUE.value()).isEqualTo("source");
+        assertThat(AnalyticsMetadata.Payment.Provider.EVENT.value()).isEqualTo("providerEvent");
+        assertThat(AnalyticsMetadata.Payment.Identifier.ID.value()).isEqualTo("payment_id");
+        assertThat(AnalyticsMetadata.Provider.Subscription.ID.value()).isEqualTo("subscription_id");
     }
 
     @Test

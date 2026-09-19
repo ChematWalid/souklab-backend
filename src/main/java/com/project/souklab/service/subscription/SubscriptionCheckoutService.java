@@ -97,7 +97,7 @@ public class SubscriptionCheckoutService {
         }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Subscription.RENEWAL, user.getId(), subscriptionId,
-                    Map.of(AnalyticsMetadata.Subscription.PLAN_ID, requestedPlan.getId(), AnalyticsMetadata.Account.SUBSCRIBER_TYPE, targetType));
+                    Map.of(AnalyticsMetadata.Subscription.Plan.ID, requestedPlan.getId(), AnalyticsMetadata.Account.Subscriber.TYPE, targetType));
         }
         return checkout(request, idempotencyKey);
     }
@@ -121,7 +121,7 @@ public class SubscriptionCheckoutService {
         ChargilyCheckoutResponse provider = chargilyCheckoutClient.createCheckout(ChargilyCheckoutRequest.builder()
                 .amount(plan.getAmount()).currency(plan.getCurrency()).successUrl(resolve(request.getSuccessUrl(), config.getSuccessUrl()))
                 .failureUrl(resolve(request.getFailureUrl(), config.getFailureUrl())).webhookUrl(config.getWebhookUrl()).locale(config.getLocale())
-                .feeAllocation(config.getFeeAllocation()).metadata(Map.of(AnalyticsMetadata.Payment.ID.value(), payment.getId(), AnalyticsMetadata.Provider.SUBSCRIPTION_ID.value(), subscriptionId)).build());
+                .feeAllocation(config.getFeeAllocation()).metadata(Map.of(AnalyticsMetadata.Payment.Identifier.ID.value(), payment.getId(), AnalyticsMetadata.Provider.Subscription.ID.value(), subscriptionId)).build());
         payment.setStatus(PaymentStatus.PENDING); payment.setProviderCheckoutId(provider.getId()); payment.setCheckoutUrl(provider.getCheckoutUrl());
         payment.setProviderCustomerId(provider.getCustomerId()); payment.setProviderInvoiceId(provider.getInvoiceId());
         try {
@@ -132,7 +132,7 @@ public class SubscriptionCheckoutService {
         Payment saved = paymentRepository.save(payment);
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Checkout.CREATED, user.getId(), saved.getId(),
-                    Map.of(AnalyticsMetadata.Payment.STATUS, saved.getStatus(), AnalyticsMetadata.Account.SUBSCRIBER_TYPE, plan.getSubscriberType()));
+                    Map.of(AnalyticsMetadata.Payment.State.STATUS, saved.getStatus(), AnalyticsMetadata.Account.Subscriber.TYPE, plan.getSubscriberType()));
         }
         notificationService.createForUser(user, "Your subscription checkout was created.", NotificationType.Checkout.CREATED, saved.getId());
         return toResponse(saved);
@@ -172,7 +172,7 @@ public class SubscriptionCheckoutService {
     private void ensureSamePlan(Payment payment, String planId) {
         try {
             String existingPlan = objectMapper.readTree(payment.getPlanSnapshot())
-                    .path(AnalyticsMetadata.Subscription.PLAN_ID.value()).asText();
+                    .path(AnalyticsMetadata.Subscription.Plan.ID.value()).asText();
             if (!planId.equals(existingPlan)) throw new BadRequestException("Idempotency-Key was already used for another plan");
         } catch (JsonProcessingException exception) {
             throw new BadRequestException("Existing idempotent payment snapshot is invalid", exception);

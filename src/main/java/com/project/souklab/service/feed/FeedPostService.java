@@ -270,7 +270,7 @@ public class FeedPostService {
         if (activityEventService != null) {
             User moderator = currentUser();
             activityEventService.record(AnalyticsEvent.Feed.Post.PUBLISHED, moderator.getId(), saved.getId(),
-                    Map.of(AnalyticsMetadata.Content.POST_TYPE, saved.getType()));
+                    Map.of(AnalyticsMetadata.Content.Post.TYPE, saved.getType()));
         }
         if (saved.getType() == FeedPostType.FORMATION) {
             notificationService.createForUser(saved.getAuthor(), "Your formation post was published.", NotificationType.Formation.NEW, saved.getId());

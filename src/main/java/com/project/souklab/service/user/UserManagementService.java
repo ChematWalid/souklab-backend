@@ -138,7 +138,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.User.BANNED, "Banned user ID: " + userId + ". Reason: " + reason);
-        recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of(AnalyticsMetadata.Moderation.REASON_PRESENT, reason != null && !reason.isBlank()));
+        recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of(AnalyticsMetadata.Moderation.Reason.PRESENT, reason != null && !reason.isBlank()));
         notificationService.createForUser(user, "Your account has been permanently suspended. Reason: " + reason, NotificationType.Account.SUSPENDED, user.getId());
     }
 
@@ -169,7 +169,7 @@ public class UserManagementService {
         refreshTokenService.deleteByUser(user);
 
         auditLogService.logAction(AuditLogAction.User.TIMED_OUT, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
-        recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of(AnalyticsMetadata.Moderation.MINUTES, minutes));
+        recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of(AnalyticsMetadata.Moderation.Duration.MINUTES, minutes));
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.Account.SUSPENDED, user.getId());
     }
 

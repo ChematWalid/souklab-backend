@@ -1,169 +1,234 @@
 package com.project.souklab.analytics;
 
 import com.project.souklab.model.EnumValue;
-/**
- * Stable keys used in activity-event metadata.
- *
- * <p>The enum values are the persisted/API boundary representation. Application
- * code uses the grouped constants so metadata contracts are not spread as
- * unrelated string literals.</p>
- */
+
+/** Stable, grouped keys used in activity-event metadata. */
 public final class AnalyticsMetadata {
-    private AnalyticsMetadata() {
-    }
+    private AnalyticsMetadata() { }
 
     public interface Key extends EnumValue { }
 
     public enum Account implements Key {
-        TYPE("accountType"),
-        SUBSCRIBER_TYPE("subscriberType");
-
+        TYPE("accountType");
         private final String value;
+        Account(String value) { this.value = value; }
+        public String value() { return value; }
 
-        Account(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String value() {
-            return value;
+        public enum Subscriber implements Key {
+            TYPE("subscriberType");
+            private final String value;
+            Subscriber(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 
     public enum Moderation implements Key {
-        REASON_PRESENT("reasonPresent"),
-        MINUTES("minutes"),
-        DECISION("decision");
+        ;
+        private Moderation() { }
 
-        private final String value;
-
-        Moderation(String value) {
-            this.value = value;
+        public enum Reason implements Key {
+            PRESENT("reasonPresent");
+            private final String value;
+            Reason(String value) { this.value = value; }
+            public String value() { return value; }
         }
 
-        @Override
-        public String value() {
-            return value;
+        public enum Duration implements Key {
+            MINUTES("minutes");
+            private final String value;
+            Duration(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Decision implements Key {
+            VALUE("decision");
+            private final String value;
+            Decision(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 
     public enum Content implements Key {
-        POST_TYPE("postType"),
-        FORMATION_ID("formationId"),
-        TARGET_TYPE("targetType"),
-        ACTION("action"),
-        RATING("rating");
+        ;
+        private Content() { }
 
-        private final String value;
-
-        Content(String value) {
-            this.value = value;
+        public enum Post implements Key {
+            TYPE("postType");
+            private final String value;
+            Post(String value) { this.value = value; }
+            public String value() { return value; }
         }
 
-        @Override
-        public String value() {
-            return value;
+        public enum Formation implements Key {
+            ID("formationId");
+            private final String value;
+            Formation(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Target implements Key {
+            TYPE("targetType");
+            private final String value;
+            Target(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Action implements Key {
+            VALUE("action");
+            private final String value;
+            Action(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Rating implements Key {
+            VALUE("rating");
+            private final String value;
+            Rating(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 
     public enum Message implements Key {
-        CONVERSATION_ID("conversationId");
+        ;
+        private Message() { }
 
-        private final String value;
-
-        Message(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String value() {
-            return value;
+        public enum Conversation implements Key {
+            ID("conversationId");
+            private final String value;
+            Conversation(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 
     public enum State implements Key {
         STATUS("status");
-
         private final String value;
-
-        State(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String value() {
-            return value;
-        }
+        State(String value) { this.value = value; }
+        public String value() { return value; }
     }
 
     public enum Subscription implements Key {
-        PLAN_ID("planId"),
-        PREVIOUS_STATUS("previousStatus"),
-        SOURCE("source");
+        ;
+        private Subscription() { }
 
-        private final String value;
-
-        Subscription(String value) {
-            this.value = value;
+        public enum Plan implements Key {
+            ID("planId");
+            private final String value;
+            Plan(String value) { this.value = value; }
+            public String value() { return value; }
         }
 
-        @Override
-        public String value() {
-            return value;
+        public enum State implements Key {
+            PREVIOUS("previousStatus");
+            private final String value;
+            State(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Source implements Key {
+            VALUE("source");
+            private final String value;
+            Source(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 
     public enum Payment implements Key {
-        STATUS("paymentStatus"),
-        PROVIDER_EVENT("providerEvent"),
-        ID("payment_id");
+        ;
+        private Payment() { }
 
-        private final String value;
-
-        Payment(String value) {
-            this.value = value;
+        public enum State implements Key {
+            STATUS("paymentStatus");
+            private final String value;
+            State(String value) { this.value = value; }
+            public String value() { return value; }
         }
 
-        @Override
-        public String value() {
-            return value;
+        public enum Provider implements Key {
+            EVENT("providerEvent");
+            private final String value;
+            Provider(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Identifier implements Key {
+            ID("payment_id");
+            private final String value;
+            Identifier(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 
     public enum Provider implements Key {
-        SUBSCRIPTION_ID("subscription_id");
+        ;
+        private Provider() { }
 
-        private final String value;
-
-        Provider(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String value() {
-            return value;
+        public enum Subscription implements Key {
+            ID("subscription_id");
+            private final String value;
+            Subscription(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 
     public enum Audit implements Key {
-        JOB_ID("jobId"),
-        MAINTENANCE_JOB_ID("maintenanceJobId"),
-        REPORT_TYPE("reportType"),
-        OPERATION("operation"),
-        RANGE("range"),
-        FILTERS("filters"),
-        PERMISSION_SCOPE("permissionScope"),
-        OUTCOME("outcome");
+        ;
+        private Audit() { }
 
-        private final String value;
-
-        Audit(String value) {
-            this.value = value;
+        public enum Job implements Key {
+            ID("jobId");
+            private final String value;
+            Job(String value) { this.value = value; }
+            public String value() { return value; }
         }
 
-        @Override
-        public String value() {
-            return value;
+        public enum MaintenanceJob implements Key {
+            ID("maintenanceJobId");
+            private final String value;
+            MaintenanceJob(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Report implements Key {
+            TYPE("reportType");
+            private final String value;
+            Report(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Operation implements Key {
+            VALUE("operation");
+            private final String value;
+            Operation(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Range implements Key {
+            VALUE("range");
+            private final String value;
+            Range(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Filter implements Key {
+            VALUE("filters");
+            private final String value;
+            Filter(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Permission implements Key {
+            SCOPE("permissionScope");
+            private final String value;
+            Permission(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Outcome implements Key {
+            VALUE("outcome");
+            private final String value;
+            Outcome(String value) { this.value = value; }
+            public String value() { return value; }
         }
     }
 }

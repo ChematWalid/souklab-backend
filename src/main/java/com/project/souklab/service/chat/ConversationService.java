@@ -133,7 +133,7 @@ public class ConversationService {
             Message saved = messageRepository.save(message);
             if (activityEventService != null) {
                 activityEventService.record(AnalyticsEvent.Message.SENT, current.getId(), saved.getId(),
-                        Map.of(AnalyticsMetadata.Message.CONVERSATION_ID, c.getId()));
+                        Map.of(AnalyticsMetadata.Message.Conversation.ID, c.getId()));
             }
             c.setUpdatedAt(LocalDateTime.now(clock));
             User recipient = otherParticipant(c, current).getUser();
