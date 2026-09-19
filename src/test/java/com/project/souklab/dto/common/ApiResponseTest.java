@@ -1,5 +1,6 @@
 package com.project.souklab.dto.common;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -33,5 +34,14 @@ class ApiResponseTest {
         assertThat(validation.getMessage()).isEqualTo("Validation failed");
         assertThat(validation.getErrors()).containsEntry("name", "required");
         assertThat(customValidation.getMessage()).isEqualTo("invalid");
+    }
+
+    @Test
+    void serializesTypedErrorCodeUsingStableWireValue() throws Exception {
+        ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.FORBIDDEN, "denied");
+
+        String json = new ObjectMapper().writeValueAsString(response);
+
+        assertThat(json).contains("\"errorCode\":\"FORBIDDEN\"");
     }
 }
