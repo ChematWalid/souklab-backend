@@ -1,5 +1,6 @@
 package com.project.souklab.security;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
  * constants are exposed.
  */
 public interface Permission {
+    @JsonValue
     String value();
 
     default boolean matches(GrantedAuthority grantedAuthority) {

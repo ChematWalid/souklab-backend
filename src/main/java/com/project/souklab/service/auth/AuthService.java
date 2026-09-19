@@ -57,6 +57,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -271,7 +272,7 @@ public class AuthService {
                 .tokenType("Bearer")
                 .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
-                .permissions(user.getPermissions().stream().map(AuthorizationPermission::getPermissionKey).toList())
+                .permissions(canonicalPermissions(user))
                 .build();
     }
 
@@ -521,7 +522,7 @@ public class AuthService {
                 .tokenType("Bearer")
                 .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
-                .permissions(user.getPermissions().stream().map(AuthorizationPermission::getPermissionKey).toList())
+                .permissions(canonicalPermissions(user))
                 .build();
     }
 
@@ -552,6 +553,15 @@ public class AuthService {
             throw new ResourceNotFoundException(ERROR_PERMISSION_NOT_FOUND_PREFIX + keys);
         }
         return new HashSet<>(permissions);
+    }
+
+    private List<Permission> canonicalPermissions(User user) {
+        return user.getPermissions().stream()
+                .filter(AuthorizationPermission::isEnabled)
+                .map(AuthorizationPermission::getPermissionKey)
+                .map(Permission::fromValue)
+                .flatMap(Optional::stream)
+                .toList();
     }
 
     /**

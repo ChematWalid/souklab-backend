@@ -1,6 +1,7 @@
 package com.project.souklab.dto.profile;
 
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.security.Permission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class ClientProfileResponseDTO implements ProfileResponse {
     /** Placeholder — wired to real upload path in Phase D. */
     private String avatarUrl;
     private AccountStatus accountStatus;
-    private Set<String> permissions;
+    private Set<Permission> permissions;
     private boolean emailVerified;
     private LocalDateTime emailVerifiedAt;
     private LocalDateTime createdAt;

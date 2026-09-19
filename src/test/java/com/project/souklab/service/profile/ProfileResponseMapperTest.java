@@ -296,7 +296,7 @@ class ProfileResponseMapperTest {
         UserSummaryDTO summary = mapper.mapToSummaryDTO(user);
 
         assertThat(summary.getEmail()).isEqualTo("artisan@example.com");
-        assertThat(summary.getPermissions()).contains(Permission.Artisan.CONTENT.value());
+        assertThat(summary.getPermissions()).contains(Permission.Artisan.CONTENT);
         assertThat(summary.isTeacher()).isTrue();
         assertThat(summary.isPremium()).isTrue();
         assertThat(summary.isValidated()).isTrue();
@@ -323,7 +323,7 @@ class ProfileResponseMapperTest {
 
         UserSummaryDTO summary = mapper.mapToSummaryDTO(user);
 
-        assertThat(summary.getPermissions()).contains(Permission.Profile.READ.value());
+        assertThat(summary.getPermissions()).contains(Permission.Profile.READ);
         assertThat(summary.isTeacher()).isFalse();
         assertThat(summary.isPremium()).isTrue();
         assertThat(summary.isValidated()).isTrue();

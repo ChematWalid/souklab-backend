@@ -1,6 +1,7 @@
 package com.project.souklab.dto.auth;
 
 import com.project.souklab.dto.profile.ProfileResponse;
+import com.project.souklab.security.Permission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +21,5 @@ public class JwtResponseDTO {
     private long expiresIn;
     /** Account-type profile object: ClientProfileResponseDTO for clients, ArtisanResponseDTO for artisans. */
     private ProfileResponse user;
-    private List<String> permissions;
+    private List<Permission> permissions;
 }

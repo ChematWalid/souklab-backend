@@ -8,6 +8,7 @@ import com.project.souklab.dto.catalog.MaterialSummaryDTO;
 import com.project.souklab.dto.catalog.RegionSummaryDTO;
 import com.project.souklab.dto.catalog.TechniqueSummaryDTO;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.security.Permission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +38,7 @@ public class ArtisanResponseDTO implements ProfileResponse {
     private String phone;
     private String avatarUrl;
     private AccountStatus accountStatus;
-    private Set<String> permissions;
+    private Set<Permission> permissions;
     private boolean emailVerified;
     private LocalDateTime emailVerifiedAt;
     private LocalDateTime createdAt;

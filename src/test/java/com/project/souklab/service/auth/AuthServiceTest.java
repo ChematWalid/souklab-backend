@@ -971,7 +971,7 @@ class AuthServiceTest {
         assertThat(response.getRefreshToken()).isEqualTo("refresh-token-uuid");
         assertThat(response.getTokenType()).isEqualTo("Bearer");
         assertThat(response.getExpiresIn()).isEqualTo(900L);
-        assertThat(response.getPermissions()).containsExactly(Permission.Profile.READ.value());
+        assertThat(response.getPermissions()).containsExactly(Permission.Profile.READ);
 
         assertThat(user.getFailedLoginAttempts()).isZero();
         assertThat(user.getLockedUntil()).isNull();
@@ -1071,7 +1071,7 @@ class AuthServiceTest {
 
         JwtResponseDTO response = authService.login(dto, null);
 
-        assertThat(response.getPermissions()).containsExactly(Permission.Artisan.CONTENT.value());
+        assertThat(response.getPermissions()).containsExactly(Permission.Artisan.CONTENT);
     }
 
     /**

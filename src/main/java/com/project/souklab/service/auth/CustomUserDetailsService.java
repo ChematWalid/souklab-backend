@@ -4,6 +4,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.User;
+import com.project.souklab.security.Permission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -35,9 +36,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (AuthorizationPermission permission : user.getPermissions()) {
-            if (permission.isEnabled()) {
-                authorities.add(new SimpleGrantedAuthority(permission.getPermissionKey()));
-            }
+            if (permission.isEnabled()) Permission.fromValue(permission.getPermissionKey())
+                    .map(Permission::value)
+                    .map(SimpleGrantedAuthority::new)
+                    .ifPresent(authorities::add);
         }
 
         boolean isAccountLocked = user.isSuspensionActive(LocalDateTime.now(clock));

@@ -34,13 +34,13 @@ public class PermissionManagementService {
     private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
-    public Set<String> list(String userId) {
+    public Set<Permission> list(String userId) {
         requireAdmin();
         return listWithoutAuthorization(findUser(userId));
     }
 
     @Transactional
-    public Set<String> grant(String userId, PermissionAssignmentRequestDTO request) {
+    public Set<Permission> grant(String userId, PermissionAssignmentRequestDTO request) {
         requireAdmin();
         User user = findUser(userId);
         AuthorizationPermission permission = findPermission(request.getPermissionKey());
@@ -53,7 +53,7 @@ public class PermissionManagementService {
     }
 
     @Transactional
-    public Set<String> revoke(String userId, PermissionAssignmentRequestDTO request) {
+    public Set<Permission> revoke(String userId, PermissionAssignmentRequestDTO request) {
         requireAdmin();
         User user = findUser(userId);
         AuthorizationPermission permission = findPermission(request.getPermissionKey());
@@ -65,12 +65,11 @@ public class PermissionManagementService {
         return listWithoutAuthorization(user);
     }
 
-    private Set<String> listWithoutAuthorization(User user) {
+    private Set<Permission> listWithoutAuthorization(User user) {
         return user.getPermissions().stream().filter(AuthorizationPermission::isEnabled)
                 .map(AuthorizationPermission::getPermissionKey)
                 .map(Permission::fromValue)
                 .flatMap(Optional::stream)
-                .map(Permission::value)
                 .collect(Collectors.toUnmodifiableSet());
     }
 

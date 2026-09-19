@@ -1,6 +1,7 @@
 package com.project.souklab.dto.auth;
 
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.security.Permission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class UserSummaryDTO {
     private String firstName;
     private String lastName;
     private String name;
-    private Set<String> permissions;
+    private Set<Permission> permissions;
     private AccountStatus accountStatus;
     private boolean isPremium;
     private boolean isValidated;

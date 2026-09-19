@@ -1,5 +1,7 @@
 package com.project.souklab.dto.profile;
 
+import com.project.souklab.security.Permission;
+
 import com.project.souklab.model.AccountStatus;
 
 import java.time.LocalDateTime;
@@ -28,7 +30,7 @@ public interface ProfileResponse {
 
     AccountStatus getAccountStatus();
 
-    Set<String> getPermissions();
+    Set<Permission> getPermissions();
 
     boolean isEmailVerified();
 

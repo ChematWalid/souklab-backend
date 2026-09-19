@@ -571,7 +571,7 @@ class UserManagementServiceTest {
         PaginatedResponse<UserResponseDTO> response = userManagementService.getAllUsers(null, pageable);
 
         UserResponseDTO dto = response.getContent().get(0);
-        assertThat(dto.getPermissions()).containsExactly(Permission.Artisan.CONTENT.value());
+        assertThat(dto.getPermissions()).containsExactly(Permission.Artisan.CONTENT);
     }
 
     /**
@@ -708,7 +708,7 @@ class UserManagementServiceTest {
         assertThat(dto.getStatus()).isEqualTo(AccountStatus.SUSPENDED);
         assertThat(dto.isEmailVerified()).isTrue();
         assertThat(dto.getEmailVerifiedAt()).isEqualTo(verifiedAt);
-        assertThat(dto.getPermissions()).containsExactly(Permission.Profile.READ.value());
+        assertThat(dto.getPermissions()).containsExactly(Permission.Profile.READ);
         assertThat(dto.getBannedUntil()).isEqualTo(bannedUntil);
         assertThat(dto.getBanReason()).isEqualTo("Temporary suspension");
         assertThat(dto.getLastLoginAt()).isEqualTo(lastLogin);

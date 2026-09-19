@@ -35,9 +35,9 @@ class PermissionManagementControllerTest {
 
     @Test
     void adminCanListGrantAndRevokePermissions() throws Exception {
-        when(permissionManagementService.list("user-1")).thenReturn(Set.of(Permission.Profile.READ.value()));
-        when(permissionManagementService.grant(eq("user-1"), any())).thenReturn(Set.of(Permission.Profile.READ.value(), Permission.Profile.WRITE.value()));
-        when(permissionManagementService.revoke(eq("user-1"), any())).thenReturn(Set.of(Permission.Profile.READ.value()));
+        when(permissionManagementService.list("user-1")).thenReturn(Set.of(Permission.Profile.READ));
+        when(permissionManagementService.grant(eq("user-1"), any())).thenReturn(Set.of(Permission.Profile.READ, Permission.Profile.WRITE));
+        when(permissionManagementService.revoke(eq("user-1"), any())).thenReturn(Set.of(Permission.Profile.READ));
 
         mockMvc.perform(get("/api/v1/admin/users/user-1/permissions").with(admin()))
                 .andExpect(status().isOk())

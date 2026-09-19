@@ -19,6 +19,7 @@ import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.model.AuthorizationPermission;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.security.RefreshTokenService;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.souklab.config.AppProperties;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -203,8 +205,10 @@ public class UserManagementService {
     }
 
     private UserResponseDTO mapToDTO(User user) {
-        Set<String> roleNames = user.getPermissions().stream()
+        Set<Permission> roleNames = user.getPermissions().stream()
                 .map(AuthorizationPermission::getPermissionKey)
+                .map(Permission::fromValue)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toSet());
 
         String name = ((user.getFirstName() != null ? user.getFirstName() : "") + " " +

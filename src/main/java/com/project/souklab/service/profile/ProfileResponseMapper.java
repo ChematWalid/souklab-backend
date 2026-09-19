@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Stateless mapping component that converts {@link User} entities into
@@ -47,8 +48,10 @@ public class ProfileResponseMapper {
         boolean isArtisan = user.getPermissions().stream()
                 .anyMatch(permission -> Permission.Artisan.CONTENT.matches(permission.getPermissionKey()));
 
-        Set<String> permissionKeys = user.getPermissions().stream()
+        Set<Permission> permissionKeys = user.getPermissions().stream()
                 .map(AuthorizationPermission::getPermissionKey)
+                .map(Permission::fromValue)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toSet());
 
         if (isArtisan) {
@@ -79,7 +82,7 @@ public class ProfileResponseMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .name(user.getName())
-                .permissions(user.getPermissions().stream().map(AuthorizationPermission::getPermissionKey).collect(Collectors.toSet()))
+                .permissions(canonicalPermissions(user))
                 .accountStatus(user.getStatus())
                 .isPremium(isPremium)
                 .isValidated(isValidated)
@@ -96,7 +99,7 @@ public class ProfileResponseMapper {
      * @param permissionKeys the set of permission keys assigned to the user
      * @return the fully populated {@link ArtisanResponseDTO}
      */
-    private ArtisanResponseDTO buildArtisanProfileResponse(User user, Set<String> permissionKeys) {
+    private ArtisanResponseDTO buildArtisanProfileResponse(User user, Set<Permission> permissionKeys) {
         Artisan profile = user.getArtisan();
         RegionSummaryDTO regionSummary = profile != null ? RegionSummaryDTO.from(profile.getRegion()) : null;
         JobSubCategorySummaryDTO subCategorySummary = profile != null ? JobSubCategorySummaryDTO.from(profile.getSubCategory()) : null;
@@ -171,7 +174,7 @@ public class ProfileResponseMapper {
      * @param permissionKeys the set of permission keys assigned to the user
      * @return the fully populated {@link ClientProfileResponseDTO}
      */
-    private ClientProfileResponseDTO buildClientProfileResponse(User user, Set<String> permissionKeys) {
+    private ClientProfileResponseDTO buildClientProfileResponse(User user, Set<Permission> permissionKeys) {
         Client client = user.getClient();
         return ClientProfileResponseDTO.builder()
                 .id(user.getId())
@@ -194,5 +197,14 @@ public class ProfileResponseMapper {
                 .regionId(client != null ? client.getRegionId() : null)
                 .city(client != null ? client.getCity() : null)
                 .build();
+    }
+
+    private Set<Permission> canonicalPermissions(User user) {
+        return user.getPermissions().stream()
+                .filter(AuthorizationPermission::isEnabled)
+                .map(AuthorizationPermission::getPermissionKey)
+                .map(Permission::fromValue)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toSet());
     }
 }

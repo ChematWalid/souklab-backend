@@ -1,6 +1,7 @@
 package com.project.souklab.dto.auth;
 
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.security.Permission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,7 @@ public class UserResponseDTO {
     private AccountStatus status;
     private boolean emailVerified;
     private LocalDateTime emailVerifiedAt;
-    private Set<String> permissions;
+    private Set<Permission> permissions;
     private boolean isPremium;
     private boolean isValidated;
     private boolean isTeacher;

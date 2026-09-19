@@ -51,7 +51,7 @@ class PermissionManagementServiceTest {
         allowAdmin();
         when(users.findById("u1")).thenReturn(Optional.of(user));
 
-        assertThat(service().list("u1")).containsExactly(Permission.Admin.USERS.value());
+        assertThat(service().list("u1")).containsExactly(Permission.Admin.USERS);
     }
 
     @Test
@@ -63,7 +63,7 @@ class PermissionManagementServiceTest {
         when(permissions.findByPermissionKeyAndEnabledTrue(Permission.Artisan.CONTENT.value())).thenReturn(Optional.of(permission));
 
         assertThat(service().grant("u1", new PermissionAssignmentRequestDTO(" " + Permission.Artisan.CONTENT.value() + " ")))
-                .containsExactly(Permission.Artisan.CONTENT.value());
+                .containsExactly(Permission.Artisan.CONTENT);
         verify(users).save(user);
         verify(audit).logAction(any(), ArgumentMatchers.eq("u1:" + Permission.Artisan.CONTENT.value()));
     }
