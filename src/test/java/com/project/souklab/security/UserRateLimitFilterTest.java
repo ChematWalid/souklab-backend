@@ -55,7 +55,7 @@ class UserRateLimitFilterTest {
                 new UsernamePasswordAuthenticationToken("admin@example.com", "n/a",
                         List.of(new SimpleGrantedAuthority(Permission.Analytics.ADMIN.authority()))));
 
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/admin/analytics/rollups/jobs/rebuild");
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/admin/analytics/rollups/rebuild");
         MockHttpServletResponse firstResponse = new MockHttpServletResponse();
         filter.doFilter(request, firstResponse, new MockFilterChain());
         MockHttpServletResponse secondResponse = new MockHttpServletResponse();

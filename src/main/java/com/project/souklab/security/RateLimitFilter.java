@@ -88,7 +88,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private boolean isAnalyticsJobPath(String path) {
         return path.contains("/analytics/jobs") || path.contains("/stats/jobs")
-                || path.contains("/analytics/rollups/jobs") || path.contains("/stats/rollups/jobs");
+                || path.contains("/analytics/rollups/") || path.contains("/stats/rollups/");
     }
 
     @Override
