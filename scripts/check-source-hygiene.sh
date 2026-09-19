@@ -68,6 +68,11 @@ if rg -n --pcre2 'Map\.of\("(?:username|online|typing|reader|messageId|message)"
   echo 'raw chat metadata keys detected; use grouped ChatMetadata enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'ApiResponse\.error\("(?:FORBIDDEN|VIRUS_DETECTED|VIRUS_SCAN_UNAVAILABLE|FILE_TOO_LARGE)"' \
+    src/main/java --glob '*.java'; then
+  echo 'raw standardized API error codes detected; use ApiErrorCode enums' >&2
+  exit 1
+fi
 
 mapfile -t migrations < <(find src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' -printf '%f\n' | sort -V)
 test "${#migrations[@]}" -gt 0 || { echo 'no Flyway migrations found' >&2; exit 1; }
