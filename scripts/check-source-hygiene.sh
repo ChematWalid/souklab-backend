@@ -19,6 +19,14 @@ if rg -n --pcre2 'Permission\.(?:ADMIN_USERS|ADMIN_FORMATIONS|ADMIN_FEED|ADMIN_R
   echo 'flat permission enum references detected; use grouped Permission enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsEvent\.(?:Authentication\.LOGIN_SUCCEEDED|Feed\.POST_PUBLISHED|Formation\.MODERATION_(?:APPROVED|REJECTED)|Payment\.STATE_TRANSITION|Source\.(?:PAYMENT_WEBHOOK|ACCOUNT_ACTION|ADMIN_ACTION|ADMIN_CORRECTION))|FinancialAuditOperation\.(?:MANUAL_GRANT|STATE_CORRECTION|REVOKE|CANCEL)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics taxonomy references detected; use grouped event and operation types' >&2
+  exit 1
+fi
+if rg -n '\.authority\(\)' src/main/java src/test/java --glob '*.java'; then
+  echo 'string authority adapter usage detected; use grouped Permission values and matches' >&2
+  exit 1
+fi
 
 mapfile -t migrations < <(find src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' -printf '%f\n' | sort -V)
 test "${#migrations[@]}" -gt 0 || { echo 'no Flyway migrations found' >&2; exit 1; }
