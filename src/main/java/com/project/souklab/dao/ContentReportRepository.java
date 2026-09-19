@@ -1,7 +1,6 @@
 package com.project.souklab.dao;
 import java.time.LocalDateTime;
 
-import com.project.souklab.model.ReportStatus;
 
 import com.project.souklab.model.ContentReport;
 import com.project.souklab.model.ReportStatus;

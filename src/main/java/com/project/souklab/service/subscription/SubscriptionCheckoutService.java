@@ -28,7 +28,6 @@ import com.project.souklab.model.Payment;
 import com.project.souklab.model.PaymentProvider;
 import com.project.souklab.model.PaymentStatus;
 import com.project.souklab.model.NotificationType;
-import com.project.souklab.model.SubscriberType;
 import com.project.souklab.model.SubscriptionPlan;
 import com.project.souklab.model.SubscriptionStatus;
 import com.project.souklab.model.SubscriberType;

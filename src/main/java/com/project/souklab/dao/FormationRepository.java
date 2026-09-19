@@ -1,7 +1,6 @@
 package com.project.souklab.dao;
 import java.time.LocalDateTime;
 
-import com.project.souklab.model.FormationStatus;
 
 import com.project.souklab.model.Formation;
 import com.project.souklab.model.FormationStatus;
