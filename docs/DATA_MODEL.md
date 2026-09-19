@@ -1,6 +1,6 @@
 # Data Model
 
-The JPA classes under `src/main/java/com/project/souklab/model` are the authoritative data model. This page lists implemented concepts; payment models remain roadmap work.
+The JPA classes under `src/main/java/com/project/souklab/model` are the authoritative data model. This page lists implemented identity, content, subscription, payment, and analytics concepts.
 
 ## Common lifecycle
 
@@ -15,6 +15,8 @@ The JPA classes under `src/main/java/com/project/souklab/model` are the authorit
 | Catalog | `Region`, `JobCategory`, `JobSubCategory`, `MaterialFamily`, `Material`, `Epoque`, `Technique` |
 | Formations | `Formation`, `FormationFile`, `FormationEnrollment`, `FormationReview` |
 | Operations | `Notification`, `AuditLog` |
+| Monetization | `ArtisanSubscription`, `ClientSubscription`, `SubscriptionPricing`, `SubscriptionPlanEntitlement`, `Payment`, `PaymentWebhookLog` |
+| Analytics | `ActivityEvent`, `AnalyticsOutboxEvent`, `AnalyticsProcessedEvent`, `AnalyticsJob`, `AnalyticsJobArtifact`, `DailyKpiRollup`, `AnalyticsMaintenanceJob` |
 
 ## Important invariants
 

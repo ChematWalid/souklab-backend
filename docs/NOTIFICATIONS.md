@@ -22,4 +22,4 @@ All routes require authentication. Repository queries scope by recipient and exc
 
 `NotificationService` saves the notification first. When a transaction synchronization is active, the STOMP push is registered with `afterCommit`; broker failures are logged and do not roll back the database write. The destination is `/user/{username}` plus the configured `app.chat.notification-destination` through the external STOMP relay.
 
-`NEW_MESSAGE` is emitted once for every successfully persisted direct message and targets its conversation. `NEW_REVIEW` and `NEW_REPORT` are active Phase 7 event types; payment values remain reserved for Phase 9.
+`NEW_MESSAGE` is emitted once for every successfully persisted direct message and targets its conversation. `NEW_REVIEW`, `NEW_REPORT`, and subscription/payment notification values are implemented in the current notification taxonomy. Analytics activity events use the grouped `AnalyticsEvent` enums and are delivered through the transactional outbox rather than user notifications.

@@ -371,7 +371,7 @@ Direct messaging is exposed through `/api/v1/conversations` and the authenticate
 
 ## 9. Subscriptions & Chargily Pay V2
 
-This module is planned and is not exposed by the current source tree. There are no `/api/v1/subscription/**` controllers, payment entities, or Chargily client beans yet. See [`ROADMAP.md`](ROADMAP.md) Phase 9 for the implementation plan.
+Subscription and Chargily Pay V2 endpoints are implemented under `/api/v1/subscription/**`, including checkout creation, account/subscription operations, administrative plan and subscription operations, and the signed idempotent webhook. Access is permission-scoped; financial operations additionally require the financial administrator permission.
 
 ---
 
