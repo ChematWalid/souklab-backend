@@ -33,4 +33,13 @@ class AnalyticsEventTaxonomyTest {
         assertThat(Permission.Analytics.ADMIN.value()).isEqualTo("permission:analytics:admin");
         assertThat(Permission.Financial.ADMIN.value()).isEqualTo("permission:financial:admin");
     }
+
+    @Test
+    void groupedMetricEnumsExposeStableApiKeys() {
+        assertThat(AnalyticsMetric.Comparison.CURRENT.value()).isEqualTo("current");
+        assertThat(AnalyticsMetric.Comparison.PREVIOUS.value()).isEqualTo("previous");
+        assertThat(AnalyticsMetric.Historical.REGISTRATIONS.value()).isEqualTo("historical.registrations");
+        assertThat(AnalyticsMetric.Summary.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
+        assertThat(AnalyticsMetric.Series.NEW_REGISTRATIONS.value()).isEqualTo("newRegistrations");
+    }
 }

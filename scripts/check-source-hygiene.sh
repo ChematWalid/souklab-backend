@@ -27,6 +27,12 @@ if rg -n '\.authority\(\)' src/main/java src/test/java --glob '*.java'; then
   echo 'string authority adapter usage detected; use grouped Permission values and matches' >&2
   exit 1
 fi
+if rg -n --pcre2 '"(?:current|previous|historical\.(?:registrations|feed_posts|formations|enrollments|reviews|reports|payments)|event\.)"' \
+    src/main/java/com/project/souklab/analytics --glob '*.java' \
+    --glob '!AnalyticsMetric.java'; then
+  echo 'raw analytics contract keys detected; use grouped AnalyticsMetric enums' >&2
+  exit 1
+fi
 
 mapfile -t migrations < <(find src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' -printf '%f\n' | sort -V)
 test "${#migrations[@]}" -gt 0 || { echo 'no Flyway migrations found' >&2; exit 1; }
