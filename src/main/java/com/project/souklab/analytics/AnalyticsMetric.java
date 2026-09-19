@@ -321,17 +321,25 @@ public final class AnalyticsMetric {
                 public String value() { return value; }
 
                 public enum Approved implements Key {
-                    IN_RANGE("formateurApprovedInRange");
-                    private final String value;
-                    Approved(String value) { this.value = value; }
-                    public String value() { return value; }
+                    ;
+
+                    public enum InRange implements Key {
+                        VALUE("formateurApprovedInRange");
+                        private final String value;
+                        InRange(String value) { this.value = value; }
+                        public String value() { return value; }
+                    }
                 }
 
                 public enum Rejected implements Key {
-                    IN_RANGE("formateurRejectedInRange");
-                    private final String value;
-                    Rejected(String value) { this.value = value; }
-                    public String value() { return value; }
+                    ;
+
+                    public enum InRange implements Key {
+                        VALUE("formateurRejectedInRange");
+                        private final String value;
+                        InRange(String value) { this.value = value; }
+                        public String value() { return value; }
+                    }
                 }
 
                 public enum Statuses implements Key {
@@ -390,7 +398,7 @@ public final class AnalyticsMetric {
 
             private static List<Key> all() {
                 return Stream.of(Count.values(), Status.By.values(), Checkout.values(), State.values(),
-                        Revenue.Gross.values(), Revenue.ProviderFees.values(), Revenue.Net.values(), Conversion.values(), Grant.values())
+                        Revenue.Gross.Collected.values(), Revenue.ProviderFees.values(), Revenue.Net.Collected.values(), Conversion.values(), Grant.values())
                         .flatMap(Arrays::stream).map(key -> (Key) key).toList();
             }
 
@@ -430,10 +438,14 @@ public final class AnalyticsMetric {
                 private Revenue() { }
 
                 public enum Gross implements Key {
-                    COLLECTED_DZD("grossCollectedDzd");
-                    private final String value;
-                    Gross(String value) { this.value = value; }
-                    public String value() { return value; }
+                    ;
+
+                    public enum Collected implements Key {
+                        DZD("grossCollectedDzd");
+                        private final String value;
+                        Collected(String value) { this.value = value; }
+                        public String value() { return value; }
+                    }
                 }
 
                 public enum ProviderFees implements Key {
@@ -444,10 +456,14 @@ public final class AnalyticsMetric {
                 }
 
                 public enum Net implements Key {
-                    COLLECTED_DZD("netCollectedDzd");
-                    private final String value;
-                    Net(String value) { this.value = value; }
-                    public String value() { return value; }
+                    ;
+
+                    public enum Collected implements Key {
+                        DZD("netCollectedDzd");
+                        private final String value;
+                        Collected(String value) { this.value = value; }
+                        public String value() { return value; }
+                    }
                 }
             }
 

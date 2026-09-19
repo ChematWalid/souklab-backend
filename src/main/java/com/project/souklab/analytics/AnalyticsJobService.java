@@ -272,9 +272,9 @@ public class AnalyticsJobService {
                             averageResolutionSeconds == null ? 0.0 : averageResolutionSeconds);
                 }
                 summary.put(AnalyticsMetric.Summary.Moderation.Formateur.PENDING, formateurRequests.countByStatusAndDeletedAtIsNull(FormateurRequestStatus.PENDING));
-                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.Approved.IN_RANGE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.Approved.InRange.VALUE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
                         FormateurRequestStatus.APPROVED, from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.Rejected.IN_RANGE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.Rejected.InRange.VALUE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
                         FormateurRequestStatus.REJECTED, from, inclusiveTo));
                 Map<FormateurRequestStatus, Long> formateurStatuses = new LinkedHashMap<>();
                 for (FormateurRequestStatus status : FormateurRequestStatus.values()) {
@@ -350,9 +350,9 @@ public class AnalyticsJobService {
                                 PaymentStatus.PAID, collectedCurrency, from, to);
                         long providerFees = payments.sumFeesByStatusAndCurrencyAndCreatedAtBetween(
                                 PaymentStatus.PAID, collectedCurrency, from, to);
-                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.Gross.COLLECTED_DZD, grossCollected);
+                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.Gross.Collected.DZD, grossCollected);
                         summary.put(AnalyticsMetric.Summary.Payment.Revenue.ProviderFees.DZD, providerFees);
-                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.Net.COLLECTED_DZD, grossCollected - providerFees);
+                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.Net.Collected.DZD, grossCollected - providerFees);
                         long paidPayments = payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
                                 PaymentStatus.PAID, from, inclusiveTo);
                         long failedPayments = payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
