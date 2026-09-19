@@ -624,7 +624,7 @@ public class AnalyticsJobService {
             LocalDateTime bucketTo = utcStart(end.plusDays(1));
             Map<String, Object> point = new LinkedHashMap<>();
             point.put("startDate", start); point.put("endDate", end);
-            String eventType = filters.get("eventType");
+            String eventType = filters.get(AnalyticsFilterKey.EVENT_TYPE.key());
             LocalDateTime inclusiveBucketTo = bucketTo.minusNanos(1);
             point.put("activityEvents", eventType == null
                     ? events.countByEventTimeBetween(bucketFrom, inclusiveBucketTo)
@@ -635,18 +635,6 @@ public class AnalyticsJobService {
             point.put("newRegistrations", users.countByCreatedAtBetween(bucketFrom, inclusiveBucketTo));
             series.add(point);
             cursor = next;
-        }
-        if (job.getSortField() != null) {
-            Comparator<Map<String, Object>> comparator = (left, right) -> {
-                Object a = left.get(job.getSortField());
-                Object b = right.get(job.getSortField());
-                if (a instanceof Number numberA && b instanceof Number numberB) {
-                    return Double.compare(numberA.doubleValue(), numberB.doubleValue());
-                }
-                return String.valueOf(a).compareTo(String.valueOf(b));
-            };
-            if (job.getSortDirection() == AnalyticsSortDirection.DESC) comparator = comparator.reversed();
-            series.sort(comparator);
         }
         return series;
     }
