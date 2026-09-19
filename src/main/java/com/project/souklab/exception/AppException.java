@@ -21,14 +21,18 @@ public class AppException extends RuntimeException {
     }
 
     public AppException(HttpStatus status, String message) {
-        this(status, status.toString(), message);
+        this(status, errorCode(status), message);
     }
 
     public AppException(String message, HttpStatus status) {
-        this(status, status.toString(), message);
+        this(status, errorCode(status), message);
     }
 
     public AppException(String message, HttpStatus status, Throwable cause) {
-        this(status, status.toString(), message, cause);
+        this(status, errorCode(status), message, cause);
+    }
+
+    private static String errorCode(HttpStatus status) {
+        return status.toString().replaceFirst("^\\d+\\s+", "");
     }
 }
