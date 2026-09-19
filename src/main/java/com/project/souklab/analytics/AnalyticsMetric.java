@@ -958,16 +958,57 @@ public final class AnalyticsMetric {
         }
     }
 
-    public enum Historical implements Key {
-        REGISTRATIONS("historical.registrations"), FEED_POSTS("historical.feed_posts"),
-        FORMATIONS("historical.formations"), ENROLLMENTS("historical.enrollments"),
-        REVIEWS("historical.reviews"), REPORTS("historical.reports"), PAYMENTS("historical.payments");
+    public static final class Historical {
+        private Historical() { }
 
-        private final String value;
+        public enum Registration implements Key {
+            COUNT("historical.registrations");
+            private final String value;
+            Registration(String value) { this.value = value; }
+            public String value() { return value; }
+        }
 
-        Historical(String value) { this.value = value; }
+        public enum Feed implements Key {
+            POSTS("historical.feed_posts");
+            private final String value;
+            Feed(String value) { this.value = value; }
+            public String value() { return value; }
+        }
 
-        public String value() { return value; }
+        public enum Formation implements Key {
+            COUNT("historical.formations");
+            private final String value;
+            Formation(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Enrollment implements Key {
+            COUNT("historical.enrollments");
+            private final String value;
+            Enrollment(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Review implements Key {
+            COUNT("historical.reviews");
+            private final String value;
+            Review(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Report implements Key {
+            COUNT("historical.reports");
+            private final String value;
+            Report(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+
+        public enum Payment implements Key {
+            COUNT("historical.payments");
+            private final String value;
+            Payment(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum EventRollup implements Key {

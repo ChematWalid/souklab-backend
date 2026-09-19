@@ -54,7 +54,7 @@ class AnalyticsEventTaxonomyTest {
     void groupedMetricEnumsExposeStableApiKeys() {
         assertThat(AnalyticsMetric.Comparison.CURRENT.value()).isEqualTo("current");
         assertThat(AnalyticsMetric.Comparison.PREVIOUS.value()).isEqualTo("previous");
-        assertThat(AnalyticsMetric.Historical.REGISTRATIONS.value()).isEqualTo("historical.registrations");
+        assertThat(AnalyticsMetric.Historical.Registration.COUNT.value()).isEqualTo("historical.registrations");
         assertThat(AnalyticsMetric.Summary.User.Registration.NEW.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.Series.Registration.NEW.value()).isEqualTo("newRegistrations");
         assertThat(AnalyticsMetric.EventRollup.SEPARATOR.value()).isEqualTo("\u0000");
