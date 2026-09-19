@@ -634,7 +634,7 @@ public class AnalyticsJobService {
             point.put("uniqueActors", eventType == null
                     ? events.countDistinctActorsByEventTimeBetween(bucketFrom, inclusiveBucketTo)
                     : events.countDistinctActorsByTypeAndEventTimeBetween(eventType, bucketFrom, inclusiveBucketTo));
-            point.put("newRegistrations", users.countByCreatedAtBetween(bucketFrom, inclusiveBucketTo));
+            point.put("newRegistrations", users.countByCreatedAtBetweenAndDeletedAtIsNull(bucketFrom, inclusiveBucketTo));
             series.add(point);
             cursor = next;
         }

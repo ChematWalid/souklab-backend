@@ -52,7 +52,7 @@ public class AnalyticsBackfillService {
             LocalDateTime end = utcStart(day.plusDays(1));
             LocalDateTime inclusiveEnd = end.minusNanos(1);
             Map<String, Long> metrics = new LinkedHashMap<>();
-            metrics.put("historical.registrations", users.countByCreatedAtBetween(start, inclusiveEnd));
+            metrics.put("historical.registrations", users.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
             metrics.put("historical.feed_posts", feedPosts.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
             metrics.put("historical.formations", formations.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
             metrics.put("historical.enrollments", enrollments.countByCreatedAtBetweenAndDeletedAtIsNull(start, inclusiveEnd));
