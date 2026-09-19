@@ -31,6 +31,10 @@ if rg -n --pcre2 'AnalyticsEvent\.(?:Authentication\.LOGIN_SUCCEEDED|Feed\.POST_
   echo 'flat analytics taxonomy references detected; use grouped event and operation types' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsMetric\.Operational\.(?:ANALYTICS_JOBS_|MAINTENANCE_JOBS_|OUTBOX_|APPLICATION_HEALTH|HEALTH_COMPONENTS|REQUEST_COUNTERS|RATE_LIMIT_REJECTIONS|REQUEST_COUNTER_METRIC|RATE_LIMIT_REJECTION_METRIC)|AnalyticsMetric\.Retention\.(?:DAY_[0-9]+|Row\.DAY_)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics metric references detected; use grouped operational and retention enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 '"(?:PLAN_(?:CREATE|UPDATE|DEACTIVATE)|REFUND_REQUEST)"' src/main/java src/test/java --glob '*.java' \
     --glob '!FinancialAuditOperation.java'; then
   echo 'raw financial audit operation literals detected; use FinancialAuditOperation grouped enums' >&2
