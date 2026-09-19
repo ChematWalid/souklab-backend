@@ -43,7 +43,7 @@ public final class AnalyticsEvent {
     public static List<Type> all() {
         return List.of(
                 Registration.CREATED, Authentication.Login.SUCCEEDED,
-                User.APPROVED, User.SUSPENDED, User.TIMED_OUT, User.REINSTATED,
+                User.APPROVED, User.SUSPENDED, User.Timeout.EVENT, User.REINSTATED,
                 Profile.VIEW, Message.SENT,
                 Formation.SUBMITTED, Formation.Moderation.APPROVED, Formation.Moderation.REJECTED,
                 Formation.PUBLISHED, Formation.ENROLLMENT,
@@ -76,11 +76,17 @@ public final class AnalyticsEvent {
     }
 
     public enum User implements Type {
-        APPROVED("USER_APPROVED"), SUSPENDED("USER_SUSPENDED"),
-        TIMED_OUT("USER_TIMED_OUT"), REINSTATED("USER_REINSTATED");
+        APPROVED("USER_APPROVED"), SUSPENDED("USER_SUSPENDED"), REINSTATED("USER_REINSTATED");
         private final String value;
         User(String value) { this.value = value; }
         public String value() { return value; }
+
+        public enum Timeout implements Type {
+            EVENT("USER_TIMED_OUT");
+            private final String value;
+            Timeout(String value) { this.value = value; }
+            public String value() { return value; }
+        }
     }
 
     public enum Profile implements Type {

@@ -212,7 +212,7 @@ public class AnalyticsJobService {
                 summary.put(AnalyticsMetric.Summary.User.Approval.PENDING, users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
                 Map<AnalyticsEvent.Type, Long> moderationActivity = new LinkedHashMap<>();
                 for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.User.APPROVED, AnalyticsEvent.User.SUSPENDED,
-                        AnalyticsEvent.User.TIMED_OUT, AnalyticsEvent.User.REINSTATED,
+                        AnalyticsEvent.User.Timeout.EVENT, AnalyticsEvent.User.REINSTATED,
                         AnalyticsEvent.Formation.Moderation.APPROVED, AnalyticsEvent.Formation.Moderation.REJECTED,
                         AnalyticsEvent.Report.RESOLVED)) {
                     moderationActivity.put(eventType, countFilteredEvent(job, eventType, from, inclusiveTo));
