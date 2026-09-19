@@ -724,9 +724,9 @@ public class AnalyticsJobService {
                 .toLocalDate();
     }
 
-    private Map<AnalyticsMetric.Table, PaginatedResponse<Map<String, Object>>> buildTables(AnalyticsJob job,
-                                                                                             Map<AnalyticsMetric.Summary, Object> summary) {
-        Map<AnalyticsMetric.Table, PaginatedResponse<Map<String, Object>>> tables = new LinkedHashMap<>();
+    private Map<AnalyticsMetric.Table, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> buildTables(AnalyticsJob job,
+                                                                                                           Map<AnalyticsMetric.Summary, Object> summary) {
+        Map<AnalyticsMetric.Table, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables = new LinkedHashMap<>();
         switch (job.getReportType()) {
             case MODERATION -> {
                 addStatusTable(tables, AnalyticsMetric.Table.USERS, summary.get(AnalyticsMetric.Summary.USER_STATUSES), job);
@@ -757,19 +757,19 @@ public class AnalyticsJobService {
         return tables;
     }
 
-    private void addStatusTable(Map<AnalyticsMetric.Table, PaginatedResponse<Map<String, Object>>> tables,
+    private void addStatusTable(Map<AnalyticsMetric.Table, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables,
                                  AnalyticsMetric.Table table, Object source, AnalyticsJob job) {
         if (!(source instanceof Map<?, ?> values)) return;
-        List<Map<String, Object>> rows = values.entrySet().stream()
-                .map(entry -> Map.<String, Object>of(AnalyticsMetric.Csv.KEY.value(), keyValue(entry.getKey()),
-                        AnalyticsMetric.Csv.VALUE.value(), entry.getValue() == null ? 0L : entry.getValue()))
-                .sorted((left, right) -> String.valueOf(left.get(AnalyticsMetric.Csv.KEY.value())).compareTo(String.valueOf(right.get(AnalyticsMetric.Csv.KEY.value()))))
+        List<Map<AnalyticsMetric.Csv, Object>> rows = values.entrySet().stream()
+                .map(entry -> Map.<AnalyticsMetric.Csv, Object>of(AnalyticsMetric.Csv.KEY, keyValue(entry.getKey()),
+                        AnalyticsMetric.Csv.VALUE, entry.getValue() == null ? 0L : entry.getValue()))
+                .sorted((left, right) -> String.valueOf(left.get(AnalyticsMetric.Csv.KEY)).compareTo(String.valueOf(right.get(AnalyticsMetric.Csv.KEY))))
                 .toList();
         int pageSize = job.getPageSize();
         long requestedStart = (long) job.getPageNumber() * pageSize;
         int start = requestedStart >= rows.size() ? rows.size() : (int) requestedStart;
         int end = Math.min(start + pageSize, rows.size());
-        tables.put(table, PaginatedResponse.<Map<String, Object>>builder()
+        tables.put(table, PaginatedResponse.<Map<AnalyticsMetric.Csv, Object>>builder()
                 .content(rows.subList(start, end)).pageNumber(job.getPageNumber()).pageSize(pageSize)
                 .totalElements(rows.size()).totalPages(rows.isEmpty() ? 0 : (rows.size() + pageSize - 1) / pageSize)
                 .last(end >= rows.size()).build());
