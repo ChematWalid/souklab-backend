@@ -120,8 +120,4 @@ public class AnalyticsJobController {
         return ResponseEntity.ok(ApiResponse.success(null, "Analytics job deleted."));
     }
 
-    private boolean hasFinancialPermission(Authentication authentication) {
-        return authentication.getAuthorities().stream()
-                .anyMatch(Permission.Financial.ADMIN::matches);
-    }
 }
