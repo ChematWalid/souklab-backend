@@ -3,9 +3,7 @@ package com.project.souklab.model;
 public final class FinancialAuditOperation {
     private FinancialAuditOperation() { }
 
-    public interface Type {
-        String value();
-    }
+    public interface Type extends EnumValue { }
 
     public enum Manual implements Type {
         GRANT("MANUAL_GRANT");

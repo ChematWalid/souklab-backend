@@ -4,6 +4,7 @@ import com.project.souklab.dao.AuditLogRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AuditLog;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.EnumValue;
 import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.model.User;
 import com.project.souklab.util.SecurityUtils;
@@ -57,6 +58,15 @@ public class AuditLogService {
                                    String paymentId, String subscriptionId) {
         persistFinancialAction(action, actor, targetAccountId, operation.value(), previousState, newState,
                 reason, paymentId, subscriptionId);
+    }
+
+    @Transactional
+    public void logFinancialState(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
+                                  EnumValue previousState, EnumValue newState, String reason,
+                                  String paymentId, String subscriptionId) {
+        persistFinancialAction(action, actor, targetAccountId, operation.value(),
+                previousState == null ? null : previousState.value(),
+                newState == null ? null : newState.value(), reason, paymentId, subscriptionId);
     }
 
     @Transactional
