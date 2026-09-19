@@ -52,7 +52,7 @@ public class ChatStompController {
     @MessageMapping("/v1/conversations/{conversationId}/read")
     public void read(@DestinationVariable String conversationId, MessageCommand command, Principal principal) {
         withPrincipal(principal, () -> { conversationService.markRead(conversationId, command.messageId()); return null; });
-        acknowledge(principal, ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UP_TO, conversationId, command.messageId(), command.correlationId(), LocalDateTime.now(clock), null));
+        acknowledge(principal, ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UpTo.EVENT, conversationId, command.messageId(), command.correlationId(), LocalDateTime.now(clock), null));
     }
 
     @MessageMapping("/v1/conversations/{conversationId}/typing.start")

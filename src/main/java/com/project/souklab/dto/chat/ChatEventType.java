@@ -26,9 +26,13 @@ public final class ChatEventType {
         private final String value; Command(String value) { this.value = value; }
         @Override public String value() { return value; }
     }
-    public enum Read implements Type {
-        UP_TO("READ_UP_TO");
-        private final String value; Read(String value) { this.value = value; }
-        @Override public String value() { return value; }
+    public static final class Read {
+        private Read() { }
+
+        public enum UpTo implements Type {
+            EVENT("READ_UP_TO");
+            private final String value; UpTo(String value) { this.value = value; }
+            @Override public String value() { return value; }
+        }
     }
 }
