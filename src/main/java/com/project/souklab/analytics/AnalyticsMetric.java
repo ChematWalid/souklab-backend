@@ -325,16 +325,48 @@ public final class AnalyticsMetric {
             public String value() { return value; }
         }
 
-        public enum Metric implements Key {
-            UPLOADS("souklab.uploads"), VIRUS_SCANS("souklab.virus.scans"),
-            SEARCH_REQUESTS("souklab.search.requests"), WEBSOCKET_CONNECTIONS("souklab.websocket.connections"),
-            RATE_LIMIT_REJECTIONS("souklab.rate_limit.rejections"), HTTP_REQUESTS("souklab.http.requests");
+        public static final class Metric {
+            private Metric() { }
 
-            private final String value;
+            public enum Upload implements Key {
+                COUNTERS("souklab.uploads");
 
-            Metric(String value) { this.value = value; }
+                private final String value;
 
-            public String value() { return value; }
+                Upload(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
+
+            public enum Virus implements Key {
+                SCANS("souklab.virus.scans");
+
+                private final String value;
+
+                Virus(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
+
+            public enum Search implements Key {
+                REQUESTS("souklab.search.requests");
+
+                private final String value;
+
+                Search(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
+
+            public enum WebSocket implements Key {
+                CONNECTIONS("souklab.websocket.connections");
+
+                private final String value;
+
+                WebSocket(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
 
             public enum Request implements Key {
                 COUNTERS("souklab.http.requests");

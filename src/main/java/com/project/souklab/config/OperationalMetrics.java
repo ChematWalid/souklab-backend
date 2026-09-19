@@ -39,32 +39,32 @@ public class OperationalMetrics {
 
     public void recordUpload(AnalyticsMetric.Operational.Operation operation,
                              AnalyticsMetric.Operational.Outcome outcome) {
-        increment(AnalyticsMetric.Operational.Metric.UPLOADS, operation, outcome);
+        increment(AnalyticsMetric.Operational.Metric.Upload.COUNTERS, operation, outcome);
     }
 
     public void recordVirusScan(AnalyticsMetric.Key outcome) {
-        increment(AnalyticsMetric.Operational.Metric.VIRUS_SCANS,
+        increment(AnalyticsMetric.Operational.Metric.Virus.SCANS,
                 AnalyticsMetric.Operational.Component.CLAMAV, outcome);
     }
 
     public void recordSearch(AnalyticsMetric.Operational.Backend backend,
                              AnalyticsMetric.Operational.Outcome outcome) {
-        increment(AnalyticsMetric.Operational.Metric.SEARCH_REQUESTS, backend, outcome);
+        increment(AnalyticsMetric.Operational.Metric.Search.REQUESTS, backend, outcome);
     }
 
     public void recordWebSocket(AnalyticsMetric.Operational.Outcome outcome) {
-        increment(AnalyticsMetric.Operational.Metric.WEBSOCKET_CONNECTIONS,
+        increment(AnalyticsMetric.Operational.Metric.WebSocket.CONNECTIONS,
                 AnalyticsMetric.Operational.Component.STOMP, outcome);
     }
 
     public void recordRateLimitRejection(AnalyticsMetric.Key scope) {
-        increment(AnalyticsMetric.Operational.Metric.RATE_LIMIT_REJECTIONS,
+        increment(AnalyticsMetric.Operational.Metric.RateLimit.REJECTIONS,
                 scope, AnalyticsMetric.Operational.Outcome.REJECTED);
     }
 
         public void recordRequest(AnalyticsMetric.Operational.HttpMethod method,
                               AnalyticsMetric.Operational.RequestOutcome.Status outcome) {
-        increment(AnalyticsMetric.Operational.Metric.HTTP_REQUESTS, method, outcome);
+        increment(AnalyticsMetric.Operational.Metric.Request.COUNTERS, method, outcome);
     }
 
     /** Returns the current bounded counter snapshot for an operational report. */
