@@ -50,9 +50,9 @@ public class AnalyticsRetentionCleanup {
         artifacts.deleteAll(deletedArtifacts);
         // Retain an expired job while its object metadata remains, so a storage outage
         // cannot turn a retryable artifact into an orphaned foreign-key failure.
-        jobs.findByExpiresAtBeforeOrderByExpiresAtAsc(now.minus(properties.getJobs()), page).stream()
+        jobs.findByExpiresAtBeforeOrderByExpiresAtAsc(now, page).stream()
                 .filter(job -> artifacts.findFirstByJobIdOrderByCreatedAtDesc(job.getId()).isEmpty())
                 .forEach(jobs::delete);
-        maintenanceJobs.deleteAll(maintenanceJobs.findByExpiresAtBeforeOrderByExpiresAtAsc(now.minus(properties.getJobs()), page));
+        maintenanceJobs.deleteAll(maintenanceJobs.findByExpiresAtBeforeOrderByExpiresAtAsc(now, page));
     }
 }
