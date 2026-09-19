@@ -15,6 +15,10 @@ Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 - enabled the application analytics RabbitMQ connection and verified the
   durable exchange/queue, publisher confirms, consumer delivery, and
   idempotency marker persistence;
+- verified enum-bound analytics bucket configuration, startup validation, and
+  disabled-bucket request rejection;
+- verified analytics activity, moderation, instructor, and formation-utilization
+  KPI code paths compile and load through the application context;
 - ran the MariaDB migration, RabbitMQ delivery, and Redis rate-limit integration tests;
 - exercised MinIO-backed storage tests;
 - ran the complete Maven test suite with JaCoCo reporting.
@@ -22,7 +26,7 @@ Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 Result:
 
 ```text
-Tests run: 1209, Failures: 0, Errors: 0, Skipped: 4
+Tests run: 1211, Failures: 0, Errors: 0, Skipped: 4
 BUILD SUCCESS
 ```
 
