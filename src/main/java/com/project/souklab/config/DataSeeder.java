@@ -447,7 +447,7 @@ public class DataSeeder implements CommandLineRunner {
 
         for (SubCategorySeed sub : subs) {
             JobSubCategory subCategory = JobSubCategory.builder()
-                .name(sub.name())
+                .name(sub.displayName())
                 .slug(sub.slug())
                 .description(sub.description())
                 .displayOrder(sub.displayOrder())
@@ -546,7 +546,7 @@ public class DataSeeder implements CommandLineRunner {
 
         for (MaterialSeed mat : materials) {
             Material material = Material.builder()
-                .name(mat.name())
+                .name(mat.displayName())
                 .slug(mat.slug())
                 .description(mat.description())
                 .displayOrder(mat.displayOrder())
