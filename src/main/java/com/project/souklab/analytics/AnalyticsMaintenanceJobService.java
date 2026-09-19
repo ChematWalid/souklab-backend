@@ -1,8 +1,10 @@
 package com.project.souklab.analytics;
 
 import com.project.souklab.config.AnalyticsProperties;
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dao.analytics.AnalyticsMaintenanceJobRepository;
+import com.project.souklab.dto.analytics.AnalyticsMaintenanceJobEvent;
 import com.project.souklab.dto.analytics.AnalyticsMaintenanceJobResponse;
 import com.project.souklab.dto.analytics.AnalyticsRebuildRequest;
 import com.project.souklab.dto.analytics.AnalyticsRebuildResponse;
@@ -16,7 +18,9 @@ import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.security.Permission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -38,6 +42,14 @@ public class AnalyticsMaintenanceJobService {
     private final Executor applicationTaskExecutor;
     private final TransactionTemplate transactionTemplate;
     private final AuditLogService auditLogService;
+    private SimpMessagingTemplate messagingTemplate;
+    private AppProperties appProperties;
+
+    @Autowired(required = false)
+    void setMessagingTemplate(SimpMessagingTemplate value) { this.messagingTemplate = value; }
+
+    @Autowired(required = false)
+    void setAppProperties(AppProperties value) { this.appProperties = value; }
 
     public AnalyticsMaintenanceJobResponse submit(AnalyticsMaintenanceOperation operation,
                                                    AnalyticsRebuildRequest request,
@@ -100,6 +112,7 @@ public class AnalyticsMaintenanceJobService {
                 current.setCompletedAt(LocalDateTime.now(clock));
                 jobs.save(current);
             }));
+            jobs.findById(id).ifPresent(this::notifyOwner);
         } catch (Exception exception) {
             log.error("Analytics maintenance job {} failed", id, exception);
             transactionTemplate.executeWithoutResult(status -> jobs.findById(id).ifPresent(current -> {
@@ -107,7 +120,15 @@ public class AnalyticsMaintenanceJobService {
                 current.setFailureMessage(exception.getMessage());
                 jobs.save(current);
             }));
+            jobs.findById(id).ifPresent(this::notifyOwner);
         }
+    }
+
+    private void notifyOwner(AnalyticsMaintenanceJob job) {
+        if (messagingTemplate == null || appProperties == null) return;
+        users.findById(job.getOwnerId()).ifPresent(owner -> messagingTemplate.convertAndSendToUser(
+                owner.getEmail(), appProperties.getChat().getNotificationDestination(),
+                new AnalyticsMaintenanceJobEvent(job.getId(), job.getOperation(), job.getStatus(), job.getFailureMessage())));
     }
 
     private AnalyticsMaintenanceJobResponse response(AnalyticsMaintenanceJob job) {

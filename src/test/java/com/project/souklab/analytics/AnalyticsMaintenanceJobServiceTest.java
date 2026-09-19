@@ -5,8 +5,10 @@ import org.mockito.Mockito;
 import com.project.souklab.config.AnalyticsProperties;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dao.analytics.AnalyticsMaintenanceJobRepository;
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.analytics.AnalyticsRebuildRequest;
 import com.project.souklab.dto.analytics.AnalyticsRebuildResponse;
+import com.project.souklab.dto.analytics.AnalyticsMaintenanceJobEvent;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.model.User;
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -33,6 +36,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -46,6 +50,7 @@ class AnalyticsMaintenanceJobServiceTest {
     @Mock private AnalyticsRebuildService rebuildService;
     @Mock private AnalyticsBackfillService backfillService;
     @Mock private AuditLogService auditLogService;
+    @Mock private SimpMessagingTemplate messagingTemplate;
     @Mock private Executor executor;
     @Mock private TransactionTemplate transactionTemplate;
 
@@ -57,6 +62,10 @@ class AnalyticsMaintenanceJobServiceTest {
         Clock clock = Clock.fixed(Instant.parse("2026-01-10T00:00:00Z"), ZoneOffset.UTC);
         service = new AnalyticsMaintenanceJobService(jobs, users, properties, rebuildService,
                 backfillService, clock, executor, transactionTemplate, auditLogService);
+        service.setMessagingTemplate(messagingTemplate);
+        AppProperties appProperties = new AppProperties();
+        appProperties.getChat().setNotificationDestination("/queue/analytics");
+        service.setAppProperties(appProperties);
         job = new AnalyticsMaintenanceJob();
         job.setId("maintenance-1");
         job.setOwnerId("owner-1");
@@ -65,6 +74,7 @@ class AnalyticsMaintenanceJobServiceTest {
         job.setFromDate(LocalDate.of(2026, 1, 1));
         job.setToDate(LocalDate.of(2026, 1, 2));
         lenient().when(users.findByEmail("admin@example.com")).thenReturn(Optional.of(user("owner-1")));
+        lenient().when(users.findById("owner-1")).thenReturn(Optional.of(user("owner-1")));
         lenient().when(properties.getJobRetention()).thenReturn(Duration.ofHours(24));
         lenient().when(properties.getMaximumRangeDays()).thenReturn(366);
         lenient().when(jobs.saveAndFlush(any(AnalyticsMaintenanceJob.class))).thenAnswer(invocation -> {
@@ -98,6 +108,8 @@ class AnalyticsMaintenanceJobServiceTest {
         assertThat(job.getEventsRead()).isEqualTo(8);
         assertThat(job.getRollupsWritten()).isEqualTo(4);
         verify(jobs, Mockito.times(2)).save(job);
+        verify(messagingTemplate).convertAndSendToUser(eq("admin@example.com"), eq("/queue/analytics"),
+                any(AnalyticsMaintenanceJobEvent.class));
     }
 
     @Test
@@ -111,6 +123,8 @@ class AnalyticsMaintenanceJobServiceTest {
         assertThat(job.getStatus()).isEqualTo(AnalyticsJobStatus.FAILED);
         assertThat(job.getFailureMessage()).isEqualTo("rollup unavailable");
         verify(jobs, Mockito.times(2)).save(job);
+        verify(messagingTemplate).convertAndSendToUser(eq("admin@example.com"), eq("/queue/analytics"),
+                any(AnalyticsMaintenanceJobEvent.class));
     }
 
     @Test
