@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.security.Permission;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.AccountRole;
+import com.project.souklab.model.ReviewStatus;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsSortField;
 import com.project.souklab.dto.analytics.AnalyticsJobRequest;
@@ -111,5 +113,7 @@ class AnalyticsEventTaxonomyTest {
 
         assertThat(mapper.writeValueAsString(AccountStatus.ACTIVE)).isEqualTo("\"ACTIVE\"");
         assertThat(mapper.writeValueAsString(EnrollmentStatus.CANCELLED)).isEqualTo("\"CANCELLED\"");
+        assertThat(mapper.writeValueAsString(AccountRole.ARTISAN)).isEqualTo("\"ARTISAN\"");
+        assertThat(mapper.writeValueAsString(ReviewStatus.PUBLISHED)).isEqualTo("\"PUBLISHED\"");
     }
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Locale;
 import java.util.Optional;
 
-public enum AccountRole {
+public enum AccountRole implements EnumValue {
     ADMIN("ADMIN"),
     ARTISAN("ARTISAN"),
     CLIENT("CLIENT");

@@ -1,6 +1,6 @@
 package com.project.souklab.model;
 
-public enum AuditLogAction {
+public enum AuditLogAction implements EnumValue {
     EMAIL_VERIFIED,
     PASSWORD_RESET_COMPLETED,
     PASSWORD_CHANGED,

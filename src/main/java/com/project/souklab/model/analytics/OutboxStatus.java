@@ -1,6 +1,8 @@
 package com.project.souklab.model.analytics;
 
-public enum OutboxStatus {
+import com.project.souklab.model.EnumValue;
+
+public enum OutboxStatus implements EnumValue {
     PENDING,
     PUBLISHED,
     DEAD_LETTER

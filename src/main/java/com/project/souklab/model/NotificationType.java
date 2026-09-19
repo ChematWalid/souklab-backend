@@ -1,6 +1,6 @@
 package com.project.souklab.model;
 
-public enum NotificationType {
+public enum NotificationType implements EnumValue {
     ACCOUNT_VALIDATED,
     /** Reserved for Phase 10 (Admin direct account rejection). */
     ACCOUNT_REJECTED,

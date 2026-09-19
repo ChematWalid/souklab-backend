@@ -1,5 +1,5 @@
 package com.project.souklab.model;
 
-public enum PaymentProvider {
+public enum PaymentProvider implements EnumValue {
     CHARGILY
 }

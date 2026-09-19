@@ -1,3 +1,5 @@
 package com.project.souklab.model.analytics;
 
-public enum AnalyticsJobStatus { QUEUED, RUNNING, COMPLETED, FAILED, EXPIRED }
+import com.project.souklab.model.EnumValue;
+
+public enum AnalyticsJobStatus implements EnumValue { QUEUED, RUNNING, COMPLETED, FAILED, EXPIRED }
