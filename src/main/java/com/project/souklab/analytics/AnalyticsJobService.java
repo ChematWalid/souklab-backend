@@ -39,6 +39,7 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.EnumValue;
 import com.project.souklab.model.FormateurRequestStatus;
 import com.project.souklab.model.ReviewStatus;
 import com.project.souklab.model.analytics.AnalyticsJob;
@@ -208,17 +209,17 @@ public class AnalyticsJobService {
                 summary.put(AnalyticsMetric.Summary.PENDING_USERS.value(), users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
                 summary.put(AnalyticsMetric.Summary.SUSPENDED_USERS.value(), users.countByStatusAndDeletedAtIsNull(AccountStatus.SUSPENDED));
                 summary.put(AnalyticsMetric.Summary.PENDING_USER_APPROVALS.value(), users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
-                Map<String, Long> moderationActivity = new LinkedHashMap<>();
+                Map<AnalyticsEvent.Type, Long> moderationActivity = new LinkedHashMap<>();
                 for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.User.APPROVED, AnalyticsEvent.User.SUSPENDED,
                         AnalyticsEvent.User.TIMED_OUT, AnalyticsEvent.User.REINSTATED,
                         AnalyticsEvent.Formation.Moderation.APPROVED, AnalyticsEvent.Formation.Moderation.REJECTED,
                         AnalyticsEvent.Report.RESOLVED)) {
-                    moderationActivity.put(eventType.value(), countFilteredEvent(job, eventType, from, inclusiveTo));
+                    moderationActivity.put(eventType, countFilteredEvent(job, eventType, from, inclusiveTo));
                 }
                 summary.put(AnalyticsMetric.Summary.MODERATION_ACTIVITY.value(), moderationActivity);
-                Map<String, Long> userStatuses = new LinkedHashMap<>();
+                Map<AccountStatus, Long> userStatuses = new LinkedHashMap<>();
                 for (AccountStatus status : AccountStatus.values()) {
-                    userStatuses.put(status.value(), users.countByStatusAndDeletedAtIsNull(status));
+                    userStatuses.put(status, users.countByStatusAndDeletedAtIsNull(status));
                 }
                 summary.put(AnalyticsMetric.Summary.USER_STATUSES.value(), userStatuses);
                 summary.put(AnalyticsMetric.Summary.ACTIVITY_EVENTS.value(), countFilteredEvents(job, from, inclusiveTo));
@@ -274,30 +275,30 @@ public class AnalyticsJobService {
                         FormateurRequestStatus.APPROVED, from, inclusiveTo));
                 summary.put(AnalyticsMetric.Summary.FORMATEUR_REJECTED_IN_RANGE.value(), formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
                         FormateurRequestStatus.REJECTED, from, inclusiveTo));
-                Map<String, Long> formateurStatuses = new LinkedHashMap<>();
+                Map<FormateurRequestStatus, Long> formateurStatuses = new LinkedHashMap<>();
                 for (FormateurRequestStatus status : FormateurRequestStatus.values()) {
-                    formateurStatuses.put(status.value(), formateurRequests.countByStatusAndDeletedAtIsNull(status));
+                    formateurStatuses.put(status, formateurRequests.countByStatusAndDeletedAtIsNull(status));
                 }
                 summary.put(AnalyticsMetric.Summary.FORMATEUR_STATUSES.value(), formateurStatuses);
                 if (payments != null) summary.put(AnalyticsMetric.Summary.PAYMENTS_CREATED.value(), payments.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (feedPosts != null) {
-                    Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (FeedPostStatus status : FeedPostStatus.values()) statuses.put(status.value(), feedPosts.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    Map<FeedPostStatus, Long> statuses = new LinkedHashMap<>();
+                    for (FeedPostStatus status : FeedPostStatus.values()) statuses.put(status, feedPosts.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put(AnalyticsMetric.Summary.FEED_POSTS_BY_STATUS.value(), statuses);
                 }
                 if (formations != null) {
-                    Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (FormationStatus status : FormationStatus.values()) statuses.put(status.value(), formations.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    Map<FormationStatus, Long> statuses = new LinkedHashMap<>();
+                    for (FormationStatus status : FormationStatus.values()) statuses.put(status, formations.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put(AnalyticsMetric.Summary.FORMATIONS_BY_STATUS.value(), statuses);
                 }
                 if (enrollments != null) {
-                    Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (EnrollmentStatus status : EnrollmentStatus.values()) statuses.put(status.value(), enrollments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    Map<EnrollmentStatus, Long> statuses = new LinkedHashMap<>();
+                    for (EnrollmentStatus status : EnrollmentStatus.values()) statuses.put(status, enrollments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put(AnalyticsMetric.Summary.ENROLLMENTS_BY_STATUS.value(), statuses);
                     long enrollmentTotal = statuses.values().stream().mapToLong(Long::longValue).sum();
-                    summary.put(AnalyticsMetric.Summary.FORMATION_COMPLETIONS.value(), statuses.getOrDefault(EnrollmentStatus.ATTENDED.value(), 0L));
+                    summary.put(AnalyticsMetric.Summary.FORMATION_COMPLETIONS.value(), statuses.getOrDefault(EnrollmentStatus.ATTENDED, 0L));
                     summary.put(AnalyticsMetric.Summary.ENROLLMENT_CANCELLATION_RATE.value(), enrollmentTotal == 0 ? 0.0
-                            : (double) statuses.getOrDefault(EnrollmentStatus.CANCELLED.value(), 0L) / enrollmentTotal);
+                            : (double) statuses.getOrDefault(EnrollmentStatus.CANCELLED, 0L) / enrollmentTotal);
                     if (formations != null) {
                         long capacity = formations.sumMaxParticipantsByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
                                 FormationStatus.PUBLISHED, from, inclusiveTo);
@@ -308,37 +309,37 @@ public class AnalyticsJobService {
                     }
                 }
                 if (reports != null) {
-                    Map<String, Long> statuses = new LinkedHashMap<>();
-                    for (ReportStatus status : ReportStatus.values()) statuses.put(status.value(), reports.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                    Map<ReportStatus, Long> statuses = new LinkedHashMap<>();
+                    for (ReportStatus status : ReportStatus.values()) statuses.put(status, reports.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     summary.put(AnalyticsMetric.Summary.REPORTS_BY_STATUS.value(), statuses);
                 }
                 if (payments != null) {
-                    Map<String, Long> statuses = new LinkedHashMap<>();
+                    Map<PaymentStatus, Long> statuses = new LinkedHashMap<>();
                         for (PaymentStatus status : PaymentStatus.values()) {
-                        statuses.put(status.value(), payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                        statuses.put(status, payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     }
                     summary.put(AnalyticsMetric.Summary.PAYMENTS_BY_STATUS.value(), statuses);
                     if (job.getReportType() == AnalyticsReportType.SUBSCRIPTIONS_PAYMENTS) {
-                        Map<String, Long> subscriptions = new LinkedHashMap<>();
+                        Map<SubscriptionStatus, Long> subscriptions = new LinkedHashMap<>();
                         for (SubscriptionStatus status : SubscriptionStatus.values()) {
-                            subscriptions.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo)
+                            subscriptions.put(status, artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo)
                                     + clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                         }
                         summary.put(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_STATUS.value(), subscriptions);
-                        Map<String, Map<String, Long>> subscriptionsBySubscriberType = new LinkedHashMap<>();
-                        Map<String, Long> artisanSubscriptionStatuses = new LinkedHashMap<>();
-                        Map<String, Long> clientSubscriptionStatuses = new LinkedHashMap<>();
+                        Map<String, Map<?, Long>> subscriptionsBySubscriberType = new LinkedHashMap<>();
+                        Map<SubscriptionStatus, Long> artisanSubscriptionStatuses = new LinkedHashMap<>();
+                        Map<SubscriptionStatus, Long> clientSubscriptionStatuses = new LinkedHashMap<>();
                             for (SubscriptionStatus status : SubscriptionStatus.values()) {
-                            artisanSubscriptionStatuses.put(status.value(), artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
-                            clientSubscriptionStatuses.put(status.value(), clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                            artisanSubscriptionStatuses.put(status, artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
+                            clientSubscriptionStatuses.put(status, clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                         }
                         subscriptionsBySubscriberType.put(AnalyticsMetric.AccountType.ARTISAN.value(), artisanSubscriptionStatuses);
                         subscriptionsBySubscriberType.put(AnalyticsMetric.AccountType.CLIENT.value(), clientSubscriptionStatuses);
                         summary.put(AnalyticsMetric.Summary.SUBSCRIPTIONS_BY_SUBSCRIBER_TYPE.value(), subscriptionsBySubscriberType);
-                        Map<String, Long> lifecycleEvents = new LinkedHashMap<>();
+                        Map<AnalyticsEvent.Type, Long> lifecycleEvents = new LinkedHashMap<>();
                         for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.Subscription.ACTIVATED, AnalyticsEvent.Subscription.EXPIRED,
                                 AnalyticsEvent.Subscription.CANCELED, AnalyticsEvent.Subscription.REVOKED, AnalyticsEvent.Subscription.RENEWAL)) {
-                            lifecycleEvents.put(eventType.value(), countFilteredEvent(job, eventType, from, inclusiveTo));
+                            lifecycleEvents.put(eventType, countFilteredEvent(job, eventType, from, inclusiveTo));
                         }
                         summary.put(AnalyticsMetric.Summary.SUBSCRIPTION_LIFECYCLE_EVENTS.value(), lifecycleEvents);
                         summary.put(AnalyticsMetric.Summary.CHECKOUT_CREATED.value(), countFilteredEvent(job, AnalyticsEvent.Checkout.CREATED, from, inclusiveTo));
@@ -760,7 +761,7 @@ public class AnalyticsJobService {
                                  AnalyticsMetric.Table table, Object source, AnalyticsJob job) {
         if (!(source instanceof Map<?, ?> values)) return;
         List<Map<String, Object>> rows = values.entrySet().stream()
-                .map(entry -> Map.<String, Object>of(AnalyticsMetric.Csv.KEY.value(), String.valueOf(entry.getKey()),
+                .map(entry -> Map.<String, Object>of(AnalyticsMetric.Csv.KEY.value(), keyValue(entry.getKey()),
                         AnalyticsMetric.Csv.VALUE.value(), entry.getValue() == null ? 0L : entry.getValue()))
                 .sorted((left, right) -> String.valueOf(left.get(AnalyticsMetric.Csv.KEY.value())).compareTo(String.valueOf(right.get(AnalyticsMetric.Csv.KEY.value()))))
                 .toList();
@@ -772,6 +773,13 @@ public class AnalyticsJobService {
                 .content(rows.subList(start, end)).pageNumber(job.getPageNumber()).pageSize(pageSize)
                 .totalElements(rows.size()).totalPages(rows.isEmpty() ? 0 : (rows.size() + pageSize - 1) / pageSize)
                 .last(end >= rows.size()).build());
+    }
+
+    private String keyValue(Object key) {
+        if (key instanceof AnalyticsEvent.Type eventType) return eventType.value();
+        if (key instanceof EnumValue enumValue) return enumValue.value();
+        if (key instanceof AnalyticsMetric.Key metricKey) return metricKey.value();
+        return String.valueOf(key);
     }
 
     private Map<String, Long> dimensionCounts(List<AnalyticsDimensionCount> counts) {
