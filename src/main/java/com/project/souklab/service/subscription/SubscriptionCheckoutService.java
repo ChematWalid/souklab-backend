@@ -172,7 +172,8 @@ public class SubscriptionCheckoutService {
     private String resolve(String requested, String configured) { return requested == null || requested.isBlank() ? configured : requested; }
     private void ensureSamePlan(Payment payment, String planId) {
         try {
-            String existingPlan = objectMapper.readTree(payment.getPlanSnapshot()).path("planId").asText();
+            String existingPlan = objectMapper.readTree(payment.getPlanSnapshot())
+                    .path(AnalyticsMetadata.Subscription.PLAN_ID.value()).asText();
             if (!planId.equals(existingPlan)) throw new BadRequestException("Idempotency-Key was already used for another plan");
         } catch (JsonProcessingException exception) {
             throw new BadRequestException("Existing idempotent payment snapshot is invalid", exception);

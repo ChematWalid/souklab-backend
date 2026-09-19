@@ -33,6 +33,11 @@ if rg -n --pcre2 '"(?:current|previous|historical\.(?:registrations|feed_posts|f
   echo 'raw analytics contract keys detected; use grouped AnalyticsMetric enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'Map\.of\("(?:accountType|subscriberType|reasonPresent|minutes|decision|postType|formationId|targetType|action|rating|status|previousStatus|source|paymentStatus|providerEvent|payment_id|subscription_id)"' \
+    src/main/java/com/project/souklab/service src/main/java/com/project/souklab/analytics --glob '*.java'; then
+  echo 'raw analytics metadata keys detected; use grouped AnalyticsMetadata enums' >&2
+  exit 1
+fi
 
 mapfile -t migrations < <(find src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' -printf '%f\n' | sort -V)
 test "${#migrations[@]}" -gt 0 || { echo 'no Flyway migrations found' >&2; exit 1; }
