@@ -707,8 +707,8 @@ public class AnalyticsJobService {
         return cohortSizes.entrySet().stream().map(entry -> {
             long size = entry.getValue();
             Map<AnalyticsMetric.Key, Object> row = new LinkedHashMap<>();
-            row.put(AnalyticsMetric.Retention.Row.COHORT_DATE, entry.getKey());
-            row.put(AnalyticsMetric.Retention.Row.COHORT_SIZE, size);
+            row.put(AnalyticsMetric.Retention.Row.Cohort.DATE, entry.getKey());
+            row.put(AnalyticsMetric.Retention.Row.Cohort.SIZE, size);
             for (Map.Entry<AnalyticsMetric.Retention.Day, Set<String>> window : retainedByWindow.entrySet()) {
                 long retained = window.getValue().stream()
                         .filter(firstRegistrationByActor::containsKey)

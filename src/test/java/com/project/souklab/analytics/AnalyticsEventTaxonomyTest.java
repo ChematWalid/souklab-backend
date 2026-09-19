@@ -67,9 +67,9 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Operational.RequestOutcome.Status.fromStatus(503))
                 .isEqualTo(AnalyticsMetric.Operational.RequestOutcome.Status.SERVER_ERROR);
         assertThat(AnalyticsMetric.Retention.Day.SEVEN.retainedRow())
-                .isEqualTo(AnalyticsMetric.Retention.Row.Day.SEVEN_RETAINED);
+                .isEqualTo(AnalyticsMetric.Retention.Row.Day.Retained.SEVEN);
         assertThat(AnalyticsMetric.Retention.Day.SEVEN.rateRow())
-                .isEqualTo(AnalyticsMetric.Retention.Row.Day.SEVEN_RATE);
+                .isEqualTo(AnalyticsMetric.Retention.Row.Day.Rate.SEVEN);
     }
 
     @Test

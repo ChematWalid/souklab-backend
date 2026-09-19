@@ -896,40 +896,48 @@ public final class AnalyticsMetric {
 
             public Key retainedRow() {
                 return switch (this) {
-                    case ONE -> Row.Day.ONE_RETAINED;
-                    case SEVEN -> Row.Day.SEVEN_RETAINED;
-                    case THIRTY -> Row.Day.THIRTY_RETAINED;
+                    case ONE -> Row.Day.Retained.ONE;
+                    case SEVEN -> Row.Day.Retained.SEVEN;
+                    case THIRTY -> Row.Day.Retained.THIRTY;
                 };
             }
 
             public Key rateRow() {
                 return switch (this) {
-                    case ONE -> Row.Day.ONE_RATE;
-                    case SEVEN -> Row.Day.SEVEN_RATE;
-                    case THIRTY -> Row.Day.THIRTY_RATE;
+                    case ONE -> Row.Day.Rate.ONE;
+                    case SEVEN -> Row.Day.Rate.SEVEN;
+                    case THIRTY -> Row.Day.Rate.THIRTY;
                 };
             }
         }
 
-        public enum Row implements Key {
-            COHORT_DATE("cohortDate"), COHORT_SIZE("cohortSize");
+        public static final class Row {
+            private Row() { }
 
-            private final String value;
-
-            Row(String value) { this.value = value; }
-
-            public String value() { return value; }
+            public enum Cohort implements Key {
+                DATE("cohortDate"), SIZE("cohortSize");
+                private final String value;
+                Cohort(String value) { this.value = value; }
+                public String value() { return value; }
+            }
 
             public enum Day implements Key {
-                ONE_RETAINED("day1Retained"), ONE_RATE("day1Rate"),
-                SEVEN_RETAINED("day7Retained"), SEVEN_RATE("day7Rate"),
-                THIRTY_RETAINED("day30Retained"), THIRTY_RATE("day30Rate");
+                ;
+                private Day() { }
 
-                private final String value;
+                public enum Retained implements Key {
+                    ONE("day1Retained"), SEVEN("day7Retained"), THIRTY("day30Retained");
+                    private final String value;
+                    Retained(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
 
-                Day(String value) { this.value = value; }
-
-                public String value() { return value; }
+                public enum Rate implements Key {
+                    ONE("day1Rate"), SEVEN("day7Rate"), THIRTY("day30Rate");
+                    private final String value;
+                    Rate(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
         }
     }
