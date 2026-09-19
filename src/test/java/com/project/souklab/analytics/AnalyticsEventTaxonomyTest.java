@@ -111,7 +111,7 @@ class AnalyticsEventTaxonomyTest {
         ObjectMapper mapper = new ObjectMapper();
 
         String json = mapper.writeValueAsString(Map.of(
-                AnalyticsMetric.Summary.General.PERIOD_COMPARISON, Map.of(
+                AnalyticsMetric.Summary.General.Period.COMPARISON, Map.of(
                         AnalyticsMetric.Comparison.CURRENT, 4,
                         AnalyticsMetric.Comparison.PREVIOUS, 2)));
 

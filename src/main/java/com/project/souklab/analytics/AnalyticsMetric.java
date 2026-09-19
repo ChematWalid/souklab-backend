@@ -29,8 +29,9 @@ public final class AnalyticsMetric {
 
         private static List<Key> all() {
             return Stream.of(
-                    User.all().toArray(Key[]::new), Engagement.all().toArray(Key[]::new), Content.values(), Formation.values(),
-                    Moderation.values(), Report.values(), Payment.values(), Subscription.values(), General.values())
+                    User.all().toArray(Key[]::new), Engagement.all().toArray(Key[]::new), Content.all().toArray(Key[]::new),
+                    Formation.all().toArray(Key[]::new), Moderation.all().toArray(Key[]::new), Report.all().toArray(Key[]::new),
+                    Payment.all().toArray(Key[]::new), Subscription.all().toArray(Key[]::new), General.all().toArray(Key[]::new))
                     .flatMap(Arrays::stream)
                     .map(key -> (Key) key)
                     .toList();
@@ -199,71 +200,249 @@ public final class AnalyticsMetric {
         }
 
         public enum Content implements Key {
-            FEED_POSTS_CREATED("feedPostsCreated"), FEED_POSTS_BY_STATUS("feedPostsByStatus"),
-            REVIEWS_SUBMITTED("reviewsSubmitted"), PUBLISHED_REVIEWS("publishedReviews"),
-            AVERAGE_PUBLISHED_RATING("averagePublishedRating");
+            ;
 
-            private final String value;
-            Content(String value) { this.value = value; }
-            public String value() { return value; }
+            private Content() { }
+
+            private static List<Key> all() {
+                return Stream.of(Feed.values(), Review.values())
+                        .flatMap(Arrays::stream).map(key -> (Key) key).toList();
+            }
+
+            public enum Feed implements Key {
+                CREATED("feedPostsCreated"), BY_STATUS("feedPostsByStatus");
+                private final String value;
+                Feed(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Review implements Key {
+                SUBMITTED("reviewsSubmitted"), PUBLISHED("publishedReviews"), AVERAGE_RATING("averagePublishedRating");
+                private final String value;
+                Review(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum Formation implements Key {
-            CREATED("formationsCreated"), ENROLLMENTS("formationEnrollments"), ACTIVE_INSTRUCTORS("activeInstructors"),
-            UTILIZATION_RATE("formationUtilizationRate"), BY_STATUS("formationsByStatus"),
-            COMPLETIONS("formationCompletions"), ENROLLMENT_CANCELLATION_RATE("enrollmentCancellationRate"),
-            ENROLLMENTS_BY_STATUS("enrollmentsByStatus");
+            ;
 
-            private final String value;
-            Formation(String value) { this.value = value; }
-            public String value() { return value; }
+            private Formation() { }
+
+            private static List<Key> all() {
+                return Stream.of(Count.values(), Instructor.values(), Utilization.values(), Status.values(), Enrollment.values())
+                        .flatMap(Arrays::stream).map(key -> (Key) key).toList();
+            }
+
+            public enum Count implements Key {
+                CREATED("formationsCreated"), ENROLLMENTS("formationEnrollments"), COMPLETIONS("formationCompletions");
+                private final String value;
+                Count(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Instructor implements Key {
+                ACTIVE("activeInstructors");
+                private final String value;
+                Instructor(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Utilization implements Key {
+                RATE("formationUtilizationRate");
+                private final String value;
+                Utilization(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Status implements Key {
+                BY_STATUS("formationsByStatus");
+                private final String value;
+                Status(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Enrollment implements Key {
+                CANCELLATION_RATE("enrollmentCancellationRate"), BY_STATUS("enrollmentsByStatus");
+                private final String value;
+                Enrollment(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum Moderation implements Key {
-            ACTIVITY("moderationActivity"), FORMATEUR_PENDING("formateurPending"),
-            FORMATEUR_APPROVED_IN_RANGE("formateurApprovedInRange"), FORMATEUR_REJECTED_IN_RANGE("formateurRejectedInRange"),
-            FORMATEUR_STATUSES("formateurStatuses");
+            ;
 
-            private final String value;
-            Moderation(String value) { this.value = value; }
-            public String value() { return value; }
+            private Moderation() { }
+
+            private static List<Key> all() {
+                return Stream.of(Activity.values(), Formateur.values())
+                        .flatMap(Arrays::stream).map(key -> (Key) key).toList();
+            }
+
+            public enum Activity implements Key {
+                SUMMARY("moderationActivity");
+                private final String value;
+                Activity(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Formateur implements Key {
+                PENDING("formateurPending"), APPROVED_IN_RANGE("formateurApprovedInRange"),
+                REJECTED_IN_RANGE("formateurRejectedInRange"), STATUSES("formateurStatuses");
+                private final String value;
+                Formateur(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum Report implements Key {
-            SUBMITTED("reportsSubmitted"), AVERAGE_RESOLUTION_SECONDS("averageReportResolutionSeconds"),
-            BY_STATUS("reportsByStatus");
+            ;
 
-            private final String value;
-            Report(String value) { this.value = value; }
-            public String value() { return value; }
+            private Report() { }
+
+            private static List<Key> all() {
+                return Stream.of(Submission.values(), Resolution.values(), Status.values())
+                        .flatMap(Arrays::stream).map(key -> (Key) key).toList();
+            }
+
+            public enum Submission implements Key {
+                COUNT("reportsSubmitted");
+                private final String value;
+                Submission(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Resolution implements Key {
+                AVERAGE_SECONDS("averageReportResolutionSeconds");
+                private final String value;
+                Resolution(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Status implements Key {
+                BY_STATUS("reportsByStatus");
+                private final String value;
+                Status(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum Payment implements Key {
-            CREATED("paymentsCreated"), BY_STATUS("paymentsByStatus"), CHECKOUT_CREATED("checkoutCreated"),
-            STATE_TRANSITIONS("paymentStateTransitions"), GROSS_COLLECTED_DZD("grossCollectedDzd"),
-            PROVIDER_FEES_DZD("providerFeesDzd"), NET_COLLECTED_DZD("netCollectedDzd"),
-            CONVERSION_RATE("paymentConversionRate"), MANUAL_GRANTS("manualGrants");
+            ;
 
-            private final String value;
-            Payment(String value) { this.value = value; }
-            public String value() { return value; }
+            private Payment() { }
+
+            private static List<Key> all() {
+                return Stream.of(Count.values(), Status.values(), Checkout.values(), State.values(), Revenue.values(), Conversion.values(), Grant.values())
+                        .flatMap(Arrays::stream).map(key -> (Key) key).toList();
+            }
+
+            public enum Count implements Key {
+                CREATED("paymentsCreated");
+                private final String value;
+                Count(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Status implements Key {
+                BY_STATUS("paymentsByStatus");
+                private final String value;
+                Status(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Checkout implements Key {
+                CREATED("checkoutCreated");
+                private final String value;
+                Checkout(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum State implements Key {
+                TRANSITIONS("paymentStateTransitions");
+                private final String value;
+                State(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Revenue implements Key {
+                GROSS_COLLECTED_DZD("grossCollectedDzd"), PROVIDER_FEES_DZD("providerFeesDzd"), NET_COLLECTED_DZD("netCollectedDzd");
+                private final String value;
+                Revenue(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Conversion implements Key {
+                RATE("paymentConversionRate");
+                private final String value;
+                Conversion(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Grant implements Key {
+                MANUAL("manualGrants");
+                private final String value;
+                Grant(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum Subscription implements Key {
-            BY_STATUS("subscriptionsByStatus"), BY_SUBSCRIBER_TYPE("subscriptionsBySubscriberType"),
-            LIFECYCLE_EVENTS("subscriptionLifecycleEvents");
+            ;
 
-            private final String value;
-            Subscription(String value) { this.value = value; }
-            public String value() { return value; }
+            private Subscription() { }
+
+            private static List<Key> all() {
+                return Stream.of(Status.values(), Subscriber.values(), Lifecycle.values())
+                        .flatMap(Arrays::stream).map(key -> (Key) key).toList();
+            }
+
+            public enum Status implements Key {
+                BY_STATUS("subscriptionsByStatus");
+                private final String value;
+                Status(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Subscriber implements Key {
+                TYPE("subscriptionsBySubscriberType");
+                private final String value;
+                Subscriber(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Lifecycle implements Key {
+                EVENTS("subscriptionLifecycleEvents");
+                private final String value;
+                Lifecycle(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum General implements Key {
-            OPERATIONAL("operational"), PERIOD_COMPARISON("periodComparison");
+            ;
 
-            private final String value;
-            General(String value) { this.value = value; }
-            public String value() { return value; }
+            private General() { }
+
+            private static List<Key> all() {
+                return Stream.of(Operational.values(), Period.values())
+                        .flatMap(Arrays::stream).map(key -> (Key) key).toList();
+            }
+
+            public enum Operational implements Key {
+                REPORT("operational");
+                private final String value;
+                Operational(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Period implements Key {
+                COMPARISON("periodComparison");
+                private final String value;
+                Period(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
     }
 
