@@ -13,6 +13,11 @@ class AnalyticsEventTaxonomyTest {
     void groupedEventEnumsExposeStablePersistedValues() {
         assertThat(AnalyticsEvent.Report.RESOLVED.value()).isEqualTo("REPORT_RESOLVED");
         assertThat(AnalyticsEvent.Authentication.Login.SUCCEEDED.value()).isEqualTo("LOGIN_SUCCEEDED");
+        assertThat(AnalyticsEvent.Formation.Moderation.APPROVED.value()).isEqualTo("FORMATION_MODERATION_APPROVED");
+        assertThat(AnalyticsEvent.Feed.Post.PUBLISHED.value()).isEqualTo("FEED_POST_PUBLISHED");
+        assertThat(AnalyticsEvent.Payment.State.TRANSITION.value()).isEqualTo("PAYMENT_STATE_TRANSITION");
+        assertThat(AnalyticsEvent.Source.Payment.WEBHOOK.value()).isEqualTo("PAYMENT_WEBHOOK");
+        assertThat(AnalyticsEvent.Source.Admin.CORRECTION.value()).isEqualTo("ADMIN_CORRECTION");
         assertThat(AnalyticsEvent.Subscription.RENEWAL.value()).isEqualTo("SUBSCRIPTION_RENEWAL");
         assertThat(AnalyticsEvent.fromValue("REPORT_RESOLVED")).contains(AnalyticsEvent.Report.RESOLVED);
         assertThat(AnalyticsEvent.fromValue("unknown_event")).isEmpty();
