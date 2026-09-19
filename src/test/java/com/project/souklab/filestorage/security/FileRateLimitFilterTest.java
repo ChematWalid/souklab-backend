@@ -2,6 +2,7 @@ package com.project.souklab.filestorage.security;
 import java.util.Arrays;
 
 import com.project.souklab.security.Permission;
+import com.project.souklab.security.SecurityAuthority;
 
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.util.ServletResponseUtil;
@@ -14,7 +15,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -197,7 +197,7 @@ class FileRateLimitFilterTest {
         assertThat(filter.shouldNotFilter(nullUri)).isTrue();
         SecurityContextHolder.getContext().setAuthentication(
                 new AnonymousAuthenticationToken("key", "anonymous",
-                        List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))));
+                        List.of(SecurityAuthority.Anonymous.ROLE)));
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/files/a.pdf");
         request.setRemoteAddr("192.0.2.1");
         filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());

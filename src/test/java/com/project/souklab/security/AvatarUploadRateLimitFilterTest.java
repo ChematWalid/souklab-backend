@@ -11,7 +11,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -252,7 +251,7 @@ class AvatarUploadRateLimitFilterTest {
 
         SecurityContextHolder.getContext().setAuthentication(
                 new AnonymousAuthenticationToken("key", "anonymous",
-                        List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))));
+                        List.of(SecurityAuthority.Anonymous.ROLE)));
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/users/me/avatars");
         request.setRemoteAddr("127.0.0.1");
         assertThat(filter.shouldNotFilter(request)).isFalse();

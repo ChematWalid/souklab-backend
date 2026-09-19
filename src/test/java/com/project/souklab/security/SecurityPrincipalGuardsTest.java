@@ -19,9 +19,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import com.project.souklab.dto.auth.JwtResponseDTO;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -64,7 +65,7 @@ class SecurityPrincipalGuardsTest {
         Authentication anonymousAuth = new AnonymousAuthenticationToken(
                 "key",
                 "anonymousUser",
-                AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
+                List.of(SecurityAuthority.Anonymous.ROLE)
         );
 
         assertThatThrownBy(() -> jwtUtils.generateAccessToken(anonymousAuth))
@@ -95,7 +96,7 @@ class SecurityPrincipalGuardsTest {
         Authentication anonymousAuth = new AnonymousAuthenticationToken(
                 "key",
                 "anonymousUser",
-                AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
+                List.of(SecurityAuthority.Anonymous.ROLE)
         );
 
         assertThatThrownBy(() -> jwtUtils.generateRefreshToken(anonymousAuth))
