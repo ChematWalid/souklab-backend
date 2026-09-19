@@ -1,7 +1,9 @@
 package com.project.souklab.model.analytics;
 
+import com.project.souklab.analytics.AnalyticsEvent;
 import com.project.souklab.model.BaseEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
@@ -18,7 +20,8 @@ import java.time.LocalDateTime;
 })
 @Getter @Setter @NoArgsConstructor
 public class ActivityEvent extends BaseEntity {
-    @Column(name = "event_type", nullable = false, length = 64) private String eventType;
+    @Convert(converter = AnalyticsEventTypeConverter.class)
+    @Column(name = "event_type", nullable = false, length = 64) private AnalyticsEvent.Type eventType;
     @Column(name = "actor_id", length = 36) private String actorId;
     @Column(name = "subject_id", length = 36) private String subjectId;
     @Column(name = "event_time", nullable = false) private LocalDateTime eventTime;

@@ -7,6 +7,7 @@ import org.springframework.transaction.TransactionStatus;
 import com.project.souklab.config.AnalyticsRabbitProperties;
 import com.project.souklab.dao.analytics.AnalyticsOutboxRepository;
 import com.project.souklab.model.analytics.AnalyticsOutboxEvent;
+import com.project.souklab.model.analytics.OutboxStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +66,7 @@ class AnalyticsOutboxRelayTest {
 
         relay.publishOne(event);
 
-        assertThat(event.getStatus()).isEqualTo(AnalyticsOutboxEvent.OutboxStatus.PUBLISHED);
+        assertThat(event.getStatus()).isEqualTo(OutboxStatus.PUBLISHED);
         assertThat(event.getPublishedAt()).isEqualTo(LocalDateTime.of(2026, 1, 1, 0, 0));
         assertThat(event.getNextAttemptAt()).isNull();
         verify(repository).save(event);
@@ -78,7 +79,7 @@ class AnalyticsOutboxRelayTest {
 
         relay.publishOne(event);
 
-        assertThat(event.getStatus()).isEqualTo(AnalyticsOutboxEvent.OutboxStatus.PENDING);
+        assertThat(event.getStatus()).isEqualTo(OutboxStatus.PENDING);
         assertThat(event.getAttemptCount()).isEqualTo(1);
         assertThat(event.getLastError()).isEqualTo("broker unavailable");
         assertThat(event.getNextAttemptAt()).isEqualTo(LocalDateTime.of(2026, 1, 1, 0, 0, 5));
@@ -95,7 +96,7 @@ class AnalyticsOutboxRelayTest {
 
         relay.publishOne(event);
 
-        assertThat(event.getStatus()).isEqualTo(AnalyticsOutboxEvent.OutboxStatus.PENDING);
+        assertThat(event.getStatus()).isEqualTo(OutboxStatus.PENDING);
         assertThat(event.getAttemptCount()).isEqualTo(3);
         assertThat(event.getNextAttemptAt()).isEqualTo(LocalDateTime.of(2026, 1, 1, 0, 0, 20));
     }
@@ -104,9 +105,9 @@ class AnalyticsOutboxRelayTest {
         AnalyticsOutboxEvent event = new AnalyticsOutboxEvent();
         event.setId("event-1");
         event.setEventId("event-1");
-        event.setEventType(AnalyticsEvent.Authentication.LOGIN_SUCCEEDED.value());
+        event.setEventType(AnalyticsEvent.Authentication.LOGIN_SUCCEEDED);
         event.setPayloadJson("{}");
-        event.setStatus(AnalyticsOutboxEvent.OutboxStatus.PENDING);
+        event.setStatus(OutboxStatus.PENDING);
         event.setNextAttemptAt(LocalDateTime.of(2026, 1, 1, 0, 0));
         return event;
     }

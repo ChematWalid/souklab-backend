@@ -3,6 +3,7 @@ package com.project.souklab.analytics;
 import com.project.souklab.config.AnalyticsRabbitProperties;
 import com.project.souklab.dao.analytics.AnalyticsOutboxRepository;
 import com.project.souklab.model.analytics.AnalyticsOutboxEvent;
+import com.project.souklab.model.analytics.OutboxStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -31,7 +32,7 @@ public class AnalyticsOutboxRelay {
     public void relayPendingEvents() {
         LocalDateTime now = LocalDateTime.now(clock);
         repository.findReadyByStatus(
-                        AnalyticsOutboxEvent.OutboxStatus.PENDING, now,
+                        OutboxStatus.PENDING, now,
                         PageRequest.of(0, properties.getRelayBatchSize()))
                 .forEach(this::publishOne);
     }
@@ -47,7 +48,7 @@ public class AnalyticsOutboxRelay {
                 operations.waitForConfirmsOrDie(properties.getConfirmTimeout().toMillis());
                 return null;
             });
-            event.setStatus(AnalyticsOutboxEvent.OutboxStatus.PUBLISHED);
+            event.setStatus(OutboxStatus.PUBLISHED);
             event.setPublishedAt(LocalDateTime.now(clock));
             event.setNextAttemptAt(null);
             repository.save(event);
@@ -56,7 +57,7 @@ public class AnalyticsOutboxRelay {
             event.setLastError(failure.getMessage());
             if (event.getAttemptCount() >= properties.getMaxAttempts()) {
                 if (publishToDeadLetter(event)) {
-                    event.setStatus(AnalyticsOutboxEvent.OutboxStatus.DEAD_LETTER);
+                    event.setStatus(OutboxStatus.DEAD_LETTER);
                     event.setNextAttemptAt(null);
                 } else {
                     event.setNextAttemptAt(nextAttempt(event.getAttemptCount()));

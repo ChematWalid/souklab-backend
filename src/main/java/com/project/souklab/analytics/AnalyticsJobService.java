@@ -48,6 +48,7 @@ import com.project.souklab.model.analytics.AnalyticsReportType;
 import com.project.souklab.model.analytics.AnalyticsFilterKey;
 import com.project.souklab.model.analytics.AnalyticsOutputFormat;
 import com.project.souklab.model.analytics.AnalyticsOutboxEvent;
+import com.project.souklab.model.analytics.OutboxStatus;
 import com.project.souklab.dto.analytics.AnalyticsJobEvent;
 import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.FormationStatus;
@@ -207,11 +208,11 @@ public class AnalyticsJobService {
                 summary.put("suspendedUsers", users.countByStatus(AccountStatus.SUSPENDED));
                 summary.put("pendingUserApprovals", users.countByStatus(AccountStatus.PENDING));
                 Map<String, Long> moderationActivity = new LinkedHashMap<>();
-                for (String eventType : List.of(AnalyticsEvent.User.APPROVED.value(), AnalyticsEvent.User.SUSPENDED.value(),
-                        AnalyticsEvent.User.TIMED_OUT.value(), AnalyticsEvent.User.REINSTATED.value(),
-                        AnalyticsEvent.Formation.MODERATION_APPROVED.value(), AnalyticsEvent.Formation.MODERATION_REJECTED.value(),
-                        AnalyticsEvent.Report.RESOLVED.value())) {
-                    moderationActivity.put(eventType, countFilteredEvent(job, eventType, from, inclusiveTo));
+                for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.User.APPROVED, AnalyticsEvent.User.SUSPENDED,
+                        AnalyticsEvent.User.TIMED_OUT, AnalyticsEvent.User.REINSTATED,
+                        AnalyticsEvent.Formation.MODERATION_APPROVED, AnalyticsEvent.Formation.MODERATION_REJECTED,
+                        AnalyticsEvent.Report.RESOLVED)) {
+                    moderationActivity.put(eventType.value(), countFilteredEvent(job, eventType, from, inclusiveTo));
                 }
                 summary.put("moderationActivity", moderationActivity);
                 Map<String, Long> userStatuses = new LinkedHashMap<>();
@@ -220,16 +221,16 @@ public class AnalyticsJobService {
                 }
                 summary.put("userStatuses", userStatuses);
                 summary.put("activityEvents", countFilteredEvents(job, from, inclusiveTo));
-                summary.put("successfulLogins", countFilteredEvent(job, AnalyticsEvent.Authentication.LOGIN_SUCCEEDED.value(), from, inclusiveTo));
-                summary.put("publishedPosts", countFilteredEvent(job, AnalyticsEvent.Feed.POST_PUBLISHED.value(), from, inclusiveTo));
-                summary.put("messagesSent", countFilteredEvent(job, AnalyticsEvent.Message.SENT.value(), from, inclusiveTo));
+                summary.put("successfulLogins", countFilteredEvent(job, AnalyticsEvent.Authentication.LOGIN_SUCCEEDED, from, inclusiveTo));
+                summary.put("publishedPosts", countFilteredEvent(job, AnalyticsEvent.Feed.POST_PUBLISHED, from, inclusiveTo));
+                summary.put("messagesSent", countFilteredEvent(job, AnalyticsEvent.Message.SENT, from, inclusiveTo));
                 LocalDateTime activityDayStart = utcStart(job.getToDate());
                 LocalDateTime activityWeekStart = utcStart(job.getToDate().minusDays(6));
                 LocalDateTime activityMonthStart = utcStart(job.getToDate().minusDays(29));
                 summary.put("dau", countFilteredDistinctActors(job, activityDayStart, inclusiveTo));
                 summary.put("wau", countFilteredDistinctActors(job, activityWeekStart, inclusiveTo));
                 summary.put("mau", countFilteredDistinctActors(job, activityMonthStart, inclusiveTo));
-                String eventFilter = eventTypeFilter(job);
+                AnalyticsEvent.Type eventFilter = eventTypeFilter(job);
                 summary.put("engagementByAccountType", Map.of(
                         "artisan", eventFilter == null
                                 ? events.countDistinctArtisanActorsByEventTimeBetween(from, inclusiveTo)
@@ -309,13 +310,13 @@ public class AnalyticsJobService {
                         subscriptionsBySubscriberType.put("client", clientSubscriptionStatuses);
                         summary.put("subscriptionsBySubscriberType", subscriptionsBySubscriberType);
                         Map<String, Long> lifecycleEvents = new LinkedHashMap<>();
-                        for (String eventType : List.of(AnalyticsEvent.Subscription.ACTIVATED.value(), AnalyticsEvent.Subscription.EXPIRED.value(),
-                                AnalyticsEvent.Subscription.CANCELED.value(), AnalyticsEvent.Subscription.REVOKED.value(), AnalyticsEvent.Subscription.RENEWAL.value())) {
-                            lifecycleEvents.put(eventType, countFilteredEvent(job, eventType, from, inclusiveTo));
+                        for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.Subscription.ACTIVATED, AnalyticsEvent.Subscription.EXPIRED,
+                                AnalyticsEvent.Subscription.CANCELED, AnalyticsEvent.Subscription.REVOKED, AnalyticsEvent.Subscription.RENEWAL)) {
+                            lifecycleEvents.put(eventType.value(), countFilteredEvent(job, eventType, from, inclusiveTo));
                         }
                         summary.put("subscriptionLifecycleEvents", lifecycleEvents);
-                        summary.put("checkoutCreated", countFilteredEvent(job, AnalyticsEvent.Checkout.CREATED.value(), from, inclusiveTo));
-                        summary.put("paymentStateTransitions", countFilteredEvent(job, AnalyticsEvent.Payment.STATE_TRANSITION.value(), from, inclusiveTo));
+                        summary.put("checkoutCreated", countFilteredEvent(job, AnalyticsEvent.Checkout.CREATED, from, inclusiveTo));
+                        summary.put("paymentStateTransitions", countFilteredEvent(job, AnalyticsEvent.Payment.STATE_TRANSITION, from, inclusiveTo));
                         long grossCollected = payments.sumAmountByStatusAndCurrencyAndCreatedAtBetween(
                                 PaymentStatus.PAID, "DZD", from, to);
                         long providerFees = payments.sumFeesByStatusAndCurrencyAndCreatedAtBetween(
@@ -349,9 +350,9 @@ public class AnalyticsJobService {
                         operational.put("maintenanceJobsCompleted", maintenanceJobs.countByStatus(AnalyticsJobStatus.COMPLETED));
                         operational.put("maintenanceJobsFailed", maintenanceJobs.countByStatus(AnalyticsJobStatus.FAILED));
                     }
-                    operational.put("outboxPending", outbox.countByStatus(AnalyticsOutboxEvent.OutboxStatus.PENDING));
-                    operational.put("outboxPublished", outbox.countByStatus(AnalyticsOutboxEvent.OutboxStatus.PUBLISHED));
-                    operational.put("outboxDeadLetter", outbox.countByStatus(AnalyticsOutboxEvent.OutboxStatus.DEAD_LETTER));
+                    operational.put("outboxPending", outbox.countByStatus(OutboxStatus.PENDING));
+                    operational.put("outboxPublished", outbox.countByStatus(OutboxStatus.PUBLISHED));
+                    operational.put("outboxDeadLetter", outbox.countByStatus(OutboxStatus.DEAD_LETTER));
                     if (healthEndpoint != null) {
                         HealthDescriptor health = healthEndpoint.health();
                         operational.put("applicationHealth", health.getStatus().getCode());
@@ -621,7 +622,7 @@ public class AnalyticsJobService {
             LocalDateTime bucketTo = utcStart(end.plusDays(1));
             Map<String, Object> point = new LinkedHashMap<>();
             point.put("startDate", start); point.put("endDate", end);
-            String eventType = filters.get(AnalyticsFilterKey.EVENT_TYPE.key());
+            AnalyticsEvent.Type eventType = AnalyticsEvent.fromValue(filters.get(AnalyticsFilterKey.EVENT_TYPE.key())).orElse(null);
             LocalDateTime inclusiveBucketTo = bucketTo.minusNanos(1);
             point.put("activityEvents", eventType == null
                     ? events.countByEventTimeBetween(bucketFrom, inclusiveBucketTo)
@@ -643,7 +644,7 @@ public class AnalyticsJobService {
     private List<Map<String, Object>> loginRetentionCohorts(LocalDateTime from, LocalDateTime to) {
         Map<String, LocalDateTime> firstRegistrationByActor = new LinkedHashMap<>();
         for (var event : events.findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(
-                AnalyticsEvent.Registration.CREATED.value(), from, to)) {
+                AnalyticsEvent.Registration.CREATED, from, to)) {
             if (event.getActorId() != null) {
                 firstRegistrationByActor.putIfAbsent(event.getActorId(), event.getEventTime());
             }
@@ -654,7 +655,7 @@ public class AnalyticsJobService {
         retainedByWindow.put("day7", new HashSet<>());
         retainedByWindow.put("day30", new HashSet<>());
         for (var event : events.findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(
-                AnalyticsEvent.Authentication.LOGIN_SUCCEEDED.value(), from, to.plusDays(30))) {
+                AnalyticsEvent.Authentication.LOGIN_SUCCEEDED, from, to.plusDays(30))) {
             LocalDateTime cohort = firstRegistrationByActor.get(event.getActorId());
             if (cohort == null) continue;
             long age = ChronoUnit.DAYS.between(businessDate(cohort), businessDate(event.getEventTime()));
@@ -746,24 +747,25 @@ public class AnalyticsJobService {
         }
     }
 
-    private String eventTypeFilter(AnalyticsJob job) {
-        return readFilters(job).get(AnalyticsFilterKey.EVENT_TYPE.key());
+    private AnalyticsEvent.Type eventTypeFilter(AnalyticsJob job) {
+        String value = readFilters(job).get(AnalyticsFilterKey.EVENT_TYPE.key());
+        return value == null ? null : AnalyticsEvent.fromValue(value).orElseThrow();
     }
 
     private long countFilteredEvents(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {
-        String eventType = eventTypeFilter(job);
+        AnalyticsEvent.Type eventType = eventTypeFilter(job);
         return eventType == null ? events.countByEventTimeBetween(from, to)
                 : events.countByEventTypeAndEventTimeBetween(eventType, from, to);
     }
 
-    private long countFilteredEvent(AnalyticsJob job, String eventType, LocalDateTime from, LocalDateTime to) {
-        String filter = eventTypeFilter(job);
+    private long countFilteredEvent(AnalyticsJob job, AnalyticsEvent.Type eventType, LocalDateTime from, LocalDateTime to) {
+        AnalyticsEvent.Type filter = eventTypeFilter(job);
         return filter != null && !filter.equals(eventType) ? 0L
                 : events.countByEventTypeAndEventTimeBetween(eventType, from, to);
     }
 
     private long countFilteredDistinctActors(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {
-        String eventType = eventTypeFilter(job);
+        AnalyticsEvent.Type eventType = eventTypeFilter(job);
         return eventType == null ? events.countDistinctActorsByEventTimeBetween(from, to)
                 : events.countDistinctActorsByTypeAndEventTimeBetween(eventType, from, to);
     }

@@ -51,7 +51,7 @@ public class AnalyticsRebuildService {
             for (ActivityEvent event : source) {
                 LocalDate eventDay = event.getEventTime().toInstant(ZoneOffset.UTC)
                         .atZone(businessZone).toLocalDate();
-                String key = eventDay + "\u0000event." + event.getEventType();
+                String key = eventDay + "\u0000event." + event.getEventType().value();
                 counts.merge(key, 1L, Long::sum);
             }
         } while (source.size() == properties.getRollupBatchSize());

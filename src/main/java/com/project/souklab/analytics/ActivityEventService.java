@@ -26,19 +26,18 @@ public class ActivityEventService {
 
     @Transactional
     public ActivityEvent record(AnalyticsEvent.Type type, String actorId, String subjectId, Map<String, ?> metadata) {
-        String eventType = type.value();
         ActivityEvent event = new ActivityEvent();
-        event.setEventType(eventType); event.setActorId(actorId); event.setSubjectId(subjectId);
+        event.setEventType(type); event.setActorId(actorId); event.setSubjectId(subjectId);
         event.setEventTime(LocalDateTime.now(clock));
         try { event.setMetadataJson(objectMapper.writeValueAsString(metadata == null ? Map.of() : metadata)); }
         catch (JsonProcessingException e) { throw new IllegalArgumentException("Activity metadata is not serializable", e); }
         ActivityEvent saved = repository.save(event);
         AnalyticsOutboxEvent outbox = new AnalyticsOutboxEvent();
         outbox.setEventId(saved.getId());
-        outbox.setEventType(eventType);
+        outbox.setEventType(type);
         outbox.setNextAttemptAt(LocalDateTime.now(clock));
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("eventId", saved.getId()); payload.put("eventType", eventType);
+        payload.put("eventId", saved.getId()); payload.put("eventType", type.value());
         payload.put("actorId", actorId == null ? "" : actorId); payload.put("subjectId", subjectId == null ? "" : subjectId);
         payload.put("eventTime", saved.getEventTime()); payload.put("metadata", metadata == null ? Map.of() : metadata);
         try { outbox.setPayloadJson(objectMapper.writeValueAsString(payload)); }
