@@ -18,6 +18,7 @@ import com.project.souklab.dto.auth.LoginDTO;
 import com.project.souklab.dto.auth.ResendVerificationRequestDTO;
 import com.project.souklab.dto.auth.ResetPasswordRequestDTO;
 import com.project.souklab.dto.auth.TokenRefreshRequestDTO;
+import com.project.souklab.dto.auth.TokenType;
 import com.project.souklab.dto.auth.UserRegistrationDTO;
 import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
 import com.project.souklab.dto.profile.ProfileResponse;
@@ -269,7 +270,7 @@ public class AuthService {
         return JwtResponseDTO.builder()
                 .accessToken(accessToken)
                 .refreshToken(newToken.getToken())
-                .tokenType("Bearer")
+                .tokenType(TokenType.BEARER)
                 .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
                 .permissions(canonicalPermissions(user))
@@ -528,7 +529,7 @@ public class AuthService {
         return JwtResponseDTO.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
-                .tokenType("Bearer")
+                .tokenType(TokenType.BEARER)
                 .expiresIn(appProperties.getJwt().getAccessTokenExpirationMs() / MS_PER_SECOND)
                 .user(profileResponseMapper.mapToProfileResponse(user))
                 .permissions(canonicalPermissions(user))

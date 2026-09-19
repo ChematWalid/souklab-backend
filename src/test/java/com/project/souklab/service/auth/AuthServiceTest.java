@@ -14,6 +14,7 @@ import com.project.souklab.dto.auth.LoginDTO;
 import com.project.souklab.dto.auth.ResendVerificationRequestDTO;
 import com.project.souklab.dto.auth.ResetPasswordRequestDTO;
 import com.project.souklab.dto.auth.TokenRefreshRequestDTO;
+import com.project.souklab.dto.auth.TokenType;
 import com.project.souklab.dto.auth.UserRegistrationDTO;
 import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
 import com.project.souklab.dto.profile.ArtisanResponseDTO;
@@ -971,7 +972,7 @@ class AuthServiceTest {
 
         assertThat(response.getAccessToken()).isEqualTo("access-token-jwt");
         assertThat(response.getRefreshToken()).isEqualTo("refresh-token-uuid");
-        assertThat(response.getTokenType()).isEqualTo("Bearer");
+        assertThat(response.getTokenType()).isEqualTo(TokenType.BEARER);
         assertThat(response.getExpiresIn()).isEqualTo(900L);
         assertThat(response.getPermissions()).containsExactly(Permission.Profile.READ);
 
@@ -1124,7 +1125,7 @@ class AuthServiceTest {
 
         assertThat(response.getAccessToken()).isEqualTo("new-access-token");
         assertThat(response.getRefreshToken()).isEqualTo("new-refresh-token");
-        assertThat(response.getTokenType()).isEqualTo("Bearer");
+        assertThat(response.getTokenType()).isEqualTo(TokenType.BEARER);
         assertThat(response.getExpiresIn()).isEqualTo(900L);
     }
 

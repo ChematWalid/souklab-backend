@@ -1,5 +1,6 @@
 package com.project.souklab.controller.auth;
 import com.project.souklab.controller.support.SecurityTestUtils;
+import com.project.souklab.dto.auth.TokenType;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
@@ -114,7 +115,7 @@ class AuthControllerTest {
         return JwtResponseDTO.builder()
                 .accessToken("access-token-123")
                 .refreshToken("refresh-token-456")
-                .tokenType("Bearer")
+                .tokenType(TokenType.BEARER)
                 .expiresIn(900L)
                 .user(user)
                 .permissions(List.of(Permission.Profile.READ))

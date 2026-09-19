@@ -17,7 +17,7 @@ public class JwtResponseDTO {
     private String accessToken;
     private String refreshToken;
     @Builder.Default
-    private String tokenType = "Bearer";
+    private TokenType tokenType = TokenType.BEARER;
     private long expiresIn;
     /** Account-type profile object: ClientProfileResponseDTO for clients, ArtisanResponseDTO for artisans. */
     private ProfileResponse user;
