@@ -73,6 +73,12 @@ if rg -n --pcre2 'ApiResponse\.error\("(?:FORBIDDEN|VIRUS_DETECTED|VIRUS_SCAN_UN
   echo 'raw standardized API error codes detected; use ApiErrorCode enums' >&2
   exit 1
 fi
+if rg -n --pcre2 '"(?:authz_version|SOUKLAB_OAUTH_INTENT)"' \
+    src/main/java src/test/java --glob '*.java' \
+    --glob '!JwtClaim.java' --glob '!OAuthCookie.java'; then
+  echo 'raw authentication protocol keys detected; use JwtClaim or OAuthCookie enums' >&2
+  exit 1
+fi
 
 mapfile -t migrations < <(find src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' -printf '%f\n' | sort -V)
 test "${#migrations[@]}" -gt 0 || { echo 'no Flyway migrations found' >&2; exit 1; }
