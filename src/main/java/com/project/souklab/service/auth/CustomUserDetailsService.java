@@ -7,7 +7,6 @@ import com.project.souklab.model.User;
 import com.project.souklab.security.Permission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,8 +36,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (AuthorizationPermission permission : user.getPermissions()) {
             if (permission.isEnabled()) Permission.fromValue(permission.getPermissionKey())
-                    .map(Permission::value)
-                    .map(SimpleGrantedAuthority::new)
                     .ifPresent(authorities::add);
         }
 

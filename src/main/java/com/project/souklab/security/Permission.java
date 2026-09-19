@@ -14,12 +14,18 @@ import java.util.Optional;
  * constants are exposed.
  */
 @JsonDeserialize(using = PermissionDeserializer.class)
-public interface Permission extends EnumValue {
+public interface Permission extends EnumValue, GrantedAuthority {
     @JsonValue
     String value();
 
+    @Override
+    default String getAuthority() {
+        return value();
+    }
+
     default boolean matches(GrantedAuthority grantedAuthority) {
-        return grantedAuthority != null && value().equals(grantedAuthority.getAuthority());
+        return grantedAuthority != null
+                && (grantedAuthority == this || value().equals(grantedAuthority.getAuthority()));
     }
 
     default boolean matches(String permissionKey) {
