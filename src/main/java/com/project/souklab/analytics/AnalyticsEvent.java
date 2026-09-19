@@ -14,6 +14,19 @@ public final class AnalyticsEvent {
         String value();
     }
 
+    public enum Source {
+        PAYMENT_WEBHOOK("PAYMENT_WEBHOOK"),
+        ACCOUNT_ACTION("ACCOUNT_ACTION"),
+        ADMIN_ACTION("ADMIN_ACTION"),
+        ADMIN_CORRECTION("ADMIN_CORRECTION");
+
+        private final String value;
+
+        Source(String value) { this.value = value; }
+
+        public String value() { return value; }
+    }
+
     public static List<Type> all() {
         return List.of(
                 Registration.CREATED, Authentication.LOGIN_SUCCEEDED,
