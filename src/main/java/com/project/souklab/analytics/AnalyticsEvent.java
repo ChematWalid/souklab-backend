@@ -1,6 +1,6 @@
 package com.project.souklab.analytics;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.project.souklab.model.EnumValue;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,10 +11,7 @@ import java.util.Optional;
 public final class AnalyticsEvent {
     private AnalyticsEvent() { }
 
-    public interface Type {
-        @JsonValue
-        String value();
-    }
+    public interface Type extends EnumValue { }
 
     public static final class Source {
         private Source() { }
@@ -41,10 +38,7 @@ public final class AnalyticsEvent {
         }
     }
 
-    public interface SourceValue {
-        @JsonValue
-        String value();
-    }
+    public interface SourceValue extends EnumValue { }
 
     public static List<Type> all() {
         return List.of(

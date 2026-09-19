@@ -1,7 +1,7 @@
 package com.project.souklab.analytics;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.project.souklab.model.EnumValue;
 /**
  * Stable keys used by the analytics result and rollup contracts.
  *
@@ -11,10 +11,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public final class AnalyticsMetric {
     private AnalyticsMetric() { }
 
-    public interface Key {
-        @JsonValue
-        String value();
-    }
+    public interface Key extends EnumValue { }
 
     public enum Summary implements Key {
         TOTAL_USERS("totalUsers"), NEW_REGISTRATIONS("newRegistrations"),
