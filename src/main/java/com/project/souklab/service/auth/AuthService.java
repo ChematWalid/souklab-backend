@@ -482,7 +482,16 @@ public class AuthService {
         if (existingIdentity.isPresent()) {
             user = existingIdentity.get().getUser();
         } else {
-            user = linkOrAuthenticateExistingIdentity(email, provider, providerUserId, firstName, lastName, picture, intentRole);
+            var existingUserByEmail = userRepository.findByEmail(email);
+            if (existingUserByEmail.isPresent()) {
+                if (!existingUserByEmail.get().isEmailVerified()) {
+                    throw new BadRequestException("An existing account must verify its email before Google sign-in can be linked.");
+                }
+                user = autoLinkByVerifiedEmail(existingUserByEmail.get(), provider, providerUserId, email);
+            } else {
+                AccountRole role = parseOAuthIntentRole(intentRole);
+                user = createOAuthUserAndProfile(email, provider, providerUserId, firstName, lastName, picture, role);
+            }
         }
 
         ensureAccountCanAuthenticate(user);
@@ -674,20 +683,6 @@ public class AuthService {
      * @throws BadRequestException       if the intent role is missing or invalid
      * @throws ResourceNotFoundException if the resolved role does not exist in the database
      */
-    private User linkOrAuthenticateExistingIdentity(String email, OAuthProvider provider, String providerUserId,
-                                                    String firstName, String lastName, String picture,
-                                                    String intentRole) {
-        var existingUserByEmail = userRepository.findByEmail(email);
-        if (existingUserByEmail.isPresent()) {
-            if (!existingUserByEmail.get().isEmailVerified()) {
-                throw new BadRequestException("An existing account must verify its email before Google sign-in can be linked.");
-            }
-            return autoLinkByVerifiedEmail(existingUserByEmail.get(), provider, providerUserId, email);
-        }
-
-        return createOAuthUserAndProfile(email, provider, providerUserId, firstName, lastName, picture, intentRole);
-    }
-
     /**
      * Links a new {@link OAuthIdentity} to an existing {@link User} found by verified email.
      * This covers the case where the user previously registered with a password and is now
@@ -727,15 +722,7 @@ public class AuthService {
      */
     private User createOAuthUserAndProfile(String email, OAuthProvider provider, String providerUserId,
                                            String firstName, String lastName, String picture,
-                                           String intentRole) {
-        if (intentRole == null || intentRole.isBlank()) {
-            throw new BadRequestException("OAuth registration intent not found or expired. Please initiate registration from the artisan or client signup page.");
-        }
-
-        AccountRole role = AccountRole.fromInput(intentRole).orElse(null);
-        if (role != AccountRole.ARTISAN && role != AccountRole.CLIENT) {
-            throw new BadRequestException("Invalid OAuth registration role intent: " + intentRole);
-        }
+                                           AccountRole role) {
         boolean artisan = role == AccountRole.ARTISAN;
         AccountStatus initialStatus = artisan ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
@@ -762,6 +749,17 @@ public class AuthService {
         oauthIdentityRepository.save(identity);
 
         return user;
+    }
+
+    private AccountRole parseOAuthIntentRole(String intentRole) {
+        if (intentRole == null || intentRole.isBlank()) {
+            throw new BadRequestException("OAuth registration intent not found or expired. Please initiate registration from the artisan or client signup page.");
+        }
+        AccountRole role = AccountRole.fromInput(intentRole).orElse(null);
+        if (role != AccountRole.ARTISAN && role != AccountRole.CLIENT) {
+            throw new BadRequestException("Invalid OAuth registration role intent: " + intentRole);
+        }
+        return role;
     }
 
     /**
