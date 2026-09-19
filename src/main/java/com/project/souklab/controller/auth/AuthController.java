@@ -47,8 +47,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private static final String ARTISAN_SIGNUP_INTENT = AccountRole.ARTISAN.value();
-    private static final String CLIENT_SIGNUP_INTENT = AccountRole.CLIENT.value();
+    private static final AccountRole ARTISAN_SIGNUP_INTENT = AccountRole.ARTISAN;
+    private static final AccountRole CLIENT_SIGNUP_INTENT = AccountRole.CLIENT;
     private static final String OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI = "/oauth2/authorization/google";
 
     private final AuthService authService;
@@ -197,8 +197,8 @@ public class AuthController {
      * @param response   the HTTP response to attach the cookie to
      * @param intentRole the account-type signup intent (for example, {@code "ARTISAN"})
      */
-    private void setIntentCookie(HttpServletResponse response, String intentRole) {
-        ResponseCookie cookie = ResponseCookie.from(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, intentRole)
+    private void setIntentCookie(HttpServletResponse response, AccountRole intentRole) {
+        ResponseCookie cookie = ResponseCookie.from(OAuth2AuthenticationSuccessHandler.OAUTH_INTENT_COOKIE_NAME, intentRole.value())
                 .path("/")
                 .httpOnly(true)
                 .sameSite("Lax")
