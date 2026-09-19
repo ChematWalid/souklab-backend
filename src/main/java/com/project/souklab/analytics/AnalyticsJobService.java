@@ -641,7 +641,7 @@ public class AnalyticsJobService {
 
     private List<Map<AnalyticsMetric.Series, Object>> buildSeries(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {
         List<Map<AnalyticsMetric.Series, Object>> series = new ArrayList<>();
-        Map<String, String> filters = readFilters(job);
+        Map<AnalyticsFilterKey, String> filters = readFilters(job);
         LocalDate cursor = firstBucketDate(job.getFromDate(), job.getBucket());
         while (!cursor.isAfter(job.getToDate())) {
             LocalDate next = switch (job.getBucket()) {
@@ -657,7 +657,9 @@ public class AnalyticsJobService {
             Map<AnalyticsMetric.Series, Object> point = new LinkedHashMap<>();
             point.put(AnalyticsMetric.Series.START_DATE, start);
             point.put(AnalyticsMetric.Series.END_DATE, end);
-            AnalyticsEvent.Type eventType = AnalyticsEvent.fromValue(filters.get(AnalyticsFilterKey.EVENT_TYPE.key())).orElse(null);
+            String eventTypeValue = filters.get(AnalyticsFilterKey.EVENT_TYPE);
+            AnalyticsEvent.Type eventType = eventTypeValue == null
+                    ? null : AnalyticsEvent.fromValue(eventTypeValue).orElse(null);
             LocalDateTime inclusiveBucketTo = bucketTo.minusNanos(1);
             point.put(AnalyticsMetric.Series.ACTIVITY_EVENTS, eventType == null
                     ? events.countByEventTimeBetween(bucketFrom, inclusiveBucketTo)
@@ -790,7 +792,7 @@ public class AnalyticsJobService {
         return result;
     }
 
-    private Map<String, String> readFilters(AnalyticsJob job) {
+    private Map<AnalyticsFilterKey, String> readFilters(AnalyticsJob job) {
         try {
             if (job.getFiltersJson() == null || job.getFiltersJson().isBlank()) return Map.of();
             return objectMapper.readValue(job.getFiltersJson(), new AnalyticsFiltersTypeReference());
@@ -800,7 +802,7 @@ public class AnalyticsJobService {
     }
 
     private AnalyticsEvent.Type eventTypeFilter(AnalyticsJob job) {
-        String value = readFilters(job).get(AnalyticsFilterKey.EVENT_TYPE.key());
+        String value = readFilters(job).get(AnalyticsFilterKey.EVENT_TYPE);
         return value == null ? null : AnalyticsEvent.fromValue(value).orElseThrow();
     }
 

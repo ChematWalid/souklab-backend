@@ -88,6 +88,8 @@ class AnalyticsEventTaxonomyTest {
                 "{\"filters\":{\"eventType\":\"REPORT_RESOLVED\"}}", AnalyticsJobRequest.class);
         assertThat(request.getFilters()).containsEntry(
                 AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value());
+        Map<AnalyticsFilterKey, String> persisted = mapper.readValue(json, new AnalyticsFiltersTypeReference());
+        assertThat(persisted).containsEntry(AnalyticsFilterKey.EVENT_TYPE, AnalyticsEvent.Report.RESOLVED.value());
     }
 
     @Test
