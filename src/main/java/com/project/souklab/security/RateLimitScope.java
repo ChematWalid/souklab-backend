@@ -8,18 +8,57 @@ import com.project.souklab.analytics.AnalyticsMetric;
 public final class RateLimitScope {
     private RateLimitScope() { }
 
-    public enum Endpoint implements AnalyticsMetric.Key {
-        CSV_EXPORTS("csv"), ANALYTICS("analytics"), AUTHENTICATION("auth"),
-        ADMINISTRATION("admin"), PUBLIC_API("public");
+    public static final class Endpoint {
+        private Endpoint() { }
 
-        private final String value;
+        public enum Csv implements AnalyticsMetric.Key {
+            EXPORTS("csv");
 
-        Endpoint(String value) {
-            this.value = value;
+            private final String value;
+
+            Csv(String value) { this.value = value; }
+
+            public String value() { return value; }
         }
 
-        public String value() {
-            return value;
+        public enum Analytics implements AnalyticsMetric.Key {
+            API("analytics");
+
+            private final String value;
+
+            Analytics(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Authentication implements AnalyticsMetric.Key {
+            API("auth");
+
+            private final String value;
+
+            Authentication(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Administration implements AnalyticsMetric.Key {
+            API("admin");
+
+            private final String value;
+
+            Administration(String value) { this.value = value; }
+
+            public String value() { return value; }
+        }
+
+        public enum Public implements AnalyticsMetric.Key {
+            API("public");
+
+            private final String value;
+
+            Public(String value) { this.value = value; }
+
+            public String value() { return value; }
         }
     }
 }

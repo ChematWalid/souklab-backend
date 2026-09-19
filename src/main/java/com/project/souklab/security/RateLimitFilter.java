@@ -1,5 +1,6 @@
 package com.project.souklab.security;
 
+import com.project.souklab.analytics.AnalyticsMetric;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.config.RateLimitEndpointProperties;
 import com.project.souklab.config.RateLimitRule;
@@ -79,13 +80,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return endpointProperties.getPublicApi();
     }
 
-    private RateLimitScope.Endpoint ruleName(HttpServletRequest request) {
+    private AnalyticsMetric.Key ruleName(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (path.contains("/download")) return RateLimitScope.Endpoint.CSV_EXPORTS;
-        if (isAnalyticsJobPath(path)) return RateLimitScope.Endpoint.ANALYTICS;
-        if (path.startsWith("/api/v1/auth/")) return RateLimitScope.Endpoint.AUTHENTICATION;
-        if (path.startsWith("/api/v1/admin/")) return RateLimitScope.Endpoint.ADMINISTRATION;
-        return RateLimitScope.Endpoint.PUBLIC_API;
+        if (path.contains("/download")) return RateLimitScope.Endpoint.Csv.EXPORTS;
+        if (isAnalyticsJobPath(path)) return RateLimitScope.Endpoint.Analytics.API;
+        if (path.startsWith("/api/v1/auth/")) return RateLimitScope.Endpoint.Authentication.API;
+        if (path.startsWith("/api/v1/admin/")) return RateLimitScope.Endpoint.Administration.API;
+        return RateLimitScope.Endpoint.Public.API;
     }
 
     private boolean isAnalyticsJobPath(String path) {
