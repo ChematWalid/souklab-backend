@@ -403,13 +403,13 @@ public class AnalyticsJobService {
                         AnalyticsMetric.Comparison.CURRENT, countFilteredEvents(job, from, inclusiveTo),
                         AnalyticsMetric.Comparison.PREVIOUS, countFilteredEvents(job, previousFrom, previousTo)));
                 summary.put(AnalyticsMetric.Summary.PERIOD_COMPARISON.value(), comparison);
-                Map<String, Object> result = new LinkedHashMap<>();
-                result.put(AnalyticsMetric.Result.REPORT_TYPE.value(), job.getReportType());
-                result.put(AnalyticsMetric.Result.FROM_DATE.value(), job.getFromDate());
-                result.put(AnalyticsMetric.Result.TO_DATE.value(), job.getToDate());
-                result.put(AnalyticsMetric.Result.BUCKET.value(), job.getBucket());
-                result.put(AnalyticsMetric.Result.SUMMARY.value(), summary);
-                result.put(AnalyticsMetric.Result.TABLES.value(), buildTables(job, summary));
+                Map<AnalyticsMetric.Result, Object> result = new LinkedHashMap<>();
+                result.put(AnalyticsMetric.Result.REPORT_TYPE, job.getReportType());
+                result.put(AnalyticsMetric.Result.FROM_DATE, job.getFromDate());
+                result.put(AnalyticsMetric.Result.TO_DATE, job.getToDate());
+                result.put(AnalyticsMetric.Result.BUCKET, job.getBucket());
+                result.put(AnalyticsMetric.Result.SUMMARY, summary);
+                result.put(AnalyticsMetric.Result.TABLES, buildTables(job, summary));
                 List<Map<String, Object>> allSeries = buildSeries(job, from, to);
                 sortSeries(allSeries, job);
                 if (allSeries.size() > jobProperties.getMaximumResultRows()) {
@@ -422,7 +422,7 @@ public class AnalyticsJobService {
                 int pageStart = requestedPageStart >= allSeries.size()
                         ? allSeries.size() : (int) requestedPageStart;
                 int pageEnd = Math.min(pageStart + job.getPageSize(), allSeries.size());
-                result.put(AnalyticsMetric.Result.SERIES.value(), PaginatedResponse.<Map<String, Object>>builder()
+                result.put(AnalyticsMetric.Result.SERIES, PaginatedResponse.<Map<String, Object>>builder()
                         .content(allSeries.subList(pageStart, pageEnd))
                         .pageNumber(job.getPageNumber())
                         .pageSize(job.getPageSize())
