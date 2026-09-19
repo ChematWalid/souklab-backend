@@ -3,6 +3,7 @@ package com.project.souklab.service.subscription;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.config.SubscriptionProperties;
 import com.project.souklab.model.BillingPeriod;
+import com.project.souklab.model.CurrencyCode;
 import com.project.souklab.model.SubscriptionStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,8 @@ public class SubscriptionPlanRules {
     }
 
     public void validateCurrency(String currency) {
-        if (!"DZD".equals(currency)) {
-            throw new IllegalArgumentException("Subscription currency must be DZD");
+        if (!CurrencyCode.DZD.matches(currency)) {
+            throw new IllegalArgumentException("Subscription currency must be " + CurrencyCode.DZD.value());
         }
     }
 

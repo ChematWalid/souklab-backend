@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.config.AvatarProperties.RateLimitProperties;
 import com.project.souklab.filestorage.config.StorageProperties;
+import com.project.souklab.model.CurrencyCode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
@@ -214,8 +215,8 @@ public class ConfigurationPolicyValidator {
         if (subscription == null || !subscription.isEnabled()) {
             return;
         }
-        if (!"DZD".equals(subscription.getCurrency())) {
-            throw new IllegalStateException("app.subscription.currency must be DZD");
+        if (!CurrencyCode.DZD.matches(subscription.getCurrency())) {
+            throw new IllegalStateException("app.subscription.currency must be " + CurrencyCode.DZD.value());
         }
         if (subscription.getMinimumPlanAmount() <= 0
                 || subscription.getMaximumPlanAmount() < subscription.getMinimumPlanAmount()) {
@@ -254,7 +255,7 @@ public class ConfigurationPolicyValidator {
         validatePositiveDuration("app.chargily.response-timeout", chargily.getResponseTimeout());
         validatePositiveDuration("app.chargily.retry-backoff", chargily.getRetryBackoff());
         if (chargily.getRetryCount() < 0 || chargily.getRequestBodyLimit() <= 0
-                || !"DZD".equals(chargily.getCurrency())) {
+                || !CurrencyCode.DZD.matches(chargily.getCurrency())) {
             throw new IllegalStateException("Chargily retry, request limit, or currency configuration is invalid");
         }
         try {
