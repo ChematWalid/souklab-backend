@@ -144,4 +144,26 @@ public final class AnalyticsMetadata {
             return value;
         }
     }
+
+    public enum Audit implements Key {
+        JOB_ID("jobId"),
+        MAINTENANCE_JOB_ID("maintenanceJobId"),
+        REPORT_TYPE("reportType"),
+        OPERATION("operation"),
+        RANGE("range"),
+        FILTERS("filters"),
+        PERMISSION_SCOPE("permissionScope"),
+        OUTCOME("outcome");
+
+        private final String value;
+
+        Audit(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String value() {
+            return value;
+        }
+    }
 }

@@ -598,12 +598,12 @@ public class AnalyticsJobService {
     }
 
     private String auditDetails(AnalyticsJob job, AnalyticsAuditOutcome outcome) {
-        return "jobId=" + job.getId()
-                + ",reportType=" + job.getReportType()
-                + ",range=" + job.getFromDate() + ".." + job.getToDate()
-                + ",filters=" + (job.getFiltersJson() == null ? "{}" : job.getFiltersJson())
-                + ",permissionScope=" + job.getPermissionScope()
-                + ",outcome=" + outcome.value();
+        return AnalyticsMetadata.Audit.JOB_ID.value() + "=" + job.getId()
+                + "," + AnalyticsMetadata.Audit.REPORT_TYPE.value() + "=" + job.getReportType()
+                + "," + AnalyticsMetadata.Audit.RANGE.value() + "=" + job.getFromDate() + ".." + job.getToDate()
+                + "," + AnalyticsMetadata.Audit.FILTERS.value() + "=" + (job.getFiltersJson() == null ? "{}" : job.getFiltersJson())
+                + "," + AnalyticsMetadata.Audit.PERMISSION_SCOPE.value() + "=" + job.getPermissionScope()
+                + "," + AnalyticsMetadata.Audit.OUTCOME.value() + "=" + outcome.value();
     }
 
     private void validate(AnalyticsJobRequest r, boolean financial) {
