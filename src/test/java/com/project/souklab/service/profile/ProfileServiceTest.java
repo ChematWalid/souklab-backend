@@ -212,7 +212,7 @@ class ProfileServiceTest {
 
         Client client = Client.builder()
                 .companyName("Atlas Trade")
-                .clientType("BUSINESS")
+                .clientType(ClientType.BUSINESS.value())
                 .city("Casablanca")
                 .build();
 
@@ -537,7 +537,7 @@ class ProfileServiceTest {
                 .build();
 
         CompleteProfileRequestDTO dto = CompleteProfileRequestDTO.builder()
-                .clientType("BUSINESS")
+                .clientType(ClientType.BUSINESS)
                 .companyName("Modern Souk")
                 .bio("Retail distributor")
                 .address("Boulevard Zerktouni")
@@ -1274,7 +1274,7 @@ class ProfileServiceTest {
                 .regionId(PatchField.of("REG-CLIENT-1"))
                 .city(PatchField.of("Rabat"))
                 .companyName(PatchField.of("Artisanal Exports"))
-                .clientType(PatchField.of("ENTERPRISE"))
+                .clientType(PatchField.of(ClientType.ENTERPRISE))
                 .build();
 
         when(userRepository.findByEmail("client@example.com")).thenReturn(Optional.of(user));
@@ -1316,7 +1316,7 @@ class ProfileServiceTest {
                 .regionId("OLD-REG")
                 .city("Old city")
                 .companyName("Old Corp")
-                .clientType("BUSINESS")
+                .clientType(ClientType.BUSINESS.value())
                 .build();
 
         UserPatchDTO patchDTO = UserPatchDTO.builder()

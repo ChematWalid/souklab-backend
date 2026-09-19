@@ -255,7 +255,7 @@ class ProfileResponseMapperTest {
     void mapToProfileResponse_forClientWithPopulatedClientEntity_returnsMappedFields() {
         Client client = Client.builder()
                 .companyName("Heritage Imports")
-                .clientType("BUSINESS")
+                .clientType(ClientType.BUSINESS.value())
                 .city("Tangier")
                 .build();
 

@@ -17,6 +17,7 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.Client;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.model.Epoque;
 import com.project.souklab.model.JobSubCategory;
 import com.project.souklab.model.Material;
@@ -209,7 +210,7 @@ public class ProfileService {
         Client client = clientRepository.findById(user.getId())
                 .orElse(Client.builder().user(user).build());
 
-        if (dto.getClientType() != null) client.setClientType(dto.getClientType());
+        if (dto.getClientType() != null) client.setClientType(dto.getClientType().value());
         if (dto.getCompanyName() != null) client.setCompanyName(dto.getCompanyName());
         if (dto.getBio() != null) client.setBio(dto.getBio());
         if (dto.getAddress() != null) client.setAddress(dto.getAddress());
@@ -327,7 +328,8 @@ public class ProfileService {
             client.setCompanyName(dto.getCompanyName().getValue());
         }
         if (dto.getClientType().isDefined()) {
-            client.setClientType(dto.getClientType().getValue());
+            ClientType clientType = dto.getClientType().getValue();
+            client.setClientType(clientType == null ? null : clientType.value());
         }
 
         clientRepository.save(client);

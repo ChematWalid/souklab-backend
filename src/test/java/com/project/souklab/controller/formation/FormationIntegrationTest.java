@@ -8,6 +8,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.Client;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import jakarta.persistence.EntityManager;
@@ -162,7 +163,7 @@ class FormationIntegrationTest {
 
         clientEntity = Client.builder()
                 .user(clientUser)
-                .clientType("INDIVIDUAL")
+                .clientType(ClientType.INDIVIDUAL.value())
                 .city("Oran")
                 .build();
         entityManager.persist(clientEntity);

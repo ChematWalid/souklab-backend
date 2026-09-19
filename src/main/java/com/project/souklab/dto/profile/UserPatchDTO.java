@@ -1,6 +1,7 @@
 package com.project.souklab.dto.profile;
 
 import com.project.souklab.dto.common.PatchField;
+import com.project.souklab.model.ClientType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -129,7 +130,7 @@ public class UserPatchDTO {
      * Client-specific; max 50 characters.
      */
     @Builder.Default
-    private PatchField<String> clientType = PatchField.undefined();
+    private PatchField<ClientType> clientType = PatchField.undefined();
 
     /**
      * Checks whether all patch fields in this DTO are undefined.

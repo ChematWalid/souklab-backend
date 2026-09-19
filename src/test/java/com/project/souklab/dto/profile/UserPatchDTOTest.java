@@ -1,5 +1,6 @@
 package com.project.souklab.dto.profile;
 
+import com.project.souklab.model.ClientType;
 import com.project.souklab.dto.common.PatchField;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,7 @@ class UserPatchDTOTest {
         assertThat(patchWithTechniques(PatchField.of(List.of("technique"))).isEmpty()).isFalse();
         assertThat(patchWithEpoques(PatchField.of(List.of("epoque"))).isEmpty()).isFalse();
         assertThat(patchWithCompany(PatchField.of("company")).isEmpty()).isFalse();
-        assertThat(patchWithClientType(PatchField.of("INDIVIDUAL")).isEmpty()).isFalse();
+        assertThat(patchWithClientType(PatchField.of(ClientType.INDIVIDUAL)).isEmpty()).isFalse();
         assertThat(patchWithBio(null).isEmpty()).isTrue();
         assertThat(patchWithBio(PatchField.of(null)).isEmpty()).isFalse();
         assertThat(patchWithCity(null).isEmpty()).isTrue();
@@ -101,7 +102,7 @@ class UserPatchDTOTest {
     private UserPatchDTO patchWithCompany(PatchField<String> value) {
         UserPatchDTO patch = new UserPatchDTO(); patch.setCompanyName(value); return patch;
     }
-    private UserPatchDTO patchWithClientType(PatchField<String> value) {
+    private UserPatchDTO patchWithClientType(PatchField<ClientType> value) {
         UserPatchDTO patch = new UserPatchDTO(); patch.setClientType(value); return patch;
     }
 }

@@ -1,5 +1,6 @@
 package com.project.souklab.dto.auth;
 
+import com.project.souklab.model.ClientType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class CompleteProfileRequestDTO {
     private List<String> epoqueIds;
     private List<String> techniqueIds;
 
-    private String clientType;
+    private ClientType clientType;
     private String companyName;
 
     public String resolveRegionId() {
