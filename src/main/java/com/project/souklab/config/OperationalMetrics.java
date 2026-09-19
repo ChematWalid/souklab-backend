@@ -42,7 +42,7 @@ public class OperationalMetrics {
         increment(AnalyticsMetric.Operational.Metric.UPLOADS, operation, outcome);
     }
 
-    public void recordVirusScan(AnalyticsMetric.Operational.Outcome outcome) {
+    public void recordVirusScan(AnalyticsMetric.Key outcome) {
         increment(AnalyticsMetric.Operational.Metric.VIRUS_SCANS,
                 AnalyticsMetric.Operational.Component.CLAMAV, outcome);
     }
@@ -62,8 +62,8 @@ public class OperationalMetrics {
                 scope, AnalyticsMetric.Operational.Outcome.REJECTED);
     }
 
-    public void recordRequest(AnalyticsMetric.Operational.HttpMethod method,
-                              AnalyticsMetric.Operational.RequestOutcome outcome) {
+        public void recordRequest(AnalyticsMetric.Operational.HttpMethod method,
+                              AnalyticsMetric.Operational.RequestOutcome.Status outcome) {
         increment(AnalyticsMetric.Operational.Metric.HTTP_REQUESTS, method, outcome);
     }
 

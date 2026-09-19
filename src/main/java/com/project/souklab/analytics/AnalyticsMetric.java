@@ -215,14 +215,23 @@ public final class AnalyticsMetric {
         public enum Outcome implements Key {
             SUCCESS("success"), FAILURE("failure"), AUTHENTICATED("authenticated"),
             REJECTED("rejected"), DISABLED("disabled"), FALLBACK("fallback"),
-            ERROR("error"), INFECTED("infected"), ERROR_ALLOWED("error_allowed"),
-            ERROR_REJECTED("error_rejected"), CLEAN("clean");
+            ERROR("error"), INFECTED("infected"), CLEAN("clean");
 
             private final String value;
 
             Outcome(String value) { this.value = value; }
 
             public String value() { return value; }
+
+            public enum Error implements Key {
+                ALLOWED("error_allowed"), REJECTED("error_rejected");
+
+                private final String value;
+
+                Error(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
         }
 
         public enum HttpMethod implements Key {
@@ -244,64 +253,78 @@ public final class AnalyticsMetric {
             }
         }
 
-        public enum RequestOutcome implements Key {
-            SUCCESS_2XX("2xx"), REDIRECT_3XX("3xx"), CLIENT_ERROR_4XX("4xx"),
-            SERVER_ERROR_5XX("5xx"), ERROR("error");
+        public static final class RequestOutcome {
+            private RequestOutcome() { }
 
-            private final String value;
+            public enum Status implements Key {
+                SUCCESS("2xx"), REDIRECT("3xx"), CLIENT_ERROR("4xx"),
+                SERVER_ERROR("5xx"), ERROR("error");
 
-            RequestOutcome(String value) { this.value = value; }
+                private final String value;
 
-            public String value() { return value; }
+                Status(String value) { this.value = value; }
 
-            public static RequestOutcome fromStatus(int status) {
-                if (status >= 500) return SERVER_ERROR_5XX;
-                if (status >= 400) return CLIENT_ERROR_4XX;
-                if (status >= 300) return REDIRECT_3XX;
-                return SUCCESS_2XX;
+                public String value() { return value; }
+
+                public static Status fromStatus(int status) {
+                    if (status >= 500) return SERVER_ERROR;
+                    if (status >= 400) return CLIENT_ERROR;
+                    if (status >= 300) return REDIRECT;
+                    return SUCCESS;
+                }
             }
         }
     }
 
-    public enum Retention implements Key {
-        DAY_1("day1"), DAY_7("day7"), DAY_30("day30"),
-        COHORT_DATE("cohortDate"), COHORT_SIZE("cohortSize");
+    public static final class Retention {
+        private Retention() { }
 
-        private final String value;
+        public enum Day implements Key {
+            ONE("day1"), SEVEN("day7"), THIRTY("day30");
 
-        Retention(String value) { this.value = value; }
+            private final String value;
 
-        public String value() { return value; }
+            Day(String value) { this.value = value; }
 
-        public Row retainedRow() {
-            return switch (this) {
-                case DAY_1 -> Row.DAY_1_RETAINED;
-                case DAY_7 -> Row.DAY_7_RETAINED;
-                case DAY_30 -> Row.DAY_30_RETAINED;
-                default -> throw new IllegalStateException("Retention row is not a retention window: " + this);
-            };
-        }
+            public String value() { return value; }
 
-        public Row rateRow() {
-            return switch (this) {
-                case DAY_1 -> Row.DAY_1_RATE;
-                case DAY_7 -> Row.DAY_7_RATE;
-                case DAY_30 -> Row.DAY_30_RATE;
-                default -> throw new IllegalStateException("Retention row is not a retention window: " + this);
-            };
+            public Key retainedRow() {
+                return switch (this) {
+                    case ONE -> Row.Day.ONE_RETAINED;
+                    case SEVEN -> Row.Day.SEVEN_RETAINED;
+                    case THIRTY -> Row.Day.THIRTY_RETAINED;
+                };
+            }
+
+            public Key rateRow() {
+                return switch (this) {
+                    case ONE -> Row.Day.ONE_RATE;
+                    case SEVEN -> Row.Day.SEVEN_RATE;
+                    case THIRTY -> Row.Day.THIRTY_RATE;
+                };
+            }
         }
 
         public enum Row implements Key {
-            COHORT_DATE("cohortDate"), COHORT_SIZE("cohortSize"),
-            DAY_1_RETAINED("day1Retained"), DAY_1_RATE("day1Rate"),
-            DAY_7_RETAINED("day7Retained"), DAY_7_RATE("day7Rate"),
-            DAY_30_RETAINED("day30Retained"), DAY_30_RATE("day30Rate");
+            COHORT_DATE("cohortDate"), COHORT_SIZE("cohortSize");
 
             private final String value;
 
             Row(String value) { this.value = value; }
 
             public String value() { return value; }
+
+            public enum Day implements Key {
+                ONE_RETAINED("day1Retained"), ONE_RATE("day1Rate"),
+                SEVEN_RETAINED("day7Retained"), SEVEN_RATE("day7Rate"),
+                THIRTY_RETAINED("day30Retained"), THIRTY_RATE("day30Rate");
+
+                private final String value;
+
+                Day(String value) { this.value = value; }
+
+                public String value() { return value; }
+            }
         }
     }
 

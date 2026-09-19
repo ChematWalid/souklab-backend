@@ -23,10 +23,10 @@ public class OperationalRequestMetricsFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        AnalyticsMetric.Operational.RequestOutcome outcome = AnalyticsMetric.Operational.RequestOutcome.ERROR;
+        AnalyticsMetric.Operational.RequestOutcome.Status outcome = AnalyticsMetric.Operational.RequestOutcome.Status.ERROR;
         try {
             filterChain.doFilter(request, response);
-            outcome = AnalyticsMetric.Operational.RequestOutcome.fromStatus(response.getStatus());
+            outcome = AnalyticsMetric.Operational.RequestOutcome.Status.fromStatus(response.getStatus());
         } catch (IOException | ServletException | RuntimeException exception) {
             metrics.recordRequest(AnalyticsMetric.Operational.HttpMethod.fromValue(request.getMethod()), outcome);
             throw exception;

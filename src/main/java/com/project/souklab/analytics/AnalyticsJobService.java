@@ -679,7 +679,7 @@ public class AnalyticsJobService {
         AnalyticsSeriesSorter.sort(series, job.getSortField(), job.getSortDirection());
     }
 
-    private List<Map<AnalyticsMetric.Retention.Row, Object>> loginRetentionCohorts(LocalDateTime from, LocalDateTime to) {
+    private List<Map<AnalyticsMetric.Key, Object>> loginRetentionCohorts(LocalDateTime from, LocalDateTime to) {
         Map<String, LocalDateTime> firstRegistrationByActor = new LinkedHashMap<>();
         for (var event : events.findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(
                 AnalyticsEvent.Registration.CREATED, from, to)) {
@@ -688,28 +688,28 @@ public class AnalyticsJobService {
             }
         }
         if (firstRegistrationByActor.isEmpty()) return List.of();
-        Map<AnalyticsMetric.Retention, Set<String>> retainedByWindow = new LinkedHashMap<>();
-        retainedByWindow.put(AnalyticsMetric.Retention.DAY_1, new HashSet<>());
-        retainedByWindow.put(AnalyticsMetric.Retention.DAY_7, new HashSet<>());
-        retainedByWindow.put(AnalyticsMetric.Retention.DAY_30, new HashSet<>());
+        Map<AnalyticsMetric.Retention.Day, Set<String>> retainedByWindow = new LinkedHashMap<>();
+        retainedByWindow.put(AnalyticsMetric.Retention.Day.ONE, new HashSet<>());
+        retainedByWindow.put(AnalyticsMetric.Retention.Day.SEVEN, new HashSet<>());
+        retainedByWindow.put(AnalyticsMetric.Retention.Day.THIRTY, new HashSet<>());
         for (var event : events.findByEventTypeAndEventTimeBetweenOrderByEventTimeAsc(
                 AnalyticsEvent.Authentication.Login.SUCCEEDED, from, to.plusDays(30))) {
             LocalDateTime cohort = firstRegistrationByActor.get(event.getActorId());
             if (cohort == null) continue;
             long age = ChronoUnit.DAYS.between(businessDate(cohort), businessDate(event.getEventTime()));
-            if (age == 1) retainedByWindow.get(AnalyticsMetric.Retention.DAY_1).add(event.getActorId());
-            if (age == 7) retainedByWindow.get(AnalyticsMetric.Retention.DAY_7).add(event.getActorId());
-            if (age == 30) retainedByWindow.get(AnalyticsMetric.Retention.DAY_30).add(event.getActorId());
+            if (age == 1) retainedByWindow.get(AnalyticsMetric.Retention.Day.ONE).add(event.getActorId());
+            if (age == 7) retainedByWindow.get(AnalyticsMetric.Retention.Day.SEVEN).add(event.getActorId());
+            if (age == 30) retainedByWindow.get(AnalyticsMetric.Retention.Day.THIRTY).add(event.getActorId());
         }
         Map<LocalDate, Long> cohortSizes = firstRegistrationByActor.values().stream()
                 .collect(Collectors.groupingBy(this::businessDate,
                         LinkedHashMap::new, Collectors.counting()));
         return cohortSizes.entrySet().stream().map(entry -> {
             long size = entry.getValue();
-            Map<AnalyticsMetric.Retention.Row, Object> row = new LinkedHashMap<>();
+            Map<AnalyticsMetric.Key, Object> row = new LinkedHashMap<>();
             row.put(AnalyticsMetric.Retention.Row.COHORT_DATE, entry.getKey());
             row.put(AnalyticsMetric.Retention.Row.COHORT_SIZE, size);
-            for (Map.Entry<AnalyticsMetric.Retention, Set<String>> window : retainedByWindow.entrySet()) {
+            for (Map.Entry<AnalyticsMetric.Retention.Day, Set<String>> window : retainedByWindow.entrySet()) {
                 long retained = window.getValue().stream()
                         .filter(firstRegistrationByActor::containsKey)
                         .filter(actor -> businessDate(firstRegistrationByActor.get(actor)).equals(entry.getKey()))

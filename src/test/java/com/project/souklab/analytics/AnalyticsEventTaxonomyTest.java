@@ -61,15 +61,15 @@ class AnalyticsEventTaxonomyTest {
         assertThat(AnalyticsMetric.Operational.REQUEST_COUNTER_METRIC.value()).isEqualTo("souklab.http.requests");
         assertThat(AnalyticsMetric.Operational.Metric.VIRUS_SCANS.value()).isEqualTo("souklab.virus.scans");
         assertThat(AnalyticsMetric.Operational.Dependency.RABBITMQ.value()).isEqualTo("rabbitmq");
-        assertThat(AnalyticsMetric.Operational.Outcome.ERROR_REJECTED.value()).isEqualTo("error_rejected");
+        assertThat(AnalyticsMetric.Operational.Outcome.Error.REJECTED.value()).isEqualTo("error_rejected");
         assertThat(AnalyticsMetric.Operational.HttpMethod.fromValue("post"))
                 .isEqualTo(AnalyticsMetric.Operational.HttpMethod.POST);
-        assertThat(AnalyticsMetric.Operational.RequestOutcome.fromStatus(503))
-                .isEqualTo(AnalyticsMetric.Operational.RequestOutcome.SERVER_ERROR_5XX);
-        assertThat(AnalyticsMetric.Retention.DAY_7.retainedRow())
-                .isEqualTo(AnalyticsMetric.Retention.Row.DAY_7_RETAINED);
-        assertThat(AnalyticsMetric.Retention.DAY_7.rateRow())
-                .isEqualTo(AnalyticsMetric.Retention.Row.DAY_7_RATE);
+        assertThat(AnalyticsMetric.Operational.RequestOutcome.Status.fromStatus(503))
+                .isEqualTo(AnalyticsMetric.Operational.RequestOutcome.Status.SERVER_ERROR);
+        assertThat(AnalyticsMetric.Retention.Day.SEVEN.retainedRow())
+                .isEqualTo(AnalyticsMetric.Retention.Row.Day.SEVEN_RETAINED);
+        assertThat(AnalyticsMetric.Retention.Day.SEVEN.rateRow())
+                .isEqualTo(AnalyticsMetric.Retention.Row.Day.SEVEN_RATE);
     }
 
     @Test

@@ -149,11 +149,11 @@ public class VirusScanService {
         if (result.isError()) {
             boolean failOpen = properties.getVirusScan().isFailOpen();
             if (failOpen) {
-                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_ALLOWED);
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.Error.ALLOWED);
                 log.warn("Virus scanner communication failure for '{}': {}. Fail-open policy active: allowing upload to proceed.",
                         filename, result.message());
             } else {
-                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.ERROR_REJECTED);
+                metrics.recordVirusScan(AnalyticsMetric.Operational.Outcome.Error.REJECTED);
                 log.error("Virus scanner communication failure for '{}': {}. Fail-closed policy active: rejecting upload.",
                         filename, result.message());
                 throw new VirusScanException("Virus scanning service unavailable: " + result.message());
