@@ -54,4 +54,19 @@ public final class ChatMetadata {
             return value;
         }
     }
+
+    public enum Command implements Key {
+        MESSAGE("message");
+
+        private final String value;
+
+        Command(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String value() {
+            return value;
+        }
+    }
 }

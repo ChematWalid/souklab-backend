@@ -70,7 +70,7 @@ public class ChatStompController {
     @MessageExceptionHandler
     public void handleError(Throwable error, Principal principal) {
         if (principal != null) {
-            ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Command.ERROR, null, null, null, LocalDateTime.now(clock), Map.of("message", error.getMessage() == null ? "Chat command failed" : error.getMessage()));
+            ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Command.ERROR, null, null, null, LocalDateTime.now(clock), Map.of(ChatMetadata.Command.MESSAGE, error.getMessage() == null ? "Chat command failed" : error.getMessage()));
             acknowledge(principal, event);
         }
     }
