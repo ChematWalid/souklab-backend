@@ -1,5 +1,8 @@
 package com.project.souklab.integration.phase10;
 
+import com.project.souklab.analytics.AnalyticsEvent;
+import com.project.souklab.analytics.AnalyticsMetric;
+import com.project.souklab.security.Permission;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -38,22 +41,24 @@ class Phase10MariaDbMigrationTest {
                 assertThat(tableExists(statement, "analytics_maintenance_jobs")).isTrue();
                 assertThat(columnExists(statement, "payments", "manual_grant")).isTrue();
                 assertThat(columnExists(statement, "analytics_outbox_events", "next_attempt_at")).isTrue();
-                assertThat(tableContains(statement, "permissions", "permission_key", "permission:analytics:admin")).isTrue();
-                assertThat(tableContains(statement, "permissions", "permission_key", "permission:financial:admin")).isTrue();
+                assertThat(tableContains(statement, "permissions", "permission_key", Permission.Analytics.ADMIN.value())).isTrue();
+                assertThat(tableContains(statement, "permissions", "permission_key", Permission.Financial.ADMIN.value())).isTrue();
                 assertThat(indexExists(statement, "analytics_outbox_events", "idx_analytics_outbox_next_attempt")).isTrue();
                 assertThat(indexExists(statement, "payments", "idx_payment_manual_status_created")).isTrue();
                 assertThat(indexExists(statement, "analytics_job_artifacts", "idx_analytics_artifact_job")).isTrue();
 
+                String loginRollupKey = AnalyticsMetric.EventRollup.PREFIX.value()
+                        + AnalyticsEvent.Authentication.Login.SUCCEEDED.value();
                 statement.executeUpdate("INSERT INTO daily_kpi_rollups "
                         + "(id, rollup_date, kpi_key, metric_value, source_version, created_at, updated_at) "
-                        + "VALUES (UUID(), '2026-01-01', 'event.LOGIN_SUCCEEDED', 1, 1, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)) "
+                        + "VALUES (UUID(), '2026-01-01', '" + loginRollupKey + "', 1, 1, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)) "
                         + "ON DUPLICATE KEY UPDATE metric_value = metric_value + 1, updated_at = CURRENT_TIMESTAMP(6)");
                 statement.executeUpdate("INSERT INTO daily_kpi_rollups "
                         + "(id, rollup_date, kpi_key, metric_value, source_version, created_at, updated_at) "
-                        + "VALUES (UUID(), '2026-01-01', 'event.LOGIN_SUCCEEDED', 1, 1, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)) "
+                        + "VALUES (UUID(), '2026-01-01', '" + loginRollupKey + "', 1, 1, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)) "
                         + "ON DUPLICATE KEY UPDATE metric_value = metric_value + 1, updated_at = CURRENT_TIMESTAMP(6)");
                 try (ResultSet result = statement.executeQuery("SELECT metric_value FROM daily_kpi_rollups "
-                        + "WHERE rollup_date = '2026-01-01' AND kpi_key = 'event.LOGIN_SUCCEEDED'")) {
+                        + "WHERE rollup_date = '2026-01-01' AND kpi_key = '" + loginRollupKey + "'")) {
                     result.next();
                     assertThat(result.getLong(1)).isEqualTo(2L);
                 }

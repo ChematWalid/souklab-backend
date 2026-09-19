@@ -35,7 +35,8 @@ class AnalyticsEventConsumerTest {
         consumer.consume("{\"eventId\":\"event-1\",\"eventType\":\"" + AnalyticsEvent.Authentication.Login.SUCCEEDED.value() + "\","
                 + "\"eventTime\":\"2026-01-01T23:30:00\"}");
 
-        verify(rollups).incrementEventKpi(LocalDate.of(2026, 1, 2), "event.LOGIN_SUCCEEDED");
+        verify(rollups).incrementEventKpi(LocalDate.of(2026, 1, 2),
+                AnalyticsMetric.EventRollup.PREFIX.value() + AnalyticsEvent.Authentication.Login.SUCCEEDED.value());
         verify(processed).save(any(AnalyticsProcessedEvent.class));
     }
 
