@@ -972,21 +972,51 @@ public final class AnalyticsMetric {
         public static final class RequestOutcome {
             private RequestOutcome() { }
 
-            public enum Status implements Key {
-                SUCCESS("2xx"), REDIRECT("3xx"), CLIENT_ERROR("4xx"),
-                SERVER_ERROR("5xx"), ERROR("error");
+            public static final class Status {
+                private Status() { }
 
-                private final String value;
+                public interface Key extends AnalyticsMetric.Key { }
 
-                Status(String value) { this.value = value; }
+                public enum Success implements Key {
+                    VALUE("2xx");
+                    private final String value;
+                    Success(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
 
-                public String value() { return value; }
+                public enum Redirect implements Key {
+                    VALUE("3xx");
+                    private final String value;
+                    Redirect(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
 
-                public static Status fromStatus(int status) {
-                    if (status >= 500) return SERVER_ERROR;
-                    if (status >= 400) return CLIENT_ERROR;
-                    if (status >= 300) return REDIRECT;
-                    return SUCCESS;
+                public enum ClientError implements Key {
+                    VALUE("4xx");
+                    private final String value;
+                    ClientError(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum ServerError implements Key {
+                    VALUE("5xx");
+                    private final String value;
+                    ServerError(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum Error implements Key {
+                    VALUE("error");
+                    private final String value;
+                    Error(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public static Key fromStatus(int status) {
+                    if (status >= 500) return ServerError.VALUE;
+                    if (status >= 400) return ClientError.VALUE;
+                    if (status >= 300) return Redirect.VALUE;
+                    return Success.VALUE;
                 }
             }
         }

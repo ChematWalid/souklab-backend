@@ -15,7 +15,7 @@ class OperationalMetricsTest {
         OperationalMetrics metrics = new OperationalMetrics(registry);
 
         metrics.recordRequest(AnalyticsMetric.Operational.HttpMethod.GET,
-                AnalyticsMetric.Operational.RequestOutcome.Status.SUCCESS);
+                AnalyticsMetric.Operational.RequestOutcome.Status.Success.VALUE);
         metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.Redis.VALUE, true);
 
         Map<String, Double> snapshot = metrics.snapshot(AnalyticsMetric.Operational.Metric.Request.COUNTERS);

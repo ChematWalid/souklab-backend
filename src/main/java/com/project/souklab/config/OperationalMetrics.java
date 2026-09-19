@@ -62,8 +62,8 @@ public class OperationalMetrics {
                 scope, AnalyticsMetric.Operational.Outcome.REJECTED);
     }
 
-        public void recordRequest(AnalyticsMetric.Operational.HttpMethod method,
-                              AnalyticsMetric.Operational.RequestOutcome.Status outcome) {
+    public void recordRequest(AnalyticsMetric.Operational.HttpMethod method,
+                              AnalyticsMetric.Operational.RequestOutcome.Status.Key outcome) {
         increment(AnalyticsMetric.Operational.Metric.Request.COUNTERS, method, outcome);
     }
 
