@@ -849,15 +849,43 @@ public final class AnalyticsMetric {
             }
         }
 
-        public enum Dependency implements Key {
-            ELASTICSEARCH("elasticsearch"), REDIS("redis"), RABBITMQ("rabbitmq"),
-            OBJECT_STORAGE("s3"), CLAMAV("clamav");
+        public static final class Dependency {
+            private Dependency() { }
 
-            private final String value;
+            public enum Elasticsearch implements Key {
+                VALUE("elasticsearch");
+                private final String value;
+                Elasticsearch(String value) { this.value = value; }
+                public String value() { return value; }
+            }
 
-            Dependency(String value) { this.value = value; }
+            public enum Redis implements Key {
+                VALUE("redis");
+                private final String value;
+                Redis(String value) { this.value = value; }
+                public String value() { return value; }
+            }
 
-            public String value() { return value; }
+            public enum RabbitMq implements Key {
+                VALUE("rabbitmq");
+                private final String value;
+                RabbitMq(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum ObjectStorage implements Key {
+                VALUE("s3");
+                private final String value;
+                ObjectStorage(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Clamav implements Key {
+                VALUE("clamav");
+                private final String value;
+                Clamav(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum Component implements Key {

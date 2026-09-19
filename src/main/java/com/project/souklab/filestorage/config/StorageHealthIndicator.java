@@ -28,10 +28,10 @@ public class StorageHealthIndicator implements HealthIndicator {
     public Health health() {
         try {
             s3Client.headBucket(HeadBucketRequest.builder().bucket(properties.getS3().getBucket()).build());
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.OBJECT_STORAGE, true);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ObjectStorage.VALUE, true);
             return Health.up().build();
         } catch (RuntimeException exception) {
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.OBJECT_STORAGE, false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.ObjectStorage.VALUE, false);
             return Health.down().withDetail("provider", "s3").build();
         }
     }

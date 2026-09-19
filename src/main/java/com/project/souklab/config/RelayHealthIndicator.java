@@ -30,10 +30,10 @@ public class RelayHealthIndicator implements HealthIndicator {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(properties.getHost(), properties.getPort()),
                     Math.toIntExact(healthProperties.getDependencyTimeout().toMillis()));
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.RABBITMQ, true);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.RabbitMq.VALUE, true);
             return Health.up().build();
         } catch (IOException exception) {
-            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.RABBITMQ, false);
+            metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.RabbitMq.VALUE, false);
             return Health.down().build();
         }
     }

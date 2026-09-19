@@ -85,7 +85,7 @@ public class OperationalMetrics {
      * Publishes the latest result of a mandatory dependency readiness probe.
      * The dependency names are fixed by the health-indicator call sites.
      */
-    public void setDependencyAvailability(AnalyticsMetric.Operational.Dependency dependency, boolean available) {
+    public void setDependencyAvailability(AnalyticsMetric.Key dependency, boolean available) {
         AtomicInteger state = dependencyAvailability.computeIfAbsent(dependency.value(), name -> {
             AtomicInteger value = new AtomicInteger();
             Gauge.builder("souklab.dependency.available", value, AtomicInteger::get)

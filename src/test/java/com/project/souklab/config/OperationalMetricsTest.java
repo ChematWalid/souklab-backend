@@ -16,13 +16,13 @@ class OperationalMetricsTest {
 
         metrics.recordRequest(AnalyticsMetric.Operational.HttpMethod.GET,
                 AnalyticsMetric.Operational.RequestOutcome.Status.SUCCESS);
-        metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.REDIS, true);
+        metrics.setDependencyAvailability(AnalyticsMetric.Operational.Dependency.Redis.VALUE, true);
 
         Map<String, Double> snapshot = metrics.snapshot(AnalyticsMetric.Operational.Metric.Request.COUNTERS);
 
         assertThat(snapshot).containsEntry("operation=GET,outcome=2xx", 1.0);
         assertThat(registry.get("souklab.dependency.available")
-                .tag("dependency", AnalyticsMetric.Operational.Dependency.REDIS.value())
+                .tag("dependency", AnalyticsMetric.Operational.Dependency.Redis.VALUE.value())
                 .gauge().value()).isEqualTo(1.0);
     }
 }
