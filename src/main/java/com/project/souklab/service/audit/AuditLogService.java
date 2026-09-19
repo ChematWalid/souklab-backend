@@ -33,7 +33,7 @@ public class AuditLogService {
      * @param action the {@link AuditLogAction} representing the action type
      * @param details a detailed description of the action and its context
      */
-    public void logAction(AuditLogAction action, String details) {
+    public void logAction(AuditLogAction.Key action, String details) {
         String username = SecurityUtils.getCurrentUsername();
         String effectiveUsername = (username != null && !username.equals(ANONYMOUS_USER)) ? username : ANONYMOUS_USER;
         recordAuditLog(action, details, effectiveUsername);
@@ -48,12 +48,12 @@ public class AuditLogService {
      */
     @Async("applicationTaskExecutor")
     @Transactional
-    public void logAction(AuditLogAction action, String details, String username) {
+    public void logAction(AuditLogAction.Key action, String details, String username) {
         recordAuditLog(action, details, username);
     }
 
     @Transactional
-    public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
+    public void logFinancialAction(AuditLogAction.Key action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
                                    String previousState, String newState, String reason,
                                    String paymentId, String subscriptionId) {
         persistFinancialAction(action, actor, targetAccountId, operation.value(), previousState, newState,
@@ -61,7 +61,7 @@ public class AuditLogService {
     }
 
     @Transactional
-    public void logFinancialState(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
+    public void logFinancialState(AuditLogAction.Key action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
                                   EnumValue previousState, EnumValue newState, String reason,
                                   String paymentId, String subscriptionId) {
         persistFinancialAction(action, actor, targetAccountId, operation.value(),
@@ -70,14 +70,14 @@ public class AuditLogService {
     }
 
     @Transactional
-    public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
+    public void logFinancialAction(AuditLogAction.Key action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
                                    String operationSuffix, String previousState, String newState, String reason,
                                    String paymentId, String subscriptionId) {
         persistFinancialAction(action, actor, targetAccountId, operation.value() + ":" + operationSuffix,
                 previousState, newState, reason, paymentId, subscriptionId);
     }
 
-    private void persistFinancialAction(AuditLogAction action, User actor, String targetAccountId, String operation,
+    private void persistFinancialAction(AuditLogAction.Key action, User actor, String targetAccountId, String operation,
                                    String previousState, String newState, String reason,
                                    String paymentId, String subscriptionId) {
         AuditLog auditLog = new AuditLog();
@@ -93,7 +93,7 @@ public class AuditLogService {
         auditLogRepository.save(auditLog);
     }
 
-    private void recordAuditLog(AuditLogAction action, String details, String username) {
+    private void recordAuditLog(AuditLogAction.Key action, String details, String username) {
         try {
             AuditLog auditLog = new AuditLog();
             auditLog.setAction(action);

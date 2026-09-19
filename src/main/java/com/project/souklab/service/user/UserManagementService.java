@@ -111,7 +111,7 @@ public class UserManagementService {
             artisanRepository.save(artisan);
         });
 
-        auditLogService.logAction(AuditLogAction.APPROVE_USER, "Approved user ID: " + userId);
+        auditLogService.logAction(AuditLogAction.User.APPROVED, "Approved user ID: " + userId);
         recordModeration(AnalyticsEvent.User.APPROVED, user, Map.of());
         notificationService.createForUser(user, "Your account has been approved and is now active!", NotificationType.Account.VALIDATED, user.getId());
     }
@@ -137,7 +137,7 @@ public class UserManagementService {
 
         refreshTokenService.deleteByUser(user);
 
-        auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: " + userId + ". Reason: " + reason);
+        auditLogService.logAction(AuditLogAction.User.BANNED, "Banned user ID: " + userId + ". Reason: " + reason);
         recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of(AnalyticsMetadata.Moderation.REASON_PRESENT, reason != null && !reason.isBlank()));
         notificationService.createForUser(user, "Your account has been permanently suspended. Reason: " + reason, NotificationType.Account.SUSPENDED, user.getId());
     }
@@ -168,7 +168,7 @@ public class UserManagementService {
 
         refreshTokenService.deleteByUser(user);
 
-        auditLogService.logAction(AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
+        auditLogService.logAction(AuditLogAction.User.TIMED_OUT, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
         recordModeration(AnalyticsEvent.User.TIMED_OUT, user, Map.of(AnalyticsMetadata.Moderation.MINUTES, minutes));
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.Account.SUSPENDED, user.getId());
     }
@@ -194,7 +194,7 @@ public class UserManagementService {
         user.setBanReason(null);
         userRepository.save(user);
 
-        auditLogService.logAction(AuditLogAction.UNBAN_USER, "Reinstated user ID: " + userId);
+        auditLogService.logAction(AuditLogAction.User.UNBANNED, "Reinstated user ID: " + userId);
         recordModeration(AnalyticsEvent.User.REINSTATED, user, Map.of());
         notificationService.createForUser(user, "Your account suspension has been lifted and your access has been restored.", NotificationType.Account.REINSTATED, user.getId());
     }

@@ -62,7 +62,7 @@ public class AnalyticsRebuildService {
             rollup.setValue(entry.getValue()); rollup.setSourceVersion(1);
             rollups.save(rollup); written++;
         }
-        auditLogService.logAction(AuditLogAction.ANALYTICS_REBUILD,
+        auditLogService.logAction(AuditLogAction.Analytics.REBUILD,
                 "range=" + from + ".." + to + ", events=" + sourceCount + ", rollups=" + written);
         return new AnalyticsRebuildResponse(from, to, sourceCount, written);
     }

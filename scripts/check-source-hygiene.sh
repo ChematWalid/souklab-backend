@@ -55,6 +55,10 @@ if rg -n --pcre2 'NotificationType\.(?:ACCOUNT_VALIDATED|ACCOUNT_REJECTED|ACCOUN
   echo 'flat notification type references detected; use grouped notification enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AuditLogAction\.(?:EMAIL_VERIFIED|PASSWORD_RESET_COMPLETED|PASSWORD_CHANGED|ASSIGN_ROLE|ASSIGN_PERMISSION_BULK|PERMISSION_GRANTED|PERMISSION_REVOKED|APPROVE_USER|BAN_USER|TIMEOUT_USER|UNBAN_USER|APPROVE_ARTISAN|REJECT_ARTISAN|APPROVE_FORMATION|REJECT_FORMATION|RESOLVE_REPORT|DISMISS_REPORT|SUBSCRIPTION_GRANTED|SUBSCRIPTION_CANCELED|SUBSCRIPTION_REVOKED|SUBSCRIPTION_STATE_CORRECTED|PAYMENT_STATE_CORRECTED|REFUND_REQUEST_REJECTED|SUBSCRIPTION_PLAN_CREATED|SUBSCRIPTION_PLAN_UPDATED|SUBSCRIPTION_PLAN_DEACTIVATED|ANALYTICS_REBUILD|ANALYTICS_JOB_SUBMITTED|ANALYTICS_RESULT_READ|ANALYTICS_EXPORT)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat audit action references detected; use grouped audit action enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 '"(?:PLAN_(?:CREATE|UPDATE|DEACTIVATE)|REFUND_REQUEST)"' src/main/java src/test/java --glob '*.java' \
     --glob '!FinancialAuditOperation.java'; then
   echo 'raw financial audit operation literals detected; use FinancialAuditOperation grouped enums' >&2

@@ -2,8 +2,7 @@ package com.project.souklab.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.Convert;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -21,15 +20,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuditLog extends BaseEntity {
 
-    public AuditLog(AuditLogAction action, String details, User user) {
+    public AuditLog(AuditLogAction.Key action, String details, User user) {
         this.action = action;
         this.details = details;
         this.user = user;
     }
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AuditLogActionConverter.class)
     @Column(nullable = false, length = 50)
-    private AuditLogAction action;
+    private AuditLogAction.Key action;
 
     @Column(length = 2000)
     private String details;

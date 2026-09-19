@@ -15,17 +15,17 @@ class AuditLogDTOTest {
 
         User user = User.builder().email("admin@example.com").build();
         user.setId("user-1");
-        AuditLog attributed = new AuditLog(AuditLogAction.APPROVE_USER, "approved", user);
+        AuditLog attributed = new AuditLog(AuditLogAction.User.APPROVED, "approved", user);
         attributed.setId("log-1");
 
         AuditLogDTO result = AuditLogDTO.from(attributed);
         assertThat(result.getId()).isEqualTo("log-1");
-        assertThat(result.getAction()).isEqualTo(AuditLogAction.APPROVE_USER);
+        assertThat(result.getAction()).isEqualTo(AuditLogAction.User.APPROVED);
         assertThat(result.getDetails()).isEqualTo("approved");
         assertThat(result.getUserId()).isEqualTo("user-1");
         assertThat(result.getUserEmail()).isEqualTo("admin@example.com");
 
-        AuditLog unattributed = new AuditLog(AuditLogAction.DISMISS_REPORT, null, null);
+        AuditLog unattributed = new AuditLog(AuditLogAction.Report.DISMISSED, null, null);
         assertThat(AuditLogDTO.from(unattributed).getUserId()).isNull();
         assertThat(AuditLogDTO.from(unattributed).getUserEmail()).isNull();
     }

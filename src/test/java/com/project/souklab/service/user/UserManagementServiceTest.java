@@ -262,7 +262,7 @@ class UserManagementServiceTest {
         assertThat(user.getStatus()).isEqualTo(AccountStatus.ACTIVE);
         verify(userRepository).save(user);
         verify(artisanRepository, never()).save(any());
-        verify(auditLogService).logAction(AuditLogAction.APPROVE_USER, "Approved user ID: u-pending");
+        verify(auditLogService).logAction(AuditLogAction.User.APPROVED, "Approved user ID: u-pending");
         verify(notificationService).createForUser(
                 user,
                 "Your account has been approved and is now active!",
@@ -293,7 +293,7 @@ class UserManagementServiceTest {
         assertThat(artisan.isVerified()).isTrue();
         verify(userRepository).save(user);
         verify(artisanRepository).save(artisan);
-        verify(auditLogService).logAction(AuditLogAction.APPROVE_USER, "Approved user ID: u-artisan");
+        verify(auditLogService).logAction(AuditLogAction.User.APPROVED, "Approved user ID: u-artisan");
         verify(notificationService).createForUser(
                 user,
                 "Your account has been approved and is now active!",
@@ -335,7 +335,7 @@ class UserManagementServiceTest {
 
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
-        verify(auditLogService).logAction(AuditLogAction.BAN_USER, "Banned user ID: u-bad. Reason: Repeated fraudulent transactions");
+        verify(auditLogService).logAction(AuditLogAction.User.BANNED, "Banned user ID: u-bad. Reason: Repeated fraudulent transactions");
         verify(notificationService).createForUser(
                 user,
                 "Your account has been permanently suspended. Reason: Repeated fraudulent transactions",
@@ -361,7 +361,7 @@ class UserManagementServiceTest {
 
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
-        verify(auditLogService).logAction(AuditLogAction.BAN_USER, "Banned user ID: u-bad2. Reason: null");
+        verify(auditLogService).logAction(AuditLogAction.User.BANNED, "Banned user ID: u-bad2. Reason: null");
         verify(notificationService).createForUser(
                 user,
                 "Your account has been permanently suspended. Reason: null",
@@ -434,7 +434,7 @@ class UserManagementServiceTest {
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
         verify(auditLogService).logAction(
-                AuditLogAction.TIMEOUT_USER,
+                AuditLogAction.User.TIMED_OUT,
                 "Timed out user ID: u-timeout for 120 minutes. Reason: Spamming chat"
         );
         verify(notificationService).createForUser(
@@ -465,7 +465,7 @@ class UserManagementServiceTest {
         verify(userRepository).save(user);
         verify(refreshTokenService).deleteByUser(user);
         verify(auditLogService).logAction(
-                AuditLogAction.TIMEOUT_USER,
+                AuditLogAction.User.TIMED_OUT,
                 "Timed out user ID: u-timeout2 for 30 minutes. Reason: null"
         );
         verify(notificationService).createForUser(
@@ -494,7 +494,7 @@ class UserManagementServiceTest {
         assertThat(user.getBanReason()).isNull();
 
         verify(userRepository).save(user);
-        verify(auditLogService).logAction(AuditLogAction.UNBAN_USER, "Reinstated user ID: u-unban");
+        verify(auditLogService).logAction(AuditLogAction.User.UNBANNED, "Reinstated user ID: u-unban");
         verify(notificationService).createForUser(
                 user,
                 "Your account suspension has been lifted and your access has been restored.",

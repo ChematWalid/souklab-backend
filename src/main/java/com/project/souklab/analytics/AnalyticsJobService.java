@@ -175,7 +175,7 @@ public class AnalyticsJobService {
         } else {
             processAsync(saved.getId());
         }
-        audit(AuditLogAction.ANALYTICS_JOB_SUBMITTED, saved, AnalyticsAuditOutcome.ACCEPTED);
+        audit(AuditLogAction.Analytics.JOB_SUBMITTED, saved, AnalyticsAuditOutcome.ACCEPTED);
         return response(saved);
     }
 
@@ -472,7 +472,7 @@ public class AnalyticsJobService {
     @Transactional(readOnly = true)
     public AnalyticsJobResponse get(String id, String username) {
         AnalyticsJob job = ownerJob(id, username);
-        audit(AuditLogAction.ANALYTICS_RESULT_READ, job, AnalyticsAuditOutcome.STATUS);
+        audit(AuditLogAction.Analytics.RESULT_READ, job, AnalyticsAuditOutcome.STATUS);
         return response(job);
     }
 
@@ -482,7 +482,7 @@ public class AnalyticsJobService {
         if (job.getStatus() != AnalyticsJobStatus.COMPLETED || job.getResultJson() == null) {
             throw new BadRequestException("Analytics result is not ready");
         }
-        audit(AuditLogAction.ANALYTICS_RESULT_READ, job, AnalyticsAuditOutcome.SUCCESS);
+        audit(AuditLogAction.Analytics.RESULT_READ, job, AnalyticsAuditOutcome.SUCCESS);
         try {
             return objectMapper.readValue(job.getResultJson(), AnalyticsResult.class);
         } catch (JsonProcessingException ex) {
@@ -496,7 +496,7 @@ public class AnalyticsJobService {
         if (job.getStatus() != AnalyticsJobStatus.COMPLETED || job.getResultJson() == null) {
             throw new BadRequestException("Analytics result is not ready");
         }
-        audit(AuditLogAction.ANALYTICS_EXPORT, job, AnalyticsAuditOutcome.SUCCESS);
+        audit(AuditLogAction.Analytics.EXPORT, job, AnalyticsAuditOutcome.SUCCESS);
         AnalyticsJobArtifact artifact = artifacts.findFirstByJobIdOrderByCreatedAtDesc(job.getId()).orElse(null);
         if (artifact != null && storageService != null) {
             try {
@@ -592,7 +592,7 @@ public class AnalyticsJobService {
         return job;
     }
 
-    private void audit(AuditLogAction action, AnalyticsJob job, AnalyticsAuditOutcome outcome) {
+    private void audit(AuditLogAction.Key action, AnalyticsJob job, AnalyticsAuditOutcome outcome) {
         if (auditLogService == null) return;
         auditLogService.logAction(action, auditDetails(job, outcome));
     }

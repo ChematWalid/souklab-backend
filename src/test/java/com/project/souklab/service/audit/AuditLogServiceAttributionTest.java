@@ -68,13 +68,13 @@ class AuditLogServiceAttributionTest {
 
         when(userRepository.findByEmail(adminEmail)).thenReturn(Optional.of(adminUser));
 
-        auditLogService.logAction(AuditLogAction.APPROVE_USER, "Approved user ID: 123");
+        auditLogService.logAction(AuditLogAction.User.APPROVED, "Approved user ID: 123");
 
         ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
         verify(auditLogRepository).save(captor.capture());
 
         AuditLog saved = captor.getValue();
-        assertThat(saved.getAction()).isEqualTo(AuditLogAction.APPROVE_USER);
+        assertThat(saved.getAction()).isEqualTo(AuditLogAction.User.APPROVED);
         assertThat(saved.getDetails()).isEqualTo("Approved user ID: 123");
         assertThat(saved.getUser()).isEqualTo(adminUser);
     }
@@ -84,13 +84,13 @@ class AuditLogServiceAttributionTest {
     void testLogAction_whenUnauthenticated_savesLogWithoutUser() {
         SecurityContextHolder.clearContext();
 
-        auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: 456");
+        auditLogService.logAction(AuditLogAction.User.BANNED, "Banned user ID: 456");
 
         ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
         verify(auditLogRepository).save(captor.capture());
 
         AuditLog saved = captor.getValue();
-        assertThat(saved.getAction()).isEqualTo(AuditLogAction.BAN_USER);
+        assertThat(saved.getAction()).isEqualTo(AuditLogAction.User.BANNED);
         assertThat(saved.getDetails()).isEqualTo("Banned user ID: 456");
         assertThat(saved.getUser()).isNull();
         verify(userRepository, never()).findByEmail(any());
@@ -99,17 +99,17 @@ class AuditLogServiceAttributionTest {
     @Test
     @DisplayName("3-arg logAction persists with the supplied username attribution")
     void testLogActionWithUsername_persistsAuditEntry() {
-        auditLogService.logAction(AuditLogAction.PERMISSION_GRANTED, "Granted permission", "admin@souklab.com");
+        auditLogService.logAction(AuditLogAction.Permission.GRANTED, "Granted permission", "admin@souklab.com");
 
         verify(auditLogRepository).save(argThat(log ->
-                log.getAction() == AuditLogAction.PERMISSION_GRANTED
+                log.getAction() == AuditLogAction.Permission.GRANTED
                         && "Granted permission".equals(log.getDetails())));
         verify(userRepository).findByEmail("admin@souklab.com");
     }
 
     @Test
     void explicitAnonymousUsernameDoesNotResolveAUser() {
-        auditLogService.logAction(AuditLogAction.BAN_USER, "anonymous action", "anonymousUser");
+        auditLogService.logAction(AuditLogAction.User.BANNED, "anonymous action", "anonymousUser");
         verify(auditLogRepository).save(any(AuditLog.class));
         verify(userRepository, never()).findByEmail("anonymousUser");
     }
@@ -120,7 +120,7 @@ class AuditLogServiceAttributionTest {
         doThrow(new IllegalStateException("database unavailable"))
                 .when(auditLogRepository).save(any(AuditLog.class));
 
-        auditLogService.logAction(AuditLogAction.BAN_USER, "Ban failed");
+        auditLogService.logAction(AuditLogAction.User.BANNED, "Ban failed");
 
         verify(auditLogRepository).save(any(AuditLog.class));
     }

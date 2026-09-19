@@ -67,7 +67,7 @@ public class AnalyticsMaintenanceJobService {
         job.setPermissionScope(Permission.Analytics.ADMIN.value());
         job.setExpiresAt(LocalDateTime.now(clock).plus(properties.getJobRetention()));
         AnalyticsMaintenanceJob saved = jobs.saveAndFlush(job);
-        auditLogService.logAction(AuditLogAction.ANALYTICS_REBUILD,
+        auditLogService.logAction(AuditLogAction.Analytics.REBUILD,
                 AnalyticsMetadata.Audit.MAINTENANCE_JOB_ID.value() + "=" + saved.getId()
                         + "," + AnalyticsMetadata.Audit.OPERATION.value() + "=" + operation
                         + "," + AnalyticsMetadata.Audit.RANGE.value() + "=" + request.fromDate() + ".." + request.toDate()
@@ -93,7 +93,7 @@ public class AnalyticsMaintenanceJobService {
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated administrator not found")).getId();
         AnalyticsMaintenanceJob job = jobs.findByIdAndOwnerId(id, ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Analytics maintenance job not found"));
-        auditLogService.logAction(AuditLogAction.ANALYTICS_RESULT_READ,
+        auditLogService.logAction(AuditLogAction.Analytics.RESULT_READ,
                 AnalyticsMetadata.Audit.MAINTENANCE_JOB_ID.value() + "=" + job.getId()
                         + "," + AnalyticsMetadata.Audit.OPERATION.value() + "=" + job.getOperation()
                         + "," + AnalyticsMetadata.Audit.RANGE.value() + "=" + job.getFromDate() + ".." + job.getToDate()

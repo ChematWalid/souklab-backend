@@ -75,7 +75,7 @@ public class AnalyticsBackfillService {
             }
         }
         entityManager.flush();
-        auditLogService.logAction(AuditLogAction.ANALYTICS_REBUILD,
+        auditLogService.logAction(AuditLogAction.Analytics.REBUILD,
                 "historical-backfill range=" + from + ".." + to + ", rollups=" + written);
         return new AnalyticsRebuildResponse(from, to, 0, written);
     }

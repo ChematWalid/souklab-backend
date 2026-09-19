@@ -48,7 +48,7 @@ public class PermissionManagementService {
             throw new ConflictException("Permission is already assigned.");
         }
         userRepository.save(user);
-        auditLogService.logAction(AuditLogAction.PERMISSION_GRANTED, userId + ":" + permission.getPermissionKey());
+        auditLogService.logAction(AuditLogAction.Permission.GRANTED, userId + ":" + permission.getPermissionKey());
         return listWithoutAuthorization(user);
     }
 
@@ -61,7 +61,7 @@ public class PermissionManagementService {
             throw new ConflictException("Permission is not assigned.");
         }
         userRepository.save(user);
-        auditLogService.logAction(AuditLogAction.PERMISSION_REVOKED, userId + ":" + permission.getPermissionKey());
+        auditLogService.logAction(AuditLogAction.Permission.REVOKED, userId + ":" + permission.getPermissionKey());
         return listWithoutAuthorization(user);
     }
 

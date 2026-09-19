@@ -2,6 +2,8 @@ package com.project.souklab.dto.admin;
 
 import com.project.souklab.model.AuditLog;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.AuditLogActionDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +17,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AuditLogDTO {
     private String id;
-    private AuditLogAction action;
+    @JsonDeserialize(using = AuditLogActionDeserializer.class)
+    private AuditLogAction.Key action;
     private String details;
     private String userEmail;
     private String userId;
