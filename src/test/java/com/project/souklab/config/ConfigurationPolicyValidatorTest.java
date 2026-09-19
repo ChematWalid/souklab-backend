@@ -70,6 +70,22 @@ class ConfigurationPolicyValidatorTest {
     }
 
     @Test
+    void validatesEnabledOpenApiContract() {
+        Fixture fixture = new Fixture();
+        OpenApiProperties openApi = new OpenApiProperties();
+        openApi.setEnabled(true);
+        openApi.setPath("/v3/api-docs");
+        openApi.setSwaggerPath("/swagger-ui.html");
+        openApi.setTitle("Souklab API");
+        openApi.setVersion("1.0.0");
+        fixture.validator.setOpenApiProperties(openApi);
+
+        assertThatCode(() -> fixture.validator.validate()).doesNotThrowAnyException();
+        openApi.setPath("v3/api-docs");
+        assertThatThrownBy(() -> fixture.validator.validate()).hasMessageContaining("app.openapi.path");
+    }
+
+    @Test
     void rejectsMissingAndMalformedNestedPolicies() {
         assertInvalid(f -> f.storage.setValidation(null), "storage.validation.max-file-size");
         assertInvalid(f -> f.app.setAsync(null), "app.async");

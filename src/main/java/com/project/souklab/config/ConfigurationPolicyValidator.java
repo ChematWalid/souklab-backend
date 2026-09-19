@@ -31,6 +31,7 @@ public class ConfigurationPolicyValidator {
     private AnalyticsJobProperties analyticsJobProperties;
     private AnalyticsExportProperties analyticsExportProperties;
     private HealthProperties healthProperties;
+    private OpenApiProperties openApiProperties;
 
     @Autowired(required = false)
     void setAnalyticsProperties(AnalyticsProperties value) { this.analyticsProperties = value; }
@@ -52,6 +53,9 @@ public class ConfigurationPolicyValidator {
 
     @Autowired(required = false)
     void setHealthProperties(HealthProperties value) { this.healthProperties = value; }
+
+    @Autowired(required = false)
+    void setOpenApiProperties(OpenApiProperties value) { this.openApiProperties = value; }
 
     @PostConstruct
     void validate() {
@@ -89,6 +93,7 @@ public class ConfigurationPolicyValidator {
         if (healthProperties != null) {
             validatePositiveDuration("app.health.dependency-timeout", healthProperties.getDependencyTimeout());
         }
+        validateOpenApiPolicy();
 
         if (isProduction() && Boolean.TRUE.equals(storageProperties.getS3().getAutoCreateBucket())) {
             throw new IllegalStateException("storage.s3.auto-create-bucket must be false in production");
@@ -159,6 +164,23 @@ public class ConfigurationPolicyValidator {
             validateRateLimitRule("app.rate-limit.endpoints.analytics-results", rateLimitEndpointProperties.getAnalyticsResults());
             validateRateLimitRule("app.rate-limit.endpoints.csv-exports", rateLimitEndpointProperties.getCsvExports());
             validateRateLimitRule("app.rate-limit.endpoints.chargily-webhook", rateLimitEndpointProperties.getChargilyWebhook());
+        }
+    }
+
+    private void validateOpenApiPolicy() {
+        if (openApiProperties == null || !openApiProperties.isEnabled()) {
+            return;
+        }
+        validateEndpointPath("app.openapi.path", openApiProperties.getPath());
+        validateEndpointPath("app.openapi.swagger-path", openApiProperties.getSwaggerPath());
+        requireConfigured("app.openapi.title", openApiProperties.getTitle());
+        requireConfigured("app.openapi.version", openApiProperties.getVersion());
+    }
+
+    private void validateEndpointPath(String name, String path) {
+        requireConfigured(name, path);
+        if (!path.startsWith("/") || path.contains(" ") || path.contains("//")) {
+            throw new IllegalStateException(name + " must be a normalized absolute endpoint path");
         }
     }
 
