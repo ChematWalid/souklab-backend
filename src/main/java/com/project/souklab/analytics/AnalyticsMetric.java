@@ -29,7 +29,7 @@ public final class AnalyticsMetric {
 
         private static List<Key> all() {
             return Stream.of(
-                    User.values(), Engagement.values(), Content.values(), Formation.values(),
+                    User.all().toArray(Key[]::new), Engagement.values(), Content.values(), Formation.values(),
                     Moderation.values(), Report.values(), Payment.values(), Subscription.values(), General.values())
                     .flatMap(Arrays::stream)
                     .map(key -> (Key) key)
@@ -37,16 +37,74 @@ public final class AnalyticsMetric {
         }
 
         public enum User implements Key {
-            TOTAL("totalUsers"), NEW_REGISTRATIONS("newRegistrations"),
-            VERIFIED_REGISTRATIONS("verifiedRegistrations"), ACTIVATION_RATE("activationRate"),
-            VERIFIED("verifiedUsers"), ARTISAN_PROFILES("artisanProfiles"), CLIENT_PROFILES("clientProfiles"),
-            ACTIVE_ARTISAN_PROFILES("activeArtisanProfiles"), ACTIVE_CLIENT_PROFILES("activeClientProfiles"),
-            ACTIVE("activeUsers"), PENDING("pendingUsers"), SUSPENDED("suspendedUsers"),
-            PENDING_APPROVALS("pendingUserApprovals"), STATUSES("userStatuses");
+            ;
 
-            private final String value;
-            User(String value) { this.value = value; }
-            public String value() { return value; }
+            private User() { }
+
+            private static List<Key> all() {
+                return Stream.of(Count.values(), Registration.values(), Activation.values(), Verification.values(),
+                                Profile.values(), Status.values(), Approval.values())
+                        .flatMap(Arrays::stream)
+                        .map(key -> (Key) key)
+                        .toList();
+            }
+
+            public enum Count implements Key {
+                TOTAL("totalUsers");
+                private final String value;
+                Count(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Registration implements Key {
+                NEW("newRegistrations"), VERIFIED("verifiedRegistrations");
+                private final String value;
+                Registration(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Activation implements Key {
+                RATE("activationRate");
+                private final String value;
+                Activation(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Verification implements Key {
+                USERS("verifiedUsers");
+                private final String value;
+                Verification(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Profile implements Key {
+                ARTISAN("artisanProfiles"), CLIENT("clientProfiles");
+                private final String value;
+                Profile(String value) { this.value = value; }
+                public String value() { return value; }
+
+                public enum Active implements Key {
+                    ARTISAN("activeArtisanProfiles"), CLIENT("activeClientProfiles");
+                    private final String value;
+                    Active(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+            }
+
+            public enum Status implements Key {
+                ACTIVE("activeUsers"), PENDING("pendingUsers"), SUSPENDED("suspendedUsers"),
+                ALL("userStatuses");
+                private final String value;
+                Status(String value) { this.value = value; }
+                public String value() { return value; }
+            }
+
+            public enum Approval implements Key {
+                PENDING("pendingUserApprovals");
+                private final String value;
+                Approval(String value) { this.value = value; }
+                public String value() { return value; }
+            }
         }
 
         public enum Engagement implements Key {

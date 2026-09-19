@@ -195,21 +195,21 @@ public class AnalyticsJobService {
                 LocalDateTime from = utcStart(job.getFromDate());
                 LocalDateTime to = utcStart(job.getToDate().plusDays(1));
                 LocalDateTime inclusiveTo = to.minusNanos(1);
-                summary.put(AnalyticsMetric.Summary.User.TOTAL, users.countByDeletedAtIsNull());
-                summary.put(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS, users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.User.VERIFIED_REGISTRATIONS, users.countByEmailVerifiedTrueAndCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
-                long registrations = (long) summary.get(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS);
-                long verifiedRegistrations = (long) summary.get(AnalyticsMetric.Summary.User.VERIFIED_REGISTRATIONS);
-                summary.put(AnalyticsMetric.Summary.User.ACTIVATION_RATE, registrations == 0 ? 0.0 : (double) verifiedRegistrations / registrations);
-                summary.put(AnalyticsMetric.Summary.User.VERIFIED, users.countByEmailVerifiedTrueAndDeletedAtIsNull());
-                summary.put(AnalyticsMetric.Summary.User.ARTISAN_PROFILES, users.countArtisanProfiles());
-                summary.put(AnalyticsMetric.Summary.User.CLIENT_PROFILES, users.countClientProfiles());
-                summary.put(AnalyticsMetric.Summary.User.ACTIVE_ARTISAN_PROFILES, users.countActiveArtisanProfiles(AccountStatus.ACTIVE));
-                summary.put(AnalyticsMetric.Summary.User.ACTIVE_CLIENT_PROFILES, users.countActiveClientProfiles(AccountStatus.ACTIVE));
-                summary.put(AnalyticsMetric.Summary.User.ACTIVE, users.countByStatusAndDeletedAtIsNull(AccountStatus.ACTIVE));
-                summary.put(AnalyticsMetric.Summary.User.PENDING, users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
-                summary.put(AnalyticsMetric.Summary.User.SUSPENDED, users.countByStatusAndDeletedAtIsNull(AccountStatus.SUSPENDED));
-                summary.put(AnalyticsMetric.Summary.User.PENDING_APPROVALS, users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
+                summary.put(AnalyticsMetric.Summary.User.Count.TOTAL, users.countByDeletedAtIsNull());
+                summary.put(AnalyticsMetric.Summary.User.Registration.NEW, users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
+                summary.put(AnalyticsMetric.Summary.User.Registration.VERIFIED, users.countByEmailVerifiedTrueAndCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
+                long registrations = (long) summary.get(AnalyticsMetric.Summary.User.Registration.NEW);
+                long verifiedRegistrations = (long) summary.get(AnalyticsMetric.Summary.User.Registration.VERIFIED);
+                summary.put(AnalyticsMetric.Summary.User.Activation.RATE, registrations == 0 ? 0.0 : (double) verifiedRegistrations / registrations);
+                summary.put(AnalyticsMetric.Summary.User.Verification.USERS, users.countByEmailVerifiedTrueAndDeletedAtIsNull());
+                summary.put(AnalyticsMetric.Summary.User.Profile.ARTISAN, users.countArtisanProfiles());
+                summary.put(AnalyticsMetric.Summary.User.Profile.CLIENT, users.countClientProfiles());
+                summary.put(AnalyticsMetric.Summary.User.Profile.Active.ARTISAN, users.countActiveArtisanProfiles(AccountStatus.ACTIVE));
+                summary.put(AnalyticsMetric.Summary.User.Profile.Active.CLIENT, users.countActiveClientProfiles(AccountStatus.ACTIVE));
+                summary.put(AnalyticsMetric.Summary.User.Status.ACTIVE, users.countByStatusAndDeletedAtIsNull(AccountStatus.ACTIVE));
+                summary.put(AnalyticsMetric.Summary.User.Status.PENDING, users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
+                summary.put(AnalyticsMetric.Summary.User.Status.SUSPENDED, users.countByStatusAndDeletedAtIsNull(AccountStatus.SUSPENDED));
+                summary.put(AnalyticsMetric.Summary.User.Approval.PENDING, users.countByStatusAndDeletedAtIsNull(AccountStatus.PENDING));
                 Map<AnalyticsEvent.Type, Long> moderationActivity = new LinkedHashMap<>();
                 for (AnalyticsEvent.Type eventType : List.of(AnalyticsEvent.User.APPROVED, AnalyticsEvent.User.SUSPENDED,
                         AnalyticsEvent.User.TIMED_OUT, AnalyticsEvent.User.REINSTATED,
@@ -222,7 +222,7 @@ public class AnalyticsJobService {
                 for (AccountStatus status : AccountStatus.values()) {
                     userStatuses.put(status, users.countByStatusAndDeletedAtIsNull(status));
                 }
-                summary.put(AnalyticsMetric.Summary.User.STATUSES, userStatuses);
+                summary.put(AnalyticsMetric.Summary.User.Status.ALL, userStatuses);
                 summary.put(AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, countFilteredEvents(job, from, inclusiveTo));
                 summary.put(AnalyticsMetric.Summary.Engagement.SUCCESSFUL_LOGINS, countFilteredEvent(job, AnalyticsEvent.Authentication.Login.SUCCEEDED, from, inclusiveTo));
                 summary.put(AnalyticsMetric.Summary.Engagement.PUBLISHED_POSTS, countFilteredEvent(job, AnalyticsEvent.Feed.Post.PUBLISHED, from, inclusiveTo));
@@ -397,7 +397,7 @@ public class AnalyticsJobService {
                 LocalDateTime previousFrom = from.minusDays(rangeDays);
                 LocalDateTime previousTo = from.minusNanos(1);
                 Map<AnalyticsMetric.Key, Object> comparison = new LinkedHashMap<>();
-                comparison.put(AnalyticsMetric.Summary.User.NEW_REGISTRATIONS, Map.of(
+                comparison.put(AnalyticsMetric.Summary.User.Registration.NEW, Map.of(
                         AnalyticsMetric.Comparison.CURRENT, users.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo),
                         AnalyticsMetric.Comparison.PREVIOUS, users.countByCreatedAtBetweenAndDeletedAtIsNull(previousFrom, previousTo)));
                 comparison.put(AnalyticsMetric.Summary.Engagement.ACTIVITY_EVENTS, Map.of(
@@ -732,7 +732,7 @@ public class AnalyticsJobService {
         Map<AnalyticsMetric.Key, PaginatedResponse<Map<AnalyticsMetric.Csv, Object>>> tables = new LinkedHashMap<>();
         switch (job.getReportType().family()) {
             case MODERATION -> {
-                addStatusTable(tables, AnalyticsMetric.Table.User.USERS, summary.get(AnalyticsMetric.Summary.User.STATUSES), job);
+                addStatusTable(tables, AnalyticsMetric.Table.User.USERS, summary.get(AnalyticsMetric.Summary.User.Status.ALL), job);
                 addStatusTable(tables, AnalyticsMetric.Table.Formateur.REQUESTS, summary.get(AnalyticsMetric.Summary.Moderation.FORMATEUR_STATUSES), job);
                 addStatusTable(tables, AnalyticsMetric.Table.Report.REPORTS, summary.get(AnalyticsMetric.Summary.Report.BY_STATUS), job);
             }

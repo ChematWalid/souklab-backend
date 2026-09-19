@@ -51,6 +51,10 @@ if rg -n --pcre2 'AnalyticsMetric\.Result\.(?:REPORT_TYPE|FROM_DATE|TO_DATE|BUCK
   echo 'flat analytics result references detected; use grouped result enums' >&2
   exit 1
 fi
+if rg -n --pcre2 'AnalyticsMetric\.Summary\.User\.(?:TOTAL|NEW_REGISTRATIONS|VERIFIED_REGISTRATIONS|ACTIVATION_RATE|VERIFIED|ARTISAN_PROFILES|CLIENT_PROFILES|ACTIVE_ARTISAN_PROFILES|ACTIVE_CLIENT_PROFILES|ACTIVE|PENDING|SUSPENDED|PENDING_APPROVALS|STATUSES)' src/main/java src/test/java --glob '*.java'; then
+  echo 'flat analytics user summary references detected; use grouped summary enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 'DirectorySortOrder\.(?:RELEVANCE|RATING_DESC|REVIEWS_DESC|VIEWS_DESC|NEWEST)|DirectorySortOrder\.values\(' src/main/java src/test/java --glob '*.java'; then
   echo 'flat directory sort references detected; use grouped sort enums' >&2
   exit 1
