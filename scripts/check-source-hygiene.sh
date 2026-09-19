@@ -15,6 +15,14 @@ if rg -n --pcre2 '(?<![\w.])(?:java|org|jakarta|lombok|com)(?:\.[A-Za-z_][\w$]*)
   echo 'inline fully qualified Java references detected; import types at the top of the file' >&2
   exit 1
 fi
+while IFS= read -r java_file; do
+  duplicate_imports="$(sed -n 's/^import //p' "$java_file" | sort | uniq -d)"
+  if [ -n "$duplicate_imports" ]; then
+    echo "duplicate imports detected in $java_file:" >&2
+    printf '%s\n' "$duplicate_imports" >&2
+    exit 1
+  fi
+done < <(rg --files src/main/java src/test/java -g '*.java')
 if rg -n --pcre2 'Permission\.(?:ADMIN_USERS|ADMIN_FORMATIONS|ADMIN_FEED|ADMIN_REPORTS|FINANCIAL_ADMIN|ARTISAN_FORMATIONS|ARTISAN_CONTENT|ARTISAN_REVIEWS|PROFILE_READ|PROFILE_WRITE|REPORT_CREATE|FILE_READ|MESSAGE_SEND|ANALYTICS_ADMIN)|Permission\.values\(|Permission\.valueOf\(' src/main/java src/test/java --glob '*.java'; then
   echo 'flat permission enum references detected; use grouped Permission enums' >&2
   exit 1
