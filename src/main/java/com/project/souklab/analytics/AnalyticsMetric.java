@@ -115,8 +115,8 @@ public final class AnalyticsMetric {
 
             private static List<Key> all() {
                 return Stream.of(Activity.values(), Login.values(), Post.values(), Message.values(),
-                                Profile.values(), Report.values(), Audience.values(), Dimension.values(),
-                                Dimension.Craft.values(), Retention.Login.values())
+                                Profile.values(), Report.values(), Audience.values(), Dimension.Account.values(),
+                                Dimension.Region.values(), Dimension.Craft.values(), Retention.Login.values())
                         .flatMap(Arrays::stream)
                         .map(key -> (Key) key)
                         .toList();
@@ -171,11 +171,22 @@ public final class AnalyticsMetric {
                 public String value() { return value; }
             }
 
-            public enum Dimension implements Key {
-                ACCOUNT_TYPE("engagementByAccountType"), REGION("engagementByRegion");
-                private final String value;
-                Dimension(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Dimension {
+                private Dimension() { }
+
+                public enum Account implements Key {
+                    TYPE("engagementByAccountType");
+                    private final String value;
+                    Account(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum Region implements Key {
+                    VALUE("engagementByRegion");
+                    private final String value;
+                    Region(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
 
                 public enum Craft implements Key {
                     CATEGORY("engagementByCraftCategory");
@@ -230,7 +241,7 @@ public final class AnalyticsMetric {
             private Formation() { }
 
             private static List<Key> all() {
-                return Stream.of(Count.values(), Instructor.values(), Utilization.values(), Status.values(), Enrollment.values())
+                return Stream.of(Count.values(), Instructor.values(), Utilization.values(), Status.By.values(), Enrollment.Cancellation.values(), Enrollment.By.values())
                         .flatMap(Arrays::stream).map(key -> (Key) key).toList();
             }
 
@@ -255,18 +266,33 @@ public final class AnalyticsMetric {
                 public String value() { return value; }
             }
 
-            public enum Status implements Key {
-                BY_STATUS("formationsByStatus");
-                private final String value;
-                Status(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Status {
+                private Status() { }
+
+                public enum By implements Key {
+                    STATUS("formationsByStatus");
+                    private final String value;
+                    By(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
 
-            public enum Enrollment implements Key {
-                CANCELLATION_RATE("enrollmentCancellationRate"), BY_STATUS("enrollmentsByStatus");
-                private final String value;
-                Enrollment(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Enrollment {
+                private Enrollment() { }
+
+                public enum Cancellation implements Key {
+                    RATE("enrollmentCancellationRate");
+                    private final String value;
+                    Cancellation(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum By implements Key {
+                    STATUS("enrollmentsByStatus");
+                    private final String value;
+                    By(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
         }
 
@@ -276,7 +302,8 @@ public final class AnalyticsMetric {
             private Moderation() { }
 
             private static List<Key> all() {
-                return Stream.of(Activity.values(), Formateur.values())
+                return Stream.of(Activity.values(), Formateur.values(), Formateur.Approved.values(),
+                        Formateur.Rejected.values(), Formateur.Statuses.values())
                         .flatMap(Arrays::stream).map(key -> (Key) key).toList();
             }
 
@@ -288,11 +315,31 @@ public final class AnalyticsMetric {
             }
 
             public enum Formateur implements Key {
-                PENDING("formateurPending"), APPROVED_IN_RANGE("formateurApprovedInRange"),
-                REJECTED_IN_RANGE("formateurRejectedInRange"), STATUSES("formateurStatuses");
+                PENDING("formateurPending");
                 private final String value;
                 Formateur(String value) { this.value = value; }
                 public String value() { return value; }
+
+                public enum Approved implements Key {
+                    IN_RANGE("formateurApprovedInRange");
+                    private final String value;
+                    Approved(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum Rejected implements Key {
+                    IN_RANGE("formateurRejectedInRange");
+                    private final String value;
+                    Rejected(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum Statuses implements Key {
+                    VALUE("formateurStatuses");
+                    private final String value;
+                    Statuses(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
         }
 
@@ -302,7 +349,7 @@ public final class AnalyticsMetric {
             private Report() { }
 
             private static List<Key> all() {
-                return Stream.of(Submission.values(), Resolution.values(), Status.values())
+                return Stream.of(Submission.values(), Resolution.Average.values(), Status.By.values())
                         .flatMap(Arrays::stream).map(key -> (Key) key).toList();
             }
 
@@ -313,18 +360,26 @@ public final class AnalyticsMetric {
                 public String value() { return value; }
             }
 
-            public enum Resolution implements Key {
-                AVERAGE_SECONDS("averageReportResolutionSeconds");
-                private final String value;
-                Resolution(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Resolution {
+                private Resolution() { }
+
+                public enum Average implements Key {
+                    SECONDS("averageReportResolutionSeconds");
+                    private final String value;
+                    Average(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
 
-            public enum Status implements Key {
-                BY_STATUS("reportsByStatus");
-                private final String value;
-                Status(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Status {
+                private Status() { }
+
+                public enum By implements Key {
+                    STATUS("reportsByStatus");
+                    private final String value;
+                    By(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
         }
 
@@ -334,7 +389,8 @@ public final class AnalyticsMetric {
             private Payment() { }
 
             private static List<Key> all() {
-                return Stream.of(Count.values(), Status.values(), Checkout.values(), State.values(), Revenue.values(), Conversion.values(), Grant.values())
+                return Stream.of(Count.values(), Status.By.values(), Checkout.values(), State.values(),
+                        Revenue.Gross.values(), Revenue.ProviderFees.values(), Revenue.Net.values(), Conversion.values(), Grant.values())
                         .flatMap(Arrays::stream).map(key -> (Key) key).toList();
             }
 
@@ -345,11 +401,15 @@ public final class AnalyticsMetric {
                 public String value() { return value; }
             }
 
-            public enum Status implements Key {
-                BY_STATUS("paymentsByStatus");
-                private final String value;
-                Status(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Status {
+                private Status() { }
+
+                public enum By implements Key {
+                    STATUS("paymentsByStatus");
+                    private final String value;
+                    By(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
 
             public enum Checkout implements Key {
@@ -366,11 +426,29 @@ public final class AnalyticsMetric {
                 public String value() { return value; }
             }
 
-            public enum Revenue implements Key {
-                GROSS_COLLECTED_DZD("grossCollectedDzd"), PROVIDER_FEES_DZD("providerFeesDzd"), NET_COLLECTED_DZD("netCollectedDzd");
-                private final String value;
-                Revenue(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Revenue {
+                private Revenue() { }
+
+                public enum Gross implements Key {
+                    COLLECTED_DZD("grossCollectedDzd");
+                    private final String value;
+                    Gross(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum ProviderFees implements Key {
+                    DZD("providerFeesDzd");
+                    private final String value;
+                    ProviderFees(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
+
+                public enum Net implements Key {
+                    COLLECTED_DZD("netCollectedDzd");
+                    private final String value;
+                    Net(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
 
             public enum Conversion implements Key {
@@ -394,15 +472,19 @@ public final class AnalyticsMetric {
             private Subscription() { }
 
             private static List<Key> all() {
-                return Stream.of(Status.values(), Subscriber.values(), Lifecycle.values())
+                return Stream.of(Status.By.values(), Subscriber.values(), Lifecycle.values())
                         .flatMap(Arrays::stream).map(key -> (Key) key).toList();
             }
 
-            public enum Status implements Key {
-                BY_STATUS("subscriptionsByStatus");
-                private final String value;
-                Status(String value) { this.value = value; }
-                public String value() { return value; }
+            public static final class Status {
+                private Status() { }
+
+                public enum By implements Key {
+                    STATUS("subscriptionsByStatus");
+                    private final String value;
+                    By(String value) { this.value = value; }
+                    public String value() { return value; }
+                }
             }
 
             public enum Subscriber implements Key {

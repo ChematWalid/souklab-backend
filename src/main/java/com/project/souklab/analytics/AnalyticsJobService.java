@@ -236,14 +236,14 @@ public class AnalyticsJobService {
                 summary.put(AnalyticsMetric.Summary.Engagement.Audience.WAU, countFilteredDistinctActors(job, activityWeekStart, inclusiveTo));
                 summary.put(AnalyticsMetric.Summary.Engagement.Audience.MAU, countFilteredDistinctActors(job, activityMonthStart, inclusiveTo));
                 AnalyticsEvent.Type eventFilter = eventTypeFilter(job);
-                summary.put(AnalyticsMetric.Summary.Engagement.Dimension.ACCOUNT_TYPE, Map.of(
+                summary.put(AnalyticsMetric.Summary.Engagement.Dimension.Account.TYPE, Map.of(
                         AnalyticsMetric.AccountType.ARTISAN, eventFilter == null
                                 ? events.countDistinctArtisanActorsByEventTimeBetween(from, inclusiveTo)
                                 : events.countDistinctArtisanActorsByTypeAndEventTimeBetween(eventFilter, from, inclusiveTo),
                         AnalyticsMetric.AccountType.CLIENT, eventFilter == null
                                 ? events.countDistinctClientActorsByEventTimeBetween(from, inclusiveTo)
                                 : events.countDistinctClientActorsByTypeAndEventTimeBetween(eventFilter, from, inclusiveTo)));
-                summary.put(AnalyticsMetric.Summary.Engagement.Dimension.REGION, dimensionCounts(
+                summary.put(AnalyticsMetric.Summary.Engagement.Dimension.Region.VALUE, dimensionCounts(
                         events.countDistinctActorsByRegionAndEventTimeBetween(eventFilter, from, inclusiveTo)));
                 summary.put(AnalyticsMetric.Summary.Engagement.Dimension.Craft.CATEGORY, dimensionCounts(
                         events.countDistinctActorsByCraftCategoryAndEventTimeBetween(eventFilter, from, inclusiveTo)));
@@ -268,19 +268,19 @@ public class AnalyticsJobService {
                 if (reports != null) summary.put(AnalyticsMetric.Summary.Report.Submission.COUNT, reports.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (reports != null) {
                     Double averageResolutionSeconds = reports.averageResolutionSecondsByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo);
-                    summary.put(AnalyticsMetric.Summary.Report.Resolution.AVERAGE_SECONDS,
+                    summary.put(AnalyticsMetric.Summary.Report.Resolution.Average.SECONDS,
                             averageResolutionSeconds == null ? 0.0 : averageResolutionSeconds);
                 }
                 summary.put(AnalyticsMetric.Summary.Moderation.Formateur.PENDING, formateurRequests.countByStatusAndDeletedAtIsNull(FormateurRequestStatus.PENDING));
-                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.APPROVED_IN_RANGE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.Approved.IN_RANGE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
                         FormateurRequestStatus.APPROVED, from, inclusiveTo));
-                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.REJECTED_IN_RANGE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.Rejected.IN_RANGE, formateurRequests.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
                         FormateurRequestStatus.REJECTED, from, inclusiveTo));
                 Map<FormateurRequestStatus, Long> formateurStatuses = new LinkedHashMap<>();
                 for (FormateurRequestStatus status : FormateurRequestStatus.values()) {
                     formateurStatuses.put(status, formateurRequests.countByStatusAndDeletedAtIsNull(status));
                 }
-                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.STATUSES, formateurStatuses);
+                summary.put(AnalyticsMetric.Summary.Moderation.Formateur.Statuses.VALUE, formateurStatuses);
                 if (payments != null) summary.put(AnalyticsMetric.Summary.Payment.Count.CREATED, payments.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (feedPosts != null) {
                     Map<FeedPostStatus, Long> statuses = new LinkedHashMap<>();
@@ -290,15 +290,15 @@ public class AnalyticsJobService {
                 if (formations != null) {
                     Map<FormationStatus, Long> statuses = new LinkedHashMap<>();
                     for (FormationStatus status : FormationStatus.values()) statuses.put(status, formations.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
-                    summary.put(AnalyticsMetric.Summary.Formation.Status.BY_STATUS, statuses);
+                    summary.put(AnalyticsMetric.Summary.Formation.Status.By.STATUS, statuses);
                 }
                 if (enrollments != null) {
                     Map<EnrollmentStatus, Long> statuses = new LinkedHashMap<>();
                     for (EnrollmentStatus status : EnrollmentStatus.values()) statuses.put(status, enrollments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
-                    summary.put(AnalyticsMetric.Summary.Formation.Enrollment.BY_STATUS, statuses);
+                    summary.put(AnalyticsMetric.Summary.Formation.Enrollment.By.STATUS, statuses);
                     long enrollmentTotal = statuses.values().stream().mapToLong(Long::longValue).sum();
                     summary.put(AnalyticsMetric.Summary.Formation.Count.COMPLETIONS, statuses.getOrDefault(EnrollmentStatus.ATTENDED, 0L));
-                    summary.put(AnalyticsMetric.Summary.Formation.Enrollment.CANCELLATION_RATE, enrollmentTotal == 0 ? 0.0
+                    summary.put(AnalyticsMetric.Summary.Formation.Enrollment.Cancellation.RATE, enrollmentTotal == 0 ? 0.0
                             : (double) statuses.getOrDefault(EnrollmentStatus.CANCELLED, 0L) / enrollmentTotal);
                     if (formations != null) {
                         long capacity = formations.sumMaxParticipantsByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
@@ -312,21 +312,21 @@ public class AnalyticsJobService {
                 if (reports != null) {
                     Map<ReportStatus, Long> statuses = new LinkedHashMap<>();
                     for (ReportStatus status : ReportStatus.values()) statuses.put(status, reports.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
-                    summary.put(AnalyticsMetric.Summary.Report.Status.BY_STATUS, statuses);
+                    summary.put(AnalyticsMetric.Summary.Report.Status.By.STATUS, statuses);
                 }
                 if (payments != null) {
                     Map<PaymentStatus, Long> statuses = new LinkedHashMap<>();
                         for (PaymentStatus status : PaymentStatus.values()) {
                         statuses.put(status, payments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                     }
-                    summary.put(AnalyticsMetric.Summary.Payment.Status.BY_STATUS, statuses);
+                    summary.put(AnalyticsMetric.Summary.Payment.Status.By.STATUS, statuses);
                     if (job.getReportType() == AnalyticsReportType.Subscriptions.PAYMENTS) {
                         Map<SubscriptionStatus, Long> subscriptions = new LinkedHashMap<>();
                         for (SubscriptionStatus status : SubscriptionStatus.values()) {
                             subscriptions.put(status, artisanSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo)
                                     + clientSubscriptions.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(status, from, inclusiveTo));
                         }
-                        summary.put(AnalyticsMetric.Summary.Subscription.Status.BY_STATUS, subscriptions);
+                        summary.put(AnalyticsMetric.Summary.Subscription.Status.By.STATUS, subscriptions);
                         Map<AnalyticsMetric.AccountType, Map<?, Long>> subscriptionsBySubscriberType = new LinkedHashMap<>();
                         Map<SubscriptionStatus, Long> artisanSubscriptionStatuses = new LinkedHashMap<>();
                         Map<SubscriptionStatus, Long> clientSubscriptionStatuses = new LinkedHashMap<>();
@@ -350,9 +350,9 @@ public class AnalyticsJobService {
                                 PaymentStatus.PAID, collectedCurrency, from, to);
                         long providerFees = payments.sumFeesByStatusAndCurrencyAndCreatedAtBetween(
                                 PaymentStatus.PAID, collectedCurrency, from, to);
-                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.GROSS_COLLECTED_DZD, grossCollected);
-                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.PROVIDER_FEES_DZD, providerFees);
-                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.NET_COLLECTED_DZD, grossCollected - providerFees);
+                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.Gross.COLLECTED_DZD, grossCollected);
+                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.ProviderFees.DZD, providerFees);
+                        summary.put(AnalyticsMetric.Summary.Payment.Revenue.Net.COLLECTED_DZD, grossCollected - providerFees);
                         long paidPayments = payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
                                 PaymentStatus.PAID, from, inclusiveTo);
                         long failedPayments = payments.countByStatusAndManualGrantFalseAndCreatedAtBetweenAndDeletedAtIsNull(
@@ -733,17 +733,17 @@ public class AnalyticsJobService {
         switch (job.getReportType().family()) {
             case MODERATION -> {
                 addStatusTable(tables, AnalyticsMetric.Table.User.USERS, summary.get(AnalyticsMetric.Summary.User.Status.ALL), job);
-                addStatusTable(tables, AnalyticsMetric.Table.Formateur.REQUESTS, summary.get(AnalyticsMetric.Summary.Moderation.Formateur.STATUSES), job);
-                addStatusTable(tables, AnalyticsMetric.Table.Report.REPORTS, summary.get(AnalyticsMetric.Summary.Report.Status.BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Formateur.REQUESTS, summary.get(AnalyticsMetric.Summary.Moderation.Formateur.Statuses.VALUE), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Report.REPORTS, summary.get(AnalyticsMetric.Summary.Report.Status.By.STATUS), job);
             }
             case CONTENT -> {
                 addStatusTable(tables, AnalyticsMetric.Table.Feed.POSTS, summary.get(AnalyticsMetric.Summary.Content.Feed.BY_STATUS), job);
-                addStatusTable(tables, AnalyticsMetric.Table.Formation.FORMATIONS, summary.get(AnalyticsMetric.Summary.Formation.Status.BY_STATUS), job);
-                addStatusTable(tables, AnalyticsMetric.Table.Enrollment.ENROLLMENTS, summary.get(AnalyticsMetric.Summary.Formation.Enrollment.BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Formation.FORMATIONS, summary.get(AnalyticsMetric.Summary.Formation.Status.By.STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Enrollment.ENROLLMENTS, summary.get(AnalyticsMetric.Summary.Formation.Enrollment.By.STATUS), job);
             }
             case SUBSCRIPTIONS -> {
-                addStatusTable(tables, AnalyticsMetric.Table.Payment.PAYMENTS, summary.get(AnalyticsMetric.Summary.Payment.Status.BY_STATUS), job);
-                addStatusTable(tables, AnalyticsMetric.Table.Subscription.ALL, summary.get(AnalyticsMetric.Summary.Subscription.Status.BY_STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Payment.PAYMENTS, summary.get(AnalyticsMetric.Summary.Payment.Status.By.STATUS), job);
+                addStatusTable(tables, AnalyticsMetric.Table.Subscription.ALL, summary.get(AnalyticsMetric.Summary.Subscription.Status.By.STATUS), job);
                 if (summary.get(AnalyticsMetric.Summary.Subscription.Subscriber.TYPE) instanceof Map<?, ?> byType) {
                     addStatusTable(tables, AnalyticsMetric.Table.Subscription.ARTISAN, byType.get(AnalyticsMetric.AccountType.ARTISAN), job);
                     addStatusTable(tables, AnalyticsMetric.Table.Subscription.CLIENT, byType.get(AnalyticsMetric.AccountType.CLIENT), job);
