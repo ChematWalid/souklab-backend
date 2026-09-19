@@ -35,6 +35,14 @@ if rg -n '\.authority\(\)' src/main/java src/test/java --glob '*.java'; then
   echo 'string authority adapter usage detected; use grouped Permission values and matches' >&2
   exit 1
 fi
+if rg -n 'private String permissionKey' src/main/java/com/project/souklab/dto src/test/java --glob '*.java'; then
+  echo 'permission request fields must use grouped Permission enums' >&2
+  exit 1
+fi
+if rg -n 'Map<String, String> filters' src/main/java/com/project/souklab/dto --glob '*.java'; then
+  echo 'analytics filter fields must use AnalyticsFilterKey enums' >&2
+  exit 1
+fi
 if rg -n --pcre2 '"(?:current|previous|historical\.(?:registrations|feed_posts|formations|enrollments|reviews|reports|payments)|event\.)"' \
     src/main/java/com/project/souklab/analytics --glob '*.java' \
     --glob '!AnalyticsMetric.java'; then
