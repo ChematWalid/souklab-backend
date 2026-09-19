@@ -14,17 +14,33 @@ public final class AnalyticsEvent {
         String value();
     }
 
-    public enum Source {
-        PAYMENT_WEBHOOK("PAYMENT_WEBHOOK"),
-        ACCOUNT_ACTION("ACCOUNT_ACTION"),
-        ADMIN_ACTION("ADMIN_ACTION"),
-        ADMIN_CORRECTION("ADMIN_CORRECTION");
+    public static final class Source {
+        private Source() { }
 
-        private final String value;
+        public enum Payment implements SourceValue {
+            WEBHOOK("PAYMENT_WEBHOOK");
+            private final String value;
+            Payment(String value) { this.value = value; }
+            public String value() { return value; }
+        }
 
-        Source(String value) { this.value = value; }
+        public enum Account implements SourceValue {
+            ACTION("ACCOUNT_ACTION");
+            private final String value;
+            Account(String value) { this.value = value; }
+            public String value() { return value; }
+        }
 
-        public String value() { return value; }
+        public enum Admin implements SourceValue {
+            ACTION("ADMIN_ACTION"), CORRECTION("ADMIN_CORRECTION");
+            private final String value;
+            Admin(String value) { this.value = value; }
+            public String value() { return value; }
+        }
+    }
+
+    public interface SourceValue {
+        String value();
     }
 
     public static List<Type> all() {

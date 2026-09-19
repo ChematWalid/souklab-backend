@@ -110,7 +110,7 @@ public class SubscriptionAccountService {
     private void recordCancellation(User account, String subscriptionId) {
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Subscription.CANCELED, account.getId(), subscriptionId,
-                    Map.of("status", SubscriptionStatus.CANCELED.value(), "source", AnalyticsEvent.Source.ACCOUNT_ACTION.value()));
+                    Map.of("status", SubscriptionStatus.CANCELED.value(), "source", AnalyticsEvent.Source.Account.ACTION.value()));
         }
     }
 

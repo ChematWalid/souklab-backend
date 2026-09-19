@@ -273,14 +273,14 @@ public class AdminSubscriptionService {
     private void recordPaymentTransition(Payment payment, String previous, String current) {
         if (activityEventService != null && payment.getAccount() != null) {
             activityEventService.record(AnalyticsEvent.Payment.State.TRANSITION, payment.getAccount().getId(), payment.getId(),
-                    Map.of("previousStatus", previous, "status", current, "source", AnalyticsEvent.Source.ADMIN_CORRECTION.value()));
+                    Map.of("previousStatus", previous, "status", current, "source", AnalyticsEvent.Source.Admin.CORRECTION.value()));
         }
     }
 
     private void recordSubscriptionEvent(User account, String subscriptionId, AnalyticsEvent.Type eventType) {
         if (activityEventService != null && account != null) {
             activityEventService.record(eventType, account.getId(), subscriptionId,
-                    Map.of("status", eventType.value().substring(AnalyticsEvent.Subscription.prefix().length()), "source", AnalyticsEvent.Source.ADMIN_ACTION.value()));
+                    Map.of("status", eventType.value().substring(AnalyticsEvent.Subscription.prefix().length()), "source", AnalyticsEvent.Source.Admin.ACTION.value()));
         }
     }
 
