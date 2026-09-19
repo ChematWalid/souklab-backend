@@ -44,6 +44,7 @@ import com.project.souklab.model.FormateurRequestStatus;
 import com.project.souklab.model.ReviewStatus;
 import com.project.souklab.model.analytics.AnalyticsJob;
 import com.project.souklab.model.analytics.AnalyticsJobStatus;
+import com.project.souklab.model.analytics.AnalyticsAuditOutcome;
 import com.project.souklab.model.analytics.AnalyticsJobArtifact;
 import com.project.souklab.model.analytics.AnalyticsBucket;
 import com.project.souklab.model.analytics.AnalyticsReportType;
@@ -174,7 +175,7 @@ public class AnalyticsJobService {
         } else {
             processAsync(saved.getId());
         }
-        audit(AuditLogAction.ANALYTICS_JOB_SUBMITTED, saved, "outcome=ACCEPTED");
+        audit(AuditLogAction.ANALYTICS_JOB_SUBMITTED, saved, AnalyticsAuditOutcome.ACCEPTED);
         return response(saved);
     }
 
@@ -471,7 +472,7 @@ public class AnalyticsJobService {
     @Transactional(readOnly = true)
     public AnalyticsJobResponse get(String id, String username) {
         AnalyticsJob job = ownerJob(id, username);
-        audit(AuditLogAction.ANALYTICS_RESULT_READ, job, "outcome=STATUS");
+        audit(AuditLogAction.ANALYTICS_RESULT_READ, job, AnalyticsAuditOutcome.STATUS);
         return response(job);
     }
 
@@ -481,7 +482,7 @@ public class AnalyticsJobService {
         if (job.getStatus() != AnalyticsJobStatus.COMPLETED || job.getResultJson() == null) {
             throw new BadRequestException("Analytics result is not ready");
         }
-        audit(AuditLogAction.ANALYTICS_RESULT_READ, job, "outcome=SUCCESS");
+        audit(AuditLogAction.ANALYTICS_RESULT_READ, job, AnalyticsAuditOutcome.SUCCESS);
         try {
             return objectMapper.readValue(job.getResultJson(), AnalyticsResult.class);
         } catch (JsonProcessingException ex) {
@@ -495,7 +496,7 @@ public class AnalyticsJobService {
         if (job.getStatus() != AnalyticsJobStatus.COMPLETED || job.getResultJson() == null) {
             throw new BadRequestException("Analytics result is not ready");
         }
-        audit(AuditLogAction.ANALYTICS_EXPORT, job, "outcome=SUCCESS");
+        audit(AuditLogAction.ANALYTICS_EXPORT, job, AnalyticsAuditOutcome.SUCCESS);
         AnalyticsJobArtifact artifact = artifacts.findFirstByJobIdOrderByCreatedAtDesc(job.getId()).orElse(null);
         if (artifact != null && storageService != null) {
             try {
@@ -591,18 +592,18 @@ public class AnalyticsJobService {
         return job;
     }
 
-    private void audit(AuditLogAction action, AnalyticsJob job, String outcome) {
+    private void audit(AuditLogAction action, AnalyticsJob job, AnalyticsAuditOutcome outcome) {
         if (auditLogService == null) return;
         auditLogService.logAction(action, auditDetails(job, outcome));
     }
 
-    private String auditDetails(AnalyticsJob job, String outcome) {
+    private String auditDetails(AnalyticsJob job, AnalyticsAuditOutcome outcome) {
         return "jobId=" + job.getId()
                 + ",reportType=" + job.getReportType()
                 + ",range=" + job.getFromDate() + ".." + job.getToDate()
                 + ",filters=" + (job.getFiltersJson() == null ? "{}" : job.getFiltersJson())
                 + ",permissionScope=" + job.getPermissionScope()
-                + ",outcome=" + outcome;
+                + ",outcome=" + outcome.value();
     }
 
     private void validate(AnalyticsJobRequest r, boolean financial) {

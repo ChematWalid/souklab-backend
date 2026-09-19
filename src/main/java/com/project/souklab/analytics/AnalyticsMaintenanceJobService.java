@@ -12,6 +12,7 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.analytics.AnalyticsJobStatus;
+import com.project.souklab.model.analytics.AnalyticsAuditOutcome;
 import com.project.souklab.model.analytics.AnalyticsMaintenanceJob;
 import com.project.souklab.model.analytics.AnalyticsMaintenanceOperation;
 import com.project.souklab.service.audit.AuditLogService;
@@ -69,7 +70,7 @@ public class AnalyticsMaintenanceJobService {
         auditLogService.logAction(AuditLogAction.ANALYTICS_REBUILD,
                 "maintenanceJobId=" + saved.getId() + ",operation=" + operation
                         + ",range=" + request.fromDate() + ".." + request.toDate()
-                        + ",permissionScope=" + job.getPermissionScope() + ",outcome=ACCEPTED");
+                        + ",permissionScope=" + job.getPermissionScope() + ",outcome=" + AnalyticsAuditOutcome.ACCEPTED.value());
         applicationTaskExecutor.execute(() -> process(saved.getId()));
         return response(saved);
     }
@@ -93,7 +94,7 @@ public class AnalyticsMaintenanceJobService {
         auditLogService.logAction(AuditLogAction.ANALYTICS_RESULT_READ,
                 "maintenanceJobId=" + job.getId() + ",operation=" + job.getOperation()
                         + ",range=" + job.getFromDate() + ".." + job.getToDate()
-                        + ",permissionScope=" + job.getPermissionScope() + ",outcome=STATUS");
+                        + ",permissionScope=" + job.getPermissionScope() + ",outcome=" + AnalyticsAuditOutcome.STATUS.value());
         return response(job);
     }
 
