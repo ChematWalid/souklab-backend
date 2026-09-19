@@ -22,7 +22,9 @@ All analytics calendar boundaries use `app.analytics.business-time-zone`; persis
 | `publishedPosts` | `FEED_POST_PUBLISHED` events in range | `activity_events.event_type` | explicit events only |
 | `feedPostsCreated` | feed posts created in range | `feed_posts.created_at` | deleted rows excluded |
 | `formationsCreated` | formations created in range | `formations.created_at` | deleted rows excluded |
+| `activeInstructors` | distinct authors of currently published formations | `formations.author_id`, `status` | current published snapshot; deleted formations excluded |
 | `formationEnrollments` | enrollments created in range | `formation_enrollments.created_at` | deleted rows excluded |
+| `formationUtilizationRate` | confirmed enrollments created in range / maximum seats on published formations created in range | formation and enrollment status/timestamps | zero when configured capacity is zero; bounded to the requested range |
 | `reviewsSubmitted` | reviews created in range | `artisan_reviews.created_at` | deleted rows excluded |
 | `reportsSubmitted` | reports created in range | `content_reports.created_at` | deleted rows excluded |
 | `moderationActivity` | approval, suspension, timeout, reinstatement, formation moderation, and report-resolution event counts | `activity_events.event_type` | explicit events only; zero when unavailable |

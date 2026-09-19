@@ -30,6 +30,7 @@ public final class AnalyticsMetric {
         ENGAGEMENT_BY_ACCOUNT_TYPE("engagementByAccountType"),
         LOGIN_RETENTION_COHORTS("loginRetentionCohorts"), FEED_POSTS_CREATED("feedPostsCreated"),
         FORMATIONS_CREATED("formationsCreated"), FORMATION_ENROLLMENTS("formationEnrollments"),
+        ACTIVE_INSTRUCTORS("activeInstructors"), FORMATION_UTILIZATION_RATE("formationUtilizationRate"),
         REVIEWS_SUBMITTED("reviewsSubmitted"), PUBLISHED_REVIEWS("publishedReviews"),
         AVERAGE_PUBLISHED_RATING("averagePublishedRating"), REPORTS_SUBMITTED("reportsSubmitted"),
         FORMATEUR_PENDING("formateurPending"), FORMATEUR_APPROVED_IN_RANGE("formateurApprovedInRange"),

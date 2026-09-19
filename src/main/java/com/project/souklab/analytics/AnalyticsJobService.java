@@ -244,7 +244,11 @@ public class AnalyticsJobService {
                     summary.put(AnalyticsMetric.Summary.LOGIN_RETENTION_COHORTS.value(), loginRetentionCohorts(from, inclusiveTo));
                 }
                 if (feedPosts != null) summary.put(AnalyticsMetric.Summary.FEED_POSTS_CREATED.value(), feedPosts.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
-                if (formations != null) summary.put(AnalyticsMetric.Summary.FORMATIONS_CREATED.value(), formations.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
+                if (formations != null) {
+                    summary.put(AnalyticsMetric.Summary.FORMATIONS_CREATED.value(), formations.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
+                    summary.put(AnalyticsMetric.Summary.ACTIVE_INSTRUCTORS.value(),
+                            formations.countDistinctAuthorsByStatusAndDeletedAtIsNull(FormationStatus.PUBLISHED));
+                }
                 if (enrollments != null) summary.put(AnalyticsMetric.Summary.FORMATION_ENROLLMENTS.value(), enrollments.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (reviews != null) summary.put(AnalyticsMetric.Summary.REVIEWS_SUBMITTED.value(), reviews.countByCreatedAtBetweenAndDeletedAtIsNull(from, inclusiveTo));
                 if (reviews != null) {
@@ -284,6 +288,14 @@ public class AnalyticsJobService {
                     summary.put(AnalyticsMetric.Summary.FORMATION_COMPLETIONS.value(), statuses.getOrDefault(EnrollmentStatus.ATTENDED.value(), 0L));
                     summary.put(AnalyticsMetric.Summary.ENROLLMENT_CANCELLATION_RATE.value(), enrollmentTotal == 0 ? 0.0
                             : (double) statuses.getOrDefault(EnrollmentStatus.CANCELLED.value(), 0L) / enrollmentTotal);
+                    if (formations != null) {
+                        long capacity = formations.sumMaxParticipantsByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                                FormationStatus.PUBLISHED, from, inclusiveTo);
+                        long confirmed = enrollments.countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+                                EnrollmentStatus.CONFIRMED, from, inclusiveTo);
+                        summary.put(AnalyticsMetric.Summary.FORMATION_UTILIZATION_RATE.value(),
+                                capacity == 0 ? 0.0 : (double) confirmed / capacity);
+                    }
                 }
                 if (reports != null) {
                     Map<String, Long> statuses = new LinkedHashMap<>();

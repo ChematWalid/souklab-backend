@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import jakarta.persistence.LockModeType;
 
@@ -24,6 +26,18 @@ public interface FormationRepository extends JpaRepository<Formation, String>, J
     long countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(FormationStatus status,
                                                             LocalDateTime from, LocalDateTime to);
     long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
+
+    @Query("select count(distinct formation.author.id) from Formation formation "
+            + "where formation.status = :status and formation.deletedAt is null")
+    long countDistinctAuthorsByStatusAndDeletedAtIsNull(@Param("status") FormationStatus status);
+
+    @Query("select coalesce(sum(formation.maxParticipants), 0) from Formation formation "
+            + "where formation.status = :status and formation.createdAt between :from and :to "
+            + "and formation.deletedAt is null")
+    long sumMaxParticipantsByStatusAndCreatedAtBetweenAndDeletedAtIsNull(
+            @Param("status") FormationStatus status,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to);
 
     /**
      * Retrieves active formations matching a specific status, excluding soft-deleted entities.
