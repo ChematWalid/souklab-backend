@@ -68,7 +68,7 @@ if rg -n --pcre2 'Map\.of\("(?:username|online|typing|reader|messageId|message)"
   echo 'raw chat metadata keys detected; use grouped ChatMetadata enums' >&2
   exit 1
 fi
-if rg -n --pcre2 'ApiResponse\.error\("(?:FORBIDDEN|VIRUS_DETECTED|VIRUS_SCAN_UNAVAILABLE|FILE_TOO_LARGE)"' \
+if rg -n --pcre2 'ApiResponse\.error\("(?:FORBIDDEN|VIRUS_DETECTED|VIRUS_SCAN_UNAVAILABLE|FILE_TOO_LARGE|MALFORMED_REQUEST|RESOURCE_NOT_FOUND|METHOD_NOT_ALLOWED|AUTHENTICATION_FAILED|MISSING_PARAMETER|INVALID_PARAMETER|UNSUPPORTED_MEDIA_TYPE|MAX_UPLOAD_SIZE_EXCEEDED|INTERNAL_SERVER_ERROR)"' \
     src/main/java --glob '*.java'; then
   echo 'raw standardized API error codes detected; use ApiErrorCode enums' >&2
   exit 1

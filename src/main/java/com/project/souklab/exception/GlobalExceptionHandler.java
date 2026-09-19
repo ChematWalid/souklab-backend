@@ -115,7 +115,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         log.warn("HttpMessageNotReadableException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Malformed or unreadable request body"));
+                .body(ApiResponse.error(ApiErrorCode.MALFORMED_REQUEST, "Malformed or unreadable request body"));
     }
 
     /**
@@ -125,7 +125,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(NoResourceFoundException ex) {
         log.debug("NoResourceFoundException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error("The requested resource was not found"));
+                .body(ApiResponse.error(ApiErrorCode.RESOURCE_NOT_FOUND, "The requested resource was not found"));
     }
 
     /**
@@ -135,7 +135,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
         log.debug("HttpRequestMethodNotSupportedException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.error("HTTP method not allowed"));
+                .body(ApiResponse.error(ApiErrorCode.METHOD_NOT_ALLOWED, "HTTP method not allowed"));
     }
 
     /**
@@ -156,7 +156,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException ex) {
         log.warn("AuthenticationException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error("Authentication failed: Invalid credentials or expired session."));
+                .body(ApiResponse.error(ApiErrorCode.AUTHENTICATION_FAILED,
+                        "Authentication failed: Invalid credentials or expired session."));
     }
 
     /**
@@ -166,7 +167,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
         log.warn("MissingServletRequestParameterException: {}", ex.getParameterName());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Missing required request parameter: " + ex.getParameterName()));
+                .body(ApiResponse.error(ApiErrorCode.MISSING_PARAMETER,
+                        "Missing required request parameter: " + ex.getParameterName()));
     }
 
     /**
@@ -179,7 +181,7 @@ public class GlobalExceptionHandler {
         String message = String.format("Parameter '%s' should be of type %s.", paramName, expectedType);
         log.warn("MethodArgumentTypeMismatchException: {}", message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(message));
+                .body(ApiResponse.error(ApiErrorCode.INVALID_PARAMETER, message));
     }
 
     /**
@@ -189,7 +191,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
         log.warn("HttpMediaTypeNotSupportedException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                .body(ApiResponse.error("Unsupported media type: " + ex.getContentType()));
+                .body(ApiResponse.error(ApiErrorCode.UNSUPPORTED_MEDIA_TYPE,
+                        "Unsupported media type: " + ex.getContentType()));
     }
 
     /**
@@ -199,7 +202,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
         log.warn("MaxUploadSizeExceededException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE)
-                .body(ApiResponse.error("Maximum upload size exceeded."));
+                .body(ApiResponse.error(ApiErrorCode.MAX_UPLOAD_SIZE_EXCEEDED, "Maximum upload size exceeded."));
     }
 
     /**
@@ -220,6 +223,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         log.error("Unhandled server exception occurred: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred. Please try again later."));
+                .body(ApiResponse.error(ApiErrorCode.INTERNAL_SERVER_ERROR,
+                        "An unexpected error occurred. Please try again later."));
     }
 }
