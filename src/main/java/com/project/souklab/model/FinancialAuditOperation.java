@@ -17,6 +17,28 @@ public final class FinancialAuditOperation {
         public String value() { return value; }
     }
 
+    public enum Plan implements Type {
+        CREATE("PLAN_CREATE"),
+        UPDATE("PLAN_UPDATE"),
+        DEACTIVATE("PLAN_DEACTIVATE");
+
+        private final String value;
+
+        Plan(String value) { this.value = value; }
+
+        public String value() { return value; }
+    }
+
+    public enum Refund implements Type {
+        REQUEST("REFUND_REQUEST");
+
+        private final String value;
+
+        Refund(String value) { this.value = value; }
+
+        public String value() { return value; }
+    }
+
     public enum State implements Type {
         CORRECTION("STATE_CORRECTION");
 

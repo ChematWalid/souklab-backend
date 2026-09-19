@@ -5,6 +5,7 @@ import com.project.souklab.dto.subscription.FinancialReasonRequest;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.model.Payment;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.service.audit.AuditLogService;
@@ -25,7 +26,7 @@ public class AdminRefundService {
     @Transactional(noRollbackFor = BadRequestException.class)
     public void reject(Payment payment, FinancialReasonRequest request) {
         auditLogService.logFinancialAction(AuditLogAction.REFUND_REQUEST_REJECTED,
-                currentUserProvider.requireCurrentUser(), payment.getAccount().getId(), "REFUND_REQUEST",
+                currentUserProvider.requireCurrentUser(), payment.getAccount().getId(), FinancialAuditOperation.Refund.REQUEST,
                 payment.getStatus().value(), payment.getStatus().value(), request.getReason(), payment.getId(), payment.getSubscriptionId());
         notificationService.createForUser(payment.getAccount(),
                 "Refund requests are unavailable for Chargily Pay V2.", NotificationType.REFUND_REQUEST_UNAVAILABLE, payment.getId());

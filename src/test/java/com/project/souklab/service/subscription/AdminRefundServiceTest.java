@@ -6,6 +6,7 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.model.Payment;
 import com.project.souklab.model.PaymentStatus;
 import com.project.souklab.model.NotificationType;
+import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.model.User;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +44,7 @@ class AdminRefundServiceTest {
         assertThatThrownBy(() -> service.reject("payment-1", request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("refunds are not supported");
-        verify(audit).logFinancialAction(any(), any(), any(), anyString(),
+        verify(audit).logFinancialAction(any(), any(), any(), any(FinancialAuditOperation.Type.class),
                 any(), any(), any(), any(), any());
         verify(notifications).createForUser(account, "Refund requests are unavailable for Chargily Pay V2.",
                 NotificationType.REFUND_REQUEST_UNAVAILABLE, "payment-1");

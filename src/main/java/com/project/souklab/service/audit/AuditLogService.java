@@ -55,11 +55,19 @@ public class AuditLogService {
     public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
                                    String previousState, String newState, String reason,
                                    String paymentId, String subscriptionId) {
-        logFinancialAction(action, actor, targetAccountId, operation.value(), previousState, newState,
+        persistFinancialAction(action, actor, targetAccountId, operation.value(), previousState, newState,
                 reason, paymentId, subscriptionId);
     }
 
-    public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, String operation,
+    @Transactional
+    public void logFinancialAction(AuditLogAction action, User actor, String targetAccountId, FinancialAuditOperation.Type operation,
+                                   String operationSuffix, String previousState, String newState, String reason,
+                                   String paymentId, String subscriptionId) {
+        persistFinancialAction(action, actor, targetAccountId, operation.value() + ":" + operationSuffix,
+                previousState, newState, reason, paymentId, subscriptionId);
+    }
+
+    private void persistFinancialAction(AuditLogAction action, User actor, String targetAccountId, String operation,
                                    String previousState, String newState, String reason,
                                    String paymentId, String subscriptionId) {
         AuditLog auditLog = new AuditLog();

@@ -7,6 +7,7 @@ import com.project.souklab.dto.subscription.SubscriptionPlanResponse;
 import com.project.souklab.model.SubscriptionPlan;
 import com.project.souklab.model.SubscriptionPlanEntitlement;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.user.CurrentUserProvider;
 import com.project.souklab.dto.subscription.FinancialReasonRequest;
@@ -37,7 +38,7 @@ public class AdminSubscriptionPlanService {
         apply(plan, request);
         SubscriptionPlan saved = planRepository.save(plan);
         auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_PLAN_CREATED, currentUserProvider.requireCurrentUser(), null,
-                "PLAN_CREATE:" + saved.getId(), "NONE", saved.getName(), request.getReason(), null, null);
+                FinancialAuditOperation.Plan.CREATE, saved.getId(), "NONE", saved.getName(), request.getReason(), null, null);
         return toResponse(saved);
     }
 
@@ -47,7 +48,7 @@ public class AdminSubscriptionPlanService {
         String previous = plan.getName() + ":" + plan.getAmount() + ":" + plan.getCurrency();
         apply(plan, request);
         auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_PLAN_UPDATED, currentUserProvider.requireCurrentUser(), null,
-                "PLAN_UPDATE:" + id, previous, plan.getName() + ":" + plan.getAmount() + ":" + plan.getCurrency(), request.getReason(), null, null);
+                FinancialAuditOperation.Plan.UPDATE, id, previous, plan.getName() + ":" + plan.getAmount() + ":" + plan.getCurrency(), request.getReason(), null, null);
         return toResponse(plan);
     }
 
@@ -57,7 +58,7 @@ public class AdminSubscriptionPlanService {
         String previous = Boolean.toString(plan.isActive());
         plan.setActive(false);
         auditLogService.logFinancialAction(AuditLogAction.SUBSCRIPTION_PLAN_DEACTIVATED, currentUserProvider.requireCurrentUser(), null,
-                "PLAN_DEACTIVATE:" + id, previous, "false", request.getReason(), null, null);
+                FinancialAuditOperation.Plan.DEACTIVATE, id, previous, "false", request.getReason(), null, null);
     }
 
     private void apply(SubscriptionPlan plan, SubscriptionPlanRequest request) {
