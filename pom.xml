@@ -38,9 +38,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
-            <version>7.0.8</version>
         </dependency>
-
         <!-- Validation (Jakarta Validation annotations: @NotBlank, @Size, @Valid) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -203,13 +201,7 @@
             <version>0.4.20</version>
         </dependency>
 
-        <!-- Developer Tools & Boilerplate Reduction -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
+        <!-- Boilerplate Reduction -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
