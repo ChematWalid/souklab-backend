@@ -70,14 +70,13 @@ hosted CI and security-alert systems.
 3. Run the configured OWASP dependency scan with the repository's approved NVD
    configuration. Do not suppress a finding without documenting the exact
    dependency, advisory, version, rationale, and expiry. The 2026-09-21 local
-   run with Dependency-Check 13.0.0 and `-DfailBuildOnCVSS=7` failed on
-   unresolved findings, including broad CPE matches for BOM-managed components.
-   Treat this as an open release gate until each result is validated against
-   the vendor advisory and a patched compatible version is selected or a
-   reviewed false-positive record is approved.
-4. Confirm `org.apache.tika:tika-core` resolves to `3.2.2` or newer and inspect
-   the complete dependency tree for affected Tika modules, especially PDF
-   parser modules.
+   run with Dependency-Check 13.0.0 and `-DfailBuildOnCVSS=7` passed after
+   upgrading compatible managed components and recording exact-SHA-1
+   false-positive suppressions for the Tika and Elasticsearch client matches.
+4. Confirm the dependency tree remains aligned with the reviewed versions:
+   Tika core 4.0.0, PDFBox 3.0.8, and the patched Boot-managed Tomcat, Netty,
+   HttpClient, and HttpCore versions; inspect the complete tree for affected
+   Tika parser modules, especially PDF parser modules.
 5. Re-check the hosted Dependabot/security-alert page after the scan and record
    the alert identifier, resolved version, and resolution timestamp.
 6. If a different critical/high finding remains, fix it in a separate coherent

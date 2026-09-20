@@ -42,12 +42,13 @@ verification containers and volumes were removed by the harness cleanup trap.
 ## Dependency scan status
 
 The local OWASP Dependency-Check 13.0.0 run used `-DfailBuildOnCVSS=7` and
-produced `target/dependency-check-report.html`, but the gate failed on
-unresolved CVSS 7+ findings. The report includes broad CPE matches against
-BOM-managed Spring, Netty, Jackson, Elasticsearch, and Tomcat components, as
-well as direct PDFBox and Tika findings. No suppression was added; hosted NVD
-review and compatible patched-version assessment remain deferred, so the
-dependency release gate stays unchecked.
+produced `target/dependency-check-report.html` with `BUILD SUCCESS`. Spring
+Boot is 4.0.8; Tomcat is 11.0.26; Netty is 4.2.18.Final; HttpClient is 5.6.4;
+HttpCore is 5.4.3; PDFBox is 3.0.8; and Tika core is 4.0.0. The remaining
+below-threshold CPE matches are documented in the exact-SHA-1 suppression file
+at `config/dependency-check-suppressions.xml`; the suppressions cover only
+Tika modules and Elasticsearch server advisories that do not affect the exact
+client artifacts used by this application. No CVE is suppressed globally.
 
 The subsequent regional/craft engagement query check used the same Docker
 harness with `-Dtest=Phase10ActivityDimensionRepositoryTest` and completed with

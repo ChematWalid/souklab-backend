@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd https://dependency-check.github.io/DependencyCheck/dependency-suppression.1.4.xsd">
+    <!--
+      Reviewed 2026-09-21 against the Apache Tika and Elastic vendor advisories.
+      These CVEs affect tika-server/tika-parser-scientific-module or the Elasticsearch
+      server, not the exact client artifacts used here. Keep the SHA-1 exact so
+      a future artifact change cannot inherit this exception accidentally.
+    -->
+    <suppress>
+        <notes><![CDATA[CVE-2026-66756 affects org.apache.tika:tika-server versions before 4.0.0-beta-1; this application uses tika-core only. Apache advisory: https://lists.apache.org/thread/ynjg5lxwhqpc83pczf5y5561o2l4o568. Review by 2027-09-21.]]></notes>
+        <sha1>f370d8619de9e19329b2cc117943c83468c2ff9f</sha1>
+        <cve>CVE-2026-66756</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[CVE-2026-66755 affects tika-parser-scientific-module; this application uses tika-core only. Apache advisory: https://lists.apache.org/thread/0hcctcp9s5lxgq2ookp4o6chltk99f8r. Review by 2027-09-21.]]></notes>
+        <sha1>f370d8619de9e19329b2cc117943c83468c2ff9f</sha1>
+        <cve>CVE-2026-66755</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[CVE-2026-72649 affects the Elasticsearch server machine-learning component; this artifact is the REST client and the deployed server is Elasticsearch 8.15.3 with machine learning disabled. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-20-9-4-5-9-5-1-security-update-esa-2026-114/390087. Review by 2027-09-21.]]></notes>
+        <sha1>0ad267c7263813f575566c41b4bbc56a5ceaceca</sha1>
+        <cve>CVE-2026-72649</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[CVE-2026-78607 affects the Elasticsearch server custom inference service; this artifact is the REST client and the deployed server is Elasticsearch 8.15.3. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-19-9-3-8-9-4-4-9-5-1-security-update-esa-2026-143/390094. Review by 2027-09-21.]]></notes>
+        <sha1>0ad267c7263813f575566c41b4bbc56a5ceaceca</sha1>
+        <cve>CVE-2026-78607</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[CVE-2026-72649 is an Elasticsearch server machine-learning issue; this is the REST client sniffer artifact. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-20-9-4-5-9-5-1-security-update-esa-2026-114/390087. Review by 2027-09-21.]]></notes>
+        <sha1>28eeb175c826810ece83497f9ddd8a2c736a4a1f</sha1>
+        <cve>CVE-2026-72649</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[CVE-2026-78607 is an Elasticsearch server custom inference issue; this is the REST client sniffer artifact. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-19-9-3-8-9-4-4-9-5-1-security-update-esa-2026-143/390094. Review by 2027-09-21.]]></notes>
+        <sha1>28eeb175c826810ece83497f9ddd8a2c736a4a1f</sha1>
+        <cve>CVE-2026-78607</cve>
+    </suppress>
+</suppressions>
