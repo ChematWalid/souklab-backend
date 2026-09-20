@@ -2,7 +2,7 @@
 
 ## Local Docker-backed verification
 
-Run on 2026-09-20 from the reviewed working tree:
+Run on 2026-09-21 from the reviewed working tree:
 
 ```text
 ./scripts/verify-local-integration.sh
@@ -38,6 +38,16 @@ reported as a false readiness failure.
 
 The skipped tests are existing opt-in/environment-gated tests. The
 verification containers and volumes were removed by the harness cleanup trap.
+
+## Dependency scan status
+
+The local OWASP Dependency-Check 13.0.0 run used `-DfailBuildOnCVSS=7` and
+produced `target/dependency-check-report.html`, but the gate failed on
+unresolved CVSS 7+ findings. The report includes broad CPE matches against
+BOM-managed Spring, Netty, Jackson, Elasticsearch, and Tomcat components, as
+well as direct PDFBox and Tika findings. No suppression was added; hosted NVD
+review and compatible patched-version assessment remain deferred, so the
+dependency release gate stays unchecked.
 
 The subsequent regional/craft engagement query check used the same Docker
 harness with `-Dtest=Phase10ActivityDimensionRepositoryTest` and completed with

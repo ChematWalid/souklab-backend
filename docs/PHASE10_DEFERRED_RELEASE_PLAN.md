@@ -69,7 +69,12 @@ hosted CI and security-alert systems.
    pass.
 3. Run the configured OWASP dependency scan with the repository's approved NVD
    configuration. Do not suppress a finding without documenting the exact
-   dependency, advisory, version, rationale, and expiry.
+   dependency, advisory, version, rationale, and expiry. The 2026-09-21 local
+   run with Dependency-Check 13.0.0 and `-DfailBuildOnCVSS=7` failed on
+   unresolved findings, including broad CPE matches for BOM-managed components.
+   Treat this as an open release gate until each result is validated against
+   the vendor advisory and a patched compatible version is selected or a
+   reviewed false-positive record is approved.
 4. Confirm `org.apache.tika:tika-core` resolves to `3.2.2` or newer and inspect
    the complete dependency tree for affected Tika modules, especially PDF
    parser modules.
@@ -370,4 +375,3 @@ The deferred release work is complete only when:
 - any remaining unchecked item has an explicit deferral owner and follow-up
   issue;
 - the final verification passes without regressing the enum/taxonomy rules.
-
