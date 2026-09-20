@@ -39,6 +39,16 @@ reported as a false readiness failure.
 The skipped tests are existing opt-in/environment-gated tests. The
 verification containers and volumes were removed by the harness cleanup trap.
 
+The opt-in tests were subsequently run explicitly with
+`PHASE9_MARIADB_INTEGRATION=true` and `PHASE10_ENDPOINT_SECURITY=true`:
+
+```text
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+```
+
+This covered the Phase 9 MariaDB invariant test and all three private
+operational endpoint-security tests.
+
 ## Dependency scan status
 
 The local OWASP Dependency-Check 13.0.0 run used `-DfailBuildOnCVSS=7` and

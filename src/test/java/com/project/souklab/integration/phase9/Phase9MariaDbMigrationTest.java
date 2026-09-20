@@ -27,7 +27,7 @@ class Phase9MariaDbMigrationTest {
                     .migrate();
 
             try (Connection connection = database.createConnection(""); Statement statement = connection.createStatement()) {
-                assertThat(migrationVersion(statement)).isEqualTo("5");
+                assertThat(migrationVersion(statement)).isEqualTo("13");
                 assertThat(tableExists(statement, "subscription_pricing")).isTrue();
                 assertThat(tableExists(statement, "subscription_plan_entitlements")).isTrue();
                 assertThat(tableExists(statement, "artisan_subscriptions")).isTrue();
