@@ -12,7 +12,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
 
     steps:
       - name: Check out source
@@ -60,7 +60,16 @@ jobs:
           systemd-analyze verify deploy/systemd/souklab-backup.service deploy/systemd/souklab-backup.timer
 
       - name: Prepare test environment
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          git check-ignore -q .env
+          awk -F= '/(PASSWORD|SECRET|TOKEN|API_KEY)=/ && $2 !~ /^(|your_|test_|minioadmin|guest|AAAA)/ { exit 1 }' .env
+
+      - name: Record reviewed commit
+        run: |
+          reviewed_commit="$(git rev-parse HEAD)"
+          echo "Reviewed commit: ${reviewed_commit}" >> "$GITHUB_STEP_SUMMARY"
+          test "${reviewed_commit}" = "${GITHUB_SHA}"
 
       - name: Verify against local production dependencies
         run: ./scripts/verify-local-integration.sh
@@ -70,6 +79,12 @@ jobs:
 
       - name: Build deployment image
         run: docker build --file Dockerfile --tag souklab:ci .
+
+      - name: Record local image digest
+        run: |
+          image_digest="$(docker image inspect souklab:ci --format '{{index .RepoDigests 0}}' 2>/dev/null || true)"
+          image_id="$(docker image inspect souklab:ci --format '{{.Id}}')"
+          echo "Local image digest: ${image_digest:-unpublished; image id ${image_id}}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Write migration verification report
         if: always()
