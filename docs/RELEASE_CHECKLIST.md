@@ -5,6 +5,12 @@ Local Phase 10 acceptance evidence is recorded in
 release gates and must be checked only when the corresponding production or CI
 evidence exists.
 
+The currently deferred production/CI work is documented in
+[`PHASE10_DEFERRED_RELEASE_PLAN.md`](PHASE10_DEFERRED_RELEASE_PLAN.md). In
+particular, hosted CI/dependency scanning and production backup/restore
+evidence are intentionally deferred and must remain unchecked until a future
+agent or operator produces the required evidence.
+
 - [ ] Hosted CI is green, including integration tests and dependency scan.
 - [ ] Working tree is clean and image is built from the reviewed commit.
 - [ ] Flyway migrations reviewed and upgrade path verified.
