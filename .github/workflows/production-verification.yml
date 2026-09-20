@@ -59,6 +59,9 @@ jobs:
           grep -q 'HIBERNATE_SEARCH_SCHEMA_MANAGEMENT: create-or-update' "$rendered"
           systemd-analyze verify deploy/systemd/souklab-backup.service deploy/systemd/souklab-backup.timer
 
+      - name: Prepare test environment
+        run: cp .env.example .env
+
       - name: Verify against local production dependencies
         run: ./scripts/verify-local-integration.sh
 
