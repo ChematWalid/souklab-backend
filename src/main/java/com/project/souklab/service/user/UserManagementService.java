@@ -15,6 +15,7 @@ import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.Artisan;
 import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
@@ -106,9 +107,16 @@ public class UserManagementService {
         user.setStatus(AccountStatus.ACTIVE);
         userRepository.save(user);
 
-        artisanRepository.findById(userId).ifPresent(artisan -> {
+        artisanRepository.findById(userId).ifPresentOrElse(artisan -> {
             artisan.setVerified(true);
             artisanRepository.save(artisan);
+        }, () -> {
+            Artisan artisan = Artisan.builder()
+                    .user(user)
+                    .isVerified(true)
+                    .build();
+            user.setArtisan(artisan);
+            userRepository.saveAndFlush(user);
         });
 
         auditLogService.logAction(AuditLogAction.User.APPROVED, "Approved user ID: " + userId);

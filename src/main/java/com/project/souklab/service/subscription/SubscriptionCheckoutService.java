@@ -105,6 +105,9 @@ public class SubscriptionCheckoutService {
     private SubscriptionCheckoutResponse createCheckout(User user, SubscriptionCheckoutRequest request, String key) {
         SubscriptionPlan plan = planRepository.findById(request.getPlanId()).filter(SubscriptionPlan::isActive)
                 .orElseThrow(() -> new BadRequestException("Subscription plan is not available"));
+        if (!appProperties.getChargily().isEnabled()) {
+            throw new BadRequestException("Chargily payments are not enabled in this environment");
+        }
         rules.validateDzdAmount(plan.getAmount());
         rules.validateCurrency(plan.getCurrency());
         if ((plan.getSubscriberType() == SubscriberType.ARTISAN && user.getArtisan() == null)

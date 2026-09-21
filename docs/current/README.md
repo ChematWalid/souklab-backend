@@ -12,6 +12,7 @@ These documents describe the current layered modular monolith and its `/api/v1` 
 - [Production configuration matrix](PRODUCTION_CONFIGURATION_MATRIX.md) — environment policy.
 - [Deployment runbook](DEPLOYMENT_RUNBOOK.md) — operational procedures.
 - [Database schema](DATABASE_SCHEMA.md) — entities and Flyway migrations.
+- [Generated OpenAPI Markdown](API_OPENAPI.md) — human-readable endpoint and schema reference exported from the running application.
 
 ## Generated contract
 
@@ -19,8 +20,9 @@ When the application is running, Springdoc exposes the code-first contract at `/
 
 ```bash
 ./scripts/export-openapi.sh http://localhost:8080/v3/api-docs docs/generated/openapi.json
+./scripts/openapi-to-markdown.sh docs/generated/openapi.json docs/current/API_OPENAPI.md
 ```
 
-The generated artifact is intentionally not committed. CI should upload it as an artifact and validate it before publishing a frontend build.
+The JSON export is intentionally not committed. The Markdown companion is committed as the reviewable API reference and should be regenerated whenever the live contract changes. CI should upload the JSON artifact and validate it before publishing a frontend build.
 
 Phase reports, old release plans, and the generated Postman reference remain for traceability and are explicitly archival where they can describe superseded behavior.

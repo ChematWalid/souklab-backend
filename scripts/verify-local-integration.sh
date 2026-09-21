@@ -93,6 +93,10 @@ export PHASE9_MARIADB_INTEGRATION="${PHASE9_MARIADB_INTEGRATION:-true}"
 export PHASE10_ENDPOINT_SECURITY="${PHASE10_ENDPOINT_SECURITY:-true}"
 
 cleanup() {
+  if [ "${KEEP_LOCAL_SERVICES:-false}" = "true" ]; then
+    echo "Keeping verification services running because KEEP_LOCAL_SERVICES=true"
+    return
+  fi
   # This project name is dedicated to verification; remove only its containers,
   # network, and test volumes so the next run starts from a fresh schema.
   docker compose down --volumes --remove-orphans
