@@ -26,7 +26,7 @@ class Phase10MariaDbMigrationTest {
             database.start();
             Flyway.configure()
                     .dataSource(database.getJdbcUrl(), database.getUsername(), database.getPassword())
-                    .locations("classpath:db/migration")
+                    .locations("filesystem:src/main/resources/db/migration")
                     .load()
                     .migrate();
 
