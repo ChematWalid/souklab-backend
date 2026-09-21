@@ -18,11 +18,12 @@ confirmed that unauthenticated health/OpenAPI endpoints return `401`, the
 WebSocket endpoint does not return a 5xx, and authenticated OpenAPI JSON was
 exported and converted to `docs/current/API_OPENAPI.md`.
 
-Dependency-Check was attempted with the configured CVSS 7 threshold but could
-not update NVD data because no `NVD_API_KEY` was available. This remains an
-external scan blocker, not a clean scan result. Hosted CI, real Chargily
-credentials/provider access, and production backup/restore evidence remain
-unavailable in this checkout.
+Dependency-Check passed locally with the configured CVSS 7 threshold using the
+cached NVD data (`265` dependencies, `18` findings, `4` documented
+suppression entries, and no build-breaking CVSS result). A fresh NVD update
+still requires `NVD_API_KEY`; hosted CI, real Chargily credentials/provider
+access, and production backup/restore evidence remain unavailable in this
+checkout.
 
 ## Local Docker-backed verification
 
