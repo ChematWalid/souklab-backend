@@ -1,5 +1,29 @@
 # Phase 10 verification evidence
 
+## Latest local release-gate run
+
+On 2026-09-21, `scripts/verify-local-integration.sh` completed against fresh
+MariaDB 11.4, RabbitMQ 4.0/STOMP, Redis 7.4, MinIO, Elasticsearch 8.15, and
+ClamAV services:
+
+```text
+Tests run: 1223, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+Flyway validation passed through V13. The SMTP-isolated suite connected only
+to the loopback sink at `127.0.0.1:1025`; verification containers, volumes,
+and networks were removed by the harness cleanup trap. Live local checks also
+confirmed that unauthenticated health/OpenAPI endpoints return `401`, the
+WebSocket endpoint does not return a 5xx, and authenticated OpenAPI JSON was
+exported and converted to `docs/current/API_OPENAPI.md`.
+
+Dependency-Check was attempted with the configured CVSS 7 threshold but could
+not update NVD data because no `NVD_API_KEY` was available. This remains an
+external scan blocker, not a clean scan result. Hosted CI, real Chargily
+credentials/provider access, and production backup/restore evidence remain
+unavailable in this checkout.
+
 ## Local Docker-backed verification
 
 Run on 2026-09-21 from the reviewed working tree:

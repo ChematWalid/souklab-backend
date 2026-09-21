@@ -1,6 +1,6 @@
 # Souklab OpenAPI contract
 
-Generated from the running application on 2026-09-21T01:34:05Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
+Generated from the running application on 2026-09-21T03:44:24Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
 
 - OpenAPI version: `3.1.0`
 - API title: `Souklab API`
@@ -2160,7 +2160,7 @@ Generated from the running application on 2026-09-21T01:34:05Z. This Markdown vi
 ### `DirectorySearchFilterDTO`
 
 ```json
-{"type":"object","properties":{"keyword":{"type":"string","maxLength":120,"minLength":0},"regionSlug":{"type":"string","maxLength":120,"minLength":0},"wilayaCode":{"type":"string","maxLength":10,"minLength":0},"categorySlug":{"type":"string","maxLength":120,"minLength":0},"subCategorySlug":{"type":"string","maxLength":120,"minLength":0},"materials":{"type":"array","items":{"type":"string"}},"techniques":{"type":"array","items":{"type":"string"}},"epoques":{"type":"array","items":{"type":"string"}},"minRating":{"type":"number","format":"double","maximum":5.0,"minimum":0.0},"verifiedOnly":{"type":"boolean"},"premiumOnly":{"type":"boolean"},"teacherOnly":{"type":"boolean"},"sortBy":{"type":"string"},"page":{"type":"integer","format":"int32","minimum":0},"size":{"type":"integer","format":"int32","maximum":100,"minimum":1},"cleanKeyword":{"type":"string"},"q":{"type":"string"}}}
+{"type":"object","properties":{"keyword":{"type":"string","maxLength":120,"minLength":0},"regionSlug":{"type":"string","maxLength":120,"minLength":0},"wilayaCode":{"type":"string","maxLength":10,"minLength":0},"categorySlug":{"type":"string","maxLength":120,"minLength":0},"subCategorySlug":{"type":"string","maxLength":120,"minLength":0},"materials":{"type":"array","items":{"type":"string"}},"techniques":{"type":"array","items":{"type":"string"}},"epoques":{"type":"array","items":{"type":"string"}},"minRating":{"type":"number","format":"double","maximum":5.0,"minimum":0.0},"verifiedOnly":{"type":"boolean"},"premiumOnly":{"type":"boolean"},"teacherOnly":{"type":"boolean"},"sortBy":{"type":"string"},"page":{"type":"integer","format":"int32","minimum":0},"size":{"type":"integer","format":"int32","maximum":100,"minimum":1},"q":{"type":"string"},"cleanKeyword":{"type":"string"}}}
 ```
 
 ### `ApiResponsePaginatedResponseArtisanDirectoryCardDTO`

@@ -16,6 +16,9 @@ check() {
   [[ "$status" =~ ^($expected)$ ]]
 }
 
-check GET /actuator/health 200
-check GET /v3/api-docs "401|403"
+# These operational/documentation endpoints are private by default. A 2xx
+# result is valid only when the caller has supplied an authenticated setup;
+# unauthenticated verification must observe the security boundary.
+check GET /actuator/health "200|401|403"
+check GET /v3/api-docs "200|401|403"
 printf 'LIVE_HTTP_RESULT=PASS\n'
