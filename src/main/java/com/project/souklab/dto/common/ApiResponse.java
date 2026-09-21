@@ -25,6 +25,9 @@ public class ApiResponse<T> {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<String, String> errors;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String traceId;
+
     public static <T> ApiResponse<T> success(T data, String message) {
         return ApiResponse.<T>builder()
                 .success(true)

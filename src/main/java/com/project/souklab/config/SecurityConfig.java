@@ -46,6 +46,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Bean
+    public FilterRegistrationBean<CorrelationIdFilter> correlationIdFilter() {
+        FilterRegistrationBean<CorrelationIdFilter> registration = new FilterRegistrationBean<>(new CorrelationIdFilter());
+        registration.setOrder(0);
+        return registration;
+    }
+
     private final AppProperties appProperties;
     private final StorageProperties storageProperties;
     private final AvatarProperties avatarProperties;

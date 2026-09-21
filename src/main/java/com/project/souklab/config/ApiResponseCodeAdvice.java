@@ -9,6 +9,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RestControllerAdvice
 public class ApiResponseCodeAdvice implements ResponseBodyAdvice<Object> {
@@ -28,6 +30,14 @@ public class ApiResponseCodeAdvice implements ResponseBodyAdvice<Object> {
                 int status = servletResponse.getServletResponse().getStatus();
                 if (status != 0) {
                     apiResponse.setCode(status);
+                }
+            }
+            ServletRequestAttributes attributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                String traceId = attributes.getRequest().getHeader(CorrelationIdFilter.HEADER_NAME);
+                if (traceId != null && !traceId.isBlank()) {
+                    apiResponse.setTraceId(traceId);
                 }
             }
         }
