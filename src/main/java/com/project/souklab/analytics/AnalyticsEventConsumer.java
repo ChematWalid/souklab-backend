@@ -39,9 +39,27 @@ public class AnalyticsEventConsumer {
         AnalyticsEvent.Type type = AnalyticsEvent.fromValue(typeValue)
                 .orElseThrow(() -> new IllegalArgumentException("Analytics event type is not registered"));
         if (processed.existsByEventId(id)) return;
-        LocalDate day = LocalDateTime.parse(event.path(AnalyticsMetric.Payload.Event.TIME.value()).asText()).atOffset(ZoneOffset.UTC)
+        LocalDateTime eventTime = parseEventTime(event.path(AnalyticsMetric.Payload.Event.TIME.value()));
+        LocalDate day = eventTime.atOffset(ZoneOffset.UTC)
                 .atZoneSameInstant(ZoneId.of(properties.getBusinessTimeZone())).toLocalDate();
         rollups.incrementEventKpi(day, new AnalyticsEventRollupKey(day, type).databaseKey());
         AnalyticsProcessedEvent marker = new AnalyticsProcessedEvent(); marker.setEventId(id); processed.save(marker);
+    }
+
+    private LocalDateTime parseEventTime(JsonNode value) {
+        if (value == null || value.isMissingNode() || value.isNull()) {
+            throw new IllegalArgumentException("Analytics event lacks event time");
+        }
+        try {
+            if (value.isTextual()) return LocalDateTime.parse(value.asText());
+            if (value.isArray() && value.size() >= 6) {
+                return LocalDateTime.of(value.get(0).asInt(), value.get(1).asInt(), value.get(2).asInt(),
+                        value.get(3).asInt(), value.get(4).asInt(), value.get(5).asInt(),
+                        value.size() > 6 ? value.get(6).asInt() : 0);
+            }
+        } catch (RuntimeException exception) {
+            throw new IllegalArgumentException("Analytics event has an invalid event time", exception);
+        }
+        throw new IllegalArgumentException("Analytics event has an invalid event time");
     }
 }

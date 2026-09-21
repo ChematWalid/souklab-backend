@@ -7,9 +7,22 @@ MariaDB 11.4, RabbitMQ 4.0/STOMP, Redis 7.4, MinIO, Elasticsearch 8.15, and
 ClamAV services:
 
 ```text
-Tests run: 1223, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 1224, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
+
+The analytics RabbitMQ wire contract uses canonical `eventId`, `eventType`,
+and ISO-8601 textual `eventTime` values. The producer regression test verifies
+the exact outbox JSON shape; the consumer also accepts legacy Jackson
+`LocalDateTime` arrays while old messages drain. The focused producer,
+consumer, and taxonomy tests passed before the complete suite.
+
+The dedicated local Chargily application scenario created a checkout through
+the HTTP API, verified idempotent replay, processed a correctly signed
+`checkout.paid` webhook, and observed `PAID`, `ACTIVE`, and `PROCESSED` state.
+The same endpoint rejected an invalid signature with `403`; unknown checkout
+events were safely ignored with `200`. No real credentials, card entry, or
+money movement was used.
 
 Flyway validation passed through V13. The SMTP-isolated suite connected only
 to the loopback sink at `127.0.0.1:1025`; verification containers, volumes,
@@ -61,7 +74,7 @@ Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 Result:
 
 ```text
-Tests run: 1223, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 1224, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 

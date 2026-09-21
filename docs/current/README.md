@@ -49,3 +49,10 @@ It records only method, path, status, expected status, trace ID, and a sanitized
 classification. It does not claim full business-journey coverage or replace a
 STOMP/WebSocket client; the current local WebSocket evidence is the `/ws` and
 `/ws/info` SockJS handshake plus the authenticated relay/integration tests.
+
+Analytics activity outbox messages use canonical `eventId`, `eventType`, and
+ISO-8601 `eventTime` fields. The consumer retains compatibility with legacy
+array-shaped `LocalDateTime` values. The local Chargily application check also
+covered checkout idempotency and a signed paid webhook; real sandbox access
+remains explicitly classified by the smoke script when credentials/provider
+access are unavailable.

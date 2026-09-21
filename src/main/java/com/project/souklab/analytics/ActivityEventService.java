@@ -43,7 +43,10 @@ public class ActivityEventService {
         payload.put(AnalyticsMetric.Payload.Event.TYPE, type);
         payload.put(AnalyticsMetric.Payload.Actor.ID, actorId == null ? "" : actorId);
         payload.put(AnalyticsMetric.Payload.Subject.ID, subjectId == null ? "" : subjectId);
-        payload.put(AnalyticsMetric.Payload.Event.TIME, saved.getEventTime());
+        // Keep the RabbitMQ wire contract textual and stable. Persistence
+        // payloads may use Jackson's LocalDateTime array representation, but
+        // consumers require a parseable ISO-8601 value.
+        payload.put(AnalyticsMetric.Payload.Event.TIME, saved.getEventTime().toString());
         payload.put(AnalyticsMetric.Payload.Metadata.VALUE, normalizedMetadata);
         try { outbox.setPayloadJson(objectMapper.writeValueAsString(payload)); }
         catch (JsonProcessingException e) { throw new IllegalArgumentException("Activity metadata is not serializable", e); }
