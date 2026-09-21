@@ -26,11 +26,12 @@ and correctly classified the attempt as `BLOCKED_CREDENTIALS`; no checkout or
 money-moving action occurred.
 
 Dependency-Check passed locally with the configured CVSS 7 threshold using the
-cached NVD data (`265` dependencies, `18` findings, `4` documented
-suppression entries, and no build-breaking CVSS result). A fresh NVD update
-still requires `NVD_API_KEY`; hosted CI, real Chargily credentials/provider
-access, and production backup/restore evidence remain unavailable in this
-checkout.
+cached NVD data after upgrading the transitive Elasticsearch REST client and
+sniffer to `9.3.8` (`265` dependencies, `11` findings, `3` report-applicable
+exact-SHA suppression entries, and no remaining CVSS >= 7 build-breaking
+finding). A fresh NVD update still requires `NVD_API_KEY`; hosted CI, real
+Chargily credentials/provider access, and production backup/restore evidence
+remain unavailable in this checkout.
 
 ## Local Docker-backed verification
 
@@ -83,7 +84,11 @@ operational endpoint-security tests.
 ## Dependency scan status
 
 The local OWASP Dependency-Check 13.0.0 run used `-DfailBuildOnCVSS=7` and
-produced `target/dependency-check-report.html` with `BUILD SUCCESS`. Spring
+produced `target/dependency-check-report.html` with `BUILD SUCCESS`. The
+transitive `org.elasticsearch.client:elasticsearch-rest-client` and
+`...:elasticsearch-rest-client-sniffer` artifacts are pinned to `9.3.8`; the
+remaining exact-SHA exceptions are limited to server-only Elastic/Tika matches.
+Spring
 Boot is 4.0.8; Tomcat is 11.0.26; Netty is 4.2.18.Final; HttpClient is 5.6.4;
 HttpCore is 5.4.3; PDFBox is 3.0.8; and Tika core is 4.0.0. The remaining
 below-threshold CPE matches are documented in the exact-SHA-1 suppression file

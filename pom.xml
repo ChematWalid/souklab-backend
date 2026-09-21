@@ -33,6 +33,9 @@
         <netty.version>4.2.18.Final</netty.version>
         <httpclient5.version>5.6.4</httpclient5.version>
         <httpcore5.version>5.4.3</httpcore5.version>
+        <!-- Hibernate Search 8.2 resolves these clients transitively; keep the
+             REST client on the Elastic security-fix release line. -->
+        <elasticsearch-rest-client.version>9.3.8</elasticsearch-rest-client.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -50,6 +53,16 @@
                 <groupId>org.apache.httpcomponents.core5</groupId>
                 <artifactId>httpcore5-h2</artifactId>
                 <version>${httpcore5.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-client</artifactId>
+                <version>${elasticsearch-rest-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-client-sniffer</artifactId>
+                <version>${elasticsearch-rest-client.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

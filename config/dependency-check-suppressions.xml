@@ -24,6 +24,11 @@
         <cve>CVE-2026-72649</cve>
     </suppress>
     <suppress>
+        <notes><![CDATA[CVE-2026-72649 describes an Elasticsearch server machine-learning issue. This exact SHA is the Elasticsearch REST client 9.3.8; the application does not ship the server or expose its machine-learning component, and the deployed server has machine learning disabled. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-20-9-4-5-9-5-1-security-update-esa-2026-114/390087. Review by 2027-09-21.]]></notes>
+        <sha1>3ec2ae24ec85ee3e79586252f09a43f9c0426229</sha1>
+        <cve>CVE-2026-72649</cve>
+    </suppress>
+    <suppress>
         <notes><![CDATA[CVE-2026-78607 affects the Elasticsearch server custom inference service; this artifact is the REST client and the deployed server is Elasticsearch 8.15.3. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-19-9-3-8-9-4-4-9-5-1-security-update-esa-2026-143/390094. Review by 2027-09-21.]]></notes>
         <sha1>0ad267c7263813f575566c41b4bbc56a5ceaceca</sha1>
         <cve>CVE-2026-78607</cve>
@@ -37,5 +42,10 @@
         <notes><![CDATA[CVE-2026-78607 is an Elasticsearch server custom inference issue; this is the REST client sniffer artifact. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-19-9-3-8-9-4-4-9-5-1-security-update-esa-2026-143/390094. Review by 2027-09-21.]]></notes>
         <sha1>28eeb175c826810ece83497f9ddd8a2c736a4a1f</sha1>
         <cve>CVE-2026-78607</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[CVE-2026-72649 describes an Elasticsearch server machine-learning issue. This exact SHA is the Elasticsearch REST client sniffer 9.3.8; the application does not ship the server or expose its machine-learning component, and the deployed server has machine learning disabled. Elastic advisory: https://discuss.elastic.co/t/elasticsearch-8-19-20-9-4-5-9-5-1-security-update-esa-2026-114/390087. Review by 2027-09-21.]]></notes>
+        <sha1>2fd05d4bd3c0dd07c017ecb0b5966f98c5d7140a</sha1>
+        <cve>CVE-2026-72649</cve>
     </suppress>
 </suppressions>
