@@ -26,3 +26,23 @@ When the application is running, Springdoc exposes the code-first contract at `/
 The JSON export is intentionally not committed. The Markdown companion is committed as the reviewable API reference and should be regenerated whenever the live contract changes. CI should upload the JSON artifact and validate it before publishing a frontend build.
 
 Phase reports, old release plans, and the generated Postman reference remain for traceability and are explicitly archival where they can describe superseded behavior.
+
+## Controlled Chargily verification
+
+The credential-free provider in `scripts/chargily-test-provider.py` implements
+only `POST /checkouts` and is intended for local application verification. Set
+`CHARGILY_BASE_URL=http://127.0.0.1:8787`, start it with
+`CHARGILY_FAKE_MODE=success`, and keep `CHARGILY_ENABLED=true` only in the
+local/test environment. `validation`, `rate_limit`, `provider`, and `malformed`
+exercise negative provider responses; no money or external network is involved.
+
+`scripts/chargily-sandbox-smoke.sh` is a separately controlled real-provider
+check. It requires test-mode credentials and a test plan, creates one checkout,
+prints only `PASS`, `BLOCKED_CREDENTIALS`, or `BLOCKED_PROVIDER`, and stops
+before card entry, capture, refund, or webhook delivery. A public callback is
+still required for real webhook delivery, which is not part of this smoke test.
+
+`scripts/verify-live-http.sh` performs a minimal status-only health/OpenAPI
+sweep. It deliberately does not claim coverage of authenticated business
+journeys or STOMP/WebSocket behavior; those require the environment-specific
+credentials and client setup described in the release runbook.

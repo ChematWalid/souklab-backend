@@ -30,3 +30,4 @@ agent or operator produces the required evidence.
 - [ ] RabbitMQ analytics exchange/queue/DLQ delivery, persisted retry backoff, publisher confirms, and duplicate-event idempotency verified with the feature enabled.
 - [ ] Private `/v3/api-docs` and Swagger UI authenticated access verified.
 - [ ] Per-IP and authenticated per-user rate-limit behavior verified across application instances.
+- [x] Credential-free local Chargily provider and bounded real sandbox checkout smoke script are repository-owned; real credentials/provider availability remain explicitly classified by the smoke script.
