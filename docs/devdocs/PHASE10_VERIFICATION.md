@@ -14,9 +14,16 @@ BUILD SUCCESS
 Flyway validation passed through V13. The SMTP-isolated suite connected only
 to the loopback sink at `127.0.0.1:1025`; verification containers, volumes,
 and networks were removed by the harness cleanup trap. Live local checks also
-confirmed that unauthenticated health/OpenAPI endpoints return `401`, the
-WebSocket endpoint does not return a 5xx, and authenticated OpenAPI JSON was
-exported and converted to `docs/current/API_OPENAPI.md`.
+confirmed that unauthenticated health/OpenAPI endpoints return `401`,
+authenticated health returns `200`, the authenticated status sweep passed
+profile/notification/subscription/payment/OpenAPI routes, the SockJS `/ws` and
+`/ws/info` endpoints returned `200`, and authenticated OpenAPI JSON was
+exported and converted to `docs/current/API_OPENAPI.md`. The credential-free
+Chargily provider returned the expected success (`200`), validation (`422`),
+rate-limit (`429` then `200`), provider (`503`), and malformed (`200` with an
+invalid shape) fixtures. The real sandbox script was run without credentials
+and correctly classified the attempt as `BLOCKED_CREDENTIALS`; no checkout or
+money-moving action occurred.
 
 Dependency-Check passed locally with the configured CVSS 7 threshold using the
 cached NVD data (`265` dependencies, `18` findings, `4` documented
@@ -53,7 +60,7 @@ Redis 7.4, MinIO, Elasticsearch 8.15, and ClamAV containers. It then:
 Result:
 
 ```text
-Tests run: 1223, Failures: 0, Errors: 0, Skipped: 4
+Tests run: 1223, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
@@ -61,10 +68,9 @@ The MariaDB health checks include a startup grace period and extended retry
 window so first-run database initialization on clean Docker volumes is not
 reported as a false readiness failure.
 
-The skipped tests are existing opt-in/environment-gated tests. The
-verification containers and volumes were removed by the harness cleanup trap.
-
-The opt-in tests were subsequently run explicitly with
+The verification containers and volumes were removed by the harness cleanup
+trap. The opt-in MariaDB invariant and private operational endpoint-security
+tests were also run explicitly with
 `PHASE9_MARIADB_INTEGRATION=true` and `PHASE10_ENDPOINT_SECURITY=true`:
 
 ```text

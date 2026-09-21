@@ -42,7 +42,10 @@ prints only `PASS`, `BLOCKED_CREDENTIALS`, or `BLOCKED_PROVIDER`, and stops
 before card entry, capture, refund, or webhook delivery. A public callback is
 still required for real webhook delivery, which is not part of this smoke test.
 
-`scripts/verify-live-http.sh` performs a minimal status-only health/OpenAPI
-sweep. It deliberately does not claim coverage of authenticated business
-journeys or STOMP/WebSocket behavior; those require the environment-specific
-credentials and client setup described in the release runbook.
+`scripts/verify-live-http.sh` performs a repeatable status-only sweep of public
+catalog/directory routes plus authenticated profile, notification, subscription,
+payment, health, and OpenAPI routes when `SOUKLAB_ACCESS_TOKEN` is supplied.
+It records only method, path, status, expected status, trace ID, and a sanitized
+classification. It does not claim full business-journey coverage or replace a
+STOMP/WebSocket client; the current local WebSocket evidence is the `/ws` and
+`/ws/info` SockJS handshake plus the authenticated relay/integration tests.
