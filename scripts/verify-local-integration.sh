@@ -61,6 +61,16 @@ export APP_CORS_ALLOWED_ORIGINS="${APP_CORS_ALLOWED_ORIGINS:-http://localhost:30
 export SMTP_CONNECTION_TIMEOUT="${SMTP_CONNECTION_TIMEOUT:-5000}"
 export SMTP_READ_TIMEOUT="${SMTP_READ_TIMEOUT:-10000}"
 export SMTP_WRITE_TIMEOUT="${SMTP_WRITE_TIMEOUT:-10000}"
+# Never inherit developer or production mail credentials during local
+# verification. A local debugging SMTP server accepts messages without
+# authenticating or delivering them to an external provider.
+export SMTP_HOST="127.0.0.1"
+export SMTP_PORT="1025"
+export SMTP_USERNAME=""
+export SMTP_PASSWORD=""
+export SMTP_AUTH="false"
+export SMTP_STARTTLS="false"
+export APP_EMAIL_USE_SMTP="true"
 export MAILERSEND_CONNECTION_TIMEOUT="${MAILERSEND_CONNECTION_TIMEOUT:-5s}"
 export MAILERSEND_READ_TIMEOUT="${MAILERSEND_READ_TIMEOUT:-10s}"
 export RELAY_HOST="${RELAY_HOST:-localhost}"
@@ -92,7 +102,56 @@ export PHASE10_REDIS_INTEGRATION="${PHASE10_REDIS_INTEGRATION:-true}"
 export PHASE9_MARIADB_INTEGRATION="${PHASE9_MARIADB_INTEGRATION:-true}"
 export PHASE10_ENDPOINT_SECURITY="${PHASE10_ENDPOINT_SECURITY:-true}"
 
+smtp_sink_pid=""
+if command -v python3 >/dev/null 2>&1; then
+  python3 -u - <<'PY' >/tmp/souklab-verification-smtp.log 2>&1 &
+import socketserver
+
+class SmtpSink(socketserver.StreamRequestHandler):
+    def reply(self, value):
+        self.wfile.write((value + "\r\n").encode())
+        self.wfile.flush()
+
+    def handle(self):
+        self.reply("220 souklab-local-smtp ESMTP")
+        while True:
+            line = self.rfile.readline()
+            if not line:
+                return
+            command = line.decode(errors="replace").strip().upper()
+            if command.startswith(("EHLO", "HELO")):
+                self.reply("250-souklab-local-smtp")
+                self.reply("250 OK")
+            elif command.startswith("MAIL FROM") or command.startswith("RCPT TO"):
+                self.reply("250 OK")
+            elif command == "DATA":
+                self.reply("354 End data with <CR><LF>.<CR><LF>")
+                while self.rfile.readline().strip() != b".":
+                    pass
+                self.reply("250 OK")
+            elif command == "QUIT":
+                self.reply("221 Bye")
+                return
+            else:
+                self.reply("250 OK")
+
+class ReusableServer(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+
+with ReusableServer(("127.0.0.1", 1025), SmtpSink) as server:
+    server.serve_forever()
+PY
+  smtp_sink_pid="$!"
+else
+  echo "python3 is required to start the local SMTP sink" >&2
+  exit 1
+fi
+
 cleanup() {
+  if [ -n "$smtp_sink_pid" ]; then
+    kill "$smtp_sink_pid" 2>/dev/null || true
+    wait "$smtp_sink_pid" 2>/dev/null || true
+  fi
   if [ "${KEEP_LOCAL_SERVICES:-false}" = "true" ]; then
     echo "Keeping verification services running because KEEP_LOCAL_SERVICES=true"
     return
