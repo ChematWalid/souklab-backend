@@ -24,6 +24,12 @@ The same endpoint rejected an invalid signature with `403`; unknown checkout
 events were safely ignored with `200`. No real credentials, card entry, or
 money movement was used.
 
+The repeatable form of this scenario is
+`scripts/verify-chargily-local-e2e.sh`; it also supports separate prepared
+test-user tokens for `checkout.failed` and `checkout.canceled` webhook paths.
+Its report is sanitized TSV and never writes bearer tokens, signatures, or
+response bodies.
+
 Flyway validation passed through V13. The SMTP-isolated suite connected only
 to the loopback sink at `127.0.0.1:1025`; verification containers, volumes,
 and networks were removed by the harness cleanup trap. Live local checks also

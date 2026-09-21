@@ -42,6 +42,14 @@ prints only `PASS`, `BLOCKED_CREDENTIALS`, or `BLOCKED_PROVIDER`, and stops
 before card entry, capture, refund, or webhook delivery. A public callback is
 still required for real webhook delivery, which is not part of this smoke test.
 
+For a repeatable application-level local lifecycle check, run
+`scripts/verify-chargily-local-e2e.sh` with `SOUKLAB_ACCESS_TOKEN`,
+`CHARGILY_TEST_PLAN_ID`, and the local `CHARGILY_SECRET_KEY`. It verifies
+checkout metadata, idempotent replay, signed paid/duplicate delivery, invalid
+signature, stale event, and unknown checkout handling. Optional
+`CHARGILY_FAILED_ACCESS_TOKEN` and `CHARGILY_CANCELED_ACCESS_TOKEN` values run
+the failed and canceled checkout paths with separate prepared test users.
+
 `scripts/verify-live-http.sh` performs a repeatable status-only sweep of public
 catalog/directory routes plus authenticated profile, notification, subscription,
 payment, health, and OpenAPI routes when `SOUKLAB_ACCESS_TOKEN` is supplied.
