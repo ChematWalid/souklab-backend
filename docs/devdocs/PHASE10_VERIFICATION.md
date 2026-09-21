@@ -100,6 +100,12 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 This covered the Phase 9 MariaDB invariant test and all three private
 operational endpoint-security tests.
 
+The repository also contains `scripts/verify-live-stomp.py`, a dependency-free
+SockJS/STOMP client verifier for authenticated CONNECT, subscription, optional
+SEND/MESSAGE delivery, and disconnect behavior. It was syntax-checked locally;
+an active deployed endpoint and safe message fixture are still required for a
+runtime delivery result.
+
 ## Dependency scan status
 
 The local OWASP Dependency-Check 13.0.0 run used `-DfailBuildOnCVSS=7` and

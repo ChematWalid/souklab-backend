@@ -58,6 +58,13 @@ classification. It does not claim full business-journey coverage or replace a
 STOMP/WebSocket client; the current local WebSocket evidence is the `/ws` and
 `/ws/info` SockJS handshake plus the authenticated relay/integration tests.
 
+`scripts/verify-live-stomp.py` is the repeatable client-side STOMP check. It
+uses only Python's standard library, authenticates with the bearer token,
+subscribes to the configured user destination, optionally sends one supplied
+test frame, verifies a delivered `MESSAGE`, and disconnects. It prints only a
+classification; missing credentials or an unavailable endpoint are reported as
+blocked rather than treated as a pass.
+
 Analytics activity outbox messages use canonical `eventId`, `eventType`, and
 ISO-8601 `eventTime` fields. The consumer retains compatibility with legacy
 array-shaped `LocalDateTime` values. The local Chargily application check also
