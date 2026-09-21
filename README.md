@@ -152,16 +152,17 @@ Service endpoints:
 
 The server listens on `http://localhost:8080/api/v1`.
 
-Authorization capabilities and their endpoint/service boundaries are documented in [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). Local development keeps Flyway disabled by default; production enables the versioned migrations and uses Hibernate schema validation.
+Authorization capabilities and their endpoint/service boundaries are documented in [`docs/current/AUTHORIZATION_MATRIX.md`](docs/current/AUTHORIZATION_MATRIX.md). Local development keeps Flyway disabled by default; production enables the versioned migrations and uses Hibernate schema validation.
 
 ---
 
 ## API Documentation & Testing Suite
 
-- **Production Audit**: See [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
+- **Documentation index**: See [`docs/current/README.md`](docs/current/README.md) for current contracts and [`docs/devdocs/README.md`](docs/devdocs/README.md) for developer history and archived material.
+- **Production Audit**: See [`docs/current/PRODUCTION_AUDIT.md`](docs/current/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
 
-- **API Specification**: See [`docs/API_SPEC.md`](docs/API_SPEC.md) for full endpoint references.
-- **Postman API Reference**: The current permission-based contract is documented in [`docs/API_SPEC.md`](docs/API_SPEC.md) and [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). The older generated reference is retained as an archival migration artifact and is not an executable contract.
+- **API Specification**: See [`docs/current/API_SPEC.md`](docs/current/API_SPEC.md) for endpoint references and [`docs/current/frontend/API_HANDOFF.md`](docs/current/frontend/API_HANDOFF.md) for frontend integration.
+- **Postman API Reference**: The current permission-based contract is documented in [`docs/current/API_SPEC.md`](docs/current/API_SPEC.md) and [`docs/current/AUTHORIZATION_MATRIX.md`](docs/current/AUTHORIZATION_MATRIX.md). The older generated reference is retained in `docs/devdocs/` as an archival migration artifact.
 - **Postman Test Suite**: The checked-in collection is retained for historical scenarios and must be regenerated before running Newman against the current permission-based API.
 
 ---

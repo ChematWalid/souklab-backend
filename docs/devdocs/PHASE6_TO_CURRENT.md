@@ -122,7 +122,7 @@ The persisted permission set currently contains 12 capabilities:
 - Permission loading uses repository/entity-graph paths so lazy permission relationships are available during authentication.
 - Legacy `ROLE_*`, `hasRole(...)`, role repositories, and role-string compatibility authorities are not part of the authorization contract.
 
-The complete endpoint/service mapping is maintained in [`AUTHORIZATION_MATRIX.md`](AUTHORIZATION_MATRIX.md).
+The complete endpoint/service mapping is maintained in [`AUTHORIZATION_MATRIX.md`](../current/AUTHORIZATION_MATRIX.md).
 
 ## Configuration and runtime policy
 
