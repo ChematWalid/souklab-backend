@@ -7,6 +7,8 @@ and are not the current production contract.
 
 ## Current authority
 
+- **[Business features guide](BUSINESS_FEATURES.md)** — plain-language description of every platform capability: what it does, who it serves, and why. No technical jargon.
+- **[Technical feature reference](FEATURES.md)** — code-derived reference: all endpoints, permissions, enums, business rules, config, and verification ledger.
 - [Frontend API handoff](frontend/API_HANDOFF.md)
 - [API conventions](API_CONVENTIONS.md)
 - [API specification](API_SPEC.md)
