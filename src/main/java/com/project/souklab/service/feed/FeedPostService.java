@@ -211,6 +211,7 @@ public class FeedPostService {
                     .fileSize(scanned.size())
                     .displayOrder(post.getMedia().size())
                     .build();
+            media.ensureId();
             post.addMedia(media);
             postRepository.save(post);
             return FeedPostMediaResponseDTO.builder()

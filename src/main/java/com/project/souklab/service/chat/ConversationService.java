@@ -199,7 +199,7 @@ public class ConversationService {
     @Transactional
     public AttachmentUploadResponse uploadAttachment(String conversationId, MultipartFile file) {
         User current = requireCurrentUser(true); requireParticipant(conversationId, current);
-        if (file == null) throw new BadRequestException("Attachment is required");
+        if (file == null || file.isEmpty()) throw new BadRequestException("Attachment is required");
         try {
             var validated = fileValidator.validateAndSanitize(file.getInputStream(), file.getOriginalFilename(), file.getContentType(), file.getSize());
             StorageResult stored = storageService.store(validated.content(), validated.sanitizedFilename(), validated.detectedMimeType(), validated.size());

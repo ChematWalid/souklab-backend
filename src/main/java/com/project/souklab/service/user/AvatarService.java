@@ -124,18 +124,22 @@ public class AvatarService {
     }
 
     /** Service entry point that owns principal and entity resolution. */
+    @Transactional
     public AvatarResponseDTO uploadAvatar(MultipartFile file) {
         return uploadAvatar(currentUserProvider.requireCurrentUser(), file);
     }
 
+    @Transactional(readOnly = true)
     public PaginatedResponse<AvatarResponseDTO> listAvatars(Pageable pageable) {
         return listAvatars(currentUserProvider.requireCurrentUser(), pageable);
     }
 
+    @Transactional
     public void deleteAvatar(String avatarId) {
         deleteAvatar(currentUserProvider.requireCurrentUser(), avatarId);
     }
 
+    @Transactional
     public AvatarResponseDTO activateAvatar(String avatarId) {
         return activateAvatar(currentUserProvider.requireCurrentUser(), avatarId);
     }

@@ -196,6 +196,7 @@ public class AuthService {
     }
 
     /** Handles logout input at the service boundary, including current-principal resolution. */
+    @Transactional
     public void logout(TokenRefreshRequestDTO request) {
         String userEmail = SecurityUtils.getCurrentUsername();
         String refreshToken = request != null ? request.getRefreshToken() : null;
