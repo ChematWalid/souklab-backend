@@ -47,6 +47,16 @@ public final class FinancialAuditOperation {
         public String value() { return value; }
     }
 
+    public enum Payment implements Type {
+        WEBHOOK("PAYMENT_WEBHOOK");
+
+        private final String value;
+
+        Payment(String value) { this.value = value; }
+
+        public String value() { return value; }
+    }
+
     public enum Subscription implements Type {
         REVOKE("REVOKE"), CANCEL("CANCEL");
 

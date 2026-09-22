@@ -34,8 +34,8 @@
         <httpclient5.version>5.6.4</httpclient5.version>
         <httpcore5.version>5.4.3</httpcore5.version>
         <!-- Hibernate Search 8.2 resolves these clients transitively; keep the
-             REST client on the Elastic security-fix release line. -->
-        <elasticsearch-rest-client.version>9.3.8</elasticsearch-rest-client.version>
+             REST client on the latest compatible Elastic security-fix line. -->
+        <elasticsearch-rest-client.version>9.4.5</elasticsearch-rest-client.version>
     </properties>
     <dependencyManagement>
         <dependencies>

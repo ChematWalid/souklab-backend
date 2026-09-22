@@ -663,6 +663,10 @@ public class AuthService {
         if (user.getStatus() == AccountStatus.PENDING) {
             throw new ForbiddenException("Account registration is pending administrator approval.");
         }
+
+        if (!user.isEmailVerified()) {
+            throw new ForbiddenException("Please verify your email address before signing in.");
+        }
     }
 
     /**

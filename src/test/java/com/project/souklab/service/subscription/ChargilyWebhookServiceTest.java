@@ -12,7 +12,10 @@ import com.project.souklab.model.PaymentStatus;
 import com.project.souklab.model.SubscriptionStatus;
 import com.project.souklab.model.ClientSubscription;
 import com.project.souklab.model.WebhookProcessingStatus;
+import com.project.souklab.model.User;
+import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.service.audit.AuditLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +32,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,6 +46,7 @@ class ChargilyWebhookServiceTest {
     private PaymentWebhookLogRepository logRepository;
     private PaymentRepository paymentRepository;
     private ClientSubscriptionRepository clientSubscriptionRepository;
+    private AuditLogService auditLogService;
     private byte[] secret;
 
     @BeforeEach
@@ -56,11 +62,13 @@ class ChargilyWebhookServiceTest {
         paymentRepository = mock(PaymentRepository.class);
         clientSubscriptionRepository = mock(ClientSubscriptionRepository.class);
         claimService = mock(WebhookEventClaimService.class);
+        auditLogService = mock(AuditLogService.class);
         service = new ChargilyWebhookService(
                 new ObjectMapper(), new WebhookSecurityService(properties), logRepository,
                 paymentRepository, mock(ArtisanSubscriptionRepository.class),
                 clientSubscriptionRepository, mock(SubscriptionPlanRules.class),
-                mock(NotificationService.class), claimService, properties, clock);
+                mock(NotificationService.class), claimService, properties, clock,
+                auditLogService);
     }
 
     @Test
@@ -79,7 +87,7 @@ class ChargilyWebhookServiceTest {
 
     @Test
     void validUnknownCheckoutIsClaimedAndIgnoredWithoutActivation() throws Exception {
-        byte[] body = ("{\"id\":\"evt-3\",\"type\":\"checkout.paid\",\"created_at\":"
+        byte[] body = ("{\"id\":\"evt-3\",\"entity\":\"event\",\"livemode\":false,\"updated_at\":1790000000,\"type\":\"checkout.paid\",\"created_at\":"
                 + Instant.parse("2026-09-17T23:00:00Z").getEpochSecond()
                 + ",\"data\":{\"id\":\"unknown-checkout\"}}").getBytes(StandardCharsets.UTF_8);
         PaymentWebhookLog log = new PaymentWebhookLog();
@@ -103,6 +111,9 @@ class ChargilyWebhookServiceTest {
         log.setStatus(WebhookProcessingStatus.RECEIVED);
         Payment payment = new Payment();
         payment.setSubscriptionId("subscription-4");
+        User account = new User();
+        account.setId("account-4");
+        payment.setAccount(account);
         ClientSubscription subscription = new ClientSubscription();
         subscription.setStatus(SubscriptionStatus.PENDING);
         when(claimService.claim("evt-4", ChargilyWebhookEvent.Checkout.FAILED, "checkout-4", body)).thenReturn(true);
@@ -116,6 +127,8 @@ class ChargilyWebhookServiceTest {
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELED);
         assertThat(log.getStatus()).isEqualTo(WebhookProcessingStatus.PROCESSED);
+        verify(auditLogService).logFinancialState(eq(AuditLogAction.Payment.State.FAILED), eq(account),
+                eq("account-4"), any(), isNull(), eq(PaymentStatus.FAILED), any(), any(), eq("subscription-4"));
     }
 
     @Test

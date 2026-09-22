@@ -1,5 +1,7 @@
 package com.project.souklab.service.audit;
 
+import com.project.souklab.dto.admin.AuditLogDTO;
+import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dao.AuditLogRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.AuditLog;
@@ -10,6 +12,8 @@ import com.project.souklab.model.User;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +27,12 @@ public class AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
     private final UserRepository userRepository;
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<AuditLogDTO> getAuditLogs(Pageable pageable) {
+        Page<AuditLogDTO> page = auditLogRepository.findAll(pageable).map(AuditLogDTO::from);
+        return PaginatedResponse.from(page);
+    }
 
     /**
      * Records an audit log entry for a specific action performed by a user.

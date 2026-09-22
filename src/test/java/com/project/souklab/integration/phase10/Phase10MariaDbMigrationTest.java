@@ -31,7 +31,11 @@ class Phase10MariaDbMigrationTest {
                     .migrate();
 
             try (Connection connection = database.createConnection(""); Statement statement = connection.createStatement()) {
-                assertThat(migrationVersion(statement)).isEqualTo("13");
+                assertThat(migrationVersion(statement)).isEqualTo("14");
+                assertThat(enumContains(statement, "audit_logs", "action", "PAYMENT_PAID")).isTrue();
+                assertThat(enumContains(statement, "audit_logs", "action", "PAYMENT_FAILED")).isTrue();
+                assertThat(enumContains(statement, "audit_logs", "action", "PAYMENT_CANCELED")).isTrue();
+                assertThat(enumContains(statement, "audit_logs", "action", "SUBSCRIPTION_ACTIVATED")).isTrue();
                 assertThat(tableExists(statement, "activity_events")).isTrue();
                 assertThat(tableExists(statement, "analytics_outbox_events")).isTrue();
                 assertThat(tableExists(statement, "analytics_processed_events")).isTrue();
@@ -99,6 +103,13 @@ class Phase10MariaDbMigrationTest {
         try (ResultSet result = statement.executeQuery("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = '" + table + "' AND index_name = '" + index + "'")) {
             result.next();
             return result.getInt(1) > 0;
+        }
+    }
+
+    private boolean enumContains(Statement statement, String table, String column, String value) throws SQLException {
+        try (ResultSet result = statement.executeQuery("SELECT COLUMN_TYPE FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '" + table + "' AND column_name = '" + column + "'")) {
+            result.next();
+            return result.getString(1).contains("'" + value + "'");
         }
     }
 }

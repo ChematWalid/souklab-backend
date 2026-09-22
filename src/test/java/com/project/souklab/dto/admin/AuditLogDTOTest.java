@@ -17,6 +17,13 @@ class AuditLogDTOTest {
         user.setId("user-1");
         AuditLog attributed = new AuditLog(AuditLogAction.User.APPROVED, "approved", user);
         attributed.setId("log-1");
+        attributed.setTargetAccountId("target-1");
+        attributed.setOperation("MANUAL_GRANT");
+        attributed.setPreviousState("NONE");
+        attributed.setNewState("ACTIVE");
+        attributed.setReason("approved");
+        attributed.setPaymentId("payment-1");
+        attributed.setSubscriptionId("subscription-1");
 
         AuditLogDTO result = AuditLogDTO.from(attributed);
         assertThat(result.getId()).isEqualTo("log-1");
@@ -24,6 +31,13 @@ class AuditLogDTOTest {
         assertThat(result.getDetails()).isEqualTo("approved");
         assertThat(result.getUserId()).isEqualTo("user-1");
         assertThat(result.getUserEmail()).isEqualTo("admin@example.com");
+        assertThat(result.getTargetAccountId()).isEqualTo("target-1");
+        assertThat(result.getOperation()).isEqualTo("MANUAL_GRANT");
+        assertThat(result.getPreviousState()).isEqualTo("NONE");
+        assertThat(result.getNewState()).isEqualTo("ACTIVE");
+        assertThat(result.getReason()).isEqualTo("approved");
+        assertThat(result.getPaymentId()).isEqualTo("payment-1");
+        assertThat(result.getSubscriptionId()).isEqualTo("subscription-1");
 
         AuditLog unattributed = new AuditLog(AuditLogAction.Report.DISMISSED, null, null);
         assertThat(AuditLogDTO.from(unattributed).getUserId()).isNull();

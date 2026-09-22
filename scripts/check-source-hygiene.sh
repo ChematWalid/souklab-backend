@@ -2,6 +2,11 @@
 set -euo pipefail
 
 source_roots=(src/main/java src/test/java src/main/resources/db/migration scripts deploy)
+command -v rg >/dev/null 2>&1 || {
+  echo 'source hygiene requires ripgrep (rg); install ripgrep or use the CI dependency check' >&2
+  exit 127
+}
+bash -n scripts/full-verification.sh scripts/verify-chargily-callback.sh scripts/run-local-verification-app.sh
 if rg -n '[[:blank:]]+$' "${source_roots[@]}"; then
   echo 'trailing whitespace detected' >&2
   exit 1
@@ -157,6 +162,7 @@ while read -r version; do
     exit 1
   }
 done <<< "$versions"
+python3 scripts/validate-audit-action-schema.py
 
 test -f deploy/.env.production.example || {
   echo 'production environment template is missing' >&2

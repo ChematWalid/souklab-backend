@@ -22,6 +22,13 @@ public class AuditLogDTO {
     private String details;
     private String userEmail;
     private String userId;
+    private String targetAccountId;
+    private String operation;
+    private String previousState;
+    private String newState;
+    private String reason;
+    private String paymentId;
+    private String subscriptionId;
     private LocalDateTime createdAt;
 
     public static AuditLogDTO from(AuditLog entity) {
@@ -34,6 +41,13 @@ public class AuditLogDTO {
                 .details(entity.getDetails())
                 .userId(entity.getUser() != null ? entity.getUser().getId() : null)
                 .userEmail(entity.getUser() != null ? entity.getUser().getEmail() : null)
+                .targetAccountId(entity.getTargetAccountId())
+                .operation(entity.getOperation())
+                .previousState(entity.getPreviousState())
+                .newState(entity.getNewState())
+                .reason(entity.getReason())
+                .paymentId(entity.getPaymentId())
+                .subscriptionId(entity.getSubscriptionId())
                 .createdAt(entity.getCreatedAt())
                 .build();
     }

@@ -18,9 +18,10 @@ public final class AuditLogAction {
                 Permission.Grant.VALUE, Permission.Revoke.VALUE, User.APPROVED, User.BANNED,
                 User.Timeout.VALUE, User.UNBANNED, Artisan.APPROVED, Artisan.REJECTED,
                 Formation.APPROVED, Formation.REJECTED, Report.RESOLVED, Report.DISMISSED,
-                Subscription.GRANTED, Subscription.CANCELED, Subscription.REVOKED,
+                Subscription.GRANTED, Subscription.ACTIVATED, Subscription.CANCELED, Subscription.REVOKED,
                 Subscription.State.CORRECTED, Subscription.Plan.CREATED, Subscription.Plan.UPDATED,
-                Subscription.Plan.DEACTIVATED, Payment.State.CORRECTED, Refund.Request.REJECTED,
+                Subscription.Plan.DEACTIVATED, Payment.State.PAID, Payment.State.FAILED,
+                Payment.State.CANCELED, Payment.State.CORRECTED, Refund.Request.REJECTED,
                 Analytics.REBUILD, Analytics.Job.SUBMITTED, Analytics.Result.READ, Analytics.EXPORT);
     }
 
@@ -122,7 +123,8 @@ public final class AuditLogAction {
     }
 
     public enum Subscription implements Key {
-        GRANTED("SUBSCRIPTION_GRANTED"), CANCELED("SUBSCRIPTION_CANCELED"), REVOKED("SUBSCRIPTION_REVOKED");
+        GRANTED("SUBSCRIPTION_GRANTED"), ACTIVATED("SUBSCRIPTION_ACTIVATED"),
+        CANCELED("SUBSCRIPTION_CANCELED"), REVOKED("SUBSCRIPTION_REVOKED");
         private final String value;
         Subscription(String value) { this.value = value; }
         public String value() { return value; }
@@ -147,6 +149,7 @@ public final class AuditLogAction {
         private Payment() { }
 
         public enum State implements Key {
+            PAID("PAYMENT_PAID"), FAILED("PAYMENT_FAILED"), CANCELED("PAYMENT_CANCELED"),
             CORRECTED("PAYMENT_STATE_CORRECTED");
             private final String value;
             State(String value) { this.value = value; }

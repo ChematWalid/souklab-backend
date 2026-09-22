@@ -1,6 +1,6 @@
 # Souklab API — Complete Postman Reference Guide
 
-> **Status: archival reference.** This generated document predates the authorization migration and is not an executable contract for the current API. Use [`API_SPEC.md`](../current/API_SPEC.md) and [`AUTHORIZATION_MATRIX.md`](../current/AUTHORIZATION_MATRIX.md) for current requests, responses, and permission requirements. The current API accepts `accountType` only during onboarding and exposes database-backed `permissions`; legacy `role`, `roles`, and `ROLE_*` fields must not be sent or expected.
+> **Status: archival reference.** This generated document predates the authorization migration and is not an executable contract for the current API. Use [`API_SPEC.md`](../API_SPEC.md) and [`AUTHORIZATION_MATRIX.md`](../AUTHORIZATION_MATRIX.md) for current requests, responses, and permission requirements. The current API accepts `accountType` only during onboarding and exposes database-backed `permissions`; legacy `role`, `roles`, and `ROLE_*` fields must not be sent or expected.
 
 This document provides the historical specification for requests, headers, request bodies, and responses captured in the **Souklab Postman Collection** (`.postman/souklab.postman_collection.json`).
 

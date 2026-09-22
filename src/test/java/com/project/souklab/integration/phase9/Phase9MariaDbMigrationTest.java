@@ -27,7 +27,11 @@ class Phase9MariaDbMigrationTest {
                     .migrate();
 
             try (Connection connection = database.createConnection(""); Statement statement = connection.createStatement()) {
-                assertThat(migrationVersion(statement)).isEqualTo("13");
+                assertThat(migrationVersion(statement)).isEqualTo("14");
+                assertThat(enumContains(statement, "audit_logs", "action", "PAYMENT_PAID")).isTrue();
+                assertThat(enumContains(statement, "audit_logs", "action", "PAYMENT_FAILED")).isTrue();
+                assertThat(enumContains(statement, "audit_logs", "action", "PAYMENT_CANCELED")).isTrue();
+                assertThat(enumContains(statement, "audit_logs", "action", "SUBSCRIPTION_ACTIVATED")).isTrue();
                 assertThat(tableExists(statement, "subscription_pricing")).isTrue();
                 assertThat(tableExists(statement, "subscription_plan_entitlements")).isTrue();
                 assertThat(tableExists(statement, "artisan_subscriptions")).isTrue();
@@ -41,6 +45,10 @@ class Phase9MariaDbMigrationTest {
 
                 statement.executeUpdate("INSERT INTO users (id, email_verified, failed_login_attempts, created_at, updated_at, email, status) "
                         + "VALUES ('account-1', 0, 0, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), 'phase9@example.test', 'ACTIVE')");
+                statement.executeUpdate("INSERT INTO audit_logs (created_at, updated_at, id, user_id, action, details) "
+                        + "VALUES (CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), 'audit-payment-paid', 'account-1', 'PAYMENT_PAID', 'payment webhook')");
+                statement.executeUpdate("INSERT INTO audit_logs (created_at, updated_at, id, user_id, action, details) "
+                        + "VALUES (CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), 'audit-subscription-active', 'account-1', 'SUBSCRIPTION_ACTIVATED', 'subscription webhook')");
                 statement.executeUpdate("INSERT INTO artisan_subscriptions "
                         + "(id, account_id, status, plan_id, plan_name, billing_period, amount, currency, entitlements_snapshot, version_number, created_at, updated_at) "
                         + "VALUES ('artisan-subscription-1', 'account-1', 'ACTIVE', 'plan-1', 'Monthly', 'MONTHLY', 1000, 'DZD', '{}', 0, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6))");
@@ -86,6 +94,13 @@ class Phase9MariaDbMigrationTest {
         try (ResultSet result = statement.executeQuery("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = '" + table + "' AND index_name = '" + index + "'")) {
             result.next();
             return result.getInt(1) > 0;
+        }
+    }
+
+    private boolean enumContains(Statement statement, String table, String column, String value) throws SQLException {
+        try (ResultSet result = statement.executeQuery("SELECT COLUMN_TYPE FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '" + table + "' AND column_name = '" + column + "'")) {
+            result.next();
+            return result.getString(1).contains("'" + value + "'");
         }
     }
 }

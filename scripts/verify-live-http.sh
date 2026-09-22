@@ -53,4 +53,14 @@ elif [[ "$require_auth" == "true" ]]; then
   exit 2
 fi
 
+python3 scripts/validate-api-docs.py "$base_url/v3/api-docs" docs/API_OPENAPI.md
+API_ROUTE_REPORT="${LIVE_API_ROUTE_REPORT:-${report%.tsv}-all-routes.tsv}" \
+  APP_BASE_URL="$base_url" SOUKLAB_ACCESS_TOKEN="$token" \
+  SOUKLAB_ADMIN_TOKEN="${SOUKLAB_ADMIN_TOKEN:-}" \
+  SOUKLAB_CLIENT_TOKEN="${SOUKLAB_CLIENT_TOKEN:-}" \
+  SOUKLAB_ARTISAN_TOKEN="${SOUKLAB_ARTISAN_TOKEN:-}" \
+  SOUKLAB_SECOND_CLIENT_TOKEN="${SOUKLAB_SECOND_CLIENT_TOKEN:-}" \
+  SOUKLAB_SECOND_ARTISAN_TOKEN="${SOUKLAB_SECOND_ARTISAN_TOKEN:-}" \
+  python3 scripts/verify-api-routes.py
+
 printf 'LIVE_HTTP_RESULT=PASS\n'

@@ -100,7 +100,7 @@ public class FormationEnrollmentService {
      * @param formationId unique identifier of the formation
      * @return comprehensive public view DTO
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public FormationPublicViewDTO getPublishedFormationDetails(String formationId) {
         Formation formation = formationRepository.findWithLockByIdAndDeletedAtIsNull(formationId)
                 .or(() -> formationRepository.findByIdAndDeletedAtIsNull(formationId))

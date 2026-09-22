@@ -6,6 +6,7 @@ import com.project.souklab.service.chat.ConversationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,7 +59,7 @@ public class ConversationController {
         service.markRead(id, request == null ? null : request.messageId()); return ResponseEntity.ok(ApiResponse.success(null, "Conversation marked as read"));
     }
 
-    @PostMapping("/{id}/attachments")
+    @PostMapping(value = "/{id}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<AttachmentUploadResponse>> uploadAttachment(@PathVariable String id, @RequestParam("file") MultipartFile file) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(service.uploadAttachment(id, file), "Attachment uploaded"));
     }

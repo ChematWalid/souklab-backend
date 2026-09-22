@@ -1,10 +1,12 @@
 package com.project.souklab.controller.user;
 
+import com.project.souklab.dto.admin.AuditLogDTO;
 import com.project.souklab.dto.auth.UserResponseDTO;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.user.BanRequestDTO;
 import com.project.souklab.dto.user.TimeoutRequestDTO;
+import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.user.UserManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,7 @@ import java.util.List;
 public class UserManagementController {
 
     private final UserManagementService userManagementService;
+    private final AuditLogService auditLogService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getAllUsers(
@@ -42,6 +45,12 @@ public class UserManagementController {
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getPendingUsers(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(userManagementService.getPendingUsers(pageable)));
+    }
+
+    @GetMapping("/audit-logs")
+    public ResponseEntity<ApiResponse<PaginatedResponse<AuditLogDTO>>> getAuditLogs(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(auditLogService.getAuditLogs(pageable)));
     }
 
     @PostMapping("/{id}/approve")

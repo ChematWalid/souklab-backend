@@ -23,7 +23,7 @@ This work does not claim zero-downtime deployment. Application rollback is resta
 
 ## Resume checklist
 
-1. Review `docs/current/RELEASE_CHECKLIST.md` and `docs/current/DEPLOYMENT_RUNBOOK.md`.
+1. Review `docs/RELEASE_CHECKLIST.md` and `docs/DEPLOYMENT_RUNBOOK.md`.
 2. Validate the real production environment without exposing secrets.
 3. Complete the hosted CI dependency and integration gates.
 4. Run the backup/restore drill before the first public deployment.

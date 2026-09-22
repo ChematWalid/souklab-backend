@@ -35,6 +35,8 @@ jobs:
 
       - name: Validate migration scripts and source hygiene
         run: |
+          command -v rg
+          rg --version
           bash -n scripts/check-source-hygiene.sh
           ./scripts/check-source-hygiene.sh
           ./mvnw --batch-mode --no-transfer-progress -DskipTests validate
@@ -100,6 +102,7 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           test -n "$NVD_API_KEY" || { echo 'NVD_API_KEY repository secret is required'; exit 1; }
+          echo 'Dependency scanning is a separate gate from application verification.'
           ./mvnw --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:13.0.0:check \
             -DnvdApiKey="$NVD_API_KEY" -DfailBuildOnCVSS=7
 

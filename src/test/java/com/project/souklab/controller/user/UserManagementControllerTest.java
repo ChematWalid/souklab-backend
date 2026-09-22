@@ -2,13 +2,16 @@ package com.project.souklab.controller.user;
 import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
+import com.project.souklab.dto.admin.AuditLogDTO;
 import com.project.souklab.dto.auth.UserResponseDTO;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
+import com.project.souklab.model.AuditLogAction;
 import com.project.souklab.security.Permission;
+import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.user.UserManagementService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -62,6 +65,9 @@ class UserManagementControllerTest {
 
     @MockitoBean
     private UserManagementService userManagementService;
+
+    @MockitoBean
+    private AuditLogService auditLogService;
 
     private UserResponseDTO buildSampleUser(String id, String email, AccountStatus status) {
         return UserResponseDTO.builder()
@@ -304,6 +310,68 @@ class UserManagementControllerTest {
             mockMvc.perform(get("/api/v1/admin/users/pending"))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value(401));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/v1/admin/users/audit-logs")
+    class GetAuditLogsTests {
+
+        @Test
+        @DisplayName("ROLE_ADMIN receives paginated audit records including financial state")
+        void getAuditLogs_withAdminRole_shouldReturnPaginatedRecords() throws Exception {
+            AuditLogDTO auditLog = AuditLogDTO.builder()
+                    .id("audit-1")
+                    .action(AuditLogAction.Subscription.GRANTED)
+                    .details("subscription granted")
+                    .userId("admin-1")
+                    .userEmail("admin@souklab.test")
+                    .targetAccountId("client-1")
+                    .operation("MANUAL_GRANT")
+                    .previousState("NONE")
+                    .newState("ACTIVE")
+                    .reason("verification")
+                    .paymentId("payment-1")
+                    .subscriptionId("subscription-1")
+                    .build();
+            PaginatedResponse<AuditLogDTO> response = PaginatedResponse.<AuditLogDTO>builder()
+                    .content(List.of(auditLog))
+                    .pageNumber(0)
+                    .pageSize(10)
+                    .totalElements(1)
+                    .totalPages(1)
+                    .last(true)
+                    .build();
+            when(auditLogService.getAuditLogs(any(Pageable.class))).thenReturn(response);
+
+            mockMvc.perform(get("/api/v1/admin/users/audit-logs").with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data.content[0].action").value("SUBSCRIPTION_GRANTED"))
+                    .andExpect(jsonPath("$.data.content[0].targetAccountId").value("client-1"))
+                    .andExpect(jsonPath("$.data.content[0].newState").value("ACTIVE"))
+                    .andExpect(jsonPath("$.data.content[0].paymentId").value("payment-1"));
+
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(auditLogService).getAuditLogs(pageableCaptor.capture());
+            assertThat(pageableCaptor.getValue().getSort().getOrderFor("createdAt").getDirection())
+                    .isEqualTo(Sort.Direction.DESC);
+        }
+
+        @Test
+        @DisplayName("non-admin users cannot read audit records")
+        void getAuditLogs_withClientRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(get("/api/v1/admin/users/audit-logs").with(client()))
+                    .andExpect(status().isForbidden());
+            verifyNoInteractions(auditLogService);
+        }
+
+        @Test
+        @DisplayName("unauthenticated requests cannot read audit records")
+        void getAuditLogs_unauthenticated_shouldReturn401Unauthorized() throws Exception {
+            mockMvc.perform(get("/api/v1/admin/users/audit-logs"))
+                    .andExpect(status().isUnauthorized());
+            verifyNoInteractions(auditLogService);
         }
     }
 

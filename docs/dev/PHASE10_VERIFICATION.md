@@ -37,7 +37,7 @@ confirmed that unauthenticated health/OpenAPI endpoints return `401`,
 authenticated health returns `200`, the authenticated status sweep passed
 profile/notification/subscription/payment/OpenAPI routes, the SockJS `/ws` and
 `/ws/info` endpoints returned `200`, and authenticated OpenAPI JSON was
-exported and converted to `docs/current/API_OPENAPI.md`. The credential-free
+exported and converted to `docs/API_OPENAPI.md`. The credential-free
 Chargily provider returned the expected success (`200`), validation (`422`),
 rate-limit (`429` then `200`), provider (`503`), and malformed (`200` with an
 invalid shape) fixtures. The real sandbox script was run without credentials

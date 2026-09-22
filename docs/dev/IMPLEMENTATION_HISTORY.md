@@ -327,7 +327,7 @@ public class DirectoryController {
 - `src/main/java/com/project/souklab/controller/formateur/`
 
 The Phase 6 behavior is covered by `FormationIntegrationTest` and the Batch 8
-Postman scenarios documented in `docs/devdocs/POSTMAN_API_REFERENCE.md`.
+Postman scenarios documented in `docs/dev/POSTMAN_API_REFERENCE.md`.
 
 ## Phase 7 — Feed, reviews, reports, and moderation
 
@@ -642,13 +642,13 @@ fresh MariaDB schema.
 
 ## API and documentation artifacts
 
-- `docs/current/API_SPEC.md` — REST contracts and common response behavior.
-- `docs/devdocs/POSTMAN_API_REFERENCE.md` — admin, analytics, and phase acceptance
+- `docs/API_SPEC.md` — REST contracts and common response behavior.
+- `docs/dev/POSTMAN_API_REFERENCE.md` — admin, analytics, and phase acceptance
   examples.
-- `docs/devdocs/PHASE10_VERIFICATION.md` — local Docker-backed evidence and scope
+- `docs/dev/PHASE10_VERIFICATION.md` — local Docker-backed evidence and scope
   boundary.
 - `docs/RELEASE_CHECKLIST.md` — production/CI release gates.
-- `docs/devdocs/PHASE10_DEFERRED_RELEASE_PLAN.md` — future-agent execution plan for
+- `docs/dev/PHASE10_DEFERRED_RELEASE_PLAN.md` — future-agent execution plan for
   deferred release work.
 - `.github/workflows/production-verification.yml` — hosted verification
   workflow.

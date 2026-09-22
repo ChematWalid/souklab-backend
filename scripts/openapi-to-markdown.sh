@@ -2,7 +2,7 @@
 set -euo pipefail
 
 input_file="${1:-docs/generated/openapi.json}"
-output_file="${2:-docs/current/API_OPENAPI.md}"
+output_file="${2:-docs/API_OPENAPI.md}"
 
 command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; exit 1; }
 test -s "$input_file" || { echo "OpenAPI input is missing: $input_file" >&2; exit 1; }

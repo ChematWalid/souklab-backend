@@ -17,6 +17,7 @@ import socket
 import ssl
 import sys
 import time
+import urllib.request
 from urllib.parse import urlparse
 
 
@@ -105,6 +106,19 @@ def sockjs_send(sock: socket.socket, stomp: str) -> None:
     send_frame(sock, ("[" + json.dumps(stomp, separators=(",", ":")) + "]").encode())
 
 
+def native_send(sock: socket.socket, stomp: str) -> None:
+    send_frame(sock, stomp.encode())
+
+
+def native_stomp_messages(sock: socket.socket, deadline: float):
+    while time.monotonic() < deadline:
+        opcode, payload = recv_frame(sock)
+        if opcode == 8:
+            return
+        if opcode == 1:
+            yield payload.decode()
+
+
 def sockjs_stomp_messages(sock: socket.socket, deadline: float):
     while time.monotonic() < deadline:
         opcode, payload = recv_frame(sock)
@@ -128,6 +142,61 @@ def stomp_frame(command: str, headers: dict[str, str], body: str = "") -> str:
     return "\n".join(lines) + "\n\n" + body + "\x00"
 
 
+def verify_sockjs_info(url: str, timeout: float) -> None:
+    """Verify the public SockJS metadata endpoint without authentication."""
+    parsed = urlparse(url)
+    scheme = "https" if parsed.scheme == "wss" else "http"
+    path = parsed.path.rsplit("/", 1)[0] + "/info"
+    info_url = f"{scheme}://{parsed.netloc}{path}"
+    request = urllib.request.Request(info_url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        if response.status != 200:
+            raise VerificationError("SockJS /info did not return HTTP 200")
+        body = json.loads(response.read().decode("utf-8"))
+    if not isinstance(body, dict) or "websocket" not in body:
+        raise VerificationError("SockJS /info response was not valid metadata")
+
+
+def verify_unauthenticated_rejection(url: str, timeout: float) -> None:
+    """CONNECT without a bearer token and require rejection, not CONNECTED."""
+    sock = None
+    try:
+        sock = ws_connect(url, timeout)
+        deadline = time.monotonic() + timeout
+        native = url.rstrip("/").endswith("/websocket")
+        send = native_send if native else sockjs_send
+        messages = native_stomp_messages if native else sockjs_stomp_messages
+        if not native and next(messages(sock, deadline), "not-open") is not None:
+            raise VerificationError("SockJS open frame was not received")
+        send(sock, stomp_frame("CONNECT", {
+            "accept-version": "1.2",
+            "host": urlparse(url).hostname or "localhost",
+        }))
+        for message in messages(sock, deadline):
+            if message is None:
+                continue
+            if message.startswith("CONNECTED\n"):
+                raise VerificationError("unauthenticated STOMP CONNECT was accepted")
+            if message.startswith("ERROR\n"):
+                return
+        raise VerificationError("unauthenticated STOMP CONNECT received no rejection")
+    except VerificationError as exc:
+        message = str(exc)
+        if "accepted" in message:
+            raise
+        if any(marker in message for marker in (
+            "websocket handshake returned",
+            "websocket frame closed",
+            "websocket payload closed",
+            "SockJS closed the connection",
+        )):
+            return
+        raise
+    finally:
+        if sock is not None:
+            sock.close()
+
+
 def main() -> int:
     token = os.getenv("SOUKLAB_ACCESS_TOKEN", "")
     url = os.getenv("STOMP_WS_URL", "ws://localhost:8080/ws/websocket")
@@ -140,17 +209,22 @@ def main() -> int:
         return 2
     sock = None
     try:
+        verify_sockjs_info(url, timeout)
+        verify_unauthenticated_rejection(url, timeout)
         sock = ws_connect(url, timeout)
         deadline = time.monotonic() + timeout
-        if next(sockjs_stomp_messages(sock, deadline), "not-open") is not None:
+        native = url.rstrip("/").endswith("/websocket")
+        send = native_send if native else sockjs_send
+        messages = native_stomp_messages if native else sockjs_stomp_messages
+        if not native and next(messages(sock, deadline), "not-open") is not None:
             raise VerificationError("SockJS open frame was not received")
-        sockjs_send(sock, stomp_frame("CONNECT", {
+        send(sock, stomp_frame("CONNECT", {
             "accept-version": "1.2",
             "host": urlparse(url).hostname or "localhost",
             "Authorization": "Bearer " + token,
         }))
         connected = False
-        for message in sockjs_stomp_messages(sock, deadline):
+        for message in messages(sock, deadline):
             if message.startswith("CONNECTED\n"):
                 connected = True
                 break
@@ -158,13 +232,13 @@ def main() -> int:
                 raise VerificationError("STOMP authentication was rejected")
         if not connected:
             raise VerificationError("STOMP CONNECT did not complete")
-        sockjs_send(sock, stomp_frame("SUBSCRIBE", {"id": "souklab-verification", "destination": destination, "ack": "auto"}))
+        send(sock, stomp_frame("SUBSCRIBE", {"id": "souklab-verification", "destination": destination, "ack": "auto"}))
         if send_destination:
-            sockjs_send(sock, stomp_frame("SEND", {"destination": send_destination, "content-type": "application/json"}, send_body))
+            send(sock, stomp_frame("SEND", {"destination": send_destination, "content-type": "application/json"}, send_body))
         if send_destination and os.getenv("STOMP_EXPECT_MESSAGE", "true").lower() == "true":
-            if not any(message.startswith("MESSAGE\n") for message in sockjs_stomp_messages(sock, deadline)):
+            if not any(message.startswith("MESSAGE\n") for message in messages(sock, deadline)):
                 raise VerificationError("STOMP MESSAGE was not delivered")
-        sockjs_send(sock, stomp_frame("DISCONNECT", {"receipt": "souklab-verification-disconnect"}))
+        send(sock, stomp_frame("DISCONNECT", {"receipt": "souklab-verification-disconnect"}))
         print("STOMP_VERIFY_RESULT=PASS")
         return 0
     except (OSError, VerificationError, json.JSONDecodeError, StopIteration) as exc:

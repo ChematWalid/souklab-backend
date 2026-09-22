@@ -2,6 +2,7 @@ package com.project.souklab.integration.chargily;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.souklab.service.subscription.ChargilyWebhookEvent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChargilyWebhookPayload {
     private String id;
     private ChargilyWebhookEvent.Checkout type;

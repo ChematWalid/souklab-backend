@@ -101,6 +101,9 @@ export PHASE10_RABBIT_INTEGRATION="${PHASE10_RABBIT_INTEGRATION:-true}"
 export PHASE10_REDIS_INTEGRATION="${PHASE10_REDIS_INTEGRATION:-true}"
 export PHASE9_MARIADB_INTEGRATION="${PHASE9_MARIADB_INTEGRATION:-true}"
 export PHASE10_ENDPOINT_SECURITY="${PHASE10_ENDPOINT_SECURITY:-true}"
+# Bound Spring's broker-relay lifecycle wait so a successful test run cannot
+# remain attached forever when RabbitMQ closes a relay session slowly.
+export SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE="${SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE:-10s}"
 
 smtp_sink_pid=""
 if command -v python3 >/dev/null 2>&1; then

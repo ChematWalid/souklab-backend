@@ -9,7 +9,9 @@ while IFS= read -r file; do
     exit 1
   fi
 done < <(rg -l '@RestController' "$controller_root" --glob '*.java')
-rg -q '^> \*\*Status: archival reference\.\*\*' docs/devdocs/POSTMAN_API_REFERENCE.md
-test -f docs/current/frontend/API_HANDOFF.md
+rg -q '^> \*\*Status: archival reference\.\*\*' docs/dev/POSTMAN_API_REFERENCE.md
+test -f docs/frontend/API_HANDOFF.md
 test -x scripts/export-openapi.sh
+test -x scripts/validate-api-docs.py
+test -x scripts/verify-api-routes.py
 echo 'API contract checks passed'

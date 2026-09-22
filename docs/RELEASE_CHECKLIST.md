@@ -1,12 +1,12 @@
 # Production release checklist
 
 Local Phase 10 acceptance evidence is recorded in
-[`PHASE10_VERIFICATION.md`](../devdocs/PHASE10_VERIFICATION.md). The boxes below remain
+[`PHASE10_VERIFICATION.md`](dev/PHASE10_VERIFICATION.md). The boxes below remain
 release gates and must be checked only when the corresponding production or CI
 evidence exists.
 
 The currently deferred production/CI work is documented in
-[`PHASE10_DEFERRED_RELEASE_PLAN.md`](../devdocs/PHASE10_DEFERRED_RELEASE_PLAN.md). In
+[`PHASE10_DEFERRED_RELEASE_PLAN.md`](dev/PHASE10_DEFERRED_RELEASE_PLAN.md). In
 particular, hosted CI/dependency scanning and production backup/restore
 evidence are intentionally deferred and must remain unchecked until a future
 agent or operator produces the required evidence.

@@ -636,6 +636,7 @@ class AuthServiceTest {
                 .email("unlocked@example.com")
                 .password("hashedPassword")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .lockedUntil(fixedNow.minusMinutes(1))
                 .failedLoginAttempts(5)
                 .permissions(new HashSet<>(Set.of(clientRole)))
@@ -869,6 +870,7 @@ class AuthServiceTest {
                 .email("unbanned@example.com")
                 .password("hashedPassword")
                 .status(AccountStatus.SUSPENDED)
+                .emailVerified(true)
                 .bannedUntil(fixedNow.minusDays(1))
                 .banReason("Prior timeout")
                 .permissions(new HashSet<>(Set.of(clientRole)))
@@ -957,6 +959,7 @@ class AuthServiceTest {
                 .email("user@example.com")
                 .password("hashedPassword")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .failedLoginAttempts(3)
                 .lockedUntil(null)
                 .permissions(new HashSet<>(Set.of(clientRole)))
@@ -983,6 +986,31 @@ class AuthServiceTest {
         verify(userRepository).save(user);
     }
 
+    @Test
+    @DisplayName("login: rejects an active account whose email is not verified")
+    void login_whenEmailIsUnverified_throwsForbiddenException() {
+        LoginDTO dto = LoginDTO.builder()
+                .email("unverified@example.com")
+                .password("correctPassword")
+                .build();
+
+        User user = User.builder()
+                .email("unverified@example.com")
+                .password("hashedPassword")
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(false)
+                .permissions(new HashSet<>(Set.of(clientRole)))
+                .build();
+
+        when(userRepository.findByEmail("unverified@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(dto, null))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("Please verify your email address before signing in.");
+        verify(userRepository, never()).save(user);
+    }
+
     /**
      * Verifies login parses first client IP from X-Forwarded-For header.
      */
@@ -998,6 +1026,7 @@ class AuthServiceTest {
                 .email("user@example.com")
                 .password("hashedPassword")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .permissions(new HashSet<>(Set.of(clientRole)))
                 .build();
 
@@ -1030,6 +1059,7 @@ class AuthServiceTest {
                 .email("user@example.com")
                 .password("hashedPassword")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .permissions(new HashSet<>(Set.of(clientRole)))
                 .build();
 
@@ -1063,6 +1093,7 @@ class AuthServiceTest {
                 .email("artisan@example.com")
                 .password("hashedPassword")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .permissions(new HashSet<>(Set.of(artisanRole)))
                 .build();
 
@@ -1309,6 +1340,7 @@ class AuthServiceTest {
         User existingUser = User.builder()
                 .email("existing@example.com")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .permissions(new HashSet<>(Set.of(clientRole)))
                 .build();
 
@@ -2218,6 +2250,7 @@ class AuthServiceTest {
                 .email("user@example.com")
                 .password("hashedPassword")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .permissions(new HashSet<>(Set.of(clientRole)))
                 .build();
 
@@ -2250,6 +2283,7 @@ class AuthServiceTest {
         User existingUser = User.builder()
                 .email("existing@example.com")
                 .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
                 .permissions(new HashSet<>(Set.of(clientRole)))
                 .build();
 

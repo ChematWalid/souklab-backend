@@ -25,10 +25,15 @@ import com.project.souklab.model.PaymentWebhookLog;
 import com.project.souklab.model.SubscriptionStatus;
 import com.project.souklab.model.WebhookProcessingStatus;
 import com.project.souklab.model.NotificationType;
+import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.service.notification.NotificationService;
+import com.project.souklab.service.audit.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
@@ -39,6 +44,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class ChargilyWebhookService {
+    private static final Logger log = LoggerFactory.getLogger(ChargilyWebhookService.class);
     private final ObjectMapper objectMapper;
     private final WebhookSecurityService webhookSecurityService;
     private final PaymentWebhookLogRepository webhookLogRepository;
@@ -50,6 +56,7 @@ public class ChargilyWebhookService {
     private final WebhookEventClaimService webhookEventClaimService;
     private final AppProperties appProperties;
     private final Clock clock;
+    private final AuditLogService auditLogService;
     private ActivityEventService activityEventService;
 
     @Autowired(required = false)
@@ -65,20 +72,29 @@ public class ChargilyWebhookService {
         if (payload.getId() == null || payload.getId().isBlank() || eventType == null
                 || eventType == ChargilyWebhookEvent.Checkout.UNKNOWN
                 || payload.getData() == null || !payload.getData().isObject() || payload.getCreatedAt() == null) {
+            log.warn("Rejecting Chargily webhook metadata: idPresent={}, eventType={}, dataObject={}, createdAtPresent={}",
+                    payload.getId() != null && !payload.getId().isBlank(), eventType,
+                    payload.getData() != null && payload.getData().isObject(), payload.getCreatedAt() != null);
             throw new MalformedWebhookException("Unsupported or incomplete webhook event");
         }
         Instant eventCreatedAt;
         try {
             eventCreatedAt = Instant.ofEpochSecond(payload.getCreatedAt());
         } catch (RuntimeException exception) {
+            log.warn("Rejecting Chargily webhook with invalid event timestamp: eventIdPresent={}",
+                    payload.getId() != null && !payload.getId().isBlank());
             throw new MalformedWebhookException("Webhook event timestamp is invalid");
         }
         if (appProperties.getSubscription().getWebhookRetention() != null
                 && eventCreatedAt.isBefore(Instant.now(clock).minus(appProperties.getSubscription().getWebhookRetention()))) {
+            log.warn("Rejecting stale Chargily webhook: eventAgeSeconds={}",
+                    Math.max(0, Instant.now(clock).getEpochSecond() - eventCreatedAt.getEpochSecond()));
             throw new MalformedWebhookException("Webhook event is stale");
         }
         String checkoutId = payload.getData() == null ? null : new WebhookJsonValue(payload.getData()).text("id", "checkout_id");
         if (checkoutId == null || checkoutId.isBlank()) {
+            log.warn("Rejecting Chargily webhook without checkout identifier: eventIdPresent={}",
+                    payload.getId() != null && !payload.getId().isBlank());
             throw new MalformedWebhookException("Webhook checkout identifier is missing");
         }
         boolean claimed = webhookEventClaimService.claim(payload.getId(), eventType, checkoutId, rawBody);
@@ -133,6 +149,28 @@ public class ChargilyWebhookService {
             if (payment.getStatus() == PaymentStatus.PAID) {
                 activityEventService.record(AnalyticsEvent.Subscription.ACTIVATED, payment.getAccount().getId(),
                         payment.getSubscriptionId(), Map.of(AnalyticsMetadata.Payment.Identifier.ID, payment.getId()));
+            }
+        }
+        AuditLogAction.Key paymentAction = switch (payment.getStatus()) {
+            case PAID -> AuditLogAction.Payment.State.PAID;
+            case FAILED -> AuditLogAction.Payment.State.FAILED;
+            case CANCELED -> AuditLogAction.Payment.State.CANCELED;
+            default -> AuditLogAction.Payment.State.CORRECTED;
+        };
+        if (payment.getAccount() != null) {
+            auditLogService.logFinancialState(paymentAction, payment.getAccount(), payment.getAccount().getId(),
+                    FinancialAuditOperation.Payment.WEBHOOK, null, payment.getStatus(),
+                    "Chargily webhook: " + eventType.value(), payment.getId(), payment.getSubscriptionId());
+            if (payment.getStatus() == PaymentStatus.PAID) {
+                auditLogService.logFinancialState(AuditLogAction.Subscription.ACTIVATED, payment.getAccount(),
+                        payment.getAccount().getId(), FinancialAuditOperation.Payment.WEBHOOK,
+                        SubscriptionStatus.PENDING, SubscriptionStatus.ACTIVE,
+                        "Chargily checkout paid", payment.getId(), payment.getSubscriptionId());
+            } else if (payment.getStatus() == PaymentStatus.FAILED || payment.getStatus() == PaymentStatus.CANCELED) {
+                auditLogService.logFinancialState(AuditLogAction.Subscription.CANCELED, payment.getAccount(),
+                        payment.getAccount().getId(), FinancialAuditOperation.Payment.WEBHOOK,
+                        SubscriptionStatus.PENDING, SubscriptionStatus.CANCELED,
+                        "Chargily checkout terminal state", payment.getId(), payment.getSubscriptionId());
             }
         }
         log.setStatus(WebhookProcessingStatus.PROCESSED);
@@ -201,8 +239,11 @@ public class ChargilyWebhookService {
                     .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
                     .readValue(rawBody, ChargilyWebhookPayload.class);
         } catch (JsonProcessingException exception) {
+            log.warn("Rejecting malformed Chargily webhook JSON: bodyBytes={}, reason={}", rawBody.length,
+                    exception.getOriginalMessage());
             throw new MalformedWebhookException("Webhook body is malformed");
         } catch (IOException exception) {
+            log.warn("Rejecting unreadable Chargily webhook body: bodyBytes={}", rawBody.length);
             throw new MalformedWebhookException("Webhook body could not be read");
         }
     }
