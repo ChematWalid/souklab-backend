@@ -11,10 +11,12 @@ import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.util.ServletResponseUtil;
 import io.github.bucket4j.Bucket;
+import io.github.bucket4j.ConsumptionProbe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.ObjectProvider;
@@ -86,8 +88,11 @@ public class UserRateLimitFilter extends OncePerRequestFilter {
                     ? rule.getUserRefillDuration() : global.getUserRefillDuration();
             AnalyticsMetric.Key scope = ruleName(request);
             Bucket bucket = store.resolve("user:" + scope.value() + ":" + authentication.getName(), capacity, refill);
-            if (!bucket.tryConsume(1)) {
+            ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+            if (!probe.isConsumed()) {
                 metrics.recordRateLimitRejection(AnalyticsMetric.Operational.Scope.USER);
+                long secondsToWait = Math.max(1L, (probe.getNanosToWaitForRefill() + 999_999_999L) / 1_000_000_000L);
+                response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(secondsToWait));
                 reject(response);
                 return;
             }

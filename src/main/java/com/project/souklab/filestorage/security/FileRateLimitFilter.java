@@ -6,11 +6,13 @@ import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.FileServingRoutes;
 import com.project.souklab.util.ServletResponseUtil;
 import io.github.bucket4j.Bucket;
+import io.github.bucket4j.ConsumptionProbe;
 import com.project.souklab.security.RateLimitBucketStore;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -87,18 +89,21 @@ public class FileRateLimitFilter extends OncePerRequestFilter {
         }
 
         String key = resolveKey(request);
-        Bucket bucket;
+        ConsumptionProbe probe;
         try {
-            bucket = resolveBucket(key);
+            Bucket bucket = resolveBucket(key);
+            probe = bucket.tryConsumeAndReturnRemaining(TOKENS_PER_REQUEST);
         } catch (RuntimeException unavailable) {
             servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
                     ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, ERROR_TOO_MANY_REQUESTS));
             return;
         }
 
-        if (bucket.tryConsume(TOKENS_PER_REQUEST)) {
+        if (probe.isConsumed()) {
             filterChain.doFilter(request, response);
         } else {
+            long secondsToWait = Math.max(1L, (probe.getNanosToWaitForRefill() + 999_999_999L) / 1_000_000_000L);
+            response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(secondsToWait));
             servletResponseUtil.writeResponse(
                     response,
                     HttpStatus.TOO_MANY_REQUESTS.value(),

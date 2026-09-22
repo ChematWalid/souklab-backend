@@ -5,10 +5,12 @@ import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.util.ServletResponseUtil;
 import io.github.bucket4j.Bucket;
+import io.github.bucket4j.ConsumptionProbe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -82,18 +84,21 @@ public class AvatarUploadRateLimitFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String key = resolveKey(request);
-        Bucket bucket;
+        ConsumptionProbe probe;
         try {
-            bucket = resolveBucket(key);
+            Bucket bucket = resolveBucket(key);
+            probe = bucket.tryConsumeAndReturnRemaining(1);
         } catch (RuntimeException unavailable) {
             servletResponseUtil.writeResponse(response, HttpStatus.TOO_MANY_REQUESTS.value(),
                     ApiResponse.error(ApiErrorCode.TOO_MANY_REQUESTS, "Too many requests. Please try again later."));
             return;
         }
 
-        if (bucket.tryConsume(1)) {
+        if (probe.isConsumed()) {
             filterChain.doFilter(request, response);
         } else {
+            long secondsToWait = Math.max(1L, (probe.getNanosToWaitForRefill() + 999_999_999L) / 1_000_000_000L);
+            response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(secondsToWait));
             servletResponseUtil.writeResponse(
                     response,
                     HttpStatus.TOO_MANY_REQUESTS.value(),
