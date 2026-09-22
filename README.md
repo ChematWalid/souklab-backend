@@ -34,23 +34,26 @@ graph TD
 | **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques). | Caffeine Cache, Spring Data JPA |
 | **Formations & Peer Workshops** | Peer masterclass authoring (`isTeacher`), syllabus ClamAV scanning, administrative review lifecycle, capacity limits, cancellation deadlines, and client 403 boundary. | Spring Security, ClamAV, Spring Data JPA |
 | **Formateur Accreditation** | Artisan teacher certification lifecycle (submission, admin review, cooldown enforcement, direct admin grants/revocations). | Multi-state state machine, Spring Events |
+| **Real-Time Messaging** | 1-on-1 private conversations, file attachments, read receipts, typing indicators, and message history via STOMP / WebSocket. | Spring WebSocket, STOMP Relay (RabbitMQ), AMQP |
 | **In-App Notifications** | User-scoped notification feeds, unread badge counters, instant WebSocket broadcast, query-scoped soft deletions. | Spring WebSocket, STOMP Relay, JPA Soft Delete |
+| **Subscriptions & Payments** | Tiered subscription plans (Free/Pro/Premium), Chargily Pay V2 hosted checkout, signed idempotent webhook processing, renewal reminders. | Chargily Pay V2, Spring Task Scheduling |
+| **Platform Analytics & KPI** | Async query jobs, multi-granularity rollups (day/week/month/quarter), CSV data export, outbox pattern event processing. | Spring Batch/Async, S3 Export Storage |
 | **File Storage & Avatars** | Multi-tier avatar processing (thumbnail, medium, full), magic number verification, ClamAV streaming antivirus, S3/MinIO bucket storage. | MinIO S3 SDK, Thumbnailator, Clamd instream |
-| **Rate Limiting & Security** | Token-bucket sliding window rate limiting on authentication and avatar uploads, cache-backed with Caffeine. | Bucket4j, Caffeine Cache, OncePerRequestFilter |
+| **Rate Limiting & Security** | Token-bucket sliding window rate limiting on authentication and avatar uploads, Redis-backed or Caffeine-backed with Retry-After headers. | Bucket4j, Redis / Caffeine Cache, OncePerRequestFilter |
 
 ---
 
 ## Technology Stack
 
-- **Runtime & Language**: Java 17+, Spring Boot 4.0+
-- **Data Persistence**: Spring Data JPA + Hibernate ORM + MariaDB / MySQL 8.0
-- **Search Engine & Indexing**: Hibernate Search 8.2.2.Final (Elasticsearch 8.x backend)
-- **Caching**: Caffeine Cache (catalog taxonomies, rate limiting buckets)
+- **Runtime & Language**: Java 21, Spring Boot 4.0.8, Spring Framework 7.x
+- **Data Persistence**: Spring Data JPA + Hibernate ORM + MariaDB 11.4
+- **Search Engine & Indexing**: Hibernate Search 8.2.2.Final (Elasticsearch 8.15.3 backend)
+- **Caching**: Caffeine Cache (catalog taxonomies, local rate limiting buckets), Redis 7.4.1 (distributed rate limiting)
 - **Connection Pool**: HikariCP (configured with leak detection and connection pooling)
 - **Object Storage**: S3-compatible object store (MinIO for local development, AWS S3 / Cloudflare R2 for production)
-- **Security & Antivirus**: Spring Security, JJWT, Bucket4j, ClamAV Daemon
-- **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ)
-- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway, Postman / Newman
+- **Security & Antivirus**: Spring Security, JJWT 0.11.5, Bucket4j 8.10.1, ClamAV 1.4 Daemon
+- **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ 4.0)
+- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V14 migrations), Postman / Newman
 
 ---
 
@@ -61,9 +64,11 @@ src/main/java/com/project/souklab/
 ├── config/              # Infrastructure and cross-cutting framework beans
 │   └── search/          # Hibernate Search Elasticsearch analysis config and startup index runner
 ├── controller/          # REST API entrypoints and HTTP adapters
+│   ├── analytics/       # Analytics jobs, rollups rebuild/backfill, and CSV exports
 │   ├── artisan/         # Artisan profile, certification, and gallery portfolio endpoints
 │   ├── auth/            # Registration, login, verification, and password flows
 │   ├── catalog/         # Reference craft taxonomies and administrative geography
+│   ├── chat/            # Private conversation REST endpoints and STOMP message handlers
 │   ├── directory/       # Public artisan directory search and faceted filtering
 │   ├── formateur/       # Formateur accreditation and moderation endpoints
 │   ├── feed/            # Public feed and post moderation endpoints
@@ -71,22 +76,26 @@ src/main/java/com/project/souklab/
 │   ├── report/          # Abuse reporting endpoints
 │   ├── formation/       # Masterclass authoring, peer enrollment, and review endpoints
 │   ├── notification/    # Notification feed and read-state management
+│   ├── subscription/    # Tiered plans, checkout, and Chargily Pay V2 webhooks
 │   └── user/            # User avatar upload/activation and admin moderation
-├── dao/                 # Spring Data JPA repositories (29 repositories)
+├── dao/                 # Spring Data JPA repositories (46 repositories)
 ├── dto/                 # Data Transfer Objects (contracts for API requests/responses)
 │   ├── admin/           # Administrative audit representations
+│   ├── analytics/       # Analytics query job and rollup representations
 │   ├── artisan/         # Certification and gallery image responses
 │   ├── auth/            # Login, registration, token refresh, and password DTOs
 │   ├── catalog/         # Reference taxonomy and geographic representations
+│   ├── chat/            # Conversation and message payloads
 │   ├── common/          # Standard response envelopes (ApiResponse, PaginatedResponse)
 │   ├── directory/       # Directory search cards and criteria filter DTOs
 │   ├── formateur/       # Formateur request and moderation DTOs
 │   ├── formation/       # Masterclass authoring, review, enrollment, and file DTOs
-│   ├── feed/             # Feed posts, media, and moderation DTOs
+│   ├── feed/            # Feed posts, media, and moderation DTOs
 │   ├── notification/    # Notification payload representations
-│   ├── review/           # Decimal artisan review DTOs
-│   ├── report/           # Report and resolution DTOs
+│   ├── review/          # Decimal artisan review DTOs
+│   ├── report/          # Report and resolution DTOs
 │   ├── profile/         # Artisan and client profile representations
+│   ├── subscription/    # Subscription and payment representations
 │   └── user/            # Moderation requests and avatar responses
 ├── exception/           # Exception hierarchy and GlobalExceptionHandler
 ├── filestorage/         # Dedicated object storage engine
@@ -100,20 +109,25 @@ src/main/java/com/project/souklab/
 │   ├── security/        # File serving rate limit filter
 │   ├── stub/            # In-memory test stubs
 │   └── validation/      # Magic bytes and MIME validation
-├── model/               # JPA entities and domain enums (44 model types)
+├── model/               # JPA entities and domain enums (47 model types)
 ├── security/            # JWT, permissions, policy predicates, rate limiting, upload boundaries
 ├── service/             # Application business logic and transactional services
+│   ├── analytics/       # Rollup processing, export generation, and job execution
 │   ├── artisan/         # Artisan profile and portfolio operations
 │   ├── audit/           # Audit trail logging
 │   ├── auth/            # User authentication and details management
 │   ├── catalog/         # Cached taxonomy and geographic retrieval
+│   ├── chat/            # Real-time messaging and conversation lifecycle
 │   ├── directory/       # Hibernate Search Elasticsearch discovery service
 │   ├── formateur/       # Formateur accreditation workflows
 │   ├── formation/       # Masterclass lifecycle, peer enrollment, and moderation
 │   ├── notification/    # In-app notifications and WebSocket dispatch
 │   ├── profile/         # Profile lifecycle, FK taxonomy resolution, and PATCH updates
+│   ├── report/          # Content reporting and moderation resolution
+│   ├── review/          # Formation-backed review verification and rating rollup
 │   ├── security/        # Token issuance and verification
 │   ├── storage/         # Application-specific file access policy
+│   ├── subscription/    # Subscription lifecycle and Chargily Pay V2 payments
 │   └── user/            # User management and avatar processing
 ├── util/                # Stateless utility functions and mappers
 └── validation/          # Custom Jakarta Bean Validation constraints
@@ -124,7 +138,7 @@ src/main/java/com/project/souklab/
 ## Getting Started
 
 ### 1. Prerequisites
-- JDK 17 or higher
+- JDK 21 or higher
 - Docker & Docker Compose
 - Maven 3.8+ (or use repository `./mvnw`)
 
@@ -159,9 +173,11 @@ Authorization capabilities and their endpoint/service boundaries are documented 
 ## API Documentation & Testing Suite
 
 - **Documentation index**: See [`docs/README.md`](docs/README.md) for current contracts and [`docs/dev/README.md`](docs/dev/README.md) for developer history and archived material.
-- **Production Audit**: See [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
-
+- **Business Features Guide**: [`docs/BUSINESS_FEATURES.md`](docs/BUSINESS_FEATURES.md) / [Version française](docs/BUSINESS_FEATURES_FR.md) — Plain-language platform capabilities for business and product stakeholders.
+- **Technical Feature Reference**: [`docs/FEATURES.md`](docs/FEATURES.md) / [Version française](docs/FEATURES_FR.md) — Comprehensive, code-derived feature reference (all endpoints, enums, business rules, and 566-case verification ledger).
+- **Architecture Codemaps**: [`docs/CODEMAPS/`](docs/CODEMAPS/) — Token-lean system diagrams, route maps, data models, and dependency topologies.
 - **API Specification**: See [`docs/API_SPEC.md`](docs/API_SPEC.md) for endpoint references and [`docs/frontend/API_HANDOFF.md`](docs/frontend/API_HANDOFF.md) for frontend integration.
+- **Production Audit**: See [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
 - **Postman API Reference**: The current permission-based contract is documented in [`docs/API_SPEC.md`](docs/API_SPEC.md) and [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). The older generated reference is retained in `docs/dev/` as an archival migration artifact.
 - **Postman Test Suite**: The checked-in collection is retained for historical scenarios and must be regenerated before running Newman against the current permission-based API.
 

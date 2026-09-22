@@ -45,9 +45,9 @@ Common statuses are 400 (malformed request), 401 (unauthenticated), 403 (forbidd
 | Catalog/directory | `/catalog/**`, `/directory/**` | public reference data and search |
 | Artisan/profile | `/artisan/**`, `/artisans/**` | profiles, certifications, galleries, reviews |
 | Feed/moderation | `/feed/**`, `/admin/feed/**`, `/reports/**` | posts, media, reports |
-| Formations | `/formations/**`, `/admin/formations/**` | authoring, files, enrollment, moderation |
+| Formations | `/artisan/formations/**`, `/admin/formations/**` | authoring, files, enrollment, moderation |
 | Messaging | `/conversations/**`, STOMP `/app/**` | conversations, messages, attachments |
-| Notifications | `/notifications/**` | feed, unread count, read state |
+| Notifications | `/notifications/**` | feed, unread count (raw integer in `data`), read state |
 | Subscriptions/payments | `/subscriptions/**`, `/payments/**`, `/admin/**` | checkout, lifecycle, refunds |
 | Administration | `/admin/**` | users, permissions, moderation, analytics |
 | Files | `/files/**`, avatar and multipart paths | uploads and protected downloads |

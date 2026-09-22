@@ -14,6 +14,7 @@ and are not the current production contract.
 - [API specification](API_SPEC.md)
 - [Authorization matrix](AUTHORIZATION_MATRIX.md)
 - [Architecture](ARCHITECTURE.md)
+- **[Architecture codemaps](CODEMAPS/README.md)** — token-lean architecture, routes, data model, and dependency maps.
 - [Production configuration matrix](PRODUCTION_CONFIGURATION_MATRIX.md)
 - [Deployment runbook](DEPLOYMENT_RUNBOOK.md)
 - [Database schema](DATABASE_SCHEMA.md)

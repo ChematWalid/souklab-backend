@@ -16,6 +16,8 @@ Authorization is capability-based. The `Permission` enum and the `permissions`/`
 | `permission:report:create` | Authenticated content-report submission | `ContentReportController` |
 | `permission:file:read` | Protected-file policy for authenticated file access | `FileAccessService` and `CustomUserDetailsService` |
 | `permission:message:send` | Send direct messages and upload message attachments | `ConversationService`, `ChatStompController`, `ConversationController` |
+| `permission:financial:admin` | Subscription management, manual grants/revocations, refunds, and payment state corrections | `AdminSubscriptionController`, `AdminPaymentController`, `AccessControlService` |
+| `permission:analytics:admin` | Analytics query jobs, rollups rebuild/backfill, metrics exports, and stats access | `AnalyticsJobController`, `AccessControlService` |
 
 Public resources remain public at the HTTP layer: authentication bootstrap, catalog taxonomies, directory search, public feed reads, public artisan profiles, and public reviews. File URLs still require an authenticated request; `FileAccessService` allows public media with cacheable headers while certification and formation files additionally require `FILE_READ` plus ownership, enrollment, or the relevant administrator permission.
 

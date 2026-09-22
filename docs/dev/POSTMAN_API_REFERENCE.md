@@ -145,7 +145,7 @@ source timestamps; it does not invent historical login or interaction events.
   "password": "Password123!",
   "firstName": "Yacine",
   "lastName": "Brahimi",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -466,7 +466,7 @@ source timestamps; it does not invent historical login or interaction events.
   "password": "Password123!",
   "firstName": "Karim",
   "lastName": "Ziani",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -1345,7 +1345,7 @@ source timestamps; it does not invent historical login or interaction events.
   "password": "Password123!",
   "firstName": "Amina",
   "lastName": "Mansouri",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -1688,7 +1688,7 @@ source timestamps; it does not invent historical login or interaction events.
   "password": "Password123!",
   "firstName": "Omar",
   "lastName": "Brahimi",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -1903,7 +1903,7 @@ source timestamps; it does not invent historical login or interaction events.
   "password": "Password123!",
   "firstName": "Samia",
   "lastName": "Benali",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -3572,7 +3572,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "{{lockoutPassword}}",
   "firstName": "Lockout",
   "lastName": "Tester",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -3802,7 +3802,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Rotation",
   "lastName": "Tester",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -3975,7 +3975,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Logout",
   "lastName": "Tester",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -4114,7 +4114,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "{{pwdChgInitialPassword}}",
   "firstName": "Pwd",
   "lastName": "Changer",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -4391,7 +4391,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "lastName": "Client",
   "email": "{{manualClientEmail}}",
   "password": "{{manualClientPassword}}",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -4569,7 +4569,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "lastName": "Artisan",
   "email": "{{manualArtisanEmail}}",
   "password": "{{manualArtisanPassword}}",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -4747,7 +4747,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "lastName": "User",
   "email": "{{manualLockoutEmail}}",
   "password": "LockoutPass123!",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -5419,7 +5419,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Foreign",
   "lastName": "Client",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -5498,7 +5498,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Batch4",
   "lastName": "Artisan",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -5708,9 +5708,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "success": true,
   "code": 200,
   "message": "Success",
-  "data": {
-    "unreadCount": 3
-  }
+  "data": 3
 }
 ```
 
@@ -5849,9 +5847,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "success": true,
   "code": 200,
   "message": "Success",
-  "data": {
-    "unreadCount": 3
-  }
+  "data": 3
 }
 ```
 
@@ -5994,9 +5990,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "success": true,
   "code": 200,
   "message": "Success",
-  "data": {
-    "unreadCount": 1
-  }
+  "data": 1
 }
 ```
 
@@ -6048,9 +6042,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "success": true,
   "code": 200,
   "message": "Success",
-  "data": {
-    "unreadCount": 1
-  }
+  "data": 0
 }
 ```
 
@@ -6100,9 +6092,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "success": true,
   "code": 200,
   "message": "Success",
-  "data": {
-    "unreadCount": 2
-  }
+  "data": 0
 }
 ```
 
@@ -6284,7 +6274,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Client",
   "lastName": "BatchFive",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 
@@ -6394,7 +6384,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Karim",
   "lastName": "Bensaid",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -6836,7 +6826,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Samir",
   "lastName": "Hadji",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -7297,7 +7287,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Yacine",
   "lastName": "Meziane",
-  "role": "ARTISAN"
+  "accountType": "ARTISAN"
 }
 ```
 
@@ -7657,7 +7647,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Client",
   "lastName": "BatchSix",
-  "role": "CLIENT",
+  "accountType": "CLIENT",
   "phoneNumber": "0555600001",
   "address": "123 Client St",
   "wilaya": "ALGER"
@@ -7905,7 +7895,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "ArtisanA",
   "lastName": "Discovery",
-  "role": "ROLE_ARTISAN",
+  "accountType": "ARTISAN",
   "phoneNumber": "0555600002",
   "address": "456 Artisan Way",
   "wilaya": "ORAN"
@@ -8113,7 +8103,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "UserB",
   "lastName": "PermBan",
-  "role": "ROLE_ARTISAN",
+  "accountType": "ARTISAN",
   "phoneNumber": "0555600003",
   "address": "789 Ban Blvd",
   "wilaya": "CONSTANTINE"
@@ -8479,7 +8469,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "UserC",
   "lastName": "Timeout",
-  "role": "ROLE_ARTISAN",
+  "accountType": "ARTISAN",
   "phoneNumber": "0555600004",
   "address": "321 Timer Way",
   "wilaya": "ANNABA"
@@ -9612,7 +9602,7 @@ All admin user moderation routes are guarded by the centralized administrator pe
   "password": "Password123!",
   "firstName": "Rate",
   "lastName": "Burst",
-  "role": "CLIENT"
+  "accountType": "CLIENT"
 }
 ```
 

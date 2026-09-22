@@ -66,7 +66,7 @@ Use `@PageableDefault(size = 20)` on the controller method — do not build
 | **Permission mismatch** | **403** | Authenticated, but not allowed to do this. Covers: `@PreAuthorize` failures, "you don't have the profile this action requires," business-rule blocks (cooldowns, permanent blocks) |
 | Not found | 404 | |
 | **State conflict** | **409** | The action can't proceed because of *current state*, not because the request is invalid — duplicate-in-progress request, "you already have the thing you're requesting" |
-| Rate limited | 429 | |
+| Rate limited | 429 | Includes `Retry-After: <seconds>` header computed from token-bucket refill estimation |
 | Unexpected server error | 500 | Never leak stack traces or raw exception messages |
 
 ### The 400 vs 403 vs 409 decision rule
@@ -141,7 +141,7 @@ reason.
 
 ## 5. API Versioning — Deliberately Deferred
 
-Spring Boot 4 / Framework 7 (confirmed running: Boot 4.0.6) has native
+Spring Boot 4 / Framework 7 (confirmed running: Boot 4.0.8) has native
 version-attribute routing (`version` attribute on mappings,
 `spring.mvc.apiversion.*` config) as an alternative to hardcoding
 `/api/v1/` as a literal path prefix.

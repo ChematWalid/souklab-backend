@@ -1,0 +1,55 @@
+# Codemap Analysis Report
+Generated: 2026-09-22T16:15:00+01:00
+Files Scanned: 472 Java source files, 15 Flyway SQL migrations, 30 Controllers, 50 Services, 46 Repositories, 47 Entities
+
+===================================================================
+1. Architecture & Component Status
+===================================================================
+- Core Runtime: Java 21, Spring Boot 4.0.8, Spring Framework 7.x, Tomcat 11.0.26
+- Controllers: 30 total (REST endpoints + STOMP WebSocket handlers)
+- Services: 50 transactional service components
+- Repositories: 46 Spring Data JPA repositories
+- Entities: 47 JPA entities (BaseEntity UUID, audit timestamps, soft-delete)
+- Database: MariaDB 11.4 with 15 Flyway migrations (V0 to V14) applied
+- Search: Hibernate Search 8.2.2.Final with Elasticsearch 8.15.3 backend
+- Rate Limiting: Bucket4j 8.10.1 (IP, User, Avatar, File filters) with Retry-After header
+- Messaging: RabbitMQ 4.0 STOMP relay on port 61613 with 3 user queues
+- Storage: MinIO / S3 object storage with Apache Tika 4.0.0 and ClamAV 1.4 scanning
+
+===================================================================
+2. Codemaps Generated (docs/CODEMAPS/)
+===================================================================
+- docs/CODEMAPS/README.md: Index and AI agent context usage instructions
+- docs/CODEMAPS/architecture.md: System topology, layers, async execution, STOMP routing
+- docs/CODEMAPS/backend.md: Filter chain, complete route map, controller->service->repo mapping
+- docs/CODEMAPS/data.md: 47 entity definitions across 7 domains, constraints, Flyway V0-V14
+- docs/CODEMAPS/dependencies.md: Runtime, Docker Compose services, external APIs, Java libraries
+
+===================================================================
+3. Documentation Staleness Audit & Corrections Applied
+===================================================================
+- docs/API_CONVENTIONS.md:
+  * Updated Spring Boot version from 4.0.6 to 4.0.8.
+  * Added Retry-After header documentation to HTTP 429 response table.
+- docs/AUTHORIZATION_MATRIX.md:
+  * Added missing permissions: permission:financial:admin and permission:analytics:admin.
+- docs/DATABASE_SCHEMA.md:
+  * Added missing table groups: Messaging, Subscriptions & Payments, Analytics.
+  * Updated deployment section to document Flyway V0-V14 migrations.
+- docs/ARCHITECTURE.md:
+  * Updated repository count from 29 to 46.
+  * Updated entity count from 44 to 47.
+  * Added missing controllers and services (chat, subscription, analytics).
+- docs/frontend/API_HANDOFF.md:
+  * Corrected formation base path to /artisan/formations/**.
+  * Clarified raw integer shape for notification unread count.
+- docs/RELEASE_CHECKLIST.md:
+  * Updated migration range from V6-V12 to V0-V14.
+- README.md:
+  * Updated runtime to Java 21, Spring Boot 4.0.8, MariaDB 11.4.
+  * Added Real-Time Messaging, Subscriptions, and Analytics to Core Modules.
+  * Updated repository tree (46 repos, 47 models, all new subpackages).
+  * Added links to Technical and Business feature references (EN and FR) and Codemaps.
+- docs/dev/POSTMAN_API_REFERENCE.md:
+  * Replaced 23 occurrences of stale role fields in registration bodies with accountType.
+  * Fixed unreadCount response shapes from wrapped objects to raw integers.
