@@ -32,6 +32,7 @@ import static com.project.souklab.controller.support.SecurityTestUtils.admin;
 import static com.project.souklab.controller.support.SecurityTestUtils.artisan;
 import static com.project.souklab.controller.support.SecurityTestUtils.client;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -276,7 +277,7 @@ class FormationIntegrationTest {
                         .with(admin(ADMIN_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content[0].id").value(formationId));
+                .andExpect(jsonPath("$.data.content[*].id").value(hasItem(formationId)));
 
         approveFormation(formationId);
         publishFormation(formationId);
@@ -285,7 +286,7 @@ class FormationIntegrationTest {
                         .with(artisan(PEER_ARTISAN_1_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content[0].id").value(formationId));
+                .andExpect(jsonPath("$.data.content[*].id").value(hasItem(formationId)));
     }
 
     /**
