@@ -66,4 +66,8 @@ public class AccessControlService {
     public boolean canWriteProfile(Authentication authentication) {
         return hasPermission(authentication, Permission.Profile.WRITE);
     }
+
+    public boolean canManageCatalog(Authentication authentication) {
+        return hasPermission(authentication, Permission.Admin.CATALOG);
+    }
 }

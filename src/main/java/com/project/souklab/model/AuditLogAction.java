@@ -22,7 +22,14 @@ public final class AuditLogAction {
                 Subscription.State.CORRECTED, Subscription.Plan.CREATED, Subscription.Plan.UPDATED,
                 Subscription.Plan.DEACTIVATED, Payment.State.PAID, Payment.State.FAILED,
                 Payment.State.CANCELED, Payment.State.CORRECTED, Refund.Request.REJECTED,
-                Analytics.REBUILD, Analytics.Job.SUBMITTED, Analytics.Result.READ, Analytics.EXPORT);
+                Analytics.REBUILD, Analytics.Job.SUBMITTED, Analytics.Result.READ, Analytics.EXPORT,
+                Catalog.TECHNIQUE_CREATED, Catalog.TECHNIQUE_UPDATED, Catalog.TECHNIQUE_DELETED,
+                Catalog.EPOQUE_CREATED, Catalog.EPOQUE_UPDATED, Catalog.EPOQUE_DELETED,
+                Catalog.REGION_CREATED, Catalog.REGION_UPDATED, Catalog.REGION_DELETED,
+                Catalog.CATEGORY_CREATED, Catalog.CATEGORY_UPDATED, Catalog.CATEGORY_DELETED,
+                Catalog.SUBCATEGORY_CREATED, Catalog.SUBCATEGORY_UPDATED, Catalog.SUBCATEGORY_DELETED,
+                Catalog.MATERIAL_FAMILY_CREATED, Catalog.MATERIAL_FAMILY_UPDATED, Catalog.MATERIAL_FAMILY_DELETED,
+                Catalog.MATERIAL_CREATED, Catalog.MATERIAL_UPDATED, Catalog.MATERIAL_DELETED);
     }
 
     public static Key fromValue(String value) {
@@ -187,5 +194,35 @@ public final class AuditLogAction {
             Result(String value) { this.value = value; }
             public String value() { return value; }
         }
+    }
+
+    /**
+     * Audit actions for admin catalog taxonomy mutations (Technique, Epoque, Region).
+     */
+    public enum Catalog implements Key {
+        TECHNIQUE_CREATED("CATALOG_TECHNIQUE_CREATED"),
+        TECHNIQUE_UPDATED("CATALOG_TECHNIQUE_UPDATED"),
+        TECHNIQUE_DELETED("CATALOG_TECHNIQUE_DELETED"),
+        EPOQUE_CREATED("CATALOG_EPOQUE_CREATED"),
+        EPOQUE_UPDATED("CATALOG_EPOQUE_UPDATED"),
+        EPOQUE_DELETED("CATALOG_EPOQUE_DELETED"),
+        REGION_CREATED("CATALOG_REGION_CREATED"),
+        REGION_UPDATED("CATALOG_REGION_UPDATED"),
+        REGION_DELETED("CATALOG_REGION_DELETED"),
+        CATEGORY_CREATED("CATALOG_CATEGORY_CREATED"),
+        CATEGORY_UPDATED("CATALOG_CATEGORY_UPDATED"),
+        CATEGORY_DELETED("CATALOG_CATEGORY_DELETED"),
+        SUBCATEGORY_CREATED("CATALOG_SUBCATEGORY_CREATED"),
+        SUBCATEGORY_UPDATED("CATALOG_SUBCATEGORY_UPDATED"),
+        SUBCATEGORY_DELETED("CATALOG_SUBCATEGORY_DELETED"),
+        MATERIAL_FAMILY_CREATED("CATALOG_MATERIAL_FAMILY_CREATED"),
+        MATERIAL_FAMILY_UPDATED("CATALOG_MATERIAL_FAMILY_UPDATED"),
+        MATERIAL_FAMILY_DELETED("CATALOG_MATERIAL_FAMILY_DELETED"),
+        MATERIAL_CREATED("CATALOG_MATERIAL_CREATED"),
+        MATERIAL_UPDATED("CATALOG_MATERIAL_UPDATED"),
+        MATERIAL_DELETED("CATALOG_MATERIAL_DELETED");
+        private final String value;
+        Catalog(String value) { this.value = value; }
+        public String value() { return value; }
     }
 }

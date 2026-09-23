@@ -41,7 +41,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
     /** Complete permission catalog used by reference-data seeding and tooling. */
     static List<Permission> all() {
         return List.of(
-                Admin.USERS, Admin.FORMATIONS, Admin.FEED, Admin.REPORTS,
+                Admin.USERS, Admin.FORMATIONS, Admin.FEED, Admin.REPORTS, Admin.CATALOG,
                 Financial.ADMIN,
                 Artisan.FORMATIONS, Artisan.CONTENT, Artisan.REVIEWS,
                 Profile.READ, Profile.WRITE,
@@ -55,7 +55,8 @@ public interface Permission extends EnumValue, GrantedAuthority {
 
     enum Admin implements Permission {
         USERS("permission:admin:users"), FORMATIONS("permission:admin:formations"),
-        FEED("permission:admin:feed"), REPORTS("permission:admin:reports");
+        FEED("permission:admin:feed"), REPORTS("permission:admin:reports"),
+        CATALOG("permission:admin:catalog");
         private final String value;
         Admin(String value) { this.value = value; }
         public String value() { return value; }
