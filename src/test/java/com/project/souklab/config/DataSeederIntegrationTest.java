@@ -103,12 +103,25 @@ class DataSeederIntegrationTest {
         List<Region> pacaChildren = regionRepository.findByParentIdAndIsActiveTrueOrderByDisplayOrderAsc(paca.get().getId());
         assertThat(pacaChildren).extracting(Region::getName).contains("Marseille");
 
-        assertThat(jobCategoryRepository.count()).isEqualTo(7);
-        assertThat(jobSubCategoryRepository.count()).isEqualTo(23);
+        assertThat(jobCategoryRepository.count()).isEqualTo(8);
+        assertThat(jobSubCategoryRepository.count()).isEqualTo(37);
         assertThat(materialFamilyRepository.count()).isEqualTo(6);
-        assertThat(materialRepository.count()).isEqualTo(16);
+        assertThat(materialRepository.count()).isEqualTo(25);
         assertThat(epoqueRepository.count()).isEqualTo(6);
         assertThat(techniqueRepository.count()).isEqualTo(7);
+
+        assertThat(jobCategoryRepository.findBySlug("gros-oeuvre-structure")).isPresent();
+        assertThat(jobCategoryRepository.findBySlug("electricite-energie")).isPresent();
+        assertThat(jobCategoryRepository.findBySlug("plomberie-systemes-techniques")).isPresent();
+        assertThat(jobCategoryRepository.findBySlug("metal-serrurerie")).isPresent();
+        assertThat(jobCategoryRepository.findBySlug("metiers-du-patrimoine")).isPresent();
+
+        assertThat(materialFamilyRepository.findBySlug("materiaux-naturels-traditionnels")).isPresent();
+        assertThat(materialFamilyRepository.findBySlug("materiaux-de-maconnerie")).isPresent();
+        assertThat(materialFamilyRepository.findBySlug("materiaux-de-toiture")).isPresent();
+        assertThat(materialFamilyRepository.findBySlug("metal-structure")).isPresent();
+        assertThat(materialFamilyRepository.findBySlug("isolation-techniques-modernes")).isPresent();
+        assertThat(materialFamilyRepository.findBySlug("revetements-finitions")).isPresent();
 
         long regionCountBefore = regionRepository.count();
         long catCountBefore = jobCategoryRepository.count();

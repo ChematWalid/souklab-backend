@@ -21,6 +21,7 @@ import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
 import com.project.souklab.security.Permission;
 import com.project.souklab.util.EmailUtil;
+import com.project.souklab.util.SlugUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -341,103 +342,119 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         saveCategoryWithSubs(
-            "Métiers de la Terre & Céramique",
-            "metiers-de-la-terre-ceramique",
-            "Façonnage traditionnel de l'argile, poterie ancestrale et céramique d'art.",
-            "category-ceramique.png",
+            "Gros œuvre & structure",
+            "Travaux structuraux, maçonnerie, terrassement et ossatures du bâtiment.",
+            "category-gros-oeuvre-structure.png",
             1,
             List.of(
-                new SubCategorySeed("Poterie de Kabylie", "poterie-de-kabylie", "Poterie féminine modelée à la main et ornée de motifs berbères.", 1),
-                new SubCategorySeed("Céramique Émaillée", "ceramique-emaillee", "Faïence architecturale, zellige et plats vernissés d'inspiration mauresque.", 2),
-                new SubCategorySeed("Poterie Rurale Saharienne", "poterie-rurale-saharienne", "Ustensiles et poteries utilitaires cuites au feu ouvert du Sahara.", 3)
+                new SubCategorySeed("Maçon", "Construction et réhabilitation de structures porteuses, murs et fondations.", 1),
+                new SubCategorySeed("Tailleur de pierre", "Façonnage et appareillage de pierres pour murs, arcs et édifices.", 2),
+                new SubCategorySeed("Charpentier bois / charpentier de marine", "Conception, taille et assemblage de charpentes et structures en bois.", 3),
+                new SubCategorySeed("Coffreur-bancheur", "Réalisation d'ouvrages en béton armé à l'aide de coffrages et banches.", 4),
+                new SubCategorySeed("Ferrailleur", "Façonnage et pose des armatures métalliques pour béton armé.", 5),
+                new SubCategorySeed("Terrassier / VRD", "Préparation des sols, terrassement et voiries et réseaux divers.", 6)
             )
         );
 
         saveCategoryWithSubs(
-            "Métiers du Métal & Bijouterie",
-            "metiers-du-metal-bijouterie",
-            "Orfèvrerie traditionnelle, dinanderie d'art et travail des métaux précieux.",
-            "category-bijouterie.png",
+            "Toiture & enveloppe du bâtiment",
+            "Couverture, étanchéité, zinguerie et protection extérieure du bâtiment.",
+            "category-toiture-enveloppe-du-batiment.png",
             2,
             List.of(
-                new SubCategorySeed("Bijoux Kabyles en Argent", "bijoux-kabyles-en-argent", "Bijoux traditionnels en argent émaillé et rehaussés de corail méditerranéen.", 1),
-                new SubCategorySeed("Dinanderie de Constantine", "dinanderie-de-constantine", "Plateaux, aiguières et récipients en cuivre martelé et ciselé.", 2),
-                new SubCategorySeed("Bijouterie Traditionnelle Chaouie", "bijouterie-traditionnelle-chaouie", "Parures et fibules en argent massif de l'Aurès.", 3),
-                new SubCategorySeed("Ferronnerie d'Art Mauresque", "ferronnerie-art-mauresque", "Grilles ouvragées, lanternes et ferronnerie d'inspiration hispano-mauresque.", 4)
+                new SubCategorySeed("Couvreur (tuiles, ardoises)", "Pose et restauration de couvertures en tuiles et ardoises.", 1),
+                new SubCategorySeed("Zingueur", "Façonnage et pose d'éléments métalliques pour l'évacuation des eaux pluviales et l'étanchéité.", 2),
+                new SubCategorySeed("Étancheur", "Mise en œuvre de revêtements d'étanchéité pour toitures-terrasses et façades.", 3),
+                new SubCategorySeed("Façadier / enduiseur", "Application d'enduits et ravalement protecteur des façades.", 4),
+                new SubCategorySeed("Bardeur", "Pose de bardages isolants et décoratifs sur les façades extérieures.", 5)
             )
         );
 
         saveCategoryWithSubs(
-            "Tapis & Tissage",
-            "tapis-tissage",
-            "Tissage de tapis traditionnels, tissage de laine et confection de textiles rituels.",
-            "category-tapis.png",
+            "Électricité & énergie",
+            "Installations électriques, énergies renouvelables et gestion technique du bâtiment.",
+            "category-electricite-energie.png",
             3,
             List.of(
-                new SubCategorySeed("Tapis du M'Zab", "tapis-du-mzab", "Tapis mozabites en pure laine vierge aux motifs symboliques ibadites.", 1),
-                new SubCategorySeed("Tapis de Babar & Nememcha", "tapis-de-babar-nememcha", "Tapis traditionnels aux motifs géométriques des hauts plateaux de l'Est.", 2),
-                new SubCategorySeed("Tissage de Bernous & Gandoura", "tissage-bernous-gandoura", "Tissage de laine fine et poil de dromadaire pour habits d'honneur.", 3),
-                new SubCategorySeed("Hanbel & Zarbiya Djebel Amour", "hanbel-zarbiya-djebel-amour", "Tissages ras et tapis de haute laine pastorale.", 4)
+                new SubCategorySeed("Électricien bâtiment", "Installation, raccordement et mise aux normes des réseaux électriques.", 1),
+                new SubCategorySeed("Installateur photovoltaïque", "Pose et maintenance de panneaux et systèmes solaires photovoltaïques.", 2),
+                new SubCategorySeed("Technicien domotique", "Automatisation, pilotage intelligent et connectivité des équipements de l'habitat.", 3),
+                new SubCategorySeed("Automaticien / GTB", "Programmation et maintenance de systèmes de gestion technique du bâtiment.", 4)
             )
         );
 
         saveCategoryWithSubs(
-            "Cuir & Maroquinerie",
-            "cuir-maroquinerie",
-            "Travail traditionnel du cuir naturel, tannerie artisanale et sellerie d'art.",
-            "category-cuir.png",
+            "Plomberie & systèmes techniques",
+            "Distribution d'eau, sanitaires, réseaux thermiques et climatisation.",
+            "category-plomberie-systemes-techniques.png",
             4,
             List.of(
-                new SubCategorySeed("Maroquinerie Traditionnelle", "maroquinerie-traditionnelle", "Sacs, sacoches et porte-documents en cuir repoussé.", 1),
-                new SubCategorySeed("Sellerie d'Apparat & Harnachement", "sellerie-apparat-harnachement", "Selles brodées de fil d'or pour fantasias et apparat équestre.", 2),
-                new SubCategorySeed("Babouches & Chaussures Traditionnelles", "babouches-chaussures-traditionnelles", "Babouches citadines et sahariennes brodées.", 3)
+                new SubCategorySeed("Plombier sanitaire", "Installation et maintenance des réseaux d'alimentation et d'évacuation sanitaire.", 1),
+                new SubCategorySeed("Chauffagiste", "Installation et maintenance de chaudières, radiateurs et pompes à chaleur.", 2),
+                new SubCategorySeed("Frigoriste / climaticien", "Mise en service et entretien d'installations frigorifiques et de climatisation.", 3),
+                new SubCategorySeed("Technicien CVC (chauffage-ventilation-climatisation)", "Gestion globale des flux d'air, de température et de ventilation du bâtiment.", 4)
             )
         );
 
         saveCategoryWithSubs(
-            "Métiers du Bois",
-            "metiers-du-bois",
-            "Menuiserie d'art, sculpture sur bois précieux et ébénisterie traditionnelle.",
-            "category-bois.png",
+            "Finitions & second œuvre",
+            "Aménagements intérieurs, cloisons, revêtements muraux et de sol.",
+            "category-finitions-second-oeuvre.png",
             5,
             List.of(
-                new SubCategorySeed("Ébénisterie Traditionnelle", "ebenisterie-traditionnelle", "Fabrication de mobilier d'art, coffres sculptés et boiseries précieuses.", 1),
-                new SubCategorySeed("Sculpture sur Bois Mauresque", "sculpture-sur-bois-mauresque", "Arabesques et bas-reliefs sculptés sur cèdre et noyer.", 2),
-                new SubCategorySeed("Tournage sur Bois & Moucharabieh", "tournage-sur-bois-moucharabieh", "Claustras en bois ajouré, quenouilles et objets tournés.", 3)
+                new SubCategorySeed("Peintre en bâtiment", "Préparation des supports et application de peintures et revêtements muraux.", 1),
+                new SubCategorySeed("Carreleur-mosaïste", "Pose géométrique de carrelages, dalles et mosaïques décoratives.", 2),
+                new SubCategorySeed("Plâtrier-plaquiste", "Pose de cloisons sèches, faux plafonds et finitions en plâtre.", 3),
+                new SubCategorySeed("Parqueteur", "Pose, ponçage et vitrification de parquets massifs et contrecollés.", 4),
+                new SubCategorySeed("Solier-moquettiste", "Découpe et pose de revêtements de sol souples, moquettes et linoléum.", 5)
             )
         );
 
         saveCategoryWithSubs(
-            "Costumes & Broderie Traditionnelle",
-            "costumes-broderie-traditionnelle",
-            "Haute couture patrimoniale, costumes régionaux et broderies ancestrales.",
-            "category-costumes.png",
+            "Menuiserie & agencement",
+            "Fabrication et pose de fermetures, mobiliers et agencements intérieurs.",
+            "category-menuiserie-agencement.png",
             6,
             List.of(
-                new SubCategorySeed("Karakou & Broderie Algéroise", "karakou-broderie-algeroise", "Vestes de velours brodées au fil d'or et d'argent selon la technique du majboud.", 1),
-                new SubCategorySeed("Gandoura Constantinoise", "gandoura-constantinoise", "Robes traditionnelles en velours lourd brodées à la fetla de Constantine.", 2),
-                new SubCategorySeed("Blousa Oranaise", "blousa-oranaise", "Robe citadine oranaise parée de dentelles et de perles fines.", 3),
-                new SubCategorySeed("Robe Kabyle Traditionnelle", "robe-kabyle-traditionnelle", "Robes d'apparat tissées et rehaussées de rubans zigzags multicolores.", 4)
+                new SubCategorySeed("Menuisier bois / aluminium / PVC", "Fabrication et pose de fenêtres, portes et baies vitrées tous matériaux.", 1),
+                new SubCategorySeed("Ébéniste", "Création, restauration et marqueterie de meubles et boiseries d'art.", 2),
+                new SubCategorySeed("Menuisier agenceur", "Conception et installation sur mesure d'aménagements intérieurs et placards.", 3),
+                new SubCategorySeed("Cuisiniste", "Conception, assemblage et pose de cuisines équipées et fonctionnelles.", 4)
             )
         );
 
         saveCategoryWithSubs(
-            "Vannerie & Sparterie",
-            "vannerie-sparterie",
-            "Tressage de fibres végétales locales, sparterie d'alfa et vannerie de palme.",
-            "category-vannerie.png",
+            "Métal & serrurerie",
+            "Ouvrages en métal, serrures, fermetures de sécurité et métallerie décorative.",
+            "category-metal-serrurerie.png",
             7,
             List.of(
-                new SubCategorySeed("Vannerie de Palme Saharienne", "vannerie-de-palme-saharienne", "Paniers, chapeaux et nattes tressés en feuilles de palmier doum.", 1),
-                new SubCategorySeed("Vannerie d'Alfa & Jonc", "vannerie-alfa-jonc", "Objets utilitaires et décoratifs en alfa et jonc des zones steppiques.", 2)
+                new SubCategorySeed("Serrurier", "Pose, dépannage et maintenance de systèmes de verrouillage et serrures de sécurité.", 1),
+                new SubCategorySeed("Métallier", "Fabrication d'ouvrages métalliques légers, garde-corps, escaliers et passerelles.", 2),
+                new SubCategorySeed("Ferronnier d'art", "Façonnage à chaud du fer et de métaux pour éléments décoratifs et d'art.", 3),
+                new SubCategorySeed("Chaudronnier", "Conformation et assemblage de tôles et tubes pour tuyauteries et cuves métalliques.", 4)
+            )
+        );
+
+        saveCategoryWithSubs(
+            "Métiers du patrimoine",
+            "Restauration, conservation et techniques traditionnelles des monuments et du bâti ancien.",
+            "category-metiers-du-patrimoine.png",
+            8,
+            List.of(
+                new SubCategorySeed("Maçon du patrimoine", "Restauration d'ouvrages anciens à la chaux, moellons et techniques d'époque.", 1),
+                new SubCategorySeed("Couvreur du patrimoine", "Réfection de toitures classées, dômes et couvertures historiques.", 2),
+                new SubCategorySeed("Vitrailliste", "Création et restauration de vitraux d'art montés au plomb.", 3),
+                new SubCategorySeed("Staffeur-ornemaniste", "Moulage et restauration de corniches, rosaces et stucs d'ornement.", 4),
+                new SubCategorySeed("Marbrier", "Découpe, polissage et restauration d'éléments architecturaux en marbre.", 5)
             )
         );
     }
 
-    private void saveCategoryWithSubs(String name, String slug, String description, String iconUrl, int displayOrder, List<SubCategorySeed> subs) {
+    private void saveCategoryWithSubs(String name, String description, String iconUrl, int displayOrder, List<SubCategorySeed> subs) {
         JobCategory category = JobCategory.builder()
             .name(name)
-            .slug(slug)
+            .slug(SlugUtils.toSlug(name))
             .description(description)
             .iconUrl(iconUrl)
             .displayOrder(displayOrder)
@@ -464,80 +481,83 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         saveMaterialFamilyWithMaterials(
-            "Terres & Argiles",
-            "terres-et-argiles",
-            "Argiles pures, grès et terres réfractaires de terroirs artisanaux.",
+            "Matériaux naturels traditionnels",
+            "Substances naturelles brutes d'origine minérale ou végétale utilisées dans l'architecture méditerranéenne.",
             1,
             List.of(
-                new MaterialSeed("Argile Rouge de Kabylie", "argile-rouge-de-kabylie", "Terre argileuse ferrugineuse riche, traditionnellement extraite des collines de Grande Kabylie.", 1),
-                new MaterialSeed("Argile Blanche & Grès", "argile-blanche-et-gres", "Kaolin et grès fin pour céramiques et faïences émaillées.", 2)
+                new MaterialSeed("Pierre calcaire", "Roche sédimentaire calcaire tendre ou dure pour maçonnerie, taille et dallages.", 1),
+                new MaterialSeed("Marbre", "Roche métamorphique noble polie pour revêtements, colonnes et éléments ornementaux.", 2),
+                new MaterialSeed("Terre crue (pisé, adobe, torchis)", "Terre argileuse compactée ou façonnée séchée au soleil offrant régulation hygrothermique.", 3),
+                new MaterialSeed("Argile", "Matière minérale plastique employée pour briques, céramiques et poteries traditionnelles.", 4),
+                new MaterialSeed("Bois (pin, cyprès, chêne)", "Essences de bois régionales pour charpente, menuiserie et structures extérieures.", 5)
             )
         );
 
         saveMaterialFamilyWithMaterials(
-            "Métaux & Alliages",
-            "metaux-et-alliages",
-            "Métaux précieux, cuivre et alliages nobles façonnés par les maîtres artisans.",
+            "Matériaux de maçonnerie",
+            "Éléments et liants manufacturés pour l'élévation des murs et le gros œuvre.",
             2,
             List.of(
-                new MaterialSeed("Argent Massif 925", "argent-massif-925", "Argent au titre 925/1000 pour bijouterie et filigrane.", 1),
-                new MaterialSeed("Cuivre Rouge & Jaune", "cuivre-rouge-et-jaune", "Cuivre martelé et laiton pour dinanderie et objets d'art.", 2),
-                new MaterialSeed("Bronze & Laiton", "bronze-et-laiton", "Alliages résistants pour fonte d'art et éléments décoratifs.", 3)
+                new MaterialSeed("Brique (pleine, creuse, terre cuite)", "Éléments modulaires en terre cuite pour cloisons et murs porteurs.", 1),
+                new MaterialSeed("Parpaing (béton)", "Bloc de béton manufacturé pour maçonnerie courante et soubassements.", 2),
+                new MaterialSeed("Mortier / chaux naturelle", "Liant respirant à base de chaux et sable pour montage de maçonneries et enduits.", 3),
+                new MaterialSeed("Béton armé", "Matériau composite de béton et d'acier conférant une haute résistance structurelle.", 4)
             )
         );
 
         saveMaterialFamilyWithMaterials(
-            "Bois & Essences Naturelles",
-            "bois-et-essences-naturelles",
-            "Essences arboricoles méditerranéennes et bois nobles des forêts d'Algérie.",
+            "Matériaux de toiture",
+            "Matériaux assurant la couverture, l'écoulement des eaux et la protection des toitures.",
             3,
             List.of(
-                new MaterialSeed("Bois de Cèdre de l'Atlas", "bois-de-cedre-de-l-atlas", "Bois noble odorant et imputrescible récolté dans les massifs de l'Atlas.", 1),
-                new MaterialSeed("Bois de Noyer & Genévrier", "bois-de-noyer-et-genevrier", "Bois denses et nervurés pour sculpture fine et tabletterie.", 2),
-                new MaterialSeed("Bois d'Olivier", "bois-d-olivier", "Bois dur aux veinures contrastées façonné pour ustensiles et pièces de collection.", 3)
+                new MaterialSeed("Tuiles en terre cuite (romanes méditerranéennes)", "Tuiles galbées traditionnelles adaptées aux climats ensoleillés du pourtour méditerranéen.", 1),
+                new MaterialSeed("Ardoise (zones plus nordiques)", "Feuillets de schiste imperméable pour toitures à pente prononcée.", 2),
+                new MaterialSeed("Zinc", "Métal laminé malléable pour toitures, chéneaux, noues et évacuations pluviales.", 3),
+                new MaterialSeed("Béton de toiture", "Dalles et tuiles en béton offrant compacité et résistance mécanique sous toiture.", 4)
             )
         );
 
         saveMaterialFamilyWithMaterials(
-            "Cuirs & Peaux",
-            "cuirs-et-peaux",
-            "Peaux naturelles préparées selon des techniques de tannage traditionnel.",
+            "Métal & structure",
+            "Profilés et alliages métalliques pour structures porteuses et ferronnerie d'art.",
             4,
             List.of(
-                new MaterialSeed("Cuir Tanné Végétal", "cuir-tanne-vegetal", "Cuir pleine fleur tanné aux écorces végétales sans produits chimiques.", 1),
-                new MaterialSeed("Peau de Chèvre & Mouton", "peau-de-chevre-et-mouton", "Peaux souples apprêtées pour reliure, babouches et maroquinerie fine.", 2),
-                new MaterialSeed("Cuir de Chameau", "cuir-de-chameau", "Cuir saharien robuste et grainé pour bagagerie et selles de méharée.", 3)
+                new MaterialSeed("Acier", "Alliage de fer et de carbone à haute limite élastique pour ossatures et renforts.", 1),
+                new MaterialSeed("Aluminium", "Métal léger inoxydable pour profilés de menuiserie et façades modernes.", 2),
+                new MaterialSeed("Fer forgé", "Fer chauffé et martelé artisanalement pour grilles, rampes et ferronneries décoratives.", 3)
             )
         );
 
         saveMaterialFamilyWithMaterials(
-            "Fibres Végétales & Textiles",
-            "fibres-vegetales-et-textiles",
-            "Fibres naturelles textiles et graminées issues des écosystèmes algériens.",
+            "Isolation & techniques modernes",
+            "Isolants thermiques, acoustiques et membranes techniques pour la performance énergétique.",
             5,
             List.of(
-                new MaterialSeed("Laine Chaouie", "laine-chaouie", "Laine dense de mouton des hauts plateaux de l'Aurès pour tissages rustiques.", 1),
-                new MaterialSeed("Soie Naturelle & Fil d'Or", "soie-naturelle-et-fil-d-or", "Fils nobles pour broderies d'apparat au majboud et à la fetla.", 2),
-                new MaterialSeed("Fibre d'Alfa & Palme Doum", "fibre-d-alfa-et-palme-doum", "Fibres résistantes récoltées dans les steppes et palmeraies.", 3)
+                new MaterialSeed("Laine de roche", "Isolant minéral fibreux incombustible pour isolation thermique et acoustique.", 1),
+                new MaterialSeed("Laine de verre", "Matelas isolant à base de silice pour combles, cloisons et toitures.", 2),
+                new MaterialSeed("Polystyrène expansé", "Panneaux isolants rigides ultra-légers pour isolation par l'extérieur et sous chape.", 3),
+                new MaterialSeed("Polyuréthane", "Mousse rigide à haut pouvoir isolant et faible épaisseur.", 4),
+                new MaterialSeed("Membranes d'étanchéité", "Feuilles élastomères ou bitumineuses assurant l'étanchéité à l'eau et à l'air.", 5)
             )
         );
 
         saveMaterialFamilyWithMaterials(
-            "Pierres & Matières Organiques",
-            "pierres-et-matieres-organiques",
-            "Gemmes méditerranéennes, coraux et matières précieuses organiques.",
+            "Revêtements & finitions",
+            "Couches décoratives et de protection pour l'embellissement des surfaces intérieures et extérieures.",
             6,
             List.of(
-                new MaterialSeed("Corail Rouge d'El Kala", "corail-rouge-d-el-kala", "Corallium rubrum pêché durablement sur le littoral d'El Kala, emblème du bijou traditionnel.", 1),
-                new MaterialSeed("Nacre & Émail Naturel", "nacre-et-email-naturel", "Incrustations nacrées et émaux cuits aux oxydes minéraux.", 2)
+                new MaterialSeed("Enduits à la chaux", "Enduits traditionnels microporeux minéraux régulant l'humidité des parois.", 1),
+                new MaterialSeed("Peintures acryliques", "Peintures en phase aqueuse résistantes aux UV et intempéries.", 2),
+                new MaterialSeed("Carrelage / céramique", "Dalles émaillées ou grès cérame pour sols et murs résistant à l'usure et à l'eau.", 3),
+                new MaterialSeed("Mosaïque", "Composition décorative de petits fragments minéraux ou émaux assemblés avec finesse.", 4)
             )
         );
     }
 
-    private void saveMaterialFamilyWithMaterials(String name, String slug, String description, int displayOrder, List<MaterialSeed> materials) {
+    private void saveMaterialFamilyWithMaterials(String name, String description, int displayOrder, List<MaterialSeed> materials) {
         MaterialFamily family = MaterialFamily.builder()
             .name(name)
-            .slug(slug)
+            .slug(SlugUtils.toSlug(name))
             .description(description)
             .displayOrder(displayOrder)
             .isActive(true)

@@ -94,15 +94,15 @@ class DirectoryIntegrationTest {
         Region beniIsguen = regionRepository.findBySlug("beni-isguen")
                 .orElseThrow(() -> new IllegalStateException("Seeded region 'beni-isguen' not found"));
 
-        JobSubCategory poterieKabylie = jobSubCategoryRepository.findBySlug("poterie-de-kabylie")
-                .orElseThrow(() -> new IllegalStateException("Seeded subcategory 'poterie-de-kabylie' not found"));
-        JobSubCategory bijouxKabyles = jobSubCategoryRepository.findBySlug("bijoux-kabyles-en-argent")
-                .orElseThrow(() -> new IllegalStateException("Seeded subcategory 'bijoux-kabyles-en-argent' not found"));
+        JobSubCategory poterieKabylie = jobSubCategoryRepository.findBySlug("macon")
+                .orElseThrow(() -> new IllegalStateException("Seeded subcategory 'macon' not found"));
+        JobSubCategory bijouxKabyles = jobSubCategoryRepository.findBySlug("charpentier-bois-charpentier-de-marine")
+                .orElseThrow(() -> new IllegalStateException("Seeded subcategory 'charpentier-bois-charpentier-de-marine' not found"));
 
-        Material argileRouge = materialRepository.findBySlug("argile-rouge-de-kabylie")
-                .orElseThrow(() -> new IllegalStateException("Seeded material 'argile-rouge-de-kabylie' not found"));
-        Material argentMassif = materialRepository.findBySlug("argent-massif-925")
-                .orElseThrow(() -> new IllegalStateException("Seeded material 'argent-massif-925' not found"));
+        Material argileRouge = materialRepository.findBySlug("pierre-calcaire")
+                .orElseThrow(() -> new IllegalStateException("Seeded material 'pierre-calcaire' not found"));
+        Material argentMassif = materialRepository.findBySlug("acier")
+                .orElseThrow(() -> new IllegalStateException("Seeded material 'acier' not found"));
 
         Technique ciselure = techniqueRepository.findBySlug("ciselure-au-repousse")
                 .orElseThrow(() -> new IllegalStateException("Seeded technique 'ciselure-au-repousse' not found"));
@@ -254,9 +254,9 @@ class DirectoryIntegrationTest {
     @DisplayName("Directory: multi-facet filtering isolates artisans matching all specified taxonomy traits")
     void multiFacetFiltering_byTaxonomyHierarchies() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory")
-                        .param("categorySlug", "metiers-de-la-terre-ceramique")
-                        .param("subCategorySlug", "poterie-de-kabylie")
-                        .param("materials", "argile-rouge-de-kabylie")
+                        .param("categorySlug", "gros-oeuvre-structure")
+                        .param("subCategorySlug", "macon")
+                        .param("materials", "pierre-calcaire")
                         .param("techniques", "ciselure-au-repousse")
                         .param("epoques", "periode-numide"))
                 .andExpect(status().isOk())
