@@ -30,6 +30,7 @@ import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.ArtisanProfileView;
 import com.project.souklab.model.User;
 import com.project.souklab.security.Permission;
+import com.project.souklab.security.ViewerPremiumResolver;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,7 @@ public class ArtisanProfileService {
     private final ArtisanProfileViewRepository artisanProfileViewRepository;
     private final ArtisanGalleryImageRepository artisanGalleryImageRepository;
     private final ArtisanCertificationRepository artisanCertificationRepository;
+    private final ViewerPremiumResolver viewerPremiumResolver;
     private ActivityEventService activityEventService;
 
     @Autowired(required = false)
@@ -223,16 +225,7 @@ public class ArtisanProfileService {
      * @return {@code true} if contact fields must be masked; {@code false} otherwise
      */
     private boolean resolveContactInfoLocked(User viewer, boolean isSelf, boolean isAdmin) {
-        if (isSelf || isAdmin) {
-            return false;
-        }
-        boolean isPremium = false;
-        if (viewer.getClient() != null) {
-            isPremium = viewer.getClient().isPremium();
-        } else if (viewer.getArtisan() != null) {
-            isPremium = viewer.getArtisan().isPremium();
-        }
-        return !isPremium;
+        return viewerPremiumResolver.isContactInfoLocked(viewer, isSelf, isAdmin);
     }
 
     /**

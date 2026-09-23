@@ -26,6 +26,7 @@ import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
 import com.project.souklab.security.Permission;
+import com.project.souklab.security.ViewerPremiumResolver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,6 +73,9 @@ class ArtisanProfileServiceTest {
 
     @Mock
     private ArtisanCertificationRepository artisanCertificationRepository;
+
+    @Mock
+    private ViewerPremiumResolver viewerPremiumResolver;
 
     @InjectMocks
     private ArtisanProfileService artisanProfileService;
@@ -373,6 +377,9 @@ class ArtisanProfileServiceTest {
                 .thenReturn(List.of(image));
         when(artisanCertificationRepository.findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc("artisan-user-id"))
                 .thenReturn(List.of(cert));
+        // Delegate to shared resolver: non-premium client → locked
+        when(viewerPremiumResolver.isContactInfoLocked(any(User.class), Mockito.eq(false), Mockito.eq(false)))
+                .thenReturn(true);
 
         ArtisanPublicViewDTO result = artisanProfileService.getArtisanProfile("artisan-user-id");
 
@@ -542,6 +549,9 @@ class ArtisanProfileServiceTest {
                 .thenReturn(Collections.emptyList());
         when(artisanCertificationRepository.findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc("x"))
                 .thenReturn(Collections.emptyList());
+        // Delegate to shared resolver: non-premium client → locked
+        when(viewerPremiumResolver.isContactInfoLocked(any(User.class), Mockito.eq(false), Mockito.eq(false)))
+                .thenReturn(true);
 
         ArtisanPublicViewDTO result = artisanProfileService.getArtisanProfile("x");
 
