@@ -2,6 +2,8 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.Material;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,4 +45,30 @@ public interface MaterialRepository extends JpaRepository<Material, String> {
      * @return True if a material with the slug exists, false otherwise
      */
     boolean existsBySlug(String slug);
+
+    /**
+     * Checks if another material (different id) already uses the given slug.
+     *
+     * @param slug slug to check
+     * @param id   id of the material being updated
+     * @return true if a different material already holds this slug
+     */
+    boolean existsBySlugAndIdNot(String slug, String id);
+
+    /**
+     * Checks if any materials exist under the specified parent family ID.
+     */
+    boolean existsByFamilyId(String familyId);
+
+    /**
+     * Returns the maximum displayOrder value for materials belonging to a family, or 0.
+     */
+    @Query("SELECT COALESCE(MAX(m.displayOrder), 0) FROM Material m WHERE m.family.id = :familyId")
+    int findMaxDisplayOrderByFamilyId(@Param("familyId") String familyId);
+
+    /**
+     * Counts how many artisans reference this material via artisan_materials join table.
+     */
+    @Query(value = "SELECT COUNT(*) FROM artisan_materials WHERE material_id = :materialId", nativeQuery = true)
+    int countArtisanReferences(@Param("materialId") String materialId);
 }

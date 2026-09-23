@@ -2,6 +2,8 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.Epoque;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,4 +36,30 @@ public interface EpoqueRepository extends JpaRepository<Epoque, String> {
      * @return True if an epoch with the slug exists, false otherwise
      */
     boolean existsBySlug(String slug);
+
+    /**
+     * Checks if another epoque (different id) already uses the given slug.
+     * Used during updates to enforce uniqueness without triggering a self-conflict.
+     *
+     * @param slug slug to check
+     * @param id   id of the epoque being updated
+     * @return true if a different epoque already holds this slug
+     */
+    boolean existsBySlugAndIdNot(String slug, String id);
+
+    /**
+     * Returns the current maximum displayOrder value across all epoques, or 0 if the table is empty.
+     */
+    @Query("SELECT COALESCE(MAX(e.displayOrder), 0) FROM Epoque e")
+    int findMaxDisplayOrder();
+
+    /**
+     * Counts how many artisans are associated with the given epoque.
+     * Used to prevent hard-deletes when artisan references exist.
+     *
+     * @param epoqueId the epoque id to check
+     * @return number of artisans linked to this epoque
+     */
+    @Query(value = "SELECT COUNT(*) FROM artisan_epoques WHERE epoque_id = :epoqueId", nativeQuery = true)
+    int countArtisanReferences(@Param("epoqueId") String epoqueId);
 }
