@@ -325,6 +325,13 @@ L'équipe opérationnelle de Souklab dispose d'un ensemble complet d'outils pour
 - Traiter les remboursements
 - Corriger les états d'abonnement ou de paiement si nécessaire
 
+**Gouvernance du catalogue et des taxonomies :**
+- Créer, mettre à jour et gérer les techniques artisanales, les époques historiques et les régions géographiques algériennes (wilayas et communes)
+- Maintenir des hiérarchies à deux niveaux pour les catégories et sous-catégories de métiers du bâtiment (taxonomie française) et les familles et matériaux méditerranéens
+- Dérivation automatique des slugs et détection des conflits pour garantir des identifiants d'URL stables et cohérents
+- Gardes d'intégrité à la suppression : les catégories ou familles parentes possédant des sous-éléments actifs ne peuvent être supprimées par erreur
+- Journal d'audit immuable enregistrant chaque modification de taxonomie avec l'identité de l'administrateur et l'horodatage
+
 ---
 
 ### 16. Analytique de la plateforme (équipe opérations)

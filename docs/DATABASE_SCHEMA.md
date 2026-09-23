@@ -22,7 +22,9 @@ All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft
 
 - Unique email and OAuth-provider identity constraints prevent duplicate account bindings.
 - `formation_enrollments` has a unique `(formation_id, artisan_id)` constraint.
-- Catalog slugs and other unique fields are declared in their entity `@Table` mappings.
+- Catalog slugs enforce unique constraints across all reference entities (`regions`, `job_categories`, `job_sub_categories`, `material_families`, `materials`, `epoques`, `techniques`).
+- Two-tier hierarchies enforce foreign key integrity (`job_sub_categories.category_id -> job_categories.id`, `materials.family_id -> material_families.id`) with delete-restriction semantics preventing orphan records.
+- Self-referencing regional hierarchy (`regions.parent_id -> regions.id`) prevents cycle traversal via recursive CTE ancestor checks.
 - Upload records retain opaque storage keys; physical object deletion is coordinated after a successful database commit.
 
 ## Database Migrations & Deployment
@@ -35,6 +37,6 @@ Schema changes are versioned and managed using **Flyway**. The repository mainta
 - `V4`: Production query performance indexes
 - `V5`: Subscriptions and Chargily Pay V2 payments
 - `V6`–`V14`: Analytics raw events, rollups, job queue, outbox patterns, and audit action tracking
-- `V15`: Admin catalog taxonomy management permission (`permission:admin:catalog`)
+- `V15`: Admin catalog taxonomy management permission (`permission:admin:catalog`) and catalog audit action types (`CATALOG_ITEM_CREATED`, `CATALOG_ITEM_UPDATED`, `CATALOG_ITEM_DELETED`)
 
 The `prod` Spring profile sets `spring.jpa.hibernate.ddl-auto=validate` and Hibernate Search schema management to `validate`. Production schema changes must be applied via Flyway (`FLYWAY_ENABLED=true`) prior to application startup. Applied migrations are immutable and must never be modified.

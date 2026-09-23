@@ -25,6 +25,33 @@ The JPA classes under `src/main/java/com/project/souklab/model` are the authorit
 - Avatar, gallery, certification, and formation file uploads enforce configured quotas and validate storage content before persistence.
 - Public media may be served without authentication; certifications and formation files are ownership/enrollment protected by `FileAccessService`.
 - Soft-deleted records remain queryable only through explicit repository methods that include deleted rows.
+- Catalog taxonomies enforce unique slug constraints (`SlugUtils.toSlug(name)`); duplicate slugs trigger 409 Conflict.
+- Two-tier parent/child taxonomies (`JobCategory` -> `JobSubCategory`, `MaterialFamily` -> `Material`) maintain foreign key integrity with delete protection (409 Conflict if parent has active children).
+- Self-referencing hierarchies (`Region` -> `parent_id`) guard against circular references via recursive CTE ancestors resolution (`RegionRepository.findAncestorIds`).
+
+## Seeded reference data inventory
+
+The reference catalog is seeded on startup when absent via `DataSeeder`:
+
+- **Wilayas & Regions**: 58 Algerian wilayas (plus DZ country root and sample communes).
+- **Job Categories & Subcategories**: 8 French construction/artisanat categories with 37 subcategories:
+  - *Gros œuvre & structure* (5 subcategories)
+  - *Couverture, étanchéité & zinguerie* (4 subcategories)
+  - *Menuiserie, fermetures & agencement* (5 subcategories)
+  - *Revêtements, finitions & décoration* (5 subcategories)
+  - *Plomberie & systèmes techniques* (4 subcategories)
+  - *Électricité & énergie* (4 subcategories)
+  - *Métal & serrurerie* (5 subcategories)
+  - *Aménagements extérieurs & paysage* (5 subcategories)
+- **Material Families & Materials**: 6 Mediterranean material families with 25 materials:
+  - *Pierre & roche* (5 materials)
+  - *Terre & céramique* (4 materials)
+  - *Bois & dérivés* (4 materials)
+  - *Métaux & alliages* (4 materials)
+  - *Chaux, plâtre & liants traditionnels* (4 materials)
+  - *Fibres, végétaux & isolants naturels* (4 materials)
+- **Epoques**: 14 historical eras spanning Antiquity, Islamic periods, Ottoman, and Modern/Contemporary craft periods.
+- **Techniques**: 20 traditional craftsmanship techniques (carving, weaving, joinery, smithing, ceramics, etc.).
 
 ## Enumerations
 

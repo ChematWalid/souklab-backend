@@ -635,10 +635,35 @@ V10__phase10_payment_origin.sql
 V11__phase10_outbox_retry_schedule.sql
 V12__phase10_analytics_maintenance_jobs.sql
 V13__phase10_report_resolution_time.sql
+V14__phase10_financial_audits.sql
+V15__admin_catalog_permission.sql
 ```
 
-The Phase 10 local harness has validated and applied the complete chain to a
+The Phase 10 and 11 local harnesses have validated and applied the complete chain to a
 fresh MariaDB schema.
+
+## Phase 11 — Admin catalog taxonomy CRUD and reference seeding
+
+### Delivered capabilities
+
+- Full administrative CRUD endpoints under `/api/v1/admin/catalog/**` for:
+  - Techniques (`/techniques/**`)
+  - Epoques (`/epoques/**`)
+  - Regions (`/regions/**`)
+  - Job Categories & Subcategories (`/categories/**`, `/subcategories/**`)
+  - Material Families & Materials (`/material-families/**`, `/materials/**`)
+- Dedicated `permission:admin:catalog` (`Admin.CATALOG`) permission controlling write access.
+- Automatic slug generation via `SlugUtils.toSlug(name)` with duplicate slug detection (`409 Conflict`).
+- Two-tier foreign key integrity and deletion protection: deleting a parent Category with subcategories or Material Family with materials is prevented (`409 Conflict`).
+- Self-referencing recursive hierarchy cycle guard in `RegionRepository.findAncestorIds` using recursive CTE.
+- Real-time Caffeine cache eviction (`@CacheEvict`) on catalog mutations.
+- Immutable audit log emission (`CATALOG_ITEM_CREATED`, `CATALOG_ITEM_UPDATED`, `CATALOG_ITEM_DELETED`).
+- Seeded verbatim reference taxonomies via `DataSeeder`:
+  - 8 French building trades / artisanat categories with 37 subcategories.
+  - 6 Mediterranean material families with 25 materials.
+  - 58 Algerian wilayas and regional administrative tree.
+  - 14 historical craftsmanship epoques.
+  - 20 traditional craftsmanship techniques.
 
 ## API and documentation artifacts
 

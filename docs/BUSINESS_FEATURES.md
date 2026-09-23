@@ -325,6 +325,13 @@ The Souklab operations team has a full set of tools to run the platform smoothly
 - Process refunds
 - Correct subscription or payment states when needed
 
+**Catalog & Taxonomy governance:**
+- Create, update, and manage craftsmanship techniques, historical epoques, and Algerian geographic regions
+- Maintain two-tier hierarchies for trade categories & subcategories (French craft taxonomy) and Mediterranean material families & materials
+- Automatic slug derivation and conflict detection ensure consistent URL and reference keys
+- Deletion guards protect integrity: parent categories or material families with active children cannot be accidentally removed
+- Immutable audit log captures every catalog modification with administrative actor details
+
 ---
 
 ### 16. Platform Analytics (Operations Team)

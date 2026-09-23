@@ -237,6 +237,7 @@ Toute l'autorisation est **basée sur les permissions**, non sur les rôles. Les
 | `permission:file:read` | `File.READ` | Télécharger les fichiers protégés d'une formation |
 | `permission:message:send` | `Message.SEND` | Envoyer et recevoir des messages |
 | `permission:analytics:admin` | `Analytics.ADMIN` | Accéder au tableau de bord analytique et exporter des données |
+| `permission:admin:catalog` | `Admin.CATALOG` | Gérer les taxonomies du catalogue : techniques, époques, régions, catégories, matériaux |
 
 ### Prédicats de `AccessControlService`
 
@@ -249,6 +250,7 @@ Toute l'autorisation est **basée sur les permissions**, non sur les rôles. Les
 | `canModerateReports()` | `Admin.REPORTS` |
 | `canManageFinancialOperations()` | `Financial.ADMIN` |
 | `canViewAnalytics()` | `Analytics.ADMIN` |
+| `canManageCatalog()` | `Admin.CATALOG` |
 | `canManageArtisanFormations()` | `Artisan.FORMATIONS` |
 | `canManageArtisanContent()` / `isArtisan()` | `Artisan.CONTENT` |
 | `canManageArtisanReviews()` | `Artisan.REVIEWS` |
@@ -792,6 +794,49 @@ Les requêtes webhook avec une signature invalide sont rejetées avec `400 Bad R
 - Débannir un utilisateur déjà `ACTIVE` retourne `409 Conflict`.
 - L'expiration du timeout est automatiquement reflétée dans `effectiveStatus` sans job cron — calculé à la requête.
 - Des entrées de journal d'audit sont créées pour chaque action admin avec l'ID de l'acteur, le type d'action et l'horodatage.
+
+### Gestion du catalogue et des taxonomies
+
+<!-- AUTO-GENERATED depuis AdminCatalogController -->
+
+| Endpoint | Méthode | Auth | Description |
+|---|---|---|---|
+| `POST /api/v1/admin/catalog/techniques` | POST | `Admin.CATALOG` | Créer une technique artisanale |
+| `PUT /api/v1/admin/catalog/techniques/{id}` | PUT | `Admin.CATALOG` | Remplacer une technique |
+| `PATCH /api/v1/admin/catalog/techniques/{id}` | PATCH | `Admin.CATALOG` | Mise à jour partielle d'une technique (statut/ordre) |
+| `DELETE /api/v1/admin/catalog/techniques/{id}` | DELETE | `Admin.CATALOG` | Supprimer une technique (bloqué si liée à des artisans) |
+| `POST /api/v1/admin/catalog/epoques` | POST | `Admin.CATALOG` | Créer une époque/période historique |
+| `PUT /api/v1/admin/catalog/epoques/{id}` | PUT | `Admin.CATALOG` | Remplacer une époque |
+| `PATCH /api/v1/admin/catalog/epoques/{id}` | PATCH | `Admin.CATALOG` | Mise à jour partielle d'une époque |
+| `DELETE /api/v1/admin/catalog/epoques/{id}` | DELETE | `Admin.CATALOG` | Supprimer une époque (bloqué si liée à des artisans) |
+| `POST /api/v1/admin/catalog/regions` | POST | `Admin.CATALOG` | Créer une région (wilaya ou commune) |
+| `PUT /api/v1/admin/catalog/regions/{id}` | PUT | `Admin.CATALOG` | Remplacer une région (garde contre les cycles circulaires) |
+| `PATCH /api/v1/admin/catalog/regions/{id}` | PATCH | `Admin.CATALOG` | Mise à jour partielle d'une région |
+| `DELETE /api/v1/admin/catalog/regions/{id}` | DELETE | `Admin.CATALOG` | Supprimer une région (bloqué si elle a des sous-régions) |
+| `POST /api/v1/admin/catalog/categories` | POST | `Admin.CATALOG` | Créer une catégorie de métier |
+| `PUT /api/v1/admin/catalog/categories/{id}` | PUT | `Admin.CATALOG` | Remplacer une catégorie |
+| `PATCH /api/v1/admin/catalog/categories/{id}` | PATCH | `Admin.CATALOG` | Mise à jour partielle d'une catégorie |
+| `DELETE /api/v1/admin/catalog/categories/{id}` | DELETE | `Admin.CATALOG` | Supprimer une catégorie (bloqué si elle a des sous-catégories) |
+| `POST /api/v1/admin/catalog/subcategories` | POST | `Admin.CATALOG` | Créer une sous-catégorie sous une catégorie parente |
+| `PUT /api/v1/admin/catalog/subcategories/{id}` | PUT | `Admin.CATALOG` | Remplacer une sous-catégorie |
+| `PATCH /api/v1/admin/catalog/subcategories/{id}` | PATCH | `Admin.CATALOG` | Mise à jour partielle d'une sous-catégorie |
+| `DELETE /api/v1/admin/catalog/subcategories/{id}` | DELETE | `Admin.CATALOG` | Supprimer une sous-catégorie (bloqué si liée à des artisans) |
+| `POST /api/v1/admin/catalog/material-families` | POST | `Admin.CATALOG` | Créer une famille de matériaux |
+| `PUT /api/v1/admin/catalog/material-families/{id}` | PUT | `Admin.CATALOG` | Remplacer une famille de matériaux |
+| `PATCH /api/v1/admin/catalog/material-families/{id}` | PATCH | `Admin.CATALOG` | Mise à jour partielle d'une famille de matériaux |
+| `DELETE /api/v1/admin/catalog/material-families/{id}` | DELETE | `Admin.CATALOG` | Supprimer une famille de matériaux (bloqué si elle a des matériaux) |
+| `POST /api/v1/admin/catalog/materials` | POST | `Admin.CATALOG` | Créer un matériau sous une famille parente |
+| `PUT /api/v1/admin/catalog/materials/{id}` | PUT | `Admin.CATALOG` | Remplacer un matériau |
+| `PATCH /api/v1/admin/catalog/materials/{id}` | PATCH | `Admin.CATALOG` | Mise à jour partielle d'un matériau |
+| `DELETE /api/v1/admin/catalog/materials/{id}` | DELETE | `Admin.CATALOG` | Supprimer un matériau (bloqué si lié à des artisans) |
+
+### Règles de gestion du catalogue
+
+- Dérivation automatique du slug unique via `SlugUtils.toSlug(nom)` lorsque le champ `slug` est nul ou omis.
+- Un slug en doublon retourne `409 Conflict`.
+- Les relations hiérarchiques à deux niveaux (`JobCategory` / `JobSubCategory`, `MaterialFamily` / `Material`) empêchent la suppression d'entités parentes ayant des éléments enfants (`409 Conflict`).
+- Les hiérarchies auto-référencées (`Region`) détectent et rejettent les cycles circulaires via CTE récursive (`422 Unprocessable Entity`).
+- Toute modification invalide les caches Caffeine publics (`@CacheEvict`) et génère une entrée d'audit avec `AuditLogAction.CATALOG_ITEM_CREATED`, `UPDATED` et `DELETED`.
 
 ---
 

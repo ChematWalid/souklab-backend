@@ -14,11 +14,11 @@
 └──────────────┬───────────────┴──────────────┬───────────────┘
                ▼                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Controller Layer (30 REST Controllers + STOMP Handlers)     │
+│ Controller Layer (33 REST Controllers + STOMP Handlers)     │
 └──────────────────────────────┬──────────────────────────────┘
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Application Service Layer (50 Transactional Services)       │
+│ Application Service Layer (46 Transactional Services)       │
 │ - Domain Invariants   - Event Outbox   - File Access Policy │
 └──────┬───────────────┬──────────────┬───────────────┬───────┘
        ▼               ▼              ▼               ▼

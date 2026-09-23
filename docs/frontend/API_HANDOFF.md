@@ -49,7 +49,7 @@ Common statuses are 400 (malformed request), 401 (unauthenticated), 403 (forbidd
 | Messaging | `/conversations/**`, STOMP `/app/**` | conversations, messages, attachments |
 | Notifications | `/notifications/**` | feed, unread count (raw integer in `data`), read state |
 | Subscriptions/payments | `/subscriptions/**`, `/payments/**`, `/admin/**` | checkout, lifecycle, refunds |
-| Administration | `/admin/**` | users, permissions, moderation, analytics |
+| Administration | `/admin/**` | users, permissions, moderation, catalog taxonomy, analytics |
 | Files | `/files/**`, avatar and multipart paths | uploads and protected downloads |
 
 Use the generated OpenAPI artifact for exact path/method pairs, schemas, security requirements, and operation IDs. Do not infer routes from this summary.

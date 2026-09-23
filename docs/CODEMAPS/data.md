@@ -63,7 +63,7 @@
 - `AnalyticsArtifactRecord` (`analytics_artifact_records`): Exported CSV metadata in S3 storage.
 - `AnalyticsMaintenanceJob` (`analytics_maintenance_jobs`): Automated retention & rollup cleanup logs.
 
-## 3. Flyway Migration History (V0–V14)
+## 3. Flyway Migration History (V0–V15)
 
 | Version | Script Name | Scope |
 |---|---|---|
@@ -75,3 +75,4 @@
 | `V5` | `V5__phase9_subscriptions_payments.sql` | Plans, subscriptions, payments, webhooks, refunds |
 | `V6`–`V9` | `V6..V9__phase10_analytics*.sql` | Analytics raw events, rollups, job queue, outbox, artifacts |
 | `V10`–`V14` | `V10..V14__phase10_*.sql` | Payment origins, retry scheduling, maintenance, resolution time, financial audits |
+| `V15` | `V15__admin_catalog_permission.sql` | Admin catalog taxonomy management permission and audit action support |
