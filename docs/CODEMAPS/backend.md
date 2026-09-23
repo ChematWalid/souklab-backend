@@ -78,6 +78,7 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `GET /admin/users` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration
 - `GET|POST|DELETE /admin/users/{userId}/permissions`: Granular permission assignments
 - `POST /admin/analytics/jobs` & `POST /admin/analytics/rollups/*`: Async reporting jobs & CSV exports
+- `POST|PUT|PATCH|DELETE /admin/catalog/**`: Full taxonomy CRUD (`permission:admin:catalog`)
 
 ## 3. Core Component Delegation
 
@@ -91,3 +92,5 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 | `NotificationController` | `NotificationService` | `NotificationRepository` |
 | `SubscriptionCheckoutController`| `SubscriptionCheckoutService`, `ChargilyService` | `SubscriptionRepository`, `PaymentRepository` |
 | `AnalyticsJobController` | `AnalyticsJobService`, `AnalyticsRollupService` | `AnalyticsJobRunRepository`, `AnalyticsRollupRepository` |
+| `AdminCatalogController` | `AdminCatalogService` | `TechniqueRepository`, `EpoqueRepository`, `RegionRepository`, `JobCategoryRepository`, `JobSubCategoryRepository`, `MaterialFamilyRepository`, `MaterialRepository` |
+

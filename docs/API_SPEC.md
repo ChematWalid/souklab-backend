@@ -309,13 +309,48 @@ Full-text search and multi-facet filtering over active, verified artisans.
 
 ---
 
-## 5. Catalog & Reference Taxonomy (`/api/v1/catalog/**`)
+## 5. Catalog & Reference Taxonomy (`/api/v1/catalog/**` and `/api/v1/admin/catalog/**`)
 
+Public read endpoints:
 - `GET /api/v1/catalog/regions`: All wilayas and communes in hierarchical tree.
 - `GET /api/v1/catalog/categories`: Categories with child subcategories.
 - `GET /api/v1/catalog/materials`: Material families and individual crafting materials.
 - `GET /api/v1/catalog/epoques`: Traditional and historical periods.
 - `GET /api/v1/catalog/techniques`: Craftsmanship techniques.
+
+### Admin Taxonomy Management (`/api/v1/admin/catalog/**`)
+Protected write endpoints requiring `permission:admin:catalog`. All writes invalidate the corresponding Caffeine cache entries in real-time.
+
+- `POST /api/v1/admin/catalog/techniques`: Create technique (201 Created). Auto-generates slug from name if omitted; 409 on duplicate slug.
+- `PUT /api/v1/admin/catalog/techniques/{id}`: Replace technique (200 OK).
+- `PATCH /api/v1/admin/catalog/techniques/{id}`: Partial update technique (200 OK; toggle isActive, displayOrder).
+- `DELETE /api/v1/admin/catalog/techniques/{id}`: Hard-delete technique (200 OK, `data: null`). 409 Conflict if referenced by artisans.
+- `POST /api/v1/admin/catalog/epoques`: Create epoque with optional periodEra (201 Created).
+- `PUT /api/v1/admin/catalog/epoques/{id}`: Replace epoque (200 OK).
+- `PATCH /api/v1/admin/catalog/epoques/{id}`: Partial update epoque (200 OK).
+- `DELETE /api/v1/admin/catalog/epoques/{id}`: Hard-delete epoque (200 OK, `data: null`). 409 Conflict if referenced by artisans.
+- `POST /api/v1/admin/catalog/regions`: Create Wilaya or Commune with optional parentId and code (201 Created). Missing parentId yields 404.
+- `PUT /api/v1/admin/catalog/regions/{id}`: Replace region (200 OK). Circular parent reference yields 422 Unprocessable Entity.
+- `PATCH /api/v1/admin/catalog/regions/{id}`: Partial update region (200 OK).
+- `DELETE /api/v1/admin/catalog/regions/{id}`: Hard-delete region (200 OK, `data: null`). 409 Conflict if region has child regions.
+- `POST /api/v1/admin/catalog/categories`: Create category (201 Created). Auto-generates slug from name if omitted; 409 on duplicate slug.
+- `PUT /api/v1/admin/catalog/categories/{id}`: Replace category (200 OK).
+- `PATCH /api/v1/admin/catalog/categories/{id}`: Partial update category (200 OK; toggle isActive, displayOrder).
+- `DELETE /api/v1/admin/catalog/categories/{id}`: Hard-delete category (200 OK, `data: null`). 409 Conflict if category has child subcategories.
+- `POST /api/v1/admin/catalog/subcategories`: Create subcategory under a category (201 Created). Missing categoryId yields 400, non-existent category yields 404; 409 on duplicate slug.
+- `PUT /api/v1/admin/catalog/subcategories/{id}`: Replace subcategory (200 OK).
+- `PATCH /api/v1/admin/catalog/subcategories/{id}`: Partial update subcategory (200 OK; toggle isActive, displayOrder).
+- `DELETE /api/v1/admin/catalog/subcategories/{id}`: Hard-delete subcategory (200 OK, `data: null`). 409 Conflict if referenced by artisans.
+- `POST /api/v1/admin/catalog/material-families`: Create material family (201 Created). Auto-generates slug from name if omitted; 409 on duplicate slug.
+- `PUT /api/v1/admin/catalog/material-families/{id}`: Replace material family (200 OK).
+- `PATCH /api/v1/admin/catalog/material-families/{id}`: Partial update material family (200 OK; toggle isActive, displayOrder).
+- `DELETE /api/v1/admin/catalog/material-families/{id}`: Hard-delete material family (200 OK, `data: null`). 409 Conflict if family has child materials.
+- `POST /api/v1/admin/catalog/materials`: Create raw material under a family (201 Created). Missing familyId yields 400, non-existent family yields 404; 409 on duplicate slug.
+- `PUT /api/v1/admin/catalog/materials/{id}`: Replace material (200 OK).
+- `PATCH /api/v1/admin/catalog/materials/{id}`: Partial update material (200 OK; toggle isActive, displayOrder).
+- `DELETE /api/v1/admin/catalog/materials/{id}`: Hard-delete material (200 OK, `data: null`). 409 Conflict if referenced by artisans.
+
+
 
 ---
 
