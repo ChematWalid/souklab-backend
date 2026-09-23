@@ -17,7 +17,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - name: Check out source
@@ -34,6 +34,18 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+
+      - name: Get current date (for NVD cache key)
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore NVD dependency-check database cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: ${{ runner.os }}-nvd-${{ steps.date.outputs.date }}
+          restore-keys: |
+            ${{ runner.os }}-nvd-
 
       - name: Compile production code
         run: ./mvnw --batch-mode --no-transfer-progress -DskipTests compile
@@ -109,7 +121,9 @@ jobs:
           test -n "$NVD_API_KEY" || { echo 'NVD_API_KEY repository secret is required'; exit 1; }
           echo 'Dependency scanning is a separate gate from application verification.'
           ./mvnw --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:13.0.0:check \
-            -DnvdApiKey="$NVD_API_KEY" -DfailBuildOnCVSS=7
+            -DnvdApiKey="$NVD_API_KEY" \
+            -DfailBuildOnCVSS=7 \
+            -DdataDirectory="${HOME}/.m2/repository/org/owasp/dependency-check-data"
 
       - name: Upload coverage report
         if: always()

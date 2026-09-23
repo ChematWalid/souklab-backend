@@ -1,0 +1,61 @@
+name: Dependency vulnerability scan
+
+on:
+  schedule:
+    # Runs every day at 02:00 UTC (outside business hours)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: dependency-scan
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Get current date (for NVD cache key)
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore NVD dependency-check database cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: ${{ runner.os }}-nvd-${{ steps.date.outputs.date }}
+          restore-keys: |
+            ${{ runner.os }}-nvd-
+
+      - name: Run OWASP dependency-check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          test -n "$NVD_API_KEY" || { echo 'NVD_API_KEY repository secret is required'; exit 1; }
+          ./mvnw --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:13.0.0:check \
+            -DnvdApiKey="$NVD_API_KEY" \
+            -DfailBuildOnCVSS=7 \
+            -DdataDirectory="${HOME}/.m2/repository/org/owasp/dependency-check-data"
+
+      - name: Upload dependency-check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: |
+            target/dependency-check-report.*
+          if-no-files-found: ignore
