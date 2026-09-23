@@ -1,6 +1,7 @@
 package com.project.souklab.controller.directory;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
+import com.project.souklab.controller.support.SecurityTestUtils;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.directory.ArtisanDirectoryCardDTO;
 import com.project.souklab.dto.directory.DirectorySearchFilterDTO;
@@ -40,10 +41,26 @@ class DirectoryControllerTest {
     private DirectorySearchService directorySearchService;
 
     /**
-     * Verifies that GET /api/v1/public/directory without parameters returns 200 OK with default pagination settings.
+     * Verifies that anonymous (unauthenticated) calls are rejected by @PreAuthorize.
+     *
+     * <p>The directory URL is under {@code /api/v1/public/**} which is {@code permitAll()} at the
+     * URL filter level, so the Spring Security filter chain passes the request through.
+     * {@code @PreAuthorize("isAuthenticated()")} then raises an {@code AuthorizationDeniedException},
+     * which is handled by the {@code AccessDeniedHandler} → 403 Forbidden.
      */
     @Test
-    @DisplayName("GET /api/v1/public/directory: returns 200 OK with default pagination when no query parameters are provided")
+    @DisplayName("GET /api/v1/public/directory: returns 403 Forbidden when caller is anonymous")
+    void search_withAnonymousCaller_shouldReturn403() throws Exception {
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
+     * Verifies that GET /api/v1/public/directory with an authenticated client returns 200 OK with default pagination settings.
+     */
+    @Test
+    @DisplayName("GET /api/v1/public/directory: returns 200 OK with default pagination when authenticated")
     void search_withDefaultParameters_shouldReturn200OkWithDefaultPagination() throws Exception {
         PaginatedResponse<ArtisanDirectoryCardDTO> emptyResponse = PaginatedResponse.<ArtisanDirectoryCardDTO>builder()
                 .content(Collections.emptyList())
@@ -57,6 +74,7 @@ class DirectoryControllerTest {
         when(directorySearchService.search(any(DirectorySearchFilterDTO.class))).thenReturn(emptyResponse);
 
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(SecurityTestUtils.client())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -109,6 +127,7 @@ class DirectoryControllerTest {
         when(directorySearchService.search(any(DirectorySearchFilterDTO.class))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(SecurityTestUtils.client())
                         .param("q", "potier")
                         .param("regionSlug", "tizi-ouzou")
                         .param("wilayaCode", "15")
@@ -159,6 +178,7 @@ class DirectoryControllerTest {
     @DisplayName("GET /api/v1/public/directory: returns 422 Unprocessable Content when page index is negative")
     void search_withNegativePage_shouldReturn422() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(SecurityTestUtils.client())
                         .param("page", "-1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnprocessableContent())
@@ -173,6 +193,7 @@ class DirectoryControllerTest {
     @DisplayName("GET /api/v1/public/directory: returns 422 Unprocessable Content when page size exceeds 100")
     void search_withOversizedPageSize_shouldReturn422() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(SecurityTestUtils.client())
                         .param("size", "150")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnprocessableContent())
@@ -187,6 +208,7 @@ class DirectoryControllerTest {
     @DisplayName("GET /api/v1/public/directory: returns 422 Unprocessable Content when page size is zero")
     void search_withZeroPageSize_shouldReturn422() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(SecurityTestUtils.client())
                         .param("size", "0")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnprocessableContent())
@@ -201,6 +223,7 @@ class DirectoryControllerTest {
     @DisplayName("GET /api/v1/public/directory: returns 422 Unprocessable Content when minRating exceeds 5.0")
     void search_withInvalidRating_shouldReturn422() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(SecurityTestUtils.client())
                         .param("minRating", "5.5")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnprocessableContent())
@@ -216,6 +239,7 @@ class DirectoryControllerTest {
     void search_withOversizedKeyword_shouldReturn422() throws Exception {
         String oversizedKeyword = "a".repeat(125);
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(SecurityTestUtils.client())
                         .param("q", oversizedKeyword)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnprocessableContent())

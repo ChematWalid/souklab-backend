@@ -8,6 +8,7 @@ import com.project.souklab.service.directory.DirectorySearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,12 +27,17 @@ public class DirectoryController {
     private final DirectorySearchService directorySearchService;
 
     /**
-     * Searches and filters public artisan directory profiles.
+     * Searches and filters the artisan directory for authenticated viewers.
+     *
+     * <p>Requires an authenticated session. Anonymous callers receive a 401 response.
+     * Non-premium viewers receive directory cards with the artisan name anonymised;
+     * premium viewers and administrators see the real artisan name.
      *
      * @param filter validated directory search criteria and pagination options
      * @return 200 OK with paginated list of matching artisan directory cards
      */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<PaginatedResponse<ArtisanDirectoryCardDTO>>> search(
             @Valid @ModelAttribute DirectorySearchFilterDTO filter
     ) {

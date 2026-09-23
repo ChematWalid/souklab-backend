@@ -33,6 +33,7 @@ import java.util.Set;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -194,12 +195,23 @@ class DirectoryIntegrationTest {
     }
 
     /**
+     * Verifies that unauthenticated callers are rejected with HTTP 403 Forbidden.
+     */
+    @Test
+    @DisplayName("Directory: anonymous caller is rejected with HTTP 403 Forbidden")
+    void defaultDirectoryBrowsing_anonymous_isRejectedWith403() throws Exception {
+        mockMvc.perform(get("/api/v1/public/directory"))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
      * Verifies default directory browsing returns active artisans while strictly excluding soft-deleted ones.
      */
     @Test
     @DisplayName("Directory: default browsing returns active artisans and excludes soft-deleted records")
     void defaultDirectoryBrowsing_returnsActiveArtisansAndExcludesSoftDeleted() throws Exception {
-        mockMvc.perform(get("/api/v1/public/directory"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.success").value(true))
@@ -214,17 +226,23 @@ class DirectoryIntegrationTest {
     @Test
     @DisplayName("Directory: keyword search matches artisan identity and craft trade keywords")
     void keywordSearch_matchesArtisanNameAndCraftTerms() throws Exception {
-        mockMvc.perform(get("/api/v1/public/directory").param("q", "Belkacem"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("q", "Belkacem"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[*].artisanName").value(hasItem("Ahmed Belkacem")))
                 .andExpect(jsonPath("$.data.content[*].artisanName").value(not(hasItem("Yacine Mansouri"))));
 
-        mockMvc.perform(get("/api/v1/public/directory").param("keyword", "potier"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("keyword", "potier"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[*].artisanName").value(hasItem("Ahmed Belkacem")))
                 .andExpect(jsonPath("$.data.content[*].artisanName").value(not(hasItem("Yacine Mansouri"))));
 
-        mockMvc.perform(get("/api/v1/public/directory").param("q", "filigrane"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("q", "filigrane"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[*].artisanName").value(hasItem("Yacine Mansouri")))
                 .andExpect(jsonPath("$.data.content[*].artisanName").value(not(hasItem("Ahmed Belkacem"))));
@@ -236,12 +254,16 @@ class DirectoryIntegrationTest {
     @Test
     @DisplayName("Directory: regional terroir filtering matches via parent Wilaya slug and Wilaya code")
     void regionalTerroirFiltering_byRegionSlugAndWilayaCode() throws Exception {
-        mockMvc.perform(get("/api/v1/public/directory").param("regionSlug", "tizi-ouzou"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("regionSlug", "tizi-ouzou"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[*].id").value(hasItem(premierArtisan.getId())))
                 .andExpect(jsonPath("$.data.content[*].id").value(not(hasItem(secondArtisan.getId()))));
 
-        mockMvc.perform(get("/api/v1/public/directory").param("wilayaCode", "47"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("wilayaCode", "47"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[*].id").value(hasItem(secondArtisan.getId())))
                 .andExpect(jsonPath("$.data.content[*].id").value(not(hasItem(premierArtisan.getId()))));
@@ -254,6 +276,7 @@ class DirectoryIntegrationTest {
     @DisplayName("Directory: multi-facet filtering isolates artisans matching all specified taxonomy traits")
     void multiFacetFiltering_byTaxonomyHierarchies() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
                         .param("categorySlug", "gros-oeuvre-structure")
                         .param("subCategorySlug", "macon")
                         .param("materials", "pierre-calcaire")
@@ -271,6 +294,7 @@ class DirectoryIntegrationTest {
     @DisplayName("Directory: flag filtering by verified, premium, and teacher status")
     void flagFiltering_verifiedPremiumTeacher() throws Exception {
         mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
                         .param("verifiedOnly", "true")
                         .param("premiumOnly", "true")
                         .param("teacherOnly", "true"))
@@ -285,12 +309,16 @@ class DirectoryIntegrationTest {
     @Test
     @DisplayName("Directory: sorting permutations order results by rating descending and newest first")
     void sorting_ratingDescAndNewest() throws Exception {
-        mockMvc.perform(get("/api/v1/public/directory").param("sortBy", "RATING_DESC"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("sortBy", "RATING_DESC"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.content[0].rating").value(4.90));
 
-        mockMvc.perform(get("/api/v1/public/directory").param("sortBy", "NEWEST"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("sortBy", "NEWEST"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.content[0].id").value(secondArtisan.getId()));
@@ -302,14 +330,19 @@ class DirectoryIntegrationTest {
     @Test
     @DisplayName("Directory: validation guards reject invalid pagination parameters with HTTP 422")
     void validation_negativePageAndExcessiveSizeAreRejected() throws Exception {
-        mockMvc.perform(get("/api/v1/public/directory").param("page", "-1"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("page", "-1"))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.code").value(422))
                 .andExpect(jsonPath("$.success").value(false));
 
-        mockMvc.perform(get("/api/v1/public/directory").param("size", "101"))
+        mockMvc.perform(get("/api/v1/public/directory")
+                        .with(user("ahmed.belkacem.integration@souklab.dz"))
+                        .param("size", "101"))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.code").value(422))
                 .andExpect(jsonPath("$.success").value(false));
     }
 }
+
