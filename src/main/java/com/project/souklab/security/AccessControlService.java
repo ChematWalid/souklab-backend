@@ -70,4 +70,14 @@ public class AccessControlService {
     public boolean canManageCatalog(Authentication authentication) {
         return hasPermission(authentication, Permission.Admin.CATALOG);
     }
+
+    /**
+     * Determines whether the authenticated principal has permission to manage client favorites.
+     *
+     * @param authentication the current authentication token
+     * @return {@code true} if the principal holds {@link Permission.Client#FAVORITES}
+     */
+    public boolean canManageFavorites(Authentication authentication) {
+        return hasPermission(authentication, Permission.Client.FAVORITES);
+    }
 }

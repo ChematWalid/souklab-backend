@@ -339,6 +339,32 @@ public class Artisan {
     }
 
     /**
+     * Determines whether the artisan profile is currently active and publicly visible.
+     *
+     * @param now current temporal reference for ban evaluation
+     * @return {@code true} if neither artisan nor owning user are deleted, and user is not suspended or actively banned
+     */
+    public boolean isEffectivelyVisible(LocalDateTime now) {
+        if (deletedAt != null || user == null || user.getDeletedAt() != null) {
+            return false;
+        }
+        if (user.getStatus() == AccountStatus.SUSPENDED) {
+            LocalDateTime effectiveNow = now != null ? now : LocalDateTime.now();
+            return user.getBannedUntil() != null && !user.getBannedUntil().isAfter(effectiveNow);
+        }
+        return true;
+    }
+
+    /**
+     * Determines whether the artisan profile is currently active and publicly visible using system time.
+     *
+     * @return {@code true} if neither artisan nor owning user are deleted, and user is not suspended or actively banned
+     */
+    public boolean isEffectivelyVisible() {
+        return isEffectivelyVisible(LocalDateTime.now());
+    }
+
+    /**
      * Custom builder extensions supporting backward-compatible string-based ID setters.
      */
     public static class ArtisanBuilder {

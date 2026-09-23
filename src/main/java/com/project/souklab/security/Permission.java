@@ -44,6 +44,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
                 Admin.USERS, Admin.FORMATIONS, Admin.FEED, Admin.REPORTS, Admin.CATALOG,
                 Financial.ADMIN,
                 Artisan.FORMATIONS, Artisan.CONTENT, Artisan.REVIEWS,
+                Client.FAVORITES,
                 Profile.READ, Profile.WRITE,
                 Report.CREATE, File.READ, Message.SEND,
                 Analytics.ADMIN);
@@ -59,6 +60,13 @@ public interface Permission extends EnumValue, GrantedAuthority {
         CATALOG("permission:admin:catalog");
         private final String value;
         Admin(String value) { this.value = value; }
+        public String value() { return value; }
+    }
+
+    enum Client implements Permission {
+        FAVORITES("permission:client:favorites");
+        private final String value;
+        Client(String value) { this.value = value; }
         public String value() { return value; }
     }
 

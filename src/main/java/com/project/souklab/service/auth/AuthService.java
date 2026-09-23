@@ -558,7 +558,7 @@ public class AuthService {
     private Set<AuthorizationPermission> permissionsForRegistration(boolean artisan) {
         Set<String> keys = artisan
                 ? Set.of(Permission.Artisan.CONTENT.value(), Permission.Artisan.FORMATIONS.value(), Permission.Artisan.REVIEWS.value(), Permission.Profile.READ.value(), Permission.Profile.WRITE.value(), Permission.Report.CREATE.value(), Permission.File.READ.value(), Permission.Message.SEND.value())
-                : Set.of(Permission.Profile.READ.value(), Permission.Profile.WRITE.value(), Permission.Report.CREATE.value(), Permission.File.READ.value(), Permission.Message.SEND.value());
+                : Set.of(Permission.Client.FAVORITES.value(), Permission.Profile.READ.value(), Permission.Profile.WRITE.value(), Permission.Report.CREATE.value(), Permission.File.READ.value(), Permission.Message.SEND.value());
         List<AuthorizationPermission> permissions = permissionRepository.findByPermissionKeyInAndEnabledTrue(keys);
         if (permissions.size() != keys.size()) {
             throw new ResourceNotFoundException(ERROR_PERMISSION_NOT_FOUND_PREFIX + keys);

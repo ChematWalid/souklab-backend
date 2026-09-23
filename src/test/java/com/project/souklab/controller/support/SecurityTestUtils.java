@@ -58,7 +58,7 @@ public final class SecurityTestUtils {
     public static RequestPostProcessor client(String email) {
         return SecurityMockMvcRequestPostProcessors.user(email)
                 .authorities(authorities(Permission.Profile.READ, Permission.Profile.WRITE,
-                        Permission.Report.CREATE, Permission.File.READ));
+                        Permission.Report.CREATE, Permission.File.READ, Permission.Client.FAVORITES));
     }
 
     /**
