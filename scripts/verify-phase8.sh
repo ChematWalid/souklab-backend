@@ -39,9 +39,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-docker compose --project-name "$compose_project" up -d
-
 services=(mariadb rabbitmq minio clamav elasticsearch)
+docker compose --project-name "$compose_project" up -d "${services[@]}"
+
 for service in "${services[@]}"; do
   for attempt in $(seq 1 "${DEPENDENCY_WAIT_ATTEMPTS:-60}"); do
     status="$(docker compose --project-name "$compose_project" ps --format '{{.Service}} {{.Health}}' "$service" 2>/dev/null || true)"

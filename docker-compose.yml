@@ -7,6 +7,37 @@
 # environment variables and IAM credentials.
 # ==============================================================================
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: souklab-app:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-souklab}_app
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    ports:
+      - "${PORT:-8080}:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q 'UP'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+
   mariadb:
     image: mariadb:11.4
     restart: unless-stopped

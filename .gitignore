@@ -37,6 +37,7 @@ build/
 deploy/.env.production
 .env.*
 !.env.example
+!.env.docker.example
 !deploy/.env.production.example
 
 ### Custom ###

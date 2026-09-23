@@ -157,11 +157,12 @@ Service endpoints:
 
 ### 3. Build & Run
 ```bash
-# Compile and test
+# Option A: Run locally with Maven (backing services in Docker)
 ./mvnw clean test
-
-# Run development server
 ./mvnw spring-boot:run
+
+# Option B: Run containerized with Docker Compose (using .env.docker)
+docker compose up -d --build app
 ```
 
 The server listens on `http://localhost:8080/api/v1`.
