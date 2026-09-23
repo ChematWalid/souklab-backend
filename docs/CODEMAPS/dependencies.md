@@ -19,6 +19,7 @@
 | **ClamAV** | `clamav/clamav:1.4` | `3310` | Streaming antivirus inspection for all file uploads |
 | **Redis** | `redis:7.4.1-alpine` | `6379` | Distributed token-bucket rate limiting (Bucket4j-redis) |
 | **Elasticsearch**| `elasticsearch:8.15.3` | `9200` | Full-text directory search index (BM25, French/Arabic folding) |
+| **App (SoukLab)**| `Dockerfile` (build) | `8080` | Spring Boot application container (Eclipse Temurin 21 JRE, non-root `souklab`) |
 
 ## 3. Third-Party Integrations & External APIs
 

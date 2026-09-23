@@ -62,7 +62,7 @@ hosted CI and security-alert systems.
 #### Actions
 
 1. Run the hosted workflow in
-   [`.github/workflows/production-verification.yml`](../.github/workflows/production-verification.yml)
+   [`.github/workflows/production-verification.yml`](../../.github/workflows/production-verification.yml)
    from the reviewed commit.
 2. Confirm compilation, source hygiene, Postman checks, production-manifest
    validation, Docker-backed integration verification, and image build all
@@ -177,16 +177,16 @@ backup host, encrypted object storage, and a disposable restore environment.
 
 #### Actions
 
-1. Run [`scripts/backup-preflight.sh`](../scripts/backup-preflight.sh) with
+1. Run [`scripts/backup-preflight.sh`](../../scripts/backup-preflight.sh) with
    production configuration and verify required tools, directories, secret
    references, storage access, and free space.
-2. Run [`scripts/backup-production.sh`](../scripts/backup-production.sh) and
+2. Run [`scripts/backup-production.sh`](../../scripts/backup-production.sh) and
    confirm the MariaDB artifact is encrypted before upload or archival.
 3. Validate backup retention and object-storage prefixes; ensure backup names
    do not expose credentials or unnecessary personal data.
 4. Verify the daily backup systemd timer is installed, enabled, and points to
    the reviewed script and environment.
-5. Execute [`scripts/restore-drill.sh`](../scripts/restore-drill.sh) in an
+5. Execute [`scripts/restore-drill.sh`](../../scripts/restore-drill.sh) in an
    isolated environment. Never restore over the live production database for a
    drill.
 6. Restore MariaDB, validate Flyway/schema state, and validate the encrypted

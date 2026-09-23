@@ -36,7 +36,7 @@ erDiagram
 
 ---
 
-## Entities & Enums Reference (44 Model Types)
+## Entities & Enums Reference (Comprehensive Domain Models)
 
 ### Lifecycle & Identity Core
 | Class / Enum | Type | Description |
@@ -97,3 +97,26 @@ erDiagram
 | [`ContentReport`](ContentReport.java) | `@Entity` | Auditable report targeting a user, post, or review. |
 | [`FeedPostType`](FeedPostType.java), [`FeedPostStatus`](FeedPostStatus.java) | `enum` | Feed categorization and moderation visibility states. |
 | [`ReviewStatus`](ReviewStatus.java), [`ReportTargetType`](ReportTargetType.java), [`ReportStatus`](ReportStatus.java), [`ReportResolutionAction`](ReportResolutionAction.java) | `enum` | Review visibility, report target, lifecycle, and resolution states. |
+
+### Real-Time Messaging & Chat
+| Class / Enum | Type | Description |
+| :--- | :---: | :--- |
+| [`Conversation`](Conversation.java) | `@Entity` | 1-on-1 private messaging channel between two participants. |
+| [`ConversationParticipant`](ConversationParticipant.java) | `@Entity` | Association between a user and conversation tracking unread counts and read markers. |
+| [`Message`](Message.java) | `@Entity` | Chat message containing text content, soft-delete timestamp, and edit history. |
+| [`MessageAttachment`](MessageAttachment.java) | `@Entity` | Image or document attached to a chat message. |
+| [`MessageAttachmentUpload`](MessageAttachmentUpload.java) | `@Entity` | Pre-signed upload tracking reservation for attachments. |
+
+### Subscriptions & Payments
+| Class / Enum | Type | Description |
+| :--- | :---: | :--- |
+| [`SubscriptionPlan`](SubscriptionPlan.java) | `@Entity` | Platform subscription tiers (`FREE`, `PRO`, `PREMIUM`) with DZD pricing and entitlements. |
+| [`SubscriptionPlanEntitlement`](SubscriptionPlanEntitlement.java) | `@Entity` | Entitlement limits (e.g. portfolio images, active formations) linked to a plan. |
+| [`ArtisanSubscription`](ArtisanSubscription.java) | `@Entity` | Active artisan subscription period, renewal state, and tier reference. |
+| [`ClientSubscription`](ClientSubscription.java) | `@Entity` | Client membership subscription granting premium perks. |
+| [`Payment`](Payment.java) | `@Entity` | Financial transaction record tracking Chargily checkout ID, amount, and status. |
+| [`PaymentWebhookLog`](PaymentWebhookLog.java) | `@Entity` | Immutable audit log of received webhook events for signature verification and idempotency. |
+| [`BillingPeriod`](BillingPeriod.java), [`PaymentProvider`](PaymentProvider.java), [`PaymentStatus`](PaymentStatus.java), [`SubscriptionStatus`](SubscriptionStatus.java), [`WebhookProcessingStatus`](WebhookProcessingStatus.java) | `enum` | Billing cycle, payment provider, transaction status, subscription lifecycle, and webhook states. |
+
+### Analytics & Outbox
+For raw activity events, outbox queues, and aggregated daily KPI rollups, see the dedicated models in [`com.project.souklab.model.analytics`](analytics/README.md) (`ActivityEvent`, `AnalyticsJob`, `AnalyticsOutboxEvent`, `DailyKpiRollup`, etc.).

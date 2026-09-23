@@ -17,16 +17,19 @@ Contracts and schemas defining client-server communications across the applicati
 | Package | Purpose |
 | :--- | :--- |
 | [`admin`](admin/README.md) | Administrative audit log representations. |
+| [`analytics`](analytics/README.md) | Query job requests, execution responses, rollups, and CSV artifact payloads. |
 | [`artisan`](artisan/README.md) | Certification and gallery portfolio image outbound representations. |
 | [`auth`](auth/README.md) | User registration, login credentials, password resets, and JWT responses. |
 | [`catalog`](catalog/README.md) | Craft categories, raw materials, epochs, techniques, and administrative regions. |
+| [`chat`](chat/README.md) | Conversation descriptors, message payloads, typing commands, and WebSocket events. |
 | [`common`](common/README.md) | Standard API envelopes (`ApiResponse<T>`) and pagination wrappers (`PaginatedResponse<T>`). |
 | [`directory`](directory/README.md) | Public directory search result cards, criteria filter payloads, and sort options. |
+| [`feed`](feed/README.md) | Moderated feed post, media, and moderation payloads. |
 | [`formateur`](formateur/README.md) | Accreditation applications, approval notes, rejections, and cooldown data. |
 | [`formation`](formation/README.md) | Masterclass authoring, curriculum updates, enrollment, review, and file descriptors. |
-| [`feed`](feed/README.md) | Moderated feed post, media, and moderation payloads. |
 | [`notification`](notification/README.md) | Notification item feed responses. |
 | [`profile`](profile/README.md) | Artisan public profile views, client representations, and patch updates. |
-| [`user`](user/README.md) | User moderation requests (bans, timeouts) and avatar representations. |
-| [`review`](review/README.md) | Decimal formation review requests and responses. |
 | [`report`](report/README.md) | Report submission, resolution, and moderation responses. |
+| [`review`](review/README.md) | Decimal formation review requests and responses. |
+| [`subscription`](subscription/README.md) | Plan configurations, checkout requests/responses, payment receipts, and webhook logs. |
+| [`user`](user/README.md) | User moderation requests (bans, timeouts) and avatar representations. |

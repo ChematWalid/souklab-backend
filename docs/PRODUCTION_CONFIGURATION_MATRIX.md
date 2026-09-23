@@ -34,6 +34,4 @@ profile.
 | CORS and support | `APP_CORS_ALLOWED_ORIGINS`, `APP_SUPPORT_*` | `app.cors.*`, `app.support.*` | `AppProperties.Cors/SupportConfig`, security config | Explicit origins; wildcard rejected when credentials are enabled |
 | Runtime logging | `APP_LOGGING_LEVEL_*` | `logging.level.*` | Spring Boot logging | Production should use `INFO` or stricter; request/debug logging disabled |
 
-The nine variables used only by local Compose (`COMPOSE_PROJECT_NAME`, database
-container credentials, MinIO credentials, `MARIADB_HOST_PORT`, and the legacy
-`ELASTICSEARCH_HOST`) are infrastructure inputs, not application placeholders.
+The variables used by local Docker Compose (`COMPOSE_PROJECT_NAME`, container credentials, port mappings) are infrastructure inputs configured via `.env` (for host-run app with backing containers) and `.env.docker` (for the fully containerized `app` service). Production uses `deploy/.env.production` strictly bound to the `prod` profile.

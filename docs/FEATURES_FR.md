@@ -110,6 +110,7 @@ Propositions de valeur principales :
 | `clamav` | `clamav/clamav:1.4` | 3310 | Analyse antivirus |
 | `redis` | `redis:7.4.1-alpine` | 6379 | Stockage rate limit + cache distribué optionnel |
 | `elasticsearch` | `elasticsearch:8.15.3` | 9200 | Index de recherche plein texte |
+| `app` | `Dockerfile` (build) | 8080 | Conteneur application Spring Boot (utilisateur non-root `souklab`, utilise `.env.docker`) |
 
 ---
 

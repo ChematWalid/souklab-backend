@@ -110,6 +110,7 @@ Core value propositions:
 | `clamav` | `clamav/clamav:1.4` | 3310 | Antivirus scanning |
 | `redis` | `redis:7.4.1-alpine` | 6379 | Rate-limit store + optional distributed cache |
 | `elasticsearch` | `elasticsearch:8.15.3` | 9200 | Full-text search index |
+| `app` | `Dockerfile` (build) | 8080 | Spring Boot application container (non-root `souklab`, uses `.env.docker`) |
 
 ---
 

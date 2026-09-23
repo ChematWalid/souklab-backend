@@ -30,13 +30,15 @@ graph TD
 
 ## Subpackages Overview
 
+- **`analytics`**: Asynchronous analytics engine, transactional outbox relay, event consumers, and daily KPI rollups.
 - **`config`**: Spring bean definitions, CORS, clock, security configuration, async settings, caching, and Hibernate Search Elasticsearch lifecycle runners.
-- **`controller`**: REST API resource adapters and controllers (auth, artisan, catalog, directory, formateur, formation, notification, user).
-- **`dao`**: Spring Data JPA repositories (29 repositories spanning identity, taxonomies, formations, social content, and moderation).
-- **`dto`**: Request and response data transfer objects (admin, artisan, auth, catalog, common, directory, formateur, formation, notification, profile, user).
+- **`controller`**: REST API resource adapters and controllers across all domains (auth, artisan, catalog, directory, formateur, formation, feed, review, report, chat, notification, subscription, analytics, user).
+- **`dao`**: Spring Data JPA repositories (46 repositories across identity, taxonomies, formations, social feed, chat, payments, and analytics).
+- **`dto`**: Request and response data transfer objects (admin, analytics, artisan, auth, catalog, chat, common, directory, feed, formateur, formation, notification, profile, report, review, subscription, user).
 - **`exception`**: Custom business exceptions, validation errors, and global exception translation.
 - **`filestorage`**: Pluggable file storage engine (MinIO/S3, ClamAV antivirus, image processing, download rate limiting, URL resolution).
-- **`model`**: JPA domain entities and lifecycle audit models (44 model types including entities, enums, and the base entity).
+- **`integration`**: External service integrations and payment gateways (Chargily Pay V2 client, webhooks, mappers).
+- **`model`**: JPA domain entities and lifecycle audit models (entities, enums, converters, and base entities).
 - **`security`**: Security filters, JWT authentication, upload boundaries, and token rate limiting.
 - **`service`**: Core transactional business logic, search indexing, profile lifecycle, and domain workflows.
 - **`service.storage`**: Application-specific ownership and enrollment checks for protected storage objects.

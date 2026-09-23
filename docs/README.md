@@ -38,6 +38,8 @@ changes.
 
 ## Verification entry points
 
+- `scripts/verify-live-http.sh` runs live HTTP smoke tests against the running application container.
+- `scripts/verify-flyway.sh` verifies all 16 Flyway migrations against an isolated database.
 - `scripts/full-verification.sh` runs the retained end-to-end workflow.
 - `scripts/verify-local-integration.sh` runs the Docker-backed Maven gates.
 - `scripts/verify-live-semantic.py` exercises live REST boundaries.

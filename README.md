@@ -189,32 +189,43 @@ Authorization capabilities and their endpoint/service boundaries are documented 
 Each individual package across the application contains its own dedicated `README.md` specifying internal classes, contracts, and architecture:
 
 - [`com.project.souklab`](src/main/java/com/project/souklab/README.md) — Application root
+- [`com.project.souklab.analytics`](src/main/java/com/project/souklab/analytics/README.md) — Analytics processing engine, outbox relay, event consumer, and KPI rollups
 - [`com.project.souklab.config`](src/main/java/com/project/souklab/config/README.md) — Framework configuration
   - [`config.search`](src/main/java/com/project/souklab/config/search/README.md) — Hibernate Search Elasticsearch configuration and startup runner
 - [`com.project.souklab.controller`](src/main/java/com/project/souklab/controller/README.md) — Controller layer overview
+  - [`controller.analytics`](src/main/java/com/project/souklab/controller/analytics/README.md) — Asynchronous query jobs, CSV artifact downloads, rollups, and platform stats
   - [`controller.artisan`](src/main/java/com/project/souklab/controller/artisan/README.md) — Artisan profile, certification, and gallery portfolio endpoints
   - [`controller.auth`](src/main/java/com/project/souklab/controller/auth/README.md) — Authentication endpoints
   - [`controller.catalog`](src/main/java/com/project/souklab/controller/catalog/README.md) — Reference craft taxonomy endpoints
+  - [`controller.chat`](src/main/java/com/project/souklab/controller/chat/README.md) — Private conversation, message lifecycle, attachment, and read-state endpoints
   - [`controller.directory`](src/main/java/com/project/souklab/controller/directory/README.md) — Public artisan directory search endpoints
-  - [`controller.formateur`](src/main/java/com/project/souklab/controller/formateur/README.md) — Formateur accreditation endpoints
   - [`controller.feed`](src/main/java/com/project/souklab/controller/feed/README.md) — Public feed and admin moderation endpoints
-  - [`controller.review`](src/main/java/com/project/souklab/controller/review/README.md) — Artisan review endpoints
-  - [`controller.report`](src/main/java/com/project/souklab/controller/report/README.md) — Abuse reporting endpoints
+  - [`controller.formateur`](src/main/java/com/project/souklab/controller/formateur/README.md) — Formateur accreditation endpoints
   - [`controller.formation`](src/main/java/com/project/souklab/controller/formation/README.md) — Formations authoring, peer enrollment, and review endpoints
   - [`controller.notification`](src/main/java/com/project/souklab/controller/notification/README.md) — Notification endpoints
+  - [`controller.report`](src/main/java/com/project/souklab/controller/report/README.md) — Abuse reporting endpoints
+  - [`controller.review`](src/main/java/com/project/souklab/controller/review/README.md) — Artisan review endpoints
+  - [`controller.subscription`](src/main/java/com/project/souklab/controller/subscription/README.md) — Subscription plans, Chargily Pay V2 checkout, webhooks, and refunds
   - [`controller.user`](src/main/java/com/project/souklab/controller/user/README.md) — User and avatar endpoints
-- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (29 repositories)
+- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (46 repositories across DAO packages)
+  - [`dao.analytics`](src/main/java/com/project/souklab/dao/analytics/README.md) — Analytics outbox, activity event, job artifact, and rollup repositories
 - [`com.project.souklab.dto`](src/main/java/com/project/souklab/dto/README.md) — DTO taxonomy
   - [`dto.admin`](src/main/java/com/project/souklab/dto/admin/README.md) — Admin audit DTOs
+  - [`dto.analytics`](src/main/java/com/project/souklab/dto/analytics/README.md) — Query job requests, execution responses, rollups, and CSV artifact payloads
   - [`dto.artisan`](src/main/java/com/project/souklab/dto/artisan/README.md) — Portfolio certification and gallery response DTOs
   - [`dto.auth`](src/main/java/com/project/souklab/dto/auth/README.md) — Authentication DTOs
   - [`dto.catalog`](src/main/java/com/project/souklab/dto/catalog/README.md) — Reference taxonomy DTOs
+  - [`dto.chat`](src/main/java/com/project/souklab/dto/chat/README.md) — Conversation descriptors, message payloads, typing commands, and WebSocket events
   - [`dto.common`](src/main/java/com/project/souklab/dto/common/README.md) — Response envelopes
   - [`dto.directory`](src/main/java/com/project/souklab/dto/directory/README.md) — Directory search cards and criteria filter DTOs
+  - [`dto.feed`](src/main/java/com/project/souklab/dto/feed/README.md) — Moderated feed post, media, and moderation payloads
   - [`dto.formateur`](src/main/java/com/project/souklab/dto/formateur/README.md) — Formateur DTOs
   - [`dto.formation`](src/main/java/com/project/souklab/dto/formation/README.md) — Formation authoring, review, enrollment, and file DTOs
   - [`dto.notification`](src/main/java/com/project/souklab/dto/notification/README.md) — Notification DTOs
   - [`dto.profile`](src/main/java/com/project/souklab/dto/profile/README.md) — Profile representations
+  - [`dto.report`](src/main/java/com/project/souklab/dto/report/README.md) — Report submission, resolution, and moderation responses
+  - [`dto.review`](src/main/java/com/project/souklab/dto/review/README.md) — Decimal formation review requests and responses
+  - [`dto.subscription`](src/main/java/com/project/souklab/dto/subscription/README.md) — Subscription plan, checkout, payment, and webhook log DTOs
   - [`dto.user`](src/main/java/com/project/souklab/dto/user/README.md) — User and avatar DTOs
 - [`com.project.souklab.exception`](src/main/java/com/project/souklab/exception/README.md) — Exception handling
 - [`com.project.souklab.filestorage`](src/main/java/com/project/souklab/filestorage/README.md) — Storage engine
@@ -228,24 +239,28 @@ Each individual package across the application contains its own dedicated `READM
   - [`filestorage.security`](src/main/java/com/project/souklab/filestorage/security/README.md) — Download rate limiting
   - [`filestorage.stub`](src/main/java/com/project/souklab/filestorage/stub/README.md) — In-memory test stubs
   - [`filestorage.validation`](src/main/java/com/project/souklab/filestorage/validation/README.md) — File validation
-- [`com.project.souklab.service.storage`](src/main/java/com/project/souklab/service/storage/README.md) — Application-specific storage access policy
-- [`com.project.souklab.model`](src/main/java/com/project/souklab/model/README.md) — Domain entities and enums (44 model types)
+- [`com.project.souklab.integration`](src/main/java/com/project/souklab/integration/README.md) — External third-party API integrations
+  - [`integration.chargily`](src/main/java/com/project/souklab/integration/chargily/README.md) — Chargily Pay V2 client, webhook payloads, and mappers
+- [`com.project.souklab.model`](src/main/java/com/project/souklab/model/README.md) — Domain entities and lifecycle enums
+  - [`model.analytics`](src/main/java/com/project/souklab/model/analytics/README.md) — Analytics activity events, outbox records, jobs, and KPI rollups
 - [`com.project.souklab.security`](src/main/java/com/project/souklab/security/README.md) — Security filters and token parsing
 - [`com.project.souklab.service`](src/main/java/com/project/souklab/service/README.md) — Service layer architecture
   - [`service.artisan`](src/main/java/com/project/souklab/service/artisan/README.md) — Artisan profile and portfolio services
   - [`service.audit`](src/main/java/com/project/souklab/service/audit/README.md) — Audit trail logging
   - [`service.auth`](src/main/java/com/project/souklab/service/auth/README.md) — Authentication workflows
   - [`service.catalog`](src/main/java/com/project/souklab/service/catalog/README.md) — Cached taxonomy retrieval service
+  - [`service.chat`](src/main/java/com/project/souklab/service/chat/README.md) — Realtime 1-on-1 conversations, message delivery, read receipts, and typing indicators
   - [`service.directory`](src/main/java/com/project/souklab/service/directory/README.md) — Hibernate Search Elasticsearch discovery service
-  - [`service.formateur`](src/main/java/com/project/souklab/service/formateur/README.md) — Formateur management
   - [`service.feed`](src/main/java/com/project/souklab/service/feed/README.md) — Feed post lifecycle and media storage
-  - [`service.review`](src/main/java/com/project/souklab/service/review/README.md) — Formation-backed artisan reviews
-  - [`service.report`](src/main/java/com/project/souklab/service/report/README.md) — Report validation and moderation actions
+  - [`service.formateur`](src/main/java/com/project/souklab/service/formateur/README.md) — Formateur management
   - [`service.formation`](src/main/java/com/project/souklab/service/formation/README.md) — Masterclass lifecycle, peer enrollment, and moderation
   - [`service.notification`](src/main/java/com/project/souklab/service/notification/README.md) — Notification dispatcher
   - [`service.profile`](src/main/java/com/project/souklab/service/profile/README.md) — User profile management and taxonomy resolution
+  - [`service.report`](src/main/java/com/project/souklab/service/report/README.md) — Report validation and moderation actions
+  - [`service.review`](src/main/java/com/project/souklab/service/review/README.md) — Formation-backed artisan reviews
   - [`service.security`](src/main/java/com/project/souklab/service/security/README.md) — Token and verification services
   - [`service.storage`](src/main/java/com/project/souklab/service/storage/README.md) — File ownership and enrollment access policy
+  - [`service.subscription`](src/main/java/com/project/souklab/service/subscription/README.md) — Subscription checkout, Chargily Pay V2 HMAC webhooks, and refund execution
   - [`service.user`](src/main/java/com/project/souklab/service/user/README.md) — User moderation and avatars
 - [`com.project.souklab.util`](src/main/java/com/project/souklab/util/README.md) — Helper utilities
 - [`com.project.souklab.validation`](src/main/java/com/project/souklab/validation/README.md) — Custom validator annotations

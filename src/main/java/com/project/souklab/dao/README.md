@@ -18,7 +18,7 @@ graph TD
 
 ---
 
-## Repositories Reference (29 Repositories)
+## Repositories Reference (46 Repositories Across DAO Packages)
 
 ### Identity, Security & Auditing
 | Repository Interface | Managed Entity | Key Query Capabilities |
@@ -68,3 +68,24 @@ graph TD
 | [`FeedPostMediaRepository`](FeedPostMediaRepository.java) | `FeedPostMedia` | Ordered post attachment lookup. |
 | [`ArtisanReviewRepository`](ArtisanReviewRepository.java) | `ArtisanReview` | Visible review pages, enrollment uniqueness, average and count aggregates. |
 | [`ContentReportRepository`](ContentReportRepository.java) | `ContentReport` | Status and target-type moderation queue filters. |
+
+### Real-Time Messaging & Chat
+| Repository Interface | Managed Entity | Key Query Capabilities |
+| :--- | :--- | :--- |
+| [`ConversationRepository`](ConversationRepository.java) | `Conversation` | `findBetweenUsers`, user conversation listings with latest activity sorting. |
+| [`ConversationParticipantRepository`](ConversationParticipantRepository.java) | `ConversationParticipant` | Membership lookup, unread count queries, and read timestamp markers. |
+| [`MessageRepository`](MessageRepository.java) | `Message` | Paginated message history, cursor traversal, and soft deletion. |
+| [`MessageAttachmentRepository`](MessageAttachmentRepository.java) | `MessageAttachment` | File attachment metadata linked to chat messages. |
+| [`MessageAttachmentUploadRepository`](MessageAttachmentUploadRepository.java) | `MessageAttachmentUpload` | Pre-signed upload reservation lifecycle tracking. |
+
+### Subscriptions & Payments
+| Repository Interface | Managed Entity | Key Query Capabilities |
+| :--- | :--- | :--- |
+| [`SubscriptionPlanRepository`](SubscriptionPlanRepository.java) | `SubscriptionPlan` | Active plans by target role (`ARTISAN`, `CLIENT`) and billing frequency. |
+| [`ArtisanSubscriptionRepository`](ArtisanSubscriptionRepository.java) | `ArtisanSubscription` | Active artisan tier subscriptions, expiry dates, and renewals. |
+| [`ClientSubscriptionRepository`](ClientSubscriptionRepository.java) | `ClientSubscription` | Active client subscriptions and premium feature gating. |
+| [`PaymentRepository`](PaymentRepository.java) | `Payment` | Transaction tracking by gateway checkout ID, user ID, and payment status. |
+| [`PaymentWebhookLogRepository`](PaymentWebhookLogRepository.java) | `PaymentWebhookLog` | Webhook idempotency event tracking and signature audit log. |
+
+### Analytics & Outbox
+For activity events, outbox queues, and aggregated KPI rollups, see the dedicated repositories in [`com.project.souklab.dao.analytics`](analytics/README.md) (`ActivityEventRepository`, `AnalyticsJobRepository`, `DailyKpiRollupRepository`, `AnalyticsOutboxRepository`, etc.).
