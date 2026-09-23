@@ -12,18 +12,43 @@ Status: current backend contract. The backend is the source of truth; generate t
 
 The path and port are configurable with `PORT`, `OPENAPI_PATH`, and `OPENAPI_SWAGGER_PATH`. Do not hard-code a production hostname.
 
-## Authentication
+## Authentication & User Profile (`/auth/**`, `/me`)
 
-Use `Authorization: Bearer <accessToken>` for protected REST calls. Login and refresh return access/refresh tokens and expiry metadata. Keep tokens in the application's approved secure mechanism and never log them.
+Use `Authorization: Bearer <accessToken>` for all protected REST calls. Login and refresh return access/refresh tokens and expiry metadata. Keep tokens in secure storage (e.g. secure memory or HttpOnly cookies) and never log them.
 
-- `POST /auth/register` starts onboarding.
-- `POST /auth/login` creates an access/refresh-token pair.
-- `POST /auth/refresh` renews the access session.
-- `POST /auth/logout` invalidates the refresh session.
-- `GET /auth/me` returns the current account.
-- `PATCH /auth/me` applies the documented partial update semantics.
+### Primary Auth & Profile Endpoints
+- `POST /api/v1/auth/register`: Starts onboarding (Artisan: `PENDING` validation, Client: `ACTIVE`).
+- `POST /api/v1/auth/login`: Authenticates credentials, returns `accessToken` (1h), `refreshToken` (24h), and user summary.
+- `POST /api/v1/auth/refresh`: Rotates the refresh token and returns a new token pair.
+- `POST /api/v1/auth/logout`: Revokes active refresh session.
+- `POST /api/v1/auth/verify-email`: Verifies 6-digit OTP code sent on registration.
+- `POST /api/v1/auth/resend-verification`: Issues a fresh 6-digit verification code.
+- `POST /api/v1/auth/forgot-password`: Requests 6-digit password reset code via email.
+- `POST /api/v1/auth/reset-password`: Resets password using the 6-digit code.
+- `POST /api/v1/auth/change-password`: Authenticated endpoint to change password.
+- `POST /api/v1/auth/complete-profile`: Onboarding wizard to complete craft/business details.
+- `GET /api/v1/auth/me`: Retrieves current user profile (`ProfileResponse`).
+- `PATCH /api/v1/auth/me`: Partial updates using JSON Merge Patch semantics.
+- `POST /api/v1/users/me/avatars`: Uploads and activates a new profile avatar (`multipart/form-data`, key `file`).
+- `GET /api/v1/users/me/avatars`: Lists uploaded avatar history.
+- `PUT /api/v1/users/me/avatars/{id}/activate`: Re-activates a past gallery avatar.
+- `DELETE /api/v1/users/me/avatars/{id}`: Deletes an avatar from storage.
 
-On `401`, attempt one refresh if available. If refresh fails, clear authentication state and redirect to login. A `403` is an authorization or ownership decision, not an expired token.
+### `GET /api/v1/auth/me` Polymorphic Contract
+The `data` payload returned by `GET /api/v1/auth/me` is account-type-specific:
+- **Artisan**: Returns `ArtisanResponseDTO` with bio, city, address, website, rating, reviewsCount, `region`, `craftCategory`, `subCategory`, `primaryMaterials`, `primaryTechniques`, `epoques`, `certifications`, `galleryImages`.
+- **Client**: Returns `ClientProfileResponseDTO` with companyName, clientType (`INDIVIDUAL` or `ENTERPRISE`), city, address, and client subscription tier.
+- Both share common base fields: `id`, `email`, `firstName`, `lastName`, `name`, `phone`, `avatarUrl`, `accountStatus`, `permissions`, `emailVerified`, `createdAt`, `updatedAt`, `premium`.
+
+### `PATCH /api/v1/auth/me` JSON Merge Patch Semantics
+- **Omitted key**: Field is untouched.
+- **Explicit `null`**: Field is cleared (if nullable).
+- **Explicit value**: Field is updated.
+- Supported Artisan fields: `bio`, `city`, `address`, `website`, `regionId`, `subCategoryId`, `materialIds`, `techniqueIds`, `epoqueIds`.
+- Supported Client fields: `companyName`, `clientType`, `city`, `address`.
+
+### Token Refresh Flow
+On `401 Unauthorized`, queue incoming requests and attempt exactly one call to `POST /api/v1/auth/refresh` with the active refresh token. If refresh succeeds, update the stored access token and replay queued requests. If refresh fails with 401 or 403, immediately clear authentication state and redirect the user to `/login`. Note: A `403 Forbidden` response indicates lack of permission or unauthenticated access (e.g. `/public/directory`), NOT an expired token.
 
 ## Response and error contracts
 

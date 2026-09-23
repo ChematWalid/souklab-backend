@@ -4208,65 +4208,94 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 #### GET — getCurrentUser
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/#### HTTP example
+Purpose: Retrieves the profile of the currently authenticated user (`ProfileResponse`). Returns polymorphic responses: `ArtisanResponseDTO` (with craft categories, subcategory, materials, techniques, epochs, ratings, certifications, gallery) for artisans, or `ClientProfileResponseDTO` (with company name, client type) for clients.
+
+Authorization: Requires authenticated session with bearer token (`Authorization: Bearer <token>`).
+
+Failure cases: `401 Unauthorized` when the token is missing or expired; `403 Forbidden` if the account is deactivated or banned.
+
+#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
 ```bash
-curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/auth/me"
+curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/auth/me" \
+  --header "Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}"
 ```
 
 ```ts
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const accessToken = "<access-token>";
-const response = await fetch(`${baseUrl}/api/v1/auth/me`, { method: "GET", headers: {} });
+const response = await fetch(`${baseUrl}/api/v1/auth/me`, {
+  method: "GET",
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+    Accept: "application/json"
+  }
+});
 const payload = await response.json();
 ```
 
-auth/me`.
-
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
 - Operation ID: `getCurrentUser`
-- Tags: `auth-controller`
+- Tags: `Authentication & Profile`
 - Responses:
-  - `200` — OK
+  - `200` — Profile retrieved successfully
+  - `401` — Unauthorized (missing or expired bearer token)
 
 ### `/api/v1/auth/me`
 
 #### PATCH — patchCurrentUser
 #### Purpose and authorization
 
-Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/auth/me`.
+Purpose: Partially updates the authenticated user's profile using JSON Merge Patch semantics (`application/json`). Omitted fields are preserved; fields set to `null` are cleared; fields set to values are updated. Supports artisan fields (`bio`, `city`, `address`, `website`, `regionId`, `subCategoryId`, `materialIds`, `techniqueIds`, `epoqueIds`) and client fields (`companyName`, `clientType`, `city`, `address`).
 
-Authorization: Public #### HTTP example
+Authorization: Requires authenticated session with bearer token (`Authorization: Bearer <token>`).
+
+Failure cases: `400 Bad Request` or `422 Unprocessable Content` on validation failure (e.g. invalid URL, invalid craft ID); `401 Unauthorized` if unauthenticated.
+
+#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
 ```bash
-curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/auth/me" --header 'Content-Type: application/json' --data '{}'
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/auth/me" \
+  --header "Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "bio": "Artisan potier traditionnel kabyle avec 15 ans d'\''expérience.",
+    "city": "Tizi Ouzou",
+    "address": "Village Ath Yanni",
+    "website": "https://poterie-kabyle.dz"
+  }'
 ```
 
 ```ts
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const accessToken = "<access-token>";
-const response = await fetch(`${baseUrl}/api/v1/auth/me`, { method: "PATCH", headers: {}, body: JSON.stringify({}) });
+const response = await fetch(`${baseUrl}/api/v1/auth/me`, {
+  method: "PATCH",
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    bio: "Artisan potier traditionnel kabyle avec 15 ans d'expérience.",
+    city: "Tizi Ouzou",
+    address: "Village Ath Yanni",
+    website: "https://poterie-kabyle.dz"
+  })
+});
 const payload = await response.json();
 ```
 
-or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
 - Operation ID: `patchCurrentUser`
-- Tags: `auth-controller`
+- Tags: `Authentication & Profile`
 - Request body: `application/json`
 - Responses:
-  - `200` — OK
+  - `200` — Profile updated successfully
+  - `400` — Malformed request
+  - `401` — Unauthorized
+  - `422` — Validation error
 
 ### `/api/v1/admin/catalog/subcategories/{id}/status`
 
@@ -4509,34 +4538,54 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 #### GET — search
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/public/directory`.
+Purpose: Multi-facet directory search and full-text querying across verified artisans. Non-premium viewers receive cards with anonymised artisan names (`Artisan #XXXXX`); premium viewers and administrators see real artisan names.
 
-Authorization: Public or#### HTTP example
+Authorization: Requires authenticated session with bearer token (`Authorization: Bearer <token>`). Anonymous requests receive `403 Forbidden`.
+
+Failure cases: `403 Forbidden` if unauthenticated; `422 Unprocessable Content` if query filter fails validation (e.g. invalid rating > 5.0, negative page number, invalid keyword size).
+
+#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
 ```bash
-curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/public/directory" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/public/directory?keyword=poterie&page=0&size=20" \
+  --header "Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}"
 ```
 
 ```ts
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const accessToken = "<access-token>";
-const response = await fetch(`${baseUrl}/api/v1/public/directory`, { method: "GET", headers: { Authorization: `Bearer ${accessToken}` } });
+const response = await fetch(`${baseUrl}/api/v1/public/directory?keyword=poterie&page=0&size=20`, {
+  method: "GET",
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+    Accept: "application/json"
+  }
+});
 const payload = await response.json();
 ```
 
- authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
 - Operation ID: `search`
-- Tags: `directory-controller`
+- Tags: `Artisan Directory`
 - Parameters:
-  - `filter` (`query`, required)
+  - `keyword` (`query`, optional, max 120 chars)
+  - `categoryId` (`query`, optional, UUID)
+  - `subCategoryId` (`query`, optional, UUID)
+  - `wilayaId` (`query`, optional)
+  - `minRating` (`query`, optional, 0.0 - 5.0)
+  - `materials` (`query`, optional, list of UUIDs)
+  - `techniques` (`query`, optional, list of UUIDs)
+  - `epoques` (`query`, optional, list of UUIDs)
+  - `verifiedOnly` (`query`, optional, boolean)
+  - `page` (`query`, optional, default: 0)
+  - `size` (`query`, optional, default: 20, max: 100)
+  - `sortBy` (`query`, optional, default: "createdAt")
+  - `sortDir` (`query`, optional, default: "desc")
 - Responses:
-  - `200` — OK
+  - `200` — Paginated list of matching artisan cards
+  - `403` — Forbidden (unauthenticated anonymous caller)
+  - `422` — Validation failure on search parameters
 
 ### `/api/v1/payments`
 
