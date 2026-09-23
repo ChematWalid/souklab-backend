@@ -34,7 +34,7 @@ Base Path: `/api/v1/feed`
 
 ### 2. Administrator Moderation (`AdminFeedController`)
 
-Base Path: `/api/v1/admin/feed`  
+Base Path: `/api/v1/admin/feed`
 Access: Requires permission `@accessControl.canModerateFeed(authentication)`
 
 | Method | Endpoint | Access | Summary | Description |
