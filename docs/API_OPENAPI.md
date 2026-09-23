@@ -87,13 +87,14 @@ See [API conventions](API_CONVENTIONS.md), [authorization matrix](AUTHORIZATION_
 and [frontend handoff](frontend/API_HANDOFF.md) for shared conventions and
 permission boundaries.
 
-Generated from the running application on 2026-09-21T03:44:24Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
+
+Generated from the running application on 2026-09-23T01:47:58Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
 
 - OpenAPI version: `3.1.0`
 - API title: `Souklab API`
 - API version: `1.0.0`
-- Paths: `123`
-- Schemas: `160`
+- Paths: `142`
+- Schemas: `177`
 
 ## Security
 
@@ -113,19 +114,7 @@ Generated from the running application on 2026-09-21T03:44:24Z. This Markdown vi
 
 Purpose: `PUT` performs the `PUT` operation for `/api/v1/users/me/avatars/{id}/activate`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `activateAvatar`
-- Tags: `avatar-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizat#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -140,6 +129,18 @@ const response = await fetch(`${baseUrl}/api/v1/users/me/avatars/{id}/activate`,
 const payload = await response.json();
 ```
 
+ion: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `activateAvatar`
+- Tags: `avatar-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/notifications/{id}/read`
 
 #### PUT — markAsRead
@@ -147,19 +148,7 @@ const payload = await response.json();
 
 Purpose: `PUT` performs the `PUT` operation for `/api/v1/notifications/{id}/read`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `markAsRead`
-- Tags: `notification-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bear#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -174,24 +163,24 @@ const response = await fetch(`${baseUrl}/api/v1/notifications/{id}/read`, { meth
 const payload = await response.json();
 ```
 
+er access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `markAsRead`
+- Tags: `notification-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/notifications/read-all`
 
 #### PUT — markAllAsRead
 #### Purpose and authorization
 
-Purpose: `PUT` performs the `PUT` operation for `/api/v1/notifications/read-all`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `markAllAsRead`
-- Tags: `notification-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/notific#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -206,6 +195,18 @@ const response = await fetch(`${baseUrl}/api/v1/notifications/read-all`, { metho
 const payload = await response.json();
 ```
 
+ations/read-all`.
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `markAllAsRead`
+- Tags: `notification-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed/{id}`
 
 #### GET — get
@@ -213,19 +214,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/feed/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `get`
-- Tags: `feed-post-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer a#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -240,6 +229,18 @@ const response = await fetch(`${baseUrl}/api/v1/feed/{id}`, { method: "GET", hea
 const payload = await response.json();
 ```
 
+ccess token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `get`
+- Tags: `feed-post-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed/{id}`
 
 #### PUT — update
@@ -247,20 +248,7 @@ const payload = await response.json();
 
 Purpose: `PUT` performs the `PUT` operation for `/api/v1/feed/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `update`
-- Tags: `feed-post-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contrac#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -275,6 +263,19 @@ const response = await fetch(`${baseUrl}/api/v1/feed/{id}`, { method: "PUT", hea
 const payload = await response.json();
 ```
 
+t and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `update`
+- Tags: `feed-post-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed/{id}`
 
 #### DELETE — remove
@@ -282,19 +283,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/feed/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `remove`
-- Tags: `feed-post-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Beare#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -309,6 +298,18 @@ const response = await fetch(`${baseUrl}/api/v1/feed/{id}`, { method: "DELETE", 
 const payload = await response.json();
 ```
 
+r access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `remove`
+- Tags: `feed-post-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/reviews/{reviewId}`
 
 #### PUT — update_1
@@ -316,20 +317,7 @@ const payload = await response.json();
 
 Purpose: `PUT` performs the `PUT` operation for `/api/v1/artisan/reviews/{reviewId}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `update_1`
-- Tags: `artisan-review-controller`
-- Parameters:
-  - `reviewId` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live con#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -344,6 +332,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/reviews/{reviewId}`, { m
 const payload = await response.json();
 ```
 
+tract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `update_1`
+- Tags: `artisan-review-controller`
+- Parameters:
+  - `reviewId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/reviews/{reviewId}`
 
 #### DELETE — delete
@@ -351,19 +352,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/artisan/reviews/{reviewId}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `delete`
-- Tags: `artisan-review-controller`
-- Parameters:
-  - `reviewId` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization:#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -378,6 +367,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/reviews/{reviewId}`, { m
 const payload = await response.json();
 ```
 
+ Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `delete`
+- Tags: `artisan-review-controller`
+- Parameters:
+  - `reviewId` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/gallery/order`
 
 #### PUT — reorderGallery
@@ -385,18 +386,7 @@ const payload = await response.json();
 
 Purpose: `PUT` performs the `PUT` operation for `/api/v1/artisan/gallery/order`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `reorderGallery`
-- Tags: `artisan-gallery-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -411,6 +401,17 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/gallery/order`, { method
 const payload = await response.json();
 ```
 
+ access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `reorderGallery`
+- Tags: `artisan-gallery-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}`
 
 #### GET — getFormationDetails
@@ -418,19 +419,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/formations/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getFormationDetails`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access toke#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -445,6 +434,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}`, { meth
 const payload = await response.json();
 ```
 
+n required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getFormationDetails`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}`
 
 #### PUT — updateFormation
@@ -452,20 +453,7 @@ const payload = await response.json();
 
 Purpose: `PUT` performs the `PUT` operation for `/api/v1/artisan/formations/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `updateFormation`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract a#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -480,6 +468,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}`, { meth
 const payload = await response.json();
 ```
 
+nd authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateFormation`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}`
 
 #### DELETE — deleteFormation
@@ -487,19 +488,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/artisan/formations/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `deleteFormation`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer a#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -514,6 +503,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}`, { meth
 const payload = await response.json();
 ```
 
+ccess token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteFormation`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/subscription-plans/{id}`
 
 #### PUT — update_2
@@ -521,20 +522,7 @@ const payload = await response.json();
 
 Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/subscription-plans/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `update_2`
-- Tags: `admin-subscription-plan-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live con#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -549,19 +537,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscription-plans/{id}`, 
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/subscription-plans/{id}`
-
-#### DELETE — deactivate
-#### Purpose and authorization
-
-Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/subscription-plans/{id}`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+tract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `deactivate`
+- Operation ID: `update_2`
 - Tags: `admin-subscription-plan-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -569,7 +550,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/subscription-plans/{id}`
+
+#### DELETE — deactivate
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/subscription-plans/{id}`.
+
+Authorization: Bearer access token required; the live#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -584,6 +572,747 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscription-plans/{id}`, 
 const payload = await response.json();
 ```
 
+ contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deactivate`
+- Tags: `admin-subscription-plan-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/techniques/{id}`
+
+#### PUT — updateTechnique
+#### Purpose and authorization
+
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/catalog/techniques/{id}`.
+
+Authorization: Bearer access token required; the live #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PUT "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/techniques/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/techniques/{id}`, { method: "PUT", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateTechnique`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/techniques/{id}`
+
+#### DELETE — deleteTechnique
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/catalog/techniques/{id}`.
+
+Authorization#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/techniques/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/techniques/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteTechnique`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/techniques/{id}`
+
+#### PATCH — patchTechnique
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/techniques/{id}`.
+
+Authorization: Bearer access token required; the #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/techniques/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/techniques/{id}`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchTechnique`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/subcategories/{id}`
+
+#### PUT — updateSubCategory
+#### Purpose and authorization
+
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/catalog/subcategories/{id}`.
+
+Authorization: Bearer access token required; the live#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PUT "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/subcategories/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/subcategories/{id}`, { method: "PUT", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+ contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateSubCategory`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/subcategories/{id}`
+
+#### DELETE — deleteSubCategory
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/catalog/subcategories/{id}`.
+
+Authorizatio#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/subcategories/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/subcategories/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+n: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteSubCategory`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/subcategories/{id}`
+
+#### PATCH — patchSubCategory
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/subcategories/{id}`.
+
+Authorization: Bearer access token required; the#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/subcategories/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/subcategories/{id}`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+ live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchSubCategory`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/regions/{id}`
+
+#### PUT — updateRegion
+#### Purpose and authorization
+
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/catalog/regions/{id}`.
+
+Authorization: Bearer access token required; the live #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PUT "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/regions/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/regions/{id}`, { method: "PUT", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateRegion`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/regions/{id}`
+
+#### DELETE — deleteRegion
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/catalog/regions/{id}`.
+
+Authorization#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/regions/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/regions/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteRegion`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/regions/{id}`
+
+#### PATCH — patchRegion
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/regions/{id}`.
+
+Authorization: Bearer access token required; the #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/regions/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/regions/{id}`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchRegion`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/materials/{id}`
+
+#### PUT — updateMaterial
+#### Purpose and authorization
+
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/catalog/materials/{id}`.
+
+Authorization: Bearer access token required; the live #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PUT "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/materials/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/materials/{id}`, { method: "PUT", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateMaterial`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/materials/{id}`
+
+#### DELETE — deleteMaterial
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/catalog/materials/{id}`.
+
+Authorization#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/materials/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/materials/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteMaterial`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/materials/{id}`
+
+#### PATCH — patchMaterial
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/materials/{id}`.
+
+Authorization: Bearer access token required; the #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/materials/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/materials/{id}`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchMaterial`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/material-families/{id}`
+
+#### PUT — updateMaterialFamily
+#### Purpose and authorization
+
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/catalog/material-families/{id}`.
+
+Authorization: Bearer access token required; the liv#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PUT "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/material-families/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/material-families/{id}`, { method: "PUT", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+e contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateMaterialFamily`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/material-families/{id}`
+
+#### DELETE — deleteMaterialFamily
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/catalog/material-families/{id}`.
+
+Authorizati#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/material-families/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/material-families/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+on: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteMaterialFamily`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/material-families/{id}`
+
+#### PATCH — patchMaterialFamily
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/material-families/{id}`.
+
+Authorization: Bearer access token required; th#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/material-families/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/material-families/{id}`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+e live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchMaterialFamily`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/epoques/{id}`
+
+#### PUT — updateEpoque
+#### Purpose and authorization
+
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/catalog/epoques/{id}`.
+
+Authorization: Bearer access token required; the live #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PUT "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/epoques/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/epoques/{id}`, { method: "PUT", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateEpoque`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/epoques/{id}`
+
+#### DELETE — deleteEpoque
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/catalog/epoques/{id}`.
+
+Authorization#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/epoques/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/epoques/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteEpoque`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/epoques/{id}`
+
+#### PATCH — patchEpoque
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/epoques/{id}`.
+
+Authorization: Bearer access token required; the #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/epoques/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/epoques/{id}`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchEpoque`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/categories/{id}`
+
+#### PUT — updateCategory
+#### Purpose and authorization
+
+Purpose: `PUT` performs the `PUT` operation for `/api/v1/admin/catalog/categories/{id}`.
+
+Authorization: Bearer access token required; the live#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PUT "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/categories/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/categories/{id}`, { method: "PUT", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+ contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `updateCategory`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/categories/{id}`
+
+#### DELETE — deleteCategory
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/catalog/categories/{id}`.
+
+Authorizatio#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/categories/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/categories/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+n: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteCategory`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/categories/{id}`
+
+#### PATCH — patchCategory
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/categories/{id}`.
+
+Authorization: Bearer access token required; the#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/categories/${ID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/categories/{id}`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+ live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchCategory`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/users/me/avatars`
 
 #### GET — listAvatars
@@ -591,19 +1320,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/users/me/avatars`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `listAvatars`
-- Tags: `avatar-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -618,6 +1335,18 @@ const response = await fetch(`${baseUrl}/api/v1/users/me/avatars`, { method: "GE
 const payload = await response.json();
 ```
 
+ token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `listAvatars`
+- Tags: `avatar-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/users/me/avatars`
 
 #### POST — uploadAvatar
@@ -625,18 +1354,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/users/me/avatars`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `uploadAvatar`
-- Tags: `avatar-controller`
-- Request body: `multipart/form-data`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: B#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -651,6 +1369,17 @@ const response = await fetch(`${baseUrl}/api/v1/users/me/avatars`, { method: "PO
 const payload = await response.json();
 ```
 
+earer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `uploadAvatar`
+- Tags: `avatar-controller`
+- Request body: `multipart/form-data`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/subscriptions/{id}/renew`
 
 #### POST — renew
@@ -658,21 +1387,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/subscriptions/{id}/renew`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `renew`
-- Tags: `subscription-checkout-controller`
-- Parameters:
-  - `id` (`path`, required)
-  - `Idempotency-Key` (`header`, optional)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and authorization matrix determine #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -687,6 +1402,20 @@ const response = await fetch(`${baseUrl}/api/v1/subscriptions/{id}/renew`, { met
 const payload = await response.json();
 ```
 
+the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `renew`
+- Tags: `subscription-checkout-controller`
+- Parameters:
+  - `id` (`path`, required)
+  - `Idempotency-Key` (`header`, optional)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/subscriptions/{id}/cancel`
 
 #### POST — cancel
@@ -694,19 +1423,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/subscriptions/{id}/cancel`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `cancel`
-- Tags: `subscription-account-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bear#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -721,6 +1438,18 @@ const response = await fetch(`${baseUrl}/api/v1/subscriptions/{id}/cancel`, { me
 const payload = await response.json();
 ```
 
+er access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `cancel`
+- Tags: `subscription-account-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/subscriptions/checkout`
 
 #### POST — checkout
@@ -728,20 +1457,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/subscriptions/checkout`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `checkout`
-- Tags: `subscription-checkout-controller`
-- Parameters:
-  - `Idempotency-Key` (`header`, optional)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and authoriz#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -756,6 +1472,19 @@ const response = await fetch(`${baseUrl}/api/v1/subscriptions/checkout`, { metho
 const payload = await response.json();
 ```
 
+ation matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `checkout`
+- Tags: `subscription-checkout-controller`
+- Parameters:
+  - `Idempotency-Key` (`header`, optional)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/reports`
 
 #### POST — create
@@ -763,18 +1492,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/reports`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `create`
-- Tags: `content-report-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer ac#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -789,6 +1507,17 @@ const response = await fetch(`${baseUrl}/api/v1/reports`, { method: "POST", head
 const payload = await response.json();
 ```
 
+cess token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `create`
+- Tags: `content-report-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/integrations/chargily/webhook`
 
 #### POST — webhook
@@ -796,20 +1525,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/integrations/chargily/webhook`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `webhook`
-- Tags: `chargily-webhook-controller`
-- Parameters:
-  - `signature` (`header`, optional)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Public or authentication-flow operation; #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -824,6 +1540,19 @@ const response = await fetch(`${baseUrl}/api/v1/integrations/chargily/webhook`, 
 const payload = await response.json();
 ```
 
+no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `webhook`
+- Tags: `chargily-webhook-controller`
+- Parameters:
+  - `signature` (`header`, optional)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed`
 
 #### GET — list
@@ -831,20 +1560,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/feed`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `list`
-- Tags: `feed-post-controller`
-- Parameters:
-  - `type` (`query`, optional)
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -859,6 +1575,19 @@ const response = await fetch(`${baseUrl}/api/v1/feed`, { method: "GET", headers:
 const payload = await response.json();
 ```
 
+authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `list`
+- Tags: `feed-post-controller`
+- Parameters:
+  - `type` (`query`, optional)
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed`
 
 #### POST — create_1
@@ -866,18 +1595,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/feed`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `create_1`
-- Tags: `feed-post-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer ac#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -892,6 +1610,17 @@ const response = await fetch(`${baseUrl}/api/v1/feed`, { method: "POST", headers
 const payload = await response.json();
 ```
 
+cess token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `create_1`
+- Tags: `feed-post-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed/{id}/media`
 
 #### POST — addMedia
@@ -899,20 +1628,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/feed/{id}/media`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `addMedia`
-- Tags: `feed-post-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `multipart/form-data`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live cont#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -927,6 +1643,19 @@ const response = await fetch(`${baseUrl}/api/v1/feed/{id}/media`, { method: "POS
 const payload = await response.json();
 ```
 
+ract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `addMedia`
+- Tags: `feed-post-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `multipart/form-data`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations`
 
 #### GET — list_1
@@ -934,19 +1663,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/conversations`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `list_1`
-- Tags: `conversation-controller`
-- Parameters:
-  - `archived` (`query`, optional)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access tok#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -961,6 +1678,18 @@ const response = await fetch(`${baseUrl}/api/v1/conversations`, { method: "GET",
 const payload = await response.json();
 ```
 
+en required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `list_1`
+- Tags: `conversation-controller`
+- Parameters:
+  - `archived` (`query`, optional)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations`
 
 #### POST — create_2
@@ -968,18 +1697,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/conversations`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `create_2`
-- Tags: `conversation-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bea#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -994,6 +1712,17 @@ const response = await fetch(`${baseUrl}/api/v1/conversations`, { method: "POST"
 const payload = await response.json();
 ```
 
+rer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `create_2`
+- Tags: `conversation-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations/{id}/read`
 
 #### POST — read
@@ -1001,20 +1730,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/conversations/{id}/read`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `read`
-- Tags: `conversation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; t#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1029,6 +1745,19 @@ const response = await fetch(`${baseUrl}/api/v1/conversations/{id}/read`, { meth
 const payload = await response.json();
 ```
 
+he live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `read`
+- Tags: `conversation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations/{id}/messages`
 
 #### GET — messages
@@ -1036,21 +1765,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/conversations/{id}/messages`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `messages`
-- Tags: `conversation-controller`
-- Parameters:
-  - `id` (`path`, required)
-  - `cursor` (`query`, optional)
-  - `size` (`query`, optional)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and authorizat#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1065,6 +1780,20 @@ const response = await fetch(`${baseUrl}/api/v1/conversations/{id}/messages`, { 
 const payload = await response.json();
 ```
 
+ion matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `messages`
+- Tags: `conversation-controller`
+- Parameters:
+  - `id` (`path`, required)
+  - `cursor` (`query`, optional)
+  - `size` (`query`, optional)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations/{id}/messages`
 
 #### POST — send
@@ -1072,20 +1801,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/conversations/{id}/messages`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `send`
-- Tags: `conversation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token require#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1100,6 +1816,19 @@ const response = await fetch(`${baseUrl}/api/v1/conversations/{id}/messages`, { 
 const payload = await response.json();
 ```
 
+d; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `send`
+- Tags: `conversation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations/{id}/attachments`
 
 #### POST — uploadAttachment
@@ -1107,7 +1836,22 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/conversations/{id}/attachments`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+Authorization: Bearer access token required; the live #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/conversations/${ID}/attachments" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/conversations/{id}/attachments`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
@@ -1116,26 +1860,9 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Tags: `conversation-controller`
 - Parameters:
   - `id` (`path`, required)
-- Request body: `multipart/form-data` with required binary `file` part
+- Request body: `multipart/form-data`
 - Responses:
-  - `201` — Created
-
-#### HTTP example
-
-The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
-
-```bash
-curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/conversations/${ID}/attachments" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --form 'file=@attachment.bin'
-```
-
-```ts
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
-const accessToken = "<access-token>";
-const form = new FormData();
-form.append("file", file);
-const response = await fetch(`${baseUrl}/api/v1/conversations/{id}/attachments`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-const payload = await response.json();
-```
+  - `200` — OK
 
 ### `/api/v1/auth/verify-email`
 
@@ -1144,18 +1871,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/verify-email`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `verifyEmail`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authoriza#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1170,6 +1886,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/verify-email`, { method: "P
 const payload = await response.json();
 ```
 
+tion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `verifyEmail`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/reset-password`
 
 #### POST — resetPassword
@@ -1177,18 +1904,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/reset-password`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `resetPassword`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authoriza#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1203,6 +1919,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/reset-password`, { method: 
 const payload = await response.json();
 ```
 
+tion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `resetPassword`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/resend-verification`
 
 #### POST — resendVerification
@@ -1210,18 +1937,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/resend-verification`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `resendVerification`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authoriza#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1236,6 +1952,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/resend-verification`, { met
 const payload = await response.json();
 ```
 
+tion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `resendVerification`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/register`
 
 #### POST — register
@@ -1243,18 +1970,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/register`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `register`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizat#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1269,6 +1985,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/register`, { method: "POST"
 const payload = await response.json();
 ```
 
+ion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `register`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/refresh`
 
 #### POST — refreshToken
@@ -1276,18 +2003,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/refresh`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `refreshToken`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1302,6 +2018,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/refresh`, { method: "POST",
 const payload = await response.json();
 ```
 
+Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `refreshToken`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/logout`
 
 #### POST — logout
@@ -1309,18 +2036,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/logout`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `logout`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizat#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1335,6 +2051,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/logout`, { method: "POST", 
 const payload = await response.json();
 ```
 
+ion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `logout`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/login`
 
 #### POST — login
@@ -1342,18 +2069,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/login`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `login`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizat#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1368,6 +2084,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/login`, { method: "POST", h
 const payload = await response.json();
 ```
 
+ion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `login`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/forgot-password`
 
 #### POST — forgotPassword
@@ -1375,18 +2102,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/forgot-password`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `forgotPassword`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authoriza#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1401,6 +2117,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/forgot-password`, { method:
 const payload = await response.json();
 ```
 
+tion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `forgotPassword`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/complete-profile`
 
 #### POST — completeProfile
@@ -1408,18 +2135,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/complete-profile`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `completeProfile`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authoriza#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1434,6 +2150,17 @@ const response = await fetch(`${baseUrl}/api/v1/auth/complete-profile`, { method
 const payload = await response.json();
 ```
 
+tion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `completeProfile`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/change-password`
 
 #### POST — changePassword
@@ -1441,18 +2168,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/auth/change-password`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `changePassword`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authoriza#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1467,24 +2183,23 @@ const response = await fetch(`${baseUrl}/api/v1/auth/change-password`, { method:
 const payload = await response.json();
 ```
 
+tion: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `changePassword`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/gallery`
 
 #### GET — getMyGallery
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/gallery`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getMyGallery`
-- Tags: `artisan-gallery-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/g#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1499,6 +2214,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/gallery`, { method: "GET
 const payload = await response.json();
 ```
 
+allery`.
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getMyGallery`
+- Tags: `artisan-gallery-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/gallery`
 
 #### POST — uploadImage
@@ -1506,21 +2233,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/gallery`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `uploadImage`
-- Tags: `artisan-gallery-controller`
-- Parameters:
-  - `title` (`query`, optional)
-  - `caption` (`query`, optional)
-- Request body: `multipart/form-data`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and authorization matrix determine the req#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1535,6 +2248,20 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/gallery`, { method: "POS
 const payload = await response.json();
 ```
 
+uired role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `uploadImage`
+- Tags: `artisan-gallery-controller`
+- Parameters:
+  - `title` (`query`, optional)
+  - `caption` (`query`, optional)
+- Request body: `multipart/form-data`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations`
 
 #### POST — createFormation
@@ -1542,18 +2269,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formations`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `createFormation`
-- Tags: `artisan-formation-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer acc#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1568,6 +2284,17 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations`, { method: "
 const payload = await response.json();
 ```
 
+ess token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createFormation`
+- Tags: `artisan-formation-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/thumbnail`
 
 #### POST — uploadThumbnail
@@ -1575,20 +2302,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formations/{id}/thumbnail`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `uploadThumbnail`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `multipart/form-data`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live c#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1603,6 +2317,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}/thumbnai
 const payload = await response.json();
 ```
 
+ontract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `uploadThumbnail`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `multipart/form-data`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/submit`
 
 #### POST — submitForReview
@@ -1610,19 +2337,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formations/{id}/submit`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `submitForReview`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Beare#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1637,6 +2352,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}/submit`,
 const payload = await response.json();
 ```
 
+r access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `submitForReview`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/files`
 
 #### POST — uploadCourseFile
@@ -1644,20 +2371,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formations/{id}/files`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `uploadCourseFile`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `multipart/form-data`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contra#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1672,6 +2386,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}/files`, 
 const payload = await response.json();
 ```
 
+ct and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `uploadCourseFile`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `multipart/form-data`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/enroll`
 
 #### POST — enroll
@@ -1679,19 +2406,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formations/{id}/enroll`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `enroll`
-- Tags: `artisan-formation-enrollment-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1706,6 +2421,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}/enroll`,
 const payload = await response.json();
 ```
 
+access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `enroll`
+- Tags: `artisan-formation-enrollment-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/cancel`
 
 #### POST — cancel_1
@@ -1713,19 +2440,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formations/{id}/cancel`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `cancel_1`
-- Tags: `artisan-formation-enrollment-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer ac#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1740,6 +2455,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}/cancel`,
 const payload = await response.json();
 ```
 
+cess token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `cancel_1`
+- Tags: `artisan-formation-enrollment-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{formationId}/reviews`
 
 #### POST — create_3
@@ -1747,20 +2474,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formations/{formationId}/reviews`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `create_3`
-- Tags: `artisan-review-controller`
-- Parameters:
-  - `formationId` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required;#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1775,6 +2489,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{formationId}
 const payload = await response.json();
 ```
 
+ the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `create_3`
+- Tags: `artisan-review-controller`
+- Parameters:
+  - `formationId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formateur-request`
 
 #### POST — submitRequest
@@ -1782,18 +2509,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/formateur-request`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `submitRequest`
-- Tags: `artisan-formateur-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: B#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1808,24 +2524,23 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formateur-request`, { me
 const payload = await response.json();
 ```
 
+earer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `submitRequest`
+- Tags: `artisan-formateur-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/certifications`
 
 #### GET — getMyCertifications
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/certifications`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getMyCertifications`
-- Tags: `artisan-certification-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/certifications#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1840,6 +2555,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/certifications`, { metho
 const payload = await response.json();
 ```
 
+`.
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getMyCertifications`
+- Tags: `artisan-certification-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/certifications`
 
 #### POST — uploadCertification
@@ -1849,21 +2576,7 @@ Purpose: `POST` performs the `POST` operation for `/api/v1/artisan/certification
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `uploadCertification`
-- Tags: `artisan-certification-controller`
-- Parameters:
-  - `title` (`query`, required)
-  - `issuer` (`query`, required)
-  - `issuedAt` (`query`, optional)
-  - `expiresAt` (`query`, optional)
-- Request body: `multipart/form-data`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Failure cases: use the respons#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1878,27 +2591,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/certifications`, { metho
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/users/audit-logs`
+e codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
-#### GET — getAuditLogs
-#### Purpose and authorization
 
-Purpose: Returns the administrator-visible, paginated audit trail, including actor attribution and financial state fields when present.
-
-Authorization: Bearer access token required; the caller must have the existing admin user-management permission.
-
-Failure cases: `401` unauthenticated, `403` insufficient permission, and the standard pagination/validation responses.
-
-- Operation ID: `getAuditLogs`
-- Tags: `user-management-controller`
+- Operation ID: `uploadCertification`
+- Tags: `artisan-certification-controller`
+- Parameters:
+  - `title` (`query`, required)
+  - `issuer` (`query`, required)
+  - `issuedAt` (`query`, optional)
+  - `expiresAt` (`query`, optional)
+- Request body: `multipart/form-data`
 - Responses:
-  - `200` — paginated audit records
-
-#### HTTP example
-
-```bash
-curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/users/audit-logs?page=0&size=20" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
-```
+  - `200` — OK
 
 ### `/api/v1/admin/users/{userId}/permissions`
 
@@ -1907,19 +2612,7 @@ curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/users/{userId}/permissions`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `list_2`
-- Tags: `permission-management-controller`
-- Parameters:
-  - `userId` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bear#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1934,6 +2627,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/{userId}/permissions
 const payload = await response.json();
 ```
 
+er access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `list_2`
+- Tags: `permission-management-controller`
+- Parameters:
+  - `userId` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/users/{userId}/permissions`
 
 #### POST — grant
@@ -1941,20 +2646,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/users/{userId}/permissions`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `grant`
-- Tags: `permission-management-controller`
-- Parameters:
-  - `userId` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the li#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -1969,19 +2661,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/{userId}/permissions
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/users/{userId}/permissions`
-
-#### DELETE — revoke
-#### Purpose and authorization
-
-Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/users/{userId}/permissions`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+ve contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `revoke`
+- Operation ID: `grant`
 - Tags: `permission-management-controller`
 - Parameters:
   - `userId` (`path`, required)
@@ -1989,7 +2674,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/users/{userId}/permissions`
+
+#### DELETE — revoke
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/users/{userId}/permissions`.
+
+Authorization: Bearer access token required; the#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2004,6 +2696,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/{userId}/permissions
 const payload = await response.json();
 ```
 
+ live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `revoke`
+- Tags: `permission-management-controller`
+- Parameters:
+  - `userId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/users/{id}/unban`
 
 #### POST — unbanUser
@@ -2011,19 +2716,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/users/{id}/unban`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `unbanUser`
-- Tags: `user-management-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Beare#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2038,6 +2731,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/{id}/unban`, { metho
 const payload = await response.json();
 ```
 
+r access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `unbanUser`
+- Tags: `user-management-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/users/{id}/timeout`
 
 #### POST — timeoutUser
@@ -2045,20 +2750,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/users/{id}/timeout`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `timeoutUser`
-- Tags: `user-management-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live c#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2073,19 +2765,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/{id}/timeout`, { met
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/users/{id}/ban`
-
-#### POST — banUser
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/users/{id}/ban`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+ontract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `banUser`
+- Operation ID: `timeoutUser`
 - Tags: `user-management-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -2093,7 +2778,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/users/{id}/ban`
+
+#### POST — banUser
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/users/{id}/ban`.
+
+Authorization: Bearer access token required; the live c#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2108,6 +2800,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/{id}/ban`, { method:
 const payload = await response.json();
 ```
 
+ontract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `banUser`
+- Tags: `user-management-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/users/{id}/approve`
 
 #### POST — approveUser
@@ -2115,19 +2820,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/users/{id}/approve`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `approveUser`
-- Tags: `user-management-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Beare#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2142,6 +2835,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/{id}/approve`, { met
 const payload = await response.json();
 ```
 
+r access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `approveUser`
+- Tags: `user-management-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/users/approve-bulk`
 
 #### POST — approveUsersBulk
@@ -2149,18 +2854,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/users/approve-bulk`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `approveUsersBulk`
-- Tags: `user-management-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bea#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2175,6 +2869,17 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/approve-bulk`, { met
 const payload = await response.json();
 ```
 
+rer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `approveUsersBulk`
+- Tags: `user-management-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/subscriptions/{id}/revoke`
 
 #### POST — revoke_1
@@ -2182,20 +2887,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/{id}/revoke`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `revoke_1`
-- Tags: `admin-subscription-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2210,19 +2902,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions/{id}/revoke`
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/subscriptions/{id}/correct-state`
-
-#### POST — correctSubscriptionState
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/{id}/correct-state`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+ live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `correctSubscriptionState`
+- Operation ID: `revoke_1`
 - Tags: `admin-subscription-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -2230,7 +2915,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/subscriptions/{id}/correct-state`
+
+#### POST — correctSubscriptionState
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/{id}/correct-state`.
+
+Authorization: Bearer access token required; the live con#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2245,19 +2937,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions/{id}/correct
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/subscriptions/{id}/cancel`
-
-#### POST — cancel_2
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/{id}/cancel`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+tract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `cancel_2`
+- Operation ID: `correctSubscriptionState`
 - Tags: `admin-subscription-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -2265,7 +2950,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/subscriptions/{id}/cancel`
+
+#### POST — cancel_2
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/{id}/cancel`.
+
+Authorization: Bearer access token required; the#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2280,19 +2972,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions/{id}/cancel`
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/subscriptions/payments/{id}/correct-state`
-
-#### POST — correctPaymentState
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/payments/{id}/correct-state`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+ live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `correctPaymentState`
+- Operation ID: `cancel_2`
 - Tags: `admin-subscription-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -2300,7 +2985,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/subscriptions/payments/{id}/correct-state`
+
+#### POST — correctPaymentState
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/payments/{id}/correct-state`.
+
+Authorization: Bearer access token required#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2315,6 +3007,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions/payments/{id
 const payload = await response.json();
 ```
 
+; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `correctPaymentState`
+- Tags: `admin-subscription-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/subscriptions/grant`
 
 #### POST — grant_1
@@ -2322,18 +3027,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscriptions/grant`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `grant_1`
-- Tags: `admin-subscription-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizati#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2348,24 +3042,23 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions/grant`, { me
 const payload = await response.json();
 ```
 
+on: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `grant_1`
+- Tags: `admin-subscription-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/subscription-plans`
 
 #### GET — list_3
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/admin/subscription-plans`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `list_3`
-- Tags: `admin-subscription-plan-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/admin/subsc#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2380,6 +3073,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscription-plans`, { met
 const payload = await response.json();
 ```
 
+ription-plans`.
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `list_3`
+- Tags: `admin-subscription-plan-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/subscription-plans`
 
 #### POST — create_4
@@ -2387,18 +3092,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/subscription-plans`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `create_4`
-- Tags: `admin-subscription-plan-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bea#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2413,6 +3107,17 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscription-plans`, { met
 const payload = await response.json();
 ```
 
+rer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `create_4`
+- Tags: `admin-subscription-plan-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/reports/{id}/resolve`
 
 #### POST — resolve
@@ -2420,20 +3125,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/reports/{id}/resolve`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `resolve`
-- Tags: `content-report-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2448,6 +3140,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/reports/{id}/resolve`, { m
 const payload = await response.json();
 ```
 
+ live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `resolve`
+- Tags: `content-report-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/payments/{id}/refund`
 
 #### POST — rejectRefund
@@ -2455,20 +3160,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/payments/{id}/refund`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `rejectRefund`
-- Tags: `admin-refund-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the li#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2483,6 +3175,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/payments/{id}/refund`, { m
 const payload = await response.json();
 ```
 
+ve contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `rejectRefund`
+- Tags: `admin-refund-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/formations/{id}/review`
 
 #### POST — reviewFormation
@@ -2490,20 +3195,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/formations/{id}/review`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `reviewFormation`
-- Tags: `admin-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live c#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2518,6 +3210,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/formations/{id}/review`, {
 const payload = await response.json();
 ```
 
+ontract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `reviewFormation`
+- Tags: `admin-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/formations/{id}/publish`
 
 #### POST — publishFormation
@@ -2525,19 +3230,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/formations/{id}/publish`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `publishFormation`
-- Tags: `admin-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Beare#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2552,6 +3245,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/formations/{id}/publish`, 
 const payload = await response.json();
 ```
 
+r access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `publishFormation`
+- Tags: `admin-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/formateur-requests/{id}/reject`
 
 #### POST — rejectRequest
@@ -2559,20 +3264,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/formateur-requests/{id}/reject`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `rejectRequest`
-- Tags: `admin-formateur-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2587,19 +3279,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/formateur-requests/{id}/re
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/formateur-requests/{id}/approve`
-
-#### POST — approveRequest
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/formateur-requests/{id}/approve`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `approveRequest`
+- Operation ID: `rejectRequest`
 - Tags: `admin-formateur-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -2607,7 +3292,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/formateur-requests/{id}/approve`
+
+#### POST — approveRequest
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/formateur-requests/{id}/approve`.
+
+Authorization: Bearer access token required; #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2622,6 +3314,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/formateur-requests/{id}/ap
 const payload = await response.json();
 ```
 
+the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `approveRequest`
+- Tags: `admin-formateur-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/formateur-requests/{artisanId}/lift-cooldown`
 
 #### POST — liftCooldown
@@ -2629,20 +3334,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/formateur-requests/{artisanId}/lift-cooldown`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `liftCooldown`
-- Tags: `admin-formateur-controller`
-- Parameters:
-  - `artisanId` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token re#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2657,6 +3349,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/formateur-requests/{artisa
 const payload = await response.json();
 ```
 
+quired; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `liftCooldown`
+- Tags: `admin-formateur-controller`
+- Parameters:
+  - `artisanId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/feed/{id}/remove`
 
 #### POST — remove_1
@@ -2664,19 +3369,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/feed/{id}/remove`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `remove_1`
-- Tags: `admin-feed-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization:#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2691,6 +3384,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/feed/{id}/remove`, { metho
 const payload = await response.json();
 ```
 
+ Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `remove_1`
+- Tags: `admin-feed-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/feed/{id}/publish`
 
 #### POST — publish
@@ -2698,20 +3403,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/feed/{id}/publish`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `publish`
-- Tags: `admin-feed-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; th#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2726,19 +3418,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/feed/{id}/publish`, { meth
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/feed/{id}/hide`
-
-#### POST — hide
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/feed/{id}/hide`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+e live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `hide`
+- Operation ID: `publish`
 - Tags: `admin-feed-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -2746,7 +3431,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/feed/{id}/hide`
+
+#### POST — hide
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/feed/{id}/hide`.
+
+Authorization: Bearer access token required; th#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2761,6 +3453,250 @@ const response = await fetch(`${baseUrl}/api/v1/admin/feed/{id}/hide`, { method:
 const payload = await response.json();
 ```
 
+e live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `hide`
+- Tags: `admin-feed-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/techniques`
+
+#### POST — createTechnique
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/catalog/techniques`.
+
+Authorization: #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/techniques" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/techniques`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createTechnique`
+- Tags: `admin-catalog-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/subcategories`
+
+#### POST — createSubCategory
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/catalog/subcategories`.
+
+Authorization:#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/subcategories" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/subcategories`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+ Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createSubCategory`
+- Tags: `admin-catalog-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/regions`
+
+#### POST — createRegion
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/catalog/regions`.
+
+Authorization: #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/regions" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/regions`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createRegion`
+- Tags: `admin-catalog-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/materials`
+
+#### POST — createMaterial
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/catalog/materials`.
+
+Authorization: #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/materials" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/materials`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createMaterial`
+- Tags: `admin-catalog-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/material-families`
+
+#### POST — createMaterialFamily
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/catalog/material-families`.
+
+Authorization#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/material-families" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/material-families`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createMaterialFamily`
+- Tags: `admin-catalog-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/epoques`
+
+#### POST — createEpoque
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/catalog/epoques`.
+
+Authorization: #### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/epoques" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/epoques`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createEpoque`
+- Tags: `admin-catalog-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/categories`
+
+#### POST — createCategory
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/catalog/categories`.
+
+Authorization:#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/categories" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/categories`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+ Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `createCategory`
+- Tags: `admin-catalog-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/artisans/{artisanId}/formateur-revoke`
 
 #### POST — revokeDirectly
@@ -2768,20 +3704,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/artisans/{artisanId}/formateur-revoke`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `revokeDirectly`
-- Tags: `admin-formateur-controller`
-- Parameters:
-  - `artisanId` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; t#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2796,19 +3719,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/artisans/{artisanId}/forma
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/artisans/{artisanId}/formateur-grant`
-
-#### POST — grantDirectly
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/artisans/{artisanId}/formateur-grant`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+he live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `grantDirectly`
+- Operation ID: `revokeDirectly`
 - Tags: `admin-formateur-controller`
 - Parameters:
   - `artisanId` (`path`, required)
@@ -2816,7 +3732,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/artisans/{artisanId}/formateur-grant`
+
+#### POST — grantDirectly
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/artisans/{artisanId}/formateur-grant`.
+
+Authorization: Bearer access token required; t#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2831,25 +3754,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/artisans/{artisanId}/forma
 const payload = await response.json();
 ```
 
+he live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `grantDirectly`
+- Tags: `admin-formateur-controller`
+- Parameters:
+  - `artisanId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/analytics/rollups/rebuild`
 
 #### POST — Queue a rollup rebuild (compatibility alias)
 #### Purpose and authorization
 
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/rebuild`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `rebuild`
-- Tags: `Admin analytics`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/re#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2864,25 +3787,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/rollups/rebuild`
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/stats/rollups/rebuild`
-
-#### POST — Queue a rollup rebuild (compatibility alias)
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/rebuild`.
+build`.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `rebuild_1`
+- Operation ID: `rebuild`
 - Tags: `Admin analytics`
 - Request body: `application/json`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/stats/rollups/rebuild`
+
+#### POST — Queue a rollup rebuild (compatibility alias)
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/rebuild`#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2897,25 +3820,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/rollups/rebuild`, { 
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/analytics/rollups/jobs/rebuild`
-
-#### POST — Queue a rollup rebuild
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/jobs/rebuild`.
+.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `queueRebuild`
+- Operation ID: `rebuild_1`
 - Tags: `Admin analytics`
 - Request body: `application/json`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/analytics/rollups/jobs/rebuild`
+
+#### POST — Queue a rollup rebuild
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/jobs/re#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2930,25 +3853,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/rollups/jobs/reb
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/stats/rollups/jobs/rebuild`
-
-#### POST — Queue a rollup rebuild
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/jobs/rebuild`.
+build`.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `queueRebuild_1`
+- Operation ID: `queueRebuild`
 - Tags: `Admin analytics`
 - Request body: `application/json`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/stats/rollups/jobs/rebuild`
+
+#### POST — Queue a rollup rebuild
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/jobs/rebuild`#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2963,25 +3886,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/rollups/jobs/rebuild
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/analytics/rollups/jobs/backfill`
-
-#### POST — Queue historical backfill
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/jobs/backfill`.
+.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `queueBackfill`
+- Operation ID: `queueRebuild_1`
 - Tags: `Admin analytics`
 - Request body: `application/json`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/analytics/rollups/jobs/backfill`
+
+#### POST — Queue historical backfill
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/jobs/bac#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -2996,25 +3919,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/rollups/jobs/bac
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/stats/rollups/jobs/backfill`
-
-#### POST — Queue historical backfill
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/jobs/backfill`.
+kfill`.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `queueBackfill_1`
+- Operation ID: `queueBackfill`
 - Tags: `Admin analytics`
 - Request body: `application/json`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/stats/rollups/jobs/backfill`
+
+#### POST — Queue historical backfill
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/jobs/backfill`#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3029,25 +3952,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/rollups/jobs/backfil
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/stats/rollups/backfill`
-
-#### POST — Queue historical backfill (compatibility alias)
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/backfill`.
+.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `backfill`
+- Operation ID: `queueBackfill_1`
 - Tags: `Admin analytics`
 - Request body: `application/json`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/stats/rollups/backfill`
+
+#### POST — Queue historical backfill (compatibility alias)
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/rollups/backfil#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3062,25 +3985,25 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/rollups/backfill`, {
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/analytics/rollups/backfill`
-
-#### POST — Queue historical backfill (compatibility alias)
-#### Purpose and authorization
-
-Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/backfill`.
+l`.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `backfill_1`
+- Operation ID: `backfill`
 - Tags: `Admin analytics`
 - Request body: `application/json`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/analytics/rollups/backfill`
+
+#### POST — Queue historical backfill (compatibility alias)
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/rollups/backf#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3095,6 +4018,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/rollups/backfill
 const payload = await response.json();
 ```
 
+ill`.
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `backfill_1`
+- Tags: `Admin analytics`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/stats/jobs`
 
 #### POST — Submit an analytics job
@@ -3102,18 +4038,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/stats/jobs`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `submit`
-- Tags: `Admin analytics`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Autho#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3128,6 +4053,17 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/jobs`, { method: "PO
 const payload = await response.json();
 ```
 
+rization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `submit`
+- Tags: `Admin analytics`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/analytics/jobs`
 
 #### POST — Submit an analytics job
@@ -3135,18 +4071,7 @@ const payload = await response.json();
 
 Purpose: `POST` performs the `POST` operation for `/api/v1/admin/analytics/jobs`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `submit_1`
-- Tags: `Admin analytics`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Aut#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3161,6 +4086,17 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/jobs`, { method:
 const payload = await response.json();
 ```
 
+horization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `submit_1`
+- Tags: `Admin analytics`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations/{id}/archive`
 
 #### PATCH — archive
@@ -3168,20 +4104,7 @@ const payload = await response.json();
 
 Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/conversations/{id}/archive`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `archive`
-- Tags: `conversation-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required;#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3196,6 +4119,19 @@ const response = await fetch(`${baseUrl}/api/v1/conversations/{id}/archive`, { m
 const payload = await response.json();
 ```
 
+ the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `archive`
+- Tags: `conversation-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations/{conversationId}/messages/{messageId}`
 
 #### DELETE — delete_1
@@ -3203,20 +4139,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/conversations/{conversationId}/messages/{messageId}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `delete_1`
-- Tags: `conversation-controller`
-- Parameters:
-  - `conversationId` (`path`, required)
-  - `messageId` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access t#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3231,6 +4154,19 @@ const response = await fetch(`${baseUrl}/api/v1/conversations/{conversationId}/m
 const payload = await response.json();
 ```
 
+oken required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `delete_1`
+- Tags: `conversation-controller`
+- Parameters:
+  - `conversationId` (`path`, required)
+  - `messageId` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/conversations/{conversationId}/messages/{messageId}`
 
 #### PATCH — edit
@@ -3238,21 +4174,7 @@ const payload = await response.json();
 
 Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/conversations/{conversationId}/messages/{messageId}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `edit`
-- Tags: `conversation-controller`
-- Parameters:
-  - `conversationId` (`path`, required)
-  - `messageId` (`path`, required)
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3267,24 +4189,26 @@ const response = await fetch(`${baseUrl}/api/v1/conversations/{conversationId}/m
 const payload = await response.json();
 ```
 
+and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `edit`
+- Tags: `conversation-controller`
+- Parameters:
+  - `conversationId` (`path`, required)
+  - `messageId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/me`
 
 #### GET — getCurrentUser
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/auth/me`.
-
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getCurrentUser`
-- Tags: `auth-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3299,6 +4223,18 @@ const response = await fetch(`${baseUrl}/api/v1/auth/me`, { method: "GET", heade
 const payload = await response.json();
 ```
 
+auth/me`.
+
+Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getCurrentUser`
+- Tags: `auth-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/me`
 
 #### PATCH — patchCurrentUser
@@ -3306,18 +4242,7 @@ const payload = await response.json();
 
 Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/auth/me`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `patchCurrentUser`
-- Tags: `auth-controller`
-- Request body: `application/json`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Public #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3332,24 +4257,163 @@ const response = await fetch(`${baseUrl}/api/v1/auth/me`, { method: "PATCH", hea
 const payload = await response.json();
 ```
 
+or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchCurrentUser`
+- Tags: `auth-controller`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/subcategories/{id}/status`
+
+#### PATCH — patchSubCategory_1
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/subcategories/{id}/status`.
+
+Authorization: Bearer access token required#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/subcategories/${ID}/status" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/subcategories/{id}/status`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchSubCategory_1`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/materials/{id}/status`
+
+#### PATCH — patchMaterial_1
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/materials/{id}/status`.
+
+Authorization: Bearer access token required;#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/materials/${ID}/status" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/materials/{id}/status`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+ the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchMaterial_1`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/material-families/{id}/status`
+
+#### PATCH — patchMaterialFamily_1
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/material-families/{id}/status`.
+
+Authorization: Bearer access token require#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/material-families/${ID}/status" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/material-families/{id}/status`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+d; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchMaterialFamily_1`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/categories/{id}/status`
+
+#### PATCH — patchCategory_1
+#### Purpose and authorization
+
+Purpose: `PATCH` performs the `PATCH` operation for `/api/v1/admin/catalog/categories/{id}/status`.
+
+Authorization: Bearer access token required#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request PATCH "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/catalog/categories/${ID}/status" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}' --header 'Content-Type: application/json' --data '{}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/catalog/categories/{id}/status`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({}) });
+const payload = await response.json();
+```
+
+; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `patchCategory_1`
+- Tags: `admin-catalog-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/subscriptions`
 
 #### GET — history
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/subscriptions`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `history`
-- Tags: `subscription-account-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/subscript#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3364,24 +4428,24 @@ const response = await fetch(`${baseUrl}/api/v1/subscriptions`, { method: "GET",
 const payload = await response.json();
 ```
 
-### `/api/v1/subscriptions/plans`
-
-#### GET — listPlans
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/subscriptions/plans`.
+ions`.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `listPlans`
-- Tags: `subscription-plan-controller`
+- Operation ID: `history`
+- Tags: `subscription-account-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/subscriptions/plans`
+
+#### GET — listPlans
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/subscrip#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3396,24 +4460,24 @@ const response = await fetch(`${baseUrl}/api/v1/subscriptions/plans`, { method: 
 const payload = await response.json();
 ```
 
-### `/api/v1/subscriptions/current`
-
-#### GET — current
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/subscriptions/current`.
+tions/plans`.
 
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `current`
-- Tags: `subscription-account-controller`
+- Operation ID: `listPlans`
+- Tags: `subscription-plan-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/subscriptions/current`
+
+#### GET — current
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/subscript#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3428,6 +4492,18 @@ const response = await fetch(`${baseUrl}/api/v1/subscriptions/current`, { method
 const payload = await response.json();
 ```
 
+ions/current`.
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `current`
+- Tags: `subscription-account-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/public/directory`
 
 #### GET — search
@@ -3435,19 +4511,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/public/directory`.
 
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `search`
-- Tags: `directory-controller`
-- Parameters:
-  - `filter` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Public or#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3462,24 +4526,24 @@ const response = await fetch(`${baseUrl}/api/v1/public/directory`, { method: "GE
 const payload = await response.json();
 ```
 
+ authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `search`
+- Tags: `directory-controller`
+- Parameters:
+  - `filter` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/payments`
 
 #### GET — payments
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/payments`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `payments`
-- Tags: `subscription-account-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/payments`.#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3494,6 +4558,18 @@ const response = await fetch(`${baseUrl}/api/v1/payments`, { method: "GET", head
 const payload = await response.json();
 ```
 
+
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `payments`
+- Tags: `subscription-account-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/payments/{id}`
 
 #### GET — payment
@@ -3501,19 +4577,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/payments/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `payment`
-- Tags: `subscription-account-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3528,6 +4592,18 @@ const response = await fetch(`${baseUrl}/api/v1/payments/{id}`, { method: "GET",
 const payload = await response.json();
 ```
 
+ required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `payment`
+- Tags: `subscription-account-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/notifications`
 
 #### GET — getNotifications
@@ -3535,19 +4611,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/notifications`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getNotifications`
-- Tags: `notification-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token require#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3562,24 +4626,24 @@ const response = await fetch(`${baseUrl}/api/v1/notifications`, { method: "GET",
 const payload = await response.json();
 ```
 
+d; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getNotifications`
+- Tags: `notification-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/notifications/unread-count`
 
 #### GET — getUnreadCount
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/notifications/unread-count`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getUnreadCount`
-- Tags: `notification-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/notifica#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3594,6 +4658,18 @@ const response = await fetch(`${baseUrl}/api/v1/notifications/unread-count`, { m
 const payload = await response.json();
 ```
 
+tions/unread-count`.
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getUnreadCount`
+- Tags: `notification-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/files/{key}`
 
 #### GET — serveFile
@@ -3601,19 +4677,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/files/{key}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `serveFile`
-- Tags: `file-serving-controller`
-- Parameters:
-  - `key` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access to#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3628,24 +4692,24 @@ const response = await fetch(`${baseUrl}/api/v1/files/{key}`, { method: "GET", h
 const payload = await response.json();
 ```
 
+ken required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `serveFile`
+- Tags: `file-serving-controller`
+- Parameters:
+  - `key` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/catalog/techniques`
 
 #### GET — getTechniques
 #### Purpose and authorization
 
-Purpose: `GET` performs the `GET` operation for `/api/v1/catalog/techniques`.
-
-Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getTechniques`
-- Tags: `catalog-controller`
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Purpose: `GET` performs the `GET` operation for `/api/v1/ca#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3660,24 +4724,24 @@ const response = await fetch(`${baseUrl}/api/v1/catalog/techniques`, { method: "
 const payload = await response.json();
 ```
 
-### `/api/v1/catalog/regions`
-
-#### GET — getRegions
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/catalog/regions`.
+talog/techniques`.
 
 Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `getRegions`
+- Operation ID: `getTechniques`
 - Tags: `catalog-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/catalog/regions`
+
+#### GET — getRegions
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3692,24 +4756,24 @@ const response = await fetch(`${baseUrl}/api/v1/catalog/regions`, { method: "GET
 const payload = await response.json();
 ```
 
-### `/api/v1/catalog/materials`
-
-#### GET — getMaterials
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/catalog/materials`.
+/catalog/regions`.
 
 Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `getMaterials`
+- Operation ID: `getRegions`
 - Tags: `catalog-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/catalog/materials`
+
+#### GET — getMaterials
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/c#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3724,24 +4788,24 @@ const response = await fetch(`${baseUrl}/api/v1/catalog/materials`, { method: "G
 const payload = await response.json();
 ```
 
-### `/api/v1/catalog/epoques`
-
-#### GET — getEpoques
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/catalog/epoques`.
+atalog/materials`.
 
 Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `getEpoques`
+- Operation ID: `getMaterials`
 - Tags: `catalog-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/catalog/epoques`
+
+#### GET — getEpoques
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3756,24 +4820,24 @@ const response = await fetch(`${baseUrl}/api/v1/catalog/epoques`, { method: "GET
 const payload = await response.json();
 ```
 
-### `/api/v1/catalog/categories`
-
-#### GET — getCategories
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/catalog/categories`.
+/catalog/epoques`.
 
 Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `getCategories`
+- Operation ID: `getEpoques`
 - Tags: `catalog-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/catalog/categories`
+
+#### GET — getCategories
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/ca#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3788,24 +4852,24 @@ const response = await fetch(`${baseUrl}/api/v1/catalog/categories`, { method: "
 const payload = await response.json();
 ```
 
-### `/api/v1/auth/oauth/google/client`
-
-#### GET — initiateGoogleOAuthClient
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/auth/oauth/google/client`.
+talog/categories`.
 
 Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `initiateGoogleOAuthClient`
-- Tags: `auth-controller`
+- Operation ID: `getCategories`
+- Tags: `catalog-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/auth/oauth/google/client`
+
+#### GET — initiateGoogleOAuthClient
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/auth/oauth/#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3820,24 +4884,24 @@ const response = await fetch(`${baseUrl}/api/v1/auth/oauth/google/client`, { met
 const payload = await response.json();
 ```
 
-### `/api/v1/auth/oauth/google/artisan`
-
-#### GET — initiateGoogleOAuthArtisan
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/auth/oauth/google/artisan`.
+google/client`.
 
 Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `initiateGoogleOAuthArtisan`
+- Operation ID: `initiateGoogleOAuthClient`
 - Tags: `auth-controller`
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/auth/oauth/google/artisan`
+
+#### GET — initiateGoogleOAuthArtisan
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/auth/oauth/g#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3852,6 +4916,18 @@ const response = await fetch(`${baseUrl}/api/v1/auth/oauth/google/artisan`, { me
 const payload = await response.json();
 ```
 
+oogle/artisan`.
+
+Authorization: Public or authentication-flow operation; no bearer token is required unless the live contract declares security.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `initiateGoogleOAuthArtisan`
+- Tags: `auth-controller`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisans/{artisanId}/reviews`
 
 #### GET — list_4
@@ -3859,20 +4935,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisans/{artisanId}/reviews`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `list_4`
-- Tags: `artisan-review-controller`
-- Parameters:
-  - `artisanId` (`path`, required)
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3887,6 +4950,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisans/{artisanId}/reviews`, {
 const payload = await response.json();
 ```
 
+contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `list_4`
+- Tags: `artisan-review-controller`
+- Parameters:
+  - `artisanId` (`path`, required)
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/{id}`
 
 #### GET — getArtisanProfile
@@ -3894,19 +4970,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getArtisanProfile`
-- Tags: `artisan-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access tok#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3921,6 +4985,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/{id}`, { method: "GET", 
 const payload = await response.json();
 ```
 
+en required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getArtisanProfile`
+- Tags: `artisan-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/files/{fileId}/download`
 
 #### GET — downloadCourseFile
@@ -3928,20 +5004,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/formations/{id}/files/{fileId}/download`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `downloadCourseFile`
-- Tags: `artisan-formation-enrollment-controller`
-- Parameters:
-  - `id` (`path`, required)
-  - `fileId` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the li#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3956,6 +5019,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}/files/{f
 const payload = await response.json();
 ```
 
+ve contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `downloadCourseFile`
+- Tags: `artisan-formation-enrollment-controller`
+- Parameters:
+  - `id` (`path`, required)
+  - `fileId` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/my-enrollments`
 
 #### GET — getMyEnrollments
@@ -3963,19 +5039,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/formations/my-enrollments`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getMyEnrollments`
-- Tags: `artisan-formation-enrollment-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token req#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -3990,6 +5054,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/my-enrollment
 const payload = await response.json();
 ```
 
+uired; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getMyEnrollments`
+- Tags: `artisan-formation-enrollment-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/me`
 
 #### GET — getMyFormations
@@ -3997,19 +5073,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/formations/me`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getMyFormations`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token req#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4024,6 +5088,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/me`, { method
 const payload = await response.json();
 ```
 
+uired; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getMyFormations`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/catalog`
 
 #### GET — getPublishedCatalog
@@ -4031,19 +5107,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/formations/catalog`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getPublishedCatalog`
-- Tags: `artisan-formation-enrollment-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4058,6 +5122,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/catalog`, { m
 const payload = await response.json();
 ```
 
+ live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getPublishedCatalog`
+- Tags: `artisan-formation-enrollment-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/catalog/{id}`
 
 #### GET — getPublishedFormationDetails
@@ -4065,19 +5141,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/artisan/formations/catalog/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getPublishedFormationDetails`
-- Tags: `artisan-formation-enrollment-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4092,6 +5156,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/catalog/{id}`
 const payload = await response.json();
 ```
 
+the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getPublishedFormationDetails`
+- Tags: `artisan-formation-enrollment-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/users`
 
 #### GET — getAllUsers
@@ -4099,20 +5175,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/users`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getAllUsers`
-- Tags: `user-management-controller`
-- Parameters:
-  - `search` (`query`, optional)
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and authoriz#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4127,6 +5190,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users`, { method: "GET", h
 const payload = await response.json();
 ```
 
+ation matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getAllUsers`
+- Tags: `user-management-controller`
+- Parameters:
+  - `search` (`query`, optional)
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/users/pending`
 
 #### GET — getPendingUsers
@@ -4134,19 +5210,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/users/pending`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getPendingUsers`
-- Tags: `user-management-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token req#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4161,6 +5225,52 @@ const response = await fetch(`${baseUrl}/api/v1/admin/users/pending`, { method: 
 const payload = await response.json();
 ```
 
+uired; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getPendingUsers`
+- Tags: `user-management-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/users/audit-logs`
+
+#### GET — getAuditLogs
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/admin/users/audit-logs`.
+
+Authorization: Bearer access tok#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/admin/users/audit-logs" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/admin/users/audit-logs`, { method: "GET", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+en required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getAuditLogs`
+- Tags: `user-management-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/subscriptions`
 
 #### GET — subscriptions
@@ -4168,20 +5278,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/subscriptions`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `subscriptions`
-- Tags: `admin-subscription-controller`
-- Parameters:
-  - `limit` (`query`, optional)
-  - `query` (`query`, optional)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and a#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4196,19 +5293,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions`, { method: 
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/subscriptions/webhooks`
-
-#### GET — webhooks
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/admin/subscriptions/webhooks`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+uthorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `webhooks`
+- Operation ID: `subscriptions`
 - Tags: `admin-subscription-controller`
 - Parameters:
   - `limit` (`query`, optional)
@@ -4216,7 +5306,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/subscriptions/webhooks`
+
+#### GET — webhooks
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/admin/subscriptions/webhooks`.
+
+Authorization: Bearer access token required; the live #### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4231,19 +5328,12 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions/webhooks`, {
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/subscriptions/payments`
-
-#### GET — payments_1
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/admin/subscriptions/payments`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `payments_1`
+- Operation ID: `webhooks`
 - Tags: `admin-subscription-controller`
 - Parameters:
   - `limit` (`query`, optional)
@@ -4251,7 +5341,14 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/subscriptions/payments`
+
+#### GET — payments_1
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/admin/subscriptions/payments`.
+
+Authorization: Bearer access token required; the live co#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4266,6 +5363,19 @@ const response = await fetch(`${baseUrl}/api/v1/admin/subscriptions/payments`, {
 const payload = await response.json();
 ```
 
+ntract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `payments_1`
+- Tags: `admin-subscription-controller`
+- Parameters:
+  - `limit` (`query`, optional)
+  - `query` (`query`, optional)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/reports`
 
 #### GET — list_5
@@ -4273,21 +5383,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/reports`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `list_5`
-- Tags: `content-report-controller`
-- Parameters:
-  - `status` (`query`, optional)
-  - `targetType` (`query`, optional)
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token required; the live contract and authorization matrix determine the re#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4302,6 +5398,20 @@ const response = await fetch(`${baseUrl}/api/v1/admin/reports`, { method: "GET",
 const payload = await response.json();
 ```
 
+quired role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `list_5`
+- Tags: `content-report-controller`
+- Parameters:
+  - `status` (`query`, optional)
+  - `targetType` (`query`, optional)
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/formations/pending`
 
 #### GET — getPendingFormations
@@ -4309,19 +5419,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/formations/pending`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getPendingFormations`
-- Tags: `admin-formation-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token req#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4336,6 +5434,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/formations/pending`, { met
 const payload = await response.json();
 ```
 
+uired; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getPendingFormations`
+- Tags: `admin-formation-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/formateur-requests`
 
 #### GET — getPendingRequests
@@ -4343,19 +5453,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/formateur-requests`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `getPendingRequests`
-- Tags: `admin-formateur-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token r#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4370,6 +5468,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/formateur-requests`, { met
 const payload = await response.json();
 ```
 
+equired; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getPendingRequests`
+- Tags: `admin-formateur-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/feed/pending`
 
 #### GET — listPending
@@ -4377,19 +5487,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/feed/pending`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `listPending`
-- Tags: `admin-feed-controller`
-- Parameters:
-  - `pageable` (`query`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access t#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4404,6 +5502,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/feed/pending`, { method: "
 const payload = await response.json();
 ```
 
+oken required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `listPending`
+- Tags: `admin-feed-controller`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/stats/rollups/jobs/{id}`
 
 #### GET — Get maintenance job status
@@ -4411,19 +5521,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/stats/rollups/jobs/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `maintenanceStatus`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizatio#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4438,6 +5536,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/rollups/jobs/{id}`, 
 const payload = await response.json();
 ```
 
+n: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `maintenanceStatus`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/analytics/rollups/jobs/{id}`
 
 #### GET — Get maintenance job status
@@ -4445,19 +5555,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/analytics/rollups/jobs/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `maintenanceStatus_1`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizat#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4472,6 +5570,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/rollups/jobs/{id
 const payload = await response.json();
 ```
 
+ion: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `maintenanceStatus_1`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/stats/jobs/{id}/result`
 
 #### GET — Fetch an analytics result
@@ -4479,19 +5589,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/stats/jobs/{id}/result`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `result`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Au#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4506,24 +5604,24 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/jobs/{id}/result`, {
 const payload = await response.json();
 ```
 
+thorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `result`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/analytics/jobs/{id}/result`
 
 #### GET — Fetch an analytics result
 #### Purpose and authorization
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/analytics/jobs/{id}/result`.
-
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `result_1`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
 
 #### HTTP example
 
@@ -4540,26 +5638,24 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/jobs/{id}/result
 const payload = await response.json();
 ```
 
-### `/api/v1/admin/analytics/jobs/{id}/download`
-
-#### GET — Download an analytics result
-#### Purpose and authorization
-
-Purpose: `GET` performs the `GET` operation for `/api/v1/admin/analytics/jobs/{id}/download`.
-
 Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
 
 Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
 
 
-- Operation ID: `download`
+- Operation ID: `result_1`
 - Tags: `Admin analytics`
 - Parameters:
   - `id` (`path`, required)
 - Responses:
   - `200` — OK
 
-#### HTTP example
+### `/api/v1/admin/analytics/jobs/{id}/download`
+
+#### GET — Download an analytics result
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/admin/analytics/jobs/{id}/download`.#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4574,6 +5670,20 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/jobs/{id}/downlo
 const payload = await response.json();
 ```
 
+
+
+Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `download`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/stats/jobs/{id}/download`
 
 #### GET — Download an analytics result
@@ -4581,19 +5691,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/stats/jobs/{id}/download`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `download_1`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Auth#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4608,6 +5706,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/jobs/{id}/download`,
 const payload = await response.json();
 ```
 
+orization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `download_1`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/analytics/jobs/{id}`
 
 #### GET — Get analytics job status
@@ -4615,19 +5725,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/analytics/jobs/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `status`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Autho#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4642,6 +5740,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/jobs/{id}`, { me
 const payload = await response.json();
 ```
 
+rization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `status`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/analytics/jobs/{id}`
 
 #### DELETE — Delete an analytics job
@@ -4649,19 +5759,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/analytics/jobs/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `delete_2`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+A#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4676,6 +5774,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/analytics/jobs/{id}`, { me
 const payload = await response.json();
 ```
 
+uthorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `delete_2`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/stats/jobs/{id}`
 
 #### GET — Get analytics job status
@@ -4683,19 +5793,7 @@ const payload = await response.json();
 
 Purpose: `GET` performs the `GET` operation for `/api/v1/admin/stats/jobs/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `status_1`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizati#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4710,6 +5808,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/jobs/{id}`, { method
 const payload = await response.json();
 ```
 
+on: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `status_1`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/admin/stats/jobs/{id}`
 
 #### DELETE — Delete an analytics job
@@ -4717,19 +5827,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/admin/stats/jobs/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `delete_3`
-- Tags: `Admin analytics`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Autho#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4744,6 +5842,18 @@ const response = await fetch(`${baseUrl}/api/v1/admin/stats/jobs/{id}`, { method
 const payload = await response.json();
 ```
 
+rization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `delete_3`
+- Tags: `Admin analytics`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/users/me/avatars/{id}`
 
 #### DELETE — deleteAvatar
@@ -4751,19 +5861,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/users/me/avatars/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `deleteAvatar`
-- Tags: `avatar-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorizati#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4778,6 +5876,18 @@ const response = await fetch(`${baseUrl}/api/v1/users/me/avatars/{id}`, { method
 const payload = await response.json();
 ```
 
+on: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteAvatar`
+- Tags: `avatar-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/notifications/{id}`
 
 #### DELETE — deleteNotification
@@ -4785,19 +5895,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/notifications/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `deleteNotification`
-- Tags: `notification-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer acce#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4812,6 +5910,18 @@ const response = await fetch(`${baseUrl}/api/v1/notifications/{id}`, { method: "
 const payload = await response.json();
 ```
 
+ss token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteNotification`
+- Tags: `notification-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed/{id}/media/{mediaId}`
 
 #### DELETE — removeMedia
@@ -4819,20 +5929,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/feed/{id}/media/{mediaId}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `removeMedia`
-- Tags: `feed-post-controller`
-- Parameters:
-  - `id` (`path`, required)
-  - `mediaId` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token require#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4847,6 +5944,19 @@ const response = await fetch(`${baseUrl}/api/v1/feed/{id}/media/{mediaId}`, { me
 const payload = await response.json();
 ```
 
+d; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `removeMedia`
+- Tags: `feed-post-controller`
+- Parameters:
+  - `id` (`path`, required)
+  - `mediaId` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/gallery/{id}`
 
 #### DELETE — deleteImage
@@ -4854,19 +5964,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/artisan/gallery/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `deleteImage`
-- Tags: `artisan-gallery-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Beare#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4881,6 +5979,18 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/gallery/{id}`, { method:
 const payload = await response.json();
 ```
 
+r access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteImage`
+- Tags: `artisan-gallery-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/files/{fileId}`
 
 #### DELETE — deleteCourseFile
@@ -4888,20 +5998,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/artisan/formations/{id}/files/{fileId}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `deleteCourseFile`
-- Tags: `artisan-formation-controller`
-- Parameters:
-  - `id` (`path`, required)
-  - `fileId` (`path`, required)
-- Responses:
-  - `200` — OK
-
-#### HTTP example
+Authorization: Bearer access token requir#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4916,6 +6013,19 @@ const response = await fetch(`${baseUrl}/api/v1/artisan/formations/{id}/files/{f
 const payload = await response.json();
 ```
 
+ed; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteCourseFile`
+- Tags: `artisan-formation-controller`
+- Parameters:
+  - `id` (`path`, required)
+  - `fileId` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/certifications/{id}`
 
 #### DELETE — deleteCertification
@@ -4923,21 +6033,7 @@ const payload = await response.json();
 
 Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/artisan/certifications/{id}`.
 
-Authorization: Bearer access token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
-
-Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
-
-
-- Operation ID: `deleteCertification`
-- Tags: `artisan-certification-controller`
-- Parameters:
-  - `id` (`path`, required)
-- Responses:
-  - `200` — OK
-
-## Schemas
-
-#### HTTP example
+Authorization: Bearer access token requ#### HTTP example
 
 The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
 
@@ -4951,6 +6047,20 @@ const accessToken = "<access-token>";
 const response = await fetch(`${baseUrl}/api/v1/artisan/certifications/{id}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
 const payload = await response.json();
 ```
+
+ired; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `deleteCertification`
+- Tags: `artisan-certification-controller`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+## Schemas
 
 ### `ApiResponseAvatarResponseDTO`
 
@@ -5076,6 +6186,132 @@ const payload = await response.json();
 
 ```json
 {"type":"object","properties":{"id":{"type":"string"},"subscriberType":{"type":"string","enum":["ARTISAN","CLIENT"]},"name":{"type":"string"},"description":{"type":"string"},"billingPeriod":{"type":"string","enum":["MONTHLY","YEARLY"]},"amount":{"type":"integer","format":"int64"},"currency":{"type":"string"},"active":{"type":"boolean"},"entitlements":{"type":"object","additionalProperties":{"type":"string"}}}}
+```
+
+### `TechniqueRequest`
+
+```json
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"isActive":{"type":"boolean"}},"required":["name"]}
+```
+
+### `ApiResponseTechniqueDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/TechniqueDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `TechniqueDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"}}}
+```
+
+### `JobSubCategoryRequest`
+
+```json
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"categoryId":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+```
+
+### `ApiResponseJobSubCategoryDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/JobSubCategoryDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `JobSubCategoryDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"categoryId":{"type":"string"}}}
+```
+
+### `RegionRequest`
+
+```json
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"parentId":{"type":"string"},"code":{"type":"string","maxLength":10,"minLength":0},"displayOrder":{"type":"integer","format":"int32"},"isActive":{"type":"boolean"}},"required":["name"]}
+```
+
+### `ApiResponseRegionDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/RegionDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `RegionDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"code":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"children":{"type":"array","items":{"$ref":"#/components/schemas/RegionDTO"}}}}
+```
+
+### `MaterialRequest`
+
+```json
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"familyId":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+```
+
+### `ApiResponseMaterialDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/MaterialDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `MaterialDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"familyId":{"type":"string"}}}
+```
+
+### `MaterialFamilyRequest`
+
+```json
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+```
+
+### `ApiResponseMaterialFamilyDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/MaterialFamilyDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `MaterialFamilyDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"materials":{"type":"array","items":{"$ref":"#/components/schemas/MaterialDTO"}}}}
+```
+
+### `EpoqueRequest`
+
+```json
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"periodEra":{"type":"string","maxLength":100,"minLength":0},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"isActive":{"type":"boolean"}},"required":["name"]}
+```
+
+### `ApiResponseEpoqueDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/EpoqueDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `EpoqueDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"periodEra":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"}}}
+```
+
+### `JobCategoryRequest`
+
+```json
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"iconUrl":{"type":"string","maxLength":500,"minLength":0},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+```
+
+### `ApiResponseJobCategoryDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/JobCategoryDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `JobCategoryDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"iconUrl":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"subCategories":{"type":"array","items":{"$ref":"#/components/schemas/JobSubCategoryDTO"}}}}
 ```
 
 ### `SubscriptionCheckoutRequest`
@@ -5537,7 +6773,7 @@ const payload = await response.json();
 ### `DirectorySearchFilterDTO`
 
 ```json
-{"type":"object","properties":{"keyword":{"type":"string","maxLength":120,"minLength":0},"regionSlug":{"type":"string","maxLength":120,"minLength":0},"wilayaCode":{"type":"string","maxLength":10,"minLength":0},"categorySlug":{"type":"string","maxLength":120,"minLength":0},"subCategorySlug":{"type":"string","maxLength":120,"minLength":0},"materials":{"type":"array","items":{"type":"string"}},"techniques":{"type":"array","items":{"type":"string"}},"epoques":{"type":"array","items":{"type":"string"}},"minRating":{"type":"number","format":"double","maximum":5.0,"minimum":0.0},"verifiedOnly":{"type":"boolean"},"premiumOnly":{"type":"boolean"},"teacherOnly":{"type":"boolean"},"sortBy":{"type":"string"},"page":{"type":"integer","format":"int32","minimum":0},"size":{"type":"integer","format":"int32","maximum":100,"minimum":1},"q":{"type":"string"},"cleanKeyword":{"type":"string"}}}
+{"type":"object","properties":{"keyword":{"type":"string","maxLength":120,"minLength":0},"regionSlug":{"type":"string","maxLength":120,"minLength":0},"wilayaCode":{"type":"string","maxLength":10,"minLength":0},"categorySlug":{"type":"string","maxLength":120,"minLength":0},"subCategorySlug":{"type":"string","maxLength":120,"minLength":0},"materials":{"type":"array","items":{"type":"string"}},"techniques":{"type":"array","items":{"type":"string"}},"epoques":{"type":"array","items":{"type":"string"}},"minRating":{"type":"number","format":"double","maximum":5.0,"minimum":0.0},"verifiedOnly":{"type":"boolean"},"premiumOnly":{"type":"boolean"},"teacherOnly":{"type":"boolean"},"sortBy":{"type":"string"},"page":{"type":"integer","format":"int32","minimum":0},"size":{"type":"integer","format":"int32","maximum":100,"minimum":1},"cleanKeyword":{"type":"string"},"q":{"type":"string"}}}
 ```
 
 ### `ApiResponsePaginatedResponseArtisanDirectoryCardDTO`
@@ -5648,22 +6884,10 @@ const payload = await response.json();
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/TechniqueDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
-### `TechniqueDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"}}}
-```
-
 ### `ApiResponseListRegionDTO`
 
 ```json
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/RegionDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
-```
-
-### `RegionDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"code":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"children":{"type":"array","items":{"$ref":"#/components/schemas/RegionDTO"}}}}
 ```
 
 ### `ApiResponseListMaterialFamilyDTO`
@@ -5672,46 +6896,16 @@ const payload = await response.json();
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/MaterialFamilyDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
-### `MaterialDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"familyId":{"type":"string"}}}
-```
-
-### `MaterialFamilyDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"materials":{"type":"array","items":{"$ref":"#/components/schemas/MaterialDTO"}}}}
-```
-
 ### `ApiResponseListEpoqueDTO`
 
 ```json
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/EpoqueDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
-### `EpoqueDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"periodEra":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"}}}
-```
-
 ### `ApiResponseListJobCategoryDTO`
 
 ```json
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/JobCategoryDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
-```
-
-### `JobCategoryDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"iconUrl":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"subCategories":{"type":"array","items":{"$ref":"#/components/schemas/JobSubCategoryDTO"}}}}
-```
-
-### `JobSubCategoryDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"categoryId":{"type":"string"}}}
 ```
 
 ### `ApiResponsePageArtisanReviewResponseDTO`
@@ -5852,6 +7046,24 @@ const payload = await response.json();
 {"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"name":{"type":"string"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"status":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED"]},"emailVerified":{"type":"boolean"},"emailVerifiedAt":{"type":"string","format":"date-time"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"bannedUntil":{"type":"string","format":"date-time"},"banReason":{"type":"string"},"lastLoginAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"teacher":{"type":"boolean"},"premium":{"type":"boolean"},"validated":{"type":"boolean"}}}
 ```
 
+### `ApiResponsePaginatedResponseAuditLogDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/PaginatedResponseAuditLogDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `AuditLogDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"action":{"type":"string"},"details":{"type":"string"},"userEmail":{"type":"string"},"userId":{"type":"string"},"targetAccountId":{"type":"string"},"operation":{"type":"string"},"previousState":{"type":"string"},"newState":{"type":"string"},"reason":{"type":"string"},"paymentId":{"type":"string"},"subscriptionId":{"type":"string"},"createdAt":{"type":"string","format":"date-time"}}}
+```
+
+### `PaginatedResponseAuditLogDTO`
+
+```json
+{"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/AuditLogDTO"}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
+```
+
 ### `AdminWebhookLogResponse`
 
 ```json
@@ -5911,3 +7123,4 @@ const payload = await response.json();
 ```json
 {"type":"object","properties":{"content":{"type":"array","items":{"type":"object","additionalProperties":{}}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
 ```
+
