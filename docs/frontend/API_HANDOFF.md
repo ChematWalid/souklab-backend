@@ -12,6 +12,21 @@ Status: current backend contract. The backend is the source of truth; generate t
 
 The path and port are configurable with `PORT`, `OPENAPI_PATH`, and `OPENAPI_SWAGGER_PATH`. Do not hard-code a production hostname.
 
+---
+
+## Starter Kit & Developer Tools
+
+To fast-track frontend development, the following battle-tested templates and references are provided in this directory:
+
+| Resource | Description |
+| :--- | :--- |
+| **[`types.ts`](types.ts)** | Ready-to-import TypeScript definitions covering all models, request bodies, and response envelopes. |
+| **[`api-client.ts`](api-client.ts)** | Drop-in Axios instance featuring a race-condition-safe 401 refresh token queue and `@stomp/stompjs` WebSocket helper. |
+| **[`api-requests.http`](api-requests.http)** | Executable HTTP test suite for VS Code (REST Client / Thunder Client) and IntelliJ IDEA. |
+| **[`ERROR_CODES.md`](ERROR_CODES.md)** | Catalog of backend error codes mapped to HTTP statuses and recommended UX handling (toasts, modals, form states). |
+
+---
+
 ## Authentication & User Profile (`/auth/**`, `/me`)
 
 Use `Authorization: Bearer <accessToken>` for all protected REST calls. Login and refresh return access/refresh tokens and expiry metadata. Keep tokens in secure storage (e.g. secure memory or HttpOnly cookies) and never log them.

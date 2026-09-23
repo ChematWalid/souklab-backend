@@ -1,0 +1,186 @@
+### =========================================================================
+### SoukLab Backend HTTP Client Test Suite
+### Compatible with VS Code REST Client, Thunder Client, and IntelliJ IDEA.
+### =========================================================================
+
+@baseUrl = http://localhost:8080
+@email = artisan.test@souklab.dz
+@password = StrongPassword123!
+@accessToken = {{login.response.body.data.accessToken}}
+@refreshToken = {{login.response.body.data.refreshToken}}
+
+### -------------------------------------------------------------------------
+### 1. AUTHENTICATION & SESSION
+### -------------------------------------------------------------------------
+
+### 1.1 Register New Account
+# @name register
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "name": "Amina Benali",
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "role": "ARTISAN",
+  "phone": "+213555123456"
+}
+
+### 1.2 Login (Stores access & refresh tokens)
+# @name login
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 1.3 Refresh Access Token
+# @name refreshToken
+POST {{baseUrl}}/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### 1.4 Get Current User Profile (Polymorphic: Artisan vs Client)
+# @name getMe
+GET {{baseUrl}}/api/v1/auth/me
+Authorization: Bearer {{accessToken}}
+
+### 1.5 Partially Update Current Profile (RFC 7396 JSON Merge Patch)
+# @name patchMe
+PATCH {{baseUrl}}/api/v1/auth/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "bio": "Mise à jour de la biographie: Maître céramiste traditionnelle.",
+  "website": "https://amina-ceramique.dz",
+  "city": "Beni Yenni",
+  "region": "Tizi Ouzou"
+}
+
+### 1.6 Verify Email with 6-Digit OTP
+POST {{baseUrl}}/api/v1/auth/verify-email
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "code": "123456"
+}
+
+### 1.7 Resend Verification Code
+POST {{baseUrl}}/api/v1/auth/resend-verification
+Content-Type: application/json
+
+{
+  "email": "{{email}}"
+}
+
+### 1.8 Request Password Reset OTP
+POST {{baseUrl}}/api/v1/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "{{email}}"
+}
+
+### 1.9 Logout (Invalidates Refresh Token)
+POST {{baseUrl}}/api/v1/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### -------------------------------------------------------------------------
+### 2. ARTISAN DIRECTORY & SEARCH
+### -------------------------------------------------------------------------
+
+### 2.1 Directory Search (Unauthenticated -> Expects 403 Forbidden)
+GET {{baseUrl}}/api/v1/public/directory?page=0&size=10
+
+### 2.2 Directory Search (Authenticated Non-Premium -> Masked Names & Locked Contacts)
+GET {{baseUrl}}/api/v1/public/directory?keyword=poterie&page=0&size=10
+Authorization: Bearer {{accessToken}}
+
+### 2.3 Directory Search with Facet Filters (Wilaya & Minimum Rating)
+GET {{baseUrl}}/api/v1/public/directory?wilaya=Tizi+Ouzou&minRating=4.0&page=0&size=12&sort=rating,desc
+Authorization: Bearer {{accessToken}}
+
+### 2.4 Get Specific Artisan Public Profile (View Count Incremented, Dynamic Contact Gating)
+GET {{baseUrl}}/api/v1/artisan/artisan-uuid-here
+Authorization: Bearer {{accessToken}}
+
+### -------------------------------------------------------------------------
+### 3. COMMUNITY FEED
+### -------------------------------------------------------------------------
+
+### 3.1 Browse Public Published Posts
+GET {{baseUrl}}/api/v1/feed?page=0&size=10
+
+### 3.2 Filter Feed by Type (ACTUALITE / FORMATION / ANNONCE)
+GET {{baseUrl}}/api/v1/feed?type=ACTUALITE&page=0&size=10
+
+### 3.3 Get Single Feed Post
+GET {{baseUrl}}/api/v1/feed/post-uuid-here
+
+### 3.4 Submit Post for Moderation (Authenticated)
+POST {{baseUrl}}/api/v1/feed
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "type": "ACTUALITE",
+  "title": "Nouvelle exposition de céramique kabyle",
+  "body": "Rejoignez-nous ce week-end à l'atelier pour découvrir notre nouvelle collection artisanale.",
+  "formationId": null
+}
+
+### -------------------------------------------------------------------------
+### 4. SUBSCRIPTIONS & CHARGILY CHECKOUT
+### -------------------------------------------------------------------------
+
+### 4.1 List Public Active Subscription Plans
+GET {{baseUrl}}/api/v1/subscriptions/plans
+
+### 4.2 Initialize Checkout Session (Chargily EDDAHABIYA / CIB)
+POST {{baseUrl}}/api/v1/subscriptions/checkout
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "planId": "plan-uuid-premium"
+}
+
+### 4.3 Check Current User Subscription Status
+GET {{baseUrl}}/api/v1/subscriptions/me
+Authorization: Bearer {{accessToken}}
+
+### -------------------------------------------------------------------------
+### 5. CATALOG TAXONOMIES (Public Reference)
+### -------------------------------------------------------------------------
+
+### 5.1 Get Craft Categories Hierarchy
+GET {{baseUrl}}/api/v1/catalog/categories
+
+### 5.2 Get Algerian Wilayas and Dairas
+GET {{baseUrl}}/api/v1/catalog/regions
+
+### 5.3 Get Material Families & Materials
+GET {{baseUrl}}/api/v1/catalog/materials
+
+### -------------------------------------------------------------------------
+### 6. CONTENT REPORTING (Abuse / Flagging)
+### -------------------------------------------------------------------------
+
+### 6.1 Submit Report Against Post / Review / User
+POST {{baseUrl}}/api/v1/reports
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "targetType": "POST",
+  "targetId": "post-uuid-here",
+  "reason": "Contenu inapproprié ou non artisanal",
+  "details": "Cet article fait la promotion de produits industriels d'importation."
+}
