@@ -117,3 +117,14 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
   - Execute the Maven test profile with a supported JDK and the required external services before release; CI results are the authoritative pass count.
 - [x] **Step 10.2**: Implement platform analytics & KPI aggregation (`/api/v1/admin/stats`) with asynchronous owner-scoped jobs, rollups, exports, audit records, and event-driven KPI tracking.
 - [x] **Step 10.3**: Implement actuator monitoring, feature-aware readiness, configurable per-IP/per-user rate limits, and private Swagger/OpenAPI documentation. Production evidence remains tracked in the release checklist.
+
+---
+
+## 📍 Phase 11: Admin Catalog Taxonomy CRUD & French Heritage Seeding (COMPLETED)
+- [x] **Step 11.1**: Implement `AdminCatalogController` and `AdminCatalogService` providing full CRUD operations for Techniques, Epoques, Regions, Job Categories/Subcategories, and Material Families/Materials.
+- [x] **Step 11.2**: Implement capability-based security with dedicated `permission:admin:catalog` (`Admin.CATALOG`) permission and `canManageCatalog()` predicate.
+- [x] **Step 11.3**: Implement automatic slug derivation (`SlugUtils.toSlug`), duplicate conflict guards, two-tier parent-child deletion integrity, and recursive CTE circular reference prevention.
+- [x] **Step 11.4**: Configure real-time Caffeine cache eviction (`@CacheEvict`) and immutable audit trail logging (`AuditLogAction.Catalog`).
+- [x] **Step 11.5**: Seed official verbatim French taxonomy: 8 building trades categories (37 subcategories) and 6 Mediterranean material families (25 materials) with idempotent startup validation.
+- [x] **Step 11.6**: Complete verification test suites (unit, slice, cache eviction, integration, and live HTTP curl testing) with 0 regressions.
+
