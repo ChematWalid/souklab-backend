@@ -25,12 +25,43 @@ Handles administrative user moderation (approvals, bans, timeouts) and user avat
 | `DELETE` | `/api/v1/admin/users/{userId}/permissions` | `permission:admin:users` | Revokes an assigned permission from a user. |
 
 ### Avatar Gallery (`AvatarController`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/users/me/avatars` | Authenticated | Uploads new avatar (enforces rate limit, ClamAV scan, magic bytes, resizing, and configured quota). |
-| `GET` | `/api/v1/users/me/avatars` | Authenticated | Lists all gallery avatars owned by the authenticated user. |
-| `PUT` | `/api/v1/users/me/avatars/{id}/activate` | Authenticated | Activates a gallery avatar as the primary profile avatar. |
-| `DELETE` | `/api/v1/users/me/avatars/{id}` | Authenticated | Deletes an avatar record and associated storage files from S3/MinIO. |
+
+Manages the authenticated caller's profile avatars under `/api/v1/users/me/avatars`.
+
+| Method | Endpoint | Access | Summary | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/users/me/avatars` | Authenticated | Upload new avatar | Multipart upload (`file`). Scanned with ClamAV, resized to 3 tiers, activates immediately. |
+| `GET` | `/api/v1/users/me/avatars` | Authenticated | List avatar history | Paginated list of avatars uploaded by caller (`?page=0&size=20`). |
+| `PUT` | `/api/v1/users/me/avatars/{id}/activate` | Authenticated | Activate avatar | Sets a previously uploaded gallery avatar as the active profile avatar. |
+| `DELETE` | `/api/v1/users/me/avatars/{id}` | Authenticated | Delete avatar | Soft-deletes avatar record and removes S3/MinIO files. |
+
+#### Avatar Upload Specifications
+- **Content-Type**: `multipart/form-data`
+- **File Key**: `file`
+- **Supported Formats**: JPEG, PNG, WebP (magic bytes verified)
+- **Max File Size**: Configured per environment (default 5MB)
+- **Security**: ClamAV antivirus scanned before persistence
+- **Resolution Tiers Generated**:
+  - `thumbnailUrl`: 150×150 px (for comments, chat messages, small headers)
+  - `mediumUrl`: 400×400 px (for profile cards, directory previews)
+  - `fullUrl`: High-resolution processed avatar (for profile headers)
+
+#### Response Example (`AvatarResponseDTO`)
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "Avatar uploaded successfully",
+  "data": {
+    "id": "avt-77bdcdf3-ba7b-4872-816a-31ba4c0ce53d",
+    "thumbnailUrl": "https://storage.souklab.dz/avatars/user_thumb.webp",
+    "mediumUrl": "https://storage.souklab.dz/avatars/user_med.webp",
+    "fullUrl": "https://storage.souklab.dz/avatars/user_full.webp",
+    "active": true,
+    "uploadedAt": "2026-09-23T22:30:00"
+  }
+}
+```
 
 ---
 
@@ -41,3 +72,4 @@ Handles administrative user moderation (approvals, bans, timeouts) and user avat
 | [`UserManagementController`](UserManagementController.java) | Administrative approval, ban, timeout, and audit log endpoints. |
 | [`PermissionManagementController`](PermissionManagementController.java) | Administrator-only assignment and revocation of enabled user capabilities. |
 | [`AvatarController`](AvatarController.java) | User avatar upload, gallery retrieval, activation, and deletion. |
+

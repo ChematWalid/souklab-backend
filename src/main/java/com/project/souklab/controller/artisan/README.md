@@ -1,31 +1,63 @@
 # Artisan Controller Package (`com.project.souklab.controller.artisan`)
 
-Handles HTTP endpoints for artisan public profile discovery, self-service profile management, professional certifications, and portfolio showcase gallery operations.
+HTTP adapters for artisan public profiles, professional qualification certifications, and portfolio showcase galleries.
+
+> [!NOTE]
+> **Profile Updates**: Updating an artisan's own bio, address, website, or crafts is handled via the unified [`PATCH /api/v1/auth/me`](../auth/README.md#2-patch-apiv1authme--partial-profile-update) endpoint.
 
 ---
 
 ## Endpoints
 
-### Profile Management (`ArtisanController`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/artisan/{id}` | Authenticated | Retrieves public view of an artisan profile with contact info gating and view tracking. |
-| `PATCH` | `/api/v1/artisan/profile` | `permission:artisan:content` | Partial updates to bio, address, website, craft subcategories, and techniques. |
+### 1. Profile Management (`ArtisanController`)
 
-### Professional Credentials (`ArtisanCertificationController`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/artisan/certifications` | `permission:artisan:content` | Uploads and records an official qualification or certification document (multipart, scanned when enabled). |
-| `GET` | `/api/v1/artisan/certifications` | `permission:artisan:content` | Lists all certifications recorded for the authenticated artisan. |
-| `DELETE` | `/api/v1/artisan/certifications/{id}` | `permission:artisan:content` | Soft-deletes a certification document belonging to the authenticated artisan. |
+| Method | Endpoint | Access | Summary | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/artisan/{id}` | Authenticated | Get artisan profile | Retrieves public artisan profile with dynamic contact information privacy gating and view count tracking. |
 
-### Showcase Gallery (`ArtisanGalleryController`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/artisan/gallery` | `permission:artisan:content` | Uploads a portfolio showcase photograph (multipart, max 20 images quota, scanned when enabled). |
-| `GET` | `/api/v1/artisan/gallery` | `permission:artisan:content` | Retrieves all active portfolio gallery images ordered by display sequence. |
-| `PUT` | `/api/v1/artisan/gallery/order` | `permission:artisan:content` | Updates the sequential presentation order of portfolio images. |
-| `DELETE` | `/api/v1/artisan/gallery/{id}` | `permission:artisan:content` | Soft-deletes a portfolio showcase photograph. |
+#### Privacy Gating Rules
+- **Non-Premium Viewers**: `name` is masked to `"Artisan #XXXXX"`, `phone`, `address`, and `website` are `null`, and `contactInfoLocked: true`.
+- **Premium Viewers, Administrators, or Self**: Returns unmasked name and full contact details (`contactInfoLocked: false`).
+
+---
+
+### 2. Professional Credentials (`ArtisanCertificationController`)
+
+| Method | Endpoint | Access | Summary | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/artisan/certifications` | `artisan:content` | Upload certification | Uploads and records an official qualification or certification document (PDF/image, multipart). |
+| `GET` | `/api/v1/artisan/certifications` | `artisan:content` | List certifications | Lists all certifications belonging to the authenticated artisan. |
+| `DELETE` | `/api/v1/artisan/certifications/{id}` | `artisan:content` | Delete certification | Soft-deletes a certification document by ID. |
+
+#### Upload Details (`multipart/form-data`)
+- Form fields:
+  - `file`: MultipartFile (PDF, JPEG, PNG, max 10MB)
+  - `title`: String (e.g., "Diplôme National d'Artisanat")
+  - `issuingOrganization`: String (e.g., "Chambre des Métiers de Tizi Ouzou")
+  - `issueDate`: ISO Date string (`YYYY-MM-DD`)
+  - `expiryDate`: Optional ISO Date string (`YYYY-MM-DD`)
+
+---
+
+### 3. Showcase Gallery (`ArtisanGalleryController`)
+
+| Method | Endpoint | Access | Summary | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/artisan/gallery` | `artisan:content` | Upload gallery image | Uploads a portfolio showcase photograph (multipart, max 20 images quota). |
+| `GET` | `/api/v1/artisan/gallery` | `artisan:content` | List gallery images | Retrieves all active portfolio gallery images ordered by sequence. |
+| `PUT` | `/api/v1/artisan/gallery/order` | `artisan:content` | Reorder gallery images | Updates the sequential presentation order of portfolio images. |
+| `DELETE` | `/api/v1/artisan/gallery/{id}` | `artisan:content` | Delete gallery image | Soft-deletes a portfolio showcase photograph. |
+
+#### Reorder Payload (`PUT /api/v1/artisan/gallery/order`)
+```json
+{
+  "imageIds": [
+    "img-uuid-3",
+    "img-uuid-1",
+    "img-uuid-2"
+  ]
+}
+```
 
 ---
 
@@ -33,6 +65,6 @@ Handles HTTP endpoints for artisan public profile discovery, self-service profil
 
 | Class | Responsibility |
 | :--- | :--- |
-| [`ArtisanController`](ArtisanController.java) | REST controller mapping `/api/v1/artisan/{id}` and `/api/v1/artisan/profile`. Delegates to `ArtisanProfileService`. |
-| [`ArtisanCertificationController`](ArtisanCertificationController.java) | REST controller handling artisan credential uploads, listing, and deletion via `ArtisanCertificationService`. |
-| [`ArtisanGalleryController`](ArtisanGalleryController.java) | REST controller managing portfolio showcase uploads, reordering, and deletion via `ArtisanGalleryService`. |
+| [`ArtisanController`](ArtisanController.java) | REST controller handling public profile view `/api/v1/artisan/{id}` with contact gating. |
+| [`ArtisanCertificationController`](ArtisanCertificationController.java) | REST controller handling qualification credential uploads, listing, and deletion. |
+| [`ArtisanGalleryController`](ArtisanGalleryController.java) | REST controller managing portfolio showcase uploads, ordering, and deletion. |
