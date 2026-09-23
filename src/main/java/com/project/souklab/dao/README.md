@@ -45,13 +45,13 @@ graph TD
 ### Reference Taxonomies
 | Repository Interface | Managed Entity | Key Query Capabilities |
 | :--- | :--- | :--- |
-| [`RegionRepository`](RegionRepository.java) | `Region` | `findByParentIsNullAndIsActiveTrueOrderByDisplayOrderAsc`, `findByParentIdAndIsActiveTrueOrderByDisplayOrderAsc`. |
-| [`JobCategoryRepository`](JobCategoryRepository.java) | `JobCategory` | `findByIsActiveTrueOrderByDisplayOrderAsc`, craftsmanship category hierarchy. |
-| [`JobSubCategoryRepository`](JobSubCategoryRepository.java) | `JobSubCategory` | `findByCategoryIdAndIsActiveTrueOrderByDisplayOrderAsc`, specialized craft subcategories. |
-| [`MaterialFamilyRepository`](MaterialFamilyRepository.java) | `MaterialFamily` | `findByIsActiveTrueOrderByDisplayOrderAsc`, raw material family hierarchy. |
-| [`MaterialRepository`](MaterialRepository.java) | `Material` | `findByFamilyIdAndIsActiveTrueOrderByDisplayOrderAsc`, constituent craft materials. |
-| [`EpoqueRepository`](EpoqueRepository.java) | `Epoque` | `findByIsActiveTrueOrderByDisplayOrderAsc`, chronological historical epochs. |
-| [`TechniqueRepository`](TechniqueRepository.java) | `Technique` | `findByIsActiveTrueOrderByDisplayOrderAsc`, traditional craftsmanship techniques. |
+| [`RegionRepository`](RegionRepository.java) | `Region` | `findByParentIsNullAndIsActiveTrueOrderByDisplayOrderAsc`, `findByParentIdAndIsActiveTrueOrderByDisplayOrderAsc`, `existsBySlug`, `existsBySlugAndIdNot`, `existsByParentId`, `countByParentId`, `findAncestorIds` (recursive CTE cycle check). |
+| [`JobCategoryRepository`](JobCategoryRepository.java) | `JobCategory` | `findByIsActiveTrueOrderByDisplayOrderAsc`, `existsBySlug`, `existsBySlugAndIdNot`, craftsmanship category hierarchy and subcategory existence checks. |
+| [`JobSubCategoryRepository`](JobSubCategoryRepository.java) | `JobSubCategory` | `findByCategoryIdAndIsActiveTrueOrderByDisplayOrderAsc`, `existsBySlug`, `existsBySlugAndIdNot`, `existsByCategoryId`, `countByCategoryId`, `isReferencedByArtisans`. |
+| [`MaterialFamilyRepository`](MaterialFamilyRepository.java) | `MaterialFamily` | `findByIsActiveTrueOrderByDisplayOrderAsc`, `existsBySlug`, `existsBySlugAndIdNot`, raw material family hierarchy and child material existence checks. |
+| [`MaterialRepository`](MaterialRepository.java) | `Material` | `findByFamilyIdAndIsActiveTrueOrderByDisplayOrderAsc`, `existsBySlug`, `existsBySlugAndIdNot`, `existsByFamilyId`, `countByFamilyId`, `isReferencedByArtisans`. |
+| [`EpoqueRepository`](EpoqueRepository.java) | `Epoque` | `findByIsActiveTrueOrderByDisplayOrderAsc`, `existsBySlug`, `existsBySlugAndIdNot`, `isReferencedByArtisans`, chronological historical epochs. |
+| [`TechniqueRepository`](TechniqueRepository.java) | `Technique` | `findByIsActiveTrueOrderByDisplayOrderAsc`, `existsBySlug`, `existsBySlugAndIdNot`, `isReferencedByArtisans`, traditional craftsmanship techniques. |
 
 ### Formations & Workshops
 | Repository Interface | Managed Entity | Key Query Capabilities |

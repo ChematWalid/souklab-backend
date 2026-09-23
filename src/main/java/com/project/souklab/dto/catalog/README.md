@@ -20,3 +20,10 @@ Data Transfer Objects representing reference craft taxonomy schemas, administrat
 | [`EpoqueSummaryDTO`](EpoqueSummaryDTO.java) | Outbound | Compact summary representation of a historical cultural era. |
 | [`TechniqueDTO`](TechniqueDTO.java) | Outbound | Craftsmanship method and artisanal technique representation. |
 | [`TechniqueSummaryDTO`](TechniqueSummaryDTO.java) | Outbound | Compact summary representation of an artisanal technique. |
+| [`TechniqueRequest`](admin/TechniqueRequest.java) | Inbound | Request payload for creating and updating craftsmanship techniques. |
+| [`EpoqueRequest`](admin/EpoqueRequest.java) | Inbound | Request payload for creating and updating historical epochs. |
+| [`RegionRequest`](admin/RegionRequest.java) | Inbound | Request payload for creating and updating Wilayas and Communes. |
+| [`JobCategoryRequest`](admin/JobCategoryRequest.java) | Inbound | Request payload for creating and updating craft job categories. |
+| [`JobSubCategoryRequest`](admin/JobSubCategoryRequest.java) | Inbound | Request payload for creating and updating craft job subcategories. |
+| [`MaterialFamilyRequest`](admin/MaterialFamilyRequest.java) | Inbound | Request payload for creating and updating raw material families. |
+| [`MaterialRequest`](admin/MaterialRequest.java) | Inbound | Request payload for creating and updating raw crafting materials. |

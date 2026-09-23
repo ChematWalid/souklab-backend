@@ -29,7 +29,7 @@ graph TD
 | [`artisan`](artisan/README.md) | Artisan profile updates, public profile sanitization, certifications, and portfolio gallery management. |
 | [`audit`](audit/README.md) | Asynchronous system auditing and administrative audit log queries. |
 | [`auth`](auth/README.md) | Credential verification, onboarding wizard, Spring Security user details. |
-| [`catalog`](catalog/README.md) | Cached reference taxonomy retrieval (Wilayas, categories, materials, epoques, techniques). |
+| [`catalog`](catalog/README.md) | Cached reference taxonomy retrieval and administrative catalog CRUD management. |
 | [`directory`](directory/README.md) | Public artisan directory search via Hibernate Search with Elasticsearch backend. |
 | [`formateur`](formateur/README.md) | Artisan teacher accreditation lifecycle, applications, and cooldown tracking. |
 | [`formation`](formation/README.md) | Peer masterclass authoring, syllabus document uploads, capacity limits, and review moderation. |

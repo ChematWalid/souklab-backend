@@ -29,7 +29,7 @@ graph LR
 | :--- | :--- |
 | [`artisan`](artisan/README.md) | Artisan profile updates, public profile viewing, portfolio certifications, and gallery images. |
 | [`auth`](auth/README.md) | Registration, login, email verification, token refreshing, password management. |
-| [`catalog`](catalog/README.md) | Public reference taxonomy endpoints (Wilayas, categories, materials, epoques, techniques). |
+| [`catalog`](catalog/README.md) | Public reference taxonomy endpoints and administrative taxonomy CRUD management. |
 | [`directory`](directory/README.md) | Public artisan discovery search engine and multi-facet directory filtering. |
 | [`formateur`](formateur/README.md) | Formateur teacher accreditation applications, administrative review, grant, and revocation. |
 | [`formation`](formation/README.md) | Artisan masterclass authoring, peer workshop enrollment, syllabus downloads, and administrative moderation. |

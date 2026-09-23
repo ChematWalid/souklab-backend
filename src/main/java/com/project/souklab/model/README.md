@@ -50,7 +50,7 @@ erDiagram
 | [`OAuthIdentity`](OAuthIdentity.java) | `@Entity` | Third-party OAuth provider binding (Google OAuth2 subject ID). |
 | [`AuditLog`](AuditLog.java) | `@Entity` | Administrative audit trail capturing security events and moderation actions. |
 | [`AccountStatus`](AccountStatus.java) | `enum` | Account states: `PENDING`, `ACTIVE`, `SUSPENDED`. |
-| [`AuditLogAction`](AuditLogAction.java) | grouped enum taxonomy | Audit codes grouped by domain (`AuditLogAction.User.APPROVED`, `AuditLogAction.Authentication.Email.VERIFIED`, `AuditLogAction.Authentication.Password.Reset.COMPLETED`). |
+| [`AuditLogAction`](AuditLogAction.java) | grouped enum taxonomy | Audit codes grouped by domain (`AuditLogAction.User`, `AuditLogAction.Catalog`, `AuditLogAction.Authentication`, `AuditLogAction.Subscription`, `AuditLogAction.Formation`, `AuditLogAction.Analytics`). |
 | [`VerificationTokenType`](VerificationTokenType.java) | `enum` | Token categories: `EMAIL_VERIFICATION`, `PASSWORD_RESET`. |
 
 ### Artisan Profiles & Portfolios

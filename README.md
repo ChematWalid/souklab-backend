@@ -31,7 +31,7 @@ graph TD
 | **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security, JJWT (HS256), BCrypt |
 | **User & Profile Management** | Artisan public profiles, profile completion wizard, permission-aware contact gating, profile view metrics deduplication. | Spring Data JPA, Jakarta Validation |
 | **Public Directory & Search** | Full-text scored search, faceted discovery (Wilayas, categories, materials, epoques, techniques), accent folding, edge n-grams, and JPA criteria fallback. | Hibernate Search 8.2.2.Final, Elasticsearch 8.x |
-| **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques). | Caffeine Cache, Spring Data JPA |
+| **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques) and administrative CRUD management with cache eviction and audit trails. | Caffeine Cache, Spring Data JPA |
 | **Formations & Peer Workshops** | Peer masterclass authoring (`isTeacher`), syllabus ClamAV scanning, administrative review lifecycle, capacity limits, cancellation deadlines, and client 403 boundary. | Spring Security, ClamAV, Spring Data JPA |
 | **Formateur Accreditation** | Artisan teacher certification lifecycle (submission, admin review, cooldown enforcement, direct admin grants/revocations). | Multi-state state machine, Spring Events |
 | **Real-Time Messaging** | 1-on-1 private conversations, file attachments, read receipts, typing indicators, and message history via STOMP / WebSocket. | Spring WebSocket, STOMP Relay (RabbitMQ), AMQP |
@@ -53,7 +53,7 @@ graph TD
 - **Object Storage**: S3-compatible object store (MinIO for local development, AWS S3 / Cloudflare R2 for production)
 - **Security & Antivirus**: Spring Security, JJWT 0.11.5, Bucket4j 8.10.1, ClamAV 1.4 Daemon
 - **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ 4.0)
-- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V14 migrations), Postman / Newman
+- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V15 migrations), Postman / Newman
 
 ---
 
@@ -67,7 +67,7 @@ src/main/java/com/project/souklab/
 │   ├── analytics/       # Analytics jobs, rollups rebuild/backfill, and CSV exports
 │   ├── artisan/         # Artisan profile, certification, and gallery portfolio endpoints
 │   ├── auth/            # Registration, login, verification, and password flows
-│   ├── catalog/         # Reference craft taxonomies and administrative geography
+│   ├── catalog/         # Public reference craft taxonomies and administrative taxonomy CRUD
 │   ├── chat/            # Private conversation REST endpoints and STOMP message handlers
 │   ├── directory/       # Public artisan directory search and faceted filtering
 │   ├── formateur/       # Formateur accreditation and moderation endpoints
@@ -116,7 +116,7 @@ src/main/java/com/project/souklab/
 │   ├── artisan/         # Artisan profile and portfolio operations
 │   ├── audit/           # Audit trail logging
 │   ├── auth/            # User authentication and details management
-│   ├── catalog/         # Cached taxonomy and geographic retrieval
+│   ├── catalog/         # Cached taxonomy retrieval and administrative catalog management
 │   ├── chat/            # Real-time messaging and conversation lifecycle
 │   ├── directory/       # Hibernate Search Elasticsearch discovery service
 │   ├── formateur/       # Formateur accreditation workflows
