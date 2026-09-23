@@ -1,5 +1,7 @@
 package com.project.souklab.service.directory;
 
+import com.project.souklab.security.ViewerPremiumResolver;
+
 import java.util.Collection;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.mockito.Answers;
@@ -7,6 +9,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.config.OperationalMetrics;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.directory.ArtisanDirectoryCardDTO;
@@ -98,11 +101,15 @@ class DirectorySearchServiceTest {
     @Mock
     private AppProperties appProperties;
 
+    @Mock
+    private ViewerPremiumResolver viewerPremiumResolver;
+
     private DirectorySearchServiceImpl directorySearchService;
 
     @BeforeEach
     void setUp() {
-        directorySearchService = new DirectorySearchServiceImpl(entityManager, artisanRepository, appProperties);
+        directorySearchService = new DirectorySearchServiceImpl(
+                entityManager, artisanRepository, appProperties, OperationalMetrics.noop(), viewerPremiumResolver);
         AppProperties.Directory directory = new AppProperties.Directory();
         directory.setDefaultPageIndex(0);
         directory.setDefaultPageSize(20);
@@ -525,6 +532,56 @@ class DirectorySearchServiceTest {
             Object sort = ReflectionTestUtils.invokeMethod(directorySearchService, "buildSort", sortFactory, filter);
             assertThat(sort).isNotNull();
         }
+    }
+
+    /**
+     * Verifies that when ViewerPremiumResolver returns true (locked), the relational fallback
+     * produces anonymised artisan names in the directory cards.
+     */
+    @Test
+    @DisplayName("searchRelationalFallback: non-premium viewer receives masked artisan names")
+    @SuppressWarnings("unchecked")
+    void searchRelationalFallback_whenContactInfoLocked_masksArtisanName() {
+        AppProperties.Search searchConfig = new AppProperties.Search();
+        searchConfig.setEnabled(false);
+        when(appProperties.getSearch()).thenReturn(searchConfig);
+        when(viewerPremiumResolver.isContactInfoLocked()).thenReturn(true);
+
+        Artisan artisan = createSampleArtisan();
+        when(artisanRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(artisan)));
+
+        DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder().page(0).size(20).build();
+        PaginatedResponse<ArtisanDirectoryCardDTO> response = directorySearchService.search(filter);
+
+        assertThat(response.getContent()).hasSize(1);
+        String maskedName = response.getContent().get(0).getArtisanName();
+        assertThat(maskedName).startsWith("Artisan #");
+        assertThat(maskedName).doesNotContain("Djamel").doesNotContain("Amrani");
+    }
+
+    /**
+     * Verifies that when ViewerPremiumResolver returns false (unlocked), the relational fallback
+     * exposes the real artisan name.
+     */
+    @Test
+    @DisplayName("searchRelationalFallback: premium viewer receives real artisan names")
+    @SuppressWarnings("unchecked")
+    void searchRelationalFallback_whenContactInfoUnlocked_exposesRealArtisanName() {
+        AppProperties.Search searchConfig = new AppProperties.Search();
+        searchConfig.setEnabled(false);
+        when(appProperties.getSearch()).thenReturn(searchConfig);
+        when(viewerPremiumResolver.isContactInfoLocked()).thenReturn(false);
+
+        Artisan artisan = createSampleArtisan();
+        when(artisanRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(artisan)));
+
+        DirectorySearchFilterDTO filter = DirectorySearchFilterDTO.builder().page(0).size(20).build();
+        PaginatedResponse<ArtisanDirectoryCardDTO> response = directorySearchService.search(filter);
+
+        assertThat(response.getContent()).hasSize(1);
+        assertThat(response.getContent().get(0).getArtisanName()).isEqualTo("Djamel Amrani");
     }
 
     private Artisan createSampleArtisan() {

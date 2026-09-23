@@ -16,6 +16,7 @@ import com.project.souklab.model.Material;
 import com.project.souklab.model.Region;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
+import com.project.souklab.security.ViewerPremiumResolver;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
@@ -69,33 +70,43 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     private final ArtisanRepository artisanRepository;
     private final AppProperties appProperties;
     private final OperationalMetrics metrics;
+    private final ViewerPremiumResolver viewerPremiumResolver;
 
     public DirectorySearchServiceImpl(EntityManager entityManager, ArtisanRepository artisanRepository,
                                       AppProperties appProperties) {
-        this(entityManager, artisanRepository, appProperties, OperationalMetrics.noop());
+        this(entityManager, artisanRepository, appProperties, OperationalMetrics.noop(), null);
+    }
+
+    public DirectorySearchServiceImpl(EntityManager entityManager, ArtisanRepository artisanRepository,
+                                      AppProperties appProperties, OperationalMetrics metrics) {
+        this(entityManager, artisanRepository, appProperties, metrics, null);
     }
 
     @Autowired
     public DirectorySearchServiceImpl(EntityManager entityManager, ArtisanRepository artisanRepository,
-                                      AppProperties appProperties, OperationalMetrics metrics) {
+                                      AppProperties appProperties, OperationalMetrics metrics,
+                                      ViewerPremiumResolver viewerPremiumResolver) {
         this.entityManager = entityManager;
         this.artisanRepository = artisanRepository;
         this.appProperties = appProperties;
         this.metrics = metrics;
+        this.viewerPremiumResolver = viewerPremiumResolver;
     }
 
     @Override
     @Transactional(readOnly = true)
     public PaginatedResponse<ArtisanDirectoryCardDTO> search(DirectorySearchFilterDTO filter) {
+        boolean contactInfoLocked = viewerPremiumResolver != null && viewerPremiumResolver.isContactInfoLocked();
+
         if (!appProperties.getSearch().isEnabled()) {
             metrics.recordSearch(AnalyticsMetric.Operational.Backend.RELATIONAL,
                     AnalyticsMetric.Operational.Outcome.DISABLED);
             log.info("Hibernate Search is disabled; routing directory search to relational JPA fallback.");
-            return searchRelationalFallback(filter);
+            return searchRelationalFallback(filter, contactInfoLocked);
         }
 
         try {
-            PaginatedResponse<ArtisanDirectoryCardDTO> response = searchHibernateSearch(filter);
+            PaginatedResponse<ArtisanDirectoryCardDTO> response = searchHibernateSearch(filter, contactInfoLocked);
             metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH,
                     AnalyticsMetric.Operational.Outcome.SUCCESS);
             return response;
@@ -103,7 +114,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
             metrics.recordSearch(AnalyticsMetric.Operational.Backend.ELASTICSEARCH,
                     AnalyticsMetric.Operational.Outcome.FALLBACK);
             log.warn("Hibernate Search query encountered an error; falling back to relational JPA specification: {}", ex.getMessage());
-            return searchRelationalFallback(filter);
+            return searchRelationalFallback(filter, contactInfoLocked);
         }
     }
 
@@ -111,10 +122,12 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
      * Executes the directory query against Elasticsearch using the Hibernate Search 8 query DSL.
      * Hydrates matching entities eagerly using the {@code artisan.directory} named entity graph.
      *
-     * @param filter validated directory search criteria
+     * @param filter            validated directory search criteria
+     * @param contactInfoLocked {@code true} if artisan names must be anonymised for this viewer
      * @return paginated directory cards
      */
-    private PaginatedResponse<ArtisanDirectoryCardDTO> searchHibernateSearch(DirectorySearchFilterDTO filter) {
+    private PaginatedResponse<ArtisanDirectoryCardDTO> searchHibernateSearch(
+            DirectorySearchFilterDTO filter, boolean contactInfoLocked) {
         SearchSession searchSession = Search.session(entityManager);
         int page = filter.resolvePage(appProperties.getDirectory().getDefaultPageIndex());
         int size = filter.resolveSize(
@@ -135,7 +148,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
                 .fetch(offset, size);
 
         List<ArtisanDirectoryCardDTO> content = result.hits().stream()
-                .map(ArtisanDirectoryCardDTO::from)
+                .map(artisan -> ArtisanDirectoryCardDTO.from(artisan, contactInfoLocked))
                 .toList();
 
         long totalElements = result.total().hitCount();
@@ -289,6 +302,20 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<ArtisanDirectoryCardDTO> searchRelationalFallback(DirectorySearchFilterDTO filter) {
+        return searchRelationalFallback(filter, false);
+    }
+
+    /**
+     * Fallback execution utilizing relational JPA Specifications and named entity graphs,
+     * with premium-aware name masking.
+     *
+     * @param filter            directory search criteria
+     * @param contactInfoLocked {@code true} if artisan names must be anonymised for this viewer
+     * @return paginated directory card responses
+     */
+    @Transactional(readOnly = true)
+    public PaginatedResponse<ArtisanDirectoryCardDTO> searchRelationalFallback(
+            DirectorySearchFilterDTO filter, boolean contactInfoLocked) {
         Specification<Artisan> spec = buildRelationalSpecification(filter);
         Sort sort = buildRelationalSort(filter);
         Pageable pageable = PageRequest.of(
@@ -300,7 +327,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
                 sort);
 
         Page<Artisan> page = artisanRepository.findAll(spec, pageable);
-        Page<ArtisanDirectoryCardDTO> dtoPage = page.map(ArtisanDirectoryCardDTO::from);
+        Page<ArtisanDirectoryCardDTO> dtoPage = page.map(artisan -> ArtisanDirectoryCardDTO.from(artisan, contactInfoLocked));
         return PaginatedResponse.from(dtoPage);
     }
 

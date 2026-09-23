@@ -26,11 +26,84 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ArtisanDirectoryCardDTOTest {
 
     @Test
-    @DisplayName("from: when artisan is null should return null")
+    @DisplayName("from: when artisan is null should return null (single-arg and two-arg overloads)")
     void from_whenArtisanIsNull_shouldReturnNull() {
-        ArtisanDirectoryCardDTO dto = ArtisanDirectoryCardDTO.from(null);
-        assertThat(dto).isNull();
+        assertThat(ArtisanDirectoryCardDTO.from(null)).isNull();
+        assertThat(ArtisanDirectoryCardDTO.from(null, false)).isNull();
+        assertThat(ArtisanDirectoryCardDTO.from(null, true)).isNull();
     }
+
+    @Test
+    @DisplayName("from(artisan, false): unlocked shows real artisan name")
+    void from_withContactInfoUnlocked_showsRealName() {
+        User user = User.builder().firstName("Djamel").lastName("Amrani").build();
+        Artisan artisan = Artisan.builder()
+                .id("abc123def456")
+                .user(user)
+                .build();
+
+        ArtisanDirectoryCardDTO dto = ArtisanDirectoryCardDTO.from(artisan, false);
+
+        assertThat(dto.getArtisanName()).isEqualTo("Djamel Amrani");
+    }
+
+    @Test
+    @DisplayName("from(artisan, true): locked replaces name with Artisan #XXXXX (last 5 chars of ID, uppercase)")
+    void from_withContactInfoLocked_replacesNameWithAnonymisedId() {
+        User user = User.builder().firstName("Djamel").lastName("Amrani").build();
+        Artisan artisan = Artisan.builder()
+                .id("abc123def456")
+                .user(user)
+                .build();
+
+        ArtisanDirectoryCardDTO dto = ArtisanDirectoryCardDTO.from(artisan, true);
+
+        assertThat(dto.getArtisanName()).isEqualTo("Artisan #EF456");
+    }
+
+    @Test
+    @DisplayName("from(artisan, true): locked with short ID (< 5 chars) uses the full ID")
+    void from_withContactInfoLocked_shortId_usesFullId() {
+        Artisan artisan = Artisan.builder().id("ab1").build();
+
+        ArtisanDirectoryCardDTO dto = ArtisanDirectoryCardDTO.from(artisan, true);
+
+        assertThat(dto.getArtisanName()).isEqualTo("Artisan #AB1");
+    }
+
+    @Test
+    @DisplayName("from(artisan, true): locked with null ID produces fallback placeholder")
+    void from_withContactInfoLocked_nullId_producesFallback() {
+        Artisan artisan = Artisan.builder().id(null).build();
+
+        ArtisanDirectoryCardDTO dto = ArtisanDirectoryCardDTO.from(artisan, true);
+
+        assertThat(dto.getArtisanName()).isEqualTo("Artisan #?????");
+    }
+
+    @Test
+    @DisplayName("from(artisan, true): non-sensitive fields (avatarUrl, city, rating) are still exposed when locked")
+    void from_withContactInfoLocked_nonSensitiveFieldsRemainVisible() {
+        User user = User.builder()
+                .firstName("Amina")
+                .lastName("Belaid")
+                .avatarUrl("https://storage.souklab.dz/avatars/amina.jpg")
+                .build();
+        Artisan artisan = Artisan.builder()
+                .id("xyz-9876")
+                .user(user)
+                .city("Ghardaïa")
+                .rating(4.5)
+                .build();
+
+        ArtisanDirectoryCardDTO dto = ArtisanDirectoryCardDTO.from(artisan, true);
+
+        assertThat(dto.getArtisanName()).isEqualTo("Artisan #-9876");
+        assertThat(dto.getAvatarUrl()).isEqualTo("https://storage.souklab.dz/avatars/amina.jpg");
+        assertThat(dto.getCity()).isEqualTo("Ghardaïa");
+        assertThat(dto.getRating()).isEqualTo(4.5);
+    }
+
 
     @Test
     @DisplayName("from: with complete artisan should map all directory card fields accurately")

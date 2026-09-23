@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Lightweight public directory card DTO representing an artisan in search results,
@@ -61,11 +62,31 @@ public class ArtisanDirectoryCardDTO {
 
     /**
      * Maps an {@link Artisan} domain entity into a lightweight public directory card DTO.
+     * Contact information is always visible (unlocked). Use this overload only when the
+     * caller has already verified premium access or when masking is not applicable.
      *
      * @param artisan the artisan entity
      * @return populated directory card DTO, or null if artisan is null
      */
     public static ArtisanDirectoryCardDTO from(Artisan artisan) {
+        return from(artisan, false);
+    }
+
+    /**
+     * Maps an {@link Artisan} domain entity into a directory card DTO, optionally masking
+     * sensitive contact fields for non-premium viewers.
+     *
+     * <p>When {@code contactInfoLocked} is {@code true}, the {@code artisanName} field is
+     * replaced with an anonymised identifier in the format {@code "Artisan #XXXXX"} (last
+     * five characters of the artisan ID, uppercased), consistent with the masking applied
+     * by the {@code GET /api/v1/artisan/{id}} endpoint.
+     *
+     * @param artisan           the artisan entity
+     * @param contactInfoLocked {@code true} if the viewer does not have premium access and
+     *                          sensitive fields must be masked
+     * @return populated directory card DTO, or null if artisan is null
+     */
+    public static ArtisanDirectoryCardDTO from(Artisan artisan, boolean contactInfoLocked) {
         if (artisan == null) {
             return null;
         }
@@ -77,7 +98,7 @@ public class ArtisanDirectoryCardDTO {
 
         return ArtisanDirectoryCardDTO.builder()
                 .id(artisan.getId())
-                .artisanName(user != null ? user.getName() : null)
+                .artisanName(resolveArtisanName(artisan, user, contactInfoLocked))
                 .avatarUrl(user != null ? user.getAvatarUrl() : null)
                 .coverImageUrl(extractCoverImageUrl(artisan.getGalleryImages()))
                 .bioSnippet(truncateBio(artisan.getBio(), DEFAULT_BIO_SNIPPET_LENGTH))
@@ -99,6 +120,30 @@ public class ArtisanDirectoryCardDTO {
                 .primaryTechniques(extractPrimaryTechniques(artisan))
                 .createdAt(artisan.getCreatedAt())
                 .build();
+    }
+
+    /**
+     * Resolves the display name for an artisan directory card.
+     *
+     * <p>When contact information is locked, returns an anonymised identifier using the
+     * last five characters of the artisan ID (uppercased), matching the convention used
+     * by {@code ArtisanProfileService}.
+     *
+     * @param artisan           the artisan entity providing the fallback ID
+     * @param user              the linked user entity, may be null
+     * @param contactInfoLocked {@code true} if the name must be anonymised
+     * @return the display name to expose in the card
+     */
+    private static String resolveArtisanName(Artisan artisan, User user, boolean contactInfoLocked) {
+        if (contactInfoLocked) {
+            String id = artisan.getId();
+            if (id == null || id.isBlank()) {
+                return "Artisan #?????";
+            }
+            String suffix = id.length() >= 5 ? id.substring(id.length() - 5) : id;
+            return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
+        }
+        return user != null ? user.getName() : null;
     }
 
     /**
