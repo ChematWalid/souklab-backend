@@ -85,6 +85,9 @@ class AppPropertiesTest {
         assertThat(appProperties.getArtisan()).isNotNull();
         assertThat(appProperties.getArtisan().getFormateur()).isNotNull();
         assertThat(appProperties.getArtisan().getFormateur().getReapplyCooldownDays()).isZero();
+
+        assertThat(appProperties.getFavorites()).isNotNull();
+        assertThat(appProperties.getFavorites().getMaxPerClient()).isZero();
     }
 
     @Test
@@ -112,7 +115,8 @@ class AppPropertiesTest {
                 Map.entry("app.cache.maximum-size", "250"),
                 Map.entry("app.search.mass-indexing.threads-to-load-objects", "3"),
                 Map.entry("app.search.mass-indexing.batch-size-to-load-objects", "40"),
-                Map.entry("app.search.mass-indexing.id-fetch-size", "75")
+                Map.entry("app.search.mass-indexing.id-fetch-size", "75"),
+                Map.entry("app.favorites.max-per-client", "250")
         )));
 
         Binder binder = new Binder(ConfigurationPropertySources.from(environment.getPropertySources()));
@@ -130,6 +134,7 @@ class AppPropertiesTest {
         assertThat(appProperties.getAuth().getVerification().getExpirationMinutes()).isEqualTo(30);
         assertThat(appProperties.getAuth().getVerification().getCodeLength()).isEqualTo(8);
         assertThat(appProperties.getArtisan().getFormateur().getReapplyCooldownDays()).isEqualTo(30L);
+        assertThat(appProperties.getFavorites().getMaxPerClient()).isEqualTo(250);
         assertThat(appProperties.getAsync().getApplication().getCorePoolSize()).isEqualTo(2);
         assertThat(appProperties.getAsync().getApplication().getMaxPoolSize()).isEqualTo(8);
         assertThat(appProperties.getAsync().getApplication().getQueueCapacity()).isEqualTo(50);

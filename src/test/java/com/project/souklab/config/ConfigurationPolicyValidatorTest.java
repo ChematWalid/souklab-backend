@@ -145,6 +145,11 @@ class ConfigurationPolicyValidatorTest {
     }
 
     @Test
+    void rejectsInvalidFavoritesPolicy() {
+        assertInvalid(f -> f.app.getFavorites().setMaxPerClient(0), "app.favorites.max-per-client");
+    }
+
+    @Test
     void rejectsMissingFileServingPrefix() {
         Fixture fixture = new Fixture();
         fixture.app.getStorage().setFileServingPrefix(null);
@@ -193,6 +198,7 @@ class ConfigurationPolicyValidatorTest {
             app.getDirectory().setDefaultPageSize(20);
             app.getDirectory().setMinPageSize(1);
             app.getDirectory().setMaxPageSize(100);
+            app.getFavorites().setMaxPerClient(500);
             when(environment.matchesProfiles("prod", "production")).thenReturn(false);
             validator = new ConfigurationPolicyValidator(app, avatar, storage, environment);
         }

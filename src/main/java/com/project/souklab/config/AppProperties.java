@@ -40,6 +40,11 @@ public class AppProperties {
     private FormationConfig formation = new FormationConfig();
     private Chat chat = new Chat();
 
+    /**
+     * Client favorites configuration bound to {@code app.favorites.*}.
+     */
+    private Favorites favorites = new Favorites();
+
     @Data
     public static class Notification {
         private int maxMessageLength;
@@ -57,6 +62,11 @@ public class AppProperties {
         private int defaultPageSize;
         private int minPageSize;
         private int maxPageSize;
+    }
+
+    @Data
+    public static class Favorites {
+        private int maxPerClient;
     }
 
 

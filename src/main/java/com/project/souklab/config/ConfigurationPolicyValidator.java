@@ -89,6 +89,7 @@ public class ConfigurationPolicyValidator {
         validateCache(appProperties.getCache());
         validateMassIndexing(appProperties.getSearch().getMassIndexing());
         validateDirectory(appProperties.getDirectory());
+        requirePositive("app.favorites.max-per-client", appProperties.getFavorites().getMaxPerClient());
         validateSubscriptionPolicy();
         validateAnalyticsPolicy();
         if (healthProperties != null) {
