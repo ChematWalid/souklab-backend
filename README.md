@@ -66,10 +66,10 @@ src/main/java/com/project/souklab/
 ├── controller/          # REST API entrypoints and HTTP adapters
 │   ├── analytics/       # Analytics jobs, rollups rebuild/backfill, and CSV exports
 │   ├── artisan/         # Artisan profile, certification, and gallery portfolio endpoints
-│   ├── auth/            # Registration, login, verification, and password flows
+│   ├── auth/            # Registration, login, /me profile, verification, and password flows
 │   ├── catalog/         # Public reference craft taxonomies and administrative taxonomy CRUD
 │   ├── chat/            # Private conversation REST endpoints and STOMP message handlers
-│   ├── directory/       # Public artisan directory search and faceted filtering
+│   ├── directory/       # Authenticated artisan directory search and faceted filtering
 │   ├── formateur/       # Formateur accreditation and moderation endpoints
 │   ├── feed/            # Public feed and post moderation endpoints
 │   ├── review/          # Formation-backed artisan review endpoints

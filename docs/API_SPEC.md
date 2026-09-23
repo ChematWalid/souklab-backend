@@ -268,12 +268,39 @@ Revokes the authenticated user's refresh tokens.
 - **Access**: Authenticated
 
 ### `GET /api/v1/auth/me`
-Returns the authenticated user's permission-aware profile response.
-- **Access**: Authenticated
+Returns the authenticated user's permission-aware polymorphic profile response (`ArtisanResponseDTO` for artisans, `ClientProfileResponseDTO` for clients).
+- **Access**: Authenticated (`Bearer <access-token>`)
+- **Response**: `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "id": "usr-uuid-1234",
+    "email": "artisan@souklab.dz",
+    "name": "Amina Benali",
+    "role": "ARTISAN",
+    "isTeacher": true,
+    "avatar": "https://cdn.souklab.dz/avatars/u-123-std.webp",
+    "bio": "Céramiste traditionnelle kabyle",
+    "craftCategories": ["Poterie", "Céramique"],
+    "address": "Beni Yenni, Tizi Ouzou",
+    "contactInfoLocked": false
+  }
+}
+```
 
 ### `PATCH /api/v1/auth/me`
-Partially updates the authenticated user's profile using the documented PATCH field semantics.
-- **Access**: Authenticated
+Partially updates the authenticated user's profile using JSON Merge Patch semantics (`null` removes an optional value; omitted keys are preserved).
+- **Access**: Authenticated (`Bearer <access-token>`)
+- **Payload Example**:
+```json
+{
+  "bio": "Nouvelle biographie d'atelier mise à jour",
+  "phone": "+213555123456",
+  "website": "https://atelier-artisan.dz"
+}
+```
+- **Response**: `200 OK` with updated profile payload.
 
 ### `GET /api/v1/auth/oauth/google/artisan` and `GET /api/v1/auth/oauth/google/client`
 Start Google OAuth2 onboarding with an account-type intent. The callback links or creates the account and issues the normal JWT response.
@@ -284,28 +311,30 @@ Start Google OAuth2 onboarding with an account-type intent. The callback links o
 ## 3. Public Directory & Search Engine (`/api/v1/public/directory/**`)
 
 ### `GET /api/v1/public/directory`
-Full-text search and multi-facet filtering over active, verified artisans.
-- **Access**: Public
+Full-text scored search and multi-facet filtering over active, verified artisans.
+- **Access**: Authenticated (`@PreAuthorize("isAuthenticated()")`). Unauthenticated callers receive `403 Forbidden`.
 - **Query Parameters**:
-  - `q` (string, optional): Search keyword (e.g. `ceramique`, `cuir`, `Ahmed`)
-  - `category` (string, optional): Category slug
-  - `subcategory` (string, optional): Subcategory slug or ID
-  - `region` (string, optional): Wilaya / Region slug
-  - `material` (array of strings, optional): Material slugs
-  - `epoque` (array of strings, optional): Historical era slugs
-  - `technique` (array of strings, optional): Craft technique slugs
-  - `featured` (boolean, optional): Filter premium/featured artisans
-  - `page` (int, default: `0`), `size` (int, default: `20`), `sort` (string, default: `rating,desc`)
-- **Response**: `200 OK` with paginated `ArtisanDirectoryCardDTO` list. Contact info (phone/email) is masked unless the requesting user has an active premium client subscription.
+  - `keyword` (string, optional, max: 120): Search term matched against names, bios, specialties, and cities
+  - `craftCategory` (string, optional): Filter by top-level craft category slug/name
+  - `craftSubCategory` (string, optional): Filter by specific subcategory slug/name
+  - `wilaya` (string, optional): Filter by Algerian Wilaya (e.g., `Tizi Ouzou`, `Alger`)
+  - `daira` (string, optional): Filter by Daira / District
+  - `minRating` (decimal, optional, 0.0 - 5.0): Minimum average client review rating
+  - `verifiedOnly` (boolean, default: `false`): Restrict results to verified artisans
+  - `page` (int, default: `0`, min: 0): Zero-indexed page number
+  - `size` (int, default: `12`, 1 - 100): Results per page
+  - `sort` (string, default: `relevance`): Sort order (`relevance`, `rating,desc`, `views,desc`)
+- **Privacy Gating**: Non-premium clients receive masked artisan names (`"Artisan #XXXXX"`) and locked contact info (`contactInfoLocked: true`). Premium clients, administrators, and self-views receive the real artisan name and full unlocked contact information.
+- **Response**: `200 OK` with `ApiResponse<PaginatedResponse<ArtisanDirectoryCardDTO>>`.
 
 ---
 
 ## 4. Artisan Profiles, Credentials & Gallery
 
-- `GET /api/v1/artisan/{id}`: Retrieve an artisan public view with deduplicated profile-view tracking and premium-gated contact fields.
-- `PATCH /api/v1/artisan/profile`: Update the authenticated artisan profile (`permission:artisan:content`).
+- `GET /api/v1/artisan/{id}`: Retrieve an artisan public view with deduplicated profile-view tracking and dynamic privacy-gated contact fields.
+- `PATCH /api/v1/auth/me`: Unified endpoint to update the authenticated artisan's bio, phone, address, website, or crafts.
 - `POST/GET/DELETE /api/v1/artisan/certifications[/{id}]`: Manage owned certification documents (`permission:artisan:content`).
-- `POST/GET/PUT/DELETE /api/v1/artisan/gallery[/{id}]` and `PUT /api/v1/artisan/gallery/order`: Manage the configured artisan gallery (`permission:artisan:content`).
+- `POST/GET/PUT/DELETE /api/v1/artisan/gallery[/{id}]` and `PUT /api/v1/artisan/gallery/order`: Manage the configured portfolio gallery (`permission:artisan:content`).
 
 ---
 
