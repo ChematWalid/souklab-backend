@@ -334,6 +334,37 @@ All taxonomy endpoints are **public** — no authentication required.
 | `GET /api/v1/catalog/epoques` | GET | None | Historical eras / style periods |
 | `GET /api/v1/catalog/techniques` | GET | None | Artisanal techniques |
 
+### Reference Taxonomies Inventory
+
+The platform seeds a comprehensive Algerian and Mediterranean reference taxonomy:
+
+- **Geographic Administrative Hierarchy (`regions`)**:
+  - Root country node: Algeria (`DZ`).
+  - 58 Algerian Wilayas (Adrar through El Meniaa) with administrative codes and display orders.
+  - Communes nested under their respective parent Wilaya.
+- **Artisanal Building Trades (`job_categories` & `job_sub_categories`)**:
+  - 8 Categories and 37 Subcategories (French taxonomy):
+    - *Gros œuvre & structure* (6 subcategories)
+    - *Toiture & enveloppe du bâtiment* (5 subcategories)
+    - *Électricité & énergie* (4 subcategories)
+    - *Plomberie & systèmes techniques* (4 subcategories)
+    - *Finitions & second œuvre* (5 subcategories)
+    - *Menuiserie & agencement* (4 subcategories)
+    - *Métal & serrurerie* (4 subcategories)
+    - *Métiers du patrimoine* (5 subcategories)
+- **Mediterranean Building Materials (`material_families` & `materials`)**:
+  - 6 Families and 25 Materials:
+    - *Matériaux naturels traditionnels* (5 materials)
+    - *Matériaux de maçonnerie* (4 materials)
+    - *Matériaux de toiture* (4 materials)
+    - *Métal & structure* (3 materials)
+    - *Isolation & techniques modernes* (5 materials)
+    - *Revêtements & finitions* (4 materials)
+- **Historical Eras (`epoques`)**:
+  - 14 chronological periods (Antiquity, Islamic eras, Ottoman regency, Traditional, and Modern craft movements).
+- **Artisanal Techniques (`techniques`)**:
+  - 20 traditional and heritage crafting techniques.
+
 ---
 
 ## 9. Artisan Directory Search

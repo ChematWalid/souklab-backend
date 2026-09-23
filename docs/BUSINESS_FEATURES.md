@@ -77,13 +77,13 @@ Souklab maintains a rich reference catalogue that powers search and categorisati
 
 | Catalogue | What It Contains |
 |---|---|
-| **Regions** | All Algerian wilayas and communes |
-| **Craft Categories** | Top-level categories with nested sub-categories |
-| **Materials** | Raw materials used in craft-making |
-| **Techniques** | Artisanal production methods |
-| **Eras / Epoques** | Historical periods and style references |
+| **Regions** | All 58 Algerian wilayas and administrative communes |
+| **Craft Categories** | 8 building trade categories with 37 specialized subcategories (French craft taxonomy) |
+| **Materials** | 6 Mediterranean material families grouping 25 authentic building materials |
+| **Techniques** | 20 traditional and heritage craftsmanship production methods |
+| **Eras / Epoques** | 14 historical eras and cultural style references |
 
-This taxonomy is curated by the Souklab team and publicly accessible — no account needed.
+This taxonomy is curated by the Souklab team and publicly accessible — no account needed. Administrative staff can add, update, and manage taxonomy items with automated conflict prevention and audit tracking.
 
 ---
 

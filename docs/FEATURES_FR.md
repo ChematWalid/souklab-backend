@@ -334,6 +334,37 @@ Tous les endpoints taxonomiques sont **publics** — aucune authentification req
 | `GET /api/v1/catalog/epoques` | GET | Aucune | Périodes historiques / époques de style |
 | `GET /api/v1/catalog/techniques` | GET | Aucune | Techniques artisanales |
 
+### Inventaire des taxonomies de référence
+
+La plateforme initialise une taxonomie de référence algérienne et méditerranéenne complète :
+
+- **Hiérarchie administrative géographique (`regions`)** :
+  - Nœud pays racine : Algérie (`DZ`).
+  - 58 Wilayas algériennes (d'Adrar à El Meniaa) avec codes administratifs et ordres d'affichage.
+  - Communes imbriquées sous leur Wilaya parente respective.
+- **Métiers artisanaux du bâtiment (`job_categories` & `job_sub_categories`)** :
+  - 8 Catégories et 37 Sous-catégories (taxonomie française) :
+    - *Gros œuvre & structure* (6 sous-catégories)
+    - *Toiture & enveloppe du bâtiment* (5 sous-catégories)
+    - *Électricité & énergie* (4 sous-catégories)
+    - *Plomberie & systèmes techniques* (4 sous-catégories)
+    - *Finitions & second œuvre* (5 sous-catégories)
+    - *Menuiserie & agencement* (4 sous-catégories)
+    - *Métal & serrurerie* (4 sous-catégories)
+    - *Métiers du patrimoine* (5 sous-catégories)
+- **Matériaux du bâtiment méditerranéen (`material_families` & `materials`)** :
+  - 6 Familles et 25 Matériaux :
+    - *Matériaux naturels traditionnels* (5 matériaux)
+    - *Matériaux de maçonnerie* (4 matériaux)
+    - *Matériaux de toiture* (4 matériaux)
+    - *Métal & structure* (3 matériaux)
+    - *Isolation & techniques modernes* (5 matériaux)
+    - *Revêtements & finitions* (4 matériaux)
+- **Époques historiques (`epoques`)** :
+  - 14 périodes chronologiques (Antiquité, ères islamiques, régence ottomane, artisanat traditionnel et mouvements contemporains).
+- **Techniques artisanales (`techniques`)** :
+  - 20 méthodes et techniques artisanales traditionnelles et patrimoniales.
+
 ---
 
 ## 9. Recherche dans l'annuaire des artisans

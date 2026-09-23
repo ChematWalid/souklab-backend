@@ -77,13 +77,13 @@ Souklab maintient un catalogue de référence riche qui alimente la recherche et
 
 | Catalogue | Contenu |
 |---|---|
-| **Régions** | L'ensemble des wilayas et communes algériennes |
-| **Catégories d'artisanat** | Catégories de premier niveau avec sous-catégories imbriquées |
-| **Matières** | Matières premières utilisées dans l'artisanat |
-| **Techniques** | Méthodes de production artisanale |
-| **Époques** | Périodes historiques et références de style |
+| **Régions** | Les 58 wilayas et communes administratives algériennes |
+| **Catégories d'artisanat** | 8 catégories de métiers du bâtiment avec 37 sous-catégories spécialisées (taxonomie française) |
+| **Matières** | 6 familles de matériaux méditerranéens regroupant 25 matériaux de construction authentiques |
+| **Techniques** | 20 méthodes et techniques de production artisanale traditionnelles et patrimoniales |
+| **Époques** | 14 périodes historiques et références culturelles de style |
 
-Cette taxonomie est gérée par l'équipe Souklab et accessible publiquement — aucun compte requis.
+Cette taxonomie est gérée par l'équipe Souklab et accessible publiquement — aucun compte requis. L'équipe d'administration peut créer, mettre à jour et administrer les éléments taxonomiques avec détection automatique des conflits et suivi d'audit.
 
 ---
 
