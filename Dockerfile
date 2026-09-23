@@ -8,6 +8,8 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 RUN apk add --no-cache wget curl
 RUN addgroup -S souklab && adduser -S -G souklab souklab
+RUN mkdir -p /app/storage/uploads /app/storage/thumbnails /app/storage/indexes && \
+    chown -R souklab:souklab /app
 COPY --from=build --chown=souklab:souklab /app/target/*.jar app.jar
 USER souklab
 EXPOSE 8080
