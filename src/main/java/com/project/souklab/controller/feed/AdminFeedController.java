@@ -4,6 +4,8 @@ import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.feed.FeedPostModerationDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.service.feed.FeedPostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Administrator moderation endpoints for community feed posts.
  */
+@Tag(name = "Community Feed Administration", description = "Administrator moderation queue and lifecycle actions for feed posts")
 @RestController
 @RequestMapping("/api/v1/admin/feed")
 @PreAuthorize("@accessControl.canModerateFeed(authentication)")

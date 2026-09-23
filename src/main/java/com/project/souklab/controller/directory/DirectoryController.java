@@ -13,14 +13,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Public REST controller for the artisan directory and faceted search engine.
- * Exposes full-text search, geographic filtering, and craft taxonomy discovery
- * without requiring client authentication.
+ * REST controller for the artisan marketplace directory and faceted search engine.
+ * Requires client authentication. Non-premium viewers receive directory cards with masked
+ * artisan names; premium viewers and administrators receive real artisan identities.
  */
 @RestController
 @RequestMapping("/api/v1/public/directory")
+@Tag(name = "Artisan Directory", description = "Faceted artisan discovery directory and full-text search with contact privacy gating")
 @RequiredArgsConstructor
 public class DirectoryController {
 
@@ -29,7 +32,7 @@ public class DirectoryController {
     /**
      * Searches and filters the artisan directory for authenticated viewers.
      *
-     * <p>Requires an authenticated session. Anonymous callers receive a 401 response.
+     * <p>Requires an authenticated session. Anonymous callers receive a 403 Forbidden response.
      * Non-premium viewers receive directory cards with the artisan name anonymised;
      * premium viewers and administrators see the real artisan name.
      *
@@ -38,6 +41,7 @@ public class DirectoryController {
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Search artisan directory", description = "Faceted full-text search across verified artisans supporting keyword, category, wilaya, rating, materials, techniques, and epochs. Requires authentication. Non-premium viewers receive directory cards with masked names ('Artisan #XXXXX'); premium viewers and administrators receive real artisan names.")
     public ResponseEntity<ApiResponse<PaginatedResponse<ArtisanDirectoryCardDTO>>> search(
             @Valid @ModelAttribute DirectorySearchFilterDTO filter
     ) {

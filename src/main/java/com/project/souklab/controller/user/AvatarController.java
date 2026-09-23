@@ -24,12 +24,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * REST controller for authenticated user avatar management.
  * Provides multipart avatar upload, quota enforcement, and tier URL resolution.
  */
 @RestController
 @RequestMapping(AvatarUploadSizeFilter.AVATAR_UPLOAD_URI)
+@Tag(name = "User Avatar", description = "Current authenticated user avatar upload, gallery retrieval, activation, and deletion (/api/v1/users/me/avatars)")
 @RequiredArgsConstructor
 @Slf4j
 public class AvatarController {
@@ -44,6 +48,7 @@ public class AvatarController {
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Upload new avatar (/api/v1/users/me/avatars)", description = "Uploads, validates, resizes, and activates a new profile avatar for the currently authenticated user. Enforces image size, allowed extension, ClamAV antivirus scanning, and account avatar quotas. Returns AvatarResponseDTO with URLs for all resolution tiers (thumbnail, medium, full).")
     public ResponseEntity<ApiResponse<AvatarResponseDTO>> uploadAvatar(@RequestParam("file") MultipartFile file) {
         AvatarResponseDTO response = avatarService.uploadAvatar(file);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,6 +63,7 @@ public class AvatarController {
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get avatar gallery history", description = "Retrieves paginated history of avatars uploaded by the authenticated user, ordered by upload date descending.")
     public ResponseEntity<ApiResponse<PaginatedResponse<AvatarResponseDTO>>> listAvatars(
             @PageableDefault(sort = "uploadedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         PaginatedResponse<AvatarResponseDTO> response = avatarService.listAvatars(pageable);
@@ -72,6 +78,7 @@ public class AvatarController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Delete avatar", description = "Deletes a specific avatar record and associated storage files belonging to the authenticated user.")
     public ResponseEntity<ApiResponse<Void>> deleteAvatar(@PathVariable String id) {
         avatarService.deleteAvatar(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Avatar deleted successfully"));
@@ -85,6 +92,7 @@ public class AvatarController {
      */
     @PutMapping("/{id}/activate")
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Activate avatar", description = "Activates a previously uploaded gallery avatar as the primary profile avatar for the authenticated user.")
     public ResponseEntity<ApiResponse<AvatarResponseDTO>> activateAvatar(@PathVariable String id) {
         AvatarResponseDTO response = avatarService.activateAvatar(id);
         return ResponseEntity.ok(ApiResponse.success(response, "Avatar activated successfully"));

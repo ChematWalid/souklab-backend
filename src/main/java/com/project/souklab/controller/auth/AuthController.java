@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.project.souklab.model.AccountRole;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.io.IOException;
 
@@ -45,6 +47,7 @@ import java.io.IOException;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Authentication & Profile", description = "User authentication, registration, token lifecycle, password management, and current user profile (/me)")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -60,6 +63,7 @@ public class AuthController {
      * Registers a new user and returns the account-type-specific profile response.
      */
     @PostMapping("/register")
+    @Operation(summary = "Register user", description = "Registers a new user (CLIENT or ARTISAN). Artisans start in PENDING status awaiting administrator verification; clients are immediately ACTIVE. Returns the account-type-specific ProfileResponse.")
     public ResponseEntity<ApiResponse<ProfileResponse>> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
         ProfileResponse response = authService.registerUser(registrationDTO);
         boolean isPending = response.getAccountStatus() == AccountStatus.PENDING;
@@ -75,6 +79,7 @@ public class AuthController {
      * Authenticates a user and returns JWT access and refresh tokens.
      */
     @PostMapping("/login")
+    @Operation(summary = "Login with credentials", description = "Authenticates user with email and password. Returns JWT access token (1 hour) and refresh token (24 hours) along with user summary.")
     public ResponseEntity<ApiResponse<JwtResponseDTO>> login(@Valid @RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         JwtResponseDTO response = authService.login(loginDTO, request);
         return ResponseEntity.ok(ApiResponse.success(response, "Login successful."));
@@ -84,6 +89,7 @@ public class AuthController {
      * Rotates the provided refresh token and returns a new JWT pair.
      */
     @PostMapping("/refresh")
+    @Operation(summary = "Rotate refresh token", description = "Rotates the provided refresh token and returns a new JWT access and refresh token pair.")
     public ResponseEntity<ApiResponse<JwtResponseDTO>> refreshToken(@Valid @RequestBody TokenRefreshRequestDTO request) {
         JwtResponseDTO response = authService.refreshToken(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Token refreshed successfully."));
@@ -93,6 +99,7 @@ public class AuthController {
      * Revokes tokens for the current user and logs them out.
      */
     @PostMapping("/logout")
+    @Operation(summary = "Logout user", description = "Revokes refresh tokens for the current user and terminates the active session.")
     public ResponseEntity<ApiResponse<Void>> logout(
             @RequestBody(required = false) TokenRefreshRequestDTO tokenRequest,
             HttpServletRequest request) {
@@ -104,6 +111,7 @@ public class AuthController {
      * Verifies the submitted email verification code.
      */
     @PostMapping("/verify-email")
+    @Operation(summary = "Verify email", description = "Validates the 6-digit numeric verification OTP code sent to user upon registration.")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@Valid @RequestBody VerifyEmailRequestDTO request) {
         authService.verifyEmail(request);
         return ResponseEntity.ok(ApiResponse.success(null, "Email verified successfully."));
@@ -113,6 +121,7 @@ public class AuthController {
      * Resends the email verification code to the given address if the account exists and is unverified.
      */
     @PostMapping("/resend-verification")
+    @Operation(summary = "Resend verification email", description = "Issues a fresh 6-digit verification code and invalidates older active codes for an unverified account.")
     public ResponseEntity<ApiResponse<Void>> resendVerification(@Valid @RequestBody ResendVerificationRequestDTO request) {
         authService.resendVerification(request);
         return ResponseEntity.ok(ApiResponse.success(null, "If an unverified account exists for this email, a verification code has been sent."));
@@ -122,6 +131,7 @@ public class AuthController {
      * Initiates the password reset flow for the given email address.
      */
     @PostMapping("/forgot-password")
+    @Operation(summary = "Forgot password", description = "Initiates password reset flow by sending a 6-digit reset code to the provided email if an account exists.")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
         authService.forgotPassword(request);
         return ResponseEntity.ok(ApiResponse.success(null, "If an account exists for this email, instructions have been sent."));
@@ -131,6 +141,7 @@ public class AuthController {
      * Resets the password using the 6-digit code sent via email.
      */
     @PostMapping("/reset-password")
+    @Operation(summary = "Reset password", description = "Resets user password using the 6-digit code sent via email, updating credentials and invalidating active refresh tokens.")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
         authService.resetPassword(request);
         return ResponseEntity.ok(ApiResponse.success(null, "Password reset successfully. You can now log in with your new password."));
@@ -140,6 +151,7 @@ public class AuthController {
      * Changes the authenticated user's password.
      */
     @PostMapping("/change-password")
+    @Operation(summary = "Change password", description = "Allows an authenticated user to change their password by supplying their current password and a new confirmed password.")
     public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequestDTO request) {
         authService.changePassword(request);
         return ResponseEntity.ok(ApiResponse.success(null, "Password changed successfully."));
@@ -150,6 +162,7 @@ public class AuthController {
      */
     @GetMapping("/me")
     @PreAuthorize("@accessControl.canReadProfile(authentication)")
+    @Operation(summary = "Get current user profile (/me)", description = "Retrieves the full profile of the currently authenticated user based on their JWT token. Returns polymorphic ProfileResponse: ArtisanResponseDTO (with bio, address, phone, rating, crafts, wilaya) for artisans, or ClientProfileResponseDTO (with company, clientType) for clients.")
     public ResponseEntity<ApiResponse<ProfileResponse>> getCurrentUser() {
         return ResponseEntity.ok(ApiResponse.success(profileService.getCurrentUser()));
     }
@@ -159,6 +172,7 @@ public class AuthController {
      */
     @PatchMapping("/me")
     @PreAuthorize("@accessControl.canWriteProfile(authentication)")
+    @Operation(summary = "Update current user profile (/me)", description = "Applies JSON Merge Patch updates to the authenticated user's profile. Supports bio, city, address, website, regionId, subCategoryId, materialIds, techniqueIds, epoqueIds for artisans; companyName, clientType for clients. Fields omitted in the JSON payload are preserved unchanged. Returns the updated ProfileResponse.")
     public ResponseEntity<ApiResponse<ProfileResponse>> patchCurrentUser(@Valid @RequestBody(required = false) UserPatchDTO patchDTO) {
         ProfileResponse response = profileService.patchCurrentUser(patchDTO);
         return ResponseEntity.ok(ApiResponse.success(response, "Profile updated successfully."));
@@ -168,6 +182,7 @@ public class AuthController {
      * Completes the artisan or client profile for the authenticated user.
      */
     @PostMapping("/complete-profile")
+    @Operation(summary = "Complete user profile", description = "Onboarding wizard endpoint allowing newly registered users to complete their profile setup with required craft or business details.")
     @PreAuthorize("@accessControl.canWriteProfile(authentication)")
     public ResponseEntity<ApiResponse<ProfileResponse>> completeProfile(@Valid @RequestBody CompleteProfileRequestDTO request) {
         ProfileResponse response = profileService.completeProfile(request);
@@ -178,6 +193,7 @@ public class AuthController {
      * Initiates the Google OAuth2 flow with artisan registration intent.
      */
     @GetMapping("/oauth/google/artisan")
+    @Operation(summary = "Google OAuth2 (Artisan)", description = "Initiates Google OAuth2 login/signup flow with ARTISAN intent cookie and redirects to Google.")
     public void initiateGoogleOAuthArtisan(HttpServletResponse response) throws IOException {
         setIntentCookie(response, ARTISAN_SIGNUP_INTENT);
         response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);
@@ -187,6 +203,7 @@ public class AuthController {
      * Initiates the Google OAuth2 flow with client registration intent.
      */
     @GetMapping("/oauth/google/client")
+    @Operation(summary = "Google OAuth2 (Client)", description = "Initiates Google OAuth2 login/signup flow with CLIENT intent cookie and redirects to Google.")
     public void initiateGoogleOAuthClient(HttpServletResponse response) throws IOException {
         setIntentCookie(response, CLIENT_SIGNUP_INTENT);
         response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);

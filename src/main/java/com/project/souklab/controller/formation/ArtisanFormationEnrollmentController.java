@@ -8,6 +8,8 @@ import com.project.souklab.dto.formation.FormationPublicViewDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.service.formation.FormationEnrollmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -33,6 +35,7 @@ import java.nio.charset.StandardCharsets;
  * REST controller managing peer artisan workshop discovery, workshop enrollment reservations,
  * cancellation workflows, enrollment history, and protected course document downloads.
  */
+@Tag(name = "Masterclass Catalog & Enrollment", description = "Discovery, peer reservation, cancellation, and syllabus downloads for masterclass workshops")
 @RestController
 @RequestMapping("/api/v1/artisan/formations")
 @PreAuthorize("@accessControl.canManageArtisanFormations(authentication)")
@@ -48,6 +51,7 @@ public class ArtisanFormationEnrollmentController {
      * @param pageable pagination and sorting parameters
      * @return 200 OK containing paginated formation summary cards
      */
+    @Operation(summary = "Browse masterclass catalog", description = "Browses published peer masterclasses, sorted by schedule date.")
     @GetMapping("/catalog")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationSummaryDTO>>> getPublishedCatalog(
             @PageableDefault(sort = "scheduledAt", direction = Sort.Direction.ASC) Pageable pageable
@@ -62,6 +66,7 @@ public class ArtisanFormationEnrollmentController {
      * @param id formation unique identifier
      * @return 200 OK containing comprehensive public view representation
      */
+    @Operation(summary = "Get published masterclass details", description = "Retrieves full details of a published masterclass including capacity and syllabus files.")
     @GetMapping("/catalog/{id}")
     public ResponseEntity<ApiResponse<FormationPublicViewDTO>> getPublishedFormationDetails(
             @PathVariable String id
@@ -76,6 +81,7 @@ public class ArtisanFormationEnrollmentController {
      * @param id formation unique identifier
      * @return 200 OK with confirmed enrollment response DTO
      */
+    @Operation(summary = "Enroll in masterclass", description = "Enrolls the authenticated artisan in a published masterclass workshop (blocks self-enrollment).")
     @PostMapping("/{id}/enroll")
     public ResponseEntity<ApiResponse<FormationEnrollmentResponseDTO>> enroll(
             @PathVariable String id
@@ -90,6 +96,7 @@ public class ArtisanFormationEnrollmentController {
      * @param id formation unique identifier
      * @return 200 OK with updated cancelled enrollment response DTO
      */
+    @Operation(summary = "Cancel masterclass enrollment", description = "Cancels a confirmed reservation before the workshop cancellation cutoff deadline.")
     @PostMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<FormationEnrollmentResponseDTO>> cancel(
             @PathVariable String id
@@ -104,6 +111,7 @@ public class ArtisanFormationEnrollmentController {
      * @param pageable pagination parameters
      * @return 200 OK containing paginated enrollment details
      */
+    @Operation(summary = "List my masterclass enrollments", description = "Retrieves paginated enrollment history and upcoming workshops for the authenticated artisan.")
     @GetMapping("/my-enrollments")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationEnrollmentDetailDTO>>> getMyEnrollments(
             @PageableDefault(sort = "enrolledAt", direction = Sort.Direction.DESC) Pageable pageable
@@ -120,6 +128,7 @@ public class ArtisanFormationEnrollmentController {
      * @param fileId course file unique identifier
      * @return 200 OK with downloadable binary resource stream
      */
+    @Operation(summary = "Download course document", description = "Streams protected course material attachment (restricted to confirmed participants and author).")
     @GetMapping("/{id}/files/{fileId}/download")
     public ResponseEntity<Resource> downloadCourseFile(
             @PathVariable String id,

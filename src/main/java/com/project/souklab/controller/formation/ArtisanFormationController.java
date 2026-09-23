@@ -8,6 +8,8 @@ import com.project.souklab.dto.formation.FormationResponseDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.dto.formation.FormationUpdateDTO;
 import com.project.souklab.service.formation.FormationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
  * Handles formation drafts, updates, thumbnail and course material uploads,
  * review submission, and lifecycle soft deletion.
  */
+@Tag(name = "Masterclass Authoring", description = "Artisan masterclass course authoring, syllabus uploads, and review submissions")
 @RestController
 @RequestMapping("/api/v1/artisan/formations")
 @PreAuthorize("@accessControl.canManageArtisanFormations(authentication)")
@@ -47,6 +50,7 @@ public class ArtisanFormationController {
      * @param dto formation creation payload
      * @return 201 Created with created formation response DTO
      */
+    @Operation(summary = "Create masterclass draft", description = "Create a new formation draft. Requires accredited instructor status (isTeacher = true).")
     @PostMapping
     public ResponseEntity<ApiResponse<FormationResponseDTO>> createFormation(
             @Valid @RequestBody FormationCreateDTO dto
@@ -63,6 +67,7 @@ public class ArtisanFormationController {
      * @param dto formation update payload
      * @return 200 OK with updated formation response DTO
      */
+    @Operation(summary = "Update masterclass", description = "Updates curriculum, price, and schedule of an authored masterclass.")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<FormationResponseDTO>> updateFormation(
             @PathVariable String id,
@@ -79,6 +84,7 @@ public class ArtisanFormationController {
      * @param file multipart image file
      * @return 200 OK with updated formation response DTO
      */
+    @Operation(summary = "Upload formation thumbnail", description = "Upload a showcase thumbnail photograph for the masterclass (multipart/form-data).")
     @PostMapping(value = "/{id}/thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<FormationResponseDTO>> uploadThumbnail(
             @PathVariable String id,
@@ -95,6 +101,7 @@ public class ArtisanFormationController {
      * @param file multipart attachment file
      * @return 201 Created with uploaded formation file response DTO
      */
+    @Operation(summary = "Upload course attachment", description = "Uploads a course syllabus or resource document attachment (PDF/doc, multipart/form-data).")
     @PostMapping(value = "/{id}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<FormationFileResponseDTO>> uploadCourseFile(
             @PathVariable String id,
@@ -112,6 +119,7 @@ public class ArtisanFormationController {
      * @param fileId course file unique identifier
      * @return 200 OK confirmation
      */
+    @Operation(summary = "Delete course attachment", description = "Deletes a syllabus or resource document attachment from an authored formation.")
     @DeleteMapping("/{id}/files/{fileId}")
     public ResponseEntity<ApiResponse<Void>> deleteCourseFile(
             @PathVariable String id,
@@ -127,6 +135,7 @@ public class ArtisanFormationController {
      * @param id formation unique identifier
      * @return 200 OK with updated formation response DTO
      */
+    @Operation(summary = "Submit masterclass for review", description = "Submits a draft or rejected masterclass for administrative approval.")
     @PostMapping("/{id}/submit")
     public ResponseEntity<ApiResponse<FormationResponseDTO>> submitForReview(
             @PathVariable String id
@@ -141,6 +150,7 @@ public class ArtisanFormationController {
      * @param id formation unique identifier
      * @return 200 OK confirmation
      */
+    @Operation(summary = "Delete masterclass", description = "Soft-deletes an authored masterclass.")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteFormation(
             @PathVariable String id
@@ -155,6 +165,7 @@ public class ArtisanFormationController {
      * @param pageable pagination parameters
      * @return 200 OK with paginated list of formation summaries
      */
+    @Operation(summary = "List authored masterclasses", description = "Retrieves paginated masterclasses authored by the authenticated artisan.")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationSummaryDTO>>> getMyFormations(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
@@ -169,6 +180,7 @@ public class ArtisanFormationController {
      * @param id formation unique identifier
      * @return 200 OK with complete formation details
      */
+    @Operation(summary = "Get authored masterclass details", description = "Retrieves complete formation details including syllabus materials and moderation history.")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<FormationResponseDTO>> getFormationDetails(
             @PathVariable String id

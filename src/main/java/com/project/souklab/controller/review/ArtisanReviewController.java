@@ -20,10 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * Formation review endpoints and public artisan review listing.
  */
 @RestController
+@Tag(name = "Artisan Reviews", description = "Public artisan review listing, workshop review submissions, and rating updates")
 @RequiredArgsConstructor
 public class ArtisanReviewController {
 
@@ -37,6 +41,7 @@ public class ArtisanReviewController {
      * @return visible reviews
      */
     @GetMapping("/api/v1/artisans/{artisanId}/reviews")
+    @Operation(summary = "List artisan reviews", description = "Retrieves paginated public reviews and ratings for a given artisan.")
     public ResponseEntity<ApiResponse<Page<ArtisanReviewResponseDTO>>> list(
             @PathVariable String artisanId,
             Pageable pageable) {
@@ -52,6 +57,7 @@ public class ArtisanReviewController {
      */
     @PostMapping("/api/v1/artisan/formations/{formationId}/reviews")
     @PreAuthorize("@accessControl.canManageArtisanReviews(authentication)")
+    @Operation(summary = "Submit workshop review", description = "Submits a rating and written review for an attended masterclass or formation.")
     public ResponseEntity<ApiResponse<ArtisanReviewResponseDTO>> create(
             @PathVariable String formationId,
             @Valid @RequestBody ArtisanReviewRequestDTO request) {
@@ -68,6 +74,7 @@ public class ArtisanReviewController {
      */
     @PutMapping("/api/v1/artisan/reviews/{reviewId}")
     @PreAuthorize("@accessControl.canManageArtisanReviews(authentication)")
+    @Operation(summary = "Update review", description = "Updates an existing review submitted by the authenticated user.")
     public ResponseEntity<ApiResponse<ArtisanReviewResponseDTO>> update(
             @PathVariable String reviewId,
             @Valid @RequestBody ArtisanReviewRequestDTO request) {
@@ -82,6 +89,7 @@ public class ArtisanReviewController {
      */
     @DeleteMapping("/api/v1/artisan/reviews/{reviewId}")
     @PreAuthorize("@accessControl.canManageArtisanReviews(authentication)")
+    @Operation(summary = "Delete review", description = "Removes a review submitted by the authenticated user.")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String reviewId) {
         reviewService.delete(reviewId);
         return ResponseEntity.ok(ApiResponse.success(null, "Review removed successfully."));

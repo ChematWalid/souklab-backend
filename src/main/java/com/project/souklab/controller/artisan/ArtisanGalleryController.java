@@ -3,6 +3,8 @@ package com.project.souklab.controller.artisan;
 import com.project.souklab.dto.artisan.GalleryImageResponseDTO;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.service.artisan.ArtisanGalleryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +27,7 @@ import java.util.List;
  * REST controller for authenticated artisan showcase gallery operations.
  * Handles portfolio image uploads, sequential ordering, retrieval, and deletion.
  */
+@Tag(name = "Artisan Showcase Gallery", description = "Portfolio image upload, display ordering, and showcase management for artisans")
 @RestController
 @RequestMapping("/api/v1/artisan/gallery")
 @PreAuthorize("@accessControl.canManageArtisanContent(authentication)")
@@ -41,6 +44,7 @@ public class ArtisanGalleryController {
      * @param caption optional caption description
      * @return 201 Created with uploaded gallery image DTO
      */
+    @Operation(summary = "Upload portfolio image", description = "Upload a portfolio showcase image (multipart/form-data) with optional title and caption.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<GalleryImageResponseDTO>> uploadImage(
             @RequestParam("file") MultipartFile file,
@@ -57,6 +61,7 @@ public class ArtisanGalleryController {
      *
      * @return 200 OK with list of gallery images
      */
+    @Operation(summary = "Get artisan gallery", description = "Retrieve all showcase gallery images belonging to the authenticated artisan ordered by sequence.")
     @GetMapping
     public ResponseEntity<ApiResponse<List<GalleryImageResponseDTO>>> getMyGallery() {
         List<GalleryImageResponseDTO> gallery = artisanGalleryService.getMyGallery();
@@ -69,6 +74,7 @@ public class ArtisanGalleryController {
      * @param imageIds complete list of active gallery image IDs in desired sequence
      * @return 200 OK with success confirmation
      */
+    @Operation(summary = "Reorder gallery images", description = "Update the display sequence of active showcase gallery images.")
     @PutMapping("/order")
     public ResponseEntity<ApiResponse<Void>> reorderGallery(@RequestBody List<String> imageIds) {
         artisanGalleryService.reorderGallery(imageIds);
@@ -81,6 +87,7 @@ public class ArtisanGalleryController {
      * @param id the unique identifier of the image to delete
      * @return 200 OK with success confirmation
      */
+    @Operation(summary = "Delete gallery image", description = "Soft-deletes a portfolio showcase photograph by its identifier.")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteImage(@PathVariable("id") String id) {
         artisanGalleryService.deleteImage(id);

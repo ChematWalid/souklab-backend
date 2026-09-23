@@ -3,6 +3,8 @@ package com.project.souklab.controller.artisan;
 import com.project.souklab.dto.artisan.CertificationResponseDTO;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.service.artisan.ArtisanCertificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,7 @@ import java.util.List;
  * REST controller for authenticated artisan professional credentials and certifications.
  * Handles certification document uploads, listing, and soft-deletion operations.
  */
+@Tag(name = "Artisan Certifications", description = "Professional credentials and qualification certificates management for artisans")
 @RestController
 @RequestMapping("/api/v1/artisan/certifications")
 @PreAuthorize("@accessControl.canManageArtisanContent(authentication)")
@@ -43,6 +46,7 @@ public class ArtisanCertificationController {
      * @param expiresAt date of expiration if applicable
      * @return 201 Created with uploaded certification DTO
      */
+    @Operation(summary = "Upload certification document", description = "Upload and record an official qualification or certification document (PDF/image, multipart/form-data).")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<CertificationResponseDTO>> uploadCertification(
             @RequestParam("file") MultipartFile file,
@@ -63,6 +67,7 @@ public class ArtisanCertificationController {
      *
      * @return 200 OK with list of certifications
      */
+    @Operation(summary = "Get artisan certifications", description = "Retrieve all professional certifications and credentials belonging to the authenticated artisan.")
     @GetMapping
     public ResponseEntity<ApiResponse<List<CertificationResponseDTO>>> getMyCertifications() {
         List<CertificationResponseDTO> certifications = artisanCertificationService.getMyCertifications();
@@ -75,6 +80,7 @@ public class ArtisanCertificationController {
      * @param id the unique identifier of the certification to delete
      * @return 200 OK with success confirmation
      */
+    @Operation(summary = "Delete certification", description = "Soft-deletes a professional qualification credential by its identifier.")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCertification(@PathVariable("id") String id) {
         artisanCertificationService.deleteCertification(id);

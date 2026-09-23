@@ -6,6 +6,8 @@ import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.service.feed.FeedPostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * Public feed and authenticated post management endpoints.
  */
+@Tag(name = "Community Feed", description = "Public craft feed browsing, post publication, editing, deletion, and media attachments")
 @RestController
 @RequestMapping("/api/v1/feed")
 @RequiredArgsConstructor
@@ -42,6 +45,7 @@ public class FeedPostController {
      * @param pageable pagination configuration
      * @return published posts
      */
+    @Operation(summary = "List public feed posts", description = "Browse paginated feed posts published across the platform with optional type filtering.")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<FeedPostResponseDTO>>> list(
             @RequestParam(required = false) FeedPostType type,
@@ -55,6 +59,7 @@ public class FeedPostController {
      * @param id post identifier
      * @return published post
      */
+    @Operation(summary = "Get published feed post", description = "Retrieve a single published feed post by its identifier.")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<FeedPostResponseDTO>> get(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(feedPostService.getPublic(id)));
@@ -66,6 +71,7 @@ public class FeedPostController {
      * @param request post payload
      * @return created pending post
      */
+    @Operation(summary = "Submit feed post", description = "Create and submit a new feed post for administrative moderation review.")
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<FeedPostResponseDTO>> create(@Valid @RequestBody FeedPostCreateDTO request) {
@@ -79,6 +85,7 @@ public class FeedPostController {
      * @param request post payload
      * @return updated post
      */
+    @Operation(summary = "Update feed post", description = "Update the content, craft tag, or title of an owned feed post.")
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<FeedPostResponseDTO>> update(@PathVariable String id, @Valid @RequestBody FeedPostCreateDTO request) {
@@ -91,6 +98,7 @@ public class FeedPostController {
      * @param id post identifier
      * @return empty success response
      */
+    @Operation(summary = "Delete feed post", description = "Soft-deletes or removes an owned feed post by its identifier.")
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> remove(@PathVariable String id) {
@@ -105,6 +113,7 @@ public class FeedPostController {
      * @param file image payload
      * @return stored attachment
      */
+    @Operation(summary = "Upload post media attachment", description = "Upload an image attachment for an existing authored feed post (multipart/form-data).")
     @PostMapping(value = "/{id}/media", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<FeedPostMediaResponseDTO>> addMedia(@PathVariable String id, @RequestParam("file") MultipartFile file) {
@@ -118,6 +127,7 @@ public class FeedPostController {
      * @param mediaId attachment identifier
      * @return empty success response
      */
+    @Operation(summary = "Delete post media attachment", description = "Removes a specific media attachment from an owned feed post.")
     @DeleteMapping("/{id}/media/{mediaId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> removeMedia(@PathVariable String id, @PathVariable String mediaId) {
