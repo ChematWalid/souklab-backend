@@ -4,6 +4,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.model.User;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +32,7 @@ public class ViewerPremiumResolver {
 
     /**
      * Resolves contact-info lock state for the viewer inferred from the current
-     * {@link org.springframework.security.core.context.SecurityContext}.
+     * {@link SecurityContext}.
      *
      * <p>Intended for the directory search path, where the viewer entity is not
      * pre-loaded and there is no self-view concept.
