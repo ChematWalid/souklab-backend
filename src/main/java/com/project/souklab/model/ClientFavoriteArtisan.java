@@ -13,6 +13,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 /**
  * Entity representing an artisan bookmarked by a client.
  */
@@ -47,6 +50,7 @@ public class ClientFavoriteArtisan extends ClientFavorite {
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "artisan_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Artisan artisan;
 
     /**

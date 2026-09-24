@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 /**
  * Base mapped superclass for client favorites.
  * Associates a favorite bookmark entry with the owning {@link Client}.
@@ -25,5 +28,6 @@ public abstract class ClientFavorite extends BaseEntity {
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "client_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Client client;
 }
