@@ -59,20 +59,24 @@ export interface AuthResponse {
   tokenType: 'Bearer';
   accessToken: string;
   refreshToken: string;
-  expiresInSeconds: number;
-  user: UserSummary;
+  expiresIn: number;
+  user: UserSummary | ArtisanResponse | ClientProfileResponse;
+  permissions?: string[];
 }
 
 export interface LoginRequest {
-  email: string;
-  password: string;
+  email?: string;
+  username?: string;
+  password: string; // max 128 characters
 }
 
 export interface RegisterRequest {
   email: string;
-  password: string;
-  name: string;
-  role: 'ARTISAN' | 'CLIENT';
+  password: string; // 8 to 128 characters
+  firstName: string;
+  lastName: string;
+  name?: string;
+  accountType: 'ARTISAN' | 'CLIENT';
   phone?: string;
 }
 

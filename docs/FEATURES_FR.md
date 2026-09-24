@@ -156,7 +156,7 @@ Inscription → PENDING (e-mail non vérifié)
 | Champ | Type | Obligatoire | Validation |
 |---|---|---|---|
 | `email` | `String` | ✅ Oui | `@NotBlank`, `@Email` |
-| `password` | `String` | ✅ Oui | `@NotBlank`, `@Size(min=8)` — règles de robustesse supplémentaires appliquées dans le service |
+| `password` | `String` | ✅ Oui | `@NotBlank`, `@Size(min=8, max=128)` — règles de robustesse supplémentaires appliquées dans le service |
 | `name` | `String` | Non | — |
 | `firstName` | `String` | Non | — |
 | `lastName` | `String` | Non | — |

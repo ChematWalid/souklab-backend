@@ -21,7 +21,13 @@ Authorization is capability-based. The `Permission` enum and the `permissions`/`
 | `permission:admin:catalog` | Catalog taxonomy management (techniques, epoques, regions CRUD) | `AdminCatalogController`, `AccessControlService` |
 | `permission:client:favorites` | Client favorite artisan management (add, list, check status, remove) | `ClientFavoriteArtisanController`, `AccessControlService` |
 
-Public resources remain public at the HTTP layer: authentication bootstrap, catalog taxonomies, directory search, public feed reads, public artisan profiles, and public reviews. File URLs still require an authenticated request; `FileAccessService` allows public media with cacheable headers while certification and formation files additionally require `FILE_READ` plus ownership, enrollment, or the relevant administrator permission.
+Public resources are strictly scoped to `HttpMethod.GET` at the HTTP security filter layer: catalog taxonomies (`/catalog/**`), public directory search (`/public/**`), public feed reads (`/feed`), public artisan profiles (`/artisan/{id}`), public subscription plans (`/subscriptions/plans`), and public reviews (`/artisans/*/reviews`). All write, modify, or delete operations on these paths require authentication and appropriate permissions. File URLs require an authenticated request; `FileAccessService` allows public media with cacheable headers while certification and formation files additionally require `FILE_READ` plus ownership, enrollment, or the relevant administrator permission.
+
+## Administrative Self-Protection Guardrails
+
+To prevent accidental permanent administrative lockout:
+- An administrator cannot ban or timeout their own account (`UserManagementService`).
+- An administrator cannot revoke their own `permission:admin:users` permission (`PermissionManagementService`).
 
 ## Audit rules
 

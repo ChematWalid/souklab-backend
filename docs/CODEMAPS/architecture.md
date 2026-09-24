@@ -44,6 +44,7 @@
   - `UserRateLimitFilter`: User-based token-bucket limiter on authenticated requests.
   - `AvatarUploadRateLimitFilter` / `FileRateLimitFilter`: Storage-specific rate limiters.
   - *All rate limiters emit `Retry-After: <seconds>` on HTTP 429.*
+  - **Browser Security & Transport**: Enforces CSP, Permissions-Policy, X-Frame-Options (`DENY`), X-Content-Type-Options (`nosniff`), Referrer-Policy (`no-referrer`), and reverse proxy forward headers (`framework`). Public endpoints (`/feed`, `/catalog/**`, `/public/**`, `/subscriptions/plans`, `/artisans/*/reviews`) strictly enforce `GET`-only access without credentials.
 - **Services (`service/`, `filestorage/`)**:
   Own `@Transactional` boundaries. Enforce domain invariants (e.g. self-enrollment guard, single review per attended session, 14-day formateur cooldown). Handle post-commit storage cleanups.
 - **Persistence (`dao/`, `model/`)**:

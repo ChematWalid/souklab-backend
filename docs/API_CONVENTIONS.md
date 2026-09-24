@@ -210,3 +210,23 @@ not merely validated-and-rejected.
 - Secrets never hardcoded — config flows `.env` → `application.properties`
   → `AppProperties`, and test/scratch scripts with real credentials stay
   outside the repository entirely.
+
+---
+
+## 9. Security Headers & Transport Scoping
+
+Every HTTP response emitted by the API is hardened with standard security headers:
+- `Content-Security-Policy: default-src 'self'; frame-ancestors 'none'; object-src 'none';`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: no-referrer`
+
+### Public Endpoints Method Scoping
+Public endpoints (`/feed`, `/catalog/**`, `/public/**`, `/subscriptions/plans`, `/artisans/*/reviews`) permit unauthenticated access **only** via `HttpMethod.GET`. Any mutating request (`POST`, `PUT`, `PATCH`, `DELETE`) to these paths without valid credentials returns HTTP 401 Unauthorized at the security filter chain level.
+
+### Defense-in-Depth & Anti-Enumeration
+- **Anti-Enumeration**: `POST /api/v1/auth/verify-email` returns uniform HTTP 400 (`"Invalid or expired code."`) whether the code is invalid/expired or the email is not registered.
+- **Timing Protection**: Verification token hash comparison uses constant-time matching (`MessageDigest.isEqual`).
+- **DoS Protection**: Password inputs across authentication and password-change DTOs are strictly capped at 128 characters to mitigate computational denial-of-service on BCrypt hashing.
+- **Admin Self-Protection**: Administrators cannot ban/timeout their own account or revoke their own `permission:admin:users` permission.

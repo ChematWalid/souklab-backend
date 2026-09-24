@@ -32,6 +32,8 @@ profile.
 | OAuth/payment | `GOOGLE_*`, `OAUTH_*`, `CHARGILY_*` | `spring.security.oauth2.*`, `app.oauth.*`, `app.chargily.*` | OAuth/payment services | Optional and disableable; secrets externalized |
 | WebSocket relay | `RELAY_*`, `CHAT_*` | `app.relay.*`, `app.chat.*` | `AppProperties.Relay/Chat`, WebSocket config/services | RabbitMQ/STOMP required in production; explicit destinations and credentials |
 | Admin bootstrap | `APP_ADMIN_*` | `app.admin.*` | `DataSeeder`, `ConfigurationPolicyValidator` | Bootstrap disabled in production |
+| Reverse proxy headers | `SERVER_FORWARD_HEADERS_STRATEGY` | `server.forward-headers-strategy` | Spring Framework / WebServer | Set to `framework` so reverse proxies (Nginx/Traefik/Cloudflare) forward TLS scheme and client IP for accurate rate-limiting and secure cookies |
+| Security headers | N/A | Spring Security DSL | `SecurityConfig` | Enforces CSP, Permissions-Policy, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, and Referrer-Policy: no-referrer |
 | CORS and support | `APP_CORS_ALLOWED_ORIGINS`, `APP_SUPPORT_*` | `app.cors.*`, `app.support.*` | `AppProperties.Cors/SupportConfig`, security config | Explicit origins; wildcard rejected when credentials are enabled |
 | Runtime logging | `APP_LOGGING_LEVEL_*` | `logging.level.*` | Spring Boot logging | Production should use `INFO` or stricter; request/debug logging disabled |
 

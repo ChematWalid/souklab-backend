@@ -156,7 +156,7 @@ Registration → PENDING (email unverified)
 | Field | Type | Required | Validation |
 |---|---|---|---|
 | `email` | `String` | ✅ Yes | `@NotBlank`, `@Email` |
-| `password` | `String` | ✅ Yes | `@NotBlank`, `@Size(min=8)` — additional strength rules enforced in service |
+| `password` | `String` | ✅ Yes | `@NotBlank`, `@Size(min=8, max=128)` — additional strength rules enforced in service |
 | `name` | `String` | No | — |
 | `firstName` | `String` | No | — |
 | `lastName` | `String` | No | — |

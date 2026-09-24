@@ -17,13 +17,13 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 
 ### Auth & Onboarding (`/api/v1/auth`)
 - `POST /register`: Register artisan/client (`accountType`: `ARTISAN` | `CLIENT`)
-- `POST /verify-email`: 6-digit numeric PIN verification (max 5 attempts, 15m exp)
+- `POST /verify-email`: 6-digit numeric PIN verification (uniform 400 on invalid/expired/nonexistent to prevent enumeration)
 - `POST /resend-verification`: Generic anti-enumeration response
-- `POST /login`: Credential validation -> returns JWT access + refresh tokens
+- `POST /login`: Credential validation (email/username, password max 128 chars) -> returns JWT access + refresh tokens
 - `POST /refresh`: Token rotation with reuse detection
 - `POST /logout`: Invalidate refresh token (transactional)
-- `POST /change-password`: Update password & invalidate active sessions
-- `POST /forgot-password` / `POST /reset-password`: One-time password reset flow
+- `POST /change-password`: Update password (`oldPassword`, `newPassword` 8-128 chars, `@DifferentPasswords`)
+- `POST /forgot-password` / `POST /reset-password`: One-time password reset flow (code, `newPassword` 8-128 chars)
 - `GET /me`: Permission-aware user profile
 - `PATCH /me`: JSON merge patch (omitted=untouched, null=cleared, rejects credential edits)
 
@@ -75,8 +75,8 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `GET /subscriptions/plans`: Public subscription plans
 - `POST /subscriptions/checkout`: Initiate Chargily Pay V2 hosted checkout
 - `POST /integrations/chargily/webhook`: Signature-verified, idempotent webhook processing
-- `GET /admin/users` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration
-- `GET|POST|DELETE /admin/users/{userId}/permissions`: Granular permission assignments
+- `GET /admin/users` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration (self-ban and self-timeout blocked -> 400)
+- `GET|POST|DELETE /admin/users/{userId}/permissions`: Granular permission assignments (self-revocation blocked -> 400)
 - `POST /admin/analytics/jobs` & `POST /admin/analytics/rollups/*`: Async reporting jobs & CSV exports
 - `POST|PUT|PATCH|DELETE /admin/catalog/**`: Full taxonomy CRUD (`permission:admin:catalog`)
 

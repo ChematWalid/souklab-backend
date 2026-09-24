@@ -32,15 +32,17 @@ To fast-track frontend development, the following battle-tested templates and re
 Use `Authorization: Bearer <accessToken>` for all protected REST calls. Login and refresh return access/refresh tokens and expiry metadata. Keep tokens in secure storage (e.g. secure memory or HttpOnly cookies) and never log them.
 
 ### Primary Auth & Profile Endpoints
-- `POST /api/v1/auth/register`: Starts onboarding (Artisan: `PENDING` validation, Client: `ACTIVE`).
-- `POST /api/v1/auth/login`: Authenticates credentials, returns `accessToken` (1h), `refreshToken` (24h), and user summary.
+- `POST /api/v1/auth/register`: Starts onboarding (Artisan: `PENDING` validation, Client: `ACTIVE`). Payload: `email`, `password` (8–128 chars), `firstName`, `lastName`, `accountType` (`'ARTISAN' | 'CLIENT'`).
+- `POST /api/v1/auth/login`: Authenticates credentials (`email` or `username`, `password` max 128 chars), returns `accessToken` (1h), `refreshToken` (24h), and user profile summary.
 - `POST /api/v1/auth/refresh`: Rotates the refresh token and returns a new token pair.
 - `POST /api/v1/auth/logout`: Revokes active refresh session.
-- `POST /api/v1/auth/verify-email`: Verifies 6-digit OTP code sent on registration.
+- `POST /api/v1/auth/verify-email`: Verifies 6-digit OTP code sent on registration. Uniform HTTP 400 (`"Invalid or expired code."`) on invalid/expired codes or unknown emails prevents user enumeration.
 - `POST /api/v1/auth/resend-verification`: Issues a fresh 6-digit verification code.
 - `POST /api/v1/auth/forgot-password`: Requests 6-digit password reset code via email.
-- `POST /api/v1/auth/reset-password`: Resets password using the 6-digit code.
-- `POST /api/v1/auth/change-password`: Authenticated endpoint to change password.
+- `POST /api/v1/auth/reset-password`: Resets password using the 6-digit code (`email`, `code`, `newPassword` 8–128 chars).
+- `POST /api/v1/auth/change-password`: Authenticated endpoint to change password (`oldPassword` max 128 chars, `newPassword` 8–128 chars, `@DifferentPasswords`).
+- `GET /api/v1/auth/oauth/google/artisan`: Google OAuth initiation with artisan intent cookie (`souklab_oauth_intent=ARTISAN`, HttpOnly, SameSite=Lax, Secure).
+- `GET /api/v1/auth/oauth/google/client`: Google OAuth initiation with client intent cookie (`souklab_oauth_intent=CLIENT`, HttpOnly, SameSite=Lax, Secure).
 - `POST /api/v1/auth/complete-profile`: Onboarding wizard to complete craft/business details.
 - `GET /api/v1/auth/me`: Retrieves current user profile (`ProfileResponse`).
 - `PATCH /api/v1/auth/me`: Partial updates using JSON Merge Patch semantics.
@@ -48,6 +50,15 @@ Use `Authorization: Bearer <accessToken>` for all protected REST calls. Login an
 - `GET /api/v1/users/me/avatars`: Lists uploaded avatar history.
 - `PUT /api/v1/users/me/avatars/{id}/activate`: Re-activates a past gallery avatar.
 - `DELETE /api/v1/users/me/avatars/{id}`: Deletes an avatar from storage.
+
+### Security Headers & Public Endpoint Scoping
+- **Public Endpoints Method Scoping**: Unauthenticated public access to `/feed`, `/catalog/**`, `/public/**`, `/subscriptions/plans`, and `/artisans/*/reviews` is restricted strictly to `HttpMethod.GET`. Any unauthenticated modification requests (`POST`, `PUT`, `PATCH`, `DELETE`) return `401 Unauthorized`.
+- **Security Headers Enforced**: Every HTTP response carries standard browser hardening headers:
+  - `Content-Security-Policy: default-src 'self'; frame-ancestors 'none'; object-src 'none';`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+  - `X-Frame-Options: DENY`
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: no-referrer`
 
 ### `GET /api/v1/auth/me` Polymorphic Contract
 The `data` payload returned by `GET /api/v1/auth/me` is account-type-specific:
