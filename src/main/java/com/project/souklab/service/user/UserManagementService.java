@@ -24,6 +24,7 @@ import com.project.souklab.security.Permission;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.security.RefreshTokenService;
+import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -137,6 +138,11 @@ public class UserManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
 
+        String currentAdminEmail = SecurityUtils.getCurrentUsername();
+        if (currentAdminEmail != null && currentAdminEmail.equalsIgnoreCase(user.getEmail())) {
+            throw new BadRequestException("Administrators cannot ban or timeout their own account.");
+        }
+
         user.setStatus(AccountStatus.SUSPENDED);
         user.setBanReason(reason != null ? reason : appProperties.getAdmin().getDefaultBanReason());
         user.setBannedUntil(null);
@@ -168,6 +174,11 @@ public class UserManagementService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
+
+        String currentAdminEmail = SecurityUtils.getCurrentUsername();
+        if (currentAdminEmail != null && currentAdminEmail.equalsIgnoreCase(user.getEmail())) {
+            throw new BadRequestException("Administrators cannot ban or timeout their own account.");
+        }
 
         user.setStatus(AccountStatus.SUSPENDED);
         user.setBanReason(reason != null ? reason : appProperties.getAdmin().getDefaultTimeoutReason());

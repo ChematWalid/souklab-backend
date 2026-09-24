@@ -306,7 +306,7 @@ public class AuthService {
     public void verifyEmail(VerifyEmailRequestDTO dto) {
         String email = dto.getEmail().trim().toLowerCase();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + dto.getEmail()));
+                .orElseThrow(() -> new BadRequestException("Invalid or expired code."));
 
         verificationTokenService.validateAndConsume(user, VerificationTokenType.EMAIL_VERIFICATION, dto.getCode());
 
@@ -470,7 +470,7 @@ public class AuthService {
         email = email.trim().toLowerCase();
 
         Object emailVerified = oAuth2User.getAttribute("email_verified");
-        if (emailVerified instanceof Boolean verified && !verified) {
+        if (Boolean.FALSE.equals(emailVerified) || (emailVerified instanceof String s && "false".equalsIgnoreCase(s.trim()))) {
             throw new BadRequestException("OAuth provider did not verify the email address.");
         }
 

@@ -3,6 +3,7 @@ package com.project.souklab.service.auth;
 import com.project.souklab.dao.AuthorizationPermissionRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.admin.PermissionAssignmentRequestDTO;
+import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import com.project.souklab.model.User;
 import com.project.souklab.security.AccessControlService;
 import com.project.souklab.security.Permission;
 import com.project.souklab.service.audit.AuditLogService;
+import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -57,6 +59,11 @@ public class PermissionManagementService {
         requireAdmin();
         User user = findUser(userId);
         AuthorizationPermission permission = findPermission(request.getPermission());
+        String currentAdminEmail = SecurityUtils.getCurrentUsername();
+        if (currentAdminEmail != null && currentAdminEmail.equalsIgnoreCase(user.getEmail())
+                && Permission.Admin.USERS.value().equals(permission.getPermissionKey())) {
+            throw new BadRequestException("Administrators cannot revoke their own administrator privileges.");
+        }
         if (!user.getPermissions().remove(permission)) {
             throw new ConflictException("Permission is not assigned.");
         }

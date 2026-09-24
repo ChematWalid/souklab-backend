@@ -96,7 +96,7 @@ public class VerificationTokenService {
 
         String submittedHash = hashToken(submittedCode);
 
-        if (!token.getCodeHash().equals(submittedHash)) {
+        if (!MessageDigest.isEqual(token.getCodeHash().getBytes(StandardCharsets.UTF_8), submittedHash.getBytes(StandardCharsets.UTF_8))) {
             int newAttempts = token.getAttempts() + 1;
             token.setAttempts(newAttempts);
             verificationTokenRepository.save(token);
