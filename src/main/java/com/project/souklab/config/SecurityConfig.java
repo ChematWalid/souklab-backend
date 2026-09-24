@@ -151,12 +151,26 @@ public class SecurityConfig {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
                         .referrerPolicy(referrer -> referrer.policy(
                                 ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER
-                        )))
+                        ))
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'; frame-ancestors 'none'; object-src 'none';")
+                        )
+                        .permissionsPolicyHeader(permissions -> permissions
+                                .policy("camera=(), microphone=(), geolocation=()")
+                        ))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/feed",
+                                "/api/v1/feed/**",
+                                "/api/v1/catalog/**",
+                                "/api/v1/public/**",
+                                "/api/v1/subscriptions/plans",
+                                "/api/v1/artisans/*/reviews"
+                        ).permitAll()
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
@@ -173,12 +187,7 @@ public class SecurityConfig {
                                 "/actuator/health/readiness",
                                 "/error",
                                 "/ws/**",
-                                "/api/v1/catalog/**",
-                                "/api/v1/public/**",
-                                "/api/v1/feed/**",
-                                "/api/v1/subscriptions/plans",
-                                "/api/v1/integrations/chargily/webhook",
-                                "/api/v1/artisans/*/reviews"
+                                "/api/v1/integrations/chargily/webhook"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

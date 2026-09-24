@@ -40,7 +40,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         JwtResponseDTO jwtResponse = authService.processOAuth2Success(oAuth2User, intentRole, request);
 
-        clearIntentCookie(response);
+        clearIntentCookie(request, response);
 
         ApiResponse<JwtResponseDTO> apiResponse = ApiResponse.success(jwtResponse, "Google OAuth authentication successful.");
         servletResponseUtil.writeResponse(response, HttpServletResponse.SC_OK, apiResponse);
@@ -54,18 +54,22 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 }
             }
         }
-        String sessionRole = (String) request.getSession().getAttribute(OAuthCookie.Intent.NAME.value());
-        if (sessionRole != null) {
-            request.getSession().removeAttribute(OAuthCookie.Intent.NAME.value());
-            return sessionRole;
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        if (session != null) {
+            String sessionRole = (String) session.getAttribute(OAuthCookie.Intent.NAME.value());
+            if (sessionRole != null) {
+                session.removeAttribute(OAuthCookie.Intent.NAME.value());
+                return sessionRole;
+            }
         }
         return null;
     }
 
-    private void clearIntentCookie(HttpServletResponse response) {
+    private void clearIntentCookie(HttpServletRequest request, HttpServletResponse response) {
         ResponseCookie clearCookie = ResponseCookie.from(OAuthCookie.Intent.NAME.value(), "")
                 .path("/")
                 .httpOnly(true)
+                .secure(request.isSecure())
                 .sameSite("Lax")
                 .maxAge(0)
                 .build();

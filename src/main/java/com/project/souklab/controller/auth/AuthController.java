@@ -194,8 +194,8 @@ public class AuthController {
      */
     @GetMapping("/oauth/google/artisan")
     @Operation(summary = "Google OAuth2 (Artisan)", description = "Initiates Google OAuth2 login/signup flow with ARTISAN intent cookie and redirects to Google.")
-    public void initiateGoogleOAuthArtisan(HttpServletResponse response) throws IOException {
-        setIntentCookie(response, ARTISAN_SIGNUP_INTENT);
+    public void initiateGoogleOAuthArtisan(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        setIntentCookie(request, response, ARTISAN_SIGNUP_INTENT);
         response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);
     }
 
@@ -204,21 +204,23 @@ public class AuthController {
      */
     @GetMapping("/oauth/google/client")
     @Operation(summary = "Google OAuth2 (Client)", description = "Initiates Google OAuth2 login/signup flow with CLIENT intent cookie and redirects to Google.")
-    public void initiateGoogleOAuthClient(HttpServletResponse response) throws IOException {
-        setIntentCookie(response, CLIENT_SIGNUP_INTENT);
+    public void initiateGoogleOAuthClient(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        setIntentCookie(request, response, CLIENT_SIGNUP_INTENT);
         response.sendRedirect(OAUTH2_GOOGLE_AUTHORIZATION_REDIRECT_URI);
     }
 
     /**
      * Sets the OAuth2 registration intent cookie on the outgoing response.
      *
+     * @param request    the incoming HTTP servlet request
      * @param response   the HTTP response to attach the cookie to
      * @param intentRole the account-type signup intent (for example, {@code "ARTISAN"})
      */
-    private void setIntentCookie(HttpServletResponse response, AccountRole intentRole) {
+    private void setIntentCookie(HttpServletRequest request, HttpServletResponse response, AccountRole intentRole) {
         ResponseCookie cookie = ResponseCookie.from(OAuthCookie.Intent.NAME.value(), intentRole.value())
                 .path("/")
                 .httpOnly(true)
+                .secure(request.isSecure())
                 .sameSite("Lax")
                 .maxAge(appProperties.getOauth().getIntentCookieMaxAgeSeconds())
                 .build();
