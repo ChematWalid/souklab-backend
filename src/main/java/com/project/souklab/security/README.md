@@ -33,6 +33,6 @@ graph TD
 | [`RateLimitFilter`](RateLimitFilter.java) | `OncePerRequestFilter` | Bucket4j rate limiting backed by the configured shared Redis store in production. |
 | [`AvatarUploadRateLimitFilter`](AvatarUploadRateLimitFilter.java) | `OncePerRequestFilter` | Dedicated rate limit filter protecting multipart avatar upload endpoints from denial-of-service bursting. |
 | [`AvatarUploadSizeFilter`](AvatarUploadSizeFilter.java) | `OncePerRequestFilter` | Inspects `Content-Length` and early stream boundaries to reject oversized avatar payloads before memory buffering. |
-| [`OAuth2AuthenticationSuccessHandler`](OAuth2AuthenticationSuccessHandler.java) | Handler | Processes successful Google OAuth2 callbacks: creates or links user accounts, checks account-type intent cookies, and issues JWT tokens. |
+| [`OAuth2AuthenticationSuccessHandler`](OAuth2AuthenticationSuccessHandler.java) | Handler | Processes successful Google OAuth2 callbacks: validates verified email claim, provisions user accounts based on intent cookie, clears the intent cookie, prevents servlet session creation, and redirects with tokens. |
 | [`Permission`](Permission.java) | Authorization contract | Defines the stable granular permission identifiers used by persistence and policy checks. |
 | [`AccessControlService`](AccessControlService.java) | Policy facade | Provides centralized Spring method-security predicates for administrator, artisan, profile, and report access. |

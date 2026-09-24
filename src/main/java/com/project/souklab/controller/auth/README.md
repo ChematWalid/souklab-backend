@@ -192,21 +192,17 @@ Registers a new user on the platform.
 {
   "email": "user@example.dz",
   "password": "StrongPassword123!",
-  "confirmPassword": "StrongPassword123!",
   "firstName": "Fatima",
   "lastName": "Zahra",
-  "phone": "+213550123456",
-  "accountRole": "ARTISAN",
-  "craftCategoryId": "cat-pottery",
-  "subCategoryId": "sub-pottery-trad",
-  "wilayaId": "reg-15"
+  "name": "Fatima Zahra",
+  "accountType": "ARTISAN"
 }
 ```
 
 #### Validation Notes
-- `accountRole`: `"CLIENT"` or `"ARTISAN"`.
-- `password`: Must be 8–72 characters, containing at least one uppercase letter, one lowercase letter, one digit, and one special character.
-- `confirmPassword`: Must match `password` exactly.
+- `accountType`: Required. Either `"CLIENT"` or `"ARTISAN"`.
+- `password`: Required. Must be between 8 and 128 characters.
+- `email`: Required valid email address.
 - Artisans receive initial status `PENDING` awaiting admin validation. Clients receive `ACTIVE` (with `emailVerified: false`).
 
 #### Response (`201 Created`)
@@ -214,8 +210,17 @@ Registers a new user on the platform.
 {
   "success": true,
   "code": 201,
-  "message": "Registration successful. Welcome to Souklab!",
-  "data": { ... ProfileResponse ... }
+  "message": "Registration successful. Please verify your email.",
+  "data": {
+    "id": "e15eabe0-16cc-42e9-aa91-755c96edc611",
+    "email": "user@example.dz",
+    "name": "Fatima Zahra",
+    "firstName": "Fatima",
+    "lastName": "Zahra",
+    "status": "PENDING",
+    "emailVerified": false,
+    "permissions": ["permission:artisan:content"]
+  }
 }
 ```
 
@@ -232,6 +237,7 @@ Authenticates an existing user and returns their JWT token pair.
   "password": "StrongPassword123!"
 }
 ```
+*Note: Clients may authenticate with either `email` or `username`. Password is capped at 128 characters.*
 
 #### Response (`200 OK`)
 ```json
@@ -309,6 +315,7 @@ Validates the 6-digit OTP received via email upon registration.
   "code": "123456"
 }
 ```
+*Note: Returns HTTP 400 Bad Request (`"Invalid or expired code."`) uniformly if the code is invalid/expired or if the email is not registered, preventing user enumeration.*
 
 #### B. `POST /api/v1/auth/resend-verification`
 Requests a fresh 6-digit OTP code for an unverified account.
@@ -336,19 +343,20 @@ Resets the password using the received 6-digit code.
 {
   "email": "user@example.dz",
   "code": "654321",
-  "newPassword": "NewStrongPassword123!",
-  "confirmPassword": "NewStrongPassword123!"
+  "newPassword": "NewStrongPassword123!"
 }
 ```
+*Validation: `email` (valid format), `code` (6-digit numeric pattern `^\d{6}$`), `newPassword` (8–128 characters).*
 
 #### C. `POST /api/v1/auth/change-password` *(Authenticated)*
+Changes the authenticated caller's password.
 ```json
 {
-  "currentPassword": "OldPassword123!",
-  "newPassword": "NewStrongPassword123!",
-  "confirmPassword": "NewStrongPassword123!"
+  "oldPassword": "OldPassword123!",
+  "newPassword": "NewStrongPassword123!"
 }
 ```
+*Validation: `oldPassword` (max 128 characters), `newPassword` (8–128 characters). Enforced by `@DifferentPasswords` so `newPassword` must differ from `oldPassword`.*
 
 ---
 
@@ -357,7 +365,12 @@ Resets the password using the received 6-digit code.
 - **Artisan intent**: `GET /api/v1/auth/oauth/google/artisan`
 - **Client intent**: `GET /api/v1/auth/oauth/google/client`
 
-Redirects browser to Google OAuth consent screen. On callback, sets secure cookies and redirects back to the frontend with auth tokens.
+Initiates Google OAuth2 login/signup flow with account-type intent:
+1. Sets an HTTP-only intent cookie `souklab_oauth_intent` with value `ARTISAN` or `CLIENT`.
+   - Security attributes: `Path=/`, `HttpOnly=true`, `SameSite=Lax`, `Secure` (when request is HTTPS), `Max-Age=300`.
+   - Avoids unwanted session creation (`request.getSession(false)`) to maintain stateless architecture.
+2. Redirects to `/oauth2/authorization/google`.
+3. Upon successful Google authentication, the `OAuth2AuthenticationSuccessHandler` validates verified email (`email_verified == true`), creates/loads the user with the specified role, immediately clears the intent cookie, and redirects to frontend `/oauth/callback?token=...`.
 
 ---
 
@@ -371,6 +384,45 @@ export interface ApiResponse<T> {
   data: T;
   errors?: Record<string, string> | null;
   traceId?: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string; // 8 - 128 characters
+  firstName: string;
+  lastName: string;
+  name?: string;
+  accountType: 'ARTISAN' | 'CLIENT';
+}
+
+export interface LoginRequest {
+  email?: string;
+  username?: string;
+  password: string; // max 128 characters
+}
+
+export interface VerifyEmailRequest {
+  email: string;
+  code: string; // 6 digits
+}
+
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string; // 6 digits
+  newPassword: string; // 8 - 128 characters
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string; // max 128 characters
+  newPassword: string; // 8 - 128 characters
 }
 
 export interface UserSummary {
