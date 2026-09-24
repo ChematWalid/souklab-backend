@@ -1,6 +1,7 @@
 package com.project.souklab.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class LoginDTO {
     private String username;
 
     @NotBlank(message = "Password is required")
+    @Size(max = 128, message = "Password must not exceed 128 characters")
     private String password;
 
     public String getLoginIdentifier() {
