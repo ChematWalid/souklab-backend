@@ -1272,6 +1272,19 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("processOAuth2Success: rejects an OAuth identity when email_verified is string false")
+    void processOAuth2Success_whenEmailVerifiedIsStringFalse_throwsBadRequestException() {
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        when(oAuth2User.getAttribute("sub")).thenReturn("google-sub-string-false");
+        when(oAuth2User.getAttribute("email")).thenReturn("user@example.com");
+        when(oAuth2User.getAttribute("email_verified")).thenReturn("false");
+
+        assertThatThrownBy(() -> authService.processOAuth2Success(oAuth2User, null, null))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("OAuth provider did not verify the email address.");
+    }
+
+    @Test
     @DisplayName("processOAuth2Success: refuses linking an existing unverified account")
     void processOAuth2Success_whenExistingEmailIsUnverified_rejectsLinking() {
         OAuth2User oAuth2User = mock(OAuth2User.class);
@@ -1561,11 +1574,11 @@ class AuthServiceTest {
     }
 
     /**
-     * Verifies verifyEmail throws ResourceNotFoundException when user is not found.
+     * Verifies verifyEmail throws BadRequestException when user is not found to prevent user enumeration.
      */
     @Test
-    @DisplayName("verifyEmail: throws ResourceNotFoundException when user not found")
-    void verifyEmail_whenUserNotFound_throwsResourceNotFoundException() {
+    @DisplayName("verifyEmail: throws BadRequestException when user not found to prevent enumeration")
+    void verifyEmail_whenUserNotFound_throwsBadRequestException() {
         VerifyEmailRequestDTO dto = VerifyEmailRequestDTO.builder()
                 .email("missing@example.com")
                 .code("123456")
@@ -1574,8 +1587,8 @@ class AuthServiceTest {
         when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.verifyEmail(dto))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("User not found with email: missing@example.com");
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Invalid or expired code.");
     }
 
     /**

@@ -5,6 +5,7 @@ import org.mockito.ArgumentMatchers;
 import com.project.souklab.dao.AuthorizationPermissionRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.admin.PermissionAssignmentRequestDTO;
+import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
@@ -98,6 +99,23 @@ class PermissionManagementServiceTest {
         verify(users).save(user);
         verify(audit).logAction(ArgumentMatchers.any(),
                 ArgumentMatchers.eq("u1:" + Permission.Artisan.CONTENT.value()));
+    }
+
+    @Test
+    void rejectsAdminRevokingOwnAdminPermission() {
+        AuthorizationPermission permission = permission(Permission.Admin.USERS, true);
+        User admin = User.builder().email("admin@example.test")
+                .permissions(new HashSet<>(Set.of(permission))).build();
+        when(access.isAdmin(any())).thenReturn(true);
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken("admin@example.test", "credentials", "ROLE_ADMIN"));
+        when(users.findById("admin-1")).thenReturn(Optional.of(admin));
+        when(permissions.findByPermissionKeyAndEnabledTrue(Permission.Admin.USERS.value()))
+                .thenReturn(Optional.of(permission));
+
+        assertThatThrownBy(() -> service().revoke("admin-1", new PermissionAssignmentRequestDTO(Permission.Admin.USERS)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Administrators cannot revoke their own administrator privileges.");
     }
 
     @Test

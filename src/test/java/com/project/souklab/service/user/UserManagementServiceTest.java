@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -368,6 +370,42 @@ class UserManagementServiceTest {
                 NotificationType.Account.SUSPENDED,
                 "u-bad2"
         );
+    }
+
+    @Test
+    @DisplayName("banUser: throws BadRequestException when administrator attempts to ban their own account")
+    void banUser_whenAdminBansSelf_shouldThrowBadRequestException() {
+        User admin = createUser("admin-1", "admin@example.com", "Admin", "User", AccountStatus.ACTIVE);
+        when(userRepository.findById("admin-1")).thenReturn(Optional.of(admin));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken("admin@example.com", "credentials", "ROLE_ADMIN"));
+
+        try {
+            assertThatThrownBy(() -> userManagementService.banUser("admin-1", "Self ban"))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("Administrators cannot ban or timeout their own account.");
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    @DisplayName("timeoutUser: throws BadRequestException when administrator attempts to timeout their own account")
+    void timeoutUser_whenAdminTimeoutsSelf_shouldThrowBadRequestException() {
+        User admin = createUser("admin-1", "admin@example.com", "Admin", "User", AccountStatus.ACTIVE);
+        when(userRepository.findById("admin-1")).thenReturn(Optional.of(admin));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken("admin@example.com", "credentials", "ROLE_ADMIN"));
+
+        try {
+            assertThatThrownBy(() -> userManagementService.timeoutUser("admin-1", 30, "Self timeout"))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("Administrators cannot ban or timeout their own account.");
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     /**
