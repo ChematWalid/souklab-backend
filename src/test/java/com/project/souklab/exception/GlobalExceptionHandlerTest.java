@@ -7,6 +7,7 @@ import com.project.souklab.filestorage.exception.StorageException;
 import com.project.souklab.filestorage.exception.VirusDetectedException;
 import com.project.souklab.filestorage.exception.VirusScanException;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.access.AccessDeniedException;
@@ -44,6 +45,7 @@ class GlobalExceptionHandlerTest {
         assertStatus(handler.handleAccessDeniedException(new AccessDeniedException("denied")), HttpStatus.FORBIDDEN);
         assertStatus(handler.handleAuthenticationException(new BadCredentialsException("bad credentials")), HttpStatus.UNAUTHORIZED);
         assertStatus(handler.handleIllegalArgumentException(new IllegalArgumentException("bad argument")), HttpStatus.BAD_REQUEST);
+        assertStatus(handler.handleInvalidDataAccessApiUsageException(new InvalidDataAccessApiUsageException("bad sort")), HttpStatus.BAD_REQUEST);
         assertStatus(handler.handleGenericException(new IllegalStateException("unexpected")), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

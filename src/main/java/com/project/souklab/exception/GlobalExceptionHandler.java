@@ -9,6 +9,8 @@ import com.project.souklab.util.SecurityUtils;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -225,6 +227,16 @@ public class GlobalExceptionHandler {
         log.warn("IllegalArgumentException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles invalid query sort properties or invalid data access usage (400 Bad Request).
+     */
+    @ExceptionHandler({InvalidDataAccessApiUsageException.class, PropertyReferenceException.class})
+    public ResponseEntity<ApiResponse<Void>> handleInvalidDataAccessApiUsageException(Exception ex) {
+        log.warn("Invalid data access / sort parameter: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ApiErrorCode.INVALID_PARAMETER, "Invalid query or sort parameter."));
     }
 
     /**
