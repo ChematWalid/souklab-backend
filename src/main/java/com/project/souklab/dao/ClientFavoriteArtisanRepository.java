@@ -2,14 +2,17 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.ClientFavoriteArtisan;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -43,6 +46,17 @@ public interface ClientFavoriteArtisanRepository extends JpaRepository<ClientFav
      * @return total count of favorites
      */
     long countByClientId(String clientId);
+
+    /**
+     * Retrieves all favorites for a client with an exclusive write lock.
+     * Guarantees a current locking read (bypassing MVCC snapshot) and serializes concurrent additions.
+     *
+     * @param clientId identifier of the client
+     * @return list of locked favorite entities
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT cfa FROM ClientFavoriteArtisan cfa WHERE cfa.client.id = :clientId")
+    List<ClientFavoriteArtisan> findForUpdateByClientId(@Param("clientId") String clientId);
 
     /**
      * Retrieves a paginated list of visible favorited artisans for a given client,
