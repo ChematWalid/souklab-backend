@@ -162,4 +162,36 @@ class ClientFavoriteArtisanRepositoryTest {
         assertThat(locked).isPresent();
         assertThat(locked.get().getId()).isEqualTo(client.getId());
     }
+
+    @Test
+    @DisplayName("findVisibleByClientId with bogus sort property throws InvalidDataAccessApiUsageException")
+    void findVisibleByClientId_bogusSort_throwsException() {
+        Client client = createClient("c_bogus_sort@test.com");
+        entityManager.flush();
+        entityManager.clear();
+
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "bogusField"));
+
+        Throwable thrown = org.assertj.core.api.Assertions.catchThrowable(() ->
+                favoriteRepository.findVisibleByClientId(
+                        client.getId(),
+                        AccountStatus.SUSPENDED,
+                        referenceTime,
+                        pageRequest
+                )
+        );
+
+        assertThat(thrown).isNotNull();
+        System.out.println("EXCEPTION_CHAIN_START");
+        Throwable current = thrown;
+        int level = 0;
+        while (current != null) {
+            System.out.println("Level " + level + ": " + current.getClass().getName() + " -> " + current.getMessage());
+            current = current.getCause();
+            level++;
+        }
+        System.out.println("EXCEPTION_CHAIN_END");
+
+        assertThat(thrown).isInstanceOf(org.springframework.dao.InvalidDataAccessApiUsageException.class);
+    }
 }
