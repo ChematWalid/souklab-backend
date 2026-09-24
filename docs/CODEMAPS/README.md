@@ -12,7 +12,7 @@ Token-lean, high-density architecture documentation designed for both human engi
 |---|---|---|
 | [**`architecture.md`**](architecture.md) | High-Level System Architecture | Topology, runtime layers, cross-cutting filters, asynchronous execution, and data flow. |
 | [**`backend.md`**](backend.md) | API Routes & Service Execution | Security filter chain, route-to-controller mapping, service delegation, and repository bindings. |
-| [**`data.md`**](data.md) | Data Models & Migrations | 47 JPA entities grouped by domain, table constraints, relationships, and Flyway V0–V15 ledger. |
+| [**`data.md`**](data.md) | Data Models & Migrations | 50 JPA entities grouped by domain, table constraints, relationships, and Flyway V0–V16 ledger. |
 | [**`dependencies.md`**](dependencies.md) | Infrastructure & Integrations | External services (MariaDB, RabbitMQ, Redis, MinIO, ClamAV, Elasticsearch), 3rd-party APIs, and dependencies. |
 
 ---

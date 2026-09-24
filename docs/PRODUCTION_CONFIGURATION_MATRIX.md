@@ -27,6 +27,7 @@ profile.
 | Object storage | `STORAGE_*`, `APP_STORAGE_*` | `storage.*`, `app.storage.*` | `StorageProperties`, `AppProperties.Storage`, storage services | S3-compatible backend; bucket provisioned externally; credentials never logged |
 | Antivirus | `STORAGE_VIRUS_SCAN_*` | `storage.virus-scan.*` | `StorageProperties.VirusScanProperties`, ClamAV services | Enabled and fail-closed in production |
 | Avatar/content policy | `AVATAR_*`, `ARTISAN_*`, `FORMATION_*`, `FEED_*`, `NOTIFICATION_*` | `avatar.*`, `app.artisan.*`, `app.formation.*`, `app.feed.*`, `app.notification.*` | Typed policy classes and services | Positive limits and explicit MIME allowlists |
+| Client favorites | `FAVORITES_MAX_PER_CLIENT` | `app.favorites.max-per-client` | `AppProperties.Favorites`, `ArtisanFavoriteService` | Maximum active favorite artisans per client; default 500; strictly enforced with pessimistic locking |
 | SMTP and transactional email | `SMTP_*`, `APP_EMAIL_USE_SMTP`, `MAILERSEND_*` | `spring.mail.*`, `app.email.*`, `app.mailersend.*` | `EmailUtil` | Optional integration; enabled mode must have complete credentials |
 | OAuth/payment | `GOOGLE_*`, `OAUTH_*`, `CHARGILY_*` | `spring.security.oauth2.*`, `app.oauth.*`, `app.chargily.*` | OAuth/payment services | Optional and disableable; secrets externalized |
 | WebSocket relay | `RELAY_*`, `CHAT_*` | `app.relay.*`, `app.chat.*` | `AppProperties.Relay/Chat`, WebSocket config/services | RabbitMQ/STOMP required in production; explicit destinations and credentials |

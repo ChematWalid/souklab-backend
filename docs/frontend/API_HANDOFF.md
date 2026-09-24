@@ -90,9 +90,26 @@ Common statuses are 400 (malformed request), 401 (unauthenticated), 403 (forbidd
 | Notifications | `/notifications/**` | feed, unread count (raw integer in `data`), read state |
 | Subscriptions/payments | `/subscriptions/**`, `/payments/**`, `/admin/**` | checkout, lifecycle, refunds |
 | Administration | `/admin/**` | users, permissions, moderation, catalog taxonomy, analytics |
+| Client favorites | `/client/favorites/artisans/**` | bookmarking, listing, status check, removal |
 | Files | `/files/**`, avatar and multipart paths | uploads and protected downloads |
 
 Use the generated OpenAPI artifact for exact path/method pairs, schemas, security requirements, and operation IDs. Do not infer routes from this summary.
+
+## Client Favorites (`/client/favorites/artisans/**`)
+
+Client favorites allow authenticated clients with `permission:client:favorites` to bookmark artisans, list them with pagination, check favorite status, and remove favorites.
+
+### Endpoints
+- `POST /api/v1/client/favorites/artisans/{artisanId}` (HTTP 201): Adds an artisan to favorites. Returns `ApiResponse<ClientFavoriteArtisanResponseDTO>`. Fails with 409 if already favorited (`"Artisan is already favorited."`) or if the per-client cap is reached (`"Client favorite limit reached."`).
+- `GET /api/v1/client/favorites/artisans` (HTTP 200): Paginated list of visible favorite artisans (`ApiResponse<PaginatedResponse<ClientFavoriteArtisanItemDTO>>`). Supports `page` (default 0), `size` (default 20, max 100), and `sort` (default `createdAt,desc`). Automatically filters out suspended or non-visible artisan profiles.
+- `GET /api/v1/client/favorites/artisans/{artisanId}/status` (HTTP 200): Checks whether an artisan is favorited (`ApiResponse<FavoriteStatusResponseDTO>`). Returns `{ "favorited": boolean }`. Returns `{ "favorited": false }` if the artisan exists but is suspended or non-visible; returns 404 only if the artisan does not exist in the database.
+- `DELETE /api/v1/client/favorites/artisans/{artisanId}` (HTTP 200): Removes an artisan from favorites. Returns `ApiResponse<Void>` with `data: null` (never HTTP 204). Returns 404 if the favorite does not exist.
+
+### Privacy & Masking Parity
+- Favorites are completely private. Artisans are never notified and cannot see who favorited them.
+- Non-client accounts (artisan, administrator) receive `403 Forbidden` (`"Only registered clients can manage favorites."`).
+- Returned `ArtisanDirectoryCardDTO` objects enforce contact privacy: non-premium clients receive an anonymized `artisanName` (`"Artisan #XXXXX"`), matching the public directory masking; premium clients receive the unmasked full name. Note that `ArtisanDirectoryCardDTO` has no phone or email fields.
+
 
 ## Pagination, files, and permissions
 

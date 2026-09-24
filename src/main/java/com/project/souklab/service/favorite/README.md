@@ -17,6 +17,6 @@ The favorites subsystem is designed for type isolation. To introduce a new favor
 4. **Repository**: Create `ClientFavoriteFormationRepository` extending `JpaRepository<ClientFavoriteFormation, String>` with targeted query methods.
 5. **DTOs**: Add target-specific request/response DTOs in `com.project.souklab.dto.favorite`.
 6. **Service**: Create `FormationFavoriteService` interface and implementation in `com.project.souklab.service.favorite`.
-7. **Controller**: Create `ClientFavoriteFormationController` mapped to `/api/v1/client/favorites/formations` secured by `@PreAuthorize("hasAuthority('CLIENT_FAVORITES')")`.
+7. **Controller**: Create `ClientFavoriteFormationController` mapped to `/api/v1/client/favorites/formations` secured by `@PreAuthorize("@accessControl.canManageFavorites(authentication)")`.
 
 Existing favorite code (`ClientFavoriteArtisan`, `ArtisanFavoriteService`, `ClientFavoriteArtisanController`) remains completely untouched.

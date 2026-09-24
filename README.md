@@ -39,6 +39,7 @@ graph TD
 | **Subscriptions & Payments** | Tiered subscription plans (Free/Pro/Premium), Chargily Pay V2 hosted checkout, signed idempotent webhook processing, renewal reminders. | Chargily Pay V2, Spring Task Scheduling |
 | **Platform Analytics & KPI** | Async query jobs, multi-granularity rollups (day/week/month/quarter), CSV data export, outbox pattern event processing. | Spring Batch/Async, S3 Export Storage |
 | **File Storage & Avatars** | Multi-tier avatar processing (thumbnail, medium, full), magic number verification, ClamAV streaming antivirus, S3/MinIO bucket storage. | MinIO S3 SDK, Thumbnailator, Clamd instream |
+| **Client Favorites** | Private artisan favorites for clients with cap enforcement, pessimistic concurrency lock, and zero N+1 directory card projection. | Spring Data JPA, Pessimistic Locking |
 | **Rate Limiting & Security** | Token-bucket sliding window rate limiting on authentication and avatar uploads, Redis-backed or Caffeine-backed with Retry-After headers. | Bucket4j, Redis / Caffeine Cache, OncePerRequestFilter |
 
 ---
@@ -53,7 +54,7 @@ graph TD
 - **Object Storage**: S3-compatible object store (MinIO for local development, AWS S3 / Cloudflare R2 for production)
 - **Security & Antivirus**: Spring Security, JJWT 0.11.5, Bucket4j 8.10.1, ClamAV 1.4 Daemon
 - **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ 4.0)
-- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V15 migrations), Postman / Newman
+- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V16 migrations), Postman / Newman
 
 ---
 
@@ -70,6 +71,7 @@ src/main/java/com/project/souklab/
 │   ├── catalog/         # Public reference craft taxonomies and administrative taxonomy CRUD
 │   ├── chat/            # Private conversation REST endpoints and STOMP message handlers
 │   ├── directory/       # Authenticated artisan directory search and faceted filtering
+│   ├── favorite/        # Client favorite artisan management endpoints
 │   ├── formateur/       # Formateur accreditation and moderation endpoints
 │   ├── feed/            # Public feed and post moderation endpoints
 │   ├── review/          # Formation-backed artisan review endpoints
@@ -78,7 +80,7 @@ src/main/java/com/project/souklab/
 │   ├── notification/    # Notification feed and read-state management
 │   ├── subscription/    # Tiered plans, checkout, and Chargily Pay V2 webhooks
 │   └── user/            # User avatar upload/activation and admin moderation
-├── dao/                 # Spring Data JPA repositories (46 repositories)
+├── dao/                 # Spring Data JPA repositories (47 repositories)
 ├── dto/                 # Data Transfer Objects (contracts for API requests/responses)
 │   ├── admin/           # Administrative audit representations
 │   ├── analytics/       # Analytics query job and rollup representations
@@ -88,6 +90,7 @@ src/main/java/com/project/souklab/
 │   ├── chat/            # Conversation and message payloads
 │   ├── common/          # Standard response envelopes (ApiResponse, PaginatedResponse)
 │   ├── directory/       # Directory search cards and criteria filter DTOs
+│   ├── favorite/        # Client favorite responses and directory card items
 │   ├── formateur/       # Formateur request and moderation DTOs
 │   ├── formation/       # Masterclass authoring, review, enrollment, and file DTOs
 │   ├── feed/            # Feed posts, media, and moderation DTOs
@@ -109,7 +112,7 @@ src/main/java/com/project/souklab/
 │   ├── security/        # File serving rate limit filter
 │   ├── stub/            # In-memory test stubs
 │   └── validation/      # Magic bytes and MIME validation
-├── model/               # JPA entities and domain enums (47 model types)
+├── model/               # JPA entities and domain enums (50 entities)
 ├── security/            # JWT, permissions, policy predicates, rate limiting, upload boundaries
 ├── service/             # Application business logic and transactional services
 │   ├── analytics/       # Rollup processing, export generation, and job execution
@@ -119,6 +122,7 @@ src/main/java/com/project/souklab/
 │   ├── catalog/         # Cached taxonomy retrieval and administrative catalog management
 │   ├── chat/            # Real-time messaging and conversation lifecycle
 │   ├── directory/       # Hibernate Search Elasticsearch discovery service
+│   ├── favorite/        # Client artisan favorites management
 │   ├── formateur/       # Formateur accreditation workflows
 │   ├── formation/       # Masterclass lifecycle, peer enrollment, and moderation
 │   ├── notification/    # In-app notifications and WebSocket dispatch
@@ -199,6 +203,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`controller.catalog`](src/main/java/com/project/souklab/controller/catalog/README.md) — Reference craft taxonomy endpoints
   - [`controller.chat`](src/main/java/com/project/souklab/controller/chat/README.md) — Private conversation, message lifecycle, attachment, and read-state endpoints
   - [`controller.directory`](src/main/java/com/project/souklab/controller/directory/README.md) — Public artisan directory search endpoints
+  - [`controller.favorite`](src/main/java/com/project/souklab/controller/favorite/README.md) — Client favorite artisan endpoints
   - [`controller.feed`](src/main/java/com/project/souklab/controller/feed/README.md) — Public feed and admin moderation endpoints
   - [`controller.formateur`](src/main/java/com/project/souklab/controller/formateur/README.md) — Formateur accreditation endpoints
   - [`controller.formation`](src/main/java/com/project/souklab/controller/formation/README.md) — Formations authoring, peer enrollment, and review endpoints
@@ -207,7 +212,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`controller.review`](src/main/java/com/project/souklab/controller/review/README.md) — Artisan review endpoints
   - [`controller.subscription`](src/main/java/com/project/souklab/controller/subscription/README.md) — Subscription plans, Chargily Pay V2 checkout, webhooks, and refunds
   - [`controller.user`](src/main/java/com/project/souklab/controller/user/README.md) — User and avatar endpoints
-- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (46 repositories across DAO packages)
+- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (47 repositories across DAO packages)
   - [`dao.analytics`](src/main/java/com/project/souklab/dao/analytics/README.md) — Analytics outbox, activity event, job artifact, and rollup repositories
 - [`com.project.souklab.dto`](src/main/java/com/project/souklab/dto/README.md) — DTO taxonomy
   - [`dto.admin`](src/main/java/com/project/souklab/dto/admin/README.md) — Admin audit DTOs
@@ -218,6 +223,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`dto.chat`](src/main/java/com/project/souklab/dto/chat/README.md) — Conversation descriptors, message payloads, typing commands, and WebSocket events
   - [`dto.common`](src/main/java/com/project/souklab/dto/common/README.md) — Response envelopes
   - [`dto.directory`](src/main/java/com/project/souklab/dto/directory/README.md) — Directory search cards and criteria filter DTOs
+  - [`dto.favorite`](src/main/java/com/project/souklab/dto/favorite/README.md) — Client favorite responses and directory card items
   - [`dto.feed`](src/main/java/com/project/souklab/dto/feed/README.md) — Moderated feed post, media, and moderation payloads
   - [`dto.formateur`](src/main/java/com/project/souklab/dto/formateur/README.md) — Formateur DTOs
   - [`dto.formation`](src/main/java/com/project/souklab/dto/formation/README.md) — Formation authoring, review, enrollment, and file DTOs
@@ -251,6 +257,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`service.catalog`](src/main/java/com/project/souklab/service/catalog/README.md) — Cached taxonomy retrieval service
   - [`service.chat`](src/main/java/com/project/souklab/service/chat/README.md) — Realtime 1-on-1 conversations, message delivery, read receipts, and typing indicators
   - [`service.directory`](src/main/java/com/project/souklab/service/directory/README.md) — Hibernate Search Elasticsearch discovery service
+  - [`service.favorite`](src/main/java/com/project/souklab/service/favorite/README.md) — Client artisan favorites management
   - [`service.feed`](src/main/java/com/project/souklab/service/feed/README.md) — Feed post lifecycle and media storage
   - [`service.formateur`](src/main/java/com/project/souklab/service/formateur/README.md) — Formateur management
   - [`service.formation`](src/main/java/com/project/souklab/service/formation/README.md) — Masterclass lifecycle, peer enrollment, and moderation

@@ -93,8 +93,8 @@ Generated from the running application on 2026-09-23T01:47:58Z. This Markdown vi
 - OpenAPI version: `3.1.0`
 - API title: `Souklab API`
 - API version: `1.0.0`
-- Paths: `142`
-- Schemas: `177`
+- Paths: `145`
+- Schemas: `184`
 
 ## Security
 
@@ -106,6 +106,142 @@ Generated from the running application on 2026-09-23T01:47:58Z. This Markdown vi
 
 
 ## Endpoints
+
+### `/api/v1/client/favorites/artisans/{artisanId}`
+
+#### POST — addFavoriteArtisan
+#### Purpose and authorization
+
+Purpose: `POST` performs the `POST` operation for `/api/v1/client/favorites/artisans/{artisanId}`.
+
+Authorization: Bearer access#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request POST "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/client/favorites/artisans/${ARTISANID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/client/favorites/artisans/{artisanId}`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+ token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `addFavoriteArtisan`
+- Tags: `Client Favorites`
+- Parameters:
+  - `artisanId` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/client/favorites/artisans/{artisanId}`
+
+#### DELETE — removeFavoriteArtisan
+#### Purpose and authorization
+
+Purpose: `DELETE` performs the `DELETE` operation for `/api/v1/client/favorites/artisans/{artisanId}`.
+
+Authorization: Bearer access#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request DELETE "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/client/favorites/artisans/${ARTISANID}" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/client/favorites/artisans/{artisanId}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+ token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `removeFavoriteArtisan`
+- Tags: `Client Favorites`
+- Parameters:
+  - `artisanId` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/client/favorites/artisans`
+
+#### GET — listFavoriteArtisans
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/client/favorites/artisans`.
+
+Authorization: Bearer access#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/client/favorites/artisans" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/client/favorites/artisans`, { method: "GET", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+ token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `listFavoriteArtisans`
+- Tags: `Client Favorites`
+- Parameters:
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/client/favorites/artisans/{artisanId}/status`
+
+#### GET — getFavoriteArtisanStatus
+#### Purpose and authorization
+
+Purpose: `GET` performs the `GET` operation for `/api/v1/client/favorites/artisans/{artisanId}/status`.
+
+Authorization: Bearer access#### HTTP example
+
+The placeholders below are intentionally non-secret; replace path parameters and request fields with values from the schema.
+
+```bash
+curl --fail-with-body --request GET "${SOUKLAB_BASE_URL:-http://localhost:8080}/api/v1/client/favorites/artisans/${ARTISANID}/status" --header 'Authorization: Bearer ${SOUKLAB_ACCESS_TOKEN}'
+```
+
+```ts
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const accessToken = "<access-token>";
+const response = await fetch(`${baseUrl}/api/v1/client/favorites/artisans/{artisanId}/status`, { method: "GET", headers: { Authorization: `Bearer ${accessToken}` } });
+const payload = await response.json();
+```
+
+ token required; the live contract and authorization matrix determine the required role/permission and ownership boundary.
+
+Failure cases: use the response codes listed in the contract; common boundaries are 400 validation, 401 authentication, 403 authorization/ownership, 404 missing resource, 409 conflict, 413 upload size, 415 media type, 429 rate limit, and 5xx dependency failure.
+
+
+- Operation ID: `getFavoriteArtisanStatus`
+- Tags: `Client Favorites`
+- Parameters:
+  - `artisanId` (`path`, required)
+- Responses:
+  - `200` — OK
 
 ### `/api/v1/users/me/avatars/{id}/activate`
 
@@ -7171,5 +7307,47 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 
 ```json
 {"type":"object","properties":{"content":{"type":"array","items":{"type":"object","additionalProperties":{}}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
+```
+
+### `ApiResponseClientFavoriteArtisanResponseDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/ClientFavoriteArtisanResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `ClientFavoriteArtisanResponseDTO`
+
+```json
+{"type":"object","properties":{"favoriteId":{"type":"string"},"artisanId":{"type":"string"},"favoritedAt":{"type":"string","format":"date-time"}}}
+```
+
+### `ApiResponsePaginatedResponseClientFavoriteArtisanItemDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/PaginatedResponseClientFavoriteArtisanItemDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `PaginatedResponseClientFavoriteArtisanItemDTO`
+
+```json
+{"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/ClientFavoriteArtisanItemDTO"}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
+```
+
+### `ClientFavoriteArtisanItemDTO`
+
+```json
+{"type":"object","properties":{"favoritedAt":{"type":"string","format":"date-time"},"artisan":{"$ref":"#/components/schemas/ArtisanDirectoryCardDTO"}}}
+```
+
+### `ApiResponseFavoriteStatusResponseDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/FavoriteStatusResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `FavoriteStatusResponseDTO`
+
+```json
+{"type":"object","properties":{"favorited":{"type":"boolean"}}}
 ```
 

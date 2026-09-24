@@ -457,3 +457,22 @@ export interface ContentReportRequest {
   reason: string;
   details?: string;
 }
+
+// ==========================================
+// 11. Client Favorites
+// ==========================================
+
+export interface ClientFavoriteArtisanResponse {
+  favoriteId: string;
+  artisanId: string;
+  favoritedAt: string;
+}
+
+export interface ClientFavoriteArtisanItem {
+  favoritedAt: string;
+  artisan: ArtisanDirectoryCard;
+}
+
+export interface FavoriteStatusResponse {
+  favorited: boolean;
+}

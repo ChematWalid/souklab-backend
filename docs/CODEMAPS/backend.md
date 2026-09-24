@@ -33,7 +33,7 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `GET /artisan/{id}`: Public artisan profile (phone/email masked for non-premium clients)
 - `POST|GET|DELETE /artisan/gallery`: Artisan portfolio images (max 20, 10MB each)
 - `POST|GET|DELETE /artisan/certifications`: Professional documents (max 10, PDF/img up to 15MB)
-- `GET|PATCH /client/profile` & `POST|DELETE|GET /client/favorites/{artisanId}`: Client favorites
+- `GET|PATCH /client/profile` & `POST|GET|DELETE /client/favorites/artisans[/{artisanId}]`: Client favorites
 
 ### Formations & Formateur (`/api/v1/`)
 - `POST /artisan/formations`: Create masterclass (`isTeacher=true` required, starts in `DRAFT`)

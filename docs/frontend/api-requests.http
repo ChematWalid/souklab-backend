@@ -184,3 +184,27 @@ Content-Type: application/json
   "reason": "Contenu inapproprié ou non artisanal",
   "details": "Cet article fait la promotion de produits industriels d'importation."
 }
+
+### -------------------------------------------------------------------------
+### 7. CLIENT FAVORITES (Artisan Bookmarking)
+### -------------------------------------------------------------------------
+
+### 7.1 Add Artisan to Favorites
+# @name addFavoriteArtisan
+POST {{baseUrl}}/api/v1/client/favorites/artisans/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{accessToken}}
+
+### 7.2 List Favorite Artisans (Paginated)
+# @name listFavoriteArtisans
+GET {{baseUrl}}/api/v1/client/favorites/artisans?page=0&size=20&sort=createdAt,desc
+Authorization: Bearer {{accessToken}}
+
+### 7.3 Check Favorite Status
+# @name getFavoriteArtisanStatus
+GET {{baseUrl}}/api/v1/client/favorites/artisans/00000000-0000-0000-0000-000000000000/status
+Authorization: Bearer {{accessToken}}
+
+### 7.4 Remove Artisan from Favorites
+# @name removeFavoriteArtisan
+DELETE {{baseUrl}}/api/v1/client/favorites/artisans/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{accessToken}}

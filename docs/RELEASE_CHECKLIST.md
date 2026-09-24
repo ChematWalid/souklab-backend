@@ -24,7 +24,7 @@ agent or operator produces the required evidence.
 - [ ] Immutable image digest recorded.
 - [ ] Readiness returns HTTP 200 after deployment.
 - [ ] Prometheus scrape is up and critical flows pass.
-- [ ] V0-V15 Flyway migrations applied and analytics and catalog admin permissions assigned only to approved administrators.
+- [ ] V0-V16 Flyway migrations applied, catalog admin permissions assigned only to approved administrators, and client favorite artisan endpoints verified.
 - [ ] Analytics job owner isolation, financial permission split, CSV download, and `/admin/stats` alias verified.
 - [ ] Activity-event retention and bounded backfill/rollup evidence recorded before enabling historical exports.
 - [ ] RabbitMQ analytics exchange/queue/DLQ delivery, persisted retry backoff, publisher confirms, and duplicate-event idempotency verified with the feature enabled.

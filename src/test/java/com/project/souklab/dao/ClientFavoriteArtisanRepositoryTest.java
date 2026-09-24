@@ -13,12 +13,14 @@ import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 /**
  * Slice test verifying query derivation, visibility filtering, pagination,
@@ -172,7 +174,7 @@ class ClientFavoriteArtisanRepositoryTest {
 
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "bogusField"));
 
-        Throwable thrown = org.assertj.core.api.Assertions.catchThrowable(() ->
+        Throwable thrown = catchThrowable(() ->
                 favoriteRepository.findVisibleByClientId(
                         client.getId(),
                         AccountStatus.SUSPENDED,
@@ -192,6 +194,6 @@ class ClientFavoriteArtisanRepositoryTest {
         }
         System.out.println("EXCEPTION_CHAIN_END");
 
-        assertThat(thrown).isInstanceOf(org.springframework.dao.InvalidDataAccessApiUsageException.class);
+        assertThat(thrown).isInstanceOf(InvalidDataAccessApiUsageException.class);
     }
 }

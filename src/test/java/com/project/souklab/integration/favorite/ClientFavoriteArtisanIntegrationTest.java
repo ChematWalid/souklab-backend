@@ -42,6 +42,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -841,7 +842,7 @@ class ClientFavoriteArtisanIntegrationTest {
             return null;
         });
 
-        String expectedMaskedName = "Artisan #" + artisan.getId().substring(artisan.getId().length() - 5).toUpperCase(java.util.Locale.ROOT);
+        String expectedMaskedName = "Artisan #" + artisan.getId().substring(artisan.getId().length() - 5).toUpperCase(Locale.ROOT);
         String maskedBody = mockMvc.perform(get("/api/v1/client/favorites/artisans")
                         .with(SecurityTestUtils.client(clientUser.getEmail())))
                 .andExpect(status().isOk())
