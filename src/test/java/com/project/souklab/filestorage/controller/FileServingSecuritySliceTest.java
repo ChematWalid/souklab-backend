@@ -29,6 +29,8 @@ import java.time.Duration;
 
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -123,17 +125,17 @@ class FileServingSecuritySliceTest {
     @DisplayName("Responses must include CSP, Permissions-Policy, X-Frame-Options, and Referrer-Policy headers")
     void responsesIncludeHardenedSecurityHeaders() throws Exception {
         mockMvc.perform(get("/api/v1/files/{key}", "test-file-key.png"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; object-src 'none';"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Permissions-Policy", "camera=(), microphone=(), geolocation=()"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("X-Frame-Options", "DENY"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("X-Content-Type-Options", "nosniff"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Referrer-Policy", "no-referrer"));
+                .andExpect(header().string("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; object-src 'none';"))
+                .andExpect(header().string("Permissions-Policy", "camera=(), microphone=(), geolocation=()"))
+                .andExpect(header().string("X-Frame-Options", "DENY"))
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().string("Referrer-Policy", "no-referrer"));
     }
 
     @Test
     @DisplayName("Public endpoints allow GET without auth but reject POST/mutations with 401")
     void publicEndpointsRestrictMethodsAtFilterLevel() throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/v1/feed"))
+        mockMvc.perform(post("/api/v1/feed"))
                 .andExpect(status().isUnauthorized());
     }
 }
