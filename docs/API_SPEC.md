@@ -483,7 +483,7 @@ financial administrator permission in addition to analytics permission.
 
 ## 14. Client Favorites (`/api/v1/client/favorites/artisans/**`)
 
-Client favorites allow authenticated clients to bookmark artisans, retrieve a paginated directory of favorited artisans, inspect favorite status for specific artisans, and remove favorites. All operations require `permission:client:favorites` and an active client profile.
+Client favorites allow authenticated clients to bookmark artisans, retrieve a paginated directory of favorited artisans, inspect favorite status for specific artisans, and remove favorites. All operations require `permission:client:favorites` and a registered client profile.
 
 ### `POST /api/v1/client/favorites/artisans/{artisanId}`
 Adds an artisan to the authenticated client's favorites.
@@ -500,14 +500,15 @@ Adds an artisan to the authenticated client's favorites.
     "data": {
       "favoriteId": "d3b07384-d113-4e44-b0a6-c87d46c82d4f",
       "artisanId": "e4a18295-e224-4f55-c1b7-d98e57d93e50",
-      "favoritedAt": "2026-09-24T06:00:00Z"
+      "favoritedAt": "2026-09-24T17:56:45.628794"
     }
   }
   ```
+  *(Note: `favoritedAt` is serialized by Jackson with microsecond precision without timezone suffix).*
 - **Status Codes**:
   - `201 Created`: Artisan added to favorites successfully.
   - `401 Unauthorized`: Missing or invalid authentication token.
-  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+  - `403 Forbidden`: Missing `permission:client:favorites` (authorization guard access denied; artisans receive this), or permission held but caller has no client profile (administrators receive this with `"Only registered clients can manage favorites."`).
   - `404 Not Found`: Target artisan does not exist or is not effectively visible (`"Artisan not found with id: <artisanId>"`).
   - `409 Conflict`: Artisan is already favorited (`"Artisan is already favorited."`), or the client's favorite capacity is exceeded (`"Client favorite limit reached."`). Configured via `app.favorites.max-per-client` (`FAVORITES_MAX_PER_CLIENT`, default 500).
 
@@ -524,11 +525,11 @@ Retrieves a paginated list of visible favorite artisans for the authenticated cl
   {
     "success": true,
     "code": 200,
-    "message": "Operation completed successfully",
+    "message": "Success",
     "data": {
       "content": [
         {
-          "favoritedAt": "2026-09-24T06:00:00Z",
+          "favoritedAt": "2026-09-24T17:56:45.628794",
           "artisan": {
             "id": "e4a18295-e224-4f55-c1b7-d98e57d93e50",
             "artisanName": "Ahmed Benali",
@@ -551,7 +552,7 @@ Retrieves a paginated list of visible favorite artisans for the authenticated cl
             "teacher": false,
             "primaryMaterials": ["Argile rouge", "Argile blanche"],
             "primaryTechniques": ["Tournage", "Émaillage"],
-            "createdAt": "2026-01-15T10:00:00Z"
+            "createdAt": "2026-01-15T10:00:00"
           }
         }
       ],
@@ -565,11 +566,12 @@ Retrieves a paginated list of visible favorite artisans for the authenticated cl
   ```
 - **Visibility & Masking Behavior**:
   - Automatically filters out suspended accounts or non-visible artisan profiles.
-  - Contact masking parity: Applies `ViewerPremiumResolver` graduated contact visibility to the returned `ArtisanDirectoryCardDTO`. Non-premium clients receive an anonymized `artisanName` (`"Artisan #XXXXX"`, matching public directory masking); premium clients receive the unmasked full name.
+  - Contact masking parity: Only `artisanName` is masked (`"Artisan #XXXXX"` for non-premium, real name for premium, same rule as the public directory).
 - **Status Codes**:
   - `200 OK`: Favorites retrieved successfully.
+  - `400 Bad Request`: Invalid sort property or query parameter (e.g. unknown sort attribute).
   - `401 Unauthorized`: Missing or invalid authentication token.
-  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+  - `403 Forbidden`: Missing `permission:client:favorites` (authorization guard access denied; artisans receive this), or permission held but caller has no client profile (administrators receive this with `"Only registered clients can manage favorites."`).
 
 ### `GET /api/v1/client/favorites/artisans/{artisanId}/status`
 Checks whether a specific artisan is favorited by the authenticated client.
@@ -582,7 +584,7 @@ Checks whether a specific artisan is favorited by the authenticated client.
   {
     "success": true,
     "code": 200,
-    "message": "Operation completed successfully",
+    "message": "Success",
     "data": {
       "favorited": true
     }
@@ -591,7 +593,7 @@ Checks whether a specific artisan is favorited by the authenticated client.
 - **Status Codes**:
   - `200 OK`: Favorite status retrieved. Returns `{ "favorited": false }` if the artisan exists in the database but is suspended or not effectively visible.
   - `401 Unauthorized`: Missing or invalid authentication token.
-  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+  - `403 Forbidden`: Missing `permission:client:favorites` (authorization guard access denied; artisans receive this), or permission held but caller has no client profile (administrators receive this with `"Only registered clients can manage favorites."`).
   - `404 Not Found`: Artisan ID does not exist in the database (`"Artisan not found with id: <artisanId>"`).
 
 ### `DELETE /api/v1/client/favorites/artisans/{artisanId}`
@@ -612,6 +614,6 @@ Removes an artisan from the authenticated client's favorites.
 - **Status Codes**:
   - `200 OK`: Artisan removed from favorites successfully (returns HTTP 200 with `data: null`).
   - `401 Unauthorized`: Missing or invalid authentication token.
-  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+  - `403 Forbidden`: Missing `permission:client:favorites` (authorization guard access denied; artisans receive this), or permission held but caller has no client profile (administrators receive this with `"Only registered clients can manage favorites."`).
   - `404 Not Found`: Favorite record does not exist for this client and artisan (`"Favorite not found for artisan: <artisanId>"`).
 

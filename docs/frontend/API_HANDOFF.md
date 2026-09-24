@@ -101,13 +101,15 @@ Client favorites allow authenticated clients with `permission:client:favorites` 
 
 ### Endpoints
 - `POST /api/v1/client/favorites/artisans/{artisanId}` (HTTP 201): Adds an artisan to favorites. Returns `ApiResponse<ClientFavoriteArtisanResponseDTO>`. Fails with 409 if already favorited (`"Artisan is already favorited."`) or if the per-client cap is reached (`"Client favorite limit reached."`).
-- `GET /api/v1/client/favorites/artisans` (HTTP 200): Paginated list of visible favorite artisans (`ApiResponse<PaginatedResponse<ClientFavoriteArtisanItemDTO>>`). Supports `page` (default 0), `size` (default 20, max 100), and `sort` (default `createdAt,desc`). Automatically filters out suspended or non-visible artisan profiles.
+- `GET /api/v1/client/favorites/artisans` (HTTP 200): Paginated list of visible favorite artisans (`ApiResponse<PaginatedResponse<ClientFavoriteArtisanItemDTO>>`). Supports `page` (default 0), `size` (default 20, max 100), and `sort` (default `createdAt,desc`; invalid sort properties return HTTP 400 `INVALID_PARAMETER`). Automatically filters out suspended or non-visible artisan profiles.
 - `GET /api/v1/client/favorites/artisans/{artisanId}/status` (HTTP 200): Checks whether an artisan is favorited (`ApiResponse<FavoriteStatusResponseDTO>`). Returns `{ "favorited": boolean }`. Returns `{ "favorited": false }` if the artisan exists but is suspended or non-visible; returns 404 only if the artisan does not exist in the database.
 - `DELETE /api/v1/client/favorites/artisans/{artisanId}` (HTTP 200): Removes an artisan from favorites. Returns `ApiResponse<Void>` with `data: null` (never HTTP 204). Returns 404 if the favorite does not exist.
 
+*(Note: `favoritedAt` in response payloads is serialized with microsecond fractional precision without timezone suffix, e.g. `"2026-09-24T17:56:45.628794"`).*
+
 ### Privacy & Masking Parity
 - Favorites are completely private. Artisans are never notified and cannot see who favorited them.
-- Non-client accounts (artisan, administrator) receive `403 Forbidden` (`"Only registered clients can manage favorites."`).
+- Non-client callers receive HTTP 403: callers lacking `permission:client:favorites` are rejected by authorization guards (standard access denied; artisans receive this); callers with the permission who lack a client profile (administrators receive this) get `403 Forbidden` (`"Only registered clients can manage favorites."`).
 - Returned `ArtisanDirectoryCardDTO` objects enforce contact privacy: non-premium clients receive an anonymized `artisanName` (`"Artisan #XXXXX"`), matching the public directory masking; premium clients receive the unmasked full name. Note that `ArtisanDirectoryCardDTO` has no phone or email fields.
 
 

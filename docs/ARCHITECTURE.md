@@ -30,13 +30,13 @@ Controllers translate transport contracts and delegate to services. Services enf
 | `dto` | Request and response contracts grouped by feature. |
 | `exception` | Application exception hierarchy and global HTTP error mapping. |
 | `filestorage` | Provider-neutral storage API, S3 adapter, in-memory stub, validation, ClamAV scanning, image variants, rate limiting, and post-commit cleanup. |
-| `model` | 50 JPA entities, enums, and lifecycle types. IDs are UUID strings supplied by `BaseEntity`. |
+| `model` | 50 JPA entities. IDs are UUID strings supplied by `BaseEntity`. |
 | `security` | JWT parsing, user principal construction, request rate limiting, and STOMP authentication. |
 | `service` | Transactional business workflows across all domains, including application-specific `service.storage.FileAccessService`. |
 | `util` / `validation` | Stateless helpers and custom Bean Validation constraints. |
 
-Subscriptions, payments, analytics, and client favorites are implemented in their respective controller, service,
-entity, repository, outbox, and integration-test modules. Social feed, direct messaging, and
+Subscriptions, payments, and analytics are implemented in their respective controller, service,
+entity, repository, outbox, and integration-test modules. Client favorites, social feed, direct messaging, and
 notifications are implemented in their respective controller, service, entity, and repository modules.
 
 ## Authentication and authorization

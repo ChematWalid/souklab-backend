@@ -465,10 +465,12 @@ export interface ContentReportRequest {
 export interface ClientFavoriteArtisanResponse {
   favoriteId: string;
   artisanId: string;
+  /** ISO-8601 timestamp with microsecond fractional seconds without timezone offset, e.g. "2026-09-24T17:56:45.628794" */
   favoritedAt: string;
 }
 
 export interface ClientFavoriteArtisanItem {
+  /** ISO-8601 timestamp with microsecond fractional seconds without timezone offset, e.g. "2026-09-24T17:56:45.628794" */
   favoritedAt: string;
   artisan: ArtisanDirectoryCard;
 }
