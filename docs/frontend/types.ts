@@ -478,3 +478,99 @@ export interface ClientFavoriteArtisanItem {
 export interface FavoriteStatusResponse {
   favorited: boolean;
 }
+
+// ==========================================
+// 12. Reference Taxonomies
+// ==========================================
+
+export interface RegionDTO {
+  id: string;
+  name: string;
+  slug: string;
+  code?: string | null;
+  displayOrder: number;
+  children?: RegionDTO[];
+}
+
+export interface JobCategoryDTO {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  iconUrl?: string | null;
+  displayOrder: number;
+  subCategories?: JobSubCategoryDTO[];
+}
+
+export interface JobSubCategoryDTO {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  displayOrder: number;
+}
+
+export interface MaterialFamilyDTO {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  displayOrder: number;
+  materials?: MaterialDTO[];
+}
+
+export interface MaterialDTO {
+  id: string;
+  familyId: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  displayOrder: number;
+}
+
+export interface EpoqueDTO {
+  id: string;
+  name: string;
+  slug: string;
+  periodEra?: string | null;
+  description?: string | null;
+  displayOrder: number;
+}
+
+export interface TechniqueDTO {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  displayOrder: number;
+}
+
+// ==========================================
+// 13. API Error Code Constants
+// ==========================================
+
+export type ApiErrorCode =
+  | 'BAD_REQUEST'
+  | 'CONFLICT'
+  | 'FORBIDDEN'
+  | 'RESOURCE_NOT_FOUND'
+  | 'UNAUTHORIZED'
+  | 'AVATAR_LIMIT_EXCEEDED'
+  | 'VIRUS_DETECTED'
+  | 'VIRUS_SCAN_UNAVAILABLE'
+  | 'FILE_TOO_LARGE'
+  | 'FILE_NOT_FOUND'
+  | 'INVALID_FILENAME'
+  | 'UNSUPPORTED_FILE_TYPE'
+  | 'UNSUPPORTED_IMAGE_FORMAT'
+  | 'STORAGE_ERROR'
+  | 'TOO_MANY_REQUESTS'
+  | 'MALFORMED_REQUEST'
+  | 'METHOD_NOT_ALLOWED'
+  | 'AUTHENTICATION_FAILED'
+  | 'MISSING_PARAMETER'
+  | 'INVALID_PARAMETER'
+  | 'UNSUPPORTED_MEDIA_TYPE'
+  | 'MAX_UPLOAD_SIZE_EXCEEDED'
+  | 'INTERNAL_SERVER_ERROR';

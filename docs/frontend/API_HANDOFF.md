@@ -77,29 +77,236 @@ Successful REST responses use:
 
 Common statuses are 400 (malformed request), 401 (unauthenticated), 403 (forbidden), 404 (missing resource), 409 (state conflict), 413 (upload too large), 415 (unsupported media type), 422 (validation/rejected content), 429 (rate limited), and 500/503 (server/dependency failure).
 
-## Endpoint groups
+## Detailed Domain Integration Guides
 
-| Group | Base paths | Notes |
+---
+
+### 1. Reference Taxonomies (`/api/v1/catalog/**`)
+
+All reference taxonomy endpoints are public and cached in-memory with Caffeine. Use these endpoints to populate dropdown selectors, search filters, and onboarding steps.
+
+#### Endpoints
+- `GET /api/v1/catalog/regions`: Full Algerian administrative hierarchy (Algeria root → 58 Wilayas → child Communes). Each node returns `id`, `name`, `slug`, `code`, `displayOrder`, and nested `children: RegionDTO[]`.
+- `GET /api/v1/catalog/categories`: Artisanal craft categories with nested `subCategories: JobSubCategoryDTO[]`.
+- `GET /api/v1/catalog/materials`: Material families (e.g., Clay, Leather, Metal) with nested child `materials: MaterialDTO[]`.
+- `GET /api/v1/catalog/epoques`: Traditional and historical Algerian epochs/periods (`id`, `name`, `slug`, `periodEra`, `displayOrder`).
+- `GET /api/v1/catalog/techniques`: Craftsmanship techniques (`id`, `name`, `slug`, `description`, `displayOrder`).
+
+#### Frontend Implementation Guidance
+- **Caching Strategy**: Cache catalog responses in client state (e.g. Pinia, Redux, TanStack Query with `staleTime: Infinity` or 24 hours). Reference taxonomies rarely change.
+- **Cascading Selectors**: In onboarding forms and search filters, populate the Wilaya selector from `regions` where `parent == null`. When a Wilaya is selected, dynamically populate the Commune selector from that Wilaya node's `children`.
+
+---
+
+### 2. Public Directory & Search Engine (`/api/v1/public/directory`)
+
+Search and discovery over verified, active artisans powered by Hibernate Search with Elasticsearch BM25 scoring and criteria fallback.
+
+#### Endpoint
+- `GET /api/v1/public/directory`: Returns `ApiResponse<PaginatedResponse<ArtisanDirectoryCardDTO>>`.
+  - **Query Parameters**:
+    - `keyword` (string, optional, max 120 chars): Full-text query matched against names, bios, specialties, and cities.
+    - `craftCategory` (string, optional): Filter by top-level category slug/name.
+    - `craftSubCategory` (string, optional): Filter by subcategory slug/name.
+    - `wilaya` (string, optional): Wilaya name filter (e.g., `Tlemcen`, `Alger`).
+    - `daira` (string, optional): District/Commune filter.
+    - `minRating` (number, optional, 0.0 - 5.0): Filter artisans by minimum average rating.
+    - `verifiedOnly` (boolean, default: `false`): Restrict results to verified artisans.
+    - `page` (integer, default: 0): Zero-based page number.
+    - `size` (integer, default: 12, max: 100): Results per page.
+    - `sort` (string, default: `relevance`): Sort order (`relevance`, `rating,desc`, `views,desc`).
+  - **Access**: Authenticated (`@PreAuthorize("isAuthenticated()")`). Unauthenticated calls return `403 Forbidden`.
+
+#### Privacy Gating & Contact Masking
+- The backend evaluates the viewer's entitlement using `ViewerPremiumResolver`.
+- **`contactInfoLocked: true` (Non-Premium Clients)**:
+  - `artisanName` is masked as `"Artisan #XXXXX"` (using the first 5 uppercase characters of the artisan's UUID).
+  - Phone, email, website, and physical address are absent.
+  - **UI Guidance**: Render a lock icon ($\text{🔒}$) with an "Unlock Contact Info" call-to-action button that triggers the subscription upgrade drawer.
+- **`contactInfoLocked: false` (Premium Clients, Admins, Self-Views)**:
+  - Real artisan name is returned unmasked. Full contact options (call, email, website) are visible.
+- **Search Debounce**: Debounce search input keystrokes by 300ms before triggering network requests to preserve rate limits.
+
+---
+
+### 3. Artisan Profiles, Certifications & Showcase Gallery
+
+Artisans manage their portfolio media, certifications, and public digital storefront.
+
+#### Endpoints
+- `GET /api/v1/artisan/{id}` (HTTP 200): Public profile details. Enforces contact masking and records deduplicated daily profile views.
+- `POST /api/v1/artisan/certifications` (HTTP 201): Uploads an accreditation document (`multipart/form-data`, keys: `title`, `issuer`, `issueDate`, `file`). Max 10 certifications per artisan. Allowed MIME: `application/pdf`, `image/jpeg`, `image/png`. Max 15MB.
+- `GET /api/v1/artisan/certifications` (HTTP 200): Lists owned certifications.
+- `DELETE /api/v1/artisan/certifications/{id}` (HTTP 200): Removes a certification document.
+- `POST /api/v1/artisan/gallery` (HTTP 201): Uploads a showcase portfolio image (`multipart/form-data`, keys: `caption`, `displayOrder`, `file`). Max 20 images. Allowed MIME: `image/jpeg`, `image/png`, `image/webp`. Max 10MB.
+- `GET /api/v1/artisan/gallery` (HTTP 200): Lists portfolio images ordered by `displayOrder` ascending.
+- `PUT /api/v1/artisan/gallery/{id}` (HTTP 200): Updates caption or display order.
+- `DELETE /api/v1/artisan/gallery/{id}` (HTTP 200): Removes an image from the portfolio.
+- `PUT /api/v1/artisan/gallery/order` (HTTP 200): Batch updates display order sequence (payload: `[{ "id": string, "displayOrder": number }]`).
+
+---
+
+### 4. Masterclasses & Formations (`/api/v1/artisan/formations/**`)
+
+Artisans with `isTeacher = true` author masterclasses, while artisans and clients enroll in workshops.
+
+#### Authoring Workflow (`permission:artisan:formations`)
+1. **Create Draft**: `POST /api/v1/artisan/formations` (`title`, `description`, `priceDZD`, `durationHours`, `capacity`, `scheduledAt`, `subCategoryId`). Status becomes `DRAFT`.
+2. **Upload Thumbnail**: `POST /api/v1/artisan/formations/{id}/thumbnail` (multipart image, max 10MB).
+3. **Attach Syllabus Files**: `POST /api/v1/artisan/formations/{id}/files` (multipart PDF/document, max 25MB, max 10 files).
+4. **Submit for Moderation**: `POST /api/v1/artisan/formations/{id}/submit`. Transitions status to `PENDING_REVIEW`. Core edits to an approved workshop reset it back to `PENDING_REVIEW`.
+5. **Manage Own Formations**: `GET /api/v1/artisan/formations/me` (paginated list of authored masterclasses with status badges).
+
+#### Discovery, Enrollment & Attendance
+- `GET /api/v1/artisan/formations/catalog`: Browse published masterclasses (`status = PUBLISHED`).
+- `GET /api/v1/artisan/formations/catalog/{id}`: Detailed workshop syllabus, seats remaining, and schedule.
+- `POST /api/v1/artisan/formations/{id}/enroll`: Confirms enrollment reservation. Blocks author self-enrollment and prevents over-capacity bookings (`409 Conflict`).
+- `POST /api/v1/artisan/formations/{id}/cancel`: Cancels an enrollment. Enforces a **24-hour cutoff** before `scheduledAt`; cancellations within 24h are rejected (`400 Bad Request`).
+- `GET /api/v1/artisan/formations/my-enrollments`: Paginated list of user enrollments (`CONFIRMED`, `ATTENDED`, `CANCELLED`).
+- `GET /api/v1/artisan/formations/{id}/files/{fileId}/download`: Secure binary stream download. Only authorized for confirmed enrolled attendees and the instructor.
+
+---
+
+### 5. Formateur Accreditation (`/api/v1/artisan/formateur-request`)
+
+Artisans apply for teacher accreditation to author masterclasses.
+
+#### Workflow
+- `POST /api/v1/artisan/formateur-request`: Submits teacher application (`yearsOfExperience`, `motivation`, `specialtyDescription`, `portfolioUrl`).
+- **Cooldown Rule**: If an application is rejected by administrators, a 30-day reapplication cooldown is enforced. The API returns `409 Conflict` with `cooldownUntil` date.
+- **Frontend Guidance**: Disable the "Apply for Formateur" button if `cooldownUntil` is in the future and display the remaining cooldown days.
+
+---
+
+### 6. Social Feed & Reviews (`/api/v1/feed/**`, `/api/v1/artisans/{id}/reviews`)
+
+Community engagement platform for artisans and clients.
+
+#### Feed Endpoints
+- `GET /api/v1/feed`: Paginated feed of published posts. Query parameter `type` accepts `ACTUALITE`, `FORMATION`, or `ANNONCE`.
+- `GET /api/v1/feed/{id}`: Single post representation with author profile and attached media array.
+- `POST /api/v1/feed`: Create a new feed post (`permission:artisan:content` for verified artisans or `permission:admin:feed`).
+- `POST /api/v1/feed/{id}/media`: Attach up to 10 images to a post (`multipart/form-data`).
+- `DELETE /api/v1/feed/{id}`: Soft-delete authored post.
+
+#### Reviews Endpoints
+- `GET /api/v1/artisans/{artisanId}/reviews`: Paginated list of visible reviews (`rating` from 0.00 to 5.00, `comment`, `createdAt`, reviewer name/avatar).
+- `POST /api/v1/artisan/formations/{formationId}/reviews`: Submit a review after completing an enrollment (`permission:artisan:reviews`). Requires status `ATTENDED`. Each attendee can review a formation exactly once (`409 Conflict` on duplicate).
+- `PUT /api/v1/artisan/reviews/{reviewId}` and `DELETE /api/v1/artisan/reviews/{reviewId}`: Edit or delete owned review.
+
+---
+
+### 7. Real-Time Messaging & Chat (`/api/v1/conversations/**`, STOMP `/ws`)
+
+Private 1-on-1 messaging between platform users backed by RabbitMQ STOMP message relay.
+
+#### REST Endpoints
+- `POST /api/v1/conversations`: Initiate or open conversation (`{ "recipientId": string }`). Returns conversation ID.
+- `GET /api/v1/conversations`: Paginated list of user conversations with last message snippet, unread counter, and participant profile.
+- `GET /api/v1/conversations/{id}/messages`: Paginated message history with cursor traversal (`?before=<timestamp>&size=50`).
+- `POST /api/v1/conversations/{id}/messages`: Send message via REST fallback (`{ "content": string, "attachmentIds": string[] }`).
+- `PUT /api/v1/conversations/{id}/read`: Mark all messages up to current timestamp as read.
+- `POST /api/v1/conversations/{id}/attachments/presign`: Pre-registers attachment upload reservation.
+
+#### WebSocket / STOMP Integration
+- **Connection URL**: `ws://<host>:8080/ws` (or SockJS fallback at `http://<host>:8080/ws`).
+- **Authentication**: Pass access token in STOMP `CONNECT` frame header:
+  ```
+  Authorization: Bearer <accessToken>
+  ```
+- **Subscriptions**:
+  - Chat Messages: Subscribe to `/user/queue/messages`.
+  - Notifications: Subscribe to `/user/queue/notifications`.
+  - Presence: Subscribe to `/topic/presence`.
+- **Sending Messages**: Send STOMP frame to `/app/v1/conversations/{conversationId}/send`:
+  ```json
+  { "content": "Bonjour!", "attachmentIds": [] }
+  ```
+- **Typing Indicators**: Send to `/app/v1/conversations/{conversationId}/typing` with `{ "typing": true }`. Ephemeral typing events expire automatically after 5 seconds on the client.
+
+---
+
+### 8. In-App Notifications (`/api/v1/notifications/**`)
+
+Centralized user notification feed.
+
+#### Endpoints
+- `GET /api/v1/notifications`: Paginated list of user notifications (`ApiResponse<PaginatedResponse<NotificationResponseDTO>>`).
+- `GET /api/v1/notifications/unread-count`: Returns raw integer unread count in `data` (e.g. `{ "data": 3 }`).
+- `PUT /api/v1/notifications/{id}/read`: Marks single notification as read.
+- `PUT /api/v1/notifications/read-all`: Marks all notifications for user as read.
+- `DELETE /api/v1/notifications/{id}`: Soft-deletes a notification.
+
+#### UI Implementation Guidance
+- Poll `GET /api/v1/notifications/unread-count` every 60 seconds (or listen for STOMP events on `/user/queue/notifications`) to update the header bell counter badge.
+- Optimistically decrement the unread badge counter immediately upon clicking a notification before the network call resolves.
+
+---
+
+### 9. Subscriptions & Payments (`/api/v1/subscription/**`)
+
+Tiered subscription monetization powered by Chargily Pay V2 with HMAC-SHA256 signature verification.
+
+#### Subscription Tiers
+| Tier | Target Role | Key Features |
 |---|---|---|
-| Auth/account | `/auth/**` | registration, login, refresh, verification, password, profile |
-| Catalog/directory | `/catalog/**`, `/directory/**` | public reference data and search |
-| Artisan/profile | `/artisan/**`, `/artisans/**` | profiles, certifications, galleries, reviews |
-| Feed/moderation | `/feed/**`, `/admin/feed/**`, `/reports/**` | posts, media, reports |
-| Formations | `/artisan/formations/**`, `/admin/formations/**` | authoring, files, enrollment, moderation |
-| Messaging | `/conversations/**`, STOMP `/app/**` | conversations, messages, attachments |
-| Notifications | `/notifications/**` | feed, unread count (raw integer in `data`), read state |
-| Subscriptions/payments | `/subscriptions/**`, `/payments/**`, `/admin/**` | checkout, lifecycle, refunds |
-| Administration | `/admin/**` | users, permissions, moderation, catalog taxonomy, analytics |
-| Client favorites | `/client/favorites/artisans/**` | bookmarking, listing, status check, removal |
-| Files | `/files/**`, avatar and multipart paths | uploads and protected downloads |
+| `FREE` | Artisan | Up to 3 gallery images, 1 active formation, directory listing |
+| `PRO` | Artisan | Up to 10 gallery images, 5 active formations, verified badge eligibility |
+| `PREMIUM` | Artisan / Client | Up to 20 gallery images, unlimited formations, unlocked contact details access, priority search |
 
-Use the generated OpenAPI artifact for exact path/method pairs, schemas, security requirements, and operation IDs. Do not infer routes from this summary.
+#### Endpoints
+- `GET /api/v1/subscriptions/plans`: Lists all active public subscription plans with pricing in Algerian Dinars (DZD).
+- `POST /api/v1/subscriptions/checkout`: Initiates checkout session (`{ "planId": string }`). Returns `{ "checkoutUrl": string, "invoiceId": string }`. Redirect the user's browser to `checkoutUrl` to complete payment.
+- `GET /api/v1/subscriptions/current`: Returns active subscription state (`status`, `tier`, `expiresAt`, `autoRenew`, `daysRemaining`).
+- `GET /api/v1/subscriptions`: Paginated subscription history for the authenticated user.
+- `POST /api/v1/subscriptions/{id}/cancel`: Cancels auto-renewal at period end.
+- `POST /api/v1/subscriptions/{id}/renew`: Re-enables auto-renewal.
+- `GET /api/v1/payments`: Paginated payment transaction history.
+- `GET /api/v1/payments/{id}`: Detailed payment record.
 
-## Client Favorites (`/client/favorites/artisans/**`)
+---
+
+### 10. Content Moderation & Abuse Reporting (`/api/v1/reports`)
+
+Authenticated reporting for community safety.
+
+#### Endpoints
+- `POST /api/v1/reports`: Submits an abuse report (`permission:report:create`).
+  - **Request Body**:
+    ```json
+    {
+      "targetType": "POST",
+      "targetId": "post-uuid-123",
+      "reason": "SPAM",
+      "details": "Repetitive promotional advertising."
+    }
+    ```
+  - `targetType` accepts `USER`, `POST`, or `REVIEW`.
+  - Returns `201 Created` with report reference ID.
+
+---
+
+### 11. File Uploads & Profile Avatars (`/api/v1/users/me/avatars`)
+
+Multipart file handling with ClamAV antivirus scanning, magic-byte format validation, and thumbnail variant generation.
+
+#### Endpoints
+- `POST /api/v1/users/me/avatars`: Uploads a new avatar (`multipart/form-data`, file part key: `file`). Max 5MB. Formats: JPEG, PNG, WebP. Automatically generates 150x150, 400x400, and original variants. Max 10 avatars per user.
+- `GET /api/v1/users/me/avatars`: Lists all gallery avatars with active pointer.
+- `PUT /api/v1/users/me/avatars/{id}/activate`: Sets an existing avatar as active.
+- `DELETE /api/v1/users/me/avatars/{id}`: Deletes an avatar from gallery and S3 storage.
+
+#### File Upload Rules
+- Never manually set `Content-Type: multipart/form-data` with a fixed boundary; let Axios or `fetch` compute the multipart boundary dynamically.
+- Pre-validate file sizes in the browser before dispatching network requests to provide instant user feedback.
+
+---
+
+### 12. Client Favorites (`/api/v1/client/favorites/artisans/**`)
 
 Client favorites allow authenticated clients with `permission:client:favorites` to bookmark artisans, list them with pagination, check favorite status, and remove favorites.
 
-### Endpoints
+#### Endpoints
 - `POST /api/v1/client/favorites/artisans/{artisanId}` (HTTP 201): Adds an artisan to favorites. Returns `ApiResponse<ClientFavoriteArtisanResponseDTO>`. Fails with 409 if already favorited (`"Artisan is already favorited."`) or if the per-client cap is reached (`"Client favorite limit reached."`).
 - `GET /api/v1/client/favorites/artisans` (HTTP 200): Paginated list of visible favorite artisans (`ApiResponse<PaginatedResponse<ClientFavoriteArtisanItemDTO>>`). Supports `page` (default 0), `size` (default 20, max 100), and `sort` (default `createdAt,desc`; invalid sort properties return HTTP 400 `INVALID_PARAMETER`). Automatically filters out suspended or non-visible artisan profiles.
 - `GET /api/v1/client/favorites/artisans/{artisanId}/status` (HTTP 200): Checks whether an artisan is favorited (`ApiResponse<FavoriteStatusResponseDTO>`). Returns `{ "favorited": boolean }`. Returns `{ "favorited": false }` if the artisan exists but is suspended or non-visible; returns 404 only if the artisan does not exist in the database.
@@ -107,23 +314,24 @@ Client favorites allow authenticated clients with `permission:client:favorites` 
 
 *(Note: `favoritedAt` in response payloads is serialized with microsecond fractional precision without timezone suffix, e.g. `"2026-09-24T17:56:45.628794"`).*
 
-### Privacy & Masking Parity
+#### Privacy & Masking Parity
 - Favorites are completely private. Artisans are never notified and cannot see who favorited them.
 - Non-client callers receive HTTP 403: callers lacking `permission:client:favorites` are rejected by authorization guards (standard access denied; artisans receive this); callers with the permission who lack a client profile (administrators receive this) get `403 Forbidden` (`"Only registered clients can manage favorites."`).
 - Returned `ArtisanDirectoryCardDTO` objects enforce contact privacy: non-premium clients receive an anonymized `artisanName` (`"Artisan #XXXXX"`), matching the public directory masking; premium clients receive the unmasked full name. Note that `ArtisanDirectoryCardDTO` has no phone or email fields.
 
+---
 
-## Pagination, files, and permissions
+## Pagination, Files, and Permissions Reference
 
 Use the advertised Spring pageable parameters (`page`, `size`, `sort`); the configured default is 20 and maximum is 100. Preserve server-provided page metadata. Multipart requests must use the browser-generated boundary; never manually set `Content-Type: multipart/form-data`. Downloads may be binary streams or redirects, so inspect the response content type and handle `Content-Disposition` safely.
 
 Authorization is permission-based and database-backed. The canonical permission names and ownership rules are in [AUTHORIZATION_MATRIX.md](../AUTHORIZATION_MATRIX.md). UI checks are for usability only; the backend is authoritative.
 
-## Realtime and reliability
+## Realtime and Reliability Best Practices
 
 WebSocket/STOMP authentication and destinations come from the backend WebSocket configuration and contract tests. Webhooks are server-to-server and are not called by the browser. Respect `Retry-After`; use bounded retries only for idempotent requests or operations with an idempotency key. Do not blindly retry login, checkout, refund, or message creation.
 
-## TypeScript generation
+## TypeScript Generation
 
 Generated code is not committed in this repository:
 
@@ -135,6 +343,11 @@ npx openapi-typescript ./openapi.json -o ./src/generated/openapi.d.ts
 
 Pin the generator version in the frontend lockfile and review the OpenAPI diff whenever a controller, DTO, status, or enum code changes.
 
-## Common mistakes
+## Common Mistakes to Avoid
 
-Do not send role strings instead of permissions, assume every operation returns 200, treat 403 as refresh failure, manually set a multipart boundary, expose refresh tokens in logs, or rely on historical Postman examples without checking the generated contract.
+1. **Role string confusion**: Do not send legacy `ROLE_*` strings; the backend is capability-based (`Permission` enum).
+2. **Assumption of 200 OK**: Always inspect HTTP response status and `ApiResponse.code` before parsing data payloads.
+3. **Treating 403 as refresh failure**: `403 Forbidden` indicates authorization rejection (e.g. unverified email or missing capability), NOT an expired token. Never trigger token refresh on 403.
+4. **Manual multipart boundary**: Never manually set `Content-Type: multipart/form-data`. Let the browser/runtime set the boundary header.
+5. **Token leakage**: Never store refresh tokens in unencrypted local storage or print access tokens in telemetry/console logs.
+6. **Masked contact info**: Do not attempt to bypass contact info masking on the client; the backend does not transmit phone/email fields when `contactInfoLocked: true`.
