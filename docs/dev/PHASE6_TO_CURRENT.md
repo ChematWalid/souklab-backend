@@ -93,7 +93,7 @@ Authorization was migrated from role-oriented/string checks to database-backed c
 
 ### Permission model
 
-The persisted permission set currently contains 12 capabilities:
+The persisted permission set currently contains 16 capabilities:
 
 1. `permission:admin:users`
 2. `permission:admin:formations`
@@ -107,6 +107,10 @@ The persisted permission set currently contains 12 capabilities:
 10. `permission:report:create`
 11. `permission:file:read`
 12. `permission:message:send`
+13. `permission:financial:admin`
+14. `permission:analytics:admin`
+15. `permission:admin:catalog`
+16. `permission:client:favorites`
 
 `Permission` is the type-safe Java source of truth, while the `permissions` and `user_permissions` tables are the database source of truth. Account type is onboarding metadata used to select initial permissions; it is not itself an authorization authority.
 

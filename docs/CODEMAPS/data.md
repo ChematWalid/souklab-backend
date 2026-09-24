@@ -9,7 +9,7 @@
 - **Auditing**: `createdAt` (`datetime(6)`), `updatedAt` (`datetime(6)`), and nullable `deletedAt` for soft-deletable entities.
 - **ORM / DDL**: Spring Data JPA / Hibernate 6/7. Production enforces `spring.jpa.hibernate.ddl-auto=validate`.
 
-## 2. Entity Map by Domain (47 JPA Entities)
+## 2. Entity Map by Domain (50 JPA Entities)
 
 ### Identity & Access Control
 - `User` (`users`): Core credentials, status (`PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`), role seed (`ARTISAN`, `CLIENT`, `ADMIN`).

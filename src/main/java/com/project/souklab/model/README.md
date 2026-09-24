@@ -32,6 +32,8 @@ erDiagram
     Artisan }o--o{ Epoque : "inspired by"
     JobCategory ||--o{ JobSubCategory : "subcategories"
     MaterialFamily ||--o{ Material : "materials"
+    Client ||--o{ ClientFavoriteArtisan : "bookmarks"
+    Artisan ||--o{ ClientFavoriteArtisan : "favorited in"
 ```
 
 ---
@@ -117,6 +119,13 @@ erDiagram
 | [`Payment`](Payment.java) | `@Entity` | Financial transaction record tracking Chargily checkout ID, amount, and status. |
 | [`PaymentWebhookLog`](PaymentWebhookLog.java) | `@Entity` | Immutable audit log of received webhook events for signature verification and idempotency. |
 | [`BillingPeriod`](BillingPeriod.java), [`PaymentProvider`](PaymentProvider.java), [`PaymentStatus`](PaymentStatus.java), [`SubscriptionStatus`](SubscriptionStatus.java), [`WebhookProcessingStatus`](WebhookProcessingStatus.java) | `enum` | Billing cycle, payment provider, transaction status, subscription lifecycle, and webhook states. |
+
+### Client Favorites
+| Class / Enum | Type | Description |
+| :--- | :---: | :--- |
+| [`ClientFavorite`](ClientFavorite.java) | `@MappedSuperclass` | Base mapped superclass for client favorites with `client` association, timestamps, and UUID id. |
+| [`ClientFavoriteArtisan`](ClientFavoriteArtisan.java) | `@Entity` | Client favorite artisan bookmark linking a client to a favorited artisan. |
+| [`FavoriteType`](FavoriteType.java) | `enum` | Extensible favorite category discriminator (`ARTISAN`). |
 
 ### Analytics & Outbox
 For raw activity events, outbox queues, and aggregated daily KPI rollups, see the dedicated models in [`com.project.souklab.model.analytics`](analytics/README.md) (`ActivityEvent`, `AnalyticsJob`, `AnalyticsOutboxEvent`, `DailyKpiRollup`, etc.).

@@ -18,7 +18,7 @@ graph TD
 
 ---
 
-## Repositories Reference (46 Repositories Across DAO Packages)
+## Repositories Reference (47 Repositories Across DAO Packages)
 
 ### Identity, Security & Auditing
 | Repository Interface | Managed Entity | Key Query Capabilities |
@@ -86,6 +86,11 @@ graph TD
 | [`ClientSubscriptionRepository`](ClientSubscriptionRepository.java) | `ClientSubscription` | Active client subscriptions and premium feature gating. |
 | [`PaymentRepository`](PaymentRepository.java) | `Payment` | Transaction tracking by gateway checkout ID, user ID, and payment status. |
 | [`PaymentWebhookLogRepository`](PaymentWebhookLogRepository.java) | `PaymentWebhookLog` | Webhook idempotency event tracking and signature audit log. |
+
+### Client Favorites
+| Repository Interface | Managed Entity | Key Query Capabilities |
+| :--- | :--- | :--- |
+| [`ClientFavoriteArtisanRepository`](ClientFavoriteArtisanRepository.java) | `ClientFavoriteArtisan` | `findByClientIdAndArtisanId`, `existsByClientIdAndArtisanId`, `countByClientId`, `findByClientIdWithArtisan` (batch fetch), `deleteByClientIdAndArtisanId`. |
 
 ### Analytics & Outbox
 For activity events, outbox queues, and aggregated KPI rollups, see the dedicated repositories in [`com.project.souklab.dao.analytics`](analytics/README.md) (`ActivityEventRepository`, `AnalyticsJobRepository`, `DailyKpiRollupRepository`, `AnalyticsOutboxRepository`, etc.).

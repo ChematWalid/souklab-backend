@@ -8,7 +8,7 @@ Spring Security filters, JWT extraction, rate limiting mechanisms, and OAuth2 su
 
 `AuthorizationPermission` is the canonical persisted capability. `AccessControlService` exposes reusable predicates for method security and domain workflows. JWTs carry an authorization schema version while current permissions are resolved from the database whenever the principal is loaded. Account type is onboarding metadata, not an authorization mechanism.
 
-The complete capability-to-endpoint matrix is maintained in [`docs/AUTHORIZATION_MATRIX.md`](../../../../../../../docs/AUTHORIZATION_MATRIX.md). The current model contains 12 capabilities and intentionally has no role compatibility layer.
+The complete capability-to-endpoint matrix is maintained in [`docs/AUTHORIZATION_MATRIX.md`](../../../../../../../docs/AUTHORIZATION_MATRIX.md). The current model contains 16 capabilities and intentionally has no role compatibility layer.
 
 ## Security Filter Pipeline
 

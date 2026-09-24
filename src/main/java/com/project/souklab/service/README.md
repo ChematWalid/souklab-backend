@@ -32,6 +32,7 @@ graph TD
 | [`catalog`](catalog/README.md) | Cached reference taxonomy retrieval and administrative catalog CRUD management. |
 | [`chat`](chat/README.md) | Realtime 1-on-1 conversations, message delivery, read receipts, and typing indicators. |
 | [`directory`](directory/README.md) | Public artisan directory search via Hibernate Search with Elasticsearch backend. |
+| [`favorite`](favorite/README.md) | Client artisan favorites management, pessimistic concurrency locking, and cap enforcement. |
 | [`feed`](feed/README.md) | Public feed post authoring, media attachments, and administrative post moderation. |
 | [`formateur`](formateur/README.md) | Artisan teacher accreditation lifecycle, applications, and cooldown tracking. |
 | [`formation`](formation/README.md) | Peer masterclass authoring, syllabus document uploads, capacity limits, and review moderation. |

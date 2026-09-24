@@ -33,6 +33,7 @@ graph LR
 | [`catalog`](catalog/README.md) | Public reference taxonomy endpoints and administrative taxonomy CRUD management. |
 | [`chat`](chat/README.md) | Private conversations, cursor-paginated messages, file attachments, and STOMP WebSocket endpoints. |
 | [`directory`](directory/README.md) | Authenticated artisan discovery search engine with dynamic contact identity privacy gating. |
+| [`favorite`](favorite/README.md) | Client favorite artisan management (`/api/v1/client/favorites/artisans/**`). |
 | [`feed`](feed/README.md) | Public feed posts, media attachments, and administrative post moderation. |
 | [`formateur`](formateur/README.md) | Formateur teacher accreditation applications, administrative review, grant, and revocation. |
 | [`formation`](formation/README.md) | Artisan masterclass authoring, peer workshop enrollment, syllabus downloads, and administrative moderation. |

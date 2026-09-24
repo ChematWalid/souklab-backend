@@ -24,6 +24,7 @@ Contracts and schemas defining client-server communications across the applicati
 | [`chat`](chat/README.md) | Conversation descriptors, message payloads, typing commands, and WebSocket events. |
 | [`common`](common/README.md) | Standard API envelopes (`ApiResponse<T>`) and pagination wrappers (`PaginatedResponse<T>`). |
 | [`directory`](directory/README.md) | Public directory search result cards, criteria filter payloads, and sort options. |
+| [`favorite`](favorite/README.md) | Client favorite artisan representations, directory card items, and status indicators. |
 | [`feed`](feed/README.md) | Moderated feed post, media, and moderation payloads. |
 | [`formateur`](formateur/README.md) | Accreditation applications, approval notes, rejections, and cooldown data. |
 | [`formation`](formation/README.md) | Masterclass authoring, curriculum updates, enrollment, review, and file descriptors. |

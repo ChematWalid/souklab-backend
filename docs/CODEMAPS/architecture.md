@@ -14,17 +14,17 @@
 └──────────────┬───────────────┴──────────────┬───────────────┘
                ▼                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Controller Layer (33 REST Controllers + STOMP Handlers)     │
+│ Controller Layer (32 Controllers: 31 REST + 1 STOMP)        │
 └──────────────────────────────┬──────────────────────────────┘
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Application Service Layer (46 Transactional Services)       │
+│ Application Service Layer (47 Application Services)          │
 │ - Domain Invariants   - Event Outbox   - File Access Policy │
 └──────┬───────────────┬──────────────┬───────────────┬───────┘
        ▼               ▼              ▼               ▼
 ┌─────────────┐ ┌─────────────┐ ┌───────────┐ ┌───────────────┐
 │ Spring Data │ │ Hibernate   │ │ Storage   │ │ External APIs │
-│ JPA (46 Repo│ │ Search 8.2  │ │ Engine    │ │ - Chargily    │
+│ JPA (47 Repo│ │ Search 8.2  │ │ Engine    │ │ - Chargily    │
 │  MariaDB)   │ │ Elastic :920│ │ MinIO S3  │ │ - MailerSend  │
 └─────────────┘ └─────────────┘ └─────┬─────┘ └───────────────┘
                                       ▼
