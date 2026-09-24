@@ -315,9 +315,10 @@ Profile endpoints apply graduated contact visibility based on the viewer's relat
 |---|---|---|---|
 | `GET /api/v1/client/profile` | GET | `Profile.READ` | Retrieve own client profile |
 | `PATCH /api/v1/client/profile` | PATCH | `Profile.WRITE` | Update own client profile |
-| `POST /api/v1/client/favorites/{artisanId}` | POST | `Profile.READ` | Add artisan to favorites |
-| `DELETE /api/v1/client/favorites/{artisanId}` | DELETE | `Profile.READ` | Remove artisan from favorites |
-| `GET /api/v1/client/favorites` | GET | `Profile.READ` | List favorite artisans |
+| `POST /api/v1/client/favorites/artisans/{artisanId}` | POST | `Client.FAVORITES` | Add artisan to favorites |
+| `GET /api/v1/client/favorites/artisans` | GET | `Client.FAVORITES` | List favorite artisans (paginated) |
+| `GET /api/v1/client/favorites/artisans/{artisanId}/status` | GET | `Client.FAVORITES` | Check whether artisan is favorited |
+| `DELETE /api/v1/client/favorites/artisans/{artisanId}` | DELETE | `Client.FAVORITES` | Remove artisan from favorites |
 
 ---
 

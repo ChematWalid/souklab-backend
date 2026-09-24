@@ -46,5 +46,6 @@ deploy/.env.production
 !.postman/*.postman_environment.example.json
 postman/.dependencies/
 .tours/
+docs/generated/
 
 CLAUDE.md

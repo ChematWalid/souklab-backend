@@ -15,6 +15,7 @@ The schema is defined by the JPA mappings in `com.project.souklab.model`; this d
 | Subscriptions & Payments | `subscription_plans`, `subscriptions`, `subscription_payments`, `chargily_webhook_events`, `subscription_refunds` |
 | Analytics | `analytics_raw_events`, `analytics_rollups`, `analytics_job_runs`, `analytics_outbox_events`, `analytics_artifact_records`, `analytics_maintenance_jobs` |
 | Operations | `notifications`, `audit_logs` |
+| Favorites | `client_favorite_artisans` |
 
 All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft-delete is represented by `deleted_at` only where the entity mapping includes that inherited field in persistence queries; join-table behavior and foreign-key actions are controlled by the annotations on each relationship.
 
@@ -22,6 +23,7 @@ All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft
 
 - Unique email and OAuth-provider identity constraints prevent duplicate account bindings.
 - `formation_enrollments` has a unique `(formation_id, artisan_id)` constraint.
+- `client_favorite_artisans` enforces a unique constraint `(client_id, artisan_id)` and foreign key cascades on client and artisan deletion.
 - Catalog slugs enforce unique constraints across all reference entities (`regions`, `job_categories`, `job_sub_categories`, `material_families`, `materials`, `epoques`, `techniques`).
 - Two-tier hierarchies enforce foreign key integrity (`job_sub_categories.category_id -> job_categories.id`, `materials.family_id -> material_families.id`) with delete-restriction semantics preventing orphan records.
 - Self-referencing regional hierarchy (`regions.parent_id -> regions.id`) prevents cycle traversal via recursive CTE ancestor checks.
@@ -29,7 +31,7 @@ All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft
 
 ## Database Migrations & Deployment
 
-Schema changes are versioned and managed using **Flyway**. The repository maintains 16 versioned migrations (`V0` through `V15`) located in `src/main/resources/db/migration/`:
+Schema changes are versioned and managed using **Flyway**. The repository maintains 17 versioned migrations (`V0` through `V16`) located in `src/main/resources/db/migration/`:
 - `V0`: Baseline schema (users, artisans, catalog, formations, enrollments)
 - `V1`: Social feed tables (posts, media, comments, likes)
 - `V2`: Authorization permissions (`permissions`, `user_permissions`)
@@ -38,5 +40,6 @@ Schema changes are versioned and managed using **Flyway**. The repository mainta
 - `V5`: Subscriptions and Chargily Pay V2 payments
 - `V6`–`V14`: Analytics raw events, rollups, job queue, outbox patterns, and audit action tracking
 - `V15`: Admin catalog taxonomy management permission (`permission:admin:catalog`) and catalog audit action types (`CATALOG_ITEM_CREATED`, `CATALOG_ITEM_UPDATED`, `CATALOG_ITEM_DELETED`)
+- `V16`: Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`)
 
 The `prod` Spring profile sets `spring.jpa.hibernate.ddl-auto=validate` and Hibernate Search schema management to `validate`. Production schema changes must be applied via Flyway (`FLYWAY_ENABLED=true`) prior to application startup. Applied migrations are immutable and must never be modified.

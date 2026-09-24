@@ -478,3 +478,140 @@ financial administrator permission in addition to analytics permission.
 
 - `POST /api/v1/artisan/formateur-request`: Submit an artisan accreditation request (`permission:artisan:content`).
 - `GET /api/v1/admin/formateur-requests`, approve/reject/lift-cooldown, and direct grant/revoke endpoints: Administrator governance under `permission:admin:users`.
+
+---
+
+## 14. Client Favorites (`/api/v1/client/favorites/artisans/**`)
+
+Client favorites allow authenticated clients to bookmark artisans, retrieve a paginated directory of favorited artisans, inspect favorite status for specific artisans, and remove favorites. All operations require `permission:client:favorites` and an active client profile.
+
+### `POST /api/v1/client/favorites/artisans/{artisanId}`
+Adds an artisan to the authenticated client's favorites.
+- **Access**: Authenticated Client (`@accessControl.canManageFavorites(authentication)`)
+- **Path Parameters**:
+  - `artisanId` (string, required): Unique identifier of the target artisan.
+- **Request Body**: None
+- **Response**: `201 Created` with `ApiResponse<ClientFavoriteArtisanResponseDTO>`
+  ```json
+  {
+    "success": true,
+    "code": 201,
+    "message": "Artisan added to favorites successfully",
+    "data": {
+      "favoriteId": "d3b07384-d113-4e44-b0a6-c87d46c82d4f",
+      "artisanId": "e4a18295-e224-4f55-c1b7-d98e57d93e50",
+      "favoritedAt": "2026-09-24T06:00:00Z"
+    }
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Artisan added to favorites successfully.
+  - `401 Unauthorized`: Missing or invalid authentication token.
+  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+  - `404 Not Found`: Target artisan does not exist or is not effectively visible (`"Artisan not found with id: <artisanId>"`).
+  - `409 Conflict`: Artisan is already favorited (`"Artisan is already favorited."`), or the client's favorite capacity is exceeded (`"Client favorite limit reached."`). Configured via `app.favorites.max-per-client` (`FAVORITES_MAX_PER_CLIENT`, default 500).
+
+### `GET /api/v1/client/favorites/artisans`
+Retrieves a paginated list of visible favorite artisans for the authenticated client.
+- **Access**: Authenticated Client (`@accessControl.canManageFavorites(authentication)`)
+- **Query Parameters**:
+  - `page` (integer, optional, default: 0): Zero-based page index.
+  - `size` (integer, optional, default: 20, max: 100): Page size.
+  - `sort` (string, optional, default: `createdAt,desc`): Sort property and direction.
+- **Request Body**: None
+- **Response**: `200 OK` with `ApiResponse<PaginatedResponse<ClientFavoriteArtisanItemDTO>>`
+  ```json
+  {
+    "success": true,
+    "code": 200,
+    "message": "Operation completed successfully",
+    "data": {
+      "content": [
+        {
+          "favoritedAt": "2026-09-24T06:00:00Z",
+          "artisan": {
+            "id": "e4a18295-e224-4f55-c1b7-d98e57d93e50",
+            "artisanName": "Ahmed Benali",
+            "avatarUrl": "https://storage.souklab.dz/avatars/...",
+            "coverImageUrl": "https://storage.souklab.dz/gallery/...",
+            "bioSnippet": "Master ceramicist specializing in traditional pottery...",
+            "city": "Tlemcen",
+            "wilayaName": "Tlemcen",
+            "wilayaCode": "13",
+            "regionSlug": "ouest",
+            "categoryName": "Poterie & Céramique",
+            "categorySlug": "poterie-ceramique",
+            "subCategoryName": "Poterie Traditionnelle",
+            "subCategorySlug": "poterie-traditionnelle",
+            "rating": 4.9,
+            "reviewsCount": 18,
+            "viewsCount": 142,
+            "verified": true,
+            "premium": true,
+            "teacher": false,
+            "primaryMaterials": ["Argile rouge", "Argile blanche"],
+            "primaryTechniques": ["Tournage", "Émaillage"],
+            "createdAt": "2026-01-15T10:00:00Z"
+          }
+        }
+      ],
+      "pageNumber": 0,
+      "pageSize": 20,
+      "totalElements": 1,
+      "totalPages": 1,
+      "last": true
+    }
+  }
+  ```
+- **Visibility & Masking Behavior**:
+  - Automatically filters out suspended accounts or non-visible artisan profiles.
+  - Contact masking parity: Applies `ViewerPremiumResolver` graduated contact visibility to the returned `ArtisanDirectoryCardDTO`. Non-premium clients receive an anonymized `artisanName` (`"Artisan #XXXXX"`, matching public directory masking); premium clients receive the unmasked full name.
+- **Status Codes**:
+  - `200 OK`: Favorites retrieved successfully.
+  - `401 Unauthorized`: Missing or invalid authentication token.
+  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+
+### `GET /api/v1/client/favorites/artisans/{artisanId}/status`
+Checks whether a specific artisan is favorited by the authenticated client.
+- **Access**: Authenticated Client (`@accessControl.canManageFavorites(authentication)`)
+- **Path Parameters**:
+  - `artisanId` (string, required): Unique identifier of the target artisan.
+- **Request Body**: None
+- **Response**: `200 OK` with `ApiResponse<FavoriteStatusResponseDTO>`
+  ```json
+  {
+    "success": true,
+    "code": 200,
+    "message": "Operation completed successfully",
+    "data": {
+      "favorited": true
+    }
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Favorite status retrieved. Returns `{ "favorited": false }` if the artisan exists in the database but is suspended or not effectively visible.
+  - `401 Unauthorized`: Missing or invalid authentication token.
+  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+  - `404 Not Found`: Artisan ID does not exist in the database (`"Artisan not found with id: <artisanId>"`).
+
+### `DELETE /api/v1/client/favorites/artisans/{artisanId}`
+Removes an artisan from the authenticated client's favorites.
+- **Access**: Authenticated Client (`@accessControl.canManageFavorites(authentication)`)
+- **Path Parameters**:
+  - `artisanId` (string, required): Unique identifier of the target artisan.
+- **Request Body**: None
+- **Response**: `200 OK` with `ApiResponse<Void>`
+  ```json
+  {
+    "success": true,
+    "code": 200,
+    "message": "Artisan removed from favorites successfully",
+    "data": null
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Artisan removed from favorites successfully (returns HTTP 200 with `data: null`).
+  - `401 Unauthorized`: Missing or invalid authentication token.
+  - `403 Forbidden`: Authenticated user lacks `permission:client:favorites` or has no active Client profile (`"Only registered clients can manage favorites."`).
+  - `404 Not Found`: Favorite record does not exist for this client and artisan (`"Favorite not found for artisan: <artisanId>"`).
+

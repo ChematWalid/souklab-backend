@@ -315,9 +315,10 @@ Les endpoints de profil appliquent une visibilité graduée des coordonnées sel
 |---|---|---|---|
 | `GET /api/v1/client/profile` | GET | `Profile.READ` | Récupérer son propre profil client |
 | `PATCH /api/v1/client/profile` | PATCH | `Profile.WRITE` | Mettre à jour son propre profil client |
-| `POST /api/v1/client/favorites/{artisanId}` | POST | `Profile.READ` | Ajouter un artisan aux favoris |
-| `DELETE /api/v1/client/favorites/{artisanId}` | DELETE | `Profile.READ` | Retirer un artisan des favoris |
-| `GET /api/v1/client/favorites` | GET | `Profile.READ` | Lister les artisans favoris |
+| `POST /api/v1/client/favorites/artisans/{artisanId}` | POST | `Client.FAVORITES` | Ajouter un artisan aux favoris |
+| `GET /api/v1/client/favorites/artisans` | GET | `Client.FAVORITES` | Lister les artisans favoris (paginé) |
+| `GET /api/v1/client/favorites/artisans/{artisanId}/status` | GET | `Client.FAVORITES` | Vérifier si un artisan est dans les favoris |
+| `DELETE /api/v1/client/favorites/artisans/{artisanId}` | DELETE | `Client.FAVORITES` | Retirer un artisan des favoris |
 
 ---
 
