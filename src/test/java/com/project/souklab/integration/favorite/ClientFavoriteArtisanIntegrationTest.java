@@ -25,8 +25,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.project.souklab.controller.support.SecurityTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +36,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
@@ -52,6 +55,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Live MariaDB integration tests verifying database constraints, foreign key cascade rules,
@@ -59,10 +67,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * pessimistic-lock cap enforcement, and zero N+1 query execution.
  */
 @SpringBootTest
+@AutoConfigureMockMvc
 @TestPropertySource(properties = {
         "app.search.enabled=false"
 })
 class ClientFavoriteArtisanIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Autowired
     private UserRepository userRepository;
@@ -659,5 +671,200 @@ class ClientFavoriteArtisanIntegrationTest {
             assertThat(unmaskedName).isEqualTo("Reda Boutique");
             return null;
         });
+    }
+
+    /**
+     * Helper to batch create active artisans with linked user accounts.
+     */
+    private List<Artisan> createTestArtisans(String prefix, int count) {
+        return transactionTemplate.execute(status -> {
+            List<Artisan> artisans = new ArrayList<>(count);
+            for (int i = 0; i < count; i++) {
+                String id = UUID.randomUUID().toString();
+                User user = User.builder()
+                        .email(prefix + "-" + i + "-" + UUID.randomUUID() + "@souklab.dz")
+                        .firstName("ArtisanFirst" + i)
+                        .lastName("ArtisanLast" + i)
+                        .status(AccountStatus.ACTIVE)
+                        .emailVerified(true)
+                        .build();
+                user.setId(id);
+                entityManager.persist(user);
+                createdUserIds.add(user.getId());
+
+                Artisan artisan = Artisan.builder()
+                        .id(id)
+                        .user(user)
+                        .bio("Bio for artisan " + i)
+                        .city("Algiers")
+                        .isVerified(true)
+                        .rating(4.5)
+                        .reviewsCount(5)
+                        .viewsCount(100)
+                        .build();
+                entityManager.persist(artisan);
+                user.setArtisan(artisan);
+                createdArtisanIds.add(artisan.getId());
+                artisans.add(artisan);
+            }
+            entityManager.flush();
+            return artisans;
+        });
+    }
+
+    /**
+     * Helper to batch create favorite records for a client.
+     */
+    private void addFavoritesForClient(Client client, List<Artisan> artisans) {
+        transactionTemplate.execute(status -> {
+            Client managedClient = entityManager.find(Client.class, client.getId());
+            for (Artisan artisan : artisans) {
+                Artisan managedArtisan = entityManager.find(Artisan.class, artisan.getId());
+                ClientFavoriteArtisan fav = ClientFavoriteArtisan.builder()
+                        .client(managedClient)
+                        .artisan(managedArtisan)
+                        .build();
+                fav.ensureId();
+                entityManager.persist(fav);
+                createdFavoriteIds.add(fav.getId());
+            }
+            entityManager.flush();
+            return null;
+        });
+    }
+
+    /**
+     * Verifies that prepared statement count remains constant across 5, 20, and 60 favorites under default
+     * pagination (size=20), and increases predictably when requesting size=100 due to batch-splitting across collections.
+     */
+    @Test
+    @DisplayName("Statement count verification: constant across 5, 20, 60 favorites under default size=20; splits batch at size=100")
+    void listFavorites_statementCountVerification_constantUnderDefaultPaginationAndSplitsBatchAt100() throws Exception {
+        User clientUser5 = createTestUser("client-sc5", AccountStatus.ACTIVE);
+        Client client5 = createTestClient(clientUser5);
+        List<Artisan> artisans5 = createTestArtisans("art-sc5", 5);
+        addFavoritesForClient(client5, artisans5);
+
+        User clientUser20 = createTestUser("client-sc20", AccountStatus.ACTIVE);
+        Client client20 = createTestClient(clientUser20);
+        List<Artisan> artisans20 = createTestArtisans("art-sc20", 20);
+        addFavoritesForClient(client20, artisans20);
+
+        User clientUser60 = createTestUser("client-sc60", AccountStatus.ACTIVE);
+        Client client60 = createTestClient(clientUser60);
+        List<Artisan> artisans60 = createTestArtisans("art-sc60", 60);
+        addFavoritesForClient(client60, artisans60);
+
+        SessionFactory sessionFactory = entityManager.getEntityManagerFactory().unwrap(SessionFactory.class);
+        Statistics stats = sessionFactory.getStatistics();
+        stats.setStatisticsEnabled(true);
+
+        stats.clear();
+        mockMvc.perform(get("/api/v1/client/favorites/artisans")
+                        .with(SecurityTestUtils.client(clientUser5.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalElements").value(5))
+                .andExpect(jsonPath("$.data.content.length()").value(5));
+        long count5 = stats.getPrepareStatementCount();
+
+        stats.clear();
+        mockMvc.perform(get("/api/v1/client/favorites/artisans")
+                        .with(SecurityTestUtils.client(clientUser20.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalElements").value(20))
+                .andExpect(jsonPath("$.data.content.length()").value(20));
+        long count20 = stats.getPrepareStatementCount();
+
+        stats.clear();
+        mockMvc.perform(get("/api/v1/client/favorites/artisans")
+                        .with(SecurityTestUtils.client(clientUser60.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalElements").value(60))
+                .andExpect(jsonPath("$.data.content.length()").value(20));
+        long count60 = stats.getPrepareStatementCount();
+
+        stats.clear();
+        mockMvc.perform(get("/api/v1/client/favorites/artisans")
+                        .param("size", "100")
+                        .with(SecurityTestUtils.client(clientUser60.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalElements").value(60))
+                .andExpect(jsonPath("$.data.content.length()").value(60));
+        long count60Size100 = stats.getPrepareStatementCount();
+
+        System.out.printf("BATCH_E_STATEMENT_COUNTS: count5=%d, count20=%d, count60=%d, count60Size100=%d%n",
+                count5, count20, count60, count60Size100);
+
+        assertEquals(count20, count60,
+                String.format("Statement count for 60 favorites under default size=20 (%d) must equal statement count for 20 favorites (%d)",
+                        count60, count20));
+        assertEquals(13L, count5,
+                String.format("Statement count for 5 favorites was %d", count5));
+        assertEquals(29L, count20,
+                String.format("Statement count for 20 favorites was %d", count20));
+        assertEquals(71L, count60Size100,
+                String.format("Statement count for 60 favorites with size=100 was %d", count60Size100));
+
+        long delta = count60Size100 - count60;
+        assertEquals(42L, delta,
+                String.format("Statement count for 60 favorites with size=100 (%d) exceeds default page size=20 count (%d) by literal delta=%d",
+                        count60Size100, count60, delta));
+    }
+
+    /**
+     * Verifies full-stack HTTP masking behavior via MockMvc: non-premium client receives anonymized name,
+     * which dynamically transitions to real name upon premium upgrade in the database.
+     */
+    @Test
+    @DisplayName("HTTP masking: non-premium client receives masked name; unmasks dynamically when upgraded to premium in DB")
+    void listFavorites_httpMasking_masksNonPremiumAndUnmasksWhenClientBecomesPremium() throws Exception {
+        User clientUser = createTestUser("client-http-mask", AccountStatus.ACTIVE);
+        Client client = createTestClient(clientUser);
+
+        User artisanUser = createTestUser("artisan-http-mask", AccountStatus.ACTIVE);
+        Artisan artisan = createTestArtisan(artisanUser, true, null);
+
+        transactionTemplate.execute(status -> {
+            User managedArtisanUser = entityManager.find(User.class, artisanUser.getId());
+            managedArtisanUser.setFirstName("Fatima");
+            managedArtisanUser.setLastName("Zohra");
+            Client managedClient = entityManager.find(Client.class, client.getId());
+            Artisan managedArtisan = entityManager.find(Artisan.class, artisan.getId());
+            ClientFavoriteArtisan fav = ClientFavoriteArtisan.builder()
+                    .client(managedClient)
+                    .artisan(managedArtisan)
+                    .build();
+            fav.ensureId();
+            entityManager.persist(fav);
+            entityManager.flush();
+            createdFavoriteIds.add(fav.getId());
+            return null;
+        });
+
+        String expectedMaskedName = "Artisan #" + artisan.getId().substring(artisan.getId().length() - 5).toUpperCase(java.util.Locale.ROOT);
+        String maskedBody = mockMvc.perform(get("/api/v1/client/favorites/artisans")
+                        .with(SecurityTestUtils.client(clientUser.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.content[0].artisan.artisanName").value(expectedMaskedName))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(maskedBody).doesNotContain("Fatima");
+        assertThat(maskedBody).doesNotContain("Zohra");
+
+        transactionTemplate.execute(status -> {
+            Client managedClient = entityManager.find(Client.class, client.getId());
+            managedClient.setPremium(true);
+            entityManager.flush();
+            return null;
+        });
+
+        mockMvc.perform(get("/api/v1/client/favorites/artisans")
+                        .with(SecurityTestUtils.client(clientUser.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.content[0].artisan.artisanName").value("Fatima Zohra"));
     }
 }
