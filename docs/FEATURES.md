@@ -239,6 +239,7 @@ All authorization is **permission-based**, not role-based. Roles (`ARTISAN`, `CL
 | `permission:message:send` | `Message.SEND` | Send and receive messages |
 | `permission:analytics:admin` | `Analytics.ADMIN` | Access analytics dashboard and export data |
 | `permission:admin:catalog` | `Admin.CATALOG` | Manage reference taxonomies: techniques, epoques, regions, categories, materials |
+| `permission:client:favorites` | `Client.FAVORITES` | Manage client favorite artisans (bookmark, list, status, remove) |
 
 ### `AccessControlService` Predicates
 
@@ -252,6 +253,7 @@ All authorization is **permission-based**, not role-based. Roles (`ARTISAN`, `CL
 | `canManageFinancialOperations()` | `Financial.ADMIN` |
 | `canViewAnalytics()` | `Analytics.ADMIN` |
 | `canManageCatalog()` | `Admin.CATALOG` |
+| `canManageFavorites()` | `Client.FAVORITES` |
 | `canManageArtisanFormations()` | `Artisan.FORMATIONS` |
 | `canManageArtisanContent()` / `isArtisan()` | `Artisan.CONTENT` |
 | `canManageArtisanReviews()` | `Artisan.REVIEWS` |
@@ -311,14 +313,25 @@ Profile endpoints apply graduated contact visibility based on the viewer's relat
 
 ## 7. Client Profiles & Favorites
 
+### Endpoints
+
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/client/profile` | GET | `Profile.READ` | Retrieve own client profile |
 | `PATCH /api/v1/client/profile` | PATCH | `Profile.WRITE` | Update own client profile |
-| `POST /api/v1/client/favorites/artisans/{artisanId}` | POST | `Client.FAVORITES` | Add artisan to favorites |
-| `GET /api/v1/client/favorites/artisans` | GET | `Client.FAVORITES` | List favorite artisans (paginated) |
-| `GET /api/v1/client/favorites/artisans/{artisanId}/status` | GET | `Client.FAVORITES` | Check whether artisan is favorited |
-| `DELETE /api/v1/client/favorites/artisans/{artisanId}` | DELETE | `Client.FAVORITES` | Remove artisan from favorites |
+| `POST /api/v1/client/favorites/artisans/{artisanId}` | POST | `Client.FAVORITES` | Add artisan to favorites (201 Created; 409 Conflict if duplicate or cap exceeded) |
+| `GET /api/v1/client/favorites/artisans` | GET | `Client.FAVORITES` | List favorite artisans (paginated, max size 100, contact masking parity) |
+| `GET /api/v1/client/favorites/artisans/{artisanId}/status` | GET | `Client.FAVORITES` | Check whether artisan is favorited (`{ "favorited": boolean }`) |
+| `DELETE /api/v1/client/favorites/artisans/{artisanId}` | DELETE | `Client.FAVORITES` | Remove artisan from favorites (200 OK, `data: null`; 404 if not favorited) |
+
+### Key Business Rules & Guarantees
+
+- **Privacy Parity**: Favorites are completely private. Artisans receive no notifications and cannot see who bookmarked them. Returned `ArtisanDirectoryCardDTO` objects enforce contact privacy: non-premium clients receive masked artisan names (`"Artisan #XXXXX"`), matching directory masking, while premium clients receive the unmasked name.
+- **Client Profile Requirement**: In addition to holding `permission:client:favorites`, callers must possess a registered `Client` database profile. Non-client principals (such as administrators) receive `403 Forbidden` (`"Only registered clients can manage favorites."`).
+- **Configurable Capacity Cap**: The maximum number of favorites per client is controlled by `app.favorites.max-per-client` (env `FAVORITES_MAX_PER_CLIENT`, default: `500`). When the cap is reached, add requests fail with `409 Conflict` (`"Client favorite limit reached."`).
+- **Pessimistic Concurrency Locking**: Capacity checks and additions are serialized using a pessimistic write lock on the `Client` row, preventing concurrent race conditions. Database unique pairing constraints `(client_id, artisan_id)` catch duplicate additions and translate them to `409 Conflict`.
+- **Visibility Filtering**: The list and status check automatically filter out suspended accounts or non-visible artisan profiles (`deletedAt IS NULL`, `accountStatus = ACTIVE`).
+- **Extensible Architecture**: The persistence model uses an abstract mapped superclass `ClientFavorite` with `FavoriteType.ARTISAN`, allowing future favorite types (formations, products) to be added without modifying existing favorite code.
 
 ---
 
@@ -1218,6 +1231,12 @@ Paginated endpoints return:
 | `SUBSCRIPTION_ENABLED` | No | `false` | Enable subscription system |
 | `SUBSCRIPTION_CURRENCY` | No | `DZD` | Subscription billing currency |
 
+### Client Favorites
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `FAVORITES_MAX_PER_CLIENT` | No | `500` | Maximum active favorite artisans per client (`app.favorites.max-per-client`) |
+
 ### STOMP / RabbitMQ
 
 | Variable | Required | Default | Description |
@@ -1260,12 +1279,23 @@ Flyway manages all schema changes. Migrations are **immutable** — applied migr
 | `V12` | `V12__phase10_analytics_maintenance_jobs.sql` | Analytics maintenance job tracking |
 | `V13` | `V13__phase10_report_resolution_time.sql` | Report resolution time tracking |
 | `V14` | `V14__phase10_financial_audit_actions.sql` | Financial audit log actions |
+| `V15` | `V15__admin_catalog_permission.sql` | Admin catalog taxonomy management permission (`permission:admin:catalog`) and catalog audit action types |
+| `V16` | `V16__client_favorites.sql` | Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`) |
 
 ---
 
 ## 28. Verification Ledger
 
 This section records the live verification campaigns conducted against the running Souklab backend instance.
+
+### Client Favorites Verification Campaign — 2026-09-24
+
+| Component | Target / Suite | Total | Passed | Failed | Status |
+|---|---|:---:|:---:|:---:|:---:|
+| Unit & Slice Tests | `GlobalExceptionHandlerTest`, `ArtisanControllerTest` | 9 | 9 | 0 | **100% Passed** |
+| Integration & Concurrency | `ClientFavoriteArtisanIntegrationTest` | 11 | 11 | 0 | **100% Passed** |
+| Live Integration & Scenarios | `test_favorites.py` (cURL/REST) | 47 | 47 | 0 | **100% Passed** |
+| Statement Counts | Statement count assertions (5, 20, 60 items) | 4 | 4 | 0 | **No N+1 (Batch size 50)** |
 
 ### Live Verification Campaign — 2026-09-22
 
@@ -1296,6 +1326,7 @@ Total time: 02:27 min
 
 | File | Fix Description |
 |---|---|
+| `GlobalExceptionHandler.java` | Added `@ExceptionHandler({InvalidDataAccessApiUsageException.class, PropertyReferenceException.class})` mapping invalid query/sort parameters to 400 Bad Request `INVALID_PARAMETER` |
 | `FormationIntegrationTest.java` | Updated content array assertions from fixed index `content[0].id` to Hamcrest `hasItem(formationId)` to handle pre-existing test data |
 | `AvatarService.java` | Added `@Transactional` on public methods to prevent `TransactionRequiredException` from Spring proxy self-invocation |
 | `RateLimitFilter.java` | Added `Retry-After` header on 429 responses, derived from Bucket4j refill estimation |

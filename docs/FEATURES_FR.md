@@ -239,6 +239,7 @@ Toute l'autorisation est **basée sur les permissions**, non sur les rôles. Les
 | `permission:message:send` | `Message.SEND` | Envoyer et recevoir des messages |
 | `permission:analytics:admin` | `Analytics.ADMIN` | Accéder au tableau de bord analytique et exporter des données |
 | `permission:admin:catalog` | `Admin.CATALOG` | Gérer les taxonomies du catalogue : techniques, époques, régions, catégories, matériaux |
+| `permission:client:favorites` | `Client.FAVORITES` | Gérer les artisans favoris des clients (ajout, liste, statut, retrait) |
 
 ### Prédicats de `AccessControlService`
 
@@ -252,6 +253,7 @@ Toute l'autorisation est **basée sur les permissions**, non sur les rôles. Les
 | `canManageFinancialOperations()` | `Financial.ADMIN` |
 | `canViewAnalytics()` | `Analytics.ADMIN` |
 | `canManageCatalog()` | `Admin.CATALOG` |
+| `canManageFavorites()` | `Client.FAVORITES` |
 | `canManageArtisanFormations()` | `Artisan.FORMATIONS` |
 | `canManageArtisanContent()` / `isArtisan()` | `Artisan.CONTENT` |
 | `canManageArtisanReviews()` | `Artisan.REVIEWS` |
@@ -311,14 +313,25 @@ Les endpoints de profil appliquent une visibilité graduée des coordonnées sel
 
 ## 7. Profils client et favoris
 
+### Endpoints
+
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/client/profile` | GET | `Profile.READ` | Récupérer son propre profil client |
 | `PATCH /api/v1/client/profile` | PATCH | `Profile.WRITE` | Mettre à jour son propre profil client |
-| `POST /api/v1/client/favorites/artisans/{artisanId}` | POST | `Client.FAVORITES` | Ajouter un artisan aux favoris |
-| `GET /api/v1/client/favorites/artisans` | GET | `Client.FAVORITES` | Lister les artisans favoris (paginé) |
-| `GET /api/v1/client/favorites/artisans/{artisanId}/status` | GET | `Client.FAVORITES` | Vérifier si un artisan est dans les favoris |
-| `DELETE /api/v1/client/favorites/artisans/{artisanId}` | DELETE | `Client.FAVORITES` | Retirer un artisan des favoris |
+| `POST /api/v1/client/favorites/artisans/{artisanId}` | POST | `Client.FAVORITES` | Ajouter un artisan aux favoris (201 Created ; 409 Conflict si doublon ou plafond atteint) |
+| `GET /api/v1/client/favorites/artisans` | GET | `Client.FAVORITES` | Lister les artisans favoris (paginé, max 100, parité de masquage contact) |
+| `GET /api/v1/client/favorites/artisans/{artisanId}/status` | GET | `Client.FAVORITES` | Vérifier si un artisan est dans les favoris (`{ "favorited": boolean }`) |
+| `DELETE /api/v1/client/favorites/artisans/{artisanId}` | DELETE | `Client.FAVORITES` | Retirer un artisan des favoris (200 OK, `data: null` ; 404 si non favorisé) |
+
+### Règles métier et garanties
+
+- **Parité de confidentialité** : Les favoris sont strictement privés. Les artisans ne reçoivent aucune notification et ne voient pas qui les a ajoutés en favori. Les objets `ArtisanDirectoryCardDTO` retournés appliquent la confidentialité des contacts : les clients non-premium reçoivent un nom anonymisé (`"Artisan #XXXXX"`), identique à l'annuaire public, tandis que les clients premium reçoivent le nom complet démasqué.
+- **Exigence d'un profil client** : En plus de détenir `permission:client:favorites`, l'appelant doit posséder un profil `Client` actif en base. Les appelants non-clients (ex. administrateurs) reçoivent `403 Forbidden` (`"Only registered clients can manage favorites."`).
+- **Plafond configurable** : Le nombre maximal de favoris par client est contrôlé par `app.favorites.max-per-client` (variable `FAVORITES_MAX_PER_CLIENT`, défaut : `500`). Si la limite est atteinte, l'ajout échoue avec `409 Conflict` (`"Client favorite limit reached."`).
+- **Verrouillage pessimiste de concurrence** : La vérification de capacité et l'insertion sont sérialisées avec un verrou pessimiste en écriture sur la ligne `Client`, évitant toute situation de concurrence. La contrainte d'unicité `(client_id, artisan_id)` intercepte les doublons et les traduit en `409 Conflict`.
+- **Filtrage de visibilité** : La liste et le statut excluent automatiquement les comptes suspendus ou non visibles (`deletedAt IS NULL`, `accountStatus = ACTIVE`).
+- **Architecture extensible** : Le modèle repose sur la classe abstraite `@MappedSuperclass` `ClientFavorite` avec le discriminateur `FavoriteType.ARTISAN`, permettant d'ajouter de futurs types de favoris sans impacter le code existant.
 
 ---
 
@@ -1218,6 +1231,12 @@ Les endpoints paginés retournent :
 | `SUBSCRIPTION_ENABLED` | Non | `false` | Activer le système d'abonnements |
 | `SUBSCRIPTION_CURRENCY` | Non | `DZD` | Devise de facturation des abonnements |
 
+### Favoris clients
+
+| Variable | Obligatoire | Défaut | Description |
+|---|---|---|---|
+| `FAVORITES_MAX_PER_CLIENT` | Non | `500` | Nombre maximum d'artisans favoris par client (`app.favorites.max-per-client`) |
+
 ### STOMP / RabbitMQ
 
 | Variable | Obligatoire | Défaut | Description |
@@ -1260,12 +1279,23 @@ Flyway gère tous les changements de schéma. Les migrations sont **immuables** 
 | `V12` | `V12__phase10_analytics_maintenance_jobs.sql` | Suivi des jobs de maintenance analytique |
 | `V13` | `V13__phase10_report_resolution_time.sql` | Suivi du temps de résolution des signalements |
 | `V14` | `V14__phase10_financial_audit_actions.sql` | Actions du journal d'audit financier |
+| `V15` | `V15__admin_catalog_permission.sql` | Permission de gestion du catalogue taxonomique (`permission:admin:catalog`) et types d'actions d'audit associées |
+| `V16` | `V16__client_favorites.sql` | Table des artisans favoris des clients (`client_favorite_artisans`), contrainte d'unicité, cascades FK, index et permission (`permission:client:favorites`) |
 
 ---
 
 ## 28. Registre de vérification
 
 Cette section enregistre les campagnes de vérification live menées contre l'instance Souklab en fonctionnement.
+
+### Campagne de vérification des favoris clients — 2026-09-24
+
+| Composant | Cible / Suite | Total | Réussis | Échoués | Statut |
+|---|---|:---:|:---:|:---:|:---:|
+| Tests unitaires et de slice | `GlobalExceptionHandlerTest`, `ArtisanControllerTest` | 9 | 9 | 0 | **100 % Réussi** |
+| Intégration et concurrence | `ClientFavoriteArtisanIntegrationTest` | 11 | 11 | 0 | **100 % Réussi** |
+| Scénarios d'intégration live | `test_favorites.py` (cURL/REST) | 47 | 47 | 0 | **100 % Réussi** |
+| Comptage des requêtes SQL | Assertions de statement count (5, 20, 60 éléments) | 4 | 4 | 0 | **Aucun N+1 (Batch size 50)** |
 
 ### Campagne de vérification live — 2026-09-22
 
@@ -1296,6 +1326,7 @@ Total time: 02:27 min
 
 | Fichier | Description de la correction |
 |---|---|
+| `GlobalExceptionHandler.java` | Ajout de `@ExceptionHandler({InvalidDataAccessApiUsageException.class, PropertyReferenceException.class})` pour mapper les paramètres de tri/requête invalides vers 400 Bad Request `INVALID_PARAMETER` |
 | `FormationIntegrationTest.java` | Mise à jour des assertions de tableau de contenu de l'index fixe `content[0].id` vers Hamcrest `hasItem(formationId)` pour gérer les données de test préexistantes |
 | `AvatarService.java` | Ajout de `@Transactional` sur les méthodes publiques pour éviter `TransactionRequiredException` lors de l'auto-invocation via proxy Spring |
 | `RateLimitFilter.java` | Ajout de l'en-tête `Retry-After` sur les réponses 429, dérivé de l'estimation de recharge Bucket4j |
@@ -1305,6 +1336,10 @@ Total time: 02:27 min
 | `AuthService.java` | Ajout de `@Transactional` sur la méthode `logout` |
 | `ConversationService.java` | Protection contre les objets de pièces jointes nuls/vides lors de la création de messages |
 | `FeedPostService.java` | Garantie d'attribution d'ID des médias avant la persistance des médias de post |
+
+---
+
+*Généré par Antigravity à partir de l'arborescence live du code source.*
 
 ---
 
