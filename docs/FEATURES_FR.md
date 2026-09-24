@@ -106,7 +106,7 @@ Propositions de valeur principales :
 | `mariadb` | `mariadb:11.4` | 3306 (configurable) | Base de données relationnelle principale |
 | `mariadb-flyway` | `mariadb:11.4` | 3308 (configurable) | Schéma isolé pour la vérification Flyway |
 | `rabbitmq` | `rabbitmq:4.0-management` | 5672, 61613, 15672 | Broker AMQP + relais STOMP + UI de gestion |
-| `minio` | `quay.io/minio/minio` | 9000, 9001 | Stockage objet compatible S3 + console |
+| `minio` | `cgr.dev/chainguard/minio` | 9000, 9001 | Stockage objet compatible S3 + console |
 | `clamav` | `clamav/clamav:1.4` | 3310 | Analyse antivirus |
 | `redis` | `redis:7.4.1-alpine` | 6379 | Stockage rate limit + cache distribué optionnel |
 | `elasticsearch` | `elasticsearch:8.15.3` | 9200 | Index de recherche plein texte |

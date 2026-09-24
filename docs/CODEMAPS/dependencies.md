@@ -15,7 +15,7 @@
 |---|---|---|---|
 | **MariaDB** | `mariadb:11.4` | `3306` (App), `3308` (Flyway test) | Primary relational datastore (UTF8MB4, InnoDB) |
 | **RabbitMQ** | `rabbitmq:4.0-management` | `5672` (AMQP), `61613` (STOMP), `15672` (UI) | STOMP message relay for real-time chat & notifications |
-| **MinIO** | `quay.io/minio/minio` | `9000` (S3 API), `9001` (Console) | S3-compatible object storage for avatars, gallery, course files |
+| **MinIO** | `cgr.dev/chainguard/minio` | `9000` (S3 API), `9001` (Console) | S3-compatible object storage for avatars, gallery, course files |
 | **ClamAV** | `clamav/clamav:1.4` | `3310` | Streaming antivirus inspection for all file uploads |
 | **Redis** | `redis:7.4.1-alpine` | `6379` | Distributed token-bucket rate limiting (Bucket4j-redis) |
 | **Elasticsearch**| `elasticsearch:8.15.3` | `9200` | Full-text directory search index (BM25, French/Arabic folding) |

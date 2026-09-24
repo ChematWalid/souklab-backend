@@ -106,7 +106,7 @@ Core value propositions:
 | `mariadb` | `mariadb:11.4` | 3306 (configurable) | Primary relational database |
 | `mariadb-flyway` | `mariadb:11.4` | 3308 (configurable) | Isolated schema for Flyway verification |
 | `rabbitmq` | `rabbitmq:4.0-management` | 5672, 61613, 15672 | AMQP broker + STOMP relay + management UI |
-| `minio` | `quay.io/minio/minio` | 9000, 9001 | S3-compatible object storage + console |
+| `minio` | `cgr.dev/chainguard/minio` | 9000, 9001 | S3-compatible object storage + console |
 | `clamav` | `clamav/clamav:1.4` | 3310 | Antivirus scanning |
 | `redis` | `redis:7.4.1-alpine` | 6379 | Rate-limit store + optional distributed cache |
 | `elasticsearch` | `elasticsearch:8.15.3` | 9200 | Full-text search index |
