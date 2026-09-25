@@ -33,8 +33,16 @@ All endpoints require authentication (`Authorization: Bearer <accessToken>`).
 - **STOMP Broker Destination Prefix**: `/topic`, `/queue`
 - **Application Destination Prefix**: `/app`
 
-### Destinations
-- **Client Subscribe**: `/user/queue/messages` (receives incoming private messages and read receipts)
-- **Send Message**: `/app/chat.send`
-- **Mark Read**: `/app/chat.read`
-- **Typing Indicator**: `/app/chat.typing`
+### Inbound Destinations (Client -> Server)
+- `/app/v1/conversations/{conversationId}/messages.send`: Send message (`SendMessageRequest`)
+- `/app/v1/conversations/{conversationId}/messages.edit`: Edit message (`EditMessageCommand`)
+- `/app/v1/conversations/{conversationId}/messages.delete`: Soft-delete message (`MessageCommand`)
+- `/app/v1/conversations/{conversationId}/read`: Mark read receipt (`MessageCommand`)
+- `/app/v1/conversations/{conversationId}/typing.start`: Typing indicator start (`TypingCommand`)
+- `/app/v1/conversations/{conversationId}/typing.stop`: Typing indicator stop (`TypingCommand`)
+
+### Subscriptions (Server -> Client)
+- `/user/queue/chat`: Message deliveries, command acknowledgments, errors
+- `/user/queue/chat-events`: Real-time typing indicators, read receipts, message updates
+- `/topic/presence`: Real-time user online/offline presence broadcasts
+- `/user/queue/notifications`: In-app notifications
