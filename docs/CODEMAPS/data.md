@@ -36,10 +36,12 @@
 - `FormationReview` (`formation_reviews`): Star rating and comment. Linked to attended enrollment.
 
 ### Social Feed & Content Moderation
-- `FeedPost` (`feed_posts`): Community updates with types (`ACTUALITE`, `FORMATION`, `ANNONCE`).
+- `FeedPost` (`feed_posts`): Moderated community updates with types (`ACTUALITE`, `FORMATION`, `ANNONCE`), lifecycle states, normalized tags, and atomic engagement counters.
 - `FeedPostMedia` (`feed_post_media`): Attached images (max 10 per post).
-- `FeedComment` (`feed_comments`) & `FeedLike` (`feed_likes`): Social engagement.
-- `ContentReport` (`content_reports`): Abuse reports targeting posts, comments, or users.
+- `FeedTag`/`feed_post_tags`: Reusable normalized tag entities and join table.
+- `FeedPostLike`/`FeedPostBookmark`: Unique per-user post engagement records.
+- `FeedPostComment`/`FeedPostCommentLike`: Root comments, one-level replies, and unique comment likes.
+- `ContentReport` (`content_reports`): Abuse reports targeting posts, comments, users, or reviews.
 - `AuditLog` (`audit_logs`): Immutable record of admin and moderation actions.
 
 ### Real-Time Messaging
@@ -67,7 +69,7 @@
 - `ClientFavoriteArtisan` (`client_favorite_artisans`): Client artisan bookmarking records.
   - *Constraint: Unique `(client_id, artisan_id)`.*
 
-## 3. Flyway Migration History (V0–V16)
+## 3. Flyway Migration History (V0–V17)
 
 | Version | Script Name | Scope |
 |---|---|---|
@@ -81,3 +83,4 @@
 | `V10`–`V14` | `V10..V14__phase10_*.sql` | Payment origins, retry scheduling, maintenance, resolution time, financial audits |
 | `V15` | `V15__admin_catalog_permission.sql` | Admin catalog taxonomy management permission and audit action support |
 | `V16` | `V16__client_favorites.sql` | Client favorite artisans table, indexes, and client favorites permission (`permission:client:favorites`) |
+| `V17` | `V17__feed_social_enhancements.sql` | Feed lifecycle states, normalized tags, likes, bookmarks, comments/replies, counters, and comment reports |

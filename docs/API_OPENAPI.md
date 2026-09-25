@@ -33,6 +33,39 @@ Every operation below includes a curl and TypeScript example. Examples use
 placeholders and are safe to copy into local development; they are not test
 credentials.
 
+## Community feed social contract
+
+Feed posts are moderated and use the states `DRAFT`, `PENDING`, `PUBLISHED`,
+`REJECTED`, `HIDDEN`, and `REMOVED`. The public list supports `type`,
+`authorId`, normalized `tag`, free-text `q`, and `sort=latest|popular`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/feed/me` | Author's drafts, pending, rejected, published, hidden, and removed posts |
+| POST | `/api/v1/feed/{id}/submit` | Submit a draft/rejected post for moderation |
+| GET | `/api/v1/feed/following` | Posts from artisans in the authenticated client's favorites |
+| POST/DELETE | `/api/v1/feed/{id}/likes` | Idempotent post like/unlike per authenticated user |
+| GET | `/api/v1/feed/{id}/likes` | Current caller's post-like status (public endpoint) |
+| POST/DELETE | `/api/v1/feed/{id}/bookmarks` | Save/remove a post |
+| GET | `/api/v1/feed/saved` | Saved posts |
+| GET/POST | `/api/v1/feed/{id}/comments` | Root comments |
+| GET/POST | `/api/v1/feed/comments/{commentId}/replies` | One-level replies |
+| POST/DELETE | `/api/v1/feed/comments/{commentId}/likes` | Idempotent comment like/unlike |
+| DELETE | `/api/v1/feed/comments/{commentId}` | Author, post owner, or feed moderator removes a comment |
+| POST | `/api/v1/feed/{id}/share` | Increment share counter and return a relative share path |
+| GET | `/api/v1/admin/feed/pending` | Admin moderation queue |
+| POST | `/api/v1/admin/feed/{id}/publish` | Approve and publish |
+| POST | `/api/v1/admin/feed/{id}/reject` | Reject with a moderation note |
+| POST | `/api/v1/admin/feed/{id}/hide` | Hide a published post |
+| POST | `/api/v1/admin/feed/{id}/remove` | Compatibility admin removal endpoint |
+| DELETE | `/api/v1/admin/feed/{id}` | Canonical admin removal |
+
+Like and bookmark uniqueness is enforced both in the service and database;
+counters are updated atomically. `COMMENT` is a supported content-report
+target. Feed submission/resubmission notifies users with `Admin.FEED`, and
+moderation, engagement, comment, reply, and report events use typed
+notifications with self-notifications suppressed.
+
 ## Chargily webhook setup
 
 Provider callbacks cannot reach a localhost-only URL. For sandbox callback
@@ -6298,7 +6331,7 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 ### `FeedPostResponseDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"authorId":{"type":"string"},"authorName":{"type":"string"},"type":{"type":"string","enum":["ACTUALITE","FORMATION","ANNONCE"]},"title":{"type":"string"},"body":{"type":"string"},"status":{"type":"string","enum":["PENDING","PUBLISHED","HIDDEN","REMOVED"]},"formationId":{"type":"string"},"publishedAt":{"type":"string","format":"date-time"},"moderationNote":{"type":"string"},"media":{"type":"array","items":{"$ref":"#/components/schemas/FeedPostMediaResponseDTO"}}}}
+{"type":"object","properties":{"id":{"type":"string"},"authorId":{"type":"string"},"authorName":{"type":"string"},"type":{"type":"string","enum":["ACTUALITE","FORMATION","ANNONCE"]},"title":{"type":"string"},"body":{"type":"string"},"status":{"type":"string","enum":["DRAFT","PENDING","PUBLISHED","REJECTED","HIDDEN","REMOVED"]},"formationId":{"type":"string"},"publishedAt":{"type":"string","format":"date-time"},"moderationNote":{"type":"string"},"tags":{"type":"array","items":{"type":"string"}},"likeCount":{"type":"integer","format":"int32"},"commentCount":{"type":"integer","format":"int32"},"bookmarkCount":{"type":"integer","format":"int32"},"shareCount":{"type":"integer","format":"int32"},"likedByCurrentUser":{"type":"boolean"},"bookmarkedByCurrentUser":{"type":"boolean"},"media":{"type":"array","items":{"$ref":"#/components/schemas/FeedPostMediaResponseDTO"}}}}
 ```
 
 ### `ArtisanReviewRequestDTO`
@@ -7350,4 +7383,3 @@ Failure cases: use the response codes listed in the contract; common boundaries 
 ```json
 {"type":"object","properties":{"favorited":{"type":"boolean"}}}
 ```
-

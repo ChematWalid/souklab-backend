@@ -6,14 +6,14 @@ Authorization is capability-based. The `Permission` enum and the `permissions`/`
 | --- | --- | --- |
 | `permission:admin:users` | User moderation, permission assignment, formateur governance | `UserManagementController`, `PermissionManagementController`, `AdminFormateurController` |
 | `permission:admin:formations` | Formation moderation and protected formation-file administrator override | `AdminFormationController`, `FileAccessService` |
-| `permission:admin:feed` | Feed moderation and administrator feed authoring | `AdminFeedController`, `FeedPostService` |
+| `permission:admin:feed` | Feed moderation, comment moderation, and administrator feed authoring | `AdminFeedController`, `FeedPostService`, `FeedEngagementService` |
 | `permission:admin:reports` | Report queue and report resolution | `ContentReportController`, `ContentReportService` |
 | `permission:artisan:formations` | Formation authoring, enrollment, cancellation, and course downloads | `ArtisanFormationController`, `ArtisanFormationEnrollmentController` |
 | `permission:artisan:content` | Gallery, certifications, formateur requests, and verified artisan feed content | artisan controllers and `FeedPostService` |
 | `permission:artisan:reviews` | Formation review create/update/delete | `ArtisanReviewController` |
 | `permission:profile:read` | Authenticated `/api/v1/auth/me` profile reads | `AuthController` and `AccessControlService` |
 | `permission:profile:write` | Profile completion and `/me` patch operations | `AuthController` and `AccessControlService` |
-| `permission:report:create` | Authenticated content-report submission | `ContentReportController` |
+| `permission:report:create` | Authenticated content-report submission, including posts and comments | `ContentReportController`, `ContentReportService` |
 | `permission:file:read` | Protected-file policy for authenticated file access | `FileAccessService` and `CustomUserDetailsService` |
 | `permission:message:send` | Send direct messages and upload message attachments | `ConversationService`, `ChatStompController`, `ConversationController` |
 | `permission:financial:admin` | Subscription management, manual grants/revocations, refunds, and payment state corrections | `AdminSubscriptionController`, `AdminPaymentController`, `AccessControlService` |

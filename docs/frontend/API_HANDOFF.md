@@ -194,11 +194,23 @@ Artisans apply for teacher accreditation to author masterclasses.
 Community engagement platform for artisans and clients.
 
 #### Feed Endpoints
-- `GET /api/v1/feed`: Paginated feed of published posts. Query parameter `type` accepts `ACTUALITE`, `FORMATION`, or `ANNONCE`.
-- `GET /api/v1/feed/{id}`: Single post representation with author profile and attached media array.
-- `POST /api/v1/feed`: Create a new feed post (`permission:artisan:content` for verified artisans or `permission:admin:feed`).
+- `GET /api/v1/feed`: Paginated published feed. Supports `type`, `authorId`, normalized `tag`, text `q`, and `sort=latest|popular`.
+- `GET /api/v1/feed/{id}`: Single post representation with author profile, tags, engagement counters, and attached media array.
+- `GET /api/v1/feed/me`: Author's draft, pending, rejected, published, hidden, and removed posts.
+- `GET /api/v1/feed/following`: Authenticated client feed based on favorited artisans.
+- `POST /api/v1/feed`: Create a draft or submit a new feed post (`permission:artisan:content` for verified artisans or `permission:admin:feed`).
+- `POST /api/v1/feed/{id}/submit`: Submit a draft or rejected post for moderation.
+- `POST/DELETE /api/v1/feed/{id}/likes`: Idempotent per-user post like/unlike.
+- `POST/DELETE /api/v1/feed/{id}/bookmarks`: Save/remove a post; `GET /api/v1/feed/saved` lists saved posts.
+- `GET/POST /api/v1/feed/{id}/comments`: Read root comments or add one.
+- `GET/POST /api/v1/feed/comments/{commentId}/replies`: Read or add one-level replies.
+- `POST/DELETE /api/v1/feed/comments/{commentId}/likes`: Idempotent comment like/unlike.
+- `DELETE /api/v1/feed/comments/{commentId}`: Remove a comment as its author, post owner, or feed moderator.
+- `POST /api/v1/feed/{id}/share`: Increment share count and return a relative share path.
 - `POST /api/v1/feed/{id}/media`: Attach up to 10 images to a post (`multipart/form-data`).
 - `DELETE /api/v1/feed/{id}`: Soft-delete authored post.
+
+Feed statuses are `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN`, and `REMOVED`. Admins use `GET /api/v1/admin/feed/pending`, then publish, reject, hide, or delete posts. Rejections include a moderation note and can be resubmitted by the author.
 
 #### Reviews Endpoints
 - `GET /api/v1/artisans/{artisanId}/reviews`: Paginated list of visible reviews (`rating` from 0.00 to 5.00, `comment`, `createdAt`, reviewer name/avatar).

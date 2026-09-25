@@ -145,17 +145,21 @@ This ensures masterclasses are run by verified, capable craftspeople.
 Souklab has a **community feed** where verified artisans can share their work, process, and stories.
 
 **Artisans can:**
-- Publish posts with text, tags, and up to **10 photos or images**
-- Edit or delete their own posts at any time
-- Build a following and engage with the community
+- Save drafts, submit posts for moderation, revise rejected posts, and resubmit them
+- Publish posts with text, normalized tags, and up to **10 photos or images**
+- Edit or delete their own posts, subject to the moderation lifecycle
+- Build a following through client favorites and engage with likes, bookmarks, comments, replies, and shares
 
 **Everyone can:**
 - Browse the feed
-- **Like** posts (like count is visible and updated in real time)
-- **Comment** on posts and reply to other comments
+- Filter by author or tag, search text, and sort by latest or popularity
+- **Like** posts and comments once per person, then remove likes
+- **Comment** on posts and reply one level deep
+- Share posts using a relative share path
 
 **Platform moderation:**
-- Souklab staff can hide, publish, or remove any post that violates platform guidelines
+- Souklab staff with `permission:admin:feed` can publish, reject, hide, or remove posts; admins are notified of pending submissions
+- Authors receive typed moderation notifications, while self-engagement notifications are suppressed
 
 ---
 

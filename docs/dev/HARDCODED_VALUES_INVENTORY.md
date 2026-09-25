@@ -10,7 +10,7 @@ that must be supplied by deployment configuration.
 - Storage provider, endpoints, bucket, credentials, object limits, and scanning policy.
 - Search URI, credentials, timeouts, schema strategy, and mass-indexing limits.
 - RabbitMQ relay credentials, ports, and destinations.
-- CORS origins, upload MIME allowlists, pagination limits, executor sizing, and cache limits.
+- CORS origins, upload MIME allowlists, pagination limits, feed title/body/comment/tag limits, executor sizing, and cache limits.
 - SMTP, MailerSend, OAuth, and payment credentials.
 
 These values are represented by environment placeholders in

@@ -95,9 +95,12 @@ erDiagram
 | :--- | :---: | :--- |
 | [`FeedPost`](FeedPost.java) | `@Entity` | Moderated public community post. |
 | [`FeedPostMedia`](FeedPostMedia.java) | `@Entity` | Provider-neutral image attachment for a feed post. |
+| [`FeedTag`](FeedTag.java) | `@Entity` | Normalized reusable feed tag. |
+| [`FeedPostLike`](FeedPostLike.java), [`FeedPostBookmark`](FeedPostBookmark.java) | `@Entity` | Unique per-user post engagement records. |
+| [`FeedPostComment`](FeedPostComment.java), [`FeedPostCommentLike`](FeedPostCommentLike.java) | `@Entity` | Root comments, one-level replies, and unique comment likes. |
 | [`ArtisanReview`](ArtisanReview.java) | `@Entity` | Decimal-rated review linked to an attended formation enrollment. |
-| [`ContentReport`](ContentReport.java) | `@Entity` | Auditable report targeting a user, post, or review. |
-| [`FeedPostType`](FeedPostType.java), [`FeedPostStatus`](FeedPostStatus.java) | `enum` | Feed categorization and moderation visibility states. |
+| [`ContentReport`](ContentReport.java) | `@Entity` | Auditable report targeting a user, post, comment, or review. |
+| [`FeedPostType`](FeedPostType.java), [`FeedPostStatus`](FeedPostStatus.java) | `enum` | Feed categorization and `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN`, `REMOVED` states. |
 | [`ReviewStatus`](ReviewStatus.java), [`ReportTargetType`](ReportTargetType.java), [`ReportStatus`](ReportStatus.java), [`ReportResolutionAction`](ReportResolutionAction.java) | `enum` | Review visibility, report target, lifecycle, and resolution states. |
 
 ### Real-Time Messaging & Chat

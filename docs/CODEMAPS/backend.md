@@ -48,8 +48,11 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `GET|POST /admin/formateur-requests/**`: Admin approve, reject, grant, revoke, lift-cooldown
 
 ### Social Feed, Reviews & Reports (`/api/v1/`)
-- `GET|POST /feed`: Browse and publish feed posts (verified artisans only, max 10 media)
-- `PUT|DELETE /feed/{id}` & `POST|DELETE /feed/{id}/media`: Author mutations
+- `GET /feed`: Browse published posts with author/tag/text filters and latest/popular sorting
+- `GET /feed/me`, `GET /feed/following`, `POST /feed/{id}/submit`: Author lifecycle and favorites-based following
+- `GET|POST /feed`, `PUT|DELETE /feed/{id}` & `POST|DELETE /feed/{id}/media`: Draft, moderation, and author mutations
+- `POST|DELETE /feed/{id}/likes|bookmarks`, `/feed/{id}/comments`, and `/feed/comments/{id}/replies|likes`: Idempotent engagement and one-level replies
+- `GET|POST /admin/feed/pending`, `publish`, `reject`, `hide`, `DELETE /admin/feed/{id}`: Feed moderation
 - `POST /artisan/formations/{formationId}/reviews`: **Single review path** (requires `ATTENDED` enrollment, unique constraint)
 - `GET /artisans/{artisanId}/reviews`: Public paginated reviews
 - `POST /reports` & `GET|POST /admin/reports[/{id}/resolve]`: Content abuse moderation
@@ -93,4 +96,3 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 | `SubscriptionCheckoutController`| `SubscriptionCheckoutService`, `ChargilyService` | `SubscriptionRepository`, `PaymentRepository` |
 | `AnalyticsJobController` | `AnalyticsJobService`, `AnalyticsRollupService` | `AnalyticsJobRunRepository`, `AnalyticsRollupRepository` |
 | `AdminCatalogController` | `AdminCatalogService` | `TechniqueRepository`, `EpoqueRepository`, `RegionRepository`, `JobCategoryRepository`, `JobSubCategoryRepository`, `MaterialFamilyRepository`, `MaterialRepository` |
-

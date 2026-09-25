@@ -66,6 +66,11 @@ graph TD
 | :--- | :--- | :--- |
 | [`FeedPostRepository`](FeedPostRepository.java) | `FeedPost` | Public visibility, type filtering, author and moderation queue queries. |
 | [`FeedPostMediaRepository`](FeedPostMediaRepository.java) | `FeedPostMedia` | Ordered post attachment lookup. |
+| [`FeedTagRepository`](FeedTagRepository.java) | `FeedTag` | Normalized slug/name lookup and creation. |
+| [`FeedPostLikeRepository`](FeedPostLikeRepository.java) | `FeedPostLike` | Unique post likes and exact like counts. |
+| [`FeedPostBookmarkRepository`](FeedPostBookmarkRepository.java) | `FeedPostBookmark` | Unique bookmarks and saved-post pages. |
+| [`FeedPostCommentRepository`](FeedPostCommentRepository.java) | `FeedPostComment` | Root/reply pages and atomic engagement counters. |
+| [`FeedPostCommentLikeRepository`](FeedPostCommentLikeRepository.java) | `FeedPostCommentLike` | Unique comment likes and exact like counts. |
 | [`ArtisanReviewRepository`](ArtisanReviewRepository.java) | `ArtisanReview` | Visible review pages, enrollment uniqueness, average and count aggregates. |
 | [`ContentReportRepository`](ContentReportRepository.java) | `ContentReport` | Status and target-type moderation queue filters. |
 

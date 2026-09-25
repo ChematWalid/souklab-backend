@@ -546,15 +546,34 @@ Admin permanent block (canReapply=false): future requests → 403 Forbidden unti
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/feed` | GET | `Profile.READ` | Paginated feed of published posts |
+| `GET /api/v1/feed?authorId=&tag=&q=&sort=` | GET | Public | Filter/search feed by author, normalized tag, text, or `latest`/`popular` order |
 | `GET /api/v1/feed/{id}` | GET | `Profile.READ` | Get single post detail |
+| `GET /api/v1/feed/me` | GET | Authenticated artisan | List own posts, including drafts and rejected posts |
+| `GET /api/v1/feed/following` | GET | Authenticated client | List posts from favorited artisans; non-clients receive an empty page |
 | `POST /api/v1/feed` | POST | `Artisan.CONTENT` | Create a new feed post |
+| `POST /api/v1/feed/{id}/submit` | POST | `Artisan.CONTENT` + owner | Submit a draft or rejected post for moderation |
 | `PUT /api/v1/feed/{id}` | PUT | `Artisan.CONTENT` + owner | Update post text/tags |
 | `DELETE /api/v1/feed/{id}` | DELETE | `Artisan.CONTENT` + owner | Soft-delete own post |
+| `POST /api/v1/feed/{id}/likes` / `DELETE .../likes` | POST/DELETE | Authenticated | Idempotent per-user post like and unlike |
+| `POST /api/v1/feed/{id}/bookmarks` / `DELETE .../bookmarks` | POST/DELETE | Authenticated | Save or remove a post bookmark |
+| `GET /api/v1/feed/saved` | GET | Authenticated | List saved posts |
+| `GET /api/v1/feed/{id}/comments` | GET | Public | List root comments and replies |
+| `POST /api/v1/feed/{id}/comments` | POST | Authenticated | Add a root comment |
+| `POST /api/v1/feed/comments/{commentId}/replies` | POST | Authenticated | Reply one level deep to a comment |
+| `POST/DELETE /api/v1/feed/comments/{commentId}/likes` | POST/DELETE | Authenticated | Idempotent comment like and unlike |
+| `GET /api/v1/feed/comments/{commentId}/likes` | GET | Public | Read the current caller's comment-like status |
+| `DELETE /api/v1/feed/comments/{commentId}` | DELETE | Authenticated/moderator | Soft-delete a comment |
+| `POST /api/v1/feed/{id}/share` | POST | Public | Increment share count and return a relative share path |
 | `POST /api/v1/feed/{id}/media` | POST (multipart) | `Artisan.CONTENT` + owner | Attach media to post |
 | `DELETE /api/v1/feed/{id}/media/{mediaId}` | DELETE | `Artisan.CONTENT` + owner | Remove media from post |
+| `GET /api/v1/admin/feed/pending` | GET | `Admin.FEED` | Paginated moderation queue |
 | `POST /api/v1/admin/feed/{id}/publish` | POST | `Admin.FEED` | Admin publish a hidden post |
+| `POST /api/v1/admin/feed/{id}/reject` | POST | `Admin.FEED` | Reject with a moderation note; author can revise and resubmit |
 | `POST /api/v1/admin/feed/{id}/hide` | POST | `Admin.FEED` | Admin hide a post |
 | `POST /api/v1/admin/feed/{id}/remove` | POST | `Admin.FEED` | Admin permanently remove a post |
+| `DELETE /api/v1/admin/feed/{id}` | DELETE | `Admin.FEED` | Canonical admin removal endpoint |
+
+Feed posts support `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN`, and `REMOVED` states. Tags are normalized and stored as reusable entities. Database uniqueness constraints make post/comment likes idempotent, while counters are updated atomically. Feed submission, moderation, engagement, comment, reply, and report events use typed notifications; the author does not receive self-engagement notifications, and admins with feed permission are notified of pending submissions.
 
 ### Feed Post Permissions
 
@@ -562,7 +581,7 @@ Admin permanent block (canReapply=false): future requests → 403 Forbidden unti
 |---|---|
 | Create post | `Artisan.CONTENT` + account status `ACTIVE` + artisan verified |
 | Edit / delete own post | `Artisan.CONTENT` + ownership check |
-| Like / comment | `Profile.READ` |
+| Like / comment / bookmark / reply | Authenticated user |
 | Admin moderation | `Admin.FEED` |
 
 ### Media Configuration
@@ -1281,6 +1300,7 @@ Flyway manages all schema changes. Migrations are **immutable** — applied migr
 | `V14` | `V14__phase10_financial_audit_actions.sql` | Financial audit log actions |
 | `V15` | `V15__admin_catalog_permission.sql` | Admin catalog taxonomy management permission (`permission:admin:catalog`) and catalog audit action types |
 | `V16` | `V16__client_favorites.sql` | Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`) |
+| `V17` | `V17__feed_social_enhancements.sql` | Feed draft/rejected states, normalized tags, likes, bookmarks, comments/replies, atomic counters, and comment reports |
 
 ---
 

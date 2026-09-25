@@ -33,7 +33,7 @@ graph TD
 - **`analytics`**: Asynchronous analytics engine, transactional outbox relay, event consumers, and daily KPI rollups.
 - **`config`**: Spring bean definitions, CORS, clock, security configuration, async settings, caching, and Hibernate Search Elasticsearch lifecycle runners.
 - **`controller`**: REST API resource adapters and controllers across all domains (auth, artisan, catalog, directory, formateur, formation, feed, review, report, chat, notification, subscription, analytics, user).
-- **`dao`**: Spring Data JPA repositories (47 repositories across identity, taxonomies, formations, social feed, chat, payments, and analytics).
+- **`dao`**: Spring Data JPA repositories (including identity, taxonomies, formations, social feed engagement, chat, payments, and analytics).
 - **`dto`**: Request and response data transfer objects (admin, analytics, artisan, auth, catalog, chat, common, directory, feed, formateur, formation, notification, profile, report, review, subscription, user).
 - **`exception`**: Custom business exceptions, validation errors, and global exception translation.
 - **`filestorage`**: Pluggable file storage engine (MinIO/S3, ClamAV antivirus, image processing, download rate limiting, URL resolution).

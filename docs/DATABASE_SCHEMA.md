@@ -10,7 +10,7 @@ The schema is defined by the JPA mappings in `com.project.souklab.model`; this d
 | Artisan | `artisans`, `artisan_gallery_images`, `artisan_certifications`, `artisan_profile_views`, `artisan_formateur_requests`, and artisan taxonomy join tables |
 | Catalog | `regions`, `job_categories`, `job_sub_categories`, `material_families`, `materials`, `epoques`, `techniques` |
 | Formations | `formations`, `formation_files`, `formation_enrollments`, `formation_reviews` |
-| Social | `feed_posts`, `feed_post_media`, `artisan_reviews`, `content_reports` |
+| Social | `feed_posts`, `feed_post_media`, `feed_tags`, `feed_post_tags`, `feed_post_likes`, `feed_post_bookmarks`, `feed_post_comments`, `feed_post_comment_likes`, `artisan_reviews`, `content_reports` |
 | Messaging | `conversations`, `conversation_participants`, `messages`, `message_attachments` |
 | Subscriptions & Payments | `subscription_plans`, `subscriptions`, `subscription_payments`, `chargily_webhook_events`, `subscription_refunds` |
 | Analytics | `analytics_raw_events`, `analytics_rollups`, `analytics_job_runs`, `analytics_outbox_events`, `analytics_artifact_records`, `analytics_maintenance_jobs` |
@@ -31,7 +31,7 @@ All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft
 
 ## Database Migrations & Deployment
 
-Schema changes are versioned and managed using **Flyway**. The repository maintains 17 versioned migrations (`V0` through `V16`) located in `src/main/resources/db/migration/`:
+Schema changes are versioned and managed using **Flyway**. The repository maintains 18 versioned migrations (`V0` through `V17`) located in `src/main/resources/db/migration/`:
 - `V0`: Baseline schema (users, artisans, catalog, formations, enrollments)
 - `V1`: Social feed tables (posts, media, comments, likes)
 - `V2`: Authorization permissions (`permissions`, `user_permissions`)
@@ -41,5 +41,6 @@ Schema changes are versioned and managed using **Flyway**. The repository mainta
 - `V6`–`V14`: Analytics raw events, rollups, job queue, outbox patterns, and audit action tracking
 - `V15`: Admin catalog taxonomy management permission (`permission:admin:catalog`) and catalog audit action types (`CATALOG_ITEM_CREATED`, `CATALOG_ITEM_UPDATED`, `CATALOG_ITEM_DELETED`)
 - `V16`: Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`)
+- `V17`: Feed social enhancements: draft/rejected states, normalized tags, post/comment likes, bookmarks, comments/replies, atomic counters, and `COMMENT` content reports
 
 The `prod` Spring profile sets `spring.jpa.hibernate.ddl-auto=validate` and Hibernate Search schema management to `validate`. Production schema changes must be applied via Flyway (`FLYWAY_ENABLED=true`) prior to application startup. Applied migrations are immutable and must never be modified.

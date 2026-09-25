@@ -546,15 +546,32 @@ Admin blocage permanent (canReapply=false) : futures demandes → 403 Forbidden 
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/feed` | GET | `Profile.READ` | Fil paginé de posts publiés |
+| `GET /api/v1/feed?authorId=&tag=&q=&sort=` | GET | Public | Filtre par auteur/tag, recherche texte et tri `latest`/`popular` |
 | `GET /api/v1/feed/{id}` | GET | `Profile.READ` | Récupérer le détail d'un post |
-| `POST /api/v1/feed` | POST | `Artisan.CONTENT` | Créer un nouveau post |
+| `GET /api/v1/feed/me` | GET | Authentifiée | Lister ses brouillons, posts en attente, rejetés et publiés |
+| `GET /api/v1/feed/following` | GET | Client authentifié | Fil des artisans ajoutés aux favoris |
+| `POST /api/v1/feed` | POST | `Artisan.CONTENT` | Créer un brouillon ou soumettre un nouveau post |
+| `POST /api/v1/feed/{id}/submit` | POST | Propriétaire | Soumettre un brouillon ou un post rejeté |
 | `PUT /api/v1/feed/{id}` | PUT | `Artisan.CONTENT` + propriétaire | Mettre à jour le texte/les tags d'un post |
 | `DELETE /api/v1/feed/{id}` | DELETE | `Artisan.CONTENT` + propriétaire | Suppression logique de son propre post |
+| `POST/DELETE /api/v1/feed/{id}/likes` | POST/DELETE | Authentifiée | Aimer/retirer son like, une seule fois par personne |
+| `POST/DELETE /api/v1/feed/{id}/bookmarks` | POST/DELETE | Authentifiée | Ajouter/retirer un post des favoris |
+| `GET /api/v1/feed/saved` | GET | Authentifiée | Lister ses posts enregistrés |
+| `GET/POST /api/v1/feed/{id}/comments` | GET/POST | Public/authentifiée | Lire des commentaires racine publiquement ou en ajouter avec authentification |
+| `GET/POST /api/v1/feed/comments/{commentId}/replies` | GET/POST | Public/authentifiée | Lire ou ajouter une réponse de niveau 1 |
+| `POST/DELETE /api/v1/feed/comments/{commentId}/likes` | POST/DELETE | Authentifiée | Aimer/retirer son like d'un commentaire |
+| `GET /api/v1/feed/comments/{commentId}/likes` | GET | Public | Lire l'état du like du commentaire pour l'appelant |
+| `DELETE /api/v1/feed/comments/{commentId}` | DELETE | Authentifiée/modérateur | Supprimer logiquement un commentaire |
+| `POST /api/v1/feed/{id}/share` | POST | Public | Incrémenter le compteur et retourner un chemin relatif |
 | `POST /api/v1/feed/{id}/media` | POST (multipart) | `Artisan.CONTENT` + propriétaire | Attacher un média à un post |
 | `DELETE /api/v1/feed/{id}/media/{mediaId}` | DELETE | `Artisan.CONTENT` + propriétaire | Supprimer un média d'un post |
 | `POST /api/v1/admin/feed/{id}/publish` | POST | `Admin.FEED` | Admin : publier un post masqué |
+| `POST /api/v1/admin/feed/{id}/reject` | POST | `Admin.FEED` | Admin : rejeter avec une note de modération |
 | `POST /api/v1/admin/feed/{id}/hide` | POST | `Admin.FEED` | Admin : masquer un post |
 | `POST /api/v1/admin/feed/{id}/remove` | POST | `Admin.FEED` | Admin : supprimer définitivement un post |
+| `DELETE /api/v1/admin/feed/{id}` | DELETE | `Admin.FEED` | Suppression administrative canonique |
+
+Les statuts sont `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN` et `REMOVED`. Les tags sont normalisés et les likes de posts/commentaires sont uniques par utilisateur grâce aux contraintes de base de données. Les soumissions en attente notifient les administrateurs disposant de `Admin.FEED`.
 
 ### Permissions des posts du fil
 
@@ -562,7 +579,7 @@ Admin blocage permanent (canReapply=false) : futures demandes → 403 Forbidden 
 |---|---|
 | Créer un post | `Artisan.CONTENT` + statut de compte `ACTIVE` + artisan vérifié |
 | Modifier / supprimer son post | `Artisan.CONTENT` + vérification de propriété |
-| Aimer / commenter | `Profile.READ` |
+| Aimer / commenter / enregistrer / répondre | Utilisateur authentifié |
 | Modération admin | `Admin.FEED` |
 
 ### Configuration des médias
@@ -1281,6 +1298,7 @@ Flyway gère tous les changements de schéma. Les migrations sont **immuables** 
 | `V14` | `V14__phase10_financial_audit_actions.sql` | Actions du journal d'audit financier |
 | `V15` | `V15__admin_catalog_permission.sql` | Permission de gestion du catalogue taxonomique (`permission:admin:catalog`) et types d'actions d'audit associées |
 | `V16` | `V16__client_favorites.sql` | Table des artisans favoris des clients (`client_favorite_artisans`), contrainte d'unicité, cascades FK, index et permission (`permission:client:favorites`) |
+| `V17` | `V17__feed_social_enhancements.sql` | Statuts de feed, tags normalisés, likes, favoris, commentaires/réponses, compteurs et signalements de commentaires |
 
 ---
 

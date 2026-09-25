@@ -122,6 +122,7 @@ source timestamps; it does not invent historical login or interaction events.
 16. [Formateur Governance](#16-formateur-governance)
 17. [Admin Moderation & Search](#17-admin-moderation--search)
 18. [User — Avatar Management](#18-user--avatar-management)
+19. [Community Feed](#19-community-feed)
 
 ---
 
@@ -9692,3 +9693,35 @@ All admin user moderation routes are guarded by the centralized administrator pe
 ```
 
 ---
+
+## 19. Community Feed
+
+Feed posts are moderated through `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`,
+`HIDDEN`, and `REMOVED` states. Public feed reads expose published posts;
+authenticated owners can inspect their managed posts through `/feed/me`.
+
+### Core feed operations
+
+| Method | Endpoint | Authentication | Purpose |
+| :--- | :--- | :--- | :--- |
+| `GET` | `{{baseUrl}}/feed?type=&authorId=&tag=&q=&sort=latest` | Public | Browse and filter published posts |
+| `GET` | `{{baseUrl}}/feed/me` | Authenticated | List the caller's post lifecycle states |
+| `GET` | `{{baseUrl}}/feed/following` | Authenticated client | Browse posts from favorited artisans |
+| `POST` | `{{baseUrl}}/feed` | Authenticated | Create a draft (`isDraft=true`) or submit for moderation |
+| `POST` | `{{baseUrl}}/feed/{{postId}}/submit` | Post owner | Submit a draft or rejected post |
+| `PUT` | `{{baseUrl}}/feed/{{postId}}` | Post owner | Update content or normalized tags |
+| `DELETE` | `{{baseUrl}}/feed/{{postId}}` | Post owner | Remove the caller's post |
+| `POST/DELETE` | `{{baseUrl}}/feed/{{postId}}/likes` | Authenticated | Idempotent like/unlike per user |
+| `POST/DELETE` | `{{baseUrl}}/feed/{{postId}}/bookmarks` | Authenticated | Save/remove a post |
+| `GET` | `{{baseUrl}}/feed/saved` | Authenticated | List saved posts |
+| `GET/POST` | `{{baseUrl}}/feed/{{postId}}/comments` | Read public / write authenticated | List or add root comments |
+| `GET/POST` | `{{baseUrl}}/feed/comments/{{commentId}}/replies` | Read public / write authenticated | List or add one-level replies |
+| `POST/DELETE` | `{{baseUrl}}/feed/comments/{{commentId}}/likes` | Authenticated | Idempotent comment like/unlike |
+| `DELETE` | `{{baseUrl}}/feed/comments/{{commentId}}` | Authenticated | Remove as author, post owner, or moderator |
+| `POST` | `{{baseUrl}}/feed/{{postId}}/share` | Public | Increment the share counter |
+
+Post and comment likes have database-backed uniqueness constraints and atomic
+counters. Feed submission and resubmission notify feed moderators; moderation,
+engagement, comment, reply, and report events use typed notifications with
+self-engagement notifications suppressed. See `docs/API_OPENAPI.md` for the
+complete endpoint contract and `docs/FEATURES.md` for the permission matrix.
