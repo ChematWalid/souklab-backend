@@ -2,6 +2,7 @@ package com.project.souklab.service.subscription;
 
 import com.project.souklab.dao.SubscriptionPlanRepository;
 import com.project.souklab.dto.subscription.SubscriptionPlanResponse;
+import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.SubscriptionPlan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,14 @@ public class SubscriptionPlanService {
         return planRepository.findByActiveTrueOrderBySubscriberTypeAscBillingPeriodAsc().stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SubscriptionPlanResponse getActivePlan(String id) {
+        SubscriptionPlan plan = planRepository.findById(id)
+                .filter(SubscriptionPlan::isActive)
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
+        return toResponse(plan);
     }
 
     private SubscriptionPlanResponse toResponse(SubscriptionPlan plan) {

@@ -6,6 +6,7 @@ import com.project.souklab.service.subscription.SubscriptionPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,5 +25,11 @@ public class SubscriptionPlanController {
     @Operation(summary = "Get subscription plans", description = "Retrieves active tiered subscription plans and pricing for clients and artisans.")
     public ResponseEntity<ApiResponse<List<SubscriptionPlanResponse>>> listPlans() {
         return ResponseEntity.ok(ApiResponse.success(planService.listActivePlans()));
+    }
+
+    @GetMapping("/plans/{id}")
+    @Operation(summary = "Get subscription plan by ID", description = "Retrieves an active subscription plan tier and pricing by its identifier.")
+    public ResponseEntity<ApiResponse<SubscriptionPlanResponse>> getPlan(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(planService.getActivePlan(id)));
     }
 }

@@ -35,4 +35,16 @@ class SubscriptionPlanControllerTest {
                 .andExpect(jsonPath("$.data[0].id").value("plan-1"))
                 .andExpect(jsonPath("$.data[0].currency").value("DZD"));
     }
+
+    @Test
+    void activePlanByIdIsPubliclyAvailable() throws Exception {
+        when(planService.getActivePlan("plan-1")).thenReturn(SubscriptionPlanResponse.builder()
+                .id("plan-1").name("Monthly").subscriberType(SubscriberType.CLIENT)
+                .billingPeriod(BillingPeriod.MONTHLY).amount(1000).currency("DZD").build());
+
+        mockMvc.perform(get("/api/v1/subscriptions/plans/plan-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value("plan-1"))
+                .andExpect(jsonPath("$.data.currency").value("DZD"));
+    }
 }

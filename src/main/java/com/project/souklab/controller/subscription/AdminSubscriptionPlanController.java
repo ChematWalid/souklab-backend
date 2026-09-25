@@ -32,6 +32,11 @@ public class AdminSubscriptionPlanController {
         return ResponseEntity.ok(ApiResponse.success(planService.list()));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<SubscriptionPlanResponse>> getById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(planService.get(id)));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<SubscriptionPlanResponse>> create(@Valid @RequestBody SubscriptionPlanRequest request) {
         return ResponseEntity.ok(ApiResponse.created(planService.create(request), "Subscription plan created"));

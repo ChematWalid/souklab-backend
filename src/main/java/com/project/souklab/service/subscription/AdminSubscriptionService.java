@@ -303,4 +303,13 @@ public class AdminSubscriptionService {
                         || value.getStatus().value().toLowerCase().contains(normalized))
                 .sorted(Comparator.comparing(SubscriptionResponse::getStartsAt, Comparator.nullsLast(Comparator.reverseOrder()))).limit(limit).toList();
     }
+
+    @Transactional(readOnly = true)
+    public SubscriptionResponse getSubscriptionById(String subscriptionId) {
+        return artisanSubscriptions.findById(subscriptionId)
+                .map(value -> toResponse(value, SubscriberType.ARTISAN))
+                .or(() -> clientSubscriptions.findById(subscriptionId)
+                        .map(value -> toResponse(value, SubscriberType.CLIENT)))
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+    }
 }

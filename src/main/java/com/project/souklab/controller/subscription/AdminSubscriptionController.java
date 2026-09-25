@@ -44,6 +44,11 @@ public class AdminSubscriptionController {
         return ResponseEntity.ok(ApiResponse.success(subscriptionService.all(Math.min(Math.max(limit, 1), 200), query)));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<SubscriptionResponse>> getSubscriptionById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(subscriptionService.getSubscriptionById(id)));
+    }
+
     @GetMapping("/payments")
     public ResponseEntity<ApiResponse<List<PaymentResponse>>> payments(
             @RequestParam(defaultValue = "50") int limit, @RequestParam(required = false) String query) {

@@ -11,6 +11,7 @@ import com.project.souklab.model.FinancialAuditOperation;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.user.CurrentUserProvider;
 import com.project.souklab.dto.subscription.FinancialReasonRequest;
+import com.project.souklab.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,13 @@ public class AdminSubscriptionPlanService {
     @Transactional(readOnly = true)
     public List<SubscriptionPlanResponse> list() {
         return planRepository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SubscriptionPlanResponse get(String id) {
+        SubscriptionPlan plan = planRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
+        return toResponse(plan);
     }
 
     @Transactional
