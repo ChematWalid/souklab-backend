@@ -170,7 +170,7 @@ public class SecurityConfig {
                                 "/api/v1/public/**",
                                 "/api/v1/subscriptions/plans",
                                 "/api/v1/artisans/*/reviews",
-                                "/api/v1/artisan/reviews/*"
+                                "/api/v1/artisan/reviews/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/feed/*/share").permitAll()
                         .requestMatchers(
