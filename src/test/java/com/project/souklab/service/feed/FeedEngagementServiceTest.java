@@ -10,6 +10,7 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.feed.FeedPostCommentCreateDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
+import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostLike;
@@ -138,7 +139,7 @@ class FeedEngagementServiceTest {
         when(commentRepository.findByIdAndDeletedAtIsNull("comment-2")).thenReturn(Optional.of(comment));
 
         assertThatThrownBy(() -> service.updateComment("comment-2", new FeedPostCommentCreateDTO("new")))
-                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
+                .isInstanceOf(ForbiddenException.class);
     }
 
     private void authenticate() {
