@@ -15,13 +15,13 @@ Authorization is capability-based. The `Permission` enum and the `permissions`/`
 | `permission:profile:write` | Profile completion and `/me` patch operations | `AuthController` and `AccessControlService` |
 | `permission:report:create` | Authenticated content-report submission, including posts and comments | `ContentReportController`, `ContentReportService` |
 | `permission:file:read` | Protected-file policy for authenticated file access | `FileAccessService` and `CustomUserDetailsService` |
-| `permission:message:send` | Send direct messages and upload message attachments | `ConversationService`, `ChatStompController`, `ConversationController` |
+| `permission:message:send` | Send direct messages and upload message attachments (clients also require an active Premium subscription) | `ConversationService`, `ChatStompController`, `ConversationController` |
 | `permission:financial:admin` | Subscription management, manual grants/revocations, refunds, and payment state corrections | `AdminSubscriptionController`, `AdminPaymentController`, `AccessControlService` |
 | `permission:analytics:admin` | Analytics query jobs, rollups rebuild/backfill, metrics exports, and stats access | `AnalyticsJobController`, `AccessControlService` |
 | `permission:admin:catalog` | Catalog taxonomy management (techniques, epoques, regions CRUD) | `AdminCatalogController`, `AccessControlService` |
 | `permission:client:favorites` | Client favorite artisan management (add, list, check status, remove) | `ClientFavoriteArtisanController`, `AccessControlService` |
 
-Public resources are strictly scoped to `HttpMethod.GET` at the HTTP security filter layer: catalog taxonomies (`/catalog/**`), public directory search (`/public/**`), public feed reads (`/feed`), public artisan profiles (`/artisan/{id}`), public subscription plans (`/subscriptions/plans`), and public reviews (`/artisans/*/reviews`). All write, modify, or delete operations on these paths require authentication and appropriate permissions. File URLs require an authenticated request; `FileAccessService` allows public media with cacheable headers while certification and formation files additionally require `FILE_READ` plus ownership, enrollment, or the relevant administrator permission.
+Public resources are strictly scoped to `HttpMethod.GET` at the HTTP security filter layer: catalog taxonomies (`/catalog/**`), public directory search (`/public/**`), public feed reads (`/feed`, `/feed/**`), public artisan profiles (`/artisan/{id}`), public subscription plans (`/subscriptions/plans`), and public reviews (`/artisans/*/reviews`, `/api/v1/artisan/reviews/**`). All write, modify, or delete operations on these paths require authentication and appropriate permissions. File URLs require an authenticated request; `FileAccessService` allows public media with cacheable headers while certification and formation files additionally require `FILE_READ` plus ownership, enrollment, or the relevant administrator permission.
 
 ## Administrative Self-Protection Guardrails
 

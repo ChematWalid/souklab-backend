@@ -31,8 +31,8 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `GET /catalog/{regions|categories|materials|epoques|techniques}`: Public cached taxonomy trees
 - `GET /public/directory`: Elasticsearch fuzzy search + faceted filters (`category`, `wilaya`, `material`, `epoque`, `sort`)
 - `GET /artisan/{id}`: Public artisan profile (phone/email masked for non-premium clients)
-- `POST|GET|DELETE /artisan/gallery`: Artisan portfolio images (max 20, 10MB each)
-- `POST|GET|DELETE /artisan/certifications`: Professional documents (max 10, PDF/img up to 15MB)
+- `POST|GET|PUT|DELETE /artisan/gallery`: Artisan portfolio images (max 20, 10MB each)
+- `POST|GET|PUT|DELETE /artisan/certifications`: Professional documents (max 10, PDF/img up to 15MB)
 - `GET|PATCH /client/profile` & `POST|GET|DELETE /client/favorites/artisans[/{artisanId}]`: Client favorites
 
 ### Formations & Formateur (`/api/v1/`)
@@ -54,14 +54,15 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `POST|DELETE /feed/{id}/likes|bookmarks`, `/feed/{id}/comments`, and `/feed/comments/{id}/replies|likes`: Idempotent engagement and one-level replies
 - `GET|POST /admin/feed/pending`, `publish`, `reject`, `hide`, `DELETE /admin/feed/{id}`: Feed moderation
 - `POST /artisan/formations/{formationId}/reviews`: **Single review path** (requires `ATTENDED` enrollment, unique constraint)
-- `GET /artisans/{artisanId}/reviews`: Public paginated reviews
-- `POST /reports` & `GET|POST /admin/reports[/{id}/resolve]`: Content abuse moderation
+- `GET /artisans/{artisanId}/reviews` & `GET /artisan/reviews/{id}`: Public reviews
+- `POST /reports` & `GET|POST /admin/reports[/{id}[/resolve]]`: Content abuse moderation
 
 ### Real-Time Messaging (`/api/v1/conversations` & `/ws`)
-- `POST|GET /conversations`: 1-on-1 conversations (self-conversation blocked -> 400)
+- `POST|GET /conversations[/{id}]`: 1-on-1 conversations (clients require Premium; artisan name masked for non-premium viewers; self-conversation blocked -> 400)
 - `GET|POST /conversations/{id}/messages`: Paginated cursor history & REST fallback
 - `PATCH|DELETE /conversations/{id}/messages/{messageId}`: Message edit / soft-delete
 - `POST /conversations/{id}/read`: Mark read receipt
+- `POST /conversations/{id}/attachments`: Upload chat attachment (max 10MB)
 - `STOMP /app/v1/conversations/{id}/messages.send`: Send message via RabbitMQ relay
 - `STOMP /app/v1/conversations/{id}/typing.{start|stop}`: Ephemeral typing broadcast
 - `User Subscriptions`: `/user/queue/chat`, `/user/queue/chat-events`, `/user/queue/notifications`

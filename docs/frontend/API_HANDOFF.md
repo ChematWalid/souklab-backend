@@ -216,6 +216,7 @@ Feed statuses are `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN`, and `RE
 
 #### Reviews Endpoints
 - `GET /api/v1/artisans/{artisanId}/reviews`: Paginated list of visible reviews (`rating` from 0.00 to 5.00, `comment`, `createdAt`, reviewer name/avatar).
+- `GET /api/v1/artisan/reviews/{reviewId}`: Single published review detail.
 - `POST /api/v1/artisan/formations/{formationId}/reviews`: Submit a review after completing an enrollment (`permission:artisan:reviews`). Requires status `ATTENDED`. Each attendee can review a formation exactly once (`409 Conflict` on duplicate).
 - `PUT /api/v1/artisan/reviews/{reviewId}` and `DELETE /api/v1/artisan/reviews/{reviewId}`: Edit or delete owned review.
 
@@ -223,15 +224,24 @@ Feed statuses are `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN`, and `RE
 
 ### 7. Real-Time Messaging & Chat (`/api/v1/conversations/**`, STOMP `/ws`)
 
-Private 1-on-1 messaging between platform users backed by RabbitMQ STOMP message relay.
+Private 1-on-1 messaging between platform users backed by WebSocket and Spring Messaging STOMP broker.
+
+> [!IMPORTANT]
+> **Client Premium Gating & Artisan Name Masking**:
+> - **Premium Gating**: Clients require an active Premium subscription to start conversations (`POST /api/v1/conversations`), send messages (`POST /api/v1/conversations/{id}/messages` and STOMP `/messages.send`), edit messages, upload attachments, or broadcast typing events. Non-premium clients attempting any of these operations receive HTTP 403 Forbidden.
+> - **Artisan Privacy Masking**: When a non-premium client lists or views conversations, the artisan counterparty's `participantName` is anonymized as `"Artisan #XXXXX"` (e.g., `Artisan #3BD3F`) to prevent off-platform bypass. Premium clients, artisans, and administrators see the unmasked artisan name.
 
 #### REST Endpoints
-- `POST /api/v1/conversations`: Initiate or open conversation (`{ "recipientId": string }`). Returns conversation ID.
-- `GET /api/v1/conversations`: Paginated list of user conversations with last message snippet, unread counter, and participant profile.
-- `GET /api/v1/conversations/{id}/messages`: Paginated message history with cursor traversal (`?before=<timestamp>&size=50`).
-- `POST /api/v1/conversations/{id}/messages`: Send message via REST fallback (`{ "content": string, "attachmentIds": string[] }`).
-- `PUT /api/v1/conversations/{id}/read`: Mark all messages up to current timestamp as read.
-- `POST /api/v1/conversations/{id}/attachments/presign`: Pre-registers attachment upload reservation.
+- `POST /api/v1/conversations`: Initiate or open conversation (`{ "recipientUserId": string }`). Returns `ApiResponse<ConversationResponse>`. (Requires Premium for clients).
+- `GET /api/v1/conversations`: List user conversations (`?archived=false`). Returns `ApiResponse<List<ConversationResponse>>`.
+- `GET /api/v1/conversations/{id}`: Single conversation summary (`ApiResponse<ConversationResponse>`).
+- `PATCH /api/v1/conversations/{id}/archive`: Toggles archive state (`{ "archived": boolean }`).
+- `GET /api/v1/conversations/{id}/messages`: Paginated message history with cursor traversal (`?cursor=string&size=50`).
+- `POST /api/v1/conversations/{id}/messages`: Send message via REST (`{ "idempotencyKey": string, "content": string, "attachmentKeys": string[] }`). (Requires Premium for clients).
+- `PATCH /api/v1/conversations/{conversationId}/messages/{messageId}`: Edit authored message (`{ "content": string }`). (Requires Premium for clients).
+- `DELETE /api/v1/conversations/{conversationId}/messages/{messageId}`: Soft-delete authored message.
+- `POST /api/v1/conversations/{id}/read`: Mark conversation messages as read (`{ "messageId": string }` — optional).
+- `POST /api/v1/conversations/{id}/attachments`: Upload chat attachment (`multipart/form-data`, file param `file`, max 10MB). Returns `AttachmentUploadResponse` (`key`, `filename`, `contentType`, `size`). (Requires Premium for clients).
 
 #### WebSocket / STOMP Integration
 - **Connection URL**: `ws://<host>:8080/ws` (or SockJS fallback at `http://<host>:8080/ws`).
@@ -239,15 +249,18 @@ Private 1-on-1 messaging between platform users backed by RabbitMQ STOMP message
   ```
   Authorization: Bearer <accessToken>
   ```
-- **Subscriptions**:
-  - Chat Messages: Subscribe to `/user/queue/messages`.
-  - Notifications: Subscribe to `/user/queue/notifications`.
-  - Presence: Subscribe to `/topic/presence`.
-- **Sending Messages**: Send STOMP frame to `/app/v1/conversations/{conversationId}/send`:
-  ```json
-  { "content": "Bonjour!", "attachmentIds": [] }
-  ```
-- **Typing Indicators**: Send to `/app/v1/conversations/{conversationId}/typing` with `{ "typing": true }`. Ephemeral typing events expire automatically after 5 seconds on the client.
+- **Inbound Destinations (Client → Server)**:
+  - Send Message: `/app/v1/conversations/{conversationId}/messages.send` with `{ "idempotencyKey": string, "content": string, "attachmentKeys": string[] }`
+  - Edit Message: `/app/v1/conversations/{conversationId}/messages.edit` with `{ "messageId": string, "correlationId": string, "content": string }`
+  - Delete Message: `/app/v1/conversations/{conversationId}/messages.delete` with `{ "messageId": string, "correlationId": string }`
+  - Mark Read: `/app/v1/conversations/{conversationId}/read` with `{ "messageId": string, "correlationId": string }`
+  - Typing Start: `/app/v1/conversations/{conversationId}/typing.start` with `{ "correlationId": string }`
+  - Typing Stop: `/app/v1/conversations/{conversationId}/typing.stop` with `{ "correlationId": string }`
+- **Subscriptions (Server → Client)**:
+  - Chat Queue: `/user/queue/chat` (message deliveries, acknowledgments, errors)
+  - Events Queue: `/user/queue/chat-events` (typing indicators, read receipts, message updates)
+  - Notifications: `/user/queue/notifications`
+  - Presence: `/topic/presence`
 
 ---
 

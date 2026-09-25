@@ -564,6 +564,20 @@ Uploads a new professional qualification or certification document.
 
 ---
 
+### `PUT /api/v1/artisan/certifications/{id}`
+Updates metadata or replaces the document file for an owned certification. Modifying an existing certification resets its verification status.
+- **Access**: Authenticated Artisan Owner (`permission:artisan:content`)
+- **Content-Type**: `multipart/form-data`
+- **Form Parameters**:
+  - `title` (string, optional): Updated credential title.
+  - `issuer` (string, optional): Granting organization.
+  - `issuedAt` (date `YYYY-MM-DD`, optional): Date of conferral.
+  - `expiresAt` (date `YYYY-MM-DD`, optional): Expiration date.
+  - `file` (file, optional): Replacement document file (PDF or image).
+- **Response**: `200 OK` with `ApiResponse<CertificationResponseDTO>`.
+
+---
+
 ### `DELETE /api/v1/artisan/certifications/{id}`
 Deletes an owned certification document.
 - **Access**: Authenticated Artisan Owner (`permission:artisan:content`)
@@ -616,6 +630,19 @@ Uploads a showcase image to the portfolio gallery. Enforces subscription tier qu
   - `400 Bad Request`: Missing image parameter.
   - `409 Conflict`: Subscription tier gallery capacity limit exceeded.
   - `415 Unsupported Media Type`: Non-image file format.
+
+---
+
+### `PUT /api/v1/artisan/gallery/{id}`
+Updates metadata or replaces the image file for an owned gallery photo.
+- **Access**: Authenticated Artisan Owner (`permission:artisan:content`)
+- **Content-Type**: `multipart/form-data`
+- **Form Parameters**:
+  - `title` (string, optional): Updated image title.
+  - `caption` (string, optional): Updated caption description.
+  - `craftSubCategoryId` (string, optional): Associated craft subcategory ID.
+  - `file` (file, optional): Replacement image file.
+- **Response**: `200 OK` with `ApiResponse<GalleryImageResponseDTO>`.
 
 ---
 
@@ -942,6 +969,24 @@ Author or administrator updates or removes a post (`200 OK`).
 #### `POST /api/v1/feed/{id}/media` and `DELETE /api/v1/feed/{id}/media/{mediaId}`
 Attaches (`multipart/form-data`, max 10MB) or removes image attachments from an authored post (`200 OK`).
 
+#### Feed Interactions & Engagement
+- `POST /api/v1/feed/{id}/likes` and `DELETE /api/v1/feed/{id}/likes`: Idempotently like or unlike a post (Authenticated).
+- `GET /api/v1/feed/{id}/likes`: Query current caller's like status on post (`FeedPostLikeStatusDTO`).
+- `POST /api/v1/feed/{id}/bookmarks` and `DELETE /api/v1/feed/{id}/bookmarks`: Save or remove post from bookmarks (Authenticated).
+- `GET /api/v1/feed/saved`: Paginated list of caller's saved posts (Authenticated).
+- `POST /api/v1/feed/{id}/share`: Increments post share counter and returns share payload.
+
+#### Feed Comments & Replies
+- `GET /api/v1/feed/{id}/comments`: Lists root comments for a post (Public, paginated).
+- `POST /api/v1/feed/{id}/comments`: Submits a root comment (`FeedPostCommentCreateDTO`: `{ "body": string }`) (Authenticated).
+- `GET /api/v1/feed/comments/{commentId}`: Retrieves a single visible comment or reply (Public).
+- `GET /api/v1/feed/comments/{commentId}/replies`: Lists replies to a comment (Public, paginated).
+- `POST /api/v1/feed/comments/{commentId}/replies`: Submits a reply one level deep (`FeedPostCommentCreateDTO`) (Authenticated).
+- `PUT /api/v1/feed/comments/{commentId}`: Updates authored comment text (`FeedPostCommentCreateDTO`) (Authenticated author).
+- `DELETE /api/v1/feed/comments/{commentId}`: Soft-deletes authored comment (Authenticated author or admin).
+- `POST /api/v1/feed/comments/{commentId}/likes` and `DELETE .../likes`: Idempotently like or unlike a comment (Authenticated).
+- `GET /api/v1/feed/comments/{commentId}/likes`: Query caller's like status on a comment (Public).
+
 ---
 
 ### Artisan Reviews (`/api/v1/artisan/reviews/**` and `/api/v1/artisans/**`)
@@ -952,30 +997,26 @@ Client and peer reviews maintain service trust and reputation. Reviews are tied 
 Retrieves public paginated reviews for a specific artisan.
 - **Access**: Public / Authenticated
 - **Response**: `200 OK` with `ApiResponse<PaginatedResponse<ArtisanReviewResponseDTO>>`
+
+#### `GET /api/v1/artisan/reviews/{reviewId}`
+Retrieves a single published, visible artisan review.
+- **Access**: Public / Authenticated
+- **Response**: `200 OK` with `ApiResponse<ArtisanReviewResponseDTO>`
   ```json
   {
     "success": true,
     "code": 200,
-    "message": "Reviews retrieved successfully",
+    "message": "Operation completed successfully",
     "data": {
-      "content": [
-        {
-          "id": "rev-01",
-          "reviewerId": "client-uuid-1",
-          "reviewerName": "Karim M.",
-          "artisanId": "artisan-uuid-1",
-          "formationId": "form-uuid-1",
-          "rating": 5.00,
-          "comment": "Exceptional instruction. Learned traditional pottery wheel fundamentals in one weekend.",
-          "createdAt": "2026-08-15T16:20:00",
-          "updatedAt": null
-        }
-      ],
-      "pageNumber": 0,
-      "pageSize": 20,
-      "totalElements": 1,
-      "totalPages": 1,
-      "last": true
+      "id": "rev-01",
+      "reviewerId": "client-uuid-1",
+      "reviewerName": "Karim M.",
+      "artisanId": "artisan-uuid-1",
+      "formationId": "form-uuid-1",
+      "rating": 5.00,
+      "comment": "Exceptional instruction. Learned traditional pottery wheel fundamentals in one weekend.",
+      "createdAt": "2026-08-15T16:20:00",
+      "updatedAt": null
     }
   }
   ```
@@ -1019,51 +1060,87 @@ Submits an abuse report against a user, post, or review.
 
 The real-time messaging subsystem provides end-to-end, private one-to-one communications between authenticated platform users (clients and artisans). Both REST and WebSocket STOMP interfaces are supported. Administrators have no private message access bypass.
 
+> [!IMPORTANT]
+> **Client Premium Requirement & Privacy Masking**:
+> - **Client Premium Gating**: Clients require an active Premium subscription to initiate conversations (`POST /api/v1/conversations`), send messages (`POST /api/v1/conversations/{id}/messages` and STOMP `/messages.send`), edit messages, upload attachments, or broadcast typing events. Non-premium clients attempting any of these operations receive `403 Forbidden` (`FORBIDDEN`).
+> - **Artisan Identity Masking**: For non-premium clients viewing conversations (`GET /api/v1/conversations` or `GET /api/v1/conversations/{id}`), the artisan's display name (`participantName`) is masked as `"Artisan #XXXXX"` (e.g. `Artisan #3BD3F`) to prevent off-platform disintermediation. Premium clients, artisans, and administrators receive the unmasked artisan name.
+
 ### REST Conversations API
 
-- `POST /api/v1/conversations`: Initiates a new conversation with a target participant (`CreateConversationRequest`: `{ "recipientId": string, "initialMessage": string }`). Returns `201 Created` with `ApiResponse<ConversationResponse>`.
-- `GET /api/v1/conversations`: Lists active conversations for the authenticated user, ordered by most recent message activity (`200 OK` with `ApiResponse<PaginatedResponse<ConversationResponse>>`).
-- `GET /api/v1/conversations/{id}/messages`: Fetches message history with cursor-based pagination (`?cursor=...&limit=30`).
-- `POST /api/v1/conversations/{id}/messages`: Fallback HTTP endpoint to send a message. Enforces idempotency via `clientMessageId`.
-- `POST /api/v1/conversations/{id}/attachments`: Uploads an image or document attachment for chat (`multipart/form-data`, max 10MB, virus scanned).
-- `POST /api/v1/conversations/{id}/read`: Advances caller's read-up-to state (`ReadReceiptRequest`: `{ "lastReadMessageId": string }`).
-- `PATCH /api/v1/conversations/{id}/archive`: Toggles archive status for the conversation (`200 OK`).
-- `PATCH /api/v1/conversations/{conversationId}/messages/{messageId}`: Edits authored message text within the allowed edit window (`200 OK`).
-- `DELETE /api/v1/conversations/{conversationId}/messages/{messageId}`: Deletes an authored message (`200 OK`).
+- `POST /api/v1/conversations`: Initiates a new conversation or retrieves existing (`CreateConversationRequest`: `{ "recipientUserId": string }`). Returns `201 Created` with `ApiResponse<ConversationResponse>`. (Requires Premium for clients; self-messaging returns `400 Bad Request`).
+- `GET /api/v1/conversations`: Lists active conversations for the authenticated user, optionally filtered by archive status (`?archived=false`). Returns `200 OK` with `ApiResponse<List<ConversationResponse>>`.
+- `GET /api/v1/conversations/{id}`: Retrieves single conversation summary for one of its participants (`200 OK` with `ApiResponse<ConversationResponse>`).
+- `PATCH /api/v1/conversations/{id}/archive`: Toggles archive status for the conversation (`ArchiveConversationRequest`: `{ "archived": boolean }`). Returns `200 OK`.
+- `GET /api/v1/conversations/{id}/messages`: Fetches cursor-paginated message history (`?cursor=string&size=50`). Returns `200 OK` with `ApiResponse<MessagePageResponse>`.
+- `POST /api/v1/conversations/{id}/messages`: Fallback HTTP endpoint to send a message (`SendMessageRequest`: `{ "idempotencyKey": string, "content": string, "attachmentKeys": string[] }`). Returns `201 Created` with `ApiResponse<MessageResponse>`. (Requires Premium for clients).
+- `PATCH /api/v1/conversations/{conversationId}/messages/{messageId}`: Edits authored message text within the allowed edit window (`EditMessageRequest`: `{ "content": string }`). Returns `200 OK` with `ApiResponse<MessageResponse>`. (Requires Premium for clients).
+- `DELETE /api/v1/conversations/{conversationId}/messages/{messageId}`: Soft-deletes an authored message (`200 OK`).
+- `POST /api/v1/conversations/{id}/read`: Advances caller's read-up-to state (`ReadReceiptRequest`: `{ "messageId": string }` — optional, if null/omitted marks all read). Returns `200 OK`.
+- `POST /api/v1/conversations/{id}/attachments`: Uploads an image or document attachment for chat (`multipart/form-data`, file param `file`, max 10MB, scanned by ClamAV). Returns `201 Created` with `ApiResponse<AttachmentUploadResponse>` (`key`, `filename`, `contentType`, `size`). (Requires Premium for clients).
 
 ---
 
 ### STOMP WebSocket Protocol (`/ws`)
 
-- **Handshake URL**: `ws://<host>/ws` (or `wss://<host>/ws`)
+- **Handshake URL**: `ws://<host>/ws` (or `wss://<host>/ws`, with SockJS fallback enabled)
 - **Authentication**: JWT bearer token passed in STOMP `CONNECT` frame:
   ```stomp
   CONNECT
   accept-version:1.2,1.1,1.0
   heart-beat:10000,10000
   Authorization:Bearer <jwt-token>
-   
+  ^@
   ```
 
 #### Inbound Destinations (Client -> Server)
-- `/app/v1/conversations/{conversationId}/send`: Sends real-time chat message.
+- `/app/v1/conversations/{conversationId}/messages.send`: Sends real-time chat message.
   ```json
   {
-    "clientMessageId": "c9284fae-3c92-4f32-8419-58bfa8319dc2",
-    "content": "Hello, is the pottery masterclass still accepting participants?"
+    "idempotencyKey": "c9284fae-3c92-4f32-8419-58bfa8319dc2",
+    "content": "Hello, is the pottery masterclass still accepting participants?",
+    "attachmentKeys": []
   }
   ```
-- `/app/v1/conversations/{conversationId}/typing`: Emits ephemeral typing indicator.
+- `/app/v1/conversations/{conversationId}/messages.edit`: Edits authored message text.
   ```json
   {
-    "isTyping": true
+    "messageId": "msg-uuid-1",
+    "correlationId": "cor-uuid-1",
+    "content": "Updated message content"
+  }
+  ```
+- `/app/v1/conversations/{conversationId}/messages.delete`: Soft-deletes authored message.
+  ```json
+  {
+    "messageId": "msg-uuid-1",
+    "correlationId": "cor-uuid-1"
+  }
+  ```
+- `/app/v1/conversations/{conversationId}/read`: Submits read receipt up to specified message.
+  ```json
+  {
+    "messageId": "msg-uuid-1",
+    "correlationId": "cor-uuid-1"
+  }
+  ```
+- `/app/v1/conversations/{conversationId}/typing.start`: Broadcasts typing indicator start.
+  ```json
+  {
+    "correlationId": "cor-uuid-1"
+  }
+  ```
+- `/app/v1/conversations/{conversationId}/typing.stop`: Broadcasts typing indicator stop.
+  ```json
+  {
+    "correlationId": "cor-uuid-1"
   }
   ```
 
 #### Subscriptions (Server -> Client)
-- `/user/queue/messages`: Inbound direct messages and message status updates.
-- `/user/queue/conversations`: Conversation state updates (new conversation, unread badge increments).
+- `/user/queue/chat`: Direct message deliveries, command acknowledgments, error events.
+- `/user/queue/chat-events`: Real-time chat events (typing indicators, read receipts, message edits/deletions).
 - `/topic/presence`: Real-time user online/offline status broadcast.
+- `/user/queue/notifications`: In-app transactional notifications.
 
 ---
 
@@ -1206,6 +1283,7 @@ Complex platform metric aggregations and reporting jobs are processed asynchrono
 - `POST /api/v1/admin/feed/{id}/hide`: Hides published post from community view (`permission:admin:feed`).
 - `POST /api/v1/admin/feed/{id}/remove`: Permanently removes offending post (`permission:admin:feed`).
 - `GET /api/v1/admin/reports`: Paginated content abuse reports queue (`permission:admin:reports`).
+- `GET /api/v1/admin/reports/{id}`: Retrieves complete details of a specific abuse report (`permission:admin:reports`).
 - `POST /api/v1/admin/reports/{id}/resolve`: Resolves report with action `DISMISS`, `HIDE`, or `REMOVE` (`ReportResolutionRequestDTO`). Automatically applies action to the targeted content and records resolution in the audit log.
 
 ---
