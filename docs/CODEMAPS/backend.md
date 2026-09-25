@@ -69,17 +69,18 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 
 ### Notifications & File Storage (`/api/v1/`)
 - `GET /notifications`: Paginated feed (newest first)
+- `GET /notifications/{id}`: Single notification lookup
 - `GET /notifications/unread-count`: **Raw integer in `data`** (`{ "code": 200, "data": 5, "success": true }`)
 - `PUT /notifications/{id}/read` & `PUT /notifications/read-all`: Mark read
 - `DELETE /notifications/{id}`: Soft-delete (cross-user access returns 404 query-scoped)
 - `GET /files/{key}`: Protected object streaming (size, MIME, Tika magic bytes, ClamAV)
-- `POST|GET|DELETE /users/me/avatars`: Avatar lifecycle (max 10 avatars per user)
+- `POST|GET|PUT|DELETE /users/me/avatars[/{id}]`: Avatar lifecycle (max 10 avatars per user)
 
 ### Subscriptions, Payments & Admin (`/api/v1/`)
-- `GET /subscriptions/plans`: Public subscription plans
+- `GET /subscriptions/plans[/{id}]`: Public subscription plans
 - `POST /subscriptions/checkout`: Initiate Chargily Pay V2 hosted checkout
 - `POST /integrations/chargily/webhook`: Signature-verified, idempotent webhook processing
-- `GET /admin/users` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration (self-ban and self-timeout blocked -> 400)
+- `GET /admin/users[/{id}]` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration (self-ban and self-timeout blocked -> 400)
 - `GET|POST|DELETE /admin/users/{userId}/permissions`: Granular permission assignments (self-revocation blocked -> 400)
 - `POST /admin/analytics/jobs` & `POST /admin/analytics/rollups/*`: Async reporting jobs & CSV exports
 - `POST|PUT|PATCH|DELETE /admin/catalog/**`: Full taxonomy CRUD (`permission:admin:catalog`)

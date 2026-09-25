@@ -10,6 +10,7 @@ Handles administrative user moderation (approvals, bans, timeouts) and user avat
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/admin/users` | `permission:admin:users` | Paginated search and filter across all users (`?search=&page=0&size=20`). |
+| `GET` | `/api/v1/admin/users/{id}` | `permission:admin:users` | Retrieves single user profile details by ID. |
 | `GET` | `/api/v1/admin/users/pending` | `permission:admin:users` | Lists users awaiting administrative validation. |
 | `POST` | `/api/v1/admin/users/{id}/approve` | `permission:admin:users` | Approves pending user, activates account, and sends notification. |
 | `POST` | `/api/v1/admin/users/approve-bulk` | `permission:admin:users` | Bulk approves a list of pending user IDs. |
@@ -42,6 +43,7 @@ Manages the authenticated caller's profile avatars under `/api/v1/users/me/avata
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/users/me/avatars` | Authenticated | Upload new avatar | Multipart upload (`file`). Scanned with ClamAV, resized to 3 tiers, activates immediately. |
 | `GET` | `/api/v1/users/me/avatars` | Authenticated | List avatar history | Paginated list of avatars uploaded by caller (`?page=0&size=20`). |
+| `GET` | `/api/v1/users/me/avatars/{id}` | Authenticated | Get avatar | Retrieves a single avatar history record owned by caller by ID. |
 | `PUT` | `/api/v1/users/me/avatars/{id}/activate` | Authenticated | Activate avatar | Sets a previously uploaded gallery avatar as the active profile avatar. |
 | `DELETE` | `/api/v1/users/me/avatars/{id}` | Authenticated | Delete avatar | Soft-deletes avatar record and removes S3/MinIO files. |
 

@@ -35,6 +35,7 @@ REST controllers managing masterclass authoring, course material uploads, peer w
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/admin/formations/pending` | `permission:admin:formations` | Retrieves paginated queue of formations awaiting moderation review. |
+| `GET` | `/api/v1/admin/formations/{id}` | `permission:admin:formations` | Retrieves complete formation details for administrative review. |
 | `POST` | `/api/v1/admin/formations/{id}/review` | `permission:admin:formations` | Submits review decision (`APPROVED` or `REJECTED`) with moderation comment. |
 | `POST` | `/api/v1/admin/formations/{id}/publish` | `permission:admin:formations` | Publishes an approved formation to the public catalog. |
 

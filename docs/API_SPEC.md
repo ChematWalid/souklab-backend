@@ -546,6 +546,18 @@ Retrieves all professional accreditation documents and credentials belonging to 
 
 ---
 
+### `GET /api/v1/artisan/certifications/{id}`
+Retrieves a single professional qualification or accreditation credential belonging to the authenticated artisan.
+- **Access**: Authenticated Artisan Owner (`permission:artisan:content`)
+- **Path Parameters**:
+  - `id` (string, required): Certification identifier.
+- **Response**: `200 OK` with `ApiResponse<CertificationResponseDTO>`
+- **Status Codes**:
+  - `200 OK`: Certification retrieved.
+  - `404 Not Found`: Certification not found or not owned by caller.
+
+---
+
 ### `POST /api/v1/artisan/certifications`
 Uploads a new professional qualification or certification document.
 - **Access**: Authenticated Artisan (`permission:artisan:content`)
@@ -616,6 +628,18 @@ Lists all portfolio showcase images for the authenticated artisan.
 
 ---
 
+### `GET /api/v1/artisan/gallery/{id}`
+Retrieves a single portfolio showcase photograph belonging to the authenticated artisan.
+- **Access**: Authenticated Artisan Owner (`permission:artisan:content`)
+- **Path Parameters**:
+  - `id` (string, required): Gallery image identifier.
+- **Response**: `200 OK` with `ApiResponse<GalleryImageResponseDTO>`
+- **Status Codes**:
+  - `200 OK`: Gallery image retrieved.
+  - `404 Not Found`: Image not found or not owned by caller.
+
+---
+
 ### `POST /api/v1/artisan/gallery`
 Uploads a showcase image to the portfolio gallery. Enforces subscription tier quotas (FREE: 3 images, PRO: 10 images, PREMIUM: 20 images).
 - **Access**: Authenticated Artisan (`permission:artisan:content`)
@@ -678,6 +702,7 @@ Reorders the display sequence of images in the artisan's portfolio gallery.
 Authenticated users can upload, switch, and delete profile avatars. Uploads are strictly rate-limited and size-bounded (max 5MB).
 - `POST /api/v1/users/me/avatars`: Upload new avatar (`multipart/form-data`, param `file`). Returns `201 Created` with `ApiResponse<AvatarResponseDTO>`.
 - `GET /api/v1/users/me/avatars`: List uploaded avatars for current user (`200 OK`).
+- `GET /api/v1/users/me/avatars/{id}`: Retrieve a single uploaded avatar owned by caller (`200 OK`).
 - `PUT /api/v1/users/me/avatars/{id}/activate`: Set selected avatar as active profile image (`200 OK`).
 - `DELETE /api/v1/users/me/avatars/{id}`: Delete an inactive avatar (`200 OK`). Active avatars cannot be deleted without activating another first.
 
@@ -1190,6 +1215,16 @@ Lists all active public subscription tiers with pricing in Algerian Dinars (DZD)
   }
   ```
 
+#### `GET /api/v1/subscriptions/plans/{id}`
+Retrieves a single active public subscription plan by ID with pricing in Algerian Dinars (DZD).
+- **Access**: Public / Unauthenticated
+- **Path Parameters**:
+  - `id` (string, required): Subscription plan identifier.
+- **Response**: `200 OK` with `ApiResponse<SubscriptionPlanResponse>`
+- **Status Codes**:
+  - `200 OK`: Plan retrieved.
+  - `404 Not Found`: Plan not found or inactive.
+
 ---
 
 ### Authenticated Subscription Checkout & Management
@@ -1237,10 +1272,16 @@ Lists all active public subscription tiers with pricing in Algerian Dinars (DZD)
 
 Protected administrative endpoints requiring `permission:financial:admin`.
 - `GET /api/v1/admin/subscriptions`: Manage and inspect all platform subscriptions.
+- `GET /api/v1/admin/subscriptions/{id}`: Detailed inspection of a specific subscription record.
 - `GET /api/v1/admin/subscriptions/payments`: Query payment audit ledger.
 - `GET /api/v1/admin/subscriptions/webhooks`: Query webhook delivery logs.
 - `POST /api/v1/admin/subscriptions/grant`: Manually grant a subscription (`ManualSubscriptionGrantRequest`).
 - `POST /api/v1/admin/subscriptions/{id}/revoke`: Immediately revoke a subscription with reason.
+- `GET /api/v1/admin/subscription-plans`: Lists all subscription plans including inactive/archived tiers.
+- `GET /api/v1/admin/subscription-plans/{id}`: Detailed inspection of a specific subscription plan.
+- `POST /api/v1/admin/subscription-plans`: Create subscription plan.
+- `PUT /api/v1/admin/subscription-plans/{id}`: Update subscription plan.
+- `DELETE /api/v1/admin/subscription-plans/{id}`: Deactivate/archive subscription plan.
 - `POST /api/v1/admin/payments/{id}/refund`: Process payment refund (`FinancialReasonRequest`).
 
 ---
@@ -1251,6 +1292,7 @@ Administrator endpoints provide comprehensive governance over users, content, re
 
 ### User Governance (`user-management-controller` & `permission-management-controller`)
 - `GET /api/v1/admin/users`: Paginated list of users with optional role, status, and email search query filters (`permission:admin:users`).
+- `GET /api/v1/admin/users/{id}`: Retrieves complete user profile details by ID (`permission:admin:users`).
 - `GET /api/v1/admin/users/pending`: Paginated queue of pending artisan registrations awaiting administrative accreditation (`permission:admin:users`).
 - `POST /api/v1/admin/users/{id}/approve`: Approves a pending artisan account, transitioning status to `ACTIVE` (`permission:admin:users`).
 - `POST /api/v1/admin/users/approve-bulk`: Bulk approves multiple artisan accounts (`List<String> userIds`) (`permission:admin:users`).
@@ -1276,9 +1318,11 @@ Complex platform metric aggregations and reporting jobs are processed asynchrono
 
 ### Content & Workshop Moderation
 - `GET /api/v1/admin/formations/pending`: Review queue for submitted workshops (`permission:admin:formations`).
+- `GET /api/v1/admin/formations/{id}`: Retrieves complete formation details for administrative review (`permission:admin:formations`).
 - `POST /api/v1/admin/formations/{id}/review`: Approves or rejects workshop curriculum (`FormationReviewRequestDTO`: `{ "approved": bool, "reviewNotes": string }`).
 - `POST /api/v1/admin/formations/{id}/publish`: Publishes approved workshop to the public catalog (`permission:admin:formations`).
 - `GET /api/v1/admin/feed/pending`: Review queue for submitted artisan feed posts (`permission:admin:feed`).
+- `GET /api/v1/admin/feed/{id}`: Retrieves complete feed post details by ID for administrative moderation (`permission:admin:feed`).
 - `POST /api/v1/admin/feed/{id}/publish`: Publishes pending post (`permission:admin:feed`).
 - `POST /api/v1/admin/feed/{id}/hide`: Hides published post from community view (`permission:admin:feed`).
 - `POST /api/v1/admin/feed/{id}/remove`: Permanently removes offending post (`permission:admin:feed`).
@@ -1317,6 +1361,7 @@ The in-app notification system delivers transactional alerts for formation enrol
     }
   }
   ```
+- `GET /api/v1/notifications/{id}`: Retrieves a specific notification by ID (`200 OK`).
 - `GET /api/v1/notifications/unread-count`: Returns integer badge count of unread, active notifications.
 - `PUT /api/v1/notifications/{id}/read`: Marks a specific notification as read (`200 OK`).
 - `PUT /api/v1/notifications/read-all`: Marks all unread notifications for the caller as read (`200 OK`).
@@ -1353,10 +1398,14 @@ Artisans must undergo administrative accreditation to receive instructor privile
   - **Request Body**: `FormateurRequestDTO` (`{ "motivation": "10 years teaching experience at Tlemcen guild." }`)
   - **Response**: `201 Created` with `ApiResponse<FormateurRequestResponseDTO>` (status `PENDING`).
   - **Validation**: Blocked if an active pending request exists or if the artisan is in an active rejection cooldown period.
+- `GET /api/v1/artisan/formateur-request`: Gets the artisan's latest accreditation request (`permission:artisan:content`).
+- `GET /api/v1/artisan/formateur-requests`: Gets paginated accreditation request history (`permission:artisan:content`).
+- `GET /api/v1/artisan/formateur-requests/{id}`: Gets specific owned accreditation request details by ID (`permission:artisan:content`).
 
 ### Administrative Accreditation Governance
 Protected endpoints requiring `permission:admin:users`.
 - `GET /api/v1/admin/formateur-requests`: Paginated queue of instructor requests with optional status filter (`PENDING`, `APPROVED`, `REJECTED`).
+- `GET /api/v1/admin/formateur-requests/{id}`: Retrieves single accreditation request details by ID (`permission:admin:users`).
 - `POST /api/v1/admin/formateur-requests/{id}/approve`: Approves application (`FormateurApproveDTO`: optional admin notes). Automatically sets `isTeacher = true` and grants `permission:artisan:formations`.
 - `POST /api/v1/admin/formateur-requests/{id}/reject`: Rejects application (`FormateurRejectDTO`: reason and cooldown days). Sets cooldown period preventing immediate re-application.
 - `POST /api/v1/admin/formateur-requests/{artisanId}/lift-cooldown`: Lifts rejection cooldown early (`FormateurCooldownOverrideDTO`).

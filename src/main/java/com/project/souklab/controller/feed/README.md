@@ -55,6 +55,7 @@ Access: Requires permission `@accessControl.canModerateFeed(authentication)`
 | Method | Endpoint | Access | Summary | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/admin/feed/pending` | Admin / Moderator | List pending posts | Lists posts awaiting moderation review. |
+| `GET` | `/api/v1/admin/feed/{id}` | Admin / Moderator | Get feed post | Retrieves complete single feed post details by ID for administrative moderation. |
 | `POST` | `/api/v1/admin/feed/{id}/publish` | Admin / Moderator | Publish pending post | Approves and publishes post to public feed. |
 | `POST` | `/api/v1/admin/feed/{id}/reject` | Admin / Moderator | Reject post | Rejects a post with a moderation note; author may revise and resubmit. |
 | `POST` | `/api/v1/admin/feed/{id}/hide` | Admin / Moderator | Hide published post | Hides a published post from the public feed. |

@@ -281,10 +281,14 @@ Toute l'autorisation est **basée sur les permissions**, non sur les rôles. Les
 | `GET /api/v1/artisan/{id}` | GET | Optionnelle | Récupérer le profil public d'un artisan par ID |
 | `POST /api/v1/artisan/gallery` | POST (multipart) | `Artisan.CONTENT` | Télécharger une nouvelle image de galerie |
 | `GET /api/v1/artisan/gallery` | GET | `Artisan.CONTENT` | Lister ses propres images de galerie |
+| `GET /api/v1/artisan/gallery/{id}` | GET | `Artisan.CONTENT` | Récupérer une image de galerie par ID |
+| `PUT /api/v1/artisan/gallery/{id}` | PUT | `Artisan.CONTENT` | Mettre à jour une image de galerie |
 | `PUT /api/v1/artisan/gallery/order` | PUT | `Artisan.CONTENT` | Réordonner les images de galerie |
 | `DELETE /api/v1/artisan/gallery/{id}` | DELETE | `Artisan.CONTENT` | Supprimer une image de galerie (propriété vérifiée) |
 | `POST /api/v1/artisan/certifications` | POST (multipart) | `Artisan.CONTENT` | Télécharger un document de certification (PDF/image) |
 | `GET /api/v1/artisan/certifications` | GET | `Artisan.CONTENT` | Lister ses propres certifications |
+| `GET /api/v1/artisan/certifications/{id}` | GET | `Artisan.CONTENT` | Récupérer une certification par ID (propriété vérifiée) |
+| `PUT /api/v1/artisan/certifications/{id}` | PUT | `Artisan.CONTENT` | Mettre à jour une certification (propriété vérifiée) |
 | `DELETE /api/v1/artisan/certifications/{id}` | DELETE | `Artisan.CONTENT` | Supprimer une certification (propriété vérifiée) |
 
 ### Masquage des coordonnées
@@ -475,6 +479,7 @@ Les formations sont des masterclasses en présentiel ou hybrides, créées exclu
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/admin/formations/pending` | GET | `Admin.FORMATIONS` | Lister les formations en attente de révision |
+| `GET /api/v1/admin/formations/{id}` | GET | `Admin.FORMATIONS` | Récupérer une formation par ID pour révision |
 | `POST /api/v1/admin/formations/{id}/review` | POST | `Admin.FORMATIONS` | Soumettre une décision de révision (APPROVED / REJECTED) |
 | `POST /api/v1/admin/formations/{id}/publish` | POST | `Admin.FORMATIONS` | Publier une formation approuvée |
 
@@ -511,7 +516,11 @@ Contrôle quels artisans peuvent créer des formations (masterclasses).
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `POST /api/v1/artisan/formateur-request` | POST | `Artisan.CONTENT` | Soumettre une demande d'accréditation |
+| `GET /api/v1/artisan/formateur-request` | GET | `Artisan.CONTENT` | Récupérer la dernière demande d'accréditation |
+| `GET /api/v1/artisan/formateur-requests` | GET | `Artisan.CONTENT` | Lister l'historique des demandes d'accréditation |
+| `GET /api/v1/artisan/formateur-requests/{id}` | GET | `Artisan.CONTENT` | Récupérer une demande d'accréditation par ID |
 | `GET /api/v1/admin/formateur-requests` | GET | `Admin.FORMATIONS` | Lister les demandes d'accréditation en attente |
+| `GET /api/v1/admin/formateur-requests/{id}` | GET | `Admin.FORMATIONS` | Récupérer une demande d'accréditation par ID |
 | `POST /api/v1/admin/formateur-requests/{id}/approve` | POST | `Admin.FORMATIONS` | Approuver la demande → définit `isTeacher=true` |
 | `POST /api/v1/admin/formateur-requests/{id}/reject` | POST | `Admin.FORMATIONS` | Rejeter avec délai d'attente optionnel |
 | `POST /api/v1/admin/artisans/{artisanId}/formateur-grant` | POST | `Admin.FORMATIONS` | Accorder directement le statut de formateur |
@@ -567,6 +576,8 @@ Admin blocage permanent (canReapply=false) : futures demandes → 403 Forbidden 
 | `POST /api/v1/feed/{id}/share` | POST | Public | Incrémenter le compteur et retourner un chemin relatif |
 | `POST /api/v1/feed/{id}/media` | POST (multipart) | `Artisan.CONTENT` + propriétaire | Attacher un média à un post |
 | `DELETE /api/v1/feed/{id}/media/{mediaId}` | DELETE | `Artisan.CONTENT` + propriétaire | Supprimer un média d'un post |
+| `GET /api/v1/admin/feed/pending` | GET | `Admin.FEED` | File de modération paginée |
+| `GET /api/v1/admin/feed/{id}` | GET | `Admin.FEED` | Récupérer un post par ID pour modération |
 | `POST /api/v1/admin/feed/{id}/publish` | POST | `Admin.FEED` | Admin : publier un post masqué |
 | `POST /api/v1/admin/feed/{id}/reject` | POST | `Admin.FEED` | Admin : rejeter avec une note de modération |
 | `POST /api/v1/admin/feed/{id}/hide` | POST | `Admin.FEED` | Admin : masquer un post |
@@ -725,6 +736,7 @@ La messagerie fonctionne sur deux couches complémentaires : REST pour la récup
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/notifications` | GET | Bearer | Liste paginée de notifications (les plus récentes en premier) |
+| `GET /api/v1/notifications/{id}` | GET | Bearer + propriétaire | Récupérer une notification par ID |
 | `GET /api/v1/notifications/unread-count` | GET | Bearer | Nombre entier brut de notifications non lues |
 | `PUT /api/v1/notifications/{id}/read` | PUT | Bearer + propriétaire | Marquer une notification individuelle comme lue |
 | `PUT /api/v1/notifications/read-all` | PUT | Bearer | Marquer toutes ses notifications comme lues |
@@ -793,6 +805,7 @@ L'accès à la notification d'un autre utilisateur retourne **`404 Not Found`** 
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/subscriptions/plans` | GET | Aucune | Lister les plans d'abonnement disponibles |
+| `GET /api/v1/subscriptions/plans/{id}` | GET | Aucune | Récupérer un plan d'abonnement actif par ID |
 | `GET /api/v1/subscriptions/current` | GET | Bearer | Récupérer son abonnement actuel |
 | `GET /api/v1/subscriptions` | GET | Bearer | Lister l'historique de ses abonnements |
 | `POST /api/v1/subscriptions/checkout` | POST | Bearer | Initier un checkout Chargily pour un plan |
@@ -806,6 +819,7 @@ L'accès à la notification d'un autre utilisateur retourne **`404 Not Found`** 
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/admin/subscriptions` | GET | `Financial.ADMIN` | Lister tous les abonnements |
+| `GET /api/v1/admin/subscriptions/{id}` | GET | `Financial.ADMIN` | Récupérer un abonnement par ID |
 | `GET /api/v1/admin/subscriptions/payments` | GET | `Financial.ADMIN` | Lister tous les paiements |
 | `GET /api/v1/admin/subscriptions/webhooks` | GET | `Financial.ADMIN` | Lister les événements webhook |
 | `POST /api/v1/admin/subscriptions/grant` | POST | `Financial.ADMIN` | Accorder manuellement un abonnement |
@@ -815,6 +829,7 @@ L'accès à la notification d'un autre utilisateur retourne **`404 Not Found`** 
 | `POST /api/v1/admin/subscriptions/payments/{id}/correct-state` | POST | `Financial.ADMIN` | Corriger l'état d'un paiement |
 | `POST /api/v1/admin/payments/{id}/refund` | POST | `Financial.ADMIN` | Traiter un remboursement |
 | `GET /api/v1/admin/subscription-plans` | GET | `Financial.ADMIN` | Lister les plans (vue admin) |
+| `GET /api/v1/admin/subscription-plans/{id}` | GET | `Financial.ADMIN` | Récupérer un plan d'abonnement par ID |
 | `POST /api/v1/admin/subscription-plans` | POST | `Financial.ADMIN` | Créer un plan d'abonnement |
 | `PUT /api/v1/admin/subscription-plans/{id}` | PUT | `Financial.ADMIN` | Mettre à jour un plan d'abonnement |
 | `DELETE /api/v1/admin/subscription-plans/{id}` | DELETE | `Financial.ADMIN` | Supprimer un plan d'abonnement |
@@ -848,6 +863,7 @@ Les requêtes webhook avec une signature invalide sont rejetées avec `400 Bad R
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/admin/users` | GET | `Admin.USERS` | Lister tous les utilisateurs avec filtres (rôle, statut) |
+| `GET /api/v1/admin/users/{id}` | GET | `Admin.USERS` | Récupérer un utilisateur par ID |
 | `GET /api/v1/admin/users/pending` | GET | `Admin.USERS` | Lister les utilisateurs en attente (non vérifiés/approuvés) |
 | `GET /api/v1/admin/users/audit-logs` | GET | `Admin.USERS` | Journal d'audit paginé des actions admin |
 | `POST /api/v1/admin/users/{id}/approve` | POST | `Admin.USERS` | Approuver un compte en attente |
@@ -918,6 +934,7 @@ Les requêtes webhook avec une signature invalide sont rejetées avec `400 Bad R
 |---|---|---|---|
 | `POST /api/v1/users/me/avatars` | POST (multipart) | Bearer | Télécharger un nouvel avatar |
 | `GET /api/v1/users/me/avatars` | GET | Bearer | Lister ses propres avatars |
+| `GET /api/v1/users/me/avatars/{id}` | GET | Bearer | Récupérer un avatar par ID |
 | `DELETE /api/v1/users/me/avatars/{id}` | DELETE | Bearer | Supprimer un avatar |
 | `PUT /api/v1/users/me/avatars/{id}/activate` | PUT | Bearer | Définir un avatar comme actif |
 

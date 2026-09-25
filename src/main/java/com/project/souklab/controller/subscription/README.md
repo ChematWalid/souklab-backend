@@ -10,6 +10,7 @@ REST controllers for subscription plans, Chargily Pay V2 (EDAHABIA / CIB) checko
 | Method | Endpoint | Access | Summary | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/subscriptions/plans` | Public | List active plans | Retrieves available subscription tiers and pricing for clients and artisans. |
+| `GET` | `/api/v1/subscriptions/plans/{id}` | Public | Get active plan | Retrieves single active subscription plan details by ID. |
 
 ### 2. Checkout & Renewals (`SubscriptionCheckoutController`)
 | Method | Endpoint | Access | Summary | Description |
@@ -34,6 +35,13 @@ REST controllers for subscription plans, Chargily Pay V2 (EDAHABIA / CIB) checko
 ### 5. Administration
 | Method | Endpoint | Access | Summary | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET/POST` | `/api/v1/admin/subscriptions[/**]` | `admin:subscriptions` | Manage subscriptions | Administrative search, state correction, grants, and cancellations. |
-| `GET/POST` | `/api/v1/admin/subscriptions/plans[/**]` | `admin:subscriptions` | Manage plans | Administrative plan creation, pricing changes, and archiving. |
-| `POST` | `/api/v1/admin/payments/{id}/refund` | `admin:financials` | Issue refund | Administrative refund execution and financial auditing. |
+| `GET` | `/api/v1/admin/subscriptions` | `permission:financial:admin` | List subscriptions | Administrative search, state inspection, and filtering. |
+| `GET` | `/api/v1/admin/subscriptions/{id}` | `permission:financial:admin` | Get subscription | Retrieves full single subscription details by ID. |
+| `POST` | `/api/v1/admin/subscriptions/grant` | `permission:financial:admin` | Grant subscription | Manual administrative subscription grant. |
+| `POST` | `/api/v1/admin/subscriptions/{id}/revoke` | `permission:financial:admin` | Revoke subscription | Administrative subscription revocation. |
+| `GET` | `/api/v1/admin/subscription-plans` | `permission:financial:admin` | List all plans | Administrative plan listing including inactive plans. |
+| `GET` | `/api/v1/admin/subscription-plans/{id}` | `permission:financial:admin` | Get plan | Retrieves single subscription plan details (including inactive) by ID. |
+| `POST` | `/api/v1/admin/subscription-plans` | `permission:financial:admin` | Create plan | Administrative plan creation and pricing setup. |
+| `PUT` | `/api/v1/admin/subscription-plans/{id}` | `permission:financial:admin` | Update plan | Administrative plan modification. |
+| `DELETE` | `/api/v1/admin/subscription-plans/{id}` | `permission:financial:admin` | Deactivate plan | Soft-deactivates or archives a plan. |
+| `POST` | `/api/v1/admin/payments/{id}/refund` | `permission:financial:admin` | Issue refund | Administrative refund execution and financial auditing. |

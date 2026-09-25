@@ -9,6 +9,7 @@ Exposes in-app notification management endpoints with user-scoped isolation.
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/notifications` | Authenticated | Paginated feed of notifications for the caller. Excludes soft-deleted items (`deletedAt IS NULL`). Default: newest-first. |
+| `GET` | `/api/v1/notifications/{id}` | Authenticated | Retrieves a single notification by ID. Returns 404 if foreign or deleted. |
 | `GET` | `/api/v1/notifications/unread-count` | Authenticated | Returns raw integer count of unread, non-deleted notifications. |
 | `PUT` | `/api/v1/notifications/{id}/read` | Authenticated | Marks a single notification as read (`read = true`). Returns updated DTO. Returns 404 if foreign or deleted. |
 | `PUT` | `/api/v1/notifications/read-all` | Authenticated | Bulk marks all unread, non-deleted notifications as read for current user. |

@@ -281,10 +281,14 @@ All authorization is **permission-based**, not role-based. Roles (`ARTISAN`, `CL
 | `GET /api/v1/artisan/{id}` | GET | Optional | Get public artisan profile by ID |
 | `POST /api/v1/artisan/gallery` | POST (multipart) | `Artisan.CONTENT` | Upload a new gallery image |
 | `GET /api/v1/artisan/gallery` | GET | `Artisan.CONTENT` | List own gallery images |
+| `GET /api/v1/artisan/gallery/{id}` | GET | `Artisan.CONTENT` | Get single gallery image |
+| `PUT /api/v1/artisan/gallery/{id}` | PUT | `Artisan.CONTENT` | Update gallery image |
 | `PUT /api/v1/artisan/gallery/order` | PUT | `Artisan.CONTENT` | Reorder gallery images |
 | `DELETE /api/v1/artisan/gallery/{id}` | DELETE | `Artisan.CONTENT` | Delete a gallery image (ownership enforced) |
 | `POST /api/v1/artisan/certifications` | POST (multipart) | `Artisan.CONTENT` | Upload a certification document (PDF/image) |
 | `GET /api/v1/artisan/certifications` | GET | `Artisan.CONTENT` | List own certifications |
+| `GET /api/v1/artisan/certifications/{id}` | GET | `Artisan.CONTENT` | Get single certification (ownership enforced) |
+| `PUT /api/v1/artisan/certifications/{id}` | PUT | `Artisan.CONTENT` | Update certification (ownership enforced) |
 | `DELETE /api/v1/artisan/certifications/{id}` | DELETE | `Artisan.CONTENT` | Delete a certification (ownership enforced) |
 
 ### Contact Info Masking
@@ -475,6 +479,7 @@ Formations are in-person or hybrid masterclasses created exclusively by artisans
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/admin/formations/pending` | GET | `Admin.FORMATIONS` | List formations awaiting review |
+| `GET /api/v1/admin/formations/{id}` | GET | `Admin.FORMATIONS` | Get single formation for review |
 | `POST /api/v1/admin/formations/{id}/review` | POST | `Admin.FORMATIONS` | Submit review decision (APPROVED / REJECTED) |
 | `POST /api/v1/admin/formations/{id}/publish` | POST | `Admin.FORMATIONS` | Publish an approved formation |
 
@@ -511,7 +516,11 @@ Controls which artisans may create formations (masterclasses).
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `POST /api/v1/artisan/formateur-request` | POST | `Artisan.CONTENT` | Submit accreditation application |
+| `GET /api/v1/artisan/formateur-request` | GET | `Artisan.CONTENT` | Get latest own accreditation request |
+| `GET /api/v1/artisan/formateur-requests` | GET | `Artisan.CONTENT` | List own accreditation request history |
+| `GET /api/v1/artisan/formateur-requests/{id}` | GET | `Artisan.CONTENT` | Get single own accreditation request |
 | `GET /api/v1/admin/formateur-requests` | GET | `Admin.FORMATIONS` | List pending accreditation requests |
+| `GET /api/v1/admin/formateur-requests/{id}` | GET | `Admin.FORMATIONS` | Get single accreditation request |
 | `POST /api/v1/admin/formateur-requests/{id}/approve` | POST | `Admin.FORMATIONS` | Approve request → sets `isTeacher=true` |
 | `POST /api/v1/admin/formateur-requests/{id}/reject` | POST | `Admin.FORMATIONS` | Reject with optional cooldown |
 | `POST /api/v1/admin/artisans/{artisanId}/formateur-grant` | POST | `Admin.FORMATIONS` | Directly grant teacher status |
@@ -569,6 +578,7 @@ Admin permanent block (canReapply=false): future requests → 403 Forbidden unti
 | `POST /api/v1/feed/{id}/media` | POST (multipart) | `Artisan.CONTENT` + owner | Attach media to post |
 | `DELETE /api/v1/feed/{id}/media/{mediaId}` | DELETE | `Artisan.CONTENT` + owner | Remove media from post |
 | `GET /api/v1/admin/feed/pending` | GET | `Admin.FEED` | Paginated moderation queue |
+| `GET /api/v1/admin/feed/{id}` | GET | `Admin.FEED` | Get single feed post for moderation |
 | `POST /api/v1/admin/feed/{id}/publish` | POST | `Admin.FEED` | Admin publish a hidden post |
 | `POST /api/v1/admin/feed/{id}/reject` | POST | `Admin.FEED` | Reject with a moderation note; author can revise and resubmit |
 | `POST /api/v1/admin/feed/{id}/hide` | POST | `Admin.FEED` | Admin hide a post |
@@ -727,6 +737,7 @@ Messaging operates on two complementary layers: REST for state retrieval and STO
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/notifications` | GET | Bearer | Paginated notification list (newest first) |
+| `GET /api/v1/notifications/{id}` | GET | Bearer + owner | Get single notification |
 | `GET /api/v1/notifications/unread-count` | GET | Bearer | Raw integer count of unread notifications |
 | `PUT /api/v1/notifications/{id}/read` | PUT | Bearer + owner | Mark single notification as read |
 | `PUT /api/v1/notifications/read-all` | PUT | Bearer | Mark all own notifications as read |
@@ -795,6 +806,7 @@ Cross-user access to another user's notification returns **`404 Not Found`** (qu
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/subscriptions/plans` | GET | None | List available subscription plans |
+| `GET /api/v1/subscriptions/plans/{id}` | GET | None | Get single active subscription plan |
 | `GET /api/v1/subscriptions/current` | GET | Bearer | Get own current subscription |
 | `GET /api/v1/subscriptions` | GET | Bearer | List own subscription history |
 | `POST /api/v1/subscriptions/checkout` | POST | Bearer | Initiate Chargily checkout for a plan |
@@ -808,6 +820,7 @@ Cross-user access to another user's notification returns **`404 Not Found`** (qu
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/admin/subscriptions` | GET | `Financial.ADMIN` | List all subscriptions |
+| `GET /api/v1/admin/subscriptions/{id}` | GET | `Financial.ADMIN` | Get single subscription |
 | `GET /api/v1/admin/subscriptions/payments` | GET | `Financial.ADMIN` | List all payments |
 | `GET /api/v1/admin/subscriptions/webhooks` | GET | `Financial.ADMIN` | List webhook events |
 | `POST /api/v1/admin/subscriptions/grant` | POST | `Financial.ADMIN` | Manually grant a subscription |
@@ -817,6 +830,7 @@ Cross-user access to another user's notification returns **`404 Not Found`** (qu
 | `POST /api/v1/admin/subscriptions/payments/{id}/correct-state` | POST | `Financial.ADMIN` | Correct payment state |
 | `POST /api/v1/admin/payments/{id}/refund` | POST | `Financial.ADMIN` | Process a refund |
 | `GET /api/v1/admin/subscription-plans` | GET | `Financial.ADMIN` | List plans (admin view) |
+| `GET /api/v1/admin/subscription-plans/{id}` | GET | `Financial.ADMIN` | Get single subscription plan |
 | `POST /api/v1/admin/subscription-plans` | POST | `Financial.ADMIN` | Create a subscription plan |
 | `PUT /api/v1/admin/subscription-plans/{id}` | PUT | `Financial.ADMIN` | Update a subscription plan |
 | `DELETE /api/v1/admin/subscription-plans/{id}` | DELETE | `Financial.ADMIN` | Delete a subscription plan |
@@ -850,6 +864,7 @@ Webhook requests with an invalid signature are rejected with `400 Bad Request`. 
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/admin/users` | GET | `Admin.USERS` | List all users with filters (role, status) |
+| `GET /api/v1/admin/users/{id}` | GET | `Admin.USERS` | Get single user by ID |
 | `GET /api/v1/admin/users/pending` | GET | `Admin.USERS` | List pending (unverified/unapproved) users |
 | `GET /api/v1/admin/users/audit-logs` | GET | `Admin.USERS` | Paginated audit log of admin actions |
 | `POST /api/v1/admin/users/{id}/approve` | POST | `Admin.USERS` | Approve a pending user account |
@@ -920,6 +935,7 @@ Webhook requests with an invalid signature are rejected with `400 Bad Request`. 
 |---|---|---|---|
 | `POST /api/v1/users/me/avatars` | POST (multipart) | Bearer | Upload a new avatar image |
 | `GET /api/v1/users/me/avatars` | GET | Bearer | List own avatars |
+| `GET /api/v1/users/me/avatars/{id}` | GET | Bearer | Get single own avatar |
 | `DELETE /api/v1/users/me/avatars/{id}` | DELETE | Bearer | Delete an avatar |
 | `PUT /api/v1/users/me/avatars/{id}/activate` | PUT | Bearer | Set an avatar as active |
 

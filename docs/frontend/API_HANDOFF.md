@@ -148,9 +148,11 @@ Artisans manage their portfolio media, certifications, and public digital storef
 - `GET /api/v1/artisan/{id}` (HTTP 200): Public profile details. Enforces contact masking and records deduplicated daily profile views.
 - `POST /api/v1/artisan/certifications` (HTTP 201): Uploads an accreditation document (`multipart/form-data`, keys: `title`, `issuer`, `issueDate`, `file`). Max 10 certifications per artisan. Allowed MIME: `application/pdf`, `image/jpeg`, `image/png`. Max 15MB.
 - `GET /api/v1/artisan/certifications` (HTTP 200): Lists owned certifications.
+- `GET /api/v1/artisan/certifications/{id}` (HTTP 200): Retrieves a single owned certification by ID.
 - `DELETE /api/v1/artisan/certifications/{id}` (HTTP 200): Removes a certification document.
 - `POST /api/v1/artisan/gallery` (HTTP 201): Uploads a showcase portfolio image (`multipart/form-data`, keys: `caption`, `displayOrder`, `file`). Max 20 images. Allowed MIME: `image/jpeg`, `image/png`, `image/webp`. Max 10MB.
 - `GET /api/v1/artisan/gallery` (HTTP 200): Lists portfolio images ordered by `displayOrder` ascending.
+- `GET /api/v1/artisan/gallery/{id}` (HTTP 200): Retrieves a single owned gallery image by ID.
 - `PUT /api/v1/artisan/gallery/{id}` (HTTP 200): Updates caption or display order.
 - `DELETE /api/v1/artisan/gallery/{id}` (HTTP 200): Removes an image from the portfolio.
 - `PUT /api/v1/artisan/gallery/order` (HTTP 200): Batch updates display order sequence (payload: `[{ "id": string, "displayOrder": number }]`).
@@ -270,6 +272,7 @@ Centralized user notification feed.
 
 #### Endpoints
 - `GET /api/v1/notifications`: Paginated list of user notifications (`ApiResponse<PaginatedResponse<NotificationResponseDTO>>`).
+- `GET /api/v1/notifications/{id}`: Retrieves single user notification by ID.
 - `GET /api/v1/notifications/unread-count`: Returns raw integer unread count in `data` (e.g. `{ "data": 3 }`).
 - `PUT /api/v1/notifications/{id}/read`: Marks single notification as read.
 - `PUT /api/v1/notifications/read-all`: Marks all notifications for user as read.
@@ -294,6 +297,7 @@ Tiered subscription monetization powered by Chargily Pay V2 with HMAC-SHA256 sig
 
 #### Endpoints
 - `GET /api/v1/subscriptions/plans`: Lists all active public subscription plans with pricing in Algerian Dinars (DZD).
+- `GET /api/v1/subscriptions/plans/{id}`: Retrieves single active subscription plan details by ID.
 - `POST /api/v1/subscriptions/checkout`: Initiates checkout session (`{ "planId": string }`). Returns `{ "checkoutUrl": string, "invoiceId": string }`. Redirect the user's browser to `checkoutUrl` to complete payment.
 - `GET /api/v1/subscriptions/current`: Returns active subscription state (`status`, `tier`, `expiresAt`, `autoRenew`, `daysRemaining`).
 - `GET /api/v1/subscriptions`: Paginated subscription history for the authenticated user.
@@ -331,6 +335,7 @@ Multipart file handling with ClamAV antivirus scanning, magic-byte format valida
 #### Endpoints
 - `POST /api/v1/users/me/avatars`: Uploads a new avatar (`multipart/form-data`, file part key: `file`). Max 5MB. Formats: JPEG, PNG, WebP. Automatically generates 150x150, 400x400, and original variants. Max 10 avatars per user.
 - `GET /api/v1/users/me/avatars`: Lists all gallery avatars with active pointer.
+- `GET /api/v1/users/me/avatars/{id}`: Retrieves a single avatar history record owned by caller by ID.
 - `PUT /api/v1/users/me/avatars/{id}/activate`: Sets an existing avatar as active.
 - `DELETE /api/v1/users/me/avatars/{id}`: Deletes an avatar from gallery and S3 storage.
 
