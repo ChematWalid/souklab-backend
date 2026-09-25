@@ -5,6 +5,7 @@ import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.dto.feed.FeedPostCreateDTO;
+import com.project.souklab.dto.feed.FeedPostCommentResponseDTO;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.service.feed.FeedPostService;
 import com.project.souklab.service.feed.FeedEngagementService;
@@ -104,6 +105,23 @@ class FeedPostControllerTest {
         ArgumentCaptor<FeedPostCreateDTO> request = ArgumentCaptor.forClass(FeedPostCreateDTO.class);
         verify(feedPostService).create(request.capture());
         assertThat(request.getValue().isDraft()).isTrue();
+    }
+
+    @Test
+    void supportsSingleCommentReadAndUpdate() throws Exception {
+        when(feedEngagementService.getComment("comment-1"))
+                .thenReturn(FeedPostCommentResponseDTO.builder().id("comment-1").content("old").build());
+        when(feedEngagementService.updateComment(any(), any()))
+                .thenReturn(FeedPostCommentResponseDTO.builder().id("comment-1").content("new").build());
+
+        mockMvc.perform(get("/api/v1/feed/comments/comment-1").with(artisan()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").value("old"));
+        mockMvc.perform(put("/api/v1/feed/comments/comment-1")
+                        .contentType("application/json")
+                        .content("{\"content\":\"new\"}").with(artisan()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").value("new"));
     }
 
     @Test

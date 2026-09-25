@@ -60,6 +60,36 @@ public class ViewerPremiumResolver {
     }
 
     /**
+     * Resolves whether contact/name information for a specific user must be
+     * masked for the current viewer. This is used by public responses that
+     * expose an artisan as an author, such as feed posts and comments.
+     *
+     * @param subject the user whose artisan identity is being exposed
+     * @return {@code true} when the subject's artisan identity must be masked
+     */
+    @Transactional(readOnly = true)
+    public boolean isContactInfoLockedFor(User subject) {
+        if (subject == null) {
+            return true;
+        }
+
+        String email = SecurityUtils.getCurrentUsername();
+        if (email == null) {
+            return true;
+        }
+
+        User viewer = userRepository.findByEmail(email.toLowerCase(Locale.ROOT)).orElse(null);
+        if (viewer == null) {
+            return true;
+        }
+
+        boolean isAdmin = viewer.getPermissions().stream()
+                .anyMatch(p -> Permission.Admin.USERS.matches(p.getPermissionKey()));
+        boolean isSelf = viewer.getId() != null && viewer.getId().equals(subject.getId());
+        return isContactInfoLocked(viewer, isSelf, isAdmin);
+    }
+
+    /**
      * Resolves contact-info lock state for an already-loaded viewer, with explicit
      * self-view and admin flags.
      *

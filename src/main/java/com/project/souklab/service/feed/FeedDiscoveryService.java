@@ -36,6 +36,7 @@ public class FeedDiscoveryService {
     private final FeedPostBookmarkRepository bookmarkRepository;
     private final AppProperties appProperties;
     private final EntityManager entityManager;
+    private final FeedPrivacyService feedPrivacyService;
 
     @Transactional(readOnly = true)
     public PaginatedResponse<FeedPostResponseDTO> list(FeedPostType type, String authorId, String tag,
@@ -66,7 +67,7 @@ public class FeedDiscoveryService {
     }
 
     private FeedPostResponseDTO toResponse(FeedPost post) {
-        FeedPostResponseDTO response = FeedPostResponseDTO.from(post);
+        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, FeedPostResponseDTO.from(post));
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
             return response;

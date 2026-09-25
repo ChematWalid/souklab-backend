@@ -52,6 +52,7 @@ class FeedEngagementServiceTest {
     @Mock NotificationService notificationService;
     @Mock AccessControlService accessControlService;
     @Mock AppProperties appProperties;
+    @Mock FeedPrivacyService feedPrivacyService;
 
     private FeedEngagementService service;
     private User user;
@@ -61,7 +62,7 @@ class FeedEngagementServiceTest {
     void setUp() {
         service = new FeedEngagementService(postRepository, postLikeRepository, bookmarkRepository,
                 commentRepository, commentLikeRepository, userRepository, notificationService,
-                appProperties, accessControlService,
+                appProperties, accessControlService, feedPrivacyService,
                 Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC));
         user = User.builder().email("user@test.com").status(AccountStatus.ACTIVE).build();
         user.setId("user-1");
@@ -72,6 +73,11 @@ class FeedEngagementServiceTest {
                 "user@test.com", "credentials", List.of()));
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
         lenient().when(postRepository.findByIdAndDeletedAtIsNull("post-1")).thenReturn(Optional.of(post));
+        AppProperties.Feed feed = new AppProperties.Feed();
+        feed.setMaxCommentLength(500);
+        lenient().when(appProperties.getFeed()).thenReturn(feed);
+        lenient().when(feedPrivacyService.protectComment(any(), any()))
+                .thenAnswer(invocation -> invocation.getArgument(1));
     }
 
     @AfterEach
@@ -107,6 +113,32 @@ class FeedEngagementServiceTest {
 
         assertThatThrownBy(() -> service.reply("reply-1", new FeedPostCommentCreateDTO("nested")))
                 .isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    void canReadAndUpdateOwnedComment() {
+        authenticate();
+        FeedPostComment comment = FeedPostComment.builder().post(post).user(user).content("old").build();
+        comment.setId("comment-1");
+        when(commentRepository.findByIdAndDeletedAtIsNull("comment-1")).thenReturn(Optional.of(comment));
+        when(commentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertThat(service.getComment("comment-1").getContent()).isEqualTo("old");
+        assertThat(service.updateComment("comment-1", new FeedPostCommentCreateDTO("new"))
+                .getContent()).isEqualTo("new");
+    }
+
+    @Test
+    void cannotUpdateAnotherUsersComment() {
+        authenticate();
+        User other = User.builder().email("other@test.com").build();
+        other.setId("other-1");
+        FeedPostComment comment = FeedPostComment.builder().post(post).user(other).content("old").build();
+        comment.setId("comment-2");
+        when(commentRepository.findByIdAndDeletedAtIsNull("comment-2")).thenReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> service.updateComment("comment-2", new FeedPostCommentCreateDTO("new")))
+                .isInstanceOf(com.project.souklab.exception.ForbiddenException.class);
     }
 
     private void authenticate() {

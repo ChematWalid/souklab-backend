@@ -52,6 +52,7 @@ public class FeedEngagementService {
     private final NotificationService notificationService;
     private final AppProperties appProperties;
     private final AccessControlService accessControlService;
+    private final FeedPrivacyService feedPrivacyService;
     private final Clock clock;
 
     @Transactional
@@ -146,6 +147,13 @@ public class FeedEngagementService {
                 .map(comment -> toComment(comment, user)));
     }
 
+    @Transactional(readOnly = true)
+    public FeedPostCommentResponseDTO getComment(String commentId) {
+        User user = currentUserOrNull();
+        FeedPostComment comment = findComment(commentId);
+        return toComment(comment, user);
+    }
+
     @Transactional
     public FeedPostCommentResponseDTO addComment(String postId, FeedPostCommentCreateDTO request) {
         User user = currentUser();
@@ -185,6 +193,17 @@ public class FeedEngagementService {
                     NotificationType.Feed.COMMENT_REPLIED, parent.getId());
         }
         return toComment(reply, user);
+    }
+
+    @Transactional
+    public FeedPostCommentResponseDTO updateComment(String commentId, FeedPostCommentCreateDTO request) {
+        User user = currentUser();
+        FeedPostComment comment = findComment(commentId);
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new ForbiddenException("You may not update this comment.");
+        }
+        comment.setContent(validateContent(request.getContent()));
+        return toComment(commentRepository.save(comment), user);
     }
 
     @Transactional
@@ -252,8 +271,9 @@ public class FeedEngagementService {
     }
 
     private FeedPostCommentResponseDTO toComment(FeedPostComment comment, User user) {
-        return FeedPostCommentResponseDTO.from(comment,
+        FeedPostCommentResponseDTO response = FeedPostCommentResponseDTO.from(comment,
                 user != null && commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), user.getId()));
+        return feedPrivacyService.protectComment(comment, response);
     }
 
     private FeedPost publishedPost(String id) {

@@ -234,6 +234,12 @@ public class FeedPostController {
                 .body(ApiResponse.created(feedEngagementService.addComment(id, request), "Comment added."));
     }
 
+    @GetMapping("/comments/{commentId}")
+    @Operation(summary = "Get feed comment", description = "Retrieve one visible comment or reply.")
+    public ResponseEntity<ApiResponse<FeedPostCommentResponseDTO>> getComment(@PathVariable String commentId) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.getComment(commentId)));
+    }
+
     @GetMapping("/comments/{commentId}/replies")
     public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostCommentResponseDTO>>> replies(
             @PathVariable String commentId, Pageable pageable) {
@@ -246,6 +252,15 @@ public class FeedPostController {
             @PathVariable String commentId, @Valid @RequestBody FeedPostCommentCreateDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(feedEngagementService.reply(commentId, request), "Reply added."));
+    }
+
+    @PutMapping("/comments/{commentId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Update feed comment", description = "Update a comment or reply owned by the authenticated author.")
+    public ResponseEntity<ApiResponse<FeedPostCommentResponseDTO>> updateComment(
+            @PathVariable String commentId, @Valid @RequestBody FeedPostCommentCreateDTO request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                feedEngagementService.updateComment(commentId, request), "Comment updated."));
     }
 
     @DeleteMapping("/comments/{commentId}")

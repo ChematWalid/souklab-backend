@@ -86,6 +86,7 @@ public class FeedPostService {
     private final AccessControlService accessControlService;
     private final Clock clock;
     private final AppProperties appProperties;
+    private final FeedPrivacyService feedPrivacyService;
     private ActivityEventService activityEventService;
 
     @Autowired(required = false)
@@ -413,7 +414,8 @@ public class FeedPostService {
     }
 
     private FeedPostResponseDTO toResponse(FeedPost post) {
-        FeedPostResponseDTO response = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, mappedResponse);
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
             return response;

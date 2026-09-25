@@ -35,7 +35,9 @@ Base Path: `/api/v1/feed`
 | `POST/DELETE` | `/api/v1/feed/{id}/bookmarks` | Authenticated | Bookmark/unbookmark post | One unique bookmark per user. |
 | `GET` | `/api/v1/feed/saved` | Authenticated | Saved posts | Lists the current user's bookmarked posts. |
 | `GET/POST` | `/api/v1/feed/{id}/comments` | Public/authenticated | Comments | Lists root comments publicly or creates an authenticated root comment. |
+| `GET` | `/api/v1/feed/comments/{commentId}` | Public | Get comment | Retrieves one visible comment or reply. |
 | `GET/POST` | `/api/v1/feed/comments/{commentId}/replies` | Public/authenticated | Replies | Lists or creates one-level replies. |
+| `PUT` | `/api/v1/feed/comments/{commentId}` | Authenticated | Update comment | Updates a comment or reply owned by the authenticated author. |
 | `POST/DELETE` | `/api/v1/feed/comments/{commentId}/likes` | Authenticated | Like/unlike comment | One unique comment like per user. |
 | `GET` | `/api/v1/feed/comments/{commentId}/likes` | Public | Read comment like status | Returns the current caller's comment-like state and count. |
 | `DELETE` | `/api/v1/feed/comments/{commentId}` | Authenticated | Remove comment | Allows the comment author, post author, or feed moderator to soft-delete. |

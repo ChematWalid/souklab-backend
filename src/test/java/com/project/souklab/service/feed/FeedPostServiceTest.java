@@ -89,6 +89,7 @@ class FeedPostServiceTest {
     @Mock private AccessControlService accessControlService;
     @Mock private AppProperties appProperties;
     @Mock private Clock clock;
+    @Mock private FeedPrivacyService feedPrivacyService;
 
     @InjectMocks private FeedPostService service;
 
@@ -106,6 +107,8 @@ class FeedPostServiceTest {
         lenient().when(accessControlService.isAdmin(any())).thenReturn(false);
         lenient().when(accessControlService.canManageArtisanContent(any())).thenReturn(true);
         lenient().when(appProperties.getFeed()).thenReturn(feedProperties());
+        lenient().when(feedPrivacyService.protectPost(any(), any()))
+                .thenAnswer(invocation -> invocation.getArgument(1));
         lenient().when(clock.instant()).thenReturn(Instant.parse("2026-01-01T00:00:00Z"));
         lenient().when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     }
