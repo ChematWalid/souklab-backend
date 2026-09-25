@@ -4,6 +4,7 @@ import com.project.souklab.model.FeedPostMedia;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Persistence operations for feed post media attachments.
@@ -17,4 +18,13 @@ public interface FeedPostMediaRepository extends JpaRepository<FeedPostMedia, St
      * @return ordered media attachments
      */
     List<FeedPostMedia> findByPostIdOrderByDisplayOrderAsc(String postId);
+
+    /**
+     * Finds active media attachment by storage key.
+     *
+     * @param storageKey opaque storage key
+     * @return matching media attachment
+     */
+    Optional<FeedPostMedia> findByStorageKeyAndDeletedAtIsNull(String storageKey);
 }
+

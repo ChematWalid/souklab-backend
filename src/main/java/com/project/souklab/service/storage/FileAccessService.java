@@ -7,6 +7,7 @@ import com.project.souklab.dao.FormationFileRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserAvatarRepository;
 import com.project.souklab.dao.ArtisanRepository;
+import com.project.souklab.dao.FeedPostMediaRepository;
 import com.project.souklab.dao.MessageAttachmentRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.exception.ForbiddenException;
@@ -15,6 +16,8 @@ import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanCertification;
 import com.project.souklab.model.EnrollmentStatus;
+import com.project.souklab.model.FeedPostMedia;
+import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.Formation;
 import com.project.souklab.model.FormationFile;
 import com.project.souklab.model.User;
@@ -27,6 +30,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * Applies Souklab ownership and enrollment rules before an opaque stored object is served.
@@ -47,6 +52,7 @@ public class FileAccessService {
     private final AccessControlService accessControlService;
     private final MessageAttachmentRepository messageAttachmentRepository;
     private final UserRepository userRepository;
+    private final FeedPostMediaRepository feedPostMediaRepository;
 
     /**
      * Verifies that the current principal may retrieve the stored object identified by the key.
@@ -73,6 +79,16 @@ public class FileAccessService {
 
         if (formationRepository.findByThumbnailUrlAndDeletedAtIsNull(objectUrl).isPresent()) {
             return true;
+        }
+
+        Optional<FeedPostMedia> feedMediaOpt = feedPostMediaRepository.findByStorageKeyAndDeletedAtIsNull(storageKey);
+        if (feedMediaOpt.isPresent()) {
+            FeedPostMedia media = feedMediaOpt.get();
+            if (media.getPost().getStatus() == FeedPostStatus.PUBLISHED) {
+                return true;
+            }
+            requireFeedPostMediaAccess(media);
+            return false;
         }
 
         if (certificationRepository.findByDocumentUrlAndDeletedAtIsNull(objectUrl).isPresent()) {
@@ -116,6 +132,18 @@ public class FileAccessService {
         if (!isAuthor && !isEnrolled) {
             throw new ForbiddenException("Access denied.");
         }
+    }
+
+    private void requireFeedPostMediaAccess(FeedPostMedia media) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (isAdministrator() || accessControlService.canModerateFeed(authentication)) {
+            return;
+        }
+        User user = resolveCurrentUserOrNull();
+        if (user != null && media.getPost().getAuthor().getId().equals(user.getId())) {
+            return;
+        }
+        throw new ResourceNotFoundException("File not found.");
     }
 
     private void requireFileRead() {
