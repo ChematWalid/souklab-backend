@@ -6,5 +6,6 @@ package com.project.souklab.model;
 public enum ReportTargetType implements EnumValue {
     USER,
     POST,
+    COMMENT,
     REVIEW
 }

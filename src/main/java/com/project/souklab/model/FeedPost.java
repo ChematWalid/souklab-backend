@@ -8,6 +8,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -16,6 +18,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +31,7 @@ import java.util.List;
  * Moderated community feed post authored by an active artisan or administrator.
  */
 @Entity
+@Indexed
 @Table(name = "feed_posts", indexes = {
         @Index(name = "idx_feed_posts_public", columnList = "status, deleted_at, published_at"),
         @Index(name = "idx_feed_posts_author", columnList = "author_id, status, deleted_at")
@@ -45,14 +52,17 @@ public class FeedPost extends BaseEntity {
     private FeedPostType type;
 
     @Column(nullable = false, length = 200)
+    @FullTextField(analyzer = "artisanal_name")
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @FullTextField(analyzer = "artisanal_name")
     private String body;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default
+    @GenericField
     private FeedPostStatus status = FeedPostStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,6 +70,7 @@ public class FeedPost extends BaseEntity {
     private Formation formation;
 
     @Column(name = "published_at")
+    @GenericField(sortable = org.hibernate.search.engine.backend.types.Sortable.YES)
     private LocalDateTime publishedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -68,6 +79,31 @@ public class FeedPost extends BaseEntity {
 
     @Column(name = "moderation_note", columnDefinition = "TEXT")
     private String moderationNote;
+
+    @Column(name = "like_count", nullable = false)
+    @GenericField(sortable = org.hibernate.search.engine.backend.types.Sortable.YES)
+    @Builder.Default
+    private int likeCount = 0;
+
+    @Column(name = "comment_count", nullable = false)
+    @Builder.Default
+    private int commentCount = 0;
+
+    @Column(name = "bookmark_count", nullable = false)
+    @Builder.Default
+    private int bookmarkCount = 0;
+
+    @Column(name = "share_count", nullable = false)
+    @Builder.Default
+    private int shareCount = 0;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "feed_post_tags",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @IndexedEmbedded
+    @Builder.Default
+    private List<FeedTag> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

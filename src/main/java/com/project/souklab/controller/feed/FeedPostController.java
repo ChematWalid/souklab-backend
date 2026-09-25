@@ -4,7 +4,15 @@ import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.feed.FeedPostCreateDTO;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
+import com.project.souklab.dto.feed.FeedPostCommentCreateDTO;
+import com.project.souklab.dto.feed.FeedPostCommentResponseDTO;
+import com.project.souklab.dto.feed.FeedPostLikeStatusDTO;
+import com.project.souklab.dto.feed.FeedShareResponseDTO;
+import com.project.souklab.dto.common.PaginatedResponse;
+import com.project.souklab.service.feed.FeedEngagementService;
+import com.project.souklab.service.feed.FeedDiscoveryService;
 import com.project.souklab.model.FeedPostType;
+import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.service.feed.FeedPostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +46,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class FeedPostController {
 
     private final FeedPostService feedPostService;
+    private final FeedEngagementService feedEngagementService;
+    private final FeedDiscoveryService feedDiscoveryService;
 
     /**
      * Lists publicly published feed posts.
@@ -47,10 +58,18 @@ public class FeedPostController {
      */
     @Operation(summary = "List public feed posts", description = "Browse paginated feed posts published across the platform with optional type filtering.")
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<FeedPostResponseDTO>>> list(
+    public ResponseEntity<ApiResponse<?>> list(
             @RequestParam(required = false) FeedPostType type,
-            Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(feedPostService.listPublic(type, pageable)));
+            @RequestParam(required = false) String authorId,
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String sort,
+        Pageable pageable) {
+        if (authorId == null && tag == null && q == null && sort == null) {
+            return ResponseEntity.ok(ApiResponse.success(
+                    PaginatedResponse.from(feedPostService.listPublic(type, pageable))));
+        }
+        return ResponseEntity.ok(ApiResponse.success(feedDiscoveryService.list(type, authorId, tag, q, sort, pageable)));
     }
 
     /**
@@ -61,8 +80,24 @@ public class FeedPostController {
      */
     @Operation(summary = "Get published feed post", description = "Retrieve a single published feed post by its identifier.")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<FeedPostResponseDTO>> get(@PathVariable String id) {
-        return ResponseEntity.ok(ApiResponse.success(feedPostService.getPublic(id)));
+    public ResponseEntity<ApiResponse<FeedPostResponseDTO>> get(@PathVariable String id,
+                                                                 Authentication authentication) {
+        FeedPostResponseDTO response = authentication != null && authentication.isAuthenticated()
+                ? feedPostService.getForCaller(id) : feedPostService.getPublic(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/following")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostResponseDTO>>> following(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedDiscoveryService.following(pageable)));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostResponseDTO>>> mine(
+            @RequestParam(required = false) FeedPostStatus status, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedPostService.listMine(status, pageable)));
     }
 
     /**
@@ -76,6 +111,12 @@ public class FeedPostController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<FeedPostResponseDTO>> create(@Valid @RequestBody FeedPostCreateDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(feedPostService.create(request), "Feed post submitted for moderation."));
+    }
+
+    @PostMapping("/{id}/submit")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<FeedPostResponseDTO>> submit(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(feedPostService.submit(id), "Feed post submitted for moderation."));
     }
 
     /**
@@ -133,6 +174,104 @@ public class FeedPostController {
     public ResponseEntity<ApiResponse<Void>> removeMedia(@PathVariable String id, @PathVariable String mediaId) {
         feedPostService.removeMedia(id, mediaId);
         return ResponseEntity.ok(ApiResponse.success(null, "Feed media removed successfully."));
+    }
+
+    @PostMapping("/{id}/likes")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<FeedPostLikeStatusDTO>> like(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(feedEngagementService.likePost(id), "Post liked."));
+    }
+
+    @DeleteMapping("/{id}/likes")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> unlike(@PathVariable String id) {
+        feedEngagementService.unlikePost(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Post unliked."));
+    }
+
+    @GetMapping("/{id}/likes")
+    public ResponseEntity<ApiResponse<FeedPostLikeStatusDTO>> likeStatus(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.likeStatus(id)));
+    }
+
+    @PostMapping("/{id}/bookmarks")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> bookmark(@PathVariable String id) {
+        feedEngagementService.bookmarkPost(id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(null, "Post bookmarked."));
+    }
+
+    @DeleteMapping("/{id}/bookmarks")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> removeBookmark(@PathVariable String id) {
+        feedEngagementService.removeBookmark(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Bookmark removed."));
+    }
+
+    @GetMapping("/saved")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostResponseDTO>>> saved(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.saved(pageable)));
+    }
+
+    @PostMapping("/{id}/share")
+    public ResponseEntity<ApiResponse<FeedShareResponseDTO>> share(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.share(id)));
+    }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostCommentResponseDTO>>> comments(
+            @PathVariable String id, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.comments(id, pageable)));
+    }
+
+    @PostMapping("/{id}/comments")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<FeedPostCommentResponseDTO>> comment(
+            @PathVariable String id, @Valid @RequestBody FeedPostCommentCreateDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(feedEngagementService.addComment(id, request), "Comment added."));
+    }
+
+    @GetMapping("/comments/{commentId}/replies")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostCommentResponseDTO>>> replies(
+            @PathVariable String commentId, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.replies(commentId, pageable)));
+    }
+
+    @PostMapping("/comments/{commentId}/replies")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<FeedPostCommentResponseDTO>> reply(
+            @PathVariable String commentId, @Valid @RequestBody FeedPostCommentCreateDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(feedEngagementService.reply(commentId, request), "Reply added."));
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable String commentId) {
+        feedEngagementService.deleteComment(commentId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Comment removed."));
+    }
+
+    @PostMapping("/comments/{commentId}/likes")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> likeComment(@PathVariable String commentId) {
+        feedEngagementService.likeComment(commentId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(null, "Comment liked."));
+    }
+
+    @DeleteMapping("/comments/{commentId}/likes")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> unlikeComment(@PathVariable String commentId) {
+        feedEngagementService.unlikeComment(commentId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Comment unliked."));
+    }
+
+    @GetMapping("/comments/{commentId}/likes")
+    public ResponseEntity<ApiResponse<FeedPostLikeStatusDTO>> commentLikeStatus(@PathVariable String commentId) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.commentLikeStatus(commentId)));
     }
 
 }

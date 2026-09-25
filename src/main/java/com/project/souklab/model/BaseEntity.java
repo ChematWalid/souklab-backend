@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,6 +31,7 @@ public abstract class BaseEntity {
     private LocalDateTime updatedAt;
 
     @Column(name = "deleted_at")
+    @GenericField
     private LocalDateTime deletedAt;
 
     @PrePersist

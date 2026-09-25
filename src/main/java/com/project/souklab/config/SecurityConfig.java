@@ -171,6 +171,7 @@ public class SecurityConfig {
                                 "/api/v1/subscriptions/plans",
                                 "/api/v1/artisans/*/reviews"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/feed/*/share").permitAll()
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",

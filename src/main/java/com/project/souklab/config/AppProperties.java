@@ -54,6 +54,11 @@ public class AppProperties {
     public static class Feed {
         private int maxMediaPerPost;
         private List<String> allowedImageMimeTypes;
+        private int maxTitleLength;
+        private int maxBodyLength;
+        private int maxCommentLength;
+        private int maxTagsPerPost;
+        private int maxTagLength;
     }
 
     @Data

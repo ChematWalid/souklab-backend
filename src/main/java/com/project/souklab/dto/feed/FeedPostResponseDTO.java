@@ -18,7 +18,7 @@ import java.util.function.Function;
  * Public or moderation representation of a feed post.
  */
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class FeedPostResponseDTO {
     String id;
     String authorId;
@@ -31,6 +31,13 @@ public class FeedPostResponseDTO {
     LocalDateTime publishedAt;
     String moderationNote;
     List<FeedPostMediaResponseDTO> media;
+    List<String> tags;
+    int likeCount;
+    int commentCount;
+    int bookmarkCount;
+    int shareCount;
+    boolean likedByCurrentUser;
+    boolean bookmarkedByCurrentUser;
 
     /**
      * Maps an entity to a response.
@@ -66,6 +73,11 @@ public class FeedPostResponseDTO {
                 .formationId(post.getFormation() == null ? null : post.getFormation().getId())
                 .publishedAt(post.getPublishedAt())
                 .moderationNote(post.getModerationNote())
+                .tags(post.getTags().stream().map(tag -> tag.getName()).toList())
+                .likeCount(post.getLikeCount())
+                .commentCount(post.getCommentCount())
+                .bookmarkCount(post.getBookmarkCount())
+                .shareCount(post.getShareCount())
                 .media(post.getMedia().stream().map(media -> FeedPostMediaResponseDTO.builder()
                         .id(media.getId())
                         .url(urlResolver.apply(media.getStorageKey()))

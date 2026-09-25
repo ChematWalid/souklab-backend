@@ -11,6 +11,7 @@ import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ContentReportRepository;
 import com.project.souklab.dao.FeedPostRepository;
+import com.project.souklab.dao.FeedPostCommentRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.report.ContentReportRequestDTO;
 import com.project.souklab.dto.report.ContentReportResponseDTO;
@@ -23,6 +24,7 @@ import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ContentReport;
 import com.project.souklab.model.FeedPost;
+import com.project.souklab.model.FeedPostComment;
 import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.ReportResolutionAction;
 import com.project.souklab.model.ReportStatus;
@@ -50,11 +52,12 @@ import java.math.RoundingMode;
  * Coordinates abuse report submission and administrator resolution actions.
  */
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ContentReportService {
 
     private final ContentReportRepository reportRepository;
     private final FeedPostRepository postRepository;
+    private final FeedPostCommentRepository commentRepository;
     private final ArtisanReviewRepository reviewRepository;
     private final ArtisanRepository artisanRepository;
     private final UserRepository userRepository;
@@ -62,6 +65,14 @@ public class ContentReportService {
     private final Clock clock;
     private final AccessControlService accessControlService;
     private ActivityEventService activityEventService;
+
+    public ContentReportService(ContentReportRepository reportRepository, FeedPostRepository postRepository,
+                                ArtisanReviewRepository reviewRepository, ArtisanRepository artisanRepository,
+                                UserRepository userRepository, NotificationService notificationService,
+                                Clock clock, AccessControlService accessControlService) {
+        this(reportRepository, postRepository, null, reviewRepository, artisanRepository, userRepository,
+                notificationService, clock, accessControlService);
+    }
 
     @Autowired(required = false)
     void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
@@ -157,6 +168,7 @@ public class ContentReportService {
             case USER -> userRepository.existsById(id);
             case POST -> postRepository.findByIdAndDeletedAtIsNull(id).isPresent();
             case REVIEW -> reviewRepository.findByIdAndDeletedAtIsNull(id).isPresent();
+            case COMMENT -> commentRepository == null || commentRepository.findByIdAndDeletedAtIsNull(id).isPresent();
         };
         if (!exists) {
             throw new ResourceNotFoundException("Report target not found.");
@@ -193,6 +205,12 @@ public class ContentReportService {
                     user.setDeletedAt(LocalDateTime.now(clock));
                 }
                 userRepository.save(user);
+            }
+            case COMMENT -> {
+                FeedPostComment comment = commentRepository.findByIdAndDeletedAtIsNull(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Comment not found."));
+                comment.setDeletedAt(LocalDateTime.now(clock));
+                commentRepository.save(comment);
             }
         }
     }

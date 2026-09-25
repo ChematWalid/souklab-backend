@@ -10,11 +10,15 @@ import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dao.FeedPostRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.dao.FeedTagRepository;
+import com.project.souklab.dao.FeedPostBookmarkRepository;
+import com.project.souklab.dao.FeedPostLikeRepository;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dto.feed.FeedPostCreateDTO;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostModerationDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
+import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
@@ -32,15 +36,19 @@ import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostMedia;
 import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.FeedPostType;
+import com.project.souklab.model.FeedTag;
 import com.project.souklab.model.Formation;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.security.AccessControlService;
+import com.project.souklab.security.Permission;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -51,6 +59,8 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Coordinates moderated public feed posts and their stored image attachments.
@@ -62,6 +72,9 @@ public class FeedPostService {
     private final FeedPostRepository postRepository;
     private final FormationRepository formationRepository;
     private final UserRepository userRepository;
+    private final FeedTagRepository tagRepository;
+    private final FeedPostLikeRepository postLikeRepository;
+    private final FeedPostBookmarkRepository bookmarkRepository;
     private final FileValidator fileValidator;
     private final VirusScanService virusScanService;
     private final StorageService storageService;
@@ -85,9 +98,12 @@ public class FeedPostService {
      */
     @Transactional(readOnly = true)
     public Page<FeedPostResponseDTO> listPublic(FeedPostType type, Pageable pageable) {
+        Pageable effectivePageable = pageable.getSort().isSorted() ? pageable : PageRequest.of(
+                pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Order.desc("publishedAt"), Sort.Order.desc("createdAt"), Sort.Order.desc("id")));
         Page<FeedPost> posts = type == null
-                ? postRepository.findByStatusAndDeletedAtIsNull(FeedPostStatus.PUBLISHED, pageable)
-                : postRepository.findByStatusAndTypeAndDeletedAtIsNull(FeedPostStatus.PUBLISHED, type, pageable);
+                ? postRepository.findByStatusAndDeletedAtIsNull(FeedPostStatus.PUBLISHED, effectivePageable)
+                : postRepository.findByStatusAndTypeAndDeletedAtIsNull(FeedPostStatus.PUBLISHED, type, effectivePageable);
         return posts.map(this::toResponse);
     }
 
@@ -123,15 +139,22 @@ public class FeedPostService {
         if (request.getType() != FeedPostType.FORMATION && formation != null) {
             throw new BadRequestException("Only formation posts may reference a formation.");
         }
+        validateTextLengths(request);
         FeedPost post = FeedPost.builder()
                 .author(author)
                 .type(request.getType())
                 .title(request.getTitle().trim())
                 .body(request.getBody().trim())
                 .formation(formation)
-                .status(FeedPostStatus.PENDING)
+                .status(request.isDraft() ? FeedPostStatus.DRAFT : FeedPostStatus.PENDING)
                 .build();
-        return toResponse(postRepository.save(post));
+        post.setTags(resolveTags(request.getTags()));
+        FeedPost saved = postRepository.save(post);
+        if (saved.getStatus() == FeedPostStatus.PENDING) {
+            notificationService.notifyPermissionHolders(Permission.Admin.FEED.value(), "New feed post submitted for moderation: " + saved.getTitle(),
+                    NotificationType.Feed.SUBMITTED, saved.getId());
+        }
+        return toResponse(saved);
     }
 
     /**
@@ -152,15 +175,58 @@ public class FeedPostService {
         if (request.getType() != FeedPostType.FORMATION && formation != null) {
             throw new BadRequestException("Only formation posts may reference a formation.");
         }
+        validateTextLengths(request);
         post.setType(request.getType());
         post.setTitle(request.getTitle().trim());
         post.setBody(request.getBody().trim());
         post.setFormation(formation);
         if (!isAdmin()) {
-            post.setStatus(FeedPostStatus.PENDING);
-            post.setPublishedAt(null);
+            post.setStatus(post.getStatus() == FeedPostStatus.DRAFT ? FeedPostStatus.DRAFT : FeedPostStatus.PENDING);
+            if (post.getStatus() != FeedPostStatus.PUBLISHED) {
+                post.setPublishedAt(null);
+            }
         }
+        post.setTags(resolveTags(request.getTags()));
         return toResponse(postRepository.save(post));
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<FeedPostResponseDTO> listMine(FeedPostStatus status, Pageable pageable) {
+        User user = currentUser();
+        validateAuthor(user);
+        Page<FeedPost> posts = status == null
+                ? postRepository.findByAuthorIdAndDeletedAtIsNull(user.getId(), pageable)
+                : postRepository.findByAuthorIdAndStatusAndDeletedAtIsNull(user.getId(), status, pageable);
+        return PaginatedResponse.from(posts.map(this::toResponse));
+    }
+
+    @Transactional(readOnly = true)
+    public FeedPostResponseDTO getForCaller(String id) {
+        FeedPost post = findPost(id);
+        User user = currentUser();
+        if (!post.getAuthor().getId().equals(user.getId()) && !isAdmin()
+                && post.getStatus() != FeedPostStatus.PUBLISHED) {
+            throw new ResourceNotFoundException("Feed post not found.");
+        }
+        if (post.getStatus() != FeedPostStatus.PUBLISHED && !post.getAuthor().getId().equals(user.getId()) && !isAdmin()) {
+            throw new ResourceNotFoundException("Feed post not found.");
+        }
+        return toResponse(post);
+    }
+
+    @Transactional
+    public FeedPostResponseDTO submit(String id) {
+        FeedPost post = findPost(id);
+        requireAuthorOrAdmin(post);
+        if (post.getStatus() != FeedPostStatus.DRAFT && post.getStatus() != FeedPostStatus.REJECTED) {
+            throw new ConflictException("Only draft or rejected posts may be submitted.");
+        }
+        post.setStatus(FeedPostStatus.PENDING);
+        post.setPublishedAt(null);
+        FeedPost saved = postRepository.save(post);
+        notificationService.notifyPermissionHolders(Permission.Admin.FEED.value(), "Feed post resubmitted for moderation: " + saved.getTitle(),
+                NotificationType.Feed.SUBMITTED, saved.getId());
+        return toResponse(saved);
     }
 
     /**
@@ -274,7 +340,11 @@ public class FeedPostService {
                     Map.of(AnalyticsMetadata.Content.Post.TYPE, saved.getType()));
         }
         if (saved.getType() == FeedPostType.FORMATION) {
-            notificationService.createForUser(saved.getAuthor(), "Your formation post was published.", NotificationType.Formation.NEW, saved.getId());
+            notificationService.createForUser(saved.getAuthor(), "Your formation post was published.",
+                    NotificationType.Formation.NEW, saved.getId());
+        } else {
+            notificationService.createForUser(saved.getAuthor(), "Your feed post was published.",
+                    NotificationType.Feed.PUBLISHED, saved.getId());
         }
         return toResponse(saved);
     }
@@ -296,7 +366,26 @@ public class FeedPostService {
         post.setStatus(FeedPostStatus.HIDDEN);
         post.setModeratedBy(currentUser());
         post.setModerationNote(request.getNote().trim());
-        return toResponse(postRepository.save(post));
+        FeedPost saved = postRepository.save(post);
+        notificationService.createForUser(saved.getAuthor(), "Your feed post was hidden: " + saved.getModerationNote(),
+                NotificationType.Feed.HIDDEN, saved.getId());
+        return toResponse(saved);
+    }
+
+    @Transactional
+    public FeedPostResponseDTO reject(String id, FeedPostModerationDTO request) {
+        requireAdmin();
+        FeedPost post = findPost(id);
+        if (post.getStatus() == FeedPostStatus.REMOVED) {
+            throw new ConflictException("Removed posts cannot be rejected.");
+        }
+        post.setStatus(FeedPostStatus.REJECTED);
+        post.setModeratedBy(currentUser());
+        post.setModerationNote(request.getNote().trim());
+        FeedPost saved = postRepository.save(post);
+        notificationService.createForUser(saved.getAuthor(), "Your feed post was rejected: " + saved.getModerationNote(),
+                NotificationType.Feed.REJECTED, saved.getId());
+        return toResponse(saved);
     }
 
     /**
@@ -322,7 +411,51 @@ public class FeedPostService {
     }
 
     private FeedPostResponseDTO toResponse(FeedPost post) {
-        return FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO response = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        String email = SecurityUtils.getCurrentUsername();
+        if (email == null) {
+            return response;
+        }
+        return userRepository.findByEmail(email)
+                .map(user -> response.toBuilder()
+                        .likedByCurrentUser(postLikeRepository.existsByPostIdAndUserId(post.getId(), user.getId()))
+                        .bookmarkedByCurrentUser(bookmarkRepository.existsByPostIdAndUserId(post.getId(), user.getId()))
+                        .build())
+                .orElse(response);
+    }
+
+    private List<FeedTag> resolveTags(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return new ArrayList<>();
+        }
+        int maxTags = appProperties.getFeed().getMaxTagsPerPost();
+        if (values.size() > maxTags) {
+            throw new BadRequestException("A feed post contains too many tags.");
+        }
+        Map<String, String> normalized = values.stream()
+                .filter(value -> value != null && !value.isBlank())
+                .map(String::trim)
+                .collect(java.util.stream.Collectors.toMap(value -> value.toLowerCase(Locale.ROOT), value -> value,
+                        (first, ignored) -> first, java.util.LinkedHashMap::new));
+        if (normalized.values().stream().anyMatch(value -> value.length() > appProperties.getFeed().getMaxTagLength())) {
+            throw new BadRequestException("A feed tag is too long.");
+        }
+        List<FeedTag> existing = tagRepository.findBySlugIn(normalized.keySet());
+        Map<String, FeedTag> bySlug = existing.stream().collect(java.util.stream.Collectors.toMap(FeedTag::getSlug, value -> value));
+        return normalized.entrySet().stream().map(entry -> bySlug.computeIfAbsent(entry.getKey(), slug ->
+                tagRepository.save(FeedTag.builder().slug(slug).name(entry.getValue()).build())))
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+    }
+
+    private void validateTextLengths(FeedPostCreateDTO request) {
+        int maxTitle = appProperties.getFeed().getMaxTitleLength();
+        int maxBody = appProperties.getFeed().getMaxBodyLength();
+        if (maxTitle > 0 && request.getTitle().trim().length() > maxTitle) {
+            throw new BadRequestException("Feed post title exceeds the configured maximum length.");
+        }
+        if (maxBody > 0 && request.getBody().trim().length() > maxBody) {
+            throw new BadRequestException("Feed post body exceeds the configured maximum length.");
+        }
     }
 
     private User currentUser() {

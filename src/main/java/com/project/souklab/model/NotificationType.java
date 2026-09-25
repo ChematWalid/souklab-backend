@@ -20,7 +20,9 @@ public final class NotificationType {
                 Payment.SUCCESS, Payment.FAILED, Checkout.CREATED, Checkout.CANCELED,
                 Refund.Request.UNAVAILABLE, Report.NEW, Review.NEW,
                 Formateur.Request.SUBMITTED, Formateur.APPROVED, Formateur.GRANTED,
-                Formateur.REJECTED, Formateur.REVOKED);
+                Formateur.REJECTED, Formateur.REVOKED,
+                Feed.SUBMITTED, Feed.PUBLISHED, Feed.REJECTED, Feed.HIDDEN,
+                Feed.POST_LIKED, Feed.POST_COMMENTED, Feed.COMMENT_LIKED, Feed.COMMENT_REPLIED);
     }
 
     public static Key fromValue(String value) {
@@ -126,6 +128,27 @@ public final class NotificationType {
             private final String value;
             Request(String value) { this.value = value; }
             public String value() { return value; }
+        }
+    }
+
+    public enum Feed implements Key {
+        SUBMITTED("FEED_POST_SUBMITTED"),
+        PUBLISHED("FEED_POST_PUBLISHED"),
+        REJECTED("FEED_POST_REJECTED"),
+        HIDDEN("FEED_POST_HIDDEN"),
+        POST_LIKED("FEED_POST_LIKED"),
+        POST_COMMENTED("FEED_POST_COMMENTED"),
+        COMMENT_LIKED("FEED_COMMENT_LIKED"),
+        COMMENT_REPLIED("FEED_COMMENT_REPLIED");
+
+        private final String value;
+
+        Feed(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
     }
 }
