@@ -10,6 +10,8 @@ import com.project.souklab.security.Permission;
 
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.FeedPostRepository;
+import com.project.souklab.dao.FeedPostLikeRepository;
+import com.project.souklab.dao.FeedPostBookmarkRepository;
 import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.config.AppProperties;
@@ -73,6 +75,8 @@ import static org.mockito.Mockito.verify;
 class FeedPostServiceTest {
 
     @Mock private FeedPostRepository postRepository;
+    @Mock private FeedPostLikeRepository postLikeRepository;
+    @Mock private FeedPostBookmarkRepository bookmarkRepository;
     @Mock private FormationRepository formationRepository;
     @Mock private UserRepository userRepository;
     @Mock private ArtisanRepository artisanRepository;

@@ -117,7 +117,7 @@ class ContentReportServiceTest {
             assertThatCode(() -> service.create(new ContentReportRequestDTO(type, target, " reason ", " details ")))
                     .doesNotThrowAnyException();
         }
-        verify(notificationService, times(3)).notifyAdmins("New content report submitted.");
+        verify(notificationService, times(4)).notifyAdmins("New content report submitted.");
     }
 
     @Test

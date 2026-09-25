@@ -4,8 +4,11 @@ import com.project.souklab.controller.support.SecurityTestUtils;
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
+import com.project.souklab.dto.feed.FeedPostCreateDTO;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.service.feed.FeedPostService;
+import com.project.souklab.service.feed.FeedEngagementService;
+import com.project.souklab.service.feed.FeedDiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
@@ -17,6 +20,8 @@ import java.util.List;
 import static com.project.souklab.controller.support.SecurityTestUtils.admin;
 import static com.project.souklab.controller.support.SecurityTestUtils.artisan;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -39,6 +44,12 @@ class FeedPostControllerTest {
     @MockitoBean
     private FeedPostService feedPostService;
 
+    @MockitoBean
+    private FeedEngagementService feedEngagementService;
+
+    @MockitoBean
+    private FeedDiscoveryService feedDiscoveryService;
+
     @Test
     void publicFeedReturnsPublishedPosts() throws Exception {
         when(feedPostService.listPublic(any(), any())).thenReturn(new PageImpl<>(List.of(FeedPostResponseDTO.builder().id("post-1").build())));
@@ -51,7 +62,7 @@ class FeedPostControllerTest {
 
     @Test
     void publicFeedCanRetrieveOnePost() throws Exception {
-        when(feedPostService.getPublic("post-1")).thenReturn(FeedPostResponseDTO.builder().id("post-1").build());
+        when(feedPostService.getForCaller("post-1")).thenReturn(FeedPostResponseDTO.builder().id("post-1").build());
 
         mockMvc.perform(get("/api/v1/feed/post-1").with(artisan()))
                 .andExpect(status().isOk())
@@ -78,6 +89,20 @@ class FeedPostControllerTest {
                 .andExpect(status().isCreated());
         mockMvc.perform(delete("/api/v1/feed/post-1/media/media-1").with(artisan()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void bindsDraftFlagFromHttpPayload() throws Exception {
+        when(feedPostService.create(any())).thenReturn(FeedPostResponseDTO.builder().id("draft-1").build());
+
+        mockMvc.perform(post("/api/v1/feed").contentType("application/json")
+                        .content("{\"type\":\"ACTUALITE\",\"title\":\"Draft\",\"body\":\"Body\",\"isDraft\":true}")
+                        .with(artisan()))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<FeedPostCreateDTO> request = ArgumentCaptor.forClass(FeedPostCreateDTO.class);
+        verify(feedPostService).create(request.capture());
+        org.assertj.core.api.Assertions.assertThat(request.getValue().isDraft()).isTrue();
     }
 
     @Test
