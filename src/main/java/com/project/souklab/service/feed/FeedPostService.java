@@ -60,7 +60,9 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Coordinates moderated public feed posts and their stored image attachments.
@@ -435,16 +437,16 @@ public class FeedPostService {
         Map<String, String> normalized = values.stream()
                 .filter(value -> value != null && !value.isBlank())
                 .map(String::trim)
-                .collect(java.util.stream.Collectors.toMap(value -> value.toLowerCase(Locale.ROOT), value -> value,
-                        (first, ignored) -> first, java.util.LinkedHashMap::new));
+                .collect(Collectors.toMap(value -> value.toLowerCase(Locale.ROOT), value -> value,
+                        (first, ignored) -> first, LinkedHashMap::new));
         if (normalized.values().stream().anyMatch(value -> value.length() > appProperties.getFeed().getMaxTagLength())) {
             throw new BadRequestException("A feed tag is too long.");
         }
         List<FeedTag> existing = tagRepository.findBySlugIn(normalized.keySet());
-        Map<String, FeedTag> bySlug = existing.stream().collect(java.util.stream.Collectors.toMap(FeedTag::getSlug, value -> value));
+        Map<String, FeedTag> bySlug = existing.stream().collect(Collectors.toMap(FeedTag::getSlug, value -> value));
         return normalized.entrySet().stream().map(entry -> bySlug.computeIfAbsent(entry.getKey(), slug ->
                 tagRepository.save(FeedTag.builder().slug(slug).name(entry.getValue()).build())))
-                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private void validateTextLengths(FeedPostCreateDTO request) {

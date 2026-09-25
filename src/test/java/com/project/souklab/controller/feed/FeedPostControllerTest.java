@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -102,7 +103,7 @@ class FeedPostControllerTest {
 
         ArgumentCaptor<FeedPostCreateDTO> request = ArgumentCaptor.forClass(FeedPostCreateDTO.class);
         verify(feedPostService).create(request.capture());
-        org.assertj.core.api.Assertions.assertThat(request.getValue().isDraft()).isTrue();
+        assertThat(request.getValue().isDraft()).isTrue();
     }
 
     @Test

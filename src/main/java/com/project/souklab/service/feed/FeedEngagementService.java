@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -196,7 +197,7 @@ public class FeedEngagementService {
                 && !comment.getPost().getAuthor().getId().equals(user.getId())) {
             throw new ForbiddenException("You may not delete this comment.");
         }
-        comment.setDeletedAt(java.time.LocalDateTime.now(clock));
+        comment.setDeletedAt(LocalDateTime.now(clock));
         commentRepository.save(comment);
         postRepository.decrementCommentCount(comment.getPost().getId());
         if (comment.getParent() != null) {

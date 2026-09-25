@@ -25,6 +25,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.engine.search.query.SearchResult;
 import java.util.List;
+import org.springframework.data.domain.PageImpl;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +58,7 @@ public class FeedDiscoveryService {
                 .orElseThrow(() -> new ForbiddenException("Authentication is required."));
         if (user.getClient() == null) {
             return PaginatedResponse.<FeedPostResponseDTO>builder()
-                    .content(java.util.List.of()).pageNumber(pageable.getPageNumber()).pageSize(pageable.getPageSize())
+                    .content(List.of()).pageNumber(pageable.getPageNumber()).pageSize(pageable.getPageSize())
                     .totalElements(0).totalPages(0).last(true).build();
         }
         Page<FeedPost> page = postRepository.findFollowing(user.getClient().getId(), FeedPostStatus.PUBLISHED, pageable);
@@ -95,14 +96,14 @@ public class FeedDiscoveryService {
                         .should(f.match().field("title").matching(query))
                         .should(f.match().field("body").matching(query))
                         .should(f.match().field("tags.name").matching(query))
-                        .filter(f.match().field("status").matching(FeedPostStatus.PUBLISHED.name()))
+                        .filter(f.match().field("status").matching(FeedPostStatus.PUBLISHED.value()))
                         .filter(f.not(f.exists().field("deletedAt")))))
                 .sort(f -> pageable.getSort().getOrderFor("likeCount") != null
                         ? f.field("likeCount").desc()
                         : f.field("publishedAt").desc())
                 .fetch(offset, pageable.getPageSize());
         List<FeedPost> content = result.hits();
-        return new org.springframework.data.domain.PageImpl<>(content, pageable, result.total().hitCount());
+        return new PageImpl<>(content, pageable, result.total().hitCount());
     }
 
     private Pageable applySort(Pageable pageable, String sort) {

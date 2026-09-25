@@ -22,6 +22,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.engine.backend.types.Sortable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class FeedPost extends BaseEntity {
     private Formation formation;
 
     @Column(name = "published_at")
-    @GenericField(sortable = org.hibernate.search.engine.backend.types.Sortable.YES)
+    @GenericField(sortable = Sortable.YES)
     private LocalDateTime publishedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -81,7 +82,7 @@ public class FeedPost extends BaseEntity {
     private String moderationNote;
 
     @Column(name = "like_count", nullable = false)
-    @GenericField(sortable = org.hibernate.search.engine.backend.types.Sortable.YES)
+    @GenericField(sortable = Sortable.YES)
     @Builder.Default
     private int likeCount = 0;
 
