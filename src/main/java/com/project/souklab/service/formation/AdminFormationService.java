@@ -84,6 +84,20 @@ public class AdminFormationService {
     }
 
     /**
+     * Retrieves full formation details for administrative moderation and review.
+     *
+     * @param id formation unique identifier
+     * @return complete formation response DTO
+     * @throws ResourceNotFoundException if formation is not found
+     */
+    @Transactional(readOnly = true)
+    public FormationResponseDTO getFormationById(String id) {
+        Formation formation = formationRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Formation not found with id: " + id));
+        return mapToResponseDTO(formation);
+    }
+
+    /**
      * Records an administrative moderation review decision (approval or rejection) for a formation.
      *
      * @param id formation unique identifier

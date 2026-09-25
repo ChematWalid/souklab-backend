@@ -37,6 +37,11 @@ public class AdminFormateurController {
         return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getPendingRequests(pageable)));
     }
 
+    @GetMapping("/formateur-requests/{id}")
+    public ResponseEntity<ApiResponse<FormateurRequestResponseDTO>> getRequestById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getRequestById(id)));
+    }
+
     @PostMapping("/formateur-requests/{id}/approve")
     public ResponseEntity<ApiResponse<FormateurRequestResponseDTO>> approveRequest(
             @PathVariable String id,

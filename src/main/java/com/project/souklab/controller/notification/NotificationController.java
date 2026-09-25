@@ -31,6 +31,12 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success(notificationService.getCurrentUserNotifications(pageable)));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get notification by ID", description = "Retrieves a single notification for the authenticated user.")
+    public ResponseEntity<ApiResponse<NotificationResponseDTO>> getNotification(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(notificationService.getNotification(id)));
+    }
+
     @GetMapping("/unread-count")
     @Operation(summary = "Get unread notifications count", description = "Returns the total number of unread notifications for the authenticated user as a numeric value in data.")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount() {

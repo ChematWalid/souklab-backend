@@ -167,6 +167,21 @@ public class NotificationService {
     }
 
     /**
+     * Retrieves a single notification belonging to the current authenticated user.
+     *
+     * @param notificationId the unique identifier of the notification
+     * @return NotificationResponseDTO representing the notification
+     * @throws ResourceNotFoundException if notification is not found or not owned by user
+     */
+    @Transactional(readOnly = true)
+    public NotificationResponseDTO getNotification(String notificationId) {
+        User user = getCurrentUser();
+        Notification notification = notificationRepository.findByIdAndUserAndDeletedAtIsNull(notificationId, user)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + notificationId));
+        return mapToDTO(notification);
+    }
+
+    /**
      * Returns the exact count of unread, non-deleted notifications for the current authenticated user.
      *
      * @return unread notification count

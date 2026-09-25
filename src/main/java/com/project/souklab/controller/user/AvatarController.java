@@ -71,6 +71,20 @@ public class AvatarController {
     }
 
     /**
+     * Retrieves a single avatar belonging to the currently authenticated user.
+     *
+     * @param id the unique identifier of the avatar
+     * @return 200 OK with AvatarResponseDTO
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get single avatar", description = "Retrieves metadata and image URLs for a specific avatar belonging to the authenticated user.")
+    public ResponseEntity<ApiResponse<AvatarResponseDTO>> getAvatar(@PathVariable String id) {
+        AvatarResponseDTO response = avatarService.getAvatar(id);
+        return ResponseEntity.ok(ApiResponse.success(response, "Avatar retrieved successfully"));
+    }
+
+    /**
      * Deletes a specific avatar belonging to the currently authenticated user.
      *
      * @param id the unique identifier of the avatar to delete

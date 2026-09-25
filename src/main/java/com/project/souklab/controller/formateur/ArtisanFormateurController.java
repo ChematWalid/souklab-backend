@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,5 +47,11 @@ public class ArtisanFormateurController {
     @GetMapping("/formateur-requests")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormateurRequestResponseDTO>>> getRequestHistory(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getRequestHistory(pageable), "Formateur request history retrieved successfully."));
+    }
+
+    @Operation(summary = "Get single formateur request", description = "Retrieves a single accreditation request belonging to the authenticated artisan by its identifier.")
+    @GetMapping("/formateur-requests/{id}")
+    public ResponseEntity<ApiResponse<FormateurRequestResponseDTO>> getRequestById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getMyRequestById(id), "Formateur request retrieved successfully."));
     }
 }

@@ -217,6 +217,37 @@ class UserManagementControllerTest {
     }
 
     @Nested
+    @DisplayName("GET /api/v1/admin/users/{id}")
+    class GetUserByIdTests {
+
+        @Test
+        @DisplayName("ROLE_ADMIN returns 200 OK with single user details")
+        void getUserById_withAdminRole_shouldReturn200Ok() throws Exception {
+            UserResponseDTO sampleUser = buildSampleUser("u-1", "user@example.com", AccountStatus.ACTIVE);
+            when(userManagementService.getUserById("u-1")).thenReturn(sampleUser);
+
+            mockMvc.perform(get("/api/v1/admin/users/u-1")
+                            .with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.data.id").value("u-1"))
+                    .andExpect(jsonPath("$.data.email").value("user@example.com"));
+
+            verify(userManagementService).getUserById("u-1");
+        }
+
+        @Test
+        @DisplayName("non-admin receives 403 Forbidden")
+        void getUserById_withClientRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(get("/api/v1/admin/users/u-1")
+                            .with(client()))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
+        }
+    }
+
+    @Nested
     @DisplayName("GET /api/v1/admin/users/pending")
     class GetPendingUsersTests {
 

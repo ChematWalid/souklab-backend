@@ -155,6 +155,43 @@ class AdminFormateurControllerTest {
     }
 
     @Nested
+    @DisplayName("GET /api/v1/admin/formateur-requests/{id}")
+    class GetSingleRequestTests {
+
+        @Test
+        @DisplayName("admin can fetch single formateur request by ID")
+        void getRequestById_withAdminRole_shouldReturn200Ok() throws Exception {
+            FormateurRequestResponseDTO item = FormateurRequestResponseDTO.builder()
+                    .id("req-1")
+                    .artisanId("artisan-1")
+                    .artisanName("Ahmed Artisan")
+                    .status(FormateurRequestStatus.PENDING)
+                    .build();
+
+            when(artisanFormateurService.getRequestById("req-1")).thenReturn(item);
+
+            mockMvc.perform(get("/api/v1/admin/formateur-requests/req-1")
+                            .with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.data.id").value("req-1"))
+                    .andExpect(jsonPath("$.data.artisanName").value("Ahmed Artisan"));
+
+            verify(artisanFormateurService).getRequestById("req-1");
+        }
+
+        @Test
+        @DisplayName("non-admin receives 403 Forbidden")
+        void getRequestById_withArtisanRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(get("/api/v1/admin/formateur-requests/req-1")
+                            .with(artisan()))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
+        }
+    }
+
+    @Nested
     @DisplayName("POST /api/v1/admin/formateur-requests/{id}/approve")
     class ApproveRequestTests {
 

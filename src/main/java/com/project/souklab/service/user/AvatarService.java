@@ -134,6 +134,21 @@ public class AvatarService {
         return listAvatars(currentUserProvider.requireCurrentUser(), pageable);
     }
 
+    @Transactional(readOnly = true)
+    public AvatarResponseDTO getAvatar(String avatarId) {
+        return getAvatar(currentUserProvider.requireCurrentUser(), avatarId);
+    }
+
+    @Transactional(readOnly = true)
+    public AvatarResponseDTO getAvatar(User currentUser, String avatarId) {
+        if (currentUser == null) {
+            throw new IllegalArgumentException(CURRENT_USER_CANNOT_BE_NULL);
+        }
+        UserAvatar avatar = userAvatarRepository.findByIdAndUserId(avatarId, currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_AVATAR_NOT_FOUND_PREFIX + avatarId));
+        return mapToResponseDTO(avatar);
+    }
+
     @Transactional
     public void deleteAvatar(String avatarId) {
         deleteAvatar(currentUserProvider.requireCurrentUser(), avatarId);

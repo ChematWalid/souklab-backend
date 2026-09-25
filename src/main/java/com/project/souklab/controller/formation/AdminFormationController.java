@@ -47,6 +47,18 @@ public class AdminFormationController {
     }
 
     /**
+     * Retrieves full formation details for administrative moderation and review.
+     *
+     * @param id formation unique identifier
+     * @return 200 OK with full formation response DTO
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<FormationResponseDTO>> getFormationById(@PathVariable String id) {
+        FormationResponseDTO response = adminFormationService.getFormationById(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
      * Submits an administrative moderation decision (approval or rejection) for a formation.
      *
      * @param id formation unique identifier

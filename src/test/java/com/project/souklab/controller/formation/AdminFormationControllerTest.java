@@ -97,6 +97,39 @@ class AdminFormationControllerTest {
     }
 
     @Nested
+    @DisplayName("Single Formation (GET /api/v1/admin/formations/{id})")
+    class GetFormationDetailsEndpointTests {
+
+        @Test
+        @DisplayName("getFormationById_whenAdminRole_shouldReturn200Ok")
+        void getFormationById_whenAdminRole_shouldReturn200Ok() throws Exception {
+            FormationResponseDTO responseDTO = FormationResponseDTO.builder()
+                    .id("formation-201")
+                    .title("Leather Crafting")
+                    .status(FormationStatus.PENDING_REVIEW)
+                    .build();
+
+            when(adminFormationService.getFormationById("formation-201")).thenReturn(responseDTO);
+
+            mockMvc.perform(get(BASE_URL + "/formation-201")
+                            .with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.data.id").value("formation-201"))
+                    .andExpect(jsonPath("$.data.title").value("Leather Crafting"));
+        }
+
+        @Test
+        @DisplayName("getFormationById_whenArtisanRole_shouldReturn403Forbidden")
+        void getFormationById_whenArtisanRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(get(BASE_URL + "/formation-201")
+                            .with(artisan()))
+                    .andExpect(status().isForbidden());
+        }
+    }
+
+    @Nested
     @DisplayName("Review Decision (POST /api/v1/admin/formations/{id}/review)")
     class ReviewEndpointTests {
 

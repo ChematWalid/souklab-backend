@@ -45,6 +45,18 @@ public class AdminFeedController {
     }
 
     /**
+     * Retrieves a feed post by ID for administrative review.
+     *
+     * @param id post identifier
+     * @return feed post response DTO
+     */
+    @Operation(summary = "Get feed post for administration", description = "Retrieves a single feed post by ID for administrative review.")
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<FeedPostResponseDTO>> getById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(feedPostService.getForCaller(id)));
+    }
+
+    /**
      * Publishes a pending post.
      *
      * @param id post identifier

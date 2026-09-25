@@ -143,6 +143,38 @@ public class ArtisanFormateurService {
     }
 
     /**
+     * Retrieves a single formateur request by ID for administrative review.
+     *
+     * @param requestId the unique identifier of the request
+     * @return FormateurRequestResponseDTO
+     * @throws ResourceNotFoundException if request is not found
+     */
+    @Transactional(readOnly = true)
+    public FormateurRequestResponseDTO getRequestById(String requestId) {
+        ArtisanFormateurRequest request = formateurRequestRepository.findByIdAndDeletedAtIsNull(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_REQUEST_NOT_FOUND_PREFIX + requestId));
+        return mapToDTO(request);
+    }
+
+    /**
+     * Retrieves a single formateur request by ID belonging to the authenticated artisan.
+     *
+     * @param requestId the unique identifier of the request
+     * @return FormateurRequestResponseDTO
+     * @throws ResourceNotFoundException if request is not found or not owned by caller
+     */
+    @Transactional(readOnly = true)
+    public FormateurRequestResponseDTO getMyRequestById(String requestId) {
+        Artisan artisan = currentArtisan();
+        ArtisanFormateurRequest request = formateurRequestRepository.findByIdAndDeletedAtIsNull(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_REQUEST_NOT_FOUND_PREFIX + requestId));
+        if (request.getArtisan() == null || !request.getArtisan().getId().equals(artisan.getId())) {
+            throw new ResourceNotFoundException(ERROR_REQUEST_NOT_FOUND_PREFIX + requestId);
+        }
+        return mapToDTO(request);
+    }
+
+    /**
      * Approves a pending formateur request.
      */
     @Transactional

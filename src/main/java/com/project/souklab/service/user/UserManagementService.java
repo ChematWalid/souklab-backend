@@ -89,6 +89,20 @@ public class UserManagementService {
     }
 
     /**
+     * Retrieves full user details by user ID for administrative inspection.
+     *
+     * @param userId the unique identifier of the user
+     * @return UserResponseDTO containing user profile and permissions
+     * @throws ResourceNotFoundException if user is not found
+     */
+    @Transactional(readOnly = true)
+    public UserResponseDTO getUserById(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
+        return mapToDTO(user);
+    }
+
+    /**
      * Approves a user's pending registration, transitioning their status from PENDING to ACTIVE.
      * Logs the action and triggers an approval notification to the user.
      *

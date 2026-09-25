@@ -328,4 +328,34 @@ class NotificationControllerTest {
                     .andExpect(jsonPath("$.code").value(401));
         }
     }
+
+    @Nested
+    @DisplayName("GET /api/v1/notifications/{id}")
+    class GetSingleNotificationEndpointTests {
+
+        @Test
+        @DisplayName("authenticated user can retrieve notification by ID")
+        void getNotification_authenticated_shouldReturn200Ok() throws Exception {
+            NotificationResponseDTO responseDTO = buildSampleNotification("notif-1", "Test message", false);
+            when(notificationService.getNotification("notif-1")).thenReturn(responseDTO);
+
+            mockMvc.perform(get("/api/v1/notifications/notif-1")
+                            .with(client()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.data.id").value("notif-1"))
+                    .andExpect(jsonPath("$.data.message").value("Test message"));
+
+            verify(notificationService).getNotification("notif-1");
+        }
+
+        @Test
+        @DisplayName("unauthenticated request receives 401 Unauthorized")
+        void getNotification_unauthenticated_shouldReturn401Unauthorized() throws Exception {
+            mockMvc.perform(get("/api/v1/notifications/notif-1"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.code").value(401));
+        }
+    }
 }

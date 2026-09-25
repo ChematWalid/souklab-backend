@@ -41,6 +41,11 @@ public class UserManagementController {
         return ResponseEntity.ok(ApiResponse.success(userManagementService.getAllUsers(search, pageable)));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponseDTO>> getUserById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(userManagementService.getUserById(id)));
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getPendingUsers(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
