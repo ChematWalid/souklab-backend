@@ -13,7 +13,7 @@ import java.sql.Statement;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Validates the V16 Flyway migration for client favorites on MariaDB.
+ * Validates the client favorites migration and current schema invariants on MariaDB.
  * Verifies table structure, constraints, indexes, permission seeding,
  * and selective client permission backfill.
  */
@@ -60,7 +60,7 @@ class ClientFavoritesMigrationTest {
             try (Connection connection = database.createConnection("");
                  Statement statement = connection.createStatement()) {
 
-                assertThat(migrationVersion(statement)).isEqualTo("17");
+                assertThat(migrationVersion(statement)).isEqualTo("18");
                 assertThat(tableExists(statement, "client_favorite_artisans")).isTrue();
                 assertThat(columnExists(statement, "client_favorite_artisans", "id")).isTrue();
                 assertThat(columnExists(statement, "client_favorite_artisans", "client_id")).isTrue();
