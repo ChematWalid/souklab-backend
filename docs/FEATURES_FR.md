@@ -605,6 +605,7 @@ Les statuts sont `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN` et `REMOV
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/artisans/{artisanId}/reviews` | GET | Optionnelle | Lister les avis publics d'un artisan (paginé) |
+| `GET /api/v1/artisan/reviews/{reviewId}` | GET | Publique | Obtenir un avis publié individuel |
 | `POST /api/v1/artisan/formations/{formationId}/reviews` | POST | `Artisan.REVIEWS` | Créer un avis (requiert une inscription `ATTENDED` sur cette formation) |
 | `PUT /api/v1/artisan/reviews/{reviewId}` | PUT | `Artisan.REVIEWS` + propriétaire | Mettre à jour son propre avis |
 | `DELETE /api/v1/artisan/reviews/{reviewId}` | DELETE | `Artisan.REVIEWS` + propriétaire | Supprimer son propre avis |
@@ -626,6 +627,7 @@ Les statuts sont `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN` et `REMOV
 |---|---|---|---|
 | `POST /api/v1/reports` | POST | `Report.CREATE` | Soumettre un signalement d'abus |
 | `GET /api/v1/admin/reports` | GET | `Admin.REPORTS` | Lister les signalements ouverts (admin) |
+| `GET /api/v1/admin/reports/{id}` | GET | `Admin.REPORTS` | Obtenir le détail d'un signalement de contenu |
 | `POST /api/v1/admin/reports/{id}/resolve` | POST | `Admin.REPORTS` | Résoudre un signalement avec décision et action |
 
 ### Cibles des signalements
@@ -658,6 +660,7 @@ La messagerie fonctionne sur deux couches complémentaires : REST pour la récup
 |---|---|---|---|
 | `POST /api/v1/conversations` | POST | `Message.SEND` | Créer ou récupérer une conversation 1-à-1 |
 | `GET /api/v1/conversations` | GET | `Message.SEND` | Lister ses propres conversations (paginé) |
+| `GET /api/v1/conversations/{id}` | GET | `Message.SEND` + participant | Obtenir les détails d'une conversation |
 | `PATCH /api/v1/conversations/{id}/archive` | PATCH | `Message.SEND` + participant | Archiver une conversation |
 | `GET /api/v1/conversations/{id}/messages` | GET | `Message.SEND` + participant | Récupérer l'historique paginé des messages |
 | `POST /api/v1/conversations/{id}/messages` | POST | `Message.SEND` + participant | Envoyer un message (fallback REST) |
@@ -705,6 +708,8 @@ La messagerie fonctionne sur deux couches complémentaires : REST pour la récup
 
 ### Règles métier
 
+- **Restriction Premium pour les clients** : Les clients doivent avoir un abonnement Premium actif pour initier des conversations (`POST /api/v1/conversations`), envoyer des messages (`POST /api/v1/conversations/{id}/messages` et STOMP `/messages.send`), modifier des messages, téléverser des pièces jointes ou émettre des événements de frappe. Les clients non-premium reçoivent `403 Forbidden`.
+- **Masquage de confidentialité de l'artisan** : Dans les résumés et détails de conversation, lorsqu'ils sont consultés par un client non-premium, le nom d'affichage de l'artisan (`participantName`) est masqué sous la forme `"Artisan #XXXXX"` (ex. `Artisan #3BD3F`) pour empêcher le contournement de la plateforme. Les clients premium, les artisans et les administrateurs reçoivent le vrai nom non masqué.
 - La messagerie à soi-même (conversation avec soi-même) retourne `400 Bad Request`.
 - Un non-participant envoyant dans une conversation retourne `403 Forbidden`.
 - Les messages supprimés logiquement sont exclus des réponses `GET /messages` ultérieures.

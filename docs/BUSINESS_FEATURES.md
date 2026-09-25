@@ -197,10 +197,12 @@ This keeps the platform safe and trustworthy for everyone.
 
 ### 10. Real-Time Messaging
 
-Clients and artisans can communicate directly through Souklab's built-in messaging system — no need to share personal contact details upfront.
+Clients and artisans can communicate directly through Souklab's built-in messaging system.
 
 **Features:**
-- **1-on-1 conversations** between any client and any artisan
+- **1-on-1 conversations** between authenticated clients and artisans
+- **Client Premium Gating**: Clients require an active Premium subscription to start conversations, send messages, edit messages, upload attachments, or broadcast typing events. Non-premium clients attempting to message are prompted to upgrade to Premium.
+- **Artisan Privacy & Identity Masking**: When a non-premium client views a conversation, the artisan's display name appears anonymized as `"Artisan #XXXXX"` (e.g., `Artisan #3BD3F`) and contact details remain hidden. Upgrading to Premium reveals the artisan's true name and unlocks messaging.
 - Send text messages and attach files in the same conversation
 - See when messages have been **read** by the other person
 - See live **typing indicators** ("is typing…") so you know the other person is responding
@@ -251,7 +253,7 @@ Souklab operates on a **tiered subscription model** for artisans, unlocking more
 | **Pro** | Growing artisans — expanded product and masterclass limits |
 | **Premium** | Established artisans — maximum visibility, priority directory placement, and full feature access |
 
-**Premium tier also benefits clients:** Premium clients can see the full contact details (phone and email) of any artisan — enabling direct off-platform contact when needed.
+**Premium tier also benefits clients:** Premium clients unlock real-time direct messaging with artisans, see unmasked artisan names in chat and directory, and access full contact details (phone, email, website, and physical address) — enabling direct off-platform contact when needed.
 
 **How subscriptions work:**
 - Artisans choose a plan, pay via Chargily (Algeria's leading payment gateway)

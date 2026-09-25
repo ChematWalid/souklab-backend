@@ -607,6 +607,7 @@ Feed posts support `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN`, and `R
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
 | `GET /api/v1/artisans/{artisanId}/reviews` | GET | Optional | List artisan's public reviews (paginated) |
+| `GET /api/v1/artisan/reviews/{reviewId}` | GET | Public | Get single published review |
 | `POST /api/v1/artisan/formations/{formationId}/reviews` | POST | `Artisan.REVIEWS` | Create a review (requires `ATTENDED` enrollment on that formation) |
 | `PUT /api/v1/artisan/reviews/{reviewId}` | PUT | `Artisan.REVIEWS` + owner | Update own review |
 | `DELETE /api/v1/artisan/reviews/{reviewId}` | DELETE | `Artisan.REVIEWS` + owner | Delete own review |
@@ -628,6 +629,7 @@ Feed posts support `DRAFT`, `PENDING`, `PUBLISHED`, `REJECTED`, `HIDDEN`, and `R
 |---|---|---|---|
 | `POST /api/v1/reports` | POST | `Report.CREATE` | Submit an abuse report |
 | `GET /api/v1/admin/reports` | GET | `Admin.REPORTS` | List open reports (admin) |
+| `GET /api/v1/admin/reports/{id}` | GET | `Admin.REPORTS` | Get content report detail |
 | `POST /api/v1/admin/reports/{id}/resolve` | POST | `Admin.REPORTS` | Resolve a report with decision and action |
 
 ### Report Targets
@@ -660,6 +662,7 @@ Messaging operates on two complementary layers: REST for state retrieval and STO
 |---|---|---|---|
 | `POST /api/v1/conversations` | POST | `Message.SEND` | Create or retrieve a 1-on-1 conversation |
 | `GET /api/v1/conversations` | GET | `Message.SEND` | List own conversations (paginated) |
+| `GET /api/v1/conversations/{id}` | GET | `Message.SEND` + participant | Get conversation details |
 | `PATCH /api/v1/conversations/{id}/archive` | PATCH | `Message.SEND` + participant | Archive a conversation |
 | `GET /api/v1/conversations/{id}/messages` | GET | `Message.SEND` + participant | Fetch paginated message history |
 | `POST /api/v1/conversations/{id}/messages` | POST | `Message.SEND` + participant | Send a message (REST fallback) |
@@ -707,6 +710,8 @@ Messaging operates on two complementary layers: REST for state retrieval and STO
 
 ### Business Rules
 
+- **Client Premium Gating**: Clients require an active Premium subscription to initiate conversations (`POST /api/v1/conversations`), send messages (`POST /api/v1/conversations/{id}/messages` and STOMP `/messages.send`), edit messages, upload attachments, or broadcast typing events. Non-premium clients receive `403 Forbidden`.
+- **Artisan Privacy Masking**: In conversation summaries and details, when viewed by a non-premium client, the artisan's display name (`participantName`) is masked as `"Artisan #XXXXX"` (e.g. `Artisan #3BD3F`) to prevent off-platform disintermediation. Premium clients, artisans, and administrators receive the real unmasked artisan name.
 - Self-messaging (conversation with yourself) returns `400 Bad Request`.
 - Non-participant sending to a conversation returns `403 Forbidden`.
 - Soft-deleted messages are excluded from subsequent `GET /messages` history responses.

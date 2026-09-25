@@ -193,10 +193,12 @@ Cela maintient la plateforme sûre et fiable pour tous.
 
 ### 10. Messagerie en temps réel
 
-Les clients et les artisans peuvent communiquer directement via le système de messagerie intégré de Souklab — sans avoir besoin d'échanger leurs coordonnées personnelles au préalable.
+Les clients et les artisans peuvent communiquer directement via le système de messagerie intégré de Souklab.
 
 **Fonctionnalités :**
-- **Conversations privées (1 contre 1)** entre n'importe quel client et n'importe quel artisan
+- **Conversations privées (1 contre 1)** entre clients et artisans authentifiés
+- **Accès Premium requis pour les clients** : Les clients doivent détenir un abonnement Premium actif pour démarrer des conversations, envoyer des messages, modifier des messages, joindre des fichiers ou émettre des indicateurs de frappe. Les clients non-premium sont invités à passer à Premium.
+- **Confidentialité et masquage de l'artisan** : Lorsqu'un client non-premium consulte une conversation, le nom d'affichage de l'artisan apparaît anonymisé sous la forme `"Artisan #XXXXX"` (ex. `Artisan #3BD3F`) et ses coordonnées restent cachées. Passer à Premium révèle le véritable nom de l'artisan et débloque la messagerie.
 - Envoyer des messages texte et joindre des fichiers dans la même conversation
 - Voir quand les messages ont été **lus** par l'autre personne
 - Voir les **indicateurs de frappe** en direct (« est en train d'écrire… ») pour savoir que l'autre personne répond
@@ -247,7 +249,7 @@ Souklab fonctionne sur un **modèle d'abonnement à plusieurs niveaux** pour les
 | **Pro** | Artisans en croissance — limites étendues de produits et de masterclasses |
 | **Premium** | Artisans établis — visibilité maximale, positionnement prioritaire dans l'annuaire et accès à toutes les fonctionnalités |
 
-**Le niveau Premium bénéficie également aux clients :** Les clients premium peuvent voir les coordonnées complètes (téléphone et e-mail) de n'importe quel artisan — permettant un contact direct hors plateforme si nécessaire.
+**Le niveau Premium bénéficie également aux clients :** Les clients premium débloquent la messagerie directe en temps réel avec les artisans, voient les noms réels non masqués dans le chat et l'annuaire, et accèdent aux coordonnées complètes (téléphone, e-mail, site web et adresse physique) — permettant un contact direct hors plateforme si nécessaire.
 
 **Fonctionnement des abonnements :**
 - Les artisans choisissent un plan et paient via Chargily (la principale passerelle de paiement algérienne)
