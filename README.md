@@ -54,7 +54,7 @@ graph TD
 - **Object Storage**: S3-compatible object store (MinIO for local development, AWS S3 / Cloudflare R2 for production)
 - **Security & Antivirus**: Spring Security, JJWT 0.11.5, Bucket4j 8.10.1, ClamAV 1.4 Daemon
 - **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ 4.0)
-- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V17 migrations), Postman / Newman
+- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V18 migrations), Postman / Newman
 
 ---
 

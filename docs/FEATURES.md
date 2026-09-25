@@ -3,10 +3,10 @@
 <!-- AUTO-GENERATED: Do not manually edit the API route tables or enum value tables in this file.
      Source of truth: controller mappings, model enums, .env.example, docker-compose.yml -->
 
-> **Version:** Spring Boot 4.0.8 · Java 21 · Generated from live source tree 2026-09-22.
+> **Version:** Spring Boot 4.0.8 · Java 21 · Generated from live source tree 2026-09-25.
 
 This document is the canonical, code-derived feature reference for the Souklab backend.  
-Every feature listed here was verified in a live exhaustive test campaign (566 scenarios, 100% pass rate) and confirmed by the automated test suite (1,228 tests, 0 failures).
+Every feature listed here was verified in a live exhaustive test campaign (566 scenarios, 100% pass rate) and confirmed by the latest automated test suite (1,439 tests, 0 failures, 0 errors, 10 environment-dependent skips).
 
 ---
 
@@ -1301,6 +1301,7 @@ Flyway manages all schema changes. Migrations are **immutable** — applied migr
 | `V15` | `V15__admin_catalog_permission.sql` | Admin catalog taxonomy management permission (`permission:admin:catalog`) and catalog audit action types |
 | `V16` | `V16__client_favorites.sql` | Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`) |
 | `V17` | `V17__feed_social_enhancements.sql` | Feed draft/rejected states, normalized tags, likes, bookmarks, comments/replies, atomic counters, and comment reports |
+| `V18` | `V18__feed_notification_types.sql` | Feed lifecycle and engagement notification enum values |
 
 ---
 
@@ -1334,13 +1335,19 @@ This section records the live verification campaigns conducted against the runni
 | Rate Limiting | `scripts/verify-domain11-ratelimit.py` | 40 | 40 | 0 | **100%** |
 | **TOTAL** | | **566** | **566** | **0** | **100.0%** |
 
-### Maven Test Suite — 2026-09-22
+### Maven Test Suite — 2026-09-25
 
 ```
-Tests run: 1228, Failures: 0, Errors: 0, Skipped: 10
+Tests run: 1439, Failures: 0, Errors: 0, Skipped: 10
 BUILD SUCCESS
-Total time: 02:27 min
 ```
+
+### Container Verification — 2026-09-25
+
+The multi-stage Docker image built successfully. An isolated container became
+healthy and returned HTTP 200 for `/actuator/health/readiness` and
+`/api/v1/feed`. GitHub Actions production verification also passed the source
+hygiene, integration, migration, Docker build, and dependency gates.
 
 ### Code Fixes Applied During Verification
 

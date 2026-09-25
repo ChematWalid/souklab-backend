@@ -31,7 +31,7 @@ All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft
 
 ## Database Migrations & Deployment
 
-Schema changes are versioned and managed using **Flyway**. The repository maintains 18 versioned migrations (`V0` through `V17`) located in `src/main/resources/db/migration/`:
+Schema changes are versioned and managed using **Flyway**. The repository maintains 19 versioned migrations (`V0` through `V18`) located in `src/main/resources/db/migration/`:
 - `V0`: Baseline schema (users, artisans, catalog, formations, enrollments)
 - `V1`: Social feed tables (posts, media, comments, likes)
 - `V2`: Authorization permissions (`permissions`, `user_permissions`)
@@ -42,5 +42,6 @@ Schema changes are versioned and managed using **Flyway**. The repository mainta
 - `V15`: Admin catalog taxonomy management permission (`permission:admin:catalog`) and catalog audit action types (`CATALOG_ITEM_CREATED`, `CATALOG_ITEM_UPDATED`, `CATALOG_ITEM_DELETED`)
 - `V16`: Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`)
 - `V17`: Feed social enhancements: draft/rejected states, normalized tags, post/comment likes, bookmarks, comments/replies, atomic counters, and `COMMENT` content reports
+- `V18`: Feed notification types for submission, publication, rejection, hiding, likes, comments, and replies
 
 The `prod` Spring profile sets `spring.jpa.hibernate.ddl-auto=validate` and Hibernate Search schema management to `validate`. Production schema changes must be applied via Flyway (`FLYWAY_ENABLED=true`) prior to application startup. Applied migrations are immutable and must never be modified.

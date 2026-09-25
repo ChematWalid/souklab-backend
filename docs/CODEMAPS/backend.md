@@ -1,4 +1,4 @@
-<!-- Generated: 2026-09-22 | Files scanned: 472 | Token estimate: ~950 -->
+<!-- Generated: 2026-09-25 | Files scanned: 510 | Token estimate: ~950 -->
 
 # Backend Route & Execution Codemap
 

@@ -1,6 +1,6 @@
 # Souklab verification report
 
-Run date: 2026-09-22
+Original campaign date: 2026-09-22. Latest verification is recorded below.
 
 This report contains sanitized evidence only. Tokens, provider keys, webhook
 bodies, checkout URLs, and personal data are intentionally excluded. Disposable
@@ -8,6 +8,18 @@ synthetic `@souklab.test` identities may appear in local workflow artifacts.
 
 Requirement-by-requirement coverage is summarized in
 `docs/VERIFICATION_COVERAGE_MATRIX.md`.
+
+## Latest verification — 2026-09-25
+
+- The full Maven suite completed with 1,439 tests, 0 failures, 0 errors, and
+  10 environment-dependent skips.
+- Flyway migrations V0 through V18 validated successfully, including the feed
+  notification enum migration.
+- The Docker image built successfully. An isolated application container became
+  healthy and returned HTTP 200 for readiness and `/api/v1/feed`.
+- GitHub Actions Production verification passed source hygiene, migration,
+  integration, Docker image, dependency, and vulnerability gates for commit
+  `4dc176d`.
 
 ## Passed
 

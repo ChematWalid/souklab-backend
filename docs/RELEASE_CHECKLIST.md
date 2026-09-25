@@ -5,15 +5,16 @@ Local Phase 10 acceptance evidence is recorded in
 release gates and must be checked only when the corresponding production or CI
 evidence exists.
 
-The currently deferred production/CI work is documented in
+The currently deferred production work is documented in
 [`PHASE10_DEFERRED_RELEASE_PLAN.md`](dev/PHASE10_DEFERRED_RELEASE_PLAN.md). In
-particular, hosted CI/dependency scanning and production backup/restore
-evidence are intentionally deferred and must remain unchecked until a future
-agent or operator produces the required evidence.
+particular, production backup/restore evidence and several opt-in environment
+validations remain deferred and must stay unchecked until a future agent or
+operator produces the required evidence. Hosted CI and dependency scanning
+were verified for the latest reviewed commit.
 
-- [ ] Hosted CI is green, including integration tests and dependency scan.
-- [ ] Working tree is clean and image is built from the reviewed commit.
-- [ ] Flyway migrations reviewed and upgrade path verified.
+- [x] Hosted CI is green, including integration tests and dependency scan.
+- [x] Working tree is clean and image is built from the reviewed commit.
+- [x] Flyway migrations reviewed and upgrade path verified through V18.
 - [ ] Opt-in `Phase10MariaDbMigrationTest` passes with `PHASE10_MARIADB_INTEGRATION=true`.
 - [ ] Fresh Elasticsearch bootstrap profile completed, then normal app schema validation verified.
 - [ ] No unresolved critical/high dependency vulnerability.
@@ -24,7 +25,7 @@ agent or operator produces the required evidence.
 - [ ] Immutable image digest recorded.
 - [ ] Readiness returns HTTP 200 after deployment.
 - [ ] Prometheus scrape is up and critical flows pass.
-- [ ] V0-V17 Flyway migrations applied and analytics, feed, and catalog admin permissions assigned only to approved administrators.
+- [ ] V0-V18 Flyway migrations applied and analytics, feed, and catalog admin permissions assigned only to approved administrators.
 - [ ] Client favorite artisan endpoints, pessimistic locking, and directory card contact masking verified.
 - [ ] Analytics job owner isolation, financial permission split, CSV download, and `/admin/stats` alias verified.
 - [ ] Activity-event retention and bounded backfill/rollup evidence recorded before enabling historical exports.

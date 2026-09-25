@@ -1,4 +1,4 @@
-<!-- Generated: 2026-09-22 | Files scanned: 472 | Token estimate: ~850 -->
+<!-- Generated: 2026-09-25 | Files scanned: 510 | Token estimate: ~850 -->
 
 # Data Architecture & Schema Codemap
 
@@ -69,7 +69,7 @@
 - `ClientFavoriteArtisan` (`client_favorite_artisans`): Client artisan bookmarking records.
   - *Constraint: Unique `(client_id, artisan_id)`.*
 
-## 3. Flyway Migration History (V0–V17)
+## 3. Flyway Migration History (V0–V18)
 
 | Version | Script Name | Scope |
 |---|---|---|
@@ -84,3 +84,4 @@
 | `V15` | `V15__admin_catalog_permission.sql` | Admin catalog taxonomy management permission and audit action support |
 | `V16` | `V16__client_favorites.sql` | Client favorite artisans table, indexes, and client favorites permission (`permission:client:favorites`) |
 | `V17` | `V17__feed_social_enhancements.sql` | Feed lifecycle states, normalized tags, likes, bookmarks, comments/replies, counters, and comment reports |
+| `V18` | `V18__feed_notification_types.sql` | Feed lifecycle and engagement notification enum values |

@@ -3,10 +3,10 @@
 <!-- AUTO-GENERATED: Ne pas éditer manuellement les tableaux de routes API ou les valeurs d'énumération dans ce fichier.
      Source de vérité : mappings des contrôleurs, énumérations des modèles, .env.example, docker-compose.yml -->
 
-> **Version :** Spring Boot 4.0.8 · Java 21 · Généré depuis l'arbre source live le 2026-09-22.
+> **Version :** Spring Boot 4.0.8 · Java 21 · Généré depuis l'arbre source live le 2026-09-25.
 
 Ce document est la référence technique officielle des fonctionnalités du backend Souklab, dérivée du code source.  
-Chaque fonctionnalité listée ici a été vérifiée lors d'une campagne de tests exhaustive en conditions réelles (566 scénarios, taux de réussite de 100 %) et confirmée par la suite de tests automatisés (1 228 tests, 0 échecs).
+Chaque fonctionnalité listée ici a été vérifiée lors d'une campagne de tests exhaustive en conditions réelles (566 scénarios, taux de réussite de 100 %) et confirmée par la dernière suite de tests automatisés (1 439 tests, 0 échec, 0 erreur, 10 exclusions dépendantes de l'environnement).
 
 ---
 
@@ -1299,6 +1299,7 @@ Flyway gère tous les changements de schéma. Les migrations sont **immuables** 
 | `V15` | `V15__admin_catalog_permission.sql` | Permission de gestion du catalogue taxonomique (`permission:admin:catalog`) et types d'actions d'audit associées |
 | `V16` | `V16__client_favorites.sql` | Table des artisans favoris des clients (`client_favorite_artisans`), contrainte d'unicité, cascades FK, index et permission (`permission:client:favorites`) |
 | `V17` | `V17__feed_social_enhancements.sql` | Statuts de feed, tags normalisés, likes, favoris, commentaires/réponses, compteurs et signalements de commentaires |
+| `V18` | `V18__feed_notification_types.sql` | Valeurs d'énumération des notifications de cycle de vie et d'engagement du feed |
 
 ---
 
@@ -1332,13 +1333,20 @@ Cette section enregistre les campagnes de vérification live menées contre l'in
 | Limitation du débit | `scripts/verify-domain11-ratelimit.py` | 40 | 40 | 0 | **100 %** |
 | **TOTAL** | | **566** | **566** | **0** | **100,0 %** |
 
-### Suite de tests Maven — 2026-09-22
+### Suite de tests Maven — 2026-09-25
 
 ```
-Tests run: 1228, Failures: 0, Errors: 0, Skipped: 10
+Tests run: 1439, Failures: 0, Errors: 0, Skipped: 10
 BUILD SUCCESS
-Total time: 02:27 min
 ```
+
+### Vérification du conteneur — 2026-09-25
+
+L'image Docker multi-étapes a été construite avec succès. Un conteneur isolé
+est devenu sain et a renvoyé HTTP 200 pour `/actuator/health/readiness` et
+`/api/v1/feed`. La vérification de production GitHub Actions a également validé
+l'hygiène du code source, les migrations, les intégrations, la construction
+Docker et la porte de sécurité des dépendances.
 
 ### Corrections de code appliquées lors de la vérification
 

@@ -12,7 +12,7 @@
 The favorites subsystem is designed for type isolation. To introduce a new favorite target (e.g. `FORMATION`, `MATERIAL`, `TECHNIQUE`):
 
 1. **Add enum value**: Declare the new entry in [`FavoriteType`](../../model/FavoriteType.java).
-2. **Database migration**: Create a new Flyway migration (e.g., `V17__client_favorite_formations.sql`) defining the dedicated table (e.g. `client_favorite_formations`) with `client_id`, target FK with `ON DELETE CASCADE`, unique constraint `(client_id, target_id)`, and appropriate indexes.
+2. **Database migration**: Create the next Flyway migration (e.g., `V19__client_favorite_formations.sql`) defining the dedicated table (e.g. `client_favorite_formations`) with `client_id`, target FK with `ON DELETE CASCADE`, unique constraint `(client_id, target_id)`, and appropriate indexes.
 3. **Model entity**: Create `ClientFavoriteFormation` extending [`ClientFavorite`](../../model/ClientFavorite.java) with `@Entity`, `@Table`, and the target `@ManyToOne` relationship.
 4. **Repository**: Create `ClientFavoriteFormationRepository` extending `JpaRepository<ClientFavoriteFormation, String>` with targeted query methods.
 5. **DTOs**: Add target-specific request/response DTOs in `com.project.souklab.dto.favorite`.

@@ -1,8 +1,8 @@
 # Schema migrations
 
-`V0__baseline_schema.sql` creates the pre-feature MariaDB schema required by the application. Subsequent migrations (`V1` through `V17`) apply the forward-only social feed, authorization permissions, messaging, query indexing, subscriptions/payments, analytics pipelines, financial audits, admin catalog taxonomy management (`V15__admin_catalog_permission.sql`), client favorite artisans (`V16__client_favorites.sql`), and complete feed social engagement (`V17__feed_social_enhancements.sql`). Spring Boot's Flyway starter is enabled for production while local development keeps Flyway disabled by default.
+`V0__baseline_schema.sql` creates the pre-feature MariaDB schema required by the application. Subsequent migrations (`V1` through `V18`) apply the forward-only social feed, authorization permissions, messaging, query indexing, subscriptions/payments, analytics pipelines, financial audits, admin catalog taxonomy management (`V15__admin_catalog_permission.sql`), client favorite artisans (`V16__client_favorites.sql`), complete feed social engagement (`V17__feed_social_enhancements.sql`), and feed notification enum values (`V18__feed_notification_types.sql`). Spring Boot's Flyway starter is enabled for production while local development keeps Flyway disabled by default.
 
-Fresh production installation applies V0 through V17 before Hibernate starts. Existing deployments must reconcile their current schema with the Flyway history before enabling this chain; do not mark migrations as applied without reviewing the actual schema. Production uses Hibernate `validate` after migrations.
+Fresh production installation applies V0 through V18 before Hibernate starts. Existing deployments must reconcile their current schema with the Flyway history before enabling this chain; do not mark migrations as applied without reviewing the actual schema. Production uses Hibernate `validate` after migrations.
 
 The dependency-backed verifier runs `scripts/verify-flyway.sh` against a fresh
 isolated MariaDB schema before the application test suite. It applies and then
