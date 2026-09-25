@@ -1,6 +1,7 @@
 package com.project.souklab.service.chat;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -217,7 +218,14 @@ public class ConversationService {
     private User requireCurrentUser(boolean sending) { User user = currentUserProvider.requireCurrentUser(); requireEligible(user, sending); return user; }
     private void requireEligible(User user, boolean sending) {
         if (user.getStatus() == AccountStatus.SUSPENDED || user.getStatus() == AccountStatus.REJECTED) throw new ForbiddenException("Account is not eligible for messaging");
-        if (sending && (user.getStatus() != AccountStatus.ACTIVE || !user.isEmailVerified() || user.getPermissions().stream().noneMatch(p -> p.isEnabled() && Permission.Message.SEND.matches(p.getPermissionKey())))) throw new ForbiddenException("Account is not eligible to send messages");
+        if (sending) {
+            if (user.getClient() != null && !user.getClient().isPremium()) {
+                throw new ForbiddenException("A premium subscription is required for clients to initiate or send messages");
+            }
+            if (user.getStatus() != AccountStatus.ACTIVE || !user.isEmailVerified() || user.getPermissions().stream().noneMatch(p -> p.isEnabled() && Permission.Message.SEND.matches(p.getPermissionKey()))) {
+                throw new ForbiddenException("Account is not eligible to send messages");
+            }
+        }
     }
     private Conversation requireParticipant(String id, User user) { Conversation c = conversationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conversation not found")); if (!participantRepository.existsByConversationAndUser(c, user)) throw new ResourceNotFoundException("Conversation not found"); return c; }
     private ConversationParticipant otherParticipant(Conversation c, User current) { return c.getParticipants().stream().filter(p -> !p.getUser().getId().equals(current.getId())).findFirst().orElseThrow(); }
@@ -227,7 +235,33 @@ public class ConversationService {
         if (target.getCreatedAt() == null) return true;
         return target.getCreatedAt().isAfter(previous.getCreatedAt());
     }
-    private ConversationResponse toConversation(Conversation c, User current) { ConversationParticipant self = participantRepository.findByConversationAndUser(c, current).orElseThrow(); ConversationParticipant p = otherParticipant(c, current); String preview = messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(c, PageRequest.of(0, 1)).stream().findFirst().map(Message::getContent).orElse(null); LocalDateTime after = self.getLastReadMessageId() == null ? null : messageRepository.findById(self.getLastReadMessageId()).map(Message::getCreatedAt).orElse(null); long unread = messageRepository.countUnread(c, current, after); return new ConversationResponse(c.getId(), p.getUser().getId(), p.getUser().getName(), self.isArchived(), preview, unread, c.getUpdatedAt()); }
+    private ConversationResponse toConversation(Conversation c, User current) {
+        ConversationParticipant self = participantRepository.findByConversationAndUser(c, current).orElseThrow();
+        ConversationParticipant p = otherParticipant(c, current);
+        String preview = messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(c, PageRequest.of(0, 1)).stream().findFirst().map(Message::getContent).orElse(null);
+        LocalDateTime after = self.getLastReadMessageId() == null ? null : messageRepository.findById(self.getLastReadMessageId()).map(Message::getCreatedAt).orElse(null);
+        long unread = messageRepository.countUnread(c, current, after);
+        String participantName = resolveParticipantName(p.getUser(), current);
+        return new ConversationResponse(c.getId(), p.getUser().getId(), participantName, self.isArchived(), preview, unread, c.getUpdatedAt());
+    }
+    private String resolveParticipantName(User participant, User viewer) {
+        if (participant == null) return "Unknown";
+        if (participant.getArtisan() != null) {
+            boolean isAdmin = viewer != null && viewer.getPermissions() != null && viewer.getPermissions().stream()
+                    .anyMatch(p -> p.isEnabled() && Permission.Admin.USERS.matches(p.getPermissionKey()));
+            if (!isAdmin && viewer != null && viewer.getClient() != null && !viewer.getClient().isPremium()) {
+                String artisanId = participant.getArtisan().getId();
+                if (artisanId == null || artisanId.isBlank()) {
+                    return "Artisan #?????";
+                }
+                String suffix = artisanId.length() >= 5
+                        ? artisanId.substring(artisanId.length() - 5)
+                        : artisanId;
+                return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
+            }
+        }
+        return participant.getName();
+    }
     private MessageResponse toMessage(Message m) { return new MessageResponse(m.getId(), m.getConversation().getId(), m.getAuthor().getId(), m.getDeletedAt() == null ? m.getContent() : "", m.getDeletedAt() != null, m.getCreatedAt(), m.getEditedAt(), m.getAttachments().stream().map(a -> new MessageAttachmentResponse(a.getId(), a.getOriginalFilename(), a.getContentType(), a.getSize(), properties.getStorage().toUrl(a.getStorageKey()))).toList()); }
     private String encodeCursor(Message message) { LocalDateTime expiry = LocalDateTime.now(clock).plus(properties.getChat().getCursorLifetime()); String value = message.getCreatedAt() + "|" + message.getId() + "|" + expiry; return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8)); }
     private MessageCursor decodeCursor(String cursor) { if (cursor == null || cursor.isBlank()) return null; try { String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3); LocalDateTime expiry = LocalDateTime.parse(values[2]); if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired"); return new MessageCursor(LocalDateTime.parse(values[0]), values[1]); } catch (BadRequestException e) { throw e; } catch (Exception e) { throw new BadRequestException("Invalid message cursor"); } }
