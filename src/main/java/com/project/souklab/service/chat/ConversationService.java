@@ -93,6 +93,12 @@ public class ConversationService {
                 .filter(Objects::nonNull).toList();
     }
 
+    @Transactional(readOnly = true)
+    public ConversationResponse get(String id) {
+        User current = requireCurrentUser(false);
+        return toConversation(requireParticipant(id, current), current);
+    }
+
     @Transactional
     public void archive(String id, boolean archived) {
         User current = requireCurrentUser(false);

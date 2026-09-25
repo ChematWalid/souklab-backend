@@ -10,6 +10,8 @@ Manages the dual-sided Formateur accreditation lifecycle: artisan applications a
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/artisan/formateur-request` | `permission:artisan:content` | Submits accreditation application with motivation. Enforces 14-day cooldown. |
+| `GET` | `/api/v1/artisan/formateur-request` | `permission:artisan:content` | Gets the artisan's latest accreditation request. |
+| `GET` | `/api/v1/artisan/formateur-requests` | `permission:artisan:content` | Gets paginated accreditation request history. |
 
 ### Administrator Endpoints (`AdminFormateurController`)
 | Method | Endpoint | Access | Description |
@@ -21,7 +23,7 @@ Manages the dual-sided Formateur accreditation lifecycle: artisan applications a
 | `POST` | `/api/v1/admin/artisans/{id}/formateur-revoke` | `permission:admin:users` | Revokes formateur status from an artisan (`isTeacher=false`). |
 | `POST` | `/api/v1/admin/formateur-requests/{artisanId}/lift-cooldown` | `permission:admin:users` | Overrides cooldown or reapply restrictions on an artisan request. |
 
-> **Architecture Note on Single Request Inspection**: SoukLab intentionally does not expose an individual request inspection endpoint (`GET /formateur-requests/{id}`) for either artisans or administrators. Request state is communicated directly through decision action payloads, the administrative pending listing, and lifecycle notification dispatches.
+Formateur requests remain immutable after submission; artisans can inspect the latest state and paginated history, but cannot edit or cancel submitted requests.
 
 ---
 

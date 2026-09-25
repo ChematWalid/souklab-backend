@@ -3,6 +3,7 @@ package com.project.souklab.controller.formateur;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.formateur.FormateurRequestDTO;
 import com.project.souklab.dto.formateur.FormateurRequestResponseDTO;
+import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.service.formateur.ArtisanFormateurService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,5 +34,17 @@ public class ArtisanFormateurController {
         FormateurRequestResponseDTO response = artisanFormateurService.submitRequest(dto != null ? dto : new FormateurRequestDTO());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "Formateur request submitted successfully."));
+    }
+
+    @Operation(summary = "Get latest formateur request", description = "Retrieves the authenticated artisan's latest accreditation request.")
+    @GetMapping
+    public ResponseEntity<ApiResponse<FormateurRequestResponseDTO>> getLatestRequest() {
+        return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getLatestRequest(), "Formateur request retrieved successfully."));
+    }
+
+    @Operation(summary = "Get formateur request history", description = "Retrieves paginated accreditation request history for the authenticated artisan.")
+    @GetMapping("s")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FormateurRequestResponseDTO>>> getRequestHistory(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getRequestHistory(pageable), "Formateur request history retrieved successfully."));
     }
 }

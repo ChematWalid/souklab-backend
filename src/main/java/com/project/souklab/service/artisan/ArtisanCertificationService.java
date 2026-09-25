@@ -4,6 +4,7 @@ import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanCertificationRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dto.artisan.CertificationResponseDTO;
+import com.project.souklab.dto.artisan.CertificationUpdateDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.StorageResult;
@@ -105,6 +106,48 @@ public class ArtisanCertificationService {
                 .stream()
                 .map(CertificationResponseDTO::from)
                 .toList();
+    }
+
+    @Transactional
+    public CertificationResponseDTO updateCertification(String certificationId, CertificationUpdateDTO update, MultipartFile file) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        ArtisanCertification cert = certificationRepository.findByIdAndArtisanIdAndDeletedAtIsNull(certificationId, artisan.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found."));
+        String oldUrl = cert.getDocumentUrl();
+        String newStorageKey = null;
+        try {
+            if (update != null) {
+                if (update.getTitle() != null) cert.setTitle(update.getTitle());
+                if (update.getIssuer() != null) cert.setIssuer(update.getIssuer());
+                if (update.getIssuedAt() != null) cert.setIssuedAt(update.getIssuedAt());
+                if (update.getExpiresAt() != null) cert.setExpiresAt(update.getExpiresAt());
+            }
+            if (cert.getTitle() == null || cert.getTitle().isBlank() || cert.getIssuer() == null || cert.getIssuer().isBlank()) {
+                throw new BadRequestException("Certification title and issuer are required.");
+            }
+            if (cert.getIssuedAt() != null && cert.getExpiresAt() != null && cert.getExpiresAt().isBefore(cert.getIssuedAt())) {
+                throw new BadRequestException("Expiration date cannot be earlier than issuance date.");
+            }
+            if (file != null && !file.isEmpty()) {
+                long max = appProperties.getArtisan().getCertification().getMaxFileSize().toBytes();
+                if (file.getSize() > max) throw new FileTooLargeException(file.getSize(), max);
+                ValidatedFile validated = virusScanService.scan(validateAndSanitizeFile(file));
+                StorageResult stored = storageService.store(validated.content(), validated.sanitizedFilename(), validated.detectedMimeType(), validated.size());
+                newStorageKey = stored.key();
+                cert.setDocumentUrl(appProperties.getStorage().toUrl(newStorageKey));
+            }
+            cert.setVerified(false);
+            CertificationResponseDTO response = CertificationResponseDTO.from(certificationRepository.save(cert));
+            if (newStorageKey != null && oldUrl != null) {
+                storageObjectLifecycle.deleteAfterCommit(fileUrlResolver.toStorageKey(oldUrl));
+            }
+            return response;
+        } catch (Exception ex) {
+            if (newStorageKey != null) {
+                try { storageService.delete(newStorageKey); } catch (Exception cleanup) { log.error("Compensating certification replacement cleanup failed", cleanup); }
+            }
+            throw ex;
+        }
     }
 
     /**

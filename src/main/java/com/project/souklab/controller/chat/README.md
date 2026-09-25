@@ -12,6 +12,7 @@ All endpoints require authentication (`Authorization: Bearer <accessToken>`).
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/conversations` | Create/get conversation | Creates a private conversation with `recipientUserId` or returns existing. |
 | `GET` | `/api/v1/conversations` | List conversations | Lists all user conversations, optionally filtered by `?archived=true/false`. |
+| `GET` | `/api/v1/conversations/{id}` | Get conversation | Retrieves one conversation summary for a participant. |
 | `PATCH`| `/api/v1/conversations/{id}/archive` | Archive conversation | Toggles archive state for a conversation (`{ "archived": true/false }`). |
 | `GET` | `/api/v1/conversations/{id}/messages` | Get messages | Retrieves cursor-paginated message history (`?cursor=<id>&size=20`). |
 | `POST` | `/api/v1/conversations/{id}/messages` | Send message | Sends a text message in the conversation. |

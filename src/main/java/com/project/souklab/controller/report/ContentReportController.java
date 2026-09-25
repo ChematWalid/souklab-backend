@@ -65,6 +65,13 @@ public class ContentReportController {
         return ResponseEntity.ok(ApiResponse.success(reportService.list(status, targetType, pageable)));
     }
 
+    @Operation(summary = "Get report details", description = "Retrieves a complete content report for administrator moderation.")
+    @GetMapping("/api/v1/admin/reports/{id}")
+    @PreAuthorize("@accessControl.canModerateReports(authentication)")
+    public ResponseEntity<ApiResponse<ContentReportResponseDTO>> get(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(reportService.get(id)));
+    }
+
     /**
      * Resolves an open report with an explicit action.
      *

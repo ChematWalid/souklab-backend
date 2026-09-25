@@ -17,6 +17,8 @@ public interface ArtisanFormateurRequestRepository extends JpaRepository<Artisan
 
     Optional<ArtisanFormateurRequest> findFirstByArtisanAndDeletedAtIsNullOrderByCreatedAtDesc(Artisan artisan);
 
+    Page<ArtisanFormateurRequest> findByArtisanAndDeletedAtIsNullOrderByCreatedAtDesc(Artisan artisan, Pageable pageable);
+
     boolean existsByArtisanAndStatusAndDeletedAtIsNull(Artisan artisan, FormateurRequestStatus status);
 
     long countByStatusAndDeletedAtIsNull(FormateurRequestStatus status);

@@ -48,6 +48,12 @@ public class ArtisanReviewController {
         return ResponseEntity.ok(ApiResponse.success(reviewService.list(artisanId, pageable)));
     }
 
+    @GetMapping("/api/v1/artisan/reviews/{reviewId}")
+    @Operation(summary = "Get published artisan review", description = "Retrieves one publicly visible, published artisan review.")
+    public ResponseEntity<ApiResponse<ArtisanReviewResponseDTO>> get(@PathVariable String reviewId) {
+        return ResponseEntity.ok(ApiResponse.success(reviewService.getPublished(reviewId)));
+    }
+
     /**
      * Creates a review for an attended formation.
      *

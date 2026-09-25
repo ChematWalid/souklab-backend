@@ -27,6 +27,7 @@ HTTP adapters for artisan public profiles, professional qualification certificat
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/artisan/certifications` | `artisan:content` | Upload certification | Uploads and records an official qualification or certification document (PDF/image, multipart). |
 | `GET` | `/api/v1/artisan/certifications` | `artisan:content` | List certifications | Lists all certifications belonging to the authenticated artisan. |
+| `PUT` | `/api/v1/artisan/certifications/{id}` | `artisan:content` | Update certification | Multipart metadata/file update; resets verification and safely replaces the stored file. |
 | `DELETE` | `/api/v1/artisan/certifications/{id}` | `artisan:content` | Delete certification | Soft-deletes a certification document by ID. |
 
 #### Upload Details (`multipart/form-data`)
@@ -45,6 +46,7 @@ HTTP adapters for artisan public profiles, professional qualification certificat
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/artisan/gallery` | `artisan:content` | Upload gallery image | Uploads a portfolio showcase photograph (multipart, max 20 images quota). |
 | `GET` | `/api/v1/artisan/gallery` | `artisan:content` | List gallery images | Retrieves all active portfolio gallery images ordered by sequence. |
+| `PUT` | `/api/v1/artisan/gallery/{id}` | `artisan:content` | Update gallery image | Multipart metadata update with optional image replacement. |
 | `PUT` | `/api/v1/artisan/gallery/order` | `artisan:content` | Reorder gallery images | Updates the sequential presentation order of portfolio images. |
 | `DELETE` | `/api/v1/artisan/gallery/{id}` | `artisan:content` | Delete gallery image | Soft-deletes a portfolio showcase photograph. |
 

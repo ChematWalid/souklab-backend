@@ -116,6 +116,22 @@ public class ArtisanFormateurService {
         return mapToDTO(saved);
     }
 
+    @Transactional(readOnly = true)
+    public FormateurRequestResponseDTO getLatestRequest() {
+        Artisan artisan = currentArtisan();
+        return formateurRequestRepository.findFirstByArtisanAndDeletedAtIsNullOrderByCreatedAtDesc(artisan)
+                .map(this::mapToDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Formateur request not found."));
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<FormateurRequestResponseDTO> getRequestHistory(Pageable pageable) {
+        Artisan artisan = currentArtisan();
+        return PaginatedResponse.from(formateurRequestRepository
+                .findByArtisanAndDeletedAtIsNullOrderByCreatedAtDesc(artisan, pageable)
+                .map(this::mapToDTO));
+    }
+
     /**
      * Retrieves a paginated list of pending formateur requests for administrators.
      */
@@ -310,6 +326,14 @@ public class ArtisanFormateurService {
                 .decidedAt(req.getDecidedAt())
                 .createdAt(req.getCreatedAt())
                 .build();
+    }
+
+    private Artisan currentArtisan() {
+        String email = SecurityUtils.getCurrentUsername();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        return artisanRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Artisan profile not found."));
     }
 
     private static String resolveArtisanFullName(User user) {

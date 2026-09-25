@@ -1,6 +1,7 @@
 package com.project.souklab.controller.artisan;
 
 import com.project.souklab.dto.artisan.CertificationResponseDTO;
+import com.project.souklab.dto.artisan.CertificationUpdateDTO;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.service.artisan.ArtisanCertificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,6 +75,15 @@ public class ArtisanCertificationController {
     public ResponseEntity<ApiResponse<List<CertificationResponseDTO>>> getMyCertifications() {
         List<CertificationResponseDTO> certifications = artisanCertificationService.getMyCertifications();
         return ResponseEntity.ok(ApiResponse.success(certifications, "Certifications retrieved successfully"));
+    }
+
+    @Operation(summary = "Update certification", description = "Updates certification metadata and optionally replaces its stored file; any change resets verification.")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<CertificationResponseDTO>> updateCertification(
+            @PathVariable String id,
+            @ModelAttribute CertificationUpdateDTO update,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.success(artisanCertificationService.updateCertification(id, update, file), "Certification updated successfully"));
     }
 
     /**

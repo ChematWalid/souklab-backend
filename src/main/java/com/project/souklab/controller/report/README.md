@@ -23,6 +23,7 @@ REST controller for submitting user complaints/abuse reports against platform co
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/reports` | Authenticated | Submit report | Creates a content report against a user, feed post, or review. |
 | `GET` | `/api/v1/admin/reports` | Admin (`canModerateReports`) | List moderation queue | Retrieves paginated reports with optional `status` and `targetType` filters. |
+| `GET` | `/api/v1/admin/reports/{id}` | Admin (`canModerateReports`) | Get report details | Retrieves the complete report DTO. |
 | `POST` | `/api/v1/admin/reports/{id}/resolve` | Admin (`canModerateReports`) | Resolve report | Executes an administrative moderation action (`DISMISS`, `HIDE`, `REMOVE`) with notes. |
 
 ---

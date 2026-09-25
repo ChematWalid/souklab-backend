@@ -66,6 +66,13 @@ public class ArtisanReviewService {
                 .map(ArtisanReviewResponseDTO::from);
     }
 
+    @Transactional(readOnly = true)
+    public ArtisanReviewResponseDTO getPublished(String reviewId) {
+        return reviewRepository.findByIdAndStatusAndDeletedAtIsNull(reviewId, ReviewStatus.PUBLISHED)
+                .map(ArtisanReviewResponseDTO::from)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found."));
+    }
+
     /**
      * Creates a review for an attended, completed formation enrollment.
      *

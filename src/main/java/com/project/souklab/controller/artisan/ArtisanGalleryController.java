@@ -1,6 +1,7 @@
 package com.project.souklab.controller.artisan;
 
 import com.project.souklab.dto.artisan.GalleryImageResponseDTO;
+import com.project.souklab.dto.artisan.GalleryImageUpdateDTO;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.service.artisan.ArtisanGalleryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -79,6 +81,15 @@ public class ArtisanGalleryController {
     public ResponseEntity<ApiResponse<Void>> reorderGallery(@RequestBody List<String> imageIds) {
         artisanGalleryService.reorderGallery(imageIds);
         return ResponseEntity.ok(ApiResponse.success(null, "Gallery display order updated successfully"));
+    }
+
+    @Operation(summary = "Update portfolio image", description = "Updates gallery metadata and optionally replaces the stored image file.")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<GalleryImageResponseDTO>> updateImage(
+            @PathVariable String id,
+            @ModelAttribute GalleryImageUpdateDTO update,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.success(artisanGalleryService.updateImage(id, update, file), "Gallery image updated successfully"));
     }
 
     /**

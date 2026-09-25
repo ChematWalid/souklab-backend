@@ -35,6 +35,12 @@ public class ConversationController {
         return ResponseEntity.ok(ApiResponse.success(service.list(archived)));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get conversation", description = "Retrieves a conversation summary for one of its participants.")
+    public ResponseEntity<ApiResponse<ConversationResponse>> get(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(service.get(id)));
+    }
+
     @PatchMapping("/{id}/archive")
     @Operation(summary = "Archive or unarchive conversation", description = "Toggles archive state for a conversation.")
     public ResponseEntity<ApiResponse<Void>> archive(@PathVariable String id, @Valid @RequestBody ArchiveConversationRequest request) {

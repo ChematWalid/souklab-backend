@@ -131,6 +131,14 @@ public class ContentReportService {
         return reports.map(ContentReportResponseDTO::from);
     }
 
+    @Transactional(readOnly = true)
+    public ContentReportResponseDTO get(String reportId) {
+        requireAdmin();
+        return reportRepository.findById(reportId)
+                .map(ContentReportResponseDTO::from)
+                .orElseThrow(() -> new ResourceNotFoundException("Report not found."));
+    }
+
     /**
      * Resolves a report and applies the selected target action.
      *

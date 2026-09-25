@@ -4,6 +4,7 @@ import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanGalleryImageRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dto.artisan.GalleryImageResponseDTO;
+import com.project.souklab.dto.artisan.GalleryImageUpdateDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.filestorage.StorageResult;
@@ -103,6 +104,38 @@ public class ArtisanGalleryService {
                 .stream()
                 .map(GalleryImageResponseDTO::from)
                 .toList();
+    }
+
+    @Transactional
+    public GalleryImageResponseDTO updateImage(String imageId, GalleryImageUpdateDTO update, MultipartFile file) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        ArtisanGalleryImage image = galleryImageRepository.findByIdAndArtisanIdAndDeletedAtIsNull(imageId, artisan.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Gallery image not found."));
+        String oldUrl = image.getImageUrl();
+        String newStorageKey = null;
+        try {
+            if (update != null) {
+                image.setTitle(update.getTitle());
+                image.setCaption(update.getCaption());
+            }
+            if (file != null && !file.isEmpty()) {
+                validateUploadPayload(file);
+                ValidatedFile validated = virusScanService.scan(validateAndSanitizeFile(file));
+                StorageResult stored = storageService.store(validated.content(), validated.sanitizedFilename(), validated.detectedMimeType(), validated.size());
+                newStorageKey = stored.key();
+                image.setImageUrl(appProperties.getStorage().toUrl(newStorageKey));
+            }
+            GalleryImageResponseDTO response = GalleryImageResponseDTO.from(galleryImageRepository.save(image));
+            if (newStorageKey != null) {
+                storageObjectLifecycle.deleteAfterCommit(fileUrlResolver.toStorageKey(oldUrl));
+            }
+            return response;
+        } catch (Exception ex) {
+            if (newStorageKey != null) {
+                try { storageService.delete(newStorageKey); } catch (Exception cleanup) { log.error("Compensating gallery replacement cleanup failed", cleanup); }
+            }
+            throw ex;
+        }
     }
 
     /**
