@@ -203,7 +203,9 @@ Community engagement platform for artisans and clients.
 - `POST/DELETE /api/v1/feed/{id}/likes`: Idempotent per-user post like/unlike.
 - `POST/DELETE /api/v1/feed/{id}/bookmarks`: Save/remove a post; `GET /api/v1/feed/saved` lists saved posts.
 - `GET/POST /api/v1/feed/{id}/comments`: Read root comments or add one.
+- `GET /api/v1/feed/comments/{commentId}`: Read one visible comment or reply.
 - `GET/POST /api/v1/feed/comments/{commentId}/replies`: Read or add one-level replies.
+- `PUT /api/v1/feed/comments/{commentId}`: Update an owned comment or reply.
 - `POST/DELETE /api/v1/feed/comments/{commentId}/likes`: Idempotent comment like/unlike.
 - `DELETE /api/v1/feed/comments/{commentId}`: Remove a comment as its author, post owner, or feed moderator.
 - `POST /api/v1/feed/{id}/share`: Increment share count and return a relative share path.

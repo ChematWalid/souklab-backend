@@ -559,7 +559,9 @@ Admin permanent block (canReapply=false): future requests → 403 Forbidden unti
 | `GET /api/v1/feed/saved` | GET | Authenticated | List saved posts |
 | `GET /api/v1/feed/{id}/comments` | GET | Public | List root comments and replies |
 | `POST /api/v1/feed/{id}/comments` | POST | Authenticated | Add a root comment |
+| `GET /api/v1/feed/comments/{commentId}` | GET | Public | Get one visible comment or reply |
 | `POST /api/v1/feed/comments/{commentId}/replies` | POST | Authenticated | Reply one level deep to a comment |
+| `PUT /api/v1/feed/comments/{commentId}` | PUT | Authenticated | Update an owned comment or reply |
 | `POST/DELETE /api/v1/feed/comments/{commentId}/likes` | POST/DELETE | Authenticated | Idempotent comment like and unlike |
 | `GET /api/v1/feed/comments/{commentId}/likes` | GET | Public | Read the current caller's comment-like status |
 | `DELETE /api/v1/feed/comments/{commentId}` | DELETE | Authenticated/moderator | Soft-delete a comment |

@@ -49,7 +49,9 @@ Feed posts are moderated and use the states `DRAFT`, `PENDING`, `PUBLISHED`,
 | POST/DELETE | `/api/v1/feed/{id}/bookmarks` | Save/remove a post |
 | GET | `/api/v1/feed/saved` | Saved posts |
 | GET/POST | `/api/v1/feed/{id}/comments` | Root comments |
+| GET | `/api/v1/feed/comments/{commentId}` | Read one visible comment or reply |
 | GET/POST | `/api/v1/feed/comments/{commentId}/replies` | One-level replies |
+| PUT | `/api/v1/feed/comments/{commentId}` | Update an owned comment or reply |
 | POST/DELETE | `/api/v1/feed/comments/{commentId}/likes` | Idempotent comment like/unlike |
 | DELETE | `/api/v1/feed/comments/{commentId}` | Author, post owner, or feed moderator removes a comment |
 | POST | `/api/v1/feed/{id}/share` | Increment share counter and return a relative share path |

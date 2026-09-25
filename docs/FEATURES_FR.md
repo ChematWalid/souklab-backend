@@ -558,7 +558,9 @@ Admin blocage permanent (canReapply=false) : futures demandes → 403 Forbidden 
 | `POST/DELETE /api/v1/feed/{id}/bookmarks` | POST/DELETE | Authentifiée | Ajouter/retirer un post des favoris |
 | `GET /api/v1/feed/saved` | GET | Authentifiée | Lister ses posts enregistrés |
 | `GET/POST /api/v1/feed/{id}/comments` | GET/POST | Public/authentifiée | Lire des commentaires racine publiquement ou en ajouter avec authentification |
+| `GET /api/v1/feed/comments/{commentId}` | GET | Public | Lire un commentaire ou une réponse visible |
 | `GET/POST /api/v1/feed/comments/{commentId}/replies` | GET/POST | Public/authentifiée | Lire ou ajouter une réponse de niveau 1 |
+| `PUT /api/v1/feed/comments/{commentId}` | PUT | Authentifiée | Modifier son commentaire ou sa réponse |
 | `POST/DELETE /api/v1/feed/comments/{commentId}/likes` | POST/DELETE | Authentifiée | Aimer/retirer son like d'un commentaire |
 | `GET /api/v1/feed/comments/{commentId}/likes` | GET | Public | Lire l'état du like du commentaire pour l'appelant |
 | `DELETE /api/v1/feed/comments/{commentId}` | DELETE | Authentifiée/modérateur | Supprimer logiquement un commentaire |
