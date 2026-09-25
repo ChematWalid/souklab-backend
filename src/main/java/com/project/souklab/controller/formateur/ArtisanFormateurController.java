@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Instructor Accreditation", description = "Artisan applications for masterclass instructor (formateur) accreditation")
 @RestController
-@RequestMapping("/api/v1/artisan/formateur-request")
+@RequestMapping("/api/v1/artisan")
 @RequiredArgsConstructor
 @PreAuthorize("@accessControl.canManageArtisanContent(authentication)")
 public class ArtisanFormateurController {
@@ -29,7 +29,7 @@ public class ArtisanFormateurController {
     private final ArtisanFormateurService artisanFormateurService;
 
     @Operation(summary = "Submit formateur accreditation request", description = "Submit an application to be accredited as a masterclass instructor.")
-    @PostMapping
+    @PostMapping("/formateur-request")
     public ResponseEntity<ApiResponse<FormateurRequestResponseDTO>> submitRequest(@Valid @RequestBody(required = false) FormateurRequestDTO dto) {
         FormateurRequestResponseDTO response = artisanFormateurService.submitRequest(dto != null ? dto : new FormateurRequestDTO());
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -37,13 +37,13 @@ public class ArtisanFormateurController {
     }
 
     @Operation(summary = "Get latest formateur request", description = "Retrieves the authenticated artisan's latest accreditation request.")
-    @GetMapping
+    @GetMapping("/formateur-request")
     public ResponseEntity<ApiResponse<FormateurRequestResponseDTO>> getLatestRequest() {
         return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getLatestRequest(), "Formateur request retrieved successfully."));
     }
 
     @Operation(summary = "Get formateur request history", description = "Retrieves paginated accreditation request history for the authenticated artisan.")
-    @GetMapping("s")
+    @GetMapping("/formateur-requests")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormateurRequestResponseDTO>>> getRequestHistory(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(artisanFormateurService.getRequestHistory(pageable), "Formateur request history retrieved successfully."));
     }
