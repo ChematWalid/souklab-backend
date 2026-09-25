@@ -231,4 +231,47 @@ class ArtisanGalleryControllerTest {
                     .andExpect(status().isForbidden());
         }
     }
+
+    @Nested
+    @DisplayName("Get Single Gallery Image (GET /api/v1/artisan/gallery/{id})")
+    class GetGalleryImageEndpointTests {
+
+        @Test
+        @DisplayName("getImage_whenArtisanRole_shouldReturn200Ok")
+        void getImage_whenArtisanRole_shouldReturn200Ok() throws Exception {
+            GalleryImageResponseDTO image = GalleryImageResponseDTO.builder()
+                    .id("img-101")
+                    .imageUrl("https://storage.souklab.com/img.jpg")
+                    .displayOrder(1)
+                    .title("Pottery")
+                    .build();
+
+            when(artisanGalleryService.getImage("img-101")).thenReturn(image);
+
+            mockMvc.perform(get(GALLERY_URL + "/img-101")
+                            .with(artisan()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.data.id").value("img-101"))
+                    .andExpect(jsonPath("$.data.title").value("Pottery"));
+
+            verify(artisanGalleryService).getImage("img-101");
+        }
+
+        @Test
+        @DisplayName("getImage_whenClientRole_shouldReturn403Forbidden")
+        void getImage_whenClientRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(get(GALLERY_URL + "/img-101")
+                            .with(client()))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("getImage_whenUnauthenticated_shouldReturn401Unauthorized")
+        void getImage_whenUnauthenticated_shouldReturn401Unauthorized() throws Exception {
+            mockMvc.perform(get(GALLERY_URL + "/img-101"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
 }

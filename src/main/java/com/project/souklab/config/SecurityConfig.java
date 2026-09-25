@@ -169,6 +169,7 @@ public class SecurityConfig {
                                 "/api/v1/catalog/**",
                                 "/api/v1/public/**",
                                 "/api/v1/subscriptions/plans",
+                                "/api/v1/subscriptions/plans/**",
                                 "/api/v1/artisans/*/reviews",
                                 "/api/v1/artisan/reviews/**"
                         ).permitAll()

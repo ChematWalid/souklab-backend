@@ -77,6 +77,19 @@ public class ArtisanCertificationController {
         return ResponseEntity.ok(ApiResponse.success(certifications, "Certifications retrieved successfully"));
     }
 
+    /**
+     * Retrieves a single professional certification belonging to the authenticated artisan.
+     *
+     * @param id the unique identifier of the certification
+     * @return 200 OK with certification DTO
+     */
+    @Operation(summary = "Get single certification", description = "Retrieve a single professional qualification or certification document by its identifier.")
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CertificationResponseDTO>> getCertification(@PathVariable("id") String id) {
+        CertificationResponseDTO certification = artisanCertificationService.getCertification(id);
+        return ResponseEntity.ok(ApiResponse.success(certification, "Certification retrieved successfully"));
+    }
+
     @Operation(summary = "Update certification", description = "Updates certification metadata and optionally replaces its stored file; any change resets verification.")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<CertificationResponseDTO>> updateCertification(

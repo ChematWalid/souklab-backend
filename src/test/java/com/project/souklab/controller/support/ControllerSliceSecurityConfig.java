@@ -51,6 +51,7 @@ public class ControllerSliceSecurityConfig {
                                 "/api/v1/catalog/**",
                                 "/api/v1/public/**",
                                 "/api/v1/subscriptions/plans",
+                                "/api/v1/subscriptions/plans/**",
                                 "/api/v1/integrations/chargily/webhook"
                         ).permitAll()
                         .anyRequest().authenticated()

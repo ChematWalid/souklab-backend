@@ -71,6 +71,19 @@ public class ArtisanGalleryController {
     }
 
     /**
+     * Retrieves a single showcase gallery image belonging to the authenticated artisan.
+     *
+     * @param id unique identifier of the gallery image
+     * @return 200 OK with gallery image DTO
+     */
+    @Operation(summary = "Get single gallery image", description = "Retrieve a single showcase gallery image belonging to the authenticated artisan.")
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<GalleryImageResponseDTO>> getImage(@PathVariable("id") String id) {
+        GalleryImageResponseDTO image = artisanGalleryService.getImage(id);
+        return ResponseEntity.ok(ApiResponse.success(image, "Gallery image retrieved successfully"));
+    }
+
+    /**
      * Reorders the presentation sequence of gallery images for the authenticated artisan.
      *
      * @param imageIds complete list of active gallery image IDs in desired sequence

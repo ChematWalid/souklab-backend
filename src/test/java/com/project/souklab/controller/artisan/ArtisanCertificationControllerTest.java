@@ -209,4 +209,47 @@ class ArtisanCertificationControllerTest {
                     .andExpect(status().isForbidden());
         }
     }
+
+    @Nested
+    @DisplayName("Get Single Certification (GET /api/v1/artisan/certifications/{id})")
+    class GetCertificationEndpointTests {
+
+        @Test
+        @DisplayName("getCertification_whenArtisanRole_shouldReturn200Ok")
+        void getCertification_whenArtisanRole_shouldReturn200Ok() throws Exception {
+            CertificationResponseDTO cert = CertificationResponseDTO.builder()
+                    .id("cert-101")
+                    .title("Diplome")
+                    .issuer("CAM")
+                    .isVerified(true)
+                    .build();
+
+            when(artisanCertificationService.getCertification("cert-101")).thenReturn(cert);
+
+            mockMvc.perform(get(CERTIFICATIONS_URL + "/cert-101")
+                            .with(artisan()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.data.id").value("cert-101"))
+                    .andExpect(jsonPath("$.data.title").value("Diplome"));
+
+            verify(artisanCertificationService).getCertification("cert-101");
+        }
+
+        @Test
+        @DisplayName("getCertification_whenClientRole_shouldReturn403Forbidden")
+        void getCertification_whenClientRole_shouldReturn403Forbidden() throws Exception {
+            mockMvc.perform(get(CERTIFICATIONS_URL + "/cert-101")
+                            .with(client()))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("getCertification_whenUnauthenticated_shouldReturn401Unauthorized")
+        void getCertification_whenUnauthenticated_shouldReturn401Unauthorized() throws Exception {
+            mockMvc.perform(get(CERTIFICATIONS_URL + "/cert-101"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
 }

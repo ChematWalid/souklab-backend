@@ -106,6 +106,22 @@ public class ArtisanGalleryService {
                 .toList();
     }
 
+    /**
+     * Retrieves a single showcase gallery image belonging to the authenticated artisan.
+     *
+     * @param imageId unique identifier of the gallery image
+     * @return response DTO representing the gallery image
+     * @throws ResourceNotFoundException if the image is missing, deleted, or owned by another artisan
+     */
+    @Transactional(readOnly = true)
+    public GalleryImageResponseDTO getImage(String imageId) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        ArtisanGalleryImage image = galleryImageRepository
+                .findByIdAndArtisanIdAndDeletedAtIsNull(imageId, artisan.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Gallery image not found."));
+        return GalleryImageResponseDTO.from(image);
+    }
+
     @Transactional
     public GalleryImageResponseDTO updateImage(String imageId, GalleryImageUpdateDTO update, MultipartFile file) {
         Artisan artisan = resolveAuthenticatedArtisan();

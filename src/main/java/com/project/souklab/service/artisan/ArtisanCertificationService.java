@@ -108,6 +108,22 @@ public class ArtisanCertificationService {
                 .toList();
     }
 
+    /**
+     * Retrieves a single professional certification belonging to the authenticated artisan.
+     *
+     * @param certificationId unique identifier of the certification
+     * @return response DTO representing the certification
+     * @throws ResourceNotFoundException if the certification is missing, deleted, or owned by another artisan
+     */
+    @Transactional(readOnly = true)
+    public CertificationResponseDTO getCertification(String certificationId) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        ArtisanCertification cert = certificationRepository
+                .findByIdAndArtisanIdAndDeletedAtIsNull(certificationId, artisan.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found."));
+        return CertificationResponseDTO.from(cert);
+    }
+
     @Transactional
     public CertificationResponseDTO updateCertification(String certificationId, CertificationUpdateDTO update, MultipartFile file) {
         Artisan artisan = resolveAuthenticatedArtisan();
