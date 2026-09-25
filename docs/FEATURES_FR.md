@@ -6,7 +6,7 @@
 > **Version :** Spring Boot 4.0.8 · Java 21 · Généré depuis l'arbre source live le 2026-09-25.
 
 Ce document est la référence technique officielle des fonctionnalités du backend Souklab, dérivée du code source.  
-Chaque fonctionnalité listée ici a été vérifiée lors d'une campagne de tests exhaustive en conditions réelles (566 scénarios, taux de réussite de 100 %) et confirmée par la dernière suite de tests automatisés (1 439 tests, 0 échec, 0 erreur, 10 exclusions dépendantes de l'environnement).
+La campagne exhaustive en conditions réelles a enregistré 566 scénarios avec un taux de réussite de 100 % le 2026-09-22. La dernière suite automatisée a validé l'arbre source actuel avec 1 439 tests, 0 échec, 0 erreur et 10 exclusions dépendantes de l'environnement.
 
 ---
 

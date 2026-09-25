@@ -6,7 +6,7 @@
 > **Version:** Spring Boot 4.0.8 · Java 21 · Generated from live source tree 2026-09-25.
 
 This document is the canonical, code-derived feature reference for the Souklab backend.  
-Every feature listed here was verified in a live exhaustive test campaign (566 scenarios, 100% pass rate) and confirmed by the latest automated test suite (1,439 tests, 0 failures, 0 errors, 10 environment-dependent skips).
+The live exhaustive campaign recorded 566 scenarios with a 100% pass rate on 2026-09-22. The latest automated suite confirmed the current source tree with 1,439 tests, 0 failures, 0 errors, and 10 environment-dependent skips.
 
 ---
 
