@@ -128,3 +128,12 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 - [x] **Step 11.5**: Seed official verbatim French taxonomy: 8 building trades categories (37 subcategories) and 6 Mediterranean material families (25 materials) with idempotent startup validation.
 - [x] **Step 11.6**: Complete verification test suites (unit, slice, cache eviction, integration, and live HTTP curl testing) with 0 regressions.
 
+---
+
+## 📍 Phase 12: Single-Resource CRUD Symmetry, Live Fuzzing Resilience & Client Premium Chat Privacy (COMPLETED)
+- [x] **Step 12.1**: Implement 12 missing single-resource read (`GET /{id}`) endpoints across Artisan (`certifications/{id}`, `gallery/{id}`, `formateur-requests/{id}`), Admin (`users/{id}`, `subscription-plans/{id}`, `formateur-requests/{id}`, `formations/{id}`, `subscriptions/{id}`, `feed/{id}`), Public (`subscriptions/plans/{id}`), and Authenticated (`avatars/{id}`, `notifications/{id}`).
+- [x] **Step 12.2**: Implement strict client premium gating in messaging (`POST /conversations`, `POST /conversations/{id}/messages`, `/messages.send`, attachment uploads, typing events) returning `403 Forbidden` for non-premium clients.
+- [x] **Step 12.3**: Implement dynamic artisan display name masking (`Artisan #XXXXX`) for non-premium clients in conversation listings and summaries to eliminate off-platform disintermediation.
+- [x] **Step 12.4**: Build exhaustive live curl test suite (`scripts/test-crud-scenarios.py`) executing 173 scenarios against live Docker container covering authentication, RBAC, cross-tenant IDOR, soft-delete privacy, method tampering, and fuzzing (SQLi, XSS, path traversal, null bytes, long strings). All 173 passed (0 failures).
+- [x] **Step 12.5**: Complete verification suite: all 1,470 tests passing, OpenAPI synchronized (220 operations), live HTTP verification passing with 0 errors.
+

@@ -9,7 +9,7 @@ HTTP REST adapter and STOMP WebSocket controller for private direct conversation
 All endpoints require authentication (`Authorization: Bearer <accessToken>`).
 
 > [!IMPORTANT]
-> **Client Premium Requirement**: Clients require an active Premium subscription to initiate conversations (`POST /api/v1/conversations`), send messages (`POST /api/v1/conversations/{id}/messages` and STOMP `/app/chat.send`), edit messages, or upload attachments. Non-premium clients attempting these operations receive `403 Forbidden`. Non-premium clients may view past conversation messages and submit read receipts, but the artisan's name will be masked (`Artisan #XXXXX`). Artisans and administrators are exempt from client subscription checks.
+> **Client Premium Requirement**: Clients require an active Premium subscription to initiate conversations (`POST /api/v1/conversations`), send messages (`POST /api/v1/conversations/{id}/messages` and STOMP `/app/v1/conversations/{conversationId}/messages.send`), edit messages, upload attachments, or broadcast typing events. Non-premium clients attempting these operations receive `403 Forbidden`. Non-premium clients may view past conversation messages and submit read receipts, but the artisan's name will be masked (`Artisan #XXXXX`). Artisans and administrators are exempt from client subscription checks.
 
 | Method | Endpoint | Summary | Description |
 | :--- | :--- | :--- | :--- |

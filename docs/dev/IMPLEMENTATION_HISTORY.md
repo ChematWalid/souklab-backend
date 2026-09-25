@@ -678,18 +678,30 @@ fresh MariaDB schema.
 - `.github/workflows/production-verification.yml` — hosted verification
   workflow.
 
+## Phase 12 — Single-resource CRUD symmetry, live fuzzing resilience & client premium chat privacy
+
+### Delivered capabilities
+
+- Resolved all asymmetric CRUD interfaces across the 31 system controllers by adding 12 single-resource read (`GET /{id}`) endpoints.
+- Fully wired through transactional application services with strict RBAC, soft-delete filtering, and cross-tenant IDOR protection.
+- Enforced client premium messaging requirement: clients without an active premium subscription are blocked (`403 Forbidden`) from initiating conversations (`POST /api/v1/conversations`), sending messages (`POST /api/v1/conversations/{id}/messages` and STOMP `/messages.send`), editing messages, uploading attachments, or broadcasting typing events.
+- Hardened client recognition logic (`isClient`) to fail-closed across both profiled clients and unprofiled accounts with client permissions.
+- Implemented dynamic artisan display name masking (`Artisan #XXXXX`) in conversation listings and summaries for non-premium viewers, preventing off-platform disintermediation.
+- Created live curl scenario runner (`scripts/test-crud-scenarios.py`) executing 173 live test scenarios covering missing auth, RBAC isolation, cross-tenant IDOR, soft-delete states, HTTP method tampering, and fuzzing payloads (SQLi, XSS, path traversal, null bytes, long strings). All 173 scenarios passed with 0 failures.
+
 ## Verification evidence currently available
 
 The recorded local Docker-backed run has validated:
 
-- fresh MariaDB/Flyway migration application through V13;
+- fresh MariaDB/Flyway migration application through V18;
 - RabbitMQ durable topology, confirms, delivery, and idempotency;
 - Redis-backed rate-limit integration;
 - MinIO storage tests;
 - analytics configuration and event/rollup code paths;
-- complete Maven suite at the recorded baseline:
-  `Tests run: 1223, Failures: 0, Errors: 0, Skipped: 4`;
-- source hygiene and migration checks.
+- complete Maven suite: `Tests run: 1470, Failures: 0, Errors: 0, Skipped: 10`;
+- source hygiene and migration checks;
+- live HTTP sweep: 220 synchronized OpenAPI operations, 782 live test cases (`LIVE_HTTP_RESULT=PASS`);
+- live CRUD & Chat Security resilience test suite: 173 scenarios, 173 passed, 0 failures.
 
 A later verification run from the latest enum-taxonomy commit is the stronger
 evidence when it completes. Hosted CI, production backup/restore, immutable
