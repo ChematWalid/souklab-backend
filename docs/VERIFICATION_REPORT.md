@@ -9,7 +9,16 @@ synthetic `@souklab.test` identities may appear in local workflow artifacts.
 Requirement-by-requirement coverage is summarized in
 `docs/VERIFICATION_COVERAGE_MATRIX.md`.
 
-## Latest verification — 2026-09-25
+## Latest verification — 2026-09-26
+
+- Live CRUD & Chat Security Resilience Suite (`scripts/test-crud-scenarios.py`): 173 live curl scenarios executed against the running Docker container covering 12 single-resource read endpoints and chat privacy/premium flows.
+  - Zero-day boundary checks: IDOR cross-tenant isolation, missing/tampered auth (`401`), privilege escalation (`403`), soft-deleted entity privacy (`404`), and HTTP method tampering (`405`).
+  - Strict input fuzzing: SQL injection payloads, XSS vectors, path traversal tokens, null-byte payloads, 500-character boundary strings, whitespace strings, and non-existent UUIDs all handled safely (`400` or `404`, zero `500` server errors).
+  - Chat privacy & premium enforcement: Non-premium client conversation initiation blocked (`403`), non-premium client message sending blocked (`403`), artisan identity masked as `Artisan #XXXXX` for non-premium viewers, unmasked for premium viewers and admins.
+  - All 173 scenarios passed (0 failures).
+- Source hygiene and API contract synchronization checks passed (`scripts/check-source-hygiene.sh`, `scripts/check-api-contract.sh`, `scripts/verify-live-http.sh`).
+
+## Previous verification — 2026-09-25
 
 - The full Maven suite completed with 1,439 tests, 0 failures, 0 errors, and
   10 environment-dependent skips.
