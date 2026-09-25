@@ -74,7 +74,7 @@ public class ConversationService {
         User current = requireCurrentUser(true);
         User recipient = userRepository.findById(recipientId).orElseThrow(() -> new ResourceNotFoundException("Recipient not found"));
         if (current.getId().equals(recipient.getId())) throw new BadRequestException("You cannot message yourself");
-        requireEligible(recipient, true);
+        requireEligible(recipient, false);
         Conversation conversation = conversationRepository.findBetween(current, recipient).orElseGet(() -> {
             Conversation created = new Conversation();
             ConversationParticipant first = new ConversationParticipant(); first.setUser(current); first.setArchived(false);
@@ -217,12 +217,17 @@ public class ConversationService {
 
     private User requireCurrentUser(boolean sending) { User user = currentUserProvider.requireCurrentUser(); requireEligible(user, sending); return user; }
     private void requireEligible(User user, boolean sending) {
-        if (user.getStatus() == AccountStatus.SUSPENDED || user.getStatus() == AccountStatus.REJECTED) throw new ForbiddenException("Account is not eligible for messaging");
+        if (user.getStatus() != AccountStatus.ACTIVE || !user.isEmailVerified()) {
+            throw new ForbiddenException("Account is not eligible for messaging");
+        }
         if (sending) {
-            if (user.getClient() != null && !user.getClient().isPremium()) {
-                throw new ForbiddenException("A premium subscription is required for clients to initiate or send messages");
+            if (isClient(user)) {
+                boolean isPremium = user.getClient() != null && user.getClient().isPremium();
+                if (!isPremium) {
+                    throw new ForbiddenException("A premium subscription is required for clients to initiate or send messages");
+                }
             }
-            if (user.getStatus() != AccountStatus.ACTIVE || !user.isEmailVerified() || user.getPermissions().stream().noneMatch(p -> p.isEnabled() && Permission.Message.SEND.matches(p.getPermissionKey()))) {
+            if (user.getPermissions().stream().noneMatch(p -> p.isEnabled() && Permission.Message.SEND.matches(p.getPermissionKey()))) {
                 throw new ForbiddenException("Account is not eligible to send messages");
             }
         }
@@ -249,18 +254,32 @@ public class ConversationService {
         if (participant.getArtisan() != null) {
             boolean isAdmin = viewer != null && viewer.getPermissions() != null && viewer.getPermissions().stream()
                     .anyMatch(p -> p.isEnabled() && Permission.Admin.USERS.matches(p.getPermissionKey()));
-            if (!isAdmin && viewer != null && viewer.getClient() != null && !viewer.getClient().isPremium()) {
-                String artisanId = participant.getArtisan().getId();
-                if (artisanId == null || artisanId.isBlank()) {
-                    return "Artisan #?????";
+            boolean isSelf = viewer != null && viewer.getId() != null && viewer.getId().equals(participant.getId());
+            if (!isAdmin && !isSelf && isClient(viewer)) {
+                boolean isPremium = viewer.getClient() != null && viewer.getClient().isPremium();
+                if (!isPremium) {
+                    String artisanId = participant.getArtisan().getId();
+                    if (artisanId == null || artisanId.isBlank()) {
+                        return "Artisan #?????";
+                    }
+                    String suffix = artisanId.length() >= 5
+                            ? artisanId.substring(artisanId.length() - 5)
+                            : artisanId;
+                    return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
                 }
-                String suffix = artisanId.length() >= 5
-                        ? artisanId.substring(artisanId.length() - 5)
-                        : artisanId;
-                return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
             }
         }
         return participant.getName();
+    }
+    private boolean isClient(User user) {
+        if (user == null) return false;
+        if (user.getArtisan() != null) return false;
+        if (user.getClient() != null) return true;
+        if (user.getPermissions() != null) {
+            return user.getPermissions().stream()
+                    .anyMatch(p -> p.isEnabled() && Permission.Client.FAVORITES.matches(p.getPermissionKey()));
+        }
+        return false;
     }
     private MessageResponse toMessage(Message m) { return new MessageResponse(m.getId(), m.getConversation().getId(), m.getAuthor().getId(), m.getDeletedAt() == null ? m.getContent() : "", m.getDeletedAt() != null, m.getCreatedAt(), m.getEditedAt(), m.getAttachments().stream().map(a -> new MessageAttachmentResponse(a.getId(), a.getOriginalFilename(), a.getContentType(), a.getSize(), properties.getStorage().toUrl(a.getStorageKey()))).toList()); }
     private String encodeCursor(Message message) { LocalDateTime expiry = LocalDateTime.now(clock).plus(properties.getChat().getCursorLifetime()); String value = message.getCreatedAt() + "|" + message.getId() + "|" + expiry; return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8)); }
