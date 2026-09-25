@@ -651,6 +651,141 @@ class ConversationServiceTest {
                 .isInstanceOf(BadRequestException.class);
     }
 
+    @Test
+    void createOrGet_whenNonPremiumClient_throwsForbiddenException() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(false).build();
+        sender.setClient(client);
+
+        assertThatThrownBy(() -> service.createOrGet(recipient.getId()))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("premium subscription is required");
+    }
+
+    @Test
+    void send_whenNonPremiumClient_throwsForbiddenException() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(false).build();
+        sender.setClient(client);
+
+        assertThatThrownBy(() -> service.send("conversation", new SendMessageRequest("k", "hi", List.of())))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("premium subscription is required");
+    }
+
+    @Test
+    void uploadAttachment_whenNonPremiumClient_throwsForbiddenException() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(false).build();
+        sender.setClient(client);
+
+        MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "data".getBytes());
+        assertThatThrownBy(() -> service.uploadAttachment("conversation", file))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("premium subscription is required");
+    }
+
+    @Test
+    void createOrGet_whenPremiumClient_succeeds() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(true).build();
+        sender.setClient(client);
+
+        when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
+        when(conversationRepository.findBetween(sender, recipient)).thenReturn(Optional.of(conversation));
+        when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(conversation.getParticipants().iterator().next()));
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+
+        ConversationResponse result = service.createOrGet(recipient.getId());
+
+        assertThat(result.id()).isEqualTo("conversation");
+    }
+
+    @Test
+    void send_whenPremiumClient_succeeds() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(true).build();
+        sender.setClient(client);
+
+        when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
+        when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
+        when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "key")).thenReturn(Optional.empty());
+        when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> {
+            Message m = invocation.getArgument(0);
+            m.setId("message");
+            m.setCreatedAt(LocalDateTime.now(clock));
+            return m;
+        });
+
+        MessageResponse result = service.send("conversation", new SendMessageRequest("key", "hello", List.of()));
+        assertThat(result.content()).isEqualTo("hello");
+    }
+
+    @Test
+    void toConversation_whenNonPremiumClientViewingArtisan_masksArtisanName() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(false).build();
+        sender.setClient(client);
+
+        recipient.setFirstName("Mohamed");
+        recipient.setLastName("Artisan");
+        Artisan artisan = Artisan.builder().id("art-abcde12345").user(recipient).build();
+        recipient.setArtisan(artisan);
+
+        ConversationParticipant self = conversation.getParticipants().stream()
+                .filter(p -> p.getUser() == sender).findFirst().orElseThrow();
+        when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
+        when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
+        when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.countUnread(conversation, sender, null)).thenReturn(0L);
+
+        ConversationResponse response = service.get("conversation");
+        assertThat(response.participantName()).isEqualTo("Artisan #12345");
+    }
+
+    @Test
+    void toConversation_whenPremiumClientViewingArtisan_returnsRealName() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(true).build();
+        sender.setClient(client);
+
+        recipient.setFirstName("Mohamed");
+        recipient.setLastName("Artisan");
+        Artisan artisan = Artisan.builder().id("art-abcde12345").user(recipient).build();
+        recipient.setArtisan(artisan);
+
+        ConversationParticipant self = conversation.getParticipants().stream()
+                .filter(p -> p.getUser() == sender).findFirst().orElseThrow();
+        when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
+        when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
+        when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.countUnread(conversation, sender, null)).thenReturn(0L);
+
+        ConversationResponse response = service.get("conversation");
+        assertThat(response.participantName()).isEqualTo("Mohamed Artisan");
+    }
+
+    @Test
+    void toConversation_whenAdminViewingArtisan_returnsRealName() {
+        Client client = Client.builder().id(sender.getId()).user(sender).isPremium(false).build();
+        sender.setClient(client);
+        AuthorizationPermission adminPerm = new AuthorizationPermission();
+        adminPerm.setPermissionKey(Permission.Admin.USERS.value());
+        adminPerm.setEnabled(true);
+        sender.getPermissions().add(adminPerm);
+
+        recipient.setFirstName("Mohamed");
+        recipient.setLastName("Artisan");
+        Artisan artisan = Artisan.builder().id("art-abcde12345").user(recipient).build();
+        recipient.setArtisan(artisan);
+
+        ConversationParticipant self = conversation.getParticipants().stream()
+                .filter(p -> p.getUser() == sender).findFirst().orElseThrow();
+        when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
+        when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
+        when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.countUnread(conversation, sender, null)).thenReturn(0L);
+
+        ConversationResponse response = service.get("conversation");
+        assertThat(response.participantName()).isEqualTo("Mohamed Artisan");
+    }
+
     private User user(String id, String email, AccountStatus status, boolean verified) { User user = new User(); user.setId(id); user.setEmail(email); user.setStatus(status); user.setEmailVerified(verified); AuthorizationPermission permission = new AuthorizationPermission(); permission.setPermissionKey(Permission.Message.SEND.value()); permission.setEnabled(true); user.setPermissions(new HashSet<>(List.of(permission))); return user; }
     private ConversationParticipant participant(User user) { ConversationParticipant p = new ConversationParticipant(); p.setUser(user); return p; }
     private Message message(String id, User author, String content) { Message m = new Message(); m.setId(id); m.setConversation(conversation); m.setAuthor(author); m.setContent(content); m.setCreatedAt(LocalDateTime.now(clock)); return m; }
