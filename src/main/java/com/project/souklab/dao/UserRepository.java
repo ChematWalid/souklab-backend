@@ -12,10 +12,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.time.LocalDateTime;
 import jakarta.persistence.LockModeType;
 
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
 
     /**
      * Loads a user with a write lock for serialized quota and profile mutations.
