@@ -44,5 +44,6 @@ graph TD
 | [`stub`](stub/README.md) | In-memory storage implementation for lightweight testing. |
 | [`validation`](validation/README.md) | Magic number verification, size-limiting input streams, and MIME checks. |
 | [`lifecycle`](lifecycle/README.md) | Transaction-aware post-commit object cleanup. |
+| [`pipeline`](pipeline/README.md) | Multi-stage reusable file upload pipeline with antivirus scanning, validation, and compensating rollback. |
 
 The storage engine deliberately contains no user, permission, or domain authorization rules. Applications compose it with their own access-policy service before serving an object. This keeps the provider adapters reusable across projects.
