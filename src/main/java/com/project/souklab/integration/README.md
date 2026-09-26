@@ -9,3 +9,4 @@ Outbound API clients and adapters connecting SoukLab to external payment gateway
 | Package | Service | Protocol | Key Technologies |
 | :--- | :--- | :--- | :--- |
 | [`chargily`](chargily/README.md) | Chargily Pay V2 | HTTPS REST / Webhook | Spring HTTP Interfaces, HMAC-SHA256, Jackson |
+| [`payment`](payment/README.md) | Payment Gateway SPI | Service Provider Interface | Decoupled payment provider strategy abstraction |
