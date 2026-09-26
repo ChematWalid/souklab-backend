@@ -80,7 +80,7 @@ src/main/java/com/project/souklab/
 │   ├── notification/    # Notification feed and read-state management
 │   ├── subscription/    # Tiered plans, checkout, and Chargily Pay V2 webhooks
 │   └── user/            # User avatar upload/activation and admin moderation
-├── dao/                 # Spring Data JPA repositories (47 repositories)
+├── dao/                 # Spring Data JPA repositories (52 repositories)
 ├── dto/                 # Data Transfer Objects (contracts for API requests/responses)
 │   ├── admin/           # Administrative audit representations
 │   ├── analytics/       # Analytics query job and rollup representations
@@ -112,7 +112,7 @@ src/main/java/com/project/souklab/
 │   ├── security/        # File serving rate limit filter
 │   ├── stub/            # In-memory test stubs
 │   └── validation/      # Magic bytes and MIME validation
-├── model/               # JPA entities and domain enums (50 entities)
+├── model/               # JPA entities and domain enums (53 entities)
 ├── security/            # JWT, permissions, policy predicates, rate limiting, upload boundaries
 ├── service/             # Application business logic and transactional services
 │   ├── analytics/       # Rollup processing, export generation, and job execution
@@ -212,7 +212,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`controller.review`](src/main/java/com/project/souklab/controller/review/README.md) — Artisan review endpoints
   - [`controller.subscription`](src/main/java/com/project/souklab/controller/subscription/README.md) — Subscription plans, Chargily Pay V2 checkout, webhooks, and refunds
   - [`controller.user`](src/main/java/com/project/souklab/controller/user/README.md) — User and avatar endpoints
-- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (47 repositories across DAO packages)
+- [`com.project.souklab.dao`](src/main/java/com/project/souklab/dao/README.md) — Persistence repositories (52 repositories across DAO packages)
   - [`dao.analytics`](src/main/java/com/project/souklab/dao/analytics/README.md) — Analytics outbox, activity event, job artifact, and rollup repositories
 - [`com.project.souklab.dto`](src/main/java/com/project/souklab/dto/README.md) — DTO taxonomy
   - [`dto.admin`](src/main/java/com/project/souklab/dto/admin/README.md) — Admin audit DTOs

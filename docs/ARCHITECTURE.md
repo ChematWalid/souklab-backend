@@ -26,11 +26,11 @@ Controllers translate transport contracts and delegate to services. Services enf
 | --- | --- |
 | `config` | Application properties, security, CORS, WebSocket relay, caching, async execution, and seed data. |
 | `controller` | REST endpoints and STOMP handlers for authentication, users, artisans, catalog, directory, formations, formateur governance, social feed, reviews, reports, messaging, notifications, subscriptions, payments, analytics, and client favorites. |
-| `dao` | 47 Spring Data JPA repositories across all platform domains. |
+| `dao` | 52 Spring Data JPA repositories across all platform domains. |
 | `dto` | Request and response contracts grouped by feature. |
 | `exception` | Application exception hierarchy and global HTTP error mapping. |
 | `filestorage` | Provider-neutral storage API, S3 adapter, in-memory stub, validation, ClamAV scanning, image variants, rate limiting, and post-commit cleanup. |
-| `model` | 50 JPA entities. IDs are UUID strings supplied by `BaseEntity`. |
+| `model` | 53 JPA entities. IDs are UUID strings supplied by `BaseEntity`. |
 | `security` | JWT parsing, user principal construction, request rate limiting, and STOMP authentication. |
 | `service` | Transactional business workflows across all domains, including application-specific `service.storage.FileAccessService`. |
 | `util` / `validation` | Stateless helpers and custom Bean Validation constraints. |

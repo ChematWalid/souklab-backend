@@ -18,7 +18,7 @@ graph TD
 
 ---
 
-## Repositories Reference (47 Repositories Across DAO Packages)
+## Repositories Reference (52 Repositories Across DAO Packages)
 
 ### Identity, Security & Auditing
 | Repository Interface | Managed Entity | Key Query Capabilities |
@@ -97,5 +97,12 @@ graph TD
 | :--- | :--- | :--- |
 | [`ClientFavoriteArtisanRepository`](ClientFavoriteArtisanRepository.java) | `ClientFavoriteArtisan` | `findByClientIdAndArtisanId`, `existsByClientIdAndArtisanId`, `countByClientId`, `findByClientIdWithArtisan` (batch fetch), `deleteByClientIdAndArtisanId`. |
 
-### Analytics & Outbox
-For activity events, outbox queues, and aggregated KPI rollups, see the dedicated repositories in [`com.project.souklab.dao.analytics`](analytics/README.md) (`ActivityEventRepository`, `AnalyticsJobRepository`, `DailyKpiRollupRepository`, `AnalyticsOutboxRepository`, etc.).
+### Analytics & Outbox (7 Repositories in `dao.analytics`)
+For raw activity events, outbox queues, and aggregated KPI rollups, see the dedicated repositories in [`com.project.souklab.dao.analytics`](analytics/README.md):
+- [`ActivityEventRepository`](analytics/ActivityEventRepository.java) — Invariant-intent activity records
+- [`AnalyticsJobRepository`](analytics/AnalyticsJobRepository.java) — Async calculation task tracking
+- [`AnalyticsJobArtifactRepository`](analytics/AnalyticsJobArtifactRepository.java) — S3 CSV artifact links
+- [`AnalyticsMaintenanceJobRepository`](analytics/AnalyticsMaintenanceJobRepository.java) — Retention and maintenance executions
+- [`AnalyticsOutboxRepository`](analytics/AnalyticsOutboxRepository.java) — Transactional outbox event relay queue
+- [`AnalyticsProcessedEventRepository`](analytics/AnalyticsProcessedEventRepository.java) — Event consumption idempotency tracking
+- [`DailyKpiRollupRepository`](analytics/DailyKpiRollupRepository.java) — Time-bucketed daily KPI rollups

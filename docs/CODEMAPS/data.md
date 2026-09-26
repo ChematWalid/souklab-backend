@@ -9,7 +9,7 @@
 - **Auditing**: `createdAt` (`datetime(6)`), `updatedAt` (`datetime(6)`), and nullable `deletedAt` for soft-deletable entities.
 - **ORM / DDL**: Spring Data JPA / Hibernate 6/7. Production enforces `spring.jpa.hibernate.ddl-auto=validate`.
 
-## 2. Entity Map by Domain (50 JPA Entities)
+## 2. Entity Map by Domain (53 JPA Entities)
 
 ### Identity & Access Control
 - `User` (`users`): Core credentials, status (`PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`), role seed (`ARTISAN`, `CLIENT`, `ADMIN`).
@@ -51,18 +51,20 @@
 - `MessageAttachment` (`message_attachments`): Attached files (max 5 per message).
 
 ### Subscriptions & Payments
-- `SubscriptionPlan` (`subscription_plans`): Tier definitions (`FREE`, `PRO`, `PREMIUM`), prices in DZD.
-- `Subscription` (`subscriptions`): Active user entitlements, start/end dates, auto-renewal flag.
-- `SubscriptionPayment` (`subscription_payments`): Transaction records with status (`PENDING`, `PAID`, `FAILED`).
-- `ChargilyWebhookEvent` (`chargily_webhook_events`): Idempotency ledger for incoming provider webhooks.
-- `SubscriptionRefund` (`subscription_refunds`): Refund audit records.
+- `SubscriptionPlan` (`subscription_pricing`): Pricing tier definitions and billing periods in DZD.
+- `SubscriptionPlanEntitlement` (`subscription_plan_entitlements`): Quotas and feature entitlements per plan.
+- `ArtisanSubscription` (`artisan_subscriptions`): Active artisan subscriptions with period validity and auto-renewal flag.
+- `ClientSubscription` (`client_subscriptions`): Active client subscriptions granting premium directory and messaging access.
+- `Payment` (`payments`): Transaction records tracking amount, status (`PENDING`, `PAID`, `FAILED`), and Chargily checkout IDs.
+- `PaymentWebhookLog` (`payment_webhook_logs`): Immutable audit ledger of provider webhooks for idempotency and signature verification.
 
 ### Analytics & KPIs
-- `AnalyticsRawEvent` (`analytics_raw_events`): Fine-grained telemetry events (90-day retention).
-- `AnalyticsRollup` (`analytics_rollups`): Time-bucket aggregations (`DAY`, `WEEK`, `MONTH`, `QUARTER`, 730-day retention).
-- `AnalyticsJobRun` (`analytics_job_runs`): Async calculation task tracking (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`).
+- `ActivityEvent` (`activity_events`): Telemetry event intent records captured across domain actions.
+- `DailyKpiRollup` (`daily_kpi_rollups`): Time-bucket KPI aggregations.
+- `AnalyticsJob` (`analytics_jobs`): Asynchronous calculation task and report execution tracking (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`).
+- `AnalyticsJobArtifact` (`analytics_job_artifacts`): Exported CSV metadata in S3 storage.
 - `AnalyticsOutboxEvent` (`analytics_outbox_events`): Reliable event publishing outbox table.
-- `AnalyticsArtifactRecord` (`analytics_artifact_records`): Exported CSV metadata in S3 storage.
+- `AnalyticsProcessedEvent` (`analytics_processed_events`): Idempotency tracker for processed analytics events.
 - `AnalyticsMaintenanceJob` (`analytics_maintenance_jobs`): Automated retention & rollup cleanup logs.
 
 ### Client Favorites
