@@ -21,6 +21,8 @@ import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.model.AuthorizationPermission;
 import com.project.souklab.security.Permission;
+import com.project.souklab.event.DomainEventPublisher;
+import com.project.souklab.event.user.UserStatusChangedEvent;
 import com.project.souklab.service.audit.AuditLogService;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.security.RefreshTokenService;
@@ -52,9 +54,13 @@ public class UserManagementService {
     private final Clock clock;
     private final AppProperties appProperties;
     private ActivityEventService activityEventService;
+    private DomainEventPublisher eventPublisher;
 
     @Autowired(required = false)
     void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
+
+    @Autowired(required = false)
+    void setEventPublisher(DomainEventPublisher eventPublisher) { this.eventPublisher = eventPublisher; }
 
     /**
      * Retrieves a paginated list of all users in the system.
@@ -137,6 +143,9 @@ public class UserManagementService {
         auditLogService.logAction(AuditLogAction.User.APPROVED, "Approved user ID: " + userId);
         recordModeration(AnalyticsEvent.User.APPROVED, user, Map.of());
         notificationService.createForUser(user, "Your account has been approved and is now active!", NotificationType.Account.VALIDATED, user.getId());
+        if (eventPublisher != null) {
+            eventPublisher.publish(UserStatusChangedEvent.of(user.getId(), user.getEmail(), AccountStatus.PENDING, AccountStatus.ACTIVE, "User approved by administrator"));
+        }
     }
 
     /**
@@ -168,6 +177,9 @@ public class UserManagementService {
         auditLogService.logAction(AuditLogAction.User.BANNED, "Banned user ID: " + userId + ". Reason: " + reason);
         recordModeration(AnalyticsEvent.User.SUSPENDED, user, Map.of(AnalyticsMetadata.Moderation.Reason.PRESENT, reason != null && !reason.isBlank()));
         notificationService.createForUser(user, "Your account has been permanently suspended. Reason: " + reason, NotificationType.Account.SUSPENDED, user.getId());
+        if (eventPublisher != null) {
+            eventPublisher.publish(UserStatusChangedEvent.of(user.getId(), user.getEmail(), AccountStatus.ACTIVE, AccountStatus.SUSPENDED, reason));
+        }
     }
 
     /**
@@ -204,6 +216,9 @@ public class UserManagementService {
         auditLogService.logAction(AuditLogAction.User.Timeout.VALUE, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
         recordModeration(AnalyticsEvent.User.Timeout.EVENT, user, Map.of(AnalyticsMetadata.Moderation.Duration.MINUTES, minutes));
         notificationService.createForUser(user, "Your account has been timed out for " + minutes + " minutes. Reason: " + reason, NotificationType.Account.SUSPENDED, user.getId());
+        if (eventPublisher != null) {
+            eventPublisher.publish(UserStatusChangedEvent.of(user.getId(), user.getEmail(), AccountStatus.ACTIVE, AccountStatus.SUSPENDED, "Timed out for " + minutes + " minutes"));
+        }
     }
 
     /**
@@ -230,6 +245,9 @@ public class UserManagementService {
         auditLogService.logAction(AuditLogAction.User.UNBANNED, "Reinstated user ID: " + userId);
         recordModeration(AnalyticsEvent.User.REINSTATED, user, Map.of());
         notificationService.createForUser(user, "Your account suspension has been lifted and your access has been restored.", NotificationType.Account.REINSTATED, user.getId());
+        if (eventPublisher != null) {
+            eventPublisher.publish(UserStatusChangedEvent.of(user.getId(), user.getEmail(), AccountStatus.SUSPENDED, AccountStatus.ACTIVE, "User reinstated"));
+        }
     }
 
     private void recordModeration(AnalyticsEvent.Type type, User user,
