@@ -8,8 +8,8 @@ Business logic for artisan public profiles, contact details gating, deduplicated
 
 - **Contact Info Gating**: Public views of artisan profiles mask contact details (phone, email, website, physical address) unless the viewer is an administrator, the artisan themselves, or an active client with a premium subscription.
 - **Impression Tracking**: Tracks profile visits in `ArtisanProfileView`, ensuring view counts only increment once per unique viewer-artisan pair.
-- **Portfolio Credentials (`ArtisanCertificationService`)**: Manages the upload, verification, storage, listing, and soft deletion of official artisan certificates with ClamAV stream scanning.
-- **Showcase Gallery (`ArtisanGalleryService`)**: Manages multi-image portfolio uploads (enforcing the configured 20-image quota per artisan), display sequence reordering, and soft deletion.
+- **Portfolio Credentials (`ArtisanCertificationService`)**: Manages the upload, verification, storage, listing, single-item retrieval, and soft deletion of official artisan certificates with ClamAV stream scanning.
+- **Showcase Gallery (`ArtisanGalleryService`)**: Manages multi-image portfolio uploads (enforcing the configured 20-image quota per artisan), single-image retrieval, display sequence reordering, and soft deletion.
 - **Clean Architecture Refactoring**: Delegates caller security context resolution to `ArtisanSecurityUtils` and storage URL generation to `FileUrlResolver`.
 
 ---

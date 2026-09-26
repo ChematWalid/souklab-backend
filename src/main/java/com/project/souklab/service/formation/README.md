@@ -20,4 +20,4 @@ Business logic and transactional state management for peer artisan formations, m
 | :--- | :--- |
 | [`FormationService`](FormationService.java) | Masterclass authoring lifecycle, thumbnail & syllabus uploads, ClamAV scanning, and review submission. |
 | [`FormationEnrollmentService`](FormationEnrollmentService.java) | Peer workshop catalog browsing, seat reservation, cancellation deadlines, and protected download streaming. |
-| [`AdminFormationService`](AdminFormationService.java) | Administrative moderation queue, review verdicts (approve/reject), and catalog publication. |
+| [`AdminFormationService`](AdminFormationService.java) | Administrative moderation queue, single formation inspection, review verdicts (approve/reject), and catalog publication. |

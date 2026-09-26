@@ -22,6 +22,6 @@ Handles administrative user discipline and full-lifecycle avatar processing.
 
 | Service Class | Responsibility |
 | :--- | :--- |
-| [`UserManagementService`](UserManagementService.java) | Implements user search, pending list retrieval, single/bulk approvals, bans, unbans, timeouts, and self-lockout protection checks. |
-| [`AvatarService`](AvatarService.java) | Owns authenticated-user resolution, avatar validation, configured gallery quota, primary activation, rollback, and file deletion. |
+| [`UserManagementService`](UserManagementService.java) | Implements user search, single user retrieval by ID, pending list retrieval, single/bulk approvals, bans, unbans, timeouts, and self-lockout protection checks. |
+| [`AvatarService`](AvatarService.java) | Owns authenticated-user resolution, single avatar lookup by ID, avatar validation, configured gallery quota, primary activation, rollback, and file deletion. |
 | [`CurrentUserProvider`](CurrentUserProvider.java) | Resolves the authenticated principal to a permission-loaded `User` entity for service operations. |

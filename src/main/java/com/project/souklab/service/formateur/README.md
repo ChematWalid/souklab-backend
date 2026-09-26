@@ -23,4 +23,4 @@ stateDiagram-v2
 
 | Service Class | Responsibility |
 | :--- | :--- |
-| [`ArtisanFormateurService`](ArtisanFormateurService.java) | Manages application submission, duplicate prevention, 14-day reapply cooldown calculation, administrative approvals, rejections, direct grants, and revocations with dual dispatch (in-app notification + email). |
+| [`ArtisanFormateurService`](ArtisanFormateurService.java) | Manages application submission, single request lookups (artisan & admin views), duplicate prevention, 14-day reapply cooldown calculation, administrative approvals, rejections, direct grants, and revocations with dual dispatch (in-app notification + email). |

@@ -14,8 +14,8 @@ Transactional services managing subscription lifecycles, Chargily Pay V2 integra
 | [`WebhookEventClaimService`](WebhookEventClaimService.java) | Database-backed event deduplication preventing double-crediting or duplicate processing. |
 | [`SubscriptionLifecycleService`](SubscriptionLifecycleService.java) | Manages subscription activations, renewals, grace periods, and expiration transitions. |
 | [`SubscriptionAccountService`](SubscriptionAccountService.java) | Evaluates user entitlements, active plans, and billing history. |
-| [`SubscriptionPlanService`](SubscriptionPlanService.java) | Cached retrieval of publicly active subscription plans. |
+| [`SubscriptionPlanService`](SubscriptionPlanService.java) | Cached retrieval of publicly active subscription plans and single plan lookups. |
 | [`SubscriptionPlanRules`](SubscriptionPlanRules.java) | Domain entitlement rules defining limits (portfolio size, formation count) per tier. |
-| [`AdminSubscriptionService`](AdminSubscriptionService.java) | Administrative subscription interventions, manual grants, and dispute resolutions. |
-| [`AdminSubscriptionPlanService`](AdminSubscriptionPlanService.java) | Plan administration, price modifications, and archive workflows. |
+| [`AdminSubscriptionService`](AdminSubscriptionService.java) | Administrative subscription interventions, single subscription detail retrieval, manual grants, and dispute resolutions. |
+| [`AdminSubscriptionPlanService`](AdminSubscriptionPlanService.java) | Plan administration, single plan retrieval (active/inactive), price modifications, and archive workflows. |
 | [`AdminRefundService`](AdminRefundService.java) | Financial refund execution and mandatory audit reason logging. |

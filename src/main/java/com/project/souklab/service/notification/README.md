@@ -27,5 +27,5 @@ NotifService->>STOMP: convertAndSendToUser(recipientEmail, configured notificati
 
 | Service Class | Responsibility |
 | :--- | :--- |
-| [`NotificationService`](NotificationService.java) | Handles notification persistence, paginated feeds excluding soft-deleted items (`deletedAt IS NULL`), unread counts, query-scoped mark-read, bulk mark-all-read, soft-delete updates, and post-commit STOMP delivery. |
+| [`NotificationService`](NotificationService.java) | Handles notification persistence, paginated feeds excluding soft-deleted items (`deletedAt IS NULL`), single notification lookup, unread counts, query-scoped mark-read, bulk mark-all-read, soft-delete updates, and post-commit STOMP delivery. |
 | [`RealtimeNotificationAfterCommit`](RealtimeNotificationAfterCommit.java) | Named transaction synchronization that sends a persisted notification over STOMP after a successful commit. |

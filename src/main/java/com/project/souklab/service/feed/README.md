@@ -4,6 +4,6 @@ The feed services enforce verified-artisan or administrator authorship, draft an
 
 | Service | Responsibility |
 | --- | --- |
-| [`FeedPostService`](FeedPostService.java) | Owns feed post lifecycle, moderation state, media validation, and storage cleanup. |
+| [`FeedPostService`](FeedPostService.java) | Owns feed post lifecycle, moderation state, single post moderation inspection, media validation, and storage cleanup. |
 | [`FeedDiscoveryService`](FeedDiscoveryService.java) | Owns public filters, Hibernate Search text queries with relational fallback, sorting, and favorites-based following. |
 | [`FeedEngagementService`](FeedEngagementService.java) | Owns post/comment likes, unlikes, bookmarks, comments, replies, shares, saved posts, and engagement notifications. |
