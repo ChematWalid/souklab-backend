@@ -1358,19 +1358,23 @@ This section records the live verification campaigns conducted against the runni
 | Rate Limiting | `scripts/verify-domain11-ratelimit.py` | 40 | 40 | 0 | **100%** |
 | **TOTAL** | | **566** | **566** | **0** | **100.0%** |
 
-### Maven Test Suite — 2026-09-25
+### Maven Test Suite — 2026-09-26
 
 ```
-Tests run: 1439, Failures: 0, Errors: 0, Skipped: 10
+Tests run: 1481, Failures: 0, Errors: 0, Skipped: 10
 BUILD SUCCESS
 ```
 
-### Container Verification — 2026-09-25
+### Container Verification & Live cURL Sweeps — 2026-09-26
 
-The multi-stage Docker image built successfully. An isolated container became
-healthy and returned HTTP 200 for `/actuator/health/readiness` and
-`/api/v1/feed`. GitHub Actions production verification also passed the source
-hygiene, integration, migration, Docker build, and dependency gates.
+The multi-stage Docker image built successfully (`souklab-app:latest`). The container became healthy and verified across:
+- **Exhaustive Multi-Role Semantic Live Sweep**: 220 operations, 1,882 cases, 0 failures (`verify-live-semantic.py`).
+- **Live HTTP Route Contract Sweep**: 220 operations, 782 live test routes (`verify-live-http.sh`).
+- **Live CRUD & Chat Security Resilience Suite**: 173 live curl scenarios, 173 passed, 0 failures (`test-crud-scenarios.py`).
+- **Semantic Authentication Workflow Replay**: 24 cases, 24 passed (`verify-auth-workflow.py`).
+- **Local Chargily Pay V2 E2E Suite**: checkout, idempotency, webhook signatures, paid/failed/canceled state transitions verified (`verify-chargily-local-e2e.sh`).
+- **WebSocket STOMP Broker Relay**: native & SockJS verification passed (`verify-live-stomp.py`).
+- **GitHub Actions Production Verification**: CI passed with `success` across all validation, integration, compilation, containerization, and dependency gates.
 
 ### Code Fixes Applied During Verification
 

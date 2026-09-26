@@ -11,12 +11,32 @@ Requirement-by-requirement coverage is summarized in
 
 ## Latest verification — 2026-09-26
 
-- Live CRUD & Chat Security Resilience Suite (`scripts/test-crud-scenarios.py`): 173 live curl scenarios executed against the running Docker container covering 12 single-resource read endpoints and chat privacy/premium flows.
+- **Exhaustive Multi-Role Semantic Live Sweep** (`scripts/verify-live-semantic.py`):
+  - 220 published OpenAPI operations tested against live Docker application (`http://127.0.0.1:8080`) across synthetic Admin, Client, Artisan, and second-owner accounts.
+  - 1,882 test cases executed with 0 failures (`API_ROUTE_SWEEP operations=220 cases=1882 failures=0`).
+  - 8 synthetic status & ownership assertions verified against MariaDB.
+- **Live HTTP Contract Route Sweep** (`scripts/verify-live-http.sh`):
+  - 220 operations verified, 782 live test routes executed (`LIVE_HTTP_RESULT=PASS`, 0 errors).
+- **Live CRUD & Chat Security Resilience Suite** (`scripts/test-crud-scenarios.py`):
+  - 173 live curl scenarios executed against running Docker container covering 12 single-resource read endpoints and chat privacy/premium flows.
   - Zero-day boundary checks: IDOR cross-tenant isolation, missing/tampered auth (`401`), privilege escalation (`403`), soft-deleted entity privacy (`404`), and HTTP method tampering (`405`).
   - Strict input fuzzing: SQL injection payloads, XSS vectors, path traversal tokens, null-byte payloads, 500-character boundary strings, whitespace strings, and non-existent UUIDs all handled safely (`400` or `404`, zero `500` server errors).
   - Chat privacy & premium enforcement: Non-premium client conversation initiation blocked (`403`), non-premium client message sending blocked (`403`), artisan identity masked as `Artisan #XXXXX` for non-premium viewers, unmasked for premium viewers and admins.
   - All 173 scenarios passed (0 failures).
-- Source hygiene and API contract synchronization checks passed (`scripts/check-source-hygiene.sh`, `scripts/check-api-contract.sh`, `scripts/verify-live-http.sh`).
+- **Semantic Authentication Workflow Replay** (`scripts/verify-auth-workflow.py`):
+  - 24 live authentication lifecycle scenarios passed (`AUTH_WORKFLOW_RESULT=PASS passed=24 failed=0`).
+  - Covers client and artisan registration, pending-state/login boundaries, duplicate email conflict (`409`), OTP verification, refresh token rotation, password reset/change, profile lifecycle, and logout.
+- **Local Chargily Pay V2 E2E Suite** (`scripts/verify-chargily-local-e2e.sh`):
+  - End-to-end checkout creation, HMAC-SHA256 signature verification, idempotent replay, payment paid/failed/canceled webhooks, duplicate delivery prevention, and invalid signature rejection (`CHARGILY_LOCAL_E2E_RESULT=PASS`).
+- **WebSocket STOMP Relay Verification** (`scripts/verify-live-stomp.py`):
+  - Native & SockJS STOMP verification passed with active RabbitMQ relay (`STOMP_VERIFY_RESULT=PASS`).
+- **Full Maven Test Suite**:
+  - `Tests run: 1481, Failures: 0, Errors: 0, Skipped: 10` (`BUILD SUCCESS`).
+- **Source Hygiene & API Contract Checks**:
+  - `scripts/check-source-hygiene.sh` passed (55 typed audit actions, 33 typed notification types synchronized).
+  - `scripts/check-api-contract.sh` passed.
+- **Remote CI Pipeline**:
+  - GitHub Actions `Production verification` (Run ID: `36211600288`) completed with `success` across all jobs.
 
 ## Previous verification — 2026-09-25
 

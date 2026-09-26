@@ -25,14 +25,18 @@ secrets, signatures, and raw webhook bodies are excluded.
 | Chargily Pro v1 mobile-top-up/voucher API | Separate product/API, not used by Souklab's Pay v2 integration | Not applicable |
 | Local failed-payment, malformed, duplicate, stale, signature and idempotency cases | Local provider suite and webhook-focused tests passed | Verified locally |
 | Single-resource CRUD symmetry & chat privacy/resilience suite | 173 live curl scenarios: auth boundaries, RBAC isolation, IDOR, SQLi/XSS/path-traversal/null-byte fuzzing across 12 single-read endpoints, client premium chat enforcement, and artisan identity masking (`scripts/test-crud-scenarios.py`) | Verified |
-| Full regression and security gates | 1,439 tests: 0 failures/errors, 10 environment-dependent skips; OWASP: 265 scanned, 0 vulnerabilities; source/API/diff checks passed | Verified |
+| Full regression and security gates | 1,481 tests: 0 failures/errors, 10 environment-dependent skips; OWASP: 265 scanned, 0 vulnerabilities; source/API/diff checks passed | Verified |
 
 ## Aggregate evidence
 
-- Full Maven suite with all Phase 9/10 integration gates enabled: 1,439 tests,
+- Full Maven suite with all Phase 9/10 integration gates enabled: 1,481 tests,
   0 failures, 0 errors, 10 environment-dependent skips.
-- Live semantic matrix: 1,232 cases, 0 5xx responses, 0 transport failures.
+- Multi-role live semantic matrix: 1,882 cases across all 220 operations, 0 5xx responses, 0 transport failures (`scripts/verify-live-semantic.py`).
+- Live HTTP contract route sweep: 782 cases across all 220 operations (`scripts/verify-live-http.sh`).
 - Live CRUD & Chat Security Resilience Suite (`scripts/test-crud-scenarios.py`): 173 live curl scenarios, 173 passed, 0 failed.
+- Semantic authentication workflow replay (`scripts/verify-auth-workflow.py`): 24 cases, 24 passed, 0 failed.
+- Local Chargily Pay V2 E2E checkout & webhooks (`scripts/verify-chargily-local-e2e.sh`): checkout, idempotency, signature, transitions passed.
+- WebSocket STOMP Relay verification (`scripts/verify-live-stomp.py`): native & SockJS verification passed.
 - Hosted Chargily Test Mode approval and cancellation, provider callbacks, and
   payment/subscription/audit reconciliation were completed manually. Live-mode
   financial operations remain intentionally out of scope.

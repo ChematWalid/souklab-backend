@@ -698,10 +698,14 @@ The recorded local Docker-backed run has validated:
 - Redis-backed rate-limit integration;
 - MinIO storage tests;
 - analytics configuration and event/rollup code paths;
-- complete Maven suite: `Tests run: 1470, Failures: 0, Errors: 0, Skipped: 10`;
+- complete Maven suite: `Tests run: 1481, Failures: 0, Errors: 0, Skipped: 10`;
 - source hygiene and migration checks;
+- multi-role live semantic sweep: 220 operations, 1,882 live test cases (`verify-live-semantic.py`, 0 failures);
 - live HTTP sweep: 220 synchronized OpenAPI operations, 782 live test cases (`LIVE_HTTP_RESULT=PASS`);
-- live CRUD & Chat Security resilience test suite: 173 scenarios, 173 passed, 0 failures.
+- live CRUD & Chat Security resilience test suite: 173 scenarios, 173 passed, 0 failures;
+- semantic authentication workflow replay: 24 cases, 24 passed (`verify-auth-workflow.py`);
+- local Chargily Pay V2 E2E checkout & webhooks: 8 cases, 8 passed (`verify-chargily-local-e2e.sh`);
+- native & SockJS STOMP broker relay verification: passed (`verify-live-stomp.py`).
 
 A later verification run from the latest enum-taxonomy commit is the stronger
 evidence when it completes. Hosted CI, production backup/restore, immutable
