@@ -7,6 +7,7 @@ The implemented notification subsystem persists user-scoped notifications and op
 | Method | Path | Behavior |
 | --- | --- | --- |
 | `GET` | `/api/v1/notifications` | Paginated notifications for the authenticated user. |
+| `GET` | `/api/v1/notifications/{id}` | Retrieves a single owned notification by ID. Returns 404 if foreign or deleted. |
 | `GET` | `/api/v1/notifications/unread-count` | Unread count for the authenticated user. |
 | `PUT` | `/api/v1/notifications/{id}/read` | Marks one owned notification as read. |
 | `PUT` | `/api/v1/notifications/read-all` | Marks all owned notifications as read. |

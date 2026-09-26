@@ -44,15 +44,16 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `POST /artisan/formations/{id}/enroll`: Participant enrollment (capacity checked, self-enrollment blocked -> 400)
 - `POST /artisan/formations/{id}/cancel`: Cancel reservation (enforces 24h deadline cutoff)
 - `GET /artisan/formations/{id}/files/{fileId}/download`: Stream course file (owner/enrollee only -> 403)
-- `POST /artisan/formateur-request`: Accreditation application (14-day cooldown on rejection)
-- `GET|POST /admin/formateur-requests/**`: Admin approve, reject, grant, revoke, lift-cooldown
+- `POST /artisan/formateur-request` & `GET /artisan/formateur-requests[/{id}]`: Accreditation application (14-day cooldown on rejection)
+- `GET /admin/formateur-requests[/{id}]` & `POST /admin/formateur-requests/**`: Admin approve, reject, grant, revoke, lift-cooldown
+- `GET /admin/formations/{id}`: Administrative formation inspection
 
 ### Social Feed, Reviews & Reports (`/api/v1/`)
 - `GET /feed`: Browse published posts with author/tag/text filters and latest/popular sorting
 - `GET /feed/me`, `GET /feed/following`, `POST /feed/{id}/submit`: Author lifecycle and favorites-based following
 - `GET|POST /feed`, `PUT|DELETE /feed/{id}` & `POST|DELETE /feed/{id}/media`: Draft, moderation, and author mutations
 - `POST|DELETE /feed/{id}/likes|bookmarks`, `/feed/{id}/comments`, and `/feed/comments/{id}/replies|likes`: Idempotent engagement and one-level replies
-- `GET|POST /admin/feed/pending`, `publish`, `reject`, `hide`, `DELETE /admin/feed/{id}`: Feed moderation
+- `GET /admin/feed/{id}`, `GET|POST /admin/feed/pending`, `publish`, `reject`, `hide`, `DELETE /admin/feed/{id}`: Feed moderation
 - `POST /artisan/formations/{formationId}/reviews`: **Single review path** (requires `ATTENDED` enrollment, unique constraint)
 - `GET /artisans/{artisanId}/reviews` & `GET /artisan/reviews/{id}`: Public reviews
 - `POST /reports` & `GET|POST /admin/reports[/{id}[/resolve]]`: Content abuse moderation
@@ -78,6 +79,7 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 
 ### Subscriptions, Payments & Admin (`/api/v1/`)
 - `GET /subscriptions/plans[/{id}]`: Public subscription plans
+- `GET|POST|PUT|DELETE /admin/subscription-plans[/{id}]` & `GET /admin/subscriptions[/{id}]`: Admin subscription and pricing management
 - `POST /subscriptions/checkout`: Initiate Chargily Pay V2 hosted checkout
 - `POST /integrations/chargily/webhook`: Signature-verified, idempotent webhook processing
 - `GET /admin/users[/{id}]` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration (self-ban and self-timeout blocked -> 400)

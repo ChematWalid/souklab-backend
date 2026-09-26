@@ -12,8 +12,8 @@ The schema is defined by the JPA mappings in `com.project.souklab.model`; this d
 | Formations | `formations`, `formation_files`, `formation_enrollments`, `formation_reviews` |
 | Social | `feed_posts`, `feed_post_media`, `feed_tags`, `feed_post_tags`, `feed_post_likes`, `feed_post_bookmarks`, `feed_post_comments`, `feed_post_comment_likes`, `artisan_reviews`, `content_reports` |
 | Messaging | `conversations`, `conversation_participants`, `messages`, `message_attachments` |
-| Subscriptions & Payments | `subscription_plans`, `subscriptions`, `subscription_payments`, `chargily_webhook_events`, `subscription_refunds` |
-| Analytics | `analytics_raw_events`, `analytics_rollups`, `analytics_job_runs`, `analytics_outbox_events`, `analytics_artifact_records`, `analytics_maintenance_jobs` |
+| Subscriptions & Payments | `subscription_pricing`, `subscription_plan_entitlements`, `artisan_subscriptions`, `client_subscriptions`, `payments`, `payment_webhook_logs` |
+| Analytics | `activity_events`, `daily_kpi_rollups`, `analytics_jobs`, `analytics_job_artifacts`, `analytics_outbox_events`, `analytics_processed_events`, `analytics_maintenance_jobs` |
 | Operations | `notifications`, `audit_logs` |
 | Favorites | `client_favorite_artisans` |
 

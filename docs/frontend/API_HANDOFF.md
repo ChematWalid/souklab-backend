@@ -48,6 +48,7 @@ Use `Authorization: Bearer <accessToken>` for all protected REST calls. Login an
 - `PATCH /api/v1/auth/me`: Partial updates using JSON Merge Patch semantics.
 - `POST /api/v1/users/me/avatars`: Uploads and activates a new profile avatar (`multipart/form-data`, key `file`).
 - `GET /api/v1/users/me/avatars`: Lists uploaded avatar history.
+- `GET /api/v1/users/me/avatars/{id}`: Retrieves single avatar record by ID.
 - `PUT /api/v1/users/me/avatars/{id}/activate`: Re-activates a past gallery avatar.
 - `DELETE /api/v1/users/me/avatars/{id}`: Deletes an avatar from storage.
 
