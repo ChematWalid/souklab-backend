@@ -2,17 +2,19 @@ package com.project.souklab.security;
 
 import com.project.souklab.dto.auth.JwtResponseDTO;
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.config.AppProperties;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.util.ServletResponseUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -22,12 +24,32 @@ import java.io.IOException;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Lazy
     private final AuthService authService;
     private final ServletResponseUtil servletResponseUtil;
+    private final AuthorizationCodeStore authorizationCodeStore;
+    private final AppProperties appProperties;
+
+    public OAuth2AuthenticationSuccessHandler(AuthService authService, ServletResponseUtil servletResponseUtil) {
+        this(authService, servletResponseUtil, null, null);
+    }
+
+    public OAuth2AuthenticationSuccessHandler(AuthService authService, ServletResponseUtil servletResponseUtil,
+                                               AuthorizationCodeStore authorizationCodeStore) {
+        this(authService, servletResponseUtil, authorizationCodeStore, null);
+    }
+
+    @Autowired
+    public OAuth2AuthenticationSuccessHandler(AuthService authService, ServletResponseUtil servletResponseUtil,
+                                               AuthorizationCodeStore authorizationCodeStore,
+                                               AppProperties appProperties) {
+        this.authService = authService;
+        this.servletResponseUtil = servletResponseUtil;
+        this.authorizationCodeStore = authorizationCodeStore;
+        this.appProperties = appProperties;
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -43,8 +65,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         clearIntentCookie(request, response);
 
-        ApiResponse<JwtResponseDTO> apiResponse = ApiResponse.success(jwtResponse, "Google OAuth authentication successful.");
-        servletResponseUtil.writeResponse(response, HttpServletResponse.SC_OK, apiResponse);
+        if (authorizationCodeStore == null) {
+            ApiResponse<JwtResponseDTO> apiResponse = ApiResponse.success(jwtResponse,
+                    "Google OAuth authentication successful.");
+            servletResponseUtil.writeResponse(response, HttpServletResponse.SC_OK, apiResponse);
+            return;
+        }
+        String code = authorizationCodeStore.put(jwtResponse);
+        String callback = appProperties.getOauth().getGoogle().getAuthorizedRedirectUri();
+        response.sendRedirect(UriComponentsBuilder.fromUriString(callback)
+                .queryParam("code", code).build().toUriString());
     }
 
     private String extractIntentRole(HttpServletRequest request) {

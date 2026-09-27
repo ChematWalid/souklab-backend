@@ -11,6 +11,8 @@ import com.project.souklab.dto.auth.ResetPasswordRequestDTO;
 import com.project.souklab.dto.auth.TokenRefreshRequestDTO;
 import com.project.souklab.dto.auth.UserRegistrationDTO;
 import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
+import com.project.souklab.dto.auth.OAuthExchangeRequest;
+import com.project.souklab.dto.auth.DeleteAccountRequest;
 import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.profile.ProfileResponse;
 import com.project.souklab.dto.profile.UserPatchDTO;
@@ -19,6 +21,8 @@ import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
 import com.project.souklab.security.OAuthCookie;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.service.profile.ProfileService;
+import com.project.souklab.security.AuthorizationCodeStore;
+import com.project.souklab.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -29,6 +33,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +44,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * HTTP adapter for authentication and profile endpoints.
@@ -58,6 +64,7 @@ public class AuthController {
     private final AuthService authService;
     private final ProfileService profileService;
     private final AppProperties appProperties;
+    private final Optional<AuthorizationCodeStore> authorizationCodeStore;
 
     /**
      * Registers a new user and returns the account-type-specific profile response.
@@ -95,6 +102,17 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response, "Token refreshed successfully."));
     }
 
+    @PostMapping("/oauth/exchange")
+    @Operation(summary = "Exchange OAuth authorization code", description = "Consumes a one-time OAuth authorization code. Codes expire after 60 seconds.")
+    public ResponseEntity<ApiResponse<JwtResponseDTO>> exchangeOAuthCode(@Valid @RequestBody OAuthExchangeRequest request) {
+        JwtResponseDTO response = authorizationCodeStore.orElseThrow(() ->
+                new IllegalStateException("OAuth authorization-code exchange is unavailable")).consume(request.code());
+        if (response == null) {
+            throw new UnauthorizedException("Invalid or expired OAuth authorization code.");
+        }
+        return ResponseEntity.ok(ApiResponse.success(response, "OAuth authorization code exchanged successfully."));
+    }
+
     /**
      * Revokes tokens for the current user and logs them out.
      */
@@ -105,6 +123,14 @@ public class AuthController {
             HttpServletRequest request) {
         authService.logout(tokenRequest);
         return ResponseEntity.ok(ApiResponse.success(null, "Logout successful."));
+    }
+
+    @DeleteMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Delete current account", description = "Anonymises and disables the authenticated account after password or OAuth confirmation.")
+    public ResponseEntity<Void> deleteCurrentAccount(@RequestBody(required = false) DeleteAccountRequest request) {
+        authService.deleteCurrentAccount(request);
+        return ResponseEntity.noContent().build();
     }
 
     /**

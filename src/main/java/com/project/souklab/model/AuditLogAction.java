@@ -29,7 +29,8 @@ public final class AuditLogAction {
                 Catalog.CATEGORY_CREATED, Catalog.CATEGORY_UPDATED, Catalog.CATEGORY_DELETED,
                 Catalog.SUBCATEGORY_CREATED, Catalog.SUBCATEGORY_UPDATED, Catalog.SUBCATEGORY_DELETED,
                 Catalog.MATERIAL_FAMILY_CREATED, Catalog.MATERIAL_FAMILY_UPDATED, Catalog.MATERIAL_FAMILY_DELETED,
-                Catalog.MATERIAL_CREATED, Catalog.MATERIAL_UPDATED, Catalog.MATERIAL_DELETED);
+                Catalog.MATERIAL_CREATED, Catalog.MATERIAL_UPDATED, Catalog.MATERIAL_DELETED,
+                User.DELETED);
     }
 
     public static Key fromValue(String value) {
@@ -94,7 +95,7 @@ public final class AuditLogAction {
     }
 
     public enum User implements Key {
-        APPROVED("APPROVE_USER"), BANNED("BAN_USER"), UNBANNED("UNBAN_USER");
+        APPROVED("APPROVE_USER"), BANNED("BAN_USER"), UNBANNED("UNBAN_USER"), DELETED("DELETE_ACCOUNT");
         private final String value;
         User(String value) { this.value = value; }
         public String value() { return value; }

@@ -13,14 +13,16 @@ All endpoints are mapped under the `/api/v1/auth` base path.
 | `POST` | `/api/v1/auth/register` | Public | Register user | Creates a new Client or Artisan account. Artisans start in `PENDING` status. |
 | `POST` | `/api/v1/auth/login` | Public | Login credentials | Authenticates with email & password, returning JWT access and refresh tokens. |
 | `POST` | `/api/v1/auth/refresh` | Public | Rotate refresh token | Exchanges a valid refresh token for a fresh access/refresh token pair. |
+| `POST` | `/api/v1/auth/oauth/exchange` | Public | Exchange OAuth code | Consumes a one-time OAuth authorization code within 60s, returning JWT token pair. |
 | `POST` | `/api/v1/auth/logout` | Public/Auth | Logout session | Revokes refresh tokens and invalidates the active user session. |
+| `DELETE` | `/api/v1/auth/me` | Authenticated | Delete account | Permanently disables and anonymises account after password or OAuth confirmation. |
 | `POST` | `/api/v1/auth/verify-email` | Public | Verify email OTP | Validates a 6-digit numeric OTP code sent upon registration. |
 | `POST` | `/api/v1/auth/resend-verification` | Public | Resend verification | Issues a fresh 6-digit verification code to an unverified email. |
 | `POST` | `/api/v1/auth/forgot-password` | Public | Forgot password | Dispatches a 6-digit password reset code to the user's email. |
 | `POST` | `/api/v1/auth/reset-password` | Public | Reset password | Resets password using the 6-digit OTP code received by email. |
 | `POST` | `/api/v1/auth/change-password` | Authenticated | Change password | Updates password for the authenticated caller given current password. |
 | `GET` | `/api/v1/auth/me` | Authenticated | Get current profile | Returns the caller's profile (`ArtisanResponseDTO` or `ClientProfileResponseDTO`). |
-| `PATCH` | `/api/v1/auth/me` | Authenticated | Patch current profile | JSON Merge Patch for profile fields (bio, address, crafts, company, etc.). |
+| `PATCH` | `/api/v1/auth/me` | Authenticated | Patch current profile | JSON Merge Patch for user scalar fields (`firstName`, `lastName`, `phone`) and profile details. |
 | `POST` | `/api/v1/auth/complete-profile` | Authenticated | Complete profile | Onboarding wizard to submit initial craft or enterprise details. |
 | `GET` | `/api/v1/auth/oauth/google/artisan`| Public | Google OAuth (Artisan)| Sets artisan intent cookie and redirects to Google authorization. |
 | `GET` | `/api/v1/auth/oauth/google/client` | Public | Google OAuth (Client) | Sets client intent cookie and redirects to Google authorization. |
@@ -154,9 +156,12 @@ Content-Type: application/json
 
 #### Request Payload Examples
 
-##### A. Updating Artisan Details
+##### A. Updating User Scalar & Artisan Details
 ```json
 {
+  "firstName": "Karim",
+  "lastName": "Belkacem",
+  "phone": "+213550123456",
   "bio": "Nouvelle biographie mise à jour.",
   "city": "Tizi Ouzou",
   "address": "Rue Principale 42",
@@ -172,6 +177,9 @@ Content-Type: application/json
 ##### B. Updating Client Details
 ```json
 {
+  "firstName": "Amina",
+  "lastName": "Mansouri",
+  "phone": "+213661987654",
   "city": "Oran",
   "companyName": "Nouvelle Entreprise SARL",
   "clientType": "ENTERPRISE"
@@ -180,6 +188,74 @@ Content-Type: application/json
 
 #### Response (`200 OK`)
 Returns the freshly updated `ApiResponse<ProfileResponse>`.
+
+---
+
+### 2b. `POST /api/v1/auth/oauth/exchange` — Exchange OAuth Authorization Code
+
+Consumes a short-lived, single-use OAuth authorization code returned from the OAuth2 provider callback, returning a standard `JwtResponseDTO` token envelope. Codes expire after 60 seconds and cannot be reused.
+
+#### Request Body (`application/json`)
+```json
+{
+  "code": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+#### Response (`200 OK`)
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "OAuth authorization code exchanged successfully.",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiJ9...",
+    "refreshToken": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+    "type": "Bearer",
+    "id": "e15eabe0-16cc-42e9-aa91-755c96edc611",
+    "email": "artisan@souklab.dz",
+    "accountType": "ARTISAN",
+    "permissions": ["artisan:content", "formation:enroll", "profile:read", "profile:write"],
+    "profileCompleted": true
+  }
+}
+```
+
+#### Errors
+- `401 UNAUTHORIZED`: Code is missing, expired, or previously consumed.
+
+---
+
+### 2c. `DELETE /api/v1/auth/me` — Self-Service Account Deletion
+
+Permanently disables and anonymises the authenticated user's account to fulfill GDPR "Right to Erasure" requirements. Revokes active refresh tokens, replaces direct PII (`email`, `firstName`, `lastName`, `phone`, `avatarUrl`) with anonymised values (`deleted+<id>@deleted.souklab.invalid`), sets account status to `DELETED`, and logs an immutable audit event (`AuditLogAction.User.DELETED`).
+
+Requires either password verification or recent OAuth confirmation (within the last 10 minutes).
+
+#### Headers
+```http
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+```
+
+#### Request Body (`application/json`)
+```json
+{
+  "password": "CurrentPassword123!"
+}
+```
+*Or for OAuth2-authenticated accounts:*
+```json
+{
+  "oauthConfirmed": true
+}
+```
+
+#### Response (`204 No Content`)
+Empty body. Immediate revocation of all session and refresh tokens.
+
+#### Errors
+- `401 UNAUTHORIZED`: Caller is unauthenticated, password does not match, or OAuth confirmation is older than 10 minutes.
 
 ---
 
@@ -261,6 +337,26 @@ Authenticates an existing user and returns their JWT token pair.
       "permissions": ["artisan:content", "profile:read", "profile:write"]
     }
   }
+}
+```
+
+#### Typed Error Codes (`403 Forbidden`)
+If authentication credentials are valid but the account is not eligible to sign in, a `403 FORBIDDEN` is returned with a machine-readable `errorCode`:
+
+| Error Code | HTTP Status | Trigger Condition |
+| :--- | :--- | :--- |
+| `ACCOUNT_LOCKED` | `403` | Too many failed login attempts; temporary lockout is active. |
+| `ACCOUNT_SUSPENDED` | `403` | Administrator placed a permanent or temporary ban on the account. |
+| `ACCOUNT_REJECTED` | `403` | Artisan account registration was formally rejected by an administrator. |
+| `ACCOUNT_PENDING` | `403` | Artisan account is awaiting administrative identity & credential approval. |
+| `EMAIL_NOT_VERIFIED` | `403` | User registered but has not yet completed 6-digit email OTP verification. |
+
+```json
+{
+  "success": false,
+  "code": 403,
+  "errorCode": "ACCOUNT_SUSPENDED",
+  "message": "Account is suspended: Policy violation"
 }
 ```
 
@@ -370,7 +466,7 @@ Initiates Google OAuth2 login/signup flow with account-type intent:
    - Security attributes: `Path=/`, `HttpOnly=true`, `SameSite=Lax`, `Secure` (when request is HTTPS), `Max-Age=300`.
    - Avoids unwanted session creation (`request.getSession(false)`) to maintain stateless architecture.
 2. Redirects to `/oauth2/authorization/google`.
-3. Upon successful Google authentication, the `OAuth2AuthenticationSuccessHandler` validates verified email (`email_verified == true`), creates/loads the user with the specified role, immediately clears the intent cookie, and redirects to frontend `/oauth/callback?token=...`.
+3. Upon successful Google authentication, the `OAuth2AuthenticationSuccessHandler` validates verified email (`email_verified == true`), creates/loads the user with the specified role, immediately clears the intent cookie, stores a one-time authorization code for 60 seconds, and returns HTTP 302 to the configured `GOOGLE_OAUTH_AUTHORIZED_REDIRECT_URI` with `?code=...`. The frontend exchanges it once through `POST /api/v1/auth/oauth/exchange`; raw JWT JSON is not returned from the browser callback path.
 
 ---
 

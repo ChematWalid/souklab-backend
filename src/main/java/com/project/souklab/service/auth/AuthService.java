@@ -12,6 +12,7 @@ import com.project.souklab.dao.RefreshTokenRepository;
 import com.project.souklab.dao.AuthorizationPermissionRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
+import com.project.souklab.dto.auth.DeleteAccountRequest;
 import com.project.souklab.dto.auth.ForgotPasswordRequestDTO;
 import com.project.souklab.dto.auth.JwtResponseDTO;
 import com.project.souklab.dto.auth.LoginDTO;
@@ -295,6 +296,43 @@ public class AuthService {
         }
     }
 
+    /** Permanently disables the account while retaining an anonymised audit-safe record. */
+    @Transactional
+    public void deleteCurrentAccount(DeleteAccountRequest request) {
+        String email = SecurityUtils.getCurrentUsername();
+        if (email == null || email.isBlank()) {
+            throw new UnauthorizedException("User is not authenticated.");
+        }
+        User user = userRepository.findByEmail(email.trim().toLowerCase())
+                .orElseThrow(() -> new UnauthorizedException("User is not authenticated."));
+        boolean passwordConfirmed = request != null && request.password() != null
+                && user.getPassword() != null && passwordEncoder.matches(request.password(), user.getPassword());
+        boolean oauthConfirmed = request != null && Boolean.TRUE.equals(request.oauthConfirmed())
+                && user.getLastOAuthLoginAt() != null
+                && user.getLastOAuthLoginAt().isAfter(LocalDateTime.now(clock).minusMinutes(10));
+        if (!passwordConfirmed && !oauthConfirmed) {
+            throw new UnauthorizedException("Valid password or recent OAuth confirmation is required.");
+        }
+
+        refreshTokenService.deleteByUser(user);
+        oauthIdentityRepository.findByUser(user).forEach(identity -> {
+            identity.setProviderUserId("deleted-" + identity.getId());
+            identity.setEmail(null);
+            oauthIdentityRepository.save(identity);
+        });
+        String originalEmail = user.getEmail();
+        user.setEmail("deleted+" + user.getId() + "@deleted.souklab.invalid");
+        user.setPassword(null);
+        user.setFirstName("Deleted");
+        user.setLastName("User");
+        user.setPhone(null);
+        user.setAvatarUrl(null);
+        user.setStatus(AccountStatus.DELETED);
+        user.setDeletedAt(LocalDateTime.now(clock));
+        userRepository.save(user);
+        auditLogService.logAction(AuditLogAction.User.DELETED, "Account deleted and direct identifiers anonymised", originalEmail);
+    }
+
     /**
      * Verifies a user's email address using a submitted 6-digit verification code.
      *
@@ -499,6 +537,7 @@ public class AuthService {
         ensureAccountCanAuthenticate(user);
 
         user.setLastLoginAt(LocalDateTime.now(clock));
+        user.setLastOAuthLoginAt(LocalDateTime.now(clock));
         if (request != null) {
             user.setLastLoginIp(extractClientIp(request));
         }
@@ -614,7 +653,7 @@ public class AuthService {
      */
     private void verifyAccountNotLocked(User user) {
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now(clock))) {
-            throw new ForbiddenException("Too many failed login attempts. Account is temporarily locked. Please try again later.");
+            throw new ForbiddenException("ACCOUNT_LOCKED", "Too many failed login attempts. Account is temporarily locked. Please try again later.");
         }
     }
 
@@ -653,20 +692,20 @@ public class AuthService {
                 user.setBannedUntil(null);
                 user.setBanReason(null);
             } else {
-                throw new ForbiddenException("Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : appProperties.getSupport().getContactMessage()));
+                throw new ForbiddenException("ACCOUNT_SUSPENDED", "Account is suspended: " + (user.getBanReason() != null ? user.getBanReason() : appProperties.getSupport().getContactMessage()));
             }
         }
 
         if (user.getStatus() == AccountStatus.REJECTED) {
-            throw new ForbiddenException("Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : appProperties.getSupport().getContactMessage()));
+            throw new ForbiddenException("ACCOUNT_REJECTED", "Account registration was rejected: " + (user.getBanReason() != null ? user.getBanReason() : appProperties.getSupport().getContactMessage()));
         }
 
         if (user.getStatus() == AccountStatus.PENDING) {
-            throw new ForbiddenException("Account registration is pending administrator approval.");
+            throw new ForbiddenException("ACCOUNT_PENDING", "Account registration is pending administrator approval.");
         }
 
         if (!user.isEmailVerified()) {
-            throw new ForbiddenException("Please verify your email address before signing in.");
+            throw new ForbiddenException("EMAIL_NOT_VERIFIED", "Please verify your email address before signing in.");
         }
     }
 

@@ -45,7 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            log.error("Cannot set user authentication: {}", e.getMessage());
+            // Invalid, expired, or revoked bearer tokens are handled as anonymous requests by
+            // the security chain; they are expected client input and should not page operators.
+            log.debug("Ignoring bearer token during authentication: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);

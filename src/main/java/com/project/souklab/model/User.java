@@ -83,6 +83,9 @@ public class User extends BaseEntity {
     @Column(name = "last_login_ip", length = 45)
     private String lastLoginIp;
 
+    @Column(name = "last_oauth_login_at")
+    private LocalDateTime lastOAuthLoginAt;
+
     @Column(name = "banned_until")
     private LocalDateTime bannedUntil;
 
@@ -131,6 +134,18 @@ public class User extends BaseEntity {
             return lastName.trim();
         }
         return email;
+    }
+
+    /** Public fallback that never exposes the account email address. */
+    @Transient
+    public String getPublicDisplayName() {
+        if (firstName != null && !firstName.isBlank() && lastName != null && !lastName.isBlank()) {
+            return firstName.trim() + " " + lastName.trim();
+        }
+        if (firstName != null && !firstName.isBlank()) return firstName.trim();
+        if (lastName != null && !lastName.isBlank()) return lastName.trim();
+        String value = getId() == null ? "member" : getId().replace("-", "");
+        return "Membre #" + value.substring(Math.max(0, value.length() - 5));
     }
 
     /**

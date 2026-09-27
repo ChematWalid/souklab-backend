@@ -4,5 +4,6 @@ public enum AccountStatus implements EnumValue {
     PENDING,
     ACTIVE,
     SUSPENDED,
-    REJECTED
+    REJECTED,
+    DELETED
 }
