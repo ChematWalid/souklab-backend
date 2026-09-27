@@ -35,6 +35,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Coordinates formation-backed artisan reviews and aggregate rating updates.
@@ -101,18 +102,28 @@ public class ArtisanReviewService {
         if (subject == null || subject.getId().equals(reviewer.getId())) {
             throw new ConflictException("You cannot review your own formation.");
         }
-        if (reviewRepository.findByEnrollmentId(enrollment.getId()).isPresent()) {
-            throw new ConflictException("A review already exists for this enrollment.");
+        Optional<ArtisanReview> existingReviewOpt = reviewRepository.findByEnrollmentId(enrollment.getId());
+        ArtisanReview review;
+        if (existingReviewOpt.isPresent()) {
+            ArtisanReview existing = existingReviewOpt.get();
+            if (existing.getDeletedAt() == null && existing.getStatus() != ReviewStatus.REMOVED) {
+                throw new ConflictException("A review already exists for this enrollment.");
+            }
+            existing.setRating(normalizeRating(request.getRating()));
+            existing.setComment(request.getComment().trim());
+            existing.setStatus(ReviewStatus.PUBLISHED);
+            existing.setDeletedAt(null);
+            review = existing;
+        } else {
+            review = ArtisanReview.builder()
+                    .reviewer(reviewer)
+                    .artisan(subject)
+                    .enrollment(enrollment)
+                    .rating(normalizeRating(request.getRating()))
+                    .comment(request.getComment().trim())
+                    .status(ReviewStatus.PUBLISHED)
+                    .build();
         }
-
-        ArtisanReview review = ArtisanReview.builder()
-                .reviewer(reviewer)
-                .artisan(subject)
-                .enrollment(enrollment)
-                .rating(normalizeRating(request.getRating()))
-                .comment(request.getComment().trim())
-                .status(ReviewStatus.PUBLISHED)
-                .build();
         ArtisanReview saved = reviewRepository.save(review);
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Review.SUBMITTED, reviewer.getId(), saved.getId(),
