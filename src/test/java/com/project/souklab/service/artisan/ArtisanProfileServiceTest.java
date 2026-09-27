@@ -35,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -302,8 +303,8 @@ class ArtisanProfileServiceTest {
         assertThat(result.getWebsite()).isEqualTo("https://djamel-bijoux.dz");
         assertThat(result.getAddress()).isEqualTo("Village Taourirt Mimoun");
 
-        verify(artisanProfileViewRepository, never()).save(any(ArtisanProfileView.class));
-        verify(artisanRepository, never()).save(any(Artisan.class));
+        verify(artisanProfileViewRepository, never()).saveAndFlush(any(ArtisanProfileView.class));
+        verify(artisanRepository, never()).incrementViewsCount(any());
     }
 
     /**
@@ -332,7 +333,7 @@ class ArtisanProfileServiceTest {
 
         assertThat(result.isContactInfoLocked()).isFalse();
         assertThat(result.getName()).isEqualTo("Djamel Beni Yenni");
-        verify(artisanProfileViewRepository, never()).save(any(ArtisanProfileView.class));
+        verify(artisanProfileViewRepository, never()).saveAndFlush(any(ArtisanProfileView.class));
     }
 
     /**
@@ -404,8 +405,8 @@ class ArtisanProfileServiceTest {
         assertThat(result.getCertifications().get(0).isVerified()).isTrue();
         assertThat(result.getCertifications().get(0).getDocumentUrl()).isNull();
 
-        verify(artisanProfileViewRepository).save(any(ArtisanProfileView.class));
-        verify(artisanRepository).save(targetArtisan);
+        verify(artisanProfileViewRepository).saveAndFlush(any(ArtisanProfileView.class));
+        verify(artisanRepository).incrementViewsCount(targetArtisan.getId());
         assertThat(targetArtisan.getViewsCount()).isEqualTo(121);
     }
 
@@ -456,8 +457,8 @@ class ArtisanProfileServiceTest {
         assertThat(result.getCertifications()).hasSize(1);
         assertThat(result.getCertifications().get(0).getDocumentUrl()).isEqualTo("https://storage.souklab.dz/private/cam-card.pdf");
 
-        verify(artisanProfileViewRepository, never()).save(any(ArtisanProfileView.class));
-        verify(artisanRepository, never()).save(any(Artisan.class));
+        verify(artisanProfileViewRepository, never()).saveAndFlush(any(ArtisanProfileView.class));
+        verify(artisanRepository, never()).incrementViewsCount(any());
         assertThat(targetArtisan.getViewsCount()).isEqualTo(120);
     }
 
@@ -585,5 +586,33 @@ class ArtisanProfileServiceTest {
 
         assertThat(artisanProfileService.getArtisanProfile("artisan-user-id").getName())
                 .isEqualTo("Solo");
+    }
+
+    @Test
+    @DisplayName("getArtisanProfile: handles concurrent profile view race condition gracefully")
+    void getArtisanProfile_whenConcurrentViewRace_handlesGracefully() {
+        setAuthenticatedViewer("client@souklab.dz", Permission.Profile.READ);
+        User viewer = User.builder()
+                .email("client@souklab.dz")
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .permissions(Set.of(createPermission(Permission.Profile.READ)))
+                .build();
+        viewer.setId("client-viewer-id");
+
+        when(userRepository.findByEmail("client@souklab.dz")).thenReturn(Optional.of(viewer));
+        when(artisanRepository.findById("artisan-user-id")).thenReturn(Optional.of(targetArtisan));
+        when(artisanProfileViewRepository.existsByViewerIdAndArtisanId("client-viewer-id", "artisan-user-id"))
+                .thenReturn(false);
+        when(artisanProfileViewRepository.saveAndFlush(any(ArtisanProfileView.class)))
+                .thenThrow(new DataIntegrityViolationException("Duplicate view"));
+        when(viewerPremiumResolver.isContactInfoLocked(viewer, false, false)).thenReturn(true);
+        when(artisanGalleryImageRepository.findByArtisanIdAndDeletedAtIsNullOrderByDisplayOrderAsc("artisan-user-id"))
+                .thenReturn(Collections.emptyList());
+        when(artisanCertificationRepository.findByArtisanIdAndDeletedAtIsNullOrderByCreatedAtDesc("artisan-user-id"))
+                .thenReturn(Collections.emptyList());
+
+        ArtisanPublicViewDTO result = artisanProfileService.getArtisanProfile("artisan-user-id");
+        assertThat(result).isNotNull();
     }
 }

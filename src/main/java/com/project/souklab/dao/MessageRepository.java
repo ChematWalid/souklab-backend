@@ -30,9 +30,6 @@ public interface MessageRepository extends JpaRepository<Message, String> {
     Optional<Message> findByIdAndConversationAndDeletedAtIsNull(String id, Conversation conversation);
     Optional<Message> findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(Conversation conversation, User author, String idempotencyKey);
 
-    @Deprecated
-    Optional<Message> findByConversationAndAuthorAndIdempotencyKey(Conversation conversation, User author, String idempotencyKey);
-
     @Query("select count(m) from Message m where m.conversation = :conversation and m.author <> :reader and m.deletedAt is null and (:afterTime is null or m.createdAt > :afterTime)")
     long countUnread(@Param("conversation") Conversation conversation, @Param("reader") User reader, @Param("afterTime") LocalDateTime afterTime);
 }

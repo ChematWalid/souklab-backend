@@ -1,6 +1,8 @@
 package com.project.souklab.service.feed;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
@@ -107,7 +109,7 @@ public class FeedPostService {
         Page<FeedPost> posts = type == null
                 ? postRepository.findByStatusAndDeletedAtIsNull(FeedPostStatus.PUBLISHED, effectivePageable)
                 : postRepository.findByStatusAndTypeAndDeletedAtIsNull(FeedPostStatus.PUBLISHED, type, effectivePageable);
-        return posts.map(this::toResponse);
+        return toResponsePage(posts);
     }
 
     /**
@@ -206,7 +208,7 @@ public class FeedPostService {
         Page<FeedPost> posts = status == null
                 ? postRepository.findByAuthorIdAndDeletedAtIsNull(user.getId(), pageable)
                 : postRepository.findByAuthorIdAndStatusAndDeletedAtIsNull(user.getId(), status, pageable);
-        return PaginatedResponse.from(posts.map(this::toResponse));
+        return PaginatedResponse.from(toResponsePage(posts));
     }
 
     @Transactional(readOnly = true)
@@ -433,7 +435,7 @@ public class FeedPostService {
     @Transactional(readOnly = true)
     public Page<FeedPostResponseDTO> listPending(Pageable pageable) {
         requireAdmin();
-        return postRepository.findByStatusAndDeletedAtIsNull(FeedPostStatus.PENDING, pageable).map(this::toResponse);
+        return toResponsePage(postRepository.findByStatusAndDeletedAtIsNull(FeedPostStatus.PENDING, pageable));
     }
 
     private FeedPost findPost(String id) {
@@ -446,19 +448,54 @@ public class FeedPostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Formation not found."));
     }
 
+    private Page<FeedPostResponseDTO> toResponsePage(Page<FeedPost> posts) {
+        if (posts.isEmpty()) {
+            return posts.map(this::toResponse);
+        }
+        User viewer = resolveCurrentViewer();
+        if (viewer == null) {
+            return posts.map(post -> {
+                FeedPostResponseDTO mapped = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+                return feedPrivacyService.protectPost(post, mapped);
+            });
+        }
+        List<String> postIds = posts.getContent().stream().map(FeedPost::getId).toList();
+        Set<String> likedPostIds = postLikeRepository.findLikedPostIdsByUserIdAndPostIdIn(viewer.getId(), postIds);
+        Set<String> bookmarkedPostIds = bookmarkRepository.findBookmarkedPostIdsByUserIdAndPostIdIn(viewer.getId(), postIds);
+        return posts.map(post -> toResponseWithViewer(post, viewer, likedPostIds, bookmarkedPostIds));
+    }
+
     private FeedPostResponseDTO toResponse(FeedPost post) {
         FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
         FeedPostResponseDTO response = feedPrivacyService.protectPost(post, mappedResponse);
-        String email = SecurityUtils.getCurrentUsername();
-        if (email == null) {
+        User viewer = resolveCurrentViewer();
+        if (viewer == null) {
             return response;
         }
-        return userRepository.findByEmail(email)
-                .map(user -> response.toBuilder()
-                        .likedByCurrentUser(postLikeRepository.existsByPostIdAndUserId(post.getId(), user.getId()))
-                        .bookmarkedByCurrentUser(bookmarkRepository.existsByPostIdAndUserId(post.getId(), user.getId()))
-                        .build())
-                .orElse(response);
+        return response.toBuilder()
+                .likedByCurrentUser(postLikeRepository.existsByPostIdAndUserId(post.getId(), viewer.getId()))
+                .bookmarkedByCurrentUser(bookmarkRepository.existsByPostIdAndUserId(post.getId(), viewer.getId()))
+                .build();
+    }
+
+    private FeedPostResponseDTO toResponseWithViewer(FeedPost post, User viewer, Set<String> likedPostIds, Set<String> bookmarkedPostIds) {
+        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, mappedResponse);
+        if (viewer == null) {
+            return response;
+        }
+        return response.toBuilder()
+                .likedByCurrentUser(likedPostIds != null && likedPostIds.contains(post.getId()))
+                .bookmarkedByCurrentUser(bookmarkedPostIds != null && bookmarkedPostIds.contains(post.getId()))
+                .build();
+    }
+
+    private User resolveCurrentViewer() {
+        String email = SecurityUtils.getCurrentUsername();
+        if (email == null) {
+            return null;
+        }
+        return userRepository.findByEmail(email).orElse(null);
     }
 
     private List<FeedTag> resolveTags(List<String> values) {

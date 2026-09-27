@@ -211,7 +211,7 @@ public class FormationService {
     @Transactional
     public FormationFileResponseDTO uploadCourseFile(String id, MultipartFile file) {
         Artisan artisan = resolveAuthenticatedArtisan();
-        Formation formation = findFormationAndVerifyOwnership(id, artisan);
+        Formation formation = findFormationWithLockAndVerifyOwnership(id, artisan);
 
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Course file is required.");
@@ -468,6 +468,16 @@ public class FormationService {
      */
     private Formation findFormationAndVerifyOwnership(String id, Artisan artisan) {
         Formation formation = formationRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Formation not found with id: " + id));
+
+        if (!formation.getAuthor().getId().equals(artisan.getId())) {
+            throw new ForbiddenException("You do not have permission to modify this formation.");
+        }
+        return formation;
+    }
+
+    private Formation findFormationWithLockAndVerifyOwnership(String id, Artisan artisan) {
+        Formation formation = formationRepository.findWithLockByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Formation not found with id: " + id));
 
         if (!formation.getAuthor().getId().equals(artisan.getId())) {

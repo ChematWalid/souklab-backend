@@ -73,13 +73,14 @@ public class AdminSubscriptionService {
     @Transactional
     public SubscriptionResponse grant(ManualSubscriptionGrantRequest request) {
         User actor = currentUserProvider.requireCurrentUser();
-        User target = userRepository.findById(request.getAccountId()).orElseThrow(() -> new ResourceNotFoundException("Target account not found"));
+        User target = userRepository.findWithLockById(request.getAccountId())
+                .orElseThrow(() -> new ResourceNotFoundException("Target account not found"));
         SubscriptionPlan plan = planRepository.findById(request.getPlanId()).filter(SubscriptionPlan::isActive)
                 .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
-        if (plan.getSubscriberType() == SubscriberType.ARTISAN && userRepository.findById(target.getId()).map(User::getArtisan).orElse(null) == null) {
+        if (plan.getSubscriberType() == SubscriberType.ARTISAN && target.getArtisan() == null) {
             throw new BadRequestException("Target account does not have an artisan profile");
         }
-        if (plan.getSubscriberType() == SubscriberType.CLIENT && userRepository.findById(target.getId()).map(User::getClient).orElse(null) == null) {
+        if (plan.getSubscriberType() == SubscriberType.CLIENT && target.getClient() == null) {
             throw new BadRequestException("Target account does not have a client profile");
         }
         LocalDateTime starts = LocalDateTime.now(clock);

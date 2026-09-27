@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
@@ -17,6 +20,15 @@ import java.util.Optional;
  * Supports relational queries, directory specifications, and multi-facet filtering.
  */
 public interface ArtisanRepository extends JpaRepository<Artisan, String>, JpaSpecificationExecutor<Artisan> {
+
+    /**
+     * Atomically increments the profile views counter for an artisan.
+     *
+     * @param id artisan identifier
+     */
+    @Modifying
+    @Query("UPDATE Artisan a SET a.viewsCount = a.viewsCount + 1 WHERE a.id = :id")
+    void incrementViewsCount(@Param("id") String id);
 
     /**
      * Loads an artisan with a write lock for quota and other serialized mutations.

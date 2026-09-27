@@ -9,11 +9,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 public interface FeedPostBookmarkRepository extends JpaRepository<FeedPostBookmark, String> {
     boolean existsByPostIdAndUserId(String postId, String userId);
     Optional<FeedPostBookmark> findByPostIdAndUserId(String postId, String userId);
+
+    @Query("select b.post.id from FeedPostBookmark b where b.user.id = :userId and b.post.id in :postIds")
+    Set<String> findBookmarkedPostIdsByUserIdAndPostIdIn(@Param("userId") String userId, @Param("postIds") Collection<String> postIds);
 
     @Query("select b.post from FeedPostBookmark b where b.user.id = :userId " +
             "and b.post.status = :status and b.post.deletedAt is null and b.deletedAt is null " +

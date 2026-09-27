@@ -33,6 +33,7 @@ import com.project.souklab.security.Permission;
 import com.project.souklab.security.ViewerPremiumResolver;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -200,18 +201,22 @@ public class ArtisanProfileService {
      */
     private void recordProfileViewIfEligible(User viewer, Artisan artisan, boolean isSelf, boolean isAdmin) {
         if (!isSelf && !isAdmin && !artisanProfileViewRepository.existsByViewerIdAndArtisanId(viewer.getId(), artisan.getId())) {
-            ArtisanProfileView view = ArtisanProfileView.builder()
-                    .viewer(viewer)
-                    .artisan(artisan)
-                    .build();
-            artisanProfileViewRepository.save(view);
-            if (activityEventService != null) {
-                activityEventService.record(AnalyticsEvent.Profile.VIEW, viewer.getId(), artisan.getId(),
-                        Map.of(AnalyticsMetadata.Account.TYPE, viewer.getArtisan() != null
-                                ? AccountRole.ARTISAN : AccountRole.CLIENT));
+            try {
+                ArtisanProfileView view = ArtisanProfileView.builder()
+                        .viewer(viewer)
+                        .artisan(artisan)
+                        .build();
+                artisanProfileViewRepository.saveAndFlush(view);
+                artisanRepository.incrementViewsCount(artisan.getId());
+                artisan.setViewsCount(artisan.getViewsCount() + 1);
+                if (activityEventService != null) {
+                    activityEventService.record(AnalyticsEvent.Profile.VIEW, viewer.getId(), artisan.getId(),
+                            Map.of(AnalyticsMetadata.Account.TYPE, viewer.getArtisan() != null
+                                    ? AccountRole.ARTISAN : AccountRole.CLIENT));
+                }
+            } catch (DataIntegrityViolationException ignored) {
+                // View already recorded concurrently by the same viewer
             }
-            artisan.setViewsCount(artisan.getViewsCount() + 1);
-            artisanRepository.save(artisan);
         }
     }
 

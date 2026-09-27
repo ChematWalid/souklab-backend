@@ -614,7 +614,7 @@ import static org.mockito.Mockito.when;
             MockMultipartFile file = new MockMultipartFile("file", "syllabus.pdf", "application/pdf", "pdf bytes".getBytes());
             ValidatedFile validated = new ValidatedFile(new ByteArrayInputStream(file.getBytes()), "syllabus.pdf", "application/pdf", file.getSize());
 
-            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
+            when(formationRepository.findWithLockByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
             when(formationFileRepository.findByFormationIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(List.of());
             when(fileValidator.validateAndSanitize(any(), anyString(), anyString(), anyLong(), anyList())).thenReturn(validated);
             when(virusScanService.scan(validated)).thenReturn(validated);
@@ -653,7 +653,7 @@ import static org.mockito.Mockito.when;
                 fullFiles.add(new FormationFile());
             }
 
-            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
+            when(formationRepository.findWithLockByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
             when(formationFileRepository.findByFormationIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(fullFiles);
 
             MockMultipartFile file = new MockMultipartFile("file", "eleventh.pdf", "application/pdf", "bytes".getBytes());
@@ -676,7 +676,7 @@ import static org.mockito.Mockito.when;
             MockMultipartFile file = new MockMultipartFile("file", "notes.pdf", "application/pdf", "pdf bytes".getBytes());
             ValidatedFile validated = new ValidatedFile(new ByteArrayInputStream(file.getBytes()), "notes.pdf", "application/pdf", file.getSize());
 
-            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
+            when(formationRepository.findWithLockByIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(Optional.of(testFormation));
             when(formationFileRepository.findByFormationIdAndDeletedAtIsNull(testFormation.getId())).thenReturn(List.of());
             when(fileValidator.validateAndSanitize(any(), anyString(), anyString(), anyLong(), anyList())).thenReturn(validated);
             when(virusScanService.scan(validated)).thenReturn(validated);
@@ -888,7 +888,7 @@ import static org.mockito.Mockito.when;
         @Test
         void uploadCourseFileRejectsMissingAndOversizedFiles() {
             authenticateArtisan(teacherArtisan);
-            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+            when(formationRepository.findWithLockByIdAndDeletedAtIsNull(testFormation.getId()))
                     .thenReturn(Optional.of(testFormation));
             MultipartFile empty = new MockMultipartFile("file", "", "application/pdf", new byte[0]);
             assertThatThrownBy(() -> formationService.uploadCourseFile(testFormation.getId(), empty))
