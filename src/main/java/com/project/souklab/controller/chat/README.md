@@ -24,6 +24,8 @@ All endpoints require authentication (`Authorization: Bearer <accessToken>`).
 | `POST` | `/api/v1/conversations/{id}/read` | Mark read | Marks messages as read up to `{ "messageId": "..." }`. |
 | `POST` | `/api/v1/conversations/{id}/attachments` | Upload attachment | Multipart upload (`file`) returning attachment metadata and storage URL. |
 
+Incoming messages do not implicitly unarchive a participant's conversation. Presence, typing, and read-receipt payloads use stable handles or user IDs and never expose email addresses. Blank content is valid when an owned attachment is present; fully empty messages remain rejected.
+
 ---
 
 ## WebSocket & Realtime STOMP (`ChatStompController`)

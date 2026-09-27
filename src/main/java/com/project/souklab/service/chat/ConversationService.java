@@ -127,9 +127,18 @@ public class ConversationService {
         Conversation c = requireParticipant(id, current);
         Message existing = messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(c, current, request.idempotencyKey()).orElse(null);
         if (existing != null) return toMessage(existing);
-        if (request.content().length() > properties.getChat().getMessageMaxLength()) throw new BadRequestException("Message content exceeds configured limit");
         if (request.attachmentKeys() != null && request.attachmentKeys().size() > properties.getChat().getAttachmentMaxCount()) throw new BadRequestException("Too many attachments");
-        Message message = new Message(); message.setConversation(c); message.setAuthor(current); message.setContent(request.content()); message.setIdempotencyKey(request.idempotencyKey());
+        String content = request.content() == null ? "" : request.content();
+        if (content.isBlank() && (request.attachmentKeys() == null || request.attachmentKeys().isEmpty())) throw new BadRequestException("Message content or at least one attachment is required");
+        if (content.length() > properties.getChat().getMessageMaxLength()) throw new BadRequestException("Message content exceeds configured limit");
+        Message message = new Message();
+        message.setConversation(c);
+        message.setAuthor(current);
+        message.setContent(content);
+        message.setIdempotencyKey(request.idempotencyKey());
+        // CreationTimestamp is assigned during flush; set it explicitly so the 201 response
+        // and realtime event contain the same timestamp as the persisted message.
+        message.setCreatedAt(LocalDateTime.now(clock));
         if (request.attachmentKeys() != null) {
             for (String key : request.attachmentKeys()) {
                 MessageAttachmentUpload upload = attachmentUploadRepository.findByStorageKeyAndOwnerAndConversationAndUsedAtIsNull(key, current, c).orElseThrow(() -> new BadRequestException("Attachment is not owned by the sender for this conversation"));
@@ -199,7 +208,7 @@ public class ConversationService {
         ChatEventType.Type eventType = typing ? ChatEventType.Typing.STARTED : ChatEventType.Typing.STOPPED;
         ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), eventType,
                 conversationId, null, correlationId, LocalDateTime.now(clock),
-                Map.of(ChatMetadata.Typing.USERNAME, current.getEmail(), ChatMetadata.Typing.TYPING, typing));
+                Map.of(ChatMetadata.Typing.USERNAME, current.getId(), ChatMetadata.Typing.TYPING, typing));
         messagingTemplate.convertAndSendToUser(recipient.getEmail(), properties.getChat().getMessageDestinationPrefix(), event);
     }
 
@@ -247,17 +256,24 @@ public class ConversationService {
         LocalDateTime after = self.getLastReadMessageId() == null ? null : messageRepository.findById(self.getLastReadMessageId()).map(Message::getCreatedAt).orElse(null);
         long unread = messageRepository.countUnread(c, current, after);
         String participantName = resolveParticipantName(p.getUser(), current);
-        return new ConversationResponse(c.getId(), p.getUser().getId(), participantName, self.isArchived(), preview, unread, c.getUpdatedAt());
+        String role = p.getUser().getArtisan() != null ? "ARTISAN" : p.getUser().getClient() != null ? "CLIENT" : "USER";
+        String participantAvatarUrl = isParticipantIdentityMasked(p.getUser(), current)
+                ? null : p.getUser().getAvatarUrl();
+        return new ConversationResponse(c.getId(), p.getUser().getId(), participantName, self.isArchived(), preview, unread,
+                c.getUpdatedAt(), participantAvatarUrl, role, self.getLastReadMessageId());
+    }
+    private boolean isParticipantIdentityMasked(User participant, User viewer) {
+        if (participant == null || participant.getArtisan() == null) return false;
+        boolean isAdmin = viewer != null && viewer.getPermissions() != null && viewer.getPermissions().stream()
+                .anyMatch(p -> p.isEnabled() && Permission.Admin.USERS.matches(p.getPermissionKey()));
+        boolean isSelf = viewer != null && Objects.equals(viewer.getId(), participant.getId());
+        return !isAdmin && !isSelf && isClient(viewer)
+                && (viewer.getClient() == null || !viewer.getClient().isPremium());
     }
     private String resolveParticipantName(User participant, User viewer) {
         if (participant == null) return "Unknown";
         if (participant.getArtisan() != null) {
-            boolean isAdmin = viewer != null && viewer.getPermissions() != null && viewer.getPermissions().stream()
-                    .anyMatch(p -> p.isEnabled() && Permission.Admin.USERS.matches(p.getPermissionKey()));
-            boolean isSelf = viewer != null && viewer.getId() != null && viewer.getId().equals(participant.getId());
-            if (!isAdmin && !isSelf && isClient(viewer)) {
-                boolean isPremium = viewer.getClient() != null && viewer.getClient().isPremium();
-                if (!isPremium) {
+            if (isParticipantIdentityMasked(participant, viewer)) {
                     String artisanId = participant.getArtisan().getId();
                     if (artisanId == null || artisanId.isBlank()) {
                         return "Artisan #?????";
@@ -266,7 +282,6 @@ public class ConversationService {
                             ? artisanId.substring(artisanId.length() - 5)
                             : artisanId;
                     return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
-                }
             }
         }
         return participant.getName();
@@ -286,5 +301,5 @@ public class ConversationService {
     private MessageCursor decodeCursor(String cursor) { if (cursor == null || cursor.isBlank()) return null; try { String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3); LocalDateTime expiry = LocalDateTime.parse(values[2]); if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired"); return new MessageCursor(LocalDateTime.parse(values[0]), values[1]); } catch (BadRequestException e) { throw e; } catch (Exception e) { throw new BadRequestException("Invalid message cursor"); } }
     private void dispatch(Conversation c, ChatEventType.Type type, Message m, String correlationId) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), type, c.getId(), m.getId(), correlationId, LocalDateTime.now(clock), toMessage(m)); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
     private void send(Conversation c, ChatEvent event) { for (ConversationParticipant p : c.getParticipants()) try { messagingTemplate.convertAndSendToUser(p.getUser().getEmail(), properties.getChat().getEventDestination(), event); } catch (Exception e) { log.warn("Chat event delivery failed", e); } }
-    private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UpTo.EVENT, c.getId(), message.getId(), null, LocalDateTime.now(clock), Map.of(ChatMetadata.Read.READER, reader.getEmail(), ChatMetadata.Read.MESSAGE_ID, message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
+        private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UpTo.EVENT, c.getId(), message.getId(), null, LocalDateTime.now(clock), Map.of(ChatMetadata.Read.READER, reader.getId(), ChatMetadata.Read.MESSAGE_ID, message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
 }
