@@ -71,6 +71,12 @@ public class ArtisanReviewController {
                 .body(ApiResponse.created(reviewService.create(formationId, request), "Review submitted successfully."));
     }
 
+    @GetMapping("/api/v1/artisan/formations/{formationId}/reviews/me")
+    @PreAuthorize("@accessControl.canManageArtisanReviews(authentication)")
+    public ResponseEntity<ApiResponse<ArtisanReviewResponseDTO>> myReview(@PathVariable String formationId) {
+        return ResponseEntity.ok(ApiResponse.success(reviewService.getMyReview(formationId)));
+    }
+
     /**
      * Updates the current artisan's review.
      *

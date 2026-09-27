@@ -1,5 +1,6 @@
 package com.project.souklab.dao;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 import com.project.souklab.model.Formation;
@@ -46,6 +47,8 @@ public interface FormationRepository extends JpaRepository<Formation, String>, J
      * @return page of matching active formations
      */
     Page<Formation> findByStatusAndDeletedAtIsNull(FormationStatus status, Pageable pageable);
+
+    List<Formation> findByStatusAndDeletedAtIsNull(FormationStatus status);
 
     /**
      * Retrieves active formations authored by a specific artisan, excluding soft-deleted entities.

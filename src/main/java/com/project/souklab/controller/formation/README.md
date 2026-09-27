@@ -19,7 +19,8 @@ REST controllers managing masterclass authoring, course material uploads, peer w
 | `POST` | `/api/v1/artisan/formations/{id}/files` | `permission:artisan:formations` | Uploads course syllabus or resource document attachment (max 10 attachments, max 25MB, scanned when enabled). |
 | `DELETE` | `/api/v1/artisan/formations/{id}/files/{fileId}` | `permission:artisan:formations` | Soft-deletes a course material attachment. |
 | `POST` | `/api/v1/artisan/formations/{id}/submit` | `permission:artisan:formations` | Submits draft or rejected formation for administrative moderation (`PENDING_REVIEW`). |
-| `DELETE` | `/api/v1/artisan/formations/{id}` | `permission:artisan:formations` | Soft-deletes an authored formation. |
+| `POST` | `/api/v1/artisan/formations/{id}/complete` | `permission:artisan:formations` | Manually marks a published authored masterclass as completed (`COMPLETED`) only after `scheduledAt + durationHours`; the scheduler applies the same rule. |
+| `DELETE` | `/api/v1/artisan/formations/{id}` | `permission:artisan:formations` | Soft-deletes an authored formation (blocked with 409 if confirmed enrollments exist). |
 
 ### Peer Discovery, Enrollment & Downloads (`ArtisanFormationEnrollmentController`)
 | Method | Endpoint | Access | Description |
@@ -28,6 +29,7 @@ REST controllers managing masterclass authoring, course material uploads, peer w
 | `GET` | `/api/v1/artisan/formations/catalog/{id}` | `permission:artisan:formations` | Retrieves detailed public view of a published masterclass, capacity, and syllabus files. |
 | `POST` | `/api/v1/artisan/formations/{id}/enroll` | `permission:artisan:formations` | Enrolls caller in published workshop (blocks self-enrollment, enforces max capacity). |
 | `POST` | `/api/v1/artisan/formations/{id}/cancel` | `permission:artisan:formations` | Cancels confirmed enrollment reservation (enforces configured cutoff deadline before start). |
+| `POST/PUT` | `/api/v1/artisan/formations/{id}/attendance/{enrollmentId}` | `permission:artisan:formations` | Records attendance for a confirmed enrollment (`ATTENDED` or `ABSENT`). Only author may call. |
 | `GET` | `/api/v1/artisan/formations/my-enrollments` | `permission:artisan:formations` | Retrieves paginated enrollment history and registered workshops for authenticated artisan. |
 | `GET` | `/api/v1/artisan/formations/{id}/files/{fileId}/download` | `permission:artisan:formations` | Streams protected course attachment (restricted to author and confirmed participants). |
 

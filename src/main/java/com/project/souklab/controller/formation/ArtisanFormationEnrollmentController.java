@@ -4,9 +4,11 @@ import com.project.souklab.dto.common.ApiResponse;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
 import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
+import com.project.souklab.dto.formation.AttendanceRequest;
 import com.project.souklab.dto.formation.FormationPublicViewDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.filestorage.StorageResource;
+import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.service.formation.FormationEnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,8 +28,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 import java.nio.charset.StandardCharsets;
 
@@ -103,6 +108,17 @@ public class ArtisanFormationEnrollmentController {
     ) {
         FormationEnrollmentResponseDTO cancelled = formationEnrollmentService.cancelEnrollment(id);
         return ResponseEntity.ok(ApiResponse.success(cancelled, "Formation enrollment cancelled successfully."));
+    }
+
+    @RequestMapping(value = "/{id}/attendance/{enrollmentId}", method = {RequestMethod.POST, RequestMethod.PUT})
+    @Operation(summary = "Record formation attendance", description = "Allows a formation author to mark a confirmed participant as attended.")
+    public ResponseEntity<ApiResponse<FormationEnrollmentResponseDTO>> markAttendance(
+            @PathVariable String id, @PathVariable String enrollmentId,
+            @Valid @RequestBody(required = false) AttendanceRequest request) {
+        var status = request == null || request.status() == null
+                ? EnrollmentStatus.ATTENDED : request.status();
+        return ResponseEntity.ok(ApiResponse.success(
+                formationEnrollmentService.markAttendance(id, enrollmentId, status), "Attendance recorded successfully."));
     }
 
     /**

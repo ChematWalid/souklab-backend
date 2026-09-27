@@ -217,6 +217,28 @@ public class FormationEnrollmentService {
         return FormationEnrollmentResponseDTO.from(saved);
     }
 
+    /** Records attendance for one confirmed participant; only the formation author may do so. */
+    @Transactional
+    public FormationEnrollmentResponseDTO markAttendance(String formationId, String enrollmentId, EnrollmentStatus attendanceStatus) {
+        Artisan author = resolveAuthenticatedArtisan();
+        Formation formation = formationRepository.findByIdAndDeletedAtIsNull(formationId)
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_FORMATION_NOT_FOUND_PREFIX + formationId));
+        if (formation.getAuthor() == null || !formation.getAuthor().getId().equals(author.getId())) {
+            throw new ForbiddenException("Only the formation author may record attendance.");
+        }
+        FormationEnrollment enrollment = formationEnrollmentRepository.findById(enrollmentId)
+                .filter(candidate -> candidate.getFormation() != null
+                        && formationId.equals(candidate.getFormation().getId())
+                        && candidate.getDeletedAt() == null)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found for formation."));
+        if (enrollment.getStatus() != EnrollmentStatus.CONFIRMED
+                || (attendanceStatus != EnrollmentStatus.ATTENDED && attendanceStatus != EnrollmentStatus.ABSENT)) {
+            throw new ConflictException("Only confirmed enrollments can be marked ATTENDED or ABSENT.");
+        }
+        enrollment.setStatus(attendanceStatus);
+        return FormationEnrollmentResponseDTO.from(formationEnrollmentRepository.save(enrollment));
+    }
+
     /**
      * Retrieves paginated active and past enrollment history for the authenticated artisan.
      *

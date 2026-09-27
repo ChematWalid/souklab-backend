@@ -18,7 +18,7 @@ graph TD
 
 ---
 
-## Repositories Reference (52 Repositories Across DAO Packages)
+## Repositories Reference (53 Repositories Across DAO Packages)
 
 ### Identity, Security & Auditing
 | Repository Interface | Managed Entity | Key Query Capabilities |
@@ -29,6 +29,7 @@ graph TD
 | [`VerificationTokenRepository`](VerificationTokenRepository.java) | `VerificationToken` | `findActiveToken`, `invalidateActiveTokens` for email verification and password reset. |
 | [`OAuthIdentityRepository`](OAuthIdentityRepository.java) | `OAuthIdentity` | `findByProviderAndProviderUserId`, OAuth account linking. |
 | [`AuditLogRepository`](AuditLogRepository.java) | `AuditLog` | `findByActionOrderByCreatedAtDesc`, administrative audit queries. |
+| [`UserNotificationPreferenceRepository`](UserNotificationPreferenceRepository.java) | `UserNotificationPreference` | `findByUser`, `findByUserAndType`, `deleteByUser`, typed notification preference overrides. |
 
 ### Profiles & Portfolios
 | Repository Interface | Managed Entity | Key Query Capabilities |

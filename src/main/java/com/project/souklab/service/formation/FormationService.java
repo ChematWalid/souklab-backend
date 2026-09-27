@@ -48,10 +48,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -137,6 +139,7 @@ public class FormationService {
         if ((formation.getStatus() == FormationStatus.APPROVED || formation.getStatus() == FormationStatus.PUBLISHED)
                 && coreMetadataChanged) {
             formation.setStatus(FormationStatus.PENDING_REVIEW);
+            notificationService.notifyAdmins("Formation resubmitted for review after metadata changes: " + formation.getTitle());
             log.info("Formation '{}' status reset to PENDING_REVIEW due to core metadata changes", formation.getId());
         }
 
@@ -319,6 +322,11 @@ public class FormationService {
     public void deleteFormation(String id) {
         Artisan artisan = resolveAuthenticatedArtisan();
         Formation formation = findFormationAndVerifyOwnership(id, artisan);
+        long confirmedEnrollments = formationEnrollmentRepository.countByFormationIdAndStatus(
+                formation.getId(), EnrollmentStatus.CONFIRMED);
+        if (confirmedEnrollments > 0) {
+            throw new ConflictException("Formation cannot be deleted while confirmed enrollments exist.");
+        }
         LocalDateTime deletedAt = LocalDateTime.now(clock);
 
         for (FormationFile file : formationFileRepository.findByFormationIdAndDeletedAtIsNull(formation.getId())) {
@@ -331,6 +339,47 @@ public class FormationService {
         formationRepository.save(formation);
         storageObjectLifecycle.deleteAfterCommit(fileUrlResolver.toStorageKey(formation.getThumbnailUrl()));
         log.info("Formation '{}' soft deleted by author '{}'", formation.getId(), artisan.getId());
+    }
+
+    /** Marks a published formation complete after delivery by its author. */
+    @Transactional
+    public FormationResponseDTO completeFormation(String id) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        Formation formation = findFormationAndVerifyOwnership(id, artisan);
+        if (formation.getStatus() != FormationStatus.PUBLISHED) {
+            throw new ConflictException("Only published formations can be completed.");
+        }
+        if (!hasEnded(formation)) {
+            throw new ConflictException("Formation cannot be completed before its scheduled end.");
+        }
+        formation.setStatus(FormationStatus.COMPLETED);
+        return mapToResponseDTO(formationRepository.save(formation));
+    }
+
+    /** Completes published sessions whose scheduled end has elapsed. */
+    @Scheduled(fixedDelay = 60_000L)
+    @Transactional
+    public void completeScheduledFormations() {
+        formationRepository.findByStatusAndDeletedAtIsNull(FormationStatus.PUBLISHED)
+                .forEach(formation -> {
+                    if (hasEnded(formation)) {
+                        formation.setStatus(FormationStatus.COMPLETED);
+                        formationRepository.save(formation);
+                    }
+                });
+    }
+
+    private boolean hasEnded(Formation formation) {
+        if (formation.getScheduledAt() == null || formation.getDurationHours() <= 0) {
+            return false;
+        }
+        return !formation.getScheduledAt().plusHours(formation.getDurationHours()).isAfter(currentTime());
+    }
+
+    private LocalDateTime currentTime() {
+        ZoneOffset offset = clock.getZone() == null
+                ? ZoneOffset.UTC : clock.getZone().getRules().getOffset(clock.instant());
+        return LocalDateTime.ofInstant(clock.instant(), offset);
     }
 
     /**

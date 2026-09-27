@@ -73,6 +73,14 @@ public class ArtisanReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found."));
     }
 
+    @Transactional(readOnly = true)
+    public ArtisanReviewResponseDTO getMyReview(String formationId) {
+        Artisan reviewer = currentArtisan();
+        var enrollment = enrollmentRepository.findByFormationIdAndArtisanId(formationId, reviewer.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found."));
+        return reviewRepository.findByEnrollmentId(enrollment.getId()).map(ArtisanReviewResponseDTO::from).orElse(null);
+    }
+
     /**
      * Creates a review for an attended, completed formation enrollment.
      *

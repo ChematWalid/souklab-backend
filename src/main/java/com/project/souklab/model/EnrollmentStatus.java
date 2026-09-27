@@ -14,6 +14,7 @@ public enum EnrollmentStatus implements EnumValue {
      * Enrolled artisan attended the scheduled formation session.
      */
     ATTENDED,
+    ABSENT,
 
     /**
      * Enrollment was cancelled prior to the cancellation cutoff deadline.

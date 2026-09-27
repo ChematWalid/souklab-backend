@@ -159,6 +159,12 @@ public class ArtisanFormationController {
         return ResponseEntity.ok(ApiResponse.success(null, "Formation deleted successfully."));
     }
 
+    @PostMapping("/{id}/complete")
+    @Operation(summary = "Complete masterclass", description = "Manually marks a published authored masterclass as completed.")
+    public ResponseEntity<ApiResponse<FormationResponseDTO>> completeFormation(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(formationService.completeFormation(id), "Formation completed successfully."));
+    }
+
     /**
      * Retrieves all formations authored by the authenticated artisan.
      *
