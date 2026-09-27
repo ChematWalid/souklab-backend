@@ -68,6 +68,7 @@ Use `@PageableDefault(size = 20)` on the controller method — do not build
 | **State conflict** | **409** | The action can't proceed because of *current state*, not because the request is invalid — duplicate-in-progress request, "you already have the thing you're requesting" |
 | Rate limited | 429 | Includes `Retry-After: <seconds>` header computed from token-bucket refill estimation |
 | Unexpected server error | 500 | Never leak stack traces or raw exception messages |
+| Service unavailable | 503 | Upstream integration failure aborts transaction (e.g. registration email dispatch failure) |
 
 ### The 400 vs 403 vs 409 decision rule
 

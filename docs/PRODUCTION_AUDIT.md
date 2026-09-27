@@ -84,6 +84,24 @@ verification gates.
 - Architecture scans: no controller repository imports and no inline implementation classes.
 - Native SonarLint executable/plugin: not installed or configured in this repository, so no native SonarLint result is available; local compiler, test, and source-hygiene checks are the available evidence.
 
+## September 2026 Hardening Audit
+
+Audit date: 2026-09-27
+
+A follow-up hardening pass resolved 7 high-impact correctness, reliability, and security issues identified during repository review and deep-dive analysis.
+
+### Findings & Resolutions
+
+| Area | Issue Description | Resolution Implemented |
+| --- | --- | --- |
+| **Authentication & Moderation** | Moderated users retained ability to authenticate; their original email remained blocked in MariaDB forever. | `CustomUserDetailsService` and `AuthService` now query `findByEmailAndDeletedAtIsNull`, rejecting soft-deleted users with `401 Unauthorized`. In `ContentReportService.resolve` (`REMOVE`), user status is set to `DELETED`, `deletedAt` set to `NOW()`, and email moved to synthetic alias `deleted+<id>@deleted.souklab.invalid`, releasing original email for reuse. |
+| **Reviews & Soft-Delete** | Re-submitting a review for an attended formation after soft-deletion caused a 500 error due to `uk_artisan_review_enrollment` constraint violation. | `ArtisanReviewService` now checks for existing reviews (including soft-deleted) by `artisanId` and `enrollmentId`. If an existing soft-deleted review exists, it reactivates the review (`deletedAt = null`), updates rating/comment, and recalculates aggregates without triggering database constraint errors. |
+| **Feed Performance** | `FeedPostMapper` executed N+1 queries fetching media attachments and authors; view counter write locks created a database bottleneck on high-traffic posts. | `FeedPostMapper` now batch-fetches media attachments and author details. Post view count increments were converted from pessimistic locking to direct atomic database operations (`incrementViewCountNative`). |
+| **Registration Reliability** | Asynchronous email dispatch during registration resulted in orphaned unverified accounts when mail delivery failed. | `AuthService.registerUser` now invokes synchronous email verification code delivery (`sendVerificationCodeSynchronous`). If email delivery fails, the transaction rolls back cleanly and returns `503 Service Unavailable`, preventing orphaned account states. |
+| **Configuration Hygiene** | Environment sample files had naming drift (`CHARGILY_SECRET` vs `CHARGILY_API_KEY`) and variable count mismatch across deployments. | Unified environment variables across `.env.example`, `.env.docker.example`, and `deploy/.env.production.example` (strictly 195 variables verified with `check-env-drift.sh`). |
+| **Migration Guardrails** | Risk of dangerous DDL pattern regressions (`MODIFY ... ENUM` without strict baseline tracking). | Added migration pattern baseline verification in `scripts/check-source-hygiene.sh` and `scripts/migration-pattern-baseline.txt`. |
+| **Security & Quality Gates** | Outdated JJWT API usage and lack of automated code coverage quality gates in build pipeline. | Modernized JJWT to 0.12.6 using `Jwts.parser().verifyWith(key).build()` and HS512/HS256 key enforcement. Configured JaCoCo coverage gate enforcing 65% minimum line coverage and CodeQL static analysis in CI. |
+
 ## Next release gate
 
 The next production milestone should require a hosted CI pass, successful

@@ -88,7 +88,7 @@ Creates a base user account.
   "accountType": "ARTISAN"
 }
 ```
-- **Response**: `201 Created` with User summary & confirmation email dispatch.
+- **Response**: `201 Created` with User summary & confirmation email dispatch. If the verification email cannot be delivered, the registration transaction is rolled back and returns `503 Service Unavailable`, preventing unusable orphaned accounts.
 
 ### `POST /api/v1/auth/login`
 Authenticates credentials and returns JWT access + refresh tokens.
@@ -1107,14 +1107,15 @@ Submits a decimal rating (`0.00` to `5.00`) and feedback commentary after attend
   }
   ```
 - **Response**: `201 Created` with `ApiResponse<ArtisanReviewResponseDTO>`.
+- **Note**: If a review for this enrollment was previously deleted (soft-deleted), re-submitting reactivates the existing record (`deleted_at = NULL`), updates its rating and comment, and recalculates the artisan's rating summary without unique key (`uk_artisan_review_enrollment`) conflicts.
 
 #### `GET /api/v1/artisan/formations/{formationId}/reviews/me`
-Retrieves the caller's existing review for their confirmed enrollment in that formation, or `null` if not yet reviewed.
+Retrieves the caller's existing active review for their confirmed enrollment in that formation, or `null` if not yet reviewed or soft-deleted.
 - **Access**: Authenticated Artisan (`permission:artisan:reviews`)
 - **Response**: `200 OK` with `ApiResponse<ArtisanReviewResponseDTO>`.
 
 #### `PUT /api/v1/artisan/reviews/{reviewId}` and `DELETE /api/v1/artisan/reviews/{reviewId}`
-Edit or delete an owned review (`200 OK`).
+Edit or delete an owned review (`200 OK`). Soft-deleting a review decrements the artisan's review count and recalculates their aggregate rating.
 
 ---
 
@@ -1383,7 +1384,7 @@ Complex platform metric aggregations and reporting jobs are processed asynchrono
 - `POST /api/v1/admin/feed/{id}/remove`: Permanently removes offending post (`permission:admin:feed`).
 - `GET /api/v1/admin/reports`: Paginated content abuse reports queue (`permission:admin:reports`).
 - `GET /api/v1/admin/reports/{id}`: Retrieves complete details of a specific abuse report (`permission:admin:reports`).
-- `POST /api/v1/admin/reports/{id}/resolve`: Resolves report with action `DISMISS`, `HIDE`, or `REMOVE` (`ReportResolutionRequestDTO`). Automatically applies action to the targeted content and records resolution in the audit log.
+- `POST /api/v1/admin/reports/{id}/resolve`: Resolves report with action `DISMISS`, `HIDE`, or `REMOVE` (`ReportResolutionRequestDTO`). Automatically applies action to the targeted content and records resolution in the audit log. When resolving a `USER` target with `REMOVE`, the account is soft-deleted (`status = DELETED`, `deleted_at = NOW()`), authentication is blocked, and their email is moved to `deleted+<id>@deleted.souklab.invalid`, freeing the unique email constraint for re-registration.
 
 ---
 

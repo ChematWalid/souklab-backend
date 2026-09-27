@@ -39,16 +39,16 @@
 - **Transports (`controller/`, `filestorage/controller/`)**:
   HTTP/STOMP adapters. Validate inputs via Jakarta Validation (`@Valid`). Map HTTP codes to standard `ApiResponse<T>` envelope. Never own transactions or expose JPA entities.
 - **Security (`security/`, `filestorage/security/`)**:
-  - `JwtAuthenticationFilter`: Extracts and verifies HS256 Bearer JWT.
+  - `JwtAuthenticationFilter`: Extracts and verifies JJWT 0.12.6 Bearer JWT (HMAC-SHA).
   - `RateLimitFilter`: IP-based token-bucket limiter on sensitive endpoints (`/auth/login`, `/verify-email`, `/forgot-password`).
   - `UserRateLimitFilter`: User-based token-bucket limiter on authenticated requests.
   - `AvatarUploadRateLimitFilter` / `FileRateLimitFilter`: Storage-specific rate limiters.
   - *All rate limiters emit `Retry-After: <seconds>` on HTTP 429.*
   - **Browser Security & Transport**: Enforces CSP, Permissions-Policy, X-Frame-Options (`DENY`), X-Content-Type-Options (`nosniff`), Referrer-Policy (`no-referrer`), and reverse proxy forward headers (`framework`). Public endpoints (`/feed`, `/catalog/**`, `/public/**`, `/subscriptions/plans`, `/artisans/*/reviews`) strictly enforce `GET`-only access without credentials.
 - **Services (`service/`, `filestorage/`)**:
-  Own `@Transactional` boundaries. Enforce domain invariants (e.g. self-enrollment guard, single review per attended session, 14-day formateur cooldown). Handle post-commit storage cleanups.
+  Own `@Transactional` boundaries. Enforce domain invariants (e.g. self-enrollment guard, single review per attended session, 14-day formateur cooldown, review reactivation on re-submission). Handle post-commit storage cleanups.
 - **Persistence (`dao/`, `model/`)**:
-  Spring Data JPA repositories extending `JpaRepository` and `JpaSpecificationExecutor`. Soft deletes mapped via `deletedAt`. All entities extend `BaseEntity` (UUID primary key + audit timestamps).
+  Spring Data JPA repositories extending `JpaRepository` and `JpaSpecificationExecutor`. Soft deletes mapped via `deletedAt`. All entities extend `BaseEntity` (UUID primary key + audit timestamps). Flyway migrations strictly guarded against table-locking `MODIFY ... ENUM` and non-deterministic `UUID()` seeds via `scripts/check-source-hygiene.sh`.
 - **Search (`config/search/`, `service/directory/`)**:
   Hibernate Search 8.2.2 synchronizes `Artisan` entity index into Elasticsearch 8.15.3. JPA criteria fallback on Elasticsearch unavailability.
 

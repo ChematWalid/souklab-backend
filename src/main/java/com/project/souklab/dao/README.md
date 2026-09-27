@@ -23,7 +23,7 @@ graph TD
 ### Identity, Security & Auditing
 | Repository Interface | Managed Entity | Key Query Capabilities |
 | :--- | :--- | :--- |
-| [`UserRepository`](UserRepository.java) | `User` | `findByEmail`, `existsByEmail`, `findByStatusAndDeletedAtIsNull`, search query filters. |
+| [`UserRepository`](UserRepository.java) | `User` | `findByEmail`, `findByEmailAndDeletedAtIsNull`, `existsByEmail`, `findByStatusAndDeletedAtIsNull`, search query filters. |
 | [`AuthorizationPermissionRepository`](AuthorizationPermissionRepository.java) | `AuthorizationPermission` | Enabled permission lookup by key and bulk key lookup. |
 | [`RefreshTokenRepository`](RefreshTokenRepository.java) | `RefreshToken` | `findByToken`, `deleteByUser`, revocation cleanup. |
 | [`VerificationTokenRepository`](VerificationTokenRepository.java) | `VerificationToken` | `findActiveToken`, `invalidateActiveTokens` for email verification and password reset. |
@@ -65,14 +65,14 @@ graph TD
 ### Social Feed, Reviews & Reports
 | Repository Interface | Managed Entity | Key Query Capabilities |
 | :--- | :--- | :--- |
-| [`FeedPostRepository`](FeedPostRepository.java) | `FeedPost` | Public visibility, type filtering, author and moderation queue queries. |
+| [`FeedPostRepository`](FeedPostRepository.java) | `FeedPost` | Public visibility, type filtering, author and moderation queue queries, atomic view increment (`incrementViewCountNative`). |
 | [`FeedPostMediaRepository`](FeedPostMediaRepository.java) | `FeedPostMedia` | Ordered post attachment lookup. |
 | [`FeedTagRepository`](FeedTagRepository.java) | `FeedTag` | Normalized slug/name lookup and creation. |
 | [`FeedPostLikeRepository`](FeedPostLikeRepository.java) | `FeedPostLike` | Unique post likes and exact like counts. |
 | [`FeedPostBookmarkRepository`](FeedPostBookmarkRepository.java) | `FeedPostBookmark` | Unique bookmarks and saved-post pages. |
 | [`FeedPostCommentRepository`](FeedPostCommentRepository.java) | `FeedPostComment` | Root/reply pages and atomic engagement counters. |
 | [`FeedPostCommentLikeRepository`](FeedPostCommentLikeRepository.java) | `FeedPostCommentLike` | Unique comment likes and exact like counts. |
-| [`ArtisanReviewRepository`](ArtisanReviewRepository.java) | `ArtisanReview` | Visible review pages, enrollment uniqueness, average and count aggregates. |
+| [`ArtisanReviewRepository`](ArtisanReviewRepository.java) | `ArtisanReview` | Visible review pages, enrollment uniqueness and reactivation (`findByArtisanIdAndEnrollmentId`), average and count aggregates. |
 | [`ContentReportRepository`](ContentReportRepository.java) | `ContentReport` | Status and target-type moderation queue filters. |
 
 ### Real-Time Messaging & Chat

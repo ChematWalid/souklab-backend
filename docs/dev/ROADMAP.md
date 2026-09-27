@@ -137,3 +137,27 @@ This roadmap breaks down the development of the **Souklab** production Spring Bo
 - [x] **Step 12.4**: Build exhaustive live curl test suite (`scripts/test-crud-scenarios.py`) executing 173 scenarios against live Docker container covering authentication, RBAC, cross-tenant IDOR, soft-delete privacy, method tampering, and fuzzing (SQLi, XSS, path traversal, null bytes, long strings). All 173 passed (0 failures).
 - [x] **Step 12.5**: Complete verification suite: all 1,470 tests passing, OpenAPI synchronized (220 operations), live HTTP verification passing with 0 errors.
 
+---
+
+## 📍 Phase 13: Repository Audit, Security Hardening & Continuous Verification (COMPLETED)
+- [x] **Step 13.1**: **Soft-Delete Auth Blocking & Email Release (COMPLETED)**:
+  - `CustomUserDetailsService` and `AuthService` filter via `findByEmailAndDeletedAtIsNull`, rejecting moderated users with `401 Unauthorized`.
+  - `ContentReportService.resolve` (`REMOVE`) sets user status to `DELETED`, `deletedAt = NOW()`, and moves email to synthetic alias `deleted+<id>@deleted.souklab.invalid`, allowing clean re-registration on original email.
+- [x] **Step 13.2**: **Formation Review Conflict-Free Reactivation (COMPLETED)**:
+  - Re-submitting a review for an attended formation after soft-delete reactivates existing review (`deletedAt = null`), updates rating/comment, and updates aggregates, eliminating `uk_artisan_review_enrollment` unique constraint errors.
+- [x] **Step 13.3**: **Feed Query Batching & Atomic View Increments (COMPLETED)**:
+  - Batch-fetching in `FeedPostMapper` eliminates N+1 queries for media attachments and author details.
+  - Replaced pessimistic view lock with native atomic database increment (`incrementViewCountNative`).
+- [x] **Step 13.4**: **Registration Synchronous Rollback Resilience (COMPLETED)**:
+  - Switched `AuthService.registerUser` to synchronous email dispatch (`sendVerificationCodeSynchronous`).
+  - If upstream email delivery fails, transaction rolls back cleanly and returns `503 Service Unavailable`, preventing unverified orphan accounts.
+- [x] **Step 13.5**: **Configuration Drift & Migration Guardrails (COMPLETED)**:
+  - Synchronized exact parity across `.env.example`, `.env.docker.example`, and `deploy/.env.production.example` (195 variables verified with `scripts/check-env-drift.sh`).
+  - Implemented migration baseline pattern guard in `scripts/check-source-hygiene.sh` and `scripts/migration-pattern-baseline.txt`.
+- [x] **Step 13.6**: **Modernized JJWT & JaCoCo Quality Gate (COMPLETED)**:
+  - Upgraded JJWT to 0.12.6 with non-deprecated builder/parser APIs and HS512/HS256 key size enforcement.
+  - Added strict 65% line coverage minimum gate in `pom.xml` and CodeQL SAST workflow in GitHub Actions.
+- [x] **Step 13.7**: **Comprehensive Verification Suite (COMPLETED)**:
+  - 1,508 Maven unit & integration tests passing with 0 failures, 69.38% JaCoCo coverage.
+  - 34 live curl assertions in `scripts/thorough-curl-test.py` passing against Docker container.
+  - Source hygiene, environment parity, and API contracts 100% synchronized.

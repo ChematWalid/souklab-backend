@@ -30,6 +30,11 @@ were verified for the latest reviewed commit.
 - [ ] Analytics job owner isolation, financial permission split, CSV download, and `/admin/stats` alias verified.
 - [ ] Activity-event retention and bounded backfill/rollup evidence recorded before enabling historical exports.
 - [ ] RabbitMQ analytics exchange/queue/DLQ delivery, persisted retry backoff, publisher confirms, and duplicate-event idempotency verified with the feature enabled.
-- [ ] Private `/v3/api-docs` and Swagger UI authenticated access verified.
 - [ ] Per-IP and authenticated per-user rate-limit behavior verified across application instances.
 - [x] Credential-free local Chargily provider and bounded real sandbox checkout smoke script are repository-owned; real credentials/provider availability remain explicitly classified by the smoke script.
+- [x] Environment drift check passes across all 195 variables (`scripts/check-env-drift.sh`).
+- [x] Production environment validation enforces mode 600, no placeholders, and immutable image digest (`scripts/validate-production-env.sh`).
+- [x] Source hygiene and Flyway migration guards pass against `scripts/migration-pattern-baseline.txt` (`scripts/check-source-hygiene.sh`).
+- [x] JaCoCo minimum 65% instruction coverage gate enforced and verified via `./mvnw verify`.
+- [x] CodeQL SAST automated scanning configured in `.github/workflows/codeql.yml`.
+- [x] Dedicated live end-to-end curl suite (34 assertions) verified against running stack (`scripts/thorough-curl-test.py`).

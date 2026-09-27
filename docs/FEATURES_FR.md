@@ -81,7 +81,7 @@ Propositions de valeur principales :
 |---|---|---|
 | `spring-boot-starter-webmvc` | 4.0.8 | Couche REST HTTP |
 | `spring-boot-starter-security` + `spring-boot-starter-oauth2-client` | 4.0.8 | Auth JWT + Google OAuth |
-| `jjwt-api` / `jjwt-impl` / `jjwt-jackson` | 0.11.5 | Signature et analyse JWT |
+| `jjwt-api` / `jjwt-impl` / `jjwt-jackson` | 0.12.6 | Signature et analyse JWT (HMAC-SHA) |
 | `spring-boot-starter-data-jpa` | 4.0.8 | ORM JPA/Hibernate |
 | `mariadb-java-client` | — | Pilote JDBC MariaDB 11.4 |
 | `spring-boot-starter-flyway` + `flyway-mysql` | — | Migrations de schéma DB |
@@ -189,7 +189,7 @@ Inscription → PENDING (e-mail non vérifié)
 
 | Propriété | Valeur |
 |---|---|
-| Type de token d'accès | JWT (HS256) |
+| Type de token d'accès | JWT (HMAC-SHA HS512 / HS256 via JJWT 0.12.6) |
 | Expiration du token d'accès | `APP_JWT_ACCESS_EXP` ms (défaut 3 600 000 = 1 heure) |
 | Expiration du token de rafraîchissement | `APP_JWT_REFRESH_EXP` ms (défaut 86 400 000 = 24 heures) |
 | Rotation du token de rafraîchissement | Oui — chaque rafraîchissement émet une nouvelle paire et invalide l'ancienne |
@@ -1231,7 +1231,7 @@ Les endpoints paginés retournent :
 
 | Variable | Obligatoire | Défaut | Description |
 |---|---|---|---|
-| `APP_JWT_SECRET` | **Oui** | — | Secret de signature HS256 — minimum 32 caractères |
+| `APP_JWT_SECRET` | **Oui** | — | Secret de signature HMAC-SHA — minimum 32 caractères (HS512 pour 64+ octets, HS256 pour 32 octets) |
 | `APP_JWT_ACCESS_EXP` | Non | `3600000` | Expiration du token d'accès en millisecondes (1 heure) |
 | `APP_JWT_REFRESH_EXP` | Non | `86400000` | Expiration du token de rafraîchissement en millisecondes (24 heures) |
 | `AUTH_LOCKOUT_MAX_ATTEMPTS` | Non | `5` | Tentatives de connexion échouées avant verrouillage |
