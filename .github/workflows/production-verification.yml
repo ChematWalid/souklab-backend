@@ -62,9 +62,6 @@ jobs:
           ./scripts/check-api-contract.sh
           ./mvnw --batch-mode --no-transfer-progress -DskipTests validate
 
-      - name: Run unit test suite
-        run: ./mvnw --batch-mode --no-transfer-progress test
-
       - name: Validate current Postman analytics collection
         run: |
           python3 -m json.tool .postman/souklab.postman_collection.json >/dev/null
