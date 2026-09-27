@@ -26,6 +26,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.engine.search.query.SearchResult;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.PageImpl;
 
 @Service
@@ -48,7 +49,7 @@ public class FeedDiscoveryService {
                 ? search(query, effectivePageable)
                 : postRepository.findForDiscovery(FeedPostStatus.PUBLISHED, type, authorId,
                 normalize(tag), normalize(query), effectivePageable);
-        return PaginatedResponse.from(page.map(this::toResponse));
+        return PaginatedResponse.from(toResponsePage(page));
     }
 
     @Transactional(readOnly = true)
@@ -65,21 +66,60 @@ public class FeedDiscoveryService {
                     .totalElements(0).totalPages(0).last(true).build();
         }
         Page<FeedPost> page = postRepository.findFollowing(user.getClient().getId(), FeedPostStatus.PUBLISHED, pageable);
-        return PaginatedResponse.from(page.map(this::toResponse));
+        return PaginatedResponse.from(toResponsePage(page, user));
+    }
+
+    private Page<FeedPostResponseDTO> toResponsePage(Page<FeedPost> posts) {
+        return toResponsePage(posts, resolveCurrentViewer());
+    }
+
+    private Page<FeedPostResponseDTO> toResponsePage(Page<FeedPost> posts, User viewer) {
+        if (posts.isEmpty()) {
+            return posts.map(this::toResponse);
+        }
+        if (viewer == null) {
+            return posts.map(post -> {
+                FeedPostResponseDTO mapped = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+                return feedPrivacyService.protectPost(post, mapped);
+            });
+        }
+        List<String> postIds = posts.getContent().stream().map(FeedPost::getId).toList();
+        Set<String> likedPostIds = postLikeRepository.findLikedPostIdsByUserIdAndPostIdIn(viewer.getId(), postIds);
+        Set<String> bookmarkedPostIds = bookmarkRepository.findBookmarkedPostIdsByUserIdAndPostIdIn(viewer.getId(), postIds);
+        return posts.map(post -> toResponseWithViewer(post, viewer, likedPostIds, bookmarkedPostIds));
     }
 
     private FeedPostResponseDTO toResponse(FeedPost post) {
-        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, FeedPostResponseDTO.from(post, fileUrlResolver::toUrl));
-        String email = SecurityUtils.getCurrentUsername();
-        if (email == null) {
+        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, mappedResponse);
+        User viewer = resolveCurrentViewer();
+        if (viewer == null) {
             return response;
         }
-        return userRepository.findByEmail(email)
-                .map(user -> response.toBuilder()
-                        .likedByCurrentUser(postLikeRepository.existsByPostIdAndUserId(post.getId(), user.getId()))
-                        .bookmarkedByCurrentUser(bookmarkRepository.existsByPostIdAndUserId(post.getId(), user.getId()))
-                        .build())
-                .orElse(response);
+        return response.toBuilder()
+                .likedByCurrentUser(postLikeRepository.existsByPostIdAndUserId(post.getId(), viewer.getId()))
+                .bookmarkedByCurrentUser(bookmarkRepository.existsByPostIdAndUserId(post.getId(), viewer.getId()))
+                .build();
+    }
+
+    private FeedPostResponseDTO toResponseWithViewer(FeedPost post, User viewer, Set<String> likedPostIds, Set<String> bookmarkedPostIds) {
+        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, mappedResponse);
+        if (viewer == null) {
+            return response;
+        }
+        return response.toBuilder()
+                .likedByCurrentUser(likedPostIds != null && likedPostIds.contains(post.getId()))
+                .bookmarkedByCurrentUser(bookmarkedPostIds != null && bookmarkedPostIds.contains(post.getId()))
+                .build();
+    }
+
+    private User resolveCurrentViewer() {
+        String email = SecurityUtils.getCurrentUsername();
+        if (email == null) {
+            return null;
+        }
+        return userRepository.findByEmail(email).orElse(null);
     }
 
     private String normalize(String value) {

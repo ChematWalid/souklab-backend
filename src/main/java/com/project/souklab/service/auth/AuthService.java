@@ -706,7 +706,7 @@ public class AuthService {
      */
     private void ensureAccountCanAuthenticate(User user) {
         if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
-            throw new ForbiddenException("ACCOUNT_DELETED", "Account has been deactivated.");
+            throw new UnauthorizedException("ACCOUNT_DELETED", "Account has been deactivated.");
         }
 
         if (user.getStatus() == AccountStatus.SUSPENDED) {

@@ -20,6 +20,20 @@ import sys
 import time
 from uuid import uuid4
 
+def load_dotenv(path=".env"):
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    k = k.strip()
+                    v = v.strip().strip("'\"")
+                    if k not in os.environ:
+                        os.environ[k] = v
+
+load_dotenv()
+
 BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8080").rstrip("/")
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DB_PORT = os.getenv("DB_PORT", "3307")
@@ -27,8 +41,8 @@ DB_USER = os.getenv("DB_USER", "souklab_test")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "souklab_test_password")
 DB_NAME = os.getenv("DB_NAME", "souklab_test")
 
-ADMIN_EMAIL = "4ce013@gmail.com"
-ADMIN_PASSWORD = "admin123"
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL") or os.getenv("APP_ADMIN_DEFAULT_EMAIL", "admin@souklab.test")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD") or os.getenv("APP_ADMIN_DEFAULT_PASSWORD", "admin123")
 
 test_results = []
 
@@ -404,6 +418,7 @@ def main():
         print(f"\n[ERROR] Test suite aborted with exception: {e}")
         import traceback
         traceback.print_exc()
+        record("Test Suite Execution", False, f"Aborted with exception: {e}")
 
     print("\n" + "=" * 80)
     print("FINAL CURL TEST SUITE REPORT")

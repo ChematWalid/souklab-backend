@@ -23,6 +23,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -104,10 +105,12 @@ public class FeedPost extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @IndexedEmbedded
     @Builder.Default
+    @BatchSize(size = 50)
     private List<FeedTag> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @BatchSize(size = 50)
     private List<FeedPostMedia> media = new ArrayList<>();
 
     /**

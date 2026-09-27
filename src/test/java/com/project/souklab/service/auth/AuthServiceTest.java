@@ -1037,13 +1037,13 @@ class AuthServiceTest {
         when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.login(dto, null))
-                .isInstanceOf(ForbiddenException.class)
+                .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Account has been deactivated.");
     }
 
     @Test
     @DisplayName("login: rejects an account whose status is DELETED")
-    void login_whenUserStatusDeleted_throwsForbiddenException() {
+    void login_whenUserStatusDeleted_throwsUnauthorizedException() {
         LoginDTO dto = LoginDTO.builder()
                 .email("deleted@example.com")
                 .password("correctPassword")
@@ -1061,7 +1061,7 @@ class AuthServiceTest {
         when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.login(dto, null))
-                .isInstanceOf(ForbiddenException.class)
+                .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Account has been deactivated.");
     }
 

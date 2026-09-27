@@ -79,7 +79,9 @@ public class ArtisanReviewService {
         Artisan reviewer = currentArtisan();
         var enrollment = enrollmentRepository.findByFormationIdAndArtisanId(formationId, reviewer.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found."));
-        return reviewRepository.findByEnrollmentId(enrollment.getId()).map(ArtisanReviewResponseDTO::from).orElse(null);
+        return reviewRepository.findByEnrollmentIdAndDeletedAtIsNull(enrollment.getId())
+                .map(ArtisanReviewResponseDTO::from)
+                .orElse(null);
     }
 
     /**

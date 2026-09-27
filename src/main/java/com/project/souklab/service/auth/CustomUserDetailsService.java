@@ -30,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String emailOrUsername) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(emailOrUsername)
+        User user = userRepository.findByEmailAndDeletedAtIsNull(emailOrUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + emailOrUsername));
 
         Set<GrantedAuthority> authorities = new HashSet<>();
@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         boolean isAccountLocked = user.isSuspensionActive(LocalDateTime.now(clock));
-        boolean isAccountDisabled = user.getStatus() != AccountStatus.ACTIVE || user.getDeletedAt() != null;
+        boolean isAccountDisabled = user.getStatus() != AccountStatus.ACTIVE;
 
         String password = user.getPassword() != null ? user.getPassword() : "";
 
