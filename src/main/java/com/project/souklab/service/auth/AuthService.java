@@ -23,6 +23,7 @@ import com.project.souklab.dto.auth.TokenType;
 import com.project.souklab.dto.auth.UserRegistrationDTO;
 import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
 import com.project.souklab.dto.profile.ProfileResponse;
+import com.project.souklab.exception.AppException;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
@@ -50,6 +51,7 @@ import com.project.souklab.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -160,6 +162,8 @@ public class AuthService {
      * @throws ConflictException         if the email is already registered
      * @throws BadRequestException       if the requested account type is invalid or ADMIN
      * @throws ResourceNotFoundException if a required permission does not exist in the database
+     * @throws AppException              with status 503 if the verification email cannot be delivered;
+     *                                   the registration transaction is rolled back in that case
      */
     @Transactional
     public ProfileResponse registerUser(UserRegistrationDTO dto) {
@@ -178,11 +182,12 @@ public class AuthService {
                     Map.of(AnalyticsMetadata.Account.TYPE, role));
         }
 
+        String rawCode = verificationTokenService.issueToken(savedUser, VerificationTokenType.EMAIL_VERIFICATION);
         try {
-            String rawCode = verificationTokenService.issueToken(savedUser, VerificationTokenType.EMAIL_VERIFICATION);
-            emailUtil.sendVerificationCode(savedUser.getEmail(), rawCode);
+            emailUtil.sendVerificationCodeSynchronous(savedUser.getEmail(), rawCode);
         } catch (Exception e) {
-            log.warn("Could not issue or send verification code to {}: {}", savedUser.getEmail(), e.getMessage());
+            throw new AppException("Registration could not be completed because the verification email could not be sent. Please try again.",
+                    HttpStatus.SERVICE_UNAVAILABLE, e);
         }
 
         if (role == AccountRole.ARTISAN) {
