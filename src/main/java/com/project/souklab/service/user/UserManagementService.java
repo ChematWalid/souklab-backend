@@ -89,7 +89,7 @@ public class UserManagementService {
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<UserResponseDTO> getPendingUsers(Pageable pageable) {
-        Page<UserResponseDTO> page = userRepository.findByStatus(AccountStatus.PENDING, pageable)
+        Page<UserResponseDTO> page = userRepository.findByStatusAndDeletedAtIsNull(AccountStatus.PENDING, pageable)
                 .map(this::mapToDTO);
         return PaginatedResponse.from(page);
     }

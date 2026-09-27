@@ -26,3 +26,7 @@ configured with `validate` and should be started only after this command exits
 successfully.
 
 For rollback, change `APP_IMAGE` to the prior immutable digest and recreate only the application. Do not reverse database migrations; ship a forward corrective migration.
+
+## Reverse Proxy & Forwarded Headers
+
+The application relies on `server.forward-headers-strategy=framework` to parse client IP and protocol information from `X-Forwarded-For` and `X-Forwarded-Proto`. Caddy acts as the trusted reverse proxy terminating public TLS traffic. To prevent IP spoofing attacks against rate limiting and audit logging, ensure the application container's port 8080 is never published directly to the public internet and is only accessible via the internal Docker network from Caddy.

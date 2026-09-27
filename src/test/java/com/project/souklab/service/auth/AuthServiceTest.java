@@ -20,6 +20,7 @@ import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
 import com.project.souklab.dto.profile.ArtisanResponseDTO;
 import com.project.souklab.dto.profile.ClientProfileResponseDTO;
 import com.project.souklab.dto.profile.ProfileResponse;
+import com.project.souklab.exception.AppException;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -327,7 +329,7 @@ class AuthServiceTest {
         assertThat(savedUser.getPassword()).isEqualTo("encodedPassword123");
         assertThat(savedUser.getStatus()).isEqualTo(AccountStatus.ACTIVE);
 
-        verify(emailUtil).sendVerificationCode("client@example.com", "123456");
+        verify(emailUtil).sendVerificationCodeSynchronous("client@example.com", "123456");
         verifyNoInteractions(notificationService);
     }
 
@@ -422,15 +424,16 @@ class AuthServiceTest {
         assertThat(artisanProfile.getAccountStatus()).isEqualTo(AccountStatus.PENDING);
 
         verify(notificationService).notifyAdmins("New artisan registration pending approval: artisan@example.com");
-        verify(emailUtil).sendVerificationCode("artisan@example.com", "654321");
+        verify(emailUtil).sendVerificationCodeSynchronous("artisan@example.com", "654321");
     }
 
     /**
-     * Verifies registerUser catches verification dispatch exception and completes registration.
+     * Verifies registerUser aborts with 503 when the verification email cannot be delivered,
+     * so no unusable account is ever persisted.
      */
     @Test
-    @DisplayName("registerUser: catches verification dispatch exception and completes successfully")
-    void registerUser_whenVerificationTokenFails_catchesExceptionAndCompletesRegistration() {
+    @DisplayName("registerUser: throws AppException 503 when verification email delivery fails")
+    void registerUser_whenVerificationEmailFails_throwsServiceUnavailableAndAbortsRegistration() {
         UserRegistrationDTO dto = UserRegistrationDTO.builder()
                 .email("client@example.com")
                 .password("rawPassword123")
@@ -446,13 +449,15 @@ class AuthServiceTest {
             user.setId("user-1");
             return user;
         });
+        when(verificationTokenService.issueToken(any(User.class), eq(VerificationTokenType.EMAIL_VERIFICATION)))
+                .thenReturn("123456");
         doThrow(new RuntimeException("Mail server down"))
-                .when(verificationTokenService).issueToken(any(User.class), eq(VerificationTokenType.EMAIL_VERIFICATION));
+                .when(emailUtil).sendVerificationCodeSynchronous("client@example.com", "123456");
 
-        ProfileResponse response = authService.registerUser(dto);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getEmail()).isEqualTo("client@example.com");
+        assertThatThrownBy(() -> authService.registerUser(dto))
+                .isInstanceOf(AppException.class)
+                .extracting(ex -> ((AppException) ex).getStatus())
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     /**
@@ -1009,6 +1014,104 @@ class AuthServiceTest {
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("Please verify your email address before signing in.");
         verify(userRepository, never()).save(user);
+    }
+
+    @Test
+    @DisplayName("login: rejects an account that is soft-deleted")
+    void login_whenUserSoftDeleted_throwsForbiddenException() {
+        LoginDTO dto = LoginDTO.builder()
+                .email("softdeleted@example.com")
+                .password("correctPassword")
+                .build();
+
+        User user = User.builder()
+                .email("softdeleted@example.com")
+                .password("hashedPassword")
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .permissions(new HashSet<>(Set.of(clientRole)))
+                .build();
+        user.setDeletedAt(fixedNow);
+
+        when(userRepository.findByEmail("softdeleted@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(dto, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Account has been deactivated.");
+    }
+
+    @Test
+    @DisplayName("login: rejects an account whose status is DELETED")
+    void login_whenUserStatusDeleted_throwsUnauthorizedException() {
+        LoginDTO dto = LoginDTO.builder()
+                .email("deleted@example.com")
+                .password("correctPassword")
+                .build();
+
+        User user = User.builder()
+                .email("deleted@example.com")
+                .password("hashedPassword")
+                .status(AccountStatus.DELETED)
+                .emailVerified(true)
+                .permissions(new HashSet<>(Set.of(clientRole)))
+                .build();
+
+        when(userRepository.findByEmail("deleted@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(dto, null))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Account has been deactivated.");
+    }
+
+    @Test
+    @DisplayName("refreshToken: rejects a soft-deleted user")
+    void refreshToken_whenUserSoftDeleted_throwsUnauthorizedException() {
+        TokenRefreshRequestDTO request = new TokenRefreshRequestDTO();
+        request.setRefreshToken("old-refresh-token");
+
+        User user = User.builder()
+                .email("softdeleted@example.com")
+                .build();
+        user.setDeletedAt(fixedNow);
+
+        RefreshToken oldToken = RefreshToken.builder()
+                .token("old-refresh-token")
+                .user(user)
+                .build();
+
+        RefreshToken newToken = RefreshToken.builder()
+                .token("new-refresh-token")
+                .user(user)
+                .build();
+
+        when(refreshTokenRepository.findByToken("old-refresh-token")).thenReturn(Optional.of(oldToken));
+        when(refreshTokenService.rotateRefreshToken(oldToken)).thenReturn(newToken);
+
+        assertThatThrownBy(() -> authService.refreshToken(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Account has been deactivated.");
+    }
+
+    @Test
+    @DisplayName("resetPassword: rejects soft-deleted user with BadRequestException")
+    void resetPassword_whenUserSoftDeleted_throwsBadRequestException() {
+        ResetPasswordRequestDTO dto = new ResetPasswordRequestDTO();
+        dto.setEmail("softdeleted@example.com");
+        dto.setCode("123456");
+        dto.setNewPassword("newPassword123!");
+
+        User user = User.builder()
+                .email("softdeleted@example.com")
+                .build();
+        user.setDeletedAt(fixedNow);
+
+        when(userRepository.findByEmail("softdeleted@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.resetPassword(dto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Invalid or expired code.");
     }
 
     /**

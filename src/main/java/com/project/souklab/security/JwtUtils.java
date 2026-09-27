@@ -3,7 +3,6 @@ package com.project.souklab.security;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
@@ -15,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.time.Clock;
 import java.time.Instant;
 import java.nio.charset.StandardCharsets;
@@ -49,7 +48,7 @@ public class JwtUtils {
         }
     }
 
-    private Key getSigningKey() {
+    private SecretKey getSigningKey() {
         byte[] keyBytes = appProperties.getJwt().getSecret().getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -76,30 +75,33 @@ public class JwtUtils {
 
     public String generateTokenFromUsername(String username, long expirationMs) {
         return Jwts.builder()
-                .setSubject(username)
-                .setId(UUID.randomUUID().toString())
+                .subject(username)
+                .id(UUID.randomUUID().toString())
                 .claim(JwtClaim.Authorization.VERSION.value(), AUTHORIZATION_SCHEMA_VERSION)
-                .setIssuedAt(Date.from(Instant.now(clock)))
-                .setExpiration(Date.from(Instant.now(clock).plusMillis(expirationMs)))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .issuedAt(Date.from(Instant.now(clock)))
+                .expiration(Date.from(Instant.now(clock).plusMillis(expirationMs)))
+                .signWith(getSigningKey())
                 .compact();
     }
 
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .setClock(() -> Date.from(clock.instant()))
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .clock(() -> Date.from(clock.instant()))
                 .build()
-                .parseClaimsJws(token).getBody().getSubject();
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
 
     public boolean validateJwtToken(String authToken) {
         try {
-            var claims = Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .setClock(() -> Date.from(clock.instant()))
+            var claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .clock(() -> Date.from(clock.instant()))
                     .build()
-                    .parseClaimsJws(authToken).getBody();
+                    .parseSignedClaims(authToken)
+                    .getPayload();
             Object version = claims.get(JwtClaim.Authorization.VERSION.value());
             if (!(version instanceof Number number) || number.intValue() != AUTHORIZATION_SCHEMA_VERSION) {
                 log.warn("Rejected JWT with obsolete authorization schema version");

@@ -1,17 +1,9 @@
 package com.project.souklab.service.artisan;
 
-import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.project.souklab.analytics.AnalyticsEvent;
-import com.project.souklab.analytics.AnalyticsMetadata;
-
 import com.project.souklab.dao.ArtisanCertificationRepository;
 import com.project.souklab.dao.ArtisanGalleryImageRepository;
-import com.project.souklab.dao.ArtisanProfileViewRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.UserRepository;
-import com.project.souklab.analytics.ActivityEventService;
 import com.project.souklab.dto.artisan.CertificationResponseDTO;
 import com.project.souklab.dto.artisan.GalleryImageResponseDTO;
 import com.project.souklab.dto.catalog.EpoqueSummaryDTO;
@@ -23,11 +15,9 @@ import com.project.souklab.dto.profile.ArtisanPublicViewDTO;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.exception.UnauthorizedException;
-import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.ArtisanCertification;
-import com.project.souklab.model.ArtisanProfileView;
 import com.project.souklab.model.User;
 import com.project.souklab.security.Permission;
 import com.project.souklab.security.ViewerPremiumResolver;
@@ -56,14 +46,10 @@ public class ArtisanProfileService {
 
     private final UserRepository userRepository;
     private final ArtisanRepository artisanRepository;
-    private final ArtisanProfileViewRepository artisanProfileViewRepository;
     private final ArtisanGalleryImageRepository artisanGalleryImageRepository;
     private final ArtisanCertificationRepository artisanCertificationRepository;
     private final ViewerPremiumResolver viewerPremiumResolver;
-    private ActivityEventService activityEventService;
-
-    @Autowired(required = false)
-    void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
+    private final ArtisanProfileViewRecorder artisanProfileViewRecorder;
 
     /**
      * Retrieves an artisan's profile for authenticated viewers.
@@ -74,7 +60,7 @@ public class ArtisanProfileService {
      * @param artisanId the ID of the target artisan to view
      * @return ArtisanPublicViewDTO containing the public/gated artisan profile
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public ArtisanPublicViewDTO getArtisanProfile(String artisanId) {
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
@@ -94,7 +80,7 @@ public class ArtisanProfileService {
 
         boolean isSelf = viewer.getId().equals(artisan.getId());
 
-        recordProfileViewIfEligible(viewer, artisan, isSelf, isAdmin);
+        artisanProfileViewRecorder.recordProfileViewIfEligible(viewer, artisan, isSelf, isAdmin);
 
         boolean contactInfoLocked = resolveContactInfoLocked(viewer, isSelf, isAdmin);
 
@@ -185,33 +171,6 @@ public class ArtisanProfileService {
         }
         if (!viewer.isEmailVerified()) {
             throw new ForbiddenException("Please verify your email address to access artisan profiles.");
-        }
-    }
-
-    /**
-     * Records a deduplicated profile view for the viewer when eligible.
-     * Views are only recorded when the viewer is neither the profile owner nor an administrator,
-     * and no prior view record exists for this viewer–artisan pair.
-     *
-     * @param viewer  the authenticated user performing the request
-     * @param artisan the target artisan whose profile is being viewed
-     * @param isSelf  {@code true} if the viewer is viewing their own profile
-     * @param isAdmin {@code true} if the viewer holds the administrator permission
-     */
-    private void recordProfileViewIfEligible(User viewer, Artisan artisan, boolean isSelf, boolean isAdmin) {
-        if (!isSelf && !isAdmin && !artisanProfileViewRepository.existsByViewerIdAndArtisanId(viewer.getId(), artisan.getId())) {
-            ArtisanProfileView view = ArtisanProfileView.builder()
-                    .viewer(viewer)
-                    .artisan(artisan)
-                    .build();
-            artisanProfileViewRepository.save(view);
-            if (activityEventService != null) {
-                activityEventService.record(AnalyticsEvent.Profile.VIEW, viewer.getId(), artisan.getId(),
-                        Map.of(AnalyticsMetadata.Account.TYPE, viewer.getArtisan() != null
-                                ? AccountRole.ARTISAN : AccountRole.CLIENT));
-            }
-            artisan.setViewsCount(artisan.getViewsCount() + 1);
-            artisanRepository.save(artisan);
         }
     }
 

@@ -56,7 +56,7 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsername_whenActiveTimeout_setsAccountLockedTrue() {
         LocalDateTime now = LocalDateTime.ofInstant(FIXED_INSTANT, ZONE);
         User user = buildUser("locked@example.com", AccountStatus.SUSPENDED, now.plusHours(1));
-        when(userRepository.findByEmail("locked@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull("locked@example.com")).thenReturn(Optional.of(user));
 
         UserDetails details = userDetailsService.loadUserByUsername("locked@example.com");
 
@@ -72,7 +72,7 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsername_whenExpiredTimeout_setsAccountLockedFalse() {
         LocalDateTime now = LocalDateTime.ofInstant(FIXED_INSTANT, ZONE);
         User user = buildUser("expired@example.com", AccountStatus.SUSPENDED, now.minusMinutes(10));
-        when(userRepository.findByEmail("expired@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull("expired@example.com")).thenReturn(Optional.of(user));
 
         UserDetails details = userDetailsService.loadUserByUsername("expired@example.com");
 
@@ -87,7 +87,7 @@ class CustomUserDetailsServiceTest {
     @DisplayName("loadUserByUsername: sets accountLocked=true for permanent ban with null bannedUntil")
     void loadUserByUsername_whenPermanentBan_setsAccountLockedTrue() {
         User user = buildUser("permban@example.com", AccountStatus.SUSPENDED, null);
-        when(userRepository.findByEmail("permban@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull("permban@example.com")).thenReturn(Optional.of(user));
 
         UserDetails details = userDetailsService.loadUserByUsername("permban@example.com");
 
@@ -101,12 +101,33 @@ class CustomUserDetailsServiceTest {
     @DisplayName("loadUserByUsername: sets disabled=true when account status is REJECTED")
     void loadUserByUsername_whenRejected_setsDisabledTrue() {
         User user = buildUser("rejected@example.com", AccountStatus.REJECTED, null);
-        when(userRepository.findByEmail("rejected@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull("rejected@example.com")).thenReturn(Optional.of(user));
 
         UserDetails details = userDetailsService.loadUserByUsername("rejected@example.com");
 
         assertThat(details.isEnabled()).isFalse();
         assertThat(details.isAccountNonLocked()).isTrue();
+    }
+
+    @Test
+    @DisplayName("loadUserByUsername: throws UsernameNotFoundException when account is soft-deleted")
+    void loadUserByUsername_whenSoftDeleted_throwsUsernameNotFoundException() {
+        when(userRepository.findByEmailAndDeletedAtIsNull("softdeleted@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userDetailsService.loadUserByUsername("softdeleted@example.com"))
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessage("User not found with email: softdeleted@example.com");
+    }
+
+    @Test
+    @DisplayName("loadUserByUsername: sets disabled=true when account status is DELETED")
+    void loadUserByUsername_whenStatusDeleted_setsDisabledTrue() {
+        User user = buildUser("deleted@example.com", AccountStatus.DELETED, null);
+        when(userRepository.findByEmailAndDeletedAtIsNull("deleted@example.com")).thenReturn(Optional.of(user));
+
+        UserDetails details = userDetailsService.loadUserByUsername("deleted@example.com");
+
+        assertThat(details.isEnabled()).isFalse();
     }
 
     /**
@@ -115,7 +136,7 @@ class CustomUserDetailsServiceTest {
     @Test
     @DisplayName("loadUserByUsername: throws UsernameNotFoundException when user is not found")
     void loadUserByUsername_whenNotFound_throwsUsernameNotFoundException() {
-        when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeletedAtIsNull("missing@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userDetailsService.loadUserByUsername("missing@example.com"))
                 .isInstanceOf(UsernameNotFoundException.class)

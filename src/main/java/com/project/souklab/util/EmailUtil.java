@@ -41,29 +41,32 @@ public class EmailUtil {
 
     @Async(APPLICATION_TASK_EXECUTOR)
     public void sendVerificationCode(String toEmail, String code) {
+        try {
+            sendVerificationCodeSynchronous(toEmail, code);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to send verification code email to {}", toEmail, ex);
+        }
+    }
+
+    /**
+     * Sends the account verification code in the caller's thread, propagating delivery failures.
+     * Registration uses this variant so a user is never persisted when the verification email
+     * cannot be delivered; enumeration-safe flows keep using the asynchronous fire-and-forget variant.
+     */
+    public void sendVerificationCodeSynchronous(String toEmail, String code) {
         String subject = SUBJECT_ACCOUNT_VERIFICATION;
         String htmlContent = "<p>Your verification code is: <strong>" + code + "</strong></p><p>This code expires soon.</p>";
 
         if (appProperties.getEmail().isUseSmtp()) {
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setTo(toEmail);
-                message.setSubject(SUBJECT_ACCOUNT_VERIFICATION);
-                message.setText("Your verification code is: " + code + "\nThis code expires soon.");
-                mailSender.send(message);
-            } catch (Exception ex) {
-                LOGGER.error("Failed to send verification code email via SMTP to {}", toEmail, ex);
-            }
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject(SUBJECT_ACCOUNT_VERIFICATION);
+            message.setText("Your verification code is: " + code + "\nThis code expires soon.");
+            mailSender.send(message);
             return;
         }
 
-        try {
-            sendViaMailerSend(toEmail, subject, htmlContent);
-        } catch (RestClientException ex) {
-            LOGGER.error("Failed to send verification code email via MailerSend to {}", toEmail, ex);
-        } catch (Exception ex) {
-            LOGGER.error("Unexpected error while sending verification code email via MailerSend to {}", toEmail, ex);
-        }
+        sendViaMailerSend(toEmail, subject, htmlContent);
     }
 
     @Async(APPLICATION_TASK_EXECUTOR)

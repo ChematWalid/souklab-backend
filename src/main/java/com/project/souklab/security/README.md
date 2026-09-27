@@ -29,7 +29,7 @@ graph TD
 | Filter / Component | Type | Responsibility |
 | :--- | :---: | :--- |
 | [`JwtAuthenticationFilter`](JwtAuthenticationFilter.java) | `OncePerRequestFilter` | Extracts `Bearer` token from `Authorization` header, validates signature and expiration, and populates `SecurityContextHolder`. |
-| [`JwtUtils`](JwtUtils.java) | Component | Encapsulates JJWT logic: generates signed access and refresh tokens using the configured lifetimes, extracts username/claims, and verifies signatures. |
+| [`JwtUtils`](JwtUtils.java) | Component | Encapsulates JJWT 0.12.6 logic: generates signed access and refresh tokens using HMAC-SHA (HS512 for keys >= 64 bytes, HS256 for 32-63 bytes) and configured lifetimes, extracts username/claims, and verifies signatures with non-deprecated parser APIs. |
 | [`RateLimitFilter`](RateLimitFilter.java) | `OncePerRequestFilter` | Bucket4j rate limiting backed by the configured shared Redis store in production. |
 | [`AvatarUploadRateLimitFilter`](AvatarUploadRateLimitFilter.java) | `OncePerRequestFilter` | Dedicated rate limit filter protecting multipart avatar upload endpoints from denial-of-service bursting. |
 | [`AvatarUploadSizeFilter`](AvatarUploadSizeFilter.java) | `OncePerRequestFilter` | Inspects `Content-Length` and early stream boundaries to reject oversized avatar payloads before memory buffering. |

@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -119,6 +120,33 @@ class EmailUtilTest {
             email.sendPasswordChangedNotice("to@test");
             email.sendFormateurApprovedEmail("to@test", "note");
         }
+    }
+
+    @Test
+    void sendVerificationCodeSynchronous_propagatesSmtpFailure() {
+        JavaMailSender sender = mock(JavaMailSender.class);
+        doThrow(new IllegalStateException("mail unavailable")).when(sender).send(any(SimpleMailMessage.class));
+        EmailUtil email = new EmailUtil(sender, properties(true), mock(RestTemplate.class));
+
+        assertThatThrownBy(() -> email.sendVerificationCodeSynchronous("to@test", "code"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("mail unavailable");
+    }
+
+    @Test
+    void sendVerificationCodeSynchronous_sendsViaMailerSendAndPropagatesFailure() {
+        AppProperties properties = properties(false);
+        RestTemplate rest = mock(RestTemplate.class);
+        EmailUtil email = new EmailUtil(mock(JavaMailSender.class), properties, rest);
+
+        email.sendVerificationCodeSynchronous("to@test", "code");
+        verify(rest).postForEntity(eq("https://mailer.test/send"), any(), eq(String.class));
+
+        reset(rest);
+        when(rest.postForEntity(any(String.class), any(), eq(String.class)))
+                .thenThrow(new RestClientException("provider unavailable"));
+        assertThatThrownBy(() -> email.sendVerificationCodeSynchronous("to@test", "code"))
+                .isInstanceOf(RestClientException.class);
     }
 
     private AppProperties properties(boolean smtp) {

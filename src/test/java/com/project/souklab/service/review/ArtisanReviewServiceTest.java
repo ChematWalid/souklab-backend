@@ -31,6 +31,7 @@ import org.springframework.data.domain.PageRequest;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -113,6 +114,35 @@ class ArtisanReviewServiceTest {
     }
 
     @Test
+    void recreatesReviewWhenPreviouslyDeleted() {
+        when(enrollmentRepository.findByFormationIdAndArtisanId("formation", "reviewer")).thenReturn(Optional.of(enrollment));
+        ArtisanReview softDeleted = ArtisanReview.builder()
+                .reviewer(reviewer)
+                .artisan(subject)
+                .enrollment(enrollment)
+                .rating(new BigDecimal("2.00"))
+                .comment("Old removed review")
+                .status(ReviewStatus.REMOVED)
+                .build();
+        softDeleted.setId("review-old");
+        softDeleted.setDeletedAt(LocalDateTime.now());
+
+        when(reviewRepository.findByEnrollmentId("enrollment")).thenReturn(Optional.of(softDeleted));
+        when(reviewRepository.save(any(ArtisanReview.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRepository.averageRating("subject", ReviewStatus.PUBLISHED)).thenReturn(new BigDecimal("5.00"));
+        when(reviewRepository.countByArtisanIdAndStatusAndDeletedAtIsNull("subject", ReviewStatus.PUBLISHED)).thenReturn(1L);
+
+        var result = service.create("formation", new ArtisanReviewRequestDTO(new BigDecimal("5.0"), "Much better now"));
+
+        assertThat(result.getId()).isEqualTo("review-old");
+        assertThat(result.getRating()).isEqualByComparingTo("5.00");
+        assertThat(result.getComment()).isEqualTo("Much better now");
+        assertThat(softDeleted.getStatus()).isEqualTo(ReviewStatus.PUBLISHED);
+        assertThat(softDeleted.getDeletedAt()).isNull();
+        verify(artisanRepository).save(subject);
+    }
+
+    @Test
     void rejectsReviewBeforeAttendance() {
         enrollment.setStatus(EnrollmentStatus.CONFIRMED);
         when(enrollmentRepository.findByFormationIdAndArtisanId("formation", "reviewer")).thenReturn(Optional.of(enrollment));
@@ -187,5 +217,45 @@ class ArtisanReviewServiceTest {
         when(reviewRepository.findByEnrollmentId("enrollment")).thenReturn(Optional.of(new ArtisanReview()));
         assertThatThrownBy(() -> service.create("formation", new ArtisanReviewRequestDTO(BigDecimal.ONE, "x")))
                 .isInstanceOf(ConflictException.class);
+    }
+
+    @Test
+    void getMyReview_whenReviewActive_returnsDto() {
+        when(enrollmentRepository.findByFormationIdAndArtisanId("formation", "reviewer")).thenReturn(Optional.of(enrollment));
+        ArtisanReview review = ArtisanReview.builder()
+                .rating(BigDecimal.valueOf(4.5))
+                .comment("Excellent session")
+                .status(ReviewStatus.PUBLISHED)
+                .reviewer(reviewer)
+                .artisan(subject)
+                .enrollment(enrollment)
+                .build();
+        review.setId("rev-1");
+        when(reviewRepository.findByEnrollmentIdAndDeletedAtIsNull("enrollment")).thenReturn(Optional.of(review));
+
+        var result = service.getMyReview("formation");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo("rev-1");
+        assertThat(result.getComment()).isEqualTo("Excellent session");
+    }
+
+    @Test
+    void getMyReview_whenReviewSoftDeletedOrAbsent_returnsNull() {
+        when(enrollmentRepository.findByFormationIdAndArtisanId("formation", "reviewer")).thenReturn(Optional.of(enrollment));
+        when(reviewRepository.findByEnrollmentIdAndDeletedAtIsNull("enrollment")).thenReturn(Optional.empty());
+
+        var result = service.getMyReview("formation");
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void getMyReview_whenEnrollmentNotFound_throwsResourceNotFoundException() {
+        when(enrollmentRepository.findByFormationIdAndArtisanId("missing", "reviewer")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getMyReview("missing"))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Enrollment not found.");
     }
 }

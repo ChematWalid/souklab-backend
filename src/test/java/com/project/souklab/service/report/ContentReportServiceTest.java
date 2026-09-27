@@ -7,7 +7,9 @@ import com.project.souklab.dao.ArtisanReviewRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ContentReportRepository;
 import com.project.souklab.dao.FeedPostRepository;
+import com.project.souklab.dao.OAuthIdentityRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.service.security.RefreshTokenService;
 import com.project.souklab.dto.report.ContentReportRequestDTO;
 import com.project.souklab.dto.report.ReportResolutionRequestDTO;
 import com.project.souklab.exception.BadRequestException;
@@ -67,6 +69,8 @@ class ContentReportServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private NotificationService notificationService;
     @Mock private AccessControlService accessControlService;
+    @Mock private RefreshTokenService refreshTokenService;
+    @Mock private OAuthIdentityRepository oauthIdentityRepository;
 
     private ContentReportService service;
     private User reporter;
@@ -75,6 +79,8 @@ class ContentReportServiceTest {
     void setUp() {
         service = new ContentReportService(reportRepository, postRepository, reviewRepository, artisanRepository, userRepository, notificationService,
                 Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC), accessControlService);
+        service.setRefreshTokenService(refreshTokenService);
+        service.setOAuthIdentityRepository(oauthIdentityRepository);
         reporter = User.builder().email("reporter@example.com").build();
         reporter.setId("user-1");
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("reporter@example.com", "credentials", List.of()));
@@ -278,6 +284,26 @@ class ContentReportServiceTest {
         assertThatThrownBy(() -> service.create(new ContentReportRequestDTO(
                 ReportTargetType.POST, "post", "reason", null)))
                 .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void resolvesUserReportWithRemoveAction() {
+        allowAdmin();
+        User targetUser = User.builder().email("baduser@example.com").status(AccountStatus.ACTIVE).password("hash").build();
+        targetUser.setId("user-bad");
+        when(userRepository.findById("user-bad")).thenReturn(Optional.of(targetUser));
+        when(reportRepository.findById("user-report")).thenReturn(Optional.of(
+                report("user-report", ReportTargetType.USER, "user-bad")));
+        when(reportRepository.save(any(ContentReport.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.resolve("user-report", new ReportResolutionRequestDTO(ReportResolutionAction.REMOVE, "Ban spammer"));
+
+        assertThat(targetUser.getStatus()).isEqualTo(AccountStatus.DELETED);
+        assertThat(targetUser.getDeletedAt()).isNotNull();
+        assertThat(targetUser.getEmail()).isEqualTo("deleted+user-bad@deleted.souklab.invalid");
+        assertThat(targetUser.getPassword()).isNull();
+        verify(refreshTokenService).deleteByUser(targetUser);
+        verify(userRepository).save(targetUser);
     }
 
     private void allowAdmin() {

@@ -49,3 +49,7 @@ postman/.dependencies/
 docs/generated/
 
 CLAUDE.md
+
+### Python ###
+__pycache__/
+*.py[cod]

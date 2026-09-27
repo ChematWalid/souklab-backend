@@ -81,7 +81,7 @@ Core value propositions:
 |---|---|---|
 | `spring-boot-starter-webmvc` | 4.0.8 | HTTP REST layer |
 | `spring-boot-starter-security` + `spring-boot-starter-oauth2-client` | 4.0.8 | JWT auth + Google OAuth |
-| `jjwt-api` / `jjwt-impl` / `jjwt-jackson` | 0.11.5 | JWT signing & parsing |
+| `jjwt-api` / `jjwt-impl` / `jjwt-jackson` | 0.12.6 | JWT signing & parsing (HMAC-SHA) |
 | `spring-boot-starter-data-jpa` | 4.0.8 | JPA/Hibernate ORM |
 | `mariadb-java-client` | — | MariaDB 11.4 JDBC driver |
 | `spring-boot-starter-flyway` + `flyway-mysql` | — | DB schema migrations |
@@ -189,7 +189,7 @@ Registration → PENDING (email unverified)
 
 | Property | Value |
 |---|---|
-| Access token type | JWT (HS256) |
+| Access token type | JWT (HMAC-SHA HS512 / HS256 via JJWT 0.12.6) |
 | Access token expiry | `APP_JWT_ACCESS_EXP` ms (default 3600000 = 1 hour) |
 | Refresh token expiry | `APP_JWT_REFRESH_EXP` ms (default 86400000 = 24 hours) |
 | Refresh token rotation | Yes — each refresh issues a new pair and invalidates the old one |
@@ -1232,7 +1232,7 @@ Paginated endpoints return:
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `APP_JWT_SECRET` | **Yes** | — | HS256 signing secret — minimum 32 characters |
+| `APP_JWT_SECRET` | **Yes** | — | HMAC-SHA signing secret — minimum 32 characters (HS512 for 64+ bytes, HS256 for 32 bytes) |
 | `APP_JWT_ACCESS_EXP` | No | `3600000` | Access token expiry in milliseconds (1 hour) |
 | `APP_JWT_REFRESH_EXP` | No | `86400000` | Refresh token expiry in milliseconds (24 hours) |
 | `AUTH_LOCKOUT_MAX_ATTEMPTS` | No | `5` | Failed login attempts before lockout |

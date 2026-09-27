@@ -30,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String emailOrUsername) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(emailOrUsername)
+        User user = userRepository.findByEmailAndDeletedAtIsNull(emailOrUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + emailOrUsername));
 
         Set<GrantedAuthority> authorities = new HashSet<>();

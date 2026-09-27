@@ -56,6 +56,10 @@ jobs:
           rg --version
           bash -n scripts/check-source-hygiene.sh
           ./scripts/check-source-hygiene.sh
+          bash -n scripts/check-env-drift.sh
+          ./scripts/check-env-drift.sh
+          bash -n scripts/check-api-contract.sh
+          ./scripts/check-api-contract.sh
           ./mvnw --batch-mode --no-transfer-progress -DskipTests validate
 
       - name: Validate current Postman analytics collection

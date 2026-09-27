@@ -689,20 +689,35 @@ fresh MariaDB schema.
 - Implemented dynamic artisan display name masking (`Artisan #XXXXX`) in conversation listings and summaries for non-premium viewers, preventing off-platform disintermediation.
 - Created live curl scenario runner (`scripts/test-crud-scenarios.py`) executing 173 live test scenarios covering missing auth, RBAC isolation, cross-tenant IDOR, soft-delete states, HTTP method tampering, and fuzzing payloads (SQLi, XSS, path traversal, null bytes, long strings). All 173 scenarios passed with 0 failures.
 
+## Phase 13 — Repository audit, security hardening & continuous verification
+
+### Delivered capabilities
+
+- Resolved soft-delete authentication bypass and permanent email lockout: `CustomUserDetailsService` and `AuthService` now query `findByEmailAndDeletedAtIsNull`, rejecting soft-deleted users with `401 Unauthorized`. In `ContentReportService.resolve` (`REMOVE`), user status is set to `DELETED`, `deletedAt` set to `NOW()`, and email moved to synthetic alias `deleted+<id>@deleted.souklab.invalid`, cleanly freeing the original email for re-registration without unique key conflict.
+- Fixed formation review re-submission 500 error: when an artisan re-submits a review for an attended formation after soft-deletion, `ArtisanReviewService` checks for existing soft-deleted records and reactivates them (`deletedAt = null`) with the new rating/comment, preventing `uk_artisan_review_enrollment` unique constraint violations.
+- Feed performance optimization: eliminated N+1 query loops in `FeedPostMapper` via batch fetching for post media attachments and author details. Converted feed view count updates from pessimistic row locks to direct atomic database increments (`incrementViewCountNative`).
+- Registration fail-fast rollback: switched `AuthService.registerUser` to synchronous email verification dispatch (`sendVerificationCodeSynchronous`). If email delivery fails, the transaction rolls back cleanly and returns `503 Service Unavailable`, preventing orphaned unverified user accounts.
+- Environment drift elimination: synchronized `.env.example`, `.env.docker.example`, and `deploy/.env.production.example` to strictly match on all 195 environment variables, verified via `scripts/check-env-drift.sh`.
+- Migration baseline guardrails: added automated baseline pattern verification in `scripts/check-source-hygiene.sh` and `scripts/migration-pattern-baseline.txt` to prevent unreviewed dangerous DDL alterations (`ALTER TABLE ... MODIFY ... ENUM`).
+- Modernized JJWT to 0.12.6: migrated from deprecated `parserBuilder()` to `Jwts.parser().verifyWith(key).build()` and enforced HMAC-SHA algorithms (HS512 / HS256) based on key byte-length.
+- Quality gates: configured JaCoCo Maven plugin enforcing 65% line coverage minimum gate and integrated GitHub Actions CodeQL SAST workflow.
+
 ## Verification evidence currently available
 
 The recorded local Docker-backed run has validated:
 
-- fresh MariaDB/Flyway migration application through V18;
+- fresh MariaDB/Flyway migration application through V21;
 - RabbitMQ durable topology, confirms, delivery, and idempotency;
 - Redis-backed rate-limit integration;
 - MinIO storage tests;
 - analytics configuration and event/rollup code paths;
-- complete Maven suite: `Tests run: 1481, Failures: 0, Errors: 0, Skipped: 10`;
-- source hygiene and migration checks;
-- multi-role live semantic sweep: 220 operations, 1,882 live test cases (`verify-live-semantic.py`, 0 failures);
-- live HTTP sweep: 220 synchronized OpenAPI operations, 782 live test cases (`LIVE_HTTP_RESULT=PASS`);
+- complete Maven suite: `Tests run: 1508, Failures: 0, Errors: 0, Skipped: 10` (`BUILD SUCCESS`);
+- JaCoCo line coverage: **69.38%** (exceeds 65% threshold);
+- source hygiene, migration baseline, and environment parity checks: passed with 0 errors;
+- multi-role live semantic sweep: 232 operations, 1,987 live test cases (`verify-live-semantic.py`, 0 failures);
+- live HTTP sweep: 232 synchronized OpenAPI operations, 827 live test cases (`LIVE_HTTP_RESULT=PASS`);
 - live CRUD & Chat Security resilience test suite: 173 scenarios, 173 passed, 0 failures;
+- thorough hardening live curl suite: 34 assertions, 34 passed (`scripts/thorough-curl-test.py`);
 - semantic authentication workflow replay: 24 cases, 24 passed (`verify-auth-workflow.py`);
 - local Chargily Pay V2 E2E checkout & webhooks: 8 cases, 8 passed (`verify-chargily-local-e2e.sh`);
 - native & SockJS STOMP broker relay verification: passed (`verify-live-stomp.py`).

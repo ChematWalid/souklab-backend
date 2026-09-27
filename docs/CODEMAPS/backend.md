@@ -6,7 +6,7 @@
 
 ```
 HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
-             ──► JwtAuthenticationFilter (HS256 Bearer)
+             ──► JwtAuthenticationFilter (JJWT 0.12.6 Bearer)
              ──► UserRateLimitFilter (Auth User: 120/min)
              ──► Controller (@Valid DTO) ──► AccessControlService (@PreAuthorize)
              ──► Application Service (@Transactional) ──► JPA Repository / Elasticsearch
@@ -16,7 +16,7 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 ## 2. API Route Map by Domain
 
 ### Auth & Onboarding (`/api/v1/auth`)
-- `POST /register`: Register artisan/client (`accountType`: `ARTISAN` | `CLIENT`)
+- `POST /register`: Register artisan/client (`accountType`: `ARTISAN` | `CLIENT`; synchronous email dispatch with transactional rollback on failure -> 503)
 - `POST /verify-email`: 6-digit numeric PIN verification (uniform 400 on invalid/expired/nonexistent to prevent enumeration)
 - `POST /resend-verification`: Generic anti-enumeration response
 - `POST /login`: Credential validation (email/username, password max 128 chars) -> returns JWT access + refresh tokens
@@ -54,9 +54,9 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `GET|POST /feed`, `PUT|DELETE /feed/{id}` & `POST|DELETE /feed/{id}/media`: Draft, moderation, and author mutations
 - `POST|DELETE /feed/{id}/likes|bookmarks`, `/feed/{id}/comments`, and `/feed/comments/{id}/replies|likes`: Idempotent engagement and one-level replies
 - `GET /admin/feed/{id}`, `GET|POST /admin/feed/pending`, `publish`, `reject`, `hide`, `DELETE /admin/feed/{id}`: Feed moderation
-- `POST /artisan/formations/{formationId}/reviews`: **Single review path** (requires `ATTENDED` enrollment, unique constraint)
+- `POST /artisan/formations/{formationId}/reviews`: **Single review path** (requires `ATTENDED` enrollment; soft-deleted review is cleanly reactivated on re-submission)
 - `GET /artisans/{artisanId}/reviews` & `GET /artisan/reviews/{id}`: Public reviews
-- `POST /reports` & `GET|POST /admin/reports[/{id}[/resolve]]`: Content abuse moderation
+- `POST /reports` & `GET|POST /admin/reports[/{id}[/resolve]]`: Content abuse moderation (resolving user with `REMOVE` soft-deletes account, blocks auth, and releases original email)
 
 ### Real-Time Messaging (`/api/v1/conversations` & `/ws`)
 - `POST|GET /conversations[/{id}]`: 1-on-1 conversations (clients require Premium; artisan name masked for non-premium viewers; self-conversation blocked -> 400)

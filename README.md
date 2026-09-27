@@ -28,11 +28,11 @@ graph TD
 
 | Module | Core Responsibility | Key Technologies |
 | :--- | :--- | :--- |
-| **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security, JJWT (HS256), BCrypt |
-| **User & Profile Management** | Artisan public profiles, profile completion wizard, permission-aware contact gating, profile view metrics deduplication. | Spring Data JPA, Jakarta Validation |
+| **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security, JJWT 0.12.6 (HMAC-SHA), BCrypt |
+| **User & Profile Management** | Artisan public profiles, profile completion wizard, permission-aware contact gating, profile view metrics deduplication with atomic increments. | Spring Data JPA, Jakarta Validation |
 | **Public Directory & Search** | Full-text scored search, faceted discovery (Wilayas, categories, materials, epoques, techniques), accent folding, edge n-grams, and JPA criteria fallback. | Hibernate Search 8.2.2.Final, Elasticsearch 8.x |
 | **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques) and administrative CRUD management with cache eviction and audit trails. | Caffeine Cache, Spring Data JPA |
-| **Formations & Peer Workshops** | Peer masterclass authoring (`isTeacher`), syllabus ClamAV scanning, administrative review lifecycle, capacity limits, cancellation deadlines, and client 403 boundary. | Spring Security, ClamAV, Spring Data JPA |
+| **Formations & Peer Workshops** | Peer masterclass authoring (`isTeacher`), syllabus ClamAV scanning, administrative review lifecycle, capacity limits, cancellation deadlines, conflict-free review reactivation, and client 403 boundary. | Spring Security, ClamAV, Spring Data JPA |
 | **Formateur Accreditation** | Artisan teacher certification lifecycle (submission, admin review, cooldown enforcement, direct admin grants/revocations). | Multi-state state machine, Spring Events |
 | **Real-Time Messaging** | 1-on-1 private conversations, client premium subscription gating, artisan identity privacy masking (`Artisan #XXXXX`), file attachments, read receipts, typing indicators, and message history via STOMP / WebSocket. | Spring WebSocket, STOMP Relay (RabbitMQ), AMQP |
 | **In-App Notifications** | User-scoped notification feeds, unread badge counters, instant WebSocket broadcast, query-scoped soft deletions. | Spring WebSocket, STOMP Relay, JPA Soft Delete |
@@ -52,9 +52,9 @@ graph TD
 - **Caching**: Caffeine Cache (catalog taxonomies, local rate limiting buckets), Redis 7.4.1 (distributed rate limiting)
 - **Connection Pool**: HikariCP (configured with leak detection and connection pooling)
 - **Object Storage**: S3-compatible object store (MinIO for local development, AWS S3 / Cloudflare R2 for production)
-- **Security & Antivirus**: Spring Security, JJWT 0.11.5, Bucket4j 8.10.1, ClamAV 1.4 Daemon
+- **Security & Antivirus**: Spring Security, JJWT 0.12.6, Bucket4j 8.10.1, ClamAV 1.4 Daemon
 - **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ 4.0)
-- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo, Flyway (V0–V21 migrations), Postman / Newman
+- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo (65% instruction coverage gate), Flyway (V0–V21 migrations), Postman / Newman, CodeQL SAST
 
 ---
 
@@ -171,6 +171,21 @@ docker compose up -d --build app
 
 The server listens on `http://localhost:8080/api/v1`.
 
+### 4. Verification & Testing Commands
+```bash
+# Build and verify with JaCoCo minimum 65% coverage gate
+./mvnw clean verify
+
+# Verify environment templates synchronization
+./scripts/check-env-drift.sh
+
+# Verify source hygiene, schema sync, and migration pattern guards
+./scripts/check-source-hygiene.sh
+
+# Live end-to-end curl verification against running Docker stack (34 scenarios)
+python3 scripts/thorough-curl-test.py
+```
+
 Authorization capabilities and their endpoint/service boundaries are documented in [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). Local development keeps Flyway disabled by default; production enables the versioned migrations and uses Hibernate schema validation.
 
 ---
@@ -183,6 +198,7 @@ Authorization capabilities and their endpoint/service boundaries are documented 
 - **Architecture Codemaps**: [`docs/CODEMAPS/`](docs/CODEMAPS/) — Token-lean system diagrams, route maps, data models, and dependency topologies.
 - **API Specification**: See [`docs/API_SPEC.md`](docs/API_SPEC.md) for endpoint references and [`docs/frontend/API_HANDOFF.md`](docs/frontend/API_HANDOFF.md) for frontend integration.
 - **Production Audit**: See [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
+- **Live Curl Suite**: See [`scripts/thorough-curl-test.py`](scripts/thorough-curl-test.py) for the live end-to-end curl verification test harness.
 - **Postman API Reference**: The current permission-based contract is documented in [`docs/API_SPEC.md`](docs/API_SPEC.md) and [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). The older generated reference is retained in `docs/dev/` as an archival migration artifact.
 - **Postman Test Suite**: The checked-in collection is retained for historical scenarios and must be regenerated before running Newman against the current permission-based API.
 

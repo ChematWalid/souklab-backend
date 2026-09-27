@@ -7,6 +7,7 @@ import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.FeedPostType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,7 @@ import java.util.Optional;
  * Persistence operations for moderated community feed posts.
  */
 public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
+    @EntityGraph(attributePaths = {"author", "author.artisan"})
     @Query("select distinct p from FeedPost p left join p.tags t " +
             "where p.status = :status and p.deletedAt is null " +
             "and (:type is null or p.type = :type) " +
@@ -33,6 +35,7 @@ public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
                                     @Param("query") String query,
                                     Pageable pageable);
 
+    @EntityGraph(attributePaths = {"author", "author.artisan"})
     @Query("select distinct p from FeedPost p join ClientFavoriteArtisan f on f.artisan.id = p.author.artisan.id " +
             "where f.client.id = :clientId and f.deletedAt is null and p.status = :status and p.deletedAt is null")
     Page<FeedPost> findFollowing(@Param("clientId") String clientId,
@@ -77,6 +80,7 @@ public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
      * @param pageable page and sort configuration
      * @return visible feed posts
      */
+    @EntityGraph(attributePaths = {"author", "author.artisan"})
     Page<FeedPost> findByStatusAndDeletedAtIsNull(FeedPostStatus status, Pageable pageable);
 
     /**
@@ -87,6 +91,7 @@ public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
      * @param pageable page and sort configuration
      * @return matching feed posts
      */
+    @EntityGraph(attributePaths = {"author", "author.artisan"})
     Page<FeedPost> findByStatusAndTypeAndDeletedAtIsNull(FeedPostStatus status, FeedPostType type, Pageable pageable);
 
     /**
@@ -95,6 +100,7 @@ public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
      * @param id post identifier
      * @return matching post
      */
+    @EntityGraph(attributePaths = {"author", "author.artisan"})
     Optional<FeedPost> findByIdAndDeletedAtIsNull(String id);
 
     /**
@@ -104,7 +110,9 @@ public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
      * @param pageable page and sort configuration
      * @return author's posts
      */
+    @EntityGraph(attributePaths = {"author", "author.artisan"})
     Page<FeedPost> findByAuthorIdAndDeletedAtIsNull(String authorId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"author", "author.artisan"})
     Page<FeedPost> findByAuthorIdAndStatusAndDeletedAtIsNull(String authorId, FeedPostStatus status, Pageable pageable);
 }

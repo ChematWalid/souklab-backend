@@ -12,7 +12,7 @@
 ## 2. Entity Map by Domain (54 JPA Entities)
 
 ### Identity & Access Control
-- `User` (`users`): Core credentials, status (`PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`, `DELETED`), role seed (`ARTISAN`, `CLIENT`, `ADMIN`).
+- `User` (`users`): Core credentials, status (`PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`, `DELETED`), role seed (`ARTISAN`, `CLIENT`, `ADMIN`). Moderation soft-delete (`REMOVE`) migrates email to `deleted+<id>@deleted.souklab.invalid`, releasing original address.
 - `Permission` (`permissions`) & `UserPermission` (`user_permissions`): Capability-based authorization catalog.
 - `RefreshToken` (`refresh_tokens`): Hashed refresh tokens with rotation and reuse revocation.
 - `VerificationToken` (`verification_tokens`): 6-digit email verification PINs.
@@ -34,7 +34,7 @@
 - `FormationFile` (`formation_files`): Syllabus & course materials (max 10 per formation, protected).
 - `FormationEnrollment` (`formation_enrollments`): Participant bookings (`CONFIRMED`, `ATTENDED`, `CANCELLED`).
   - *Constraint: Unique `(formation_id, artisan_id)`.*
-- `FormationReview` (`formation_reviews`): Star rating and comment. Linked to attended enrollment.
+- `FormationReview` (`formation_reviews`): Star rating and comment. Linked to attended enrollment. Re-submission after soft-delete reactivates existing row to uphold `uk_artisan_review_enrollment`.
 
 ### Social Feed & Content Moderation
 - `FeedPost` (`feed_posts`): Moderated community updates with types (`ACTUALITE`, `FORMATION`, `ANNONCE`), lifecycle states, normalized tags, and atomic engagement counters.

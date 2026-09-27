@@ -34,7 +34,7 @@
 
 | Library | Version | Purpose |
 |---|---|---|
-| `jjwt-api` / `jjwt-impl` / `jjwt-jackson` | `0.11.5` | Cryptographic JWT signing (HS256) and claims extraction |
+| `jjwt-api` / `jjwt-impl` / `jjwt-jackson` | `0.12.6` | Cryptographic JWT signing (HMAC-SHA HS512 / HS256) and claims extraction |
 | `bucket4j-core` / `bucket4j-redis` | `8.10.1` | In-memory or Redis-backed sliding token-bucket rate limiting |
 | `hibernate-search-mapper-orm` | `8.2.2.Final` | Automatic ORM-to-Elasticsearch index synchronization |
 | `aws-sdk-s3` | `2.55.1` | AWS S3 SDK v2 used for MinIO / S3 object operations |

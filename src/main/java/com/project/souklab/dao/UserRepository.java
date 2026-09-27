@@ -30,6 +30,9 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     @EntityGraph(attributePaths = {"permissions"})
     Optional<User> findByEmail(String email);
 
+    @EntityGraph(attributePaths = {"permissions"})
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
+
     boolean existsByEmail(String email);
 
     @EntityGraph(attributePaths = {"permissions"})
@@ -41,6 +44,8 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     }
 
     Page<User> findByStatus(AccountStatus status, Pageable pageable);
+
+    Page<User> findByStatusAndDeletedAtIsNull(AccountStatus status, Pageable pageable);
 
     long countByStatus(AccountStatus status);
 

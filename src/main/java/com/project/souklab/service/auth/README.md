@@ -10,6 +10,7 @@ Core authentication workflows, credential hashing, registration state machines, 
 - New client registrations are saved with `AccountStatus.ACTIVE` and require email verification.
 - New artisan registrations are saved with `AccountStatus.PENDING`, requiring administrative vetting and approval before activation.
 - Password inputs across registration, login, and reset/change flows enforce bounds up to 128 characters to mitigate password hashing denial-of-service.
+- Email verification codes are dispatched synchronously (`sendVerificationCodeSynchronous`). If email delivery fails, the transaction is rolled back and returns `503 Service Unavailable`, preventing unverified orphan accounts.
 
 ### 2. Email Verification & Anti-Enumeration Protection
 - `verifyEmail` validates the 6-digit numeric OTP code.
@@ -21,6 +22,7 @@ Core authentication workflows, credential hashing, registration state machines, 
 
 ### 4. Spring Security UserDetailsService Adapter
 - `CustomUserDetailsService` bridges SoukLab `User` entities into Spring Security `UserDetails` using enabled database permissions. Account type is onboarding metadata; legacy role authorities are not emitted or accepted.
+- Queries enforce `findByEmailAndDeletedAtIsNull`; soft-deleted or moderated accounts cannot authenticate and are rejected with `401 Unauthorized`.
 
 ### 5. Administrative Permission Management Guardrails
 - `PermissionManagementService` allows authorized administrators (`permission:admin:users`) to inspect, grant, and revoke permissions.

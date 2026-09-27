@@ -260,8 +260,21 @@ public class ConfigurationPolicyValidator {
             throw new IllegalStateException("Chargily retry, request limit, or currency configuration is invalid");
         }
         try {
-            if (Base64.getDecoder().decode(chargily.getWebhookEncryptionKey()).length != 32) {
+            byte[] decoded = Base64.getDecoder().decode(chargily.getWebhookEncryptionKey());
+            if (decoded.length != 32) {
                 throw new IllegalStateException("app.chargily.webhook-encryption-key must decode to 32 bytes");
+            }
+            if (isProduction()) {
+                boolean allZeros = true;
+                for (byte b : decoded) {
+                    if (b != 0) {
+                        allZeros = false;
+                        break;
+                    }
+                }
+                if (allZeros) {
+                    throw new IllegalStateException("app.chargily.webhook-encryption-key must not be all zeros in production");
+                }
             }
         } catch (IllegalArgumentException exception) {
             throw new IllegalStateException("app.chargily.webhook-encryption-key must be valid Base64", exception);

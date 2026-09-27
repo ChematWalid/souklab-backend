@@ -9,8 +9,25 @@ synthetic `@souklab.test` identities may appear in local workflow artifacts.
 Requirement-by-requirement coverage is summarized in
 `docs/VERIFICATION_COVERAGE_MATRIX.md`.
 
-## Latest verification — 2026-09-27
+## Latest verification — 2026-09-27 (Hardening & Deep-Dive Pass)
 
+- **Hardening Curl Verification Suite** (`scripts/thorough-curl-test.py`):
+  - 34 comprehensive live curl assertions executed against running Docker application (`http://127.0.0.1:8080`) covering all 7 audit hardening domains:
+    - User registration and email verification code flow (synchronous delivery, 503 rollback resilience).
+    - JJWT 0.12.6 authentication with HMAC-SHA verification (HS512 / HS256) and refresh token rotation.
+    - Soft-delete moderation (`REMOVE`) email release: original email instantly re-registerable; moderated account receives `401 Unauthorized` on login.
+    - Formation review re-submission reactivation: re-submitting a review for an attended formation after soft-delete reactivates existing review without unique constraint (`uk_artisan_review_enrollment`) conflicts.
+    - Feed query batching & atomic view increments (`incrementViewCountNative`).
+    - Contact masking for non-premium viewers and unmasking for premium subscribers.
+  - Result: 34 / 34 assertions passed (0 failures).
+- **Environment Drift Verification** (`scripts/check-env-drift.sh`):
+  - Strictly verified exact parity across `.env.example`, `.env.docker.example`, and `deploy/.env.production.example` (195 environment variables synchronized, 0 missing, 0 drift).
+- **Migration & Source Hygiene Verification** (`scripts/check-source-hygiene.sh`):
+  - Validated zero forbidden DDL modifications outside tracked baseline (`scripts/migration-pattern-baseline.txt`).
+  - Strict Unix line endings, zero trailing whitespace, 56 typed audit actions, and 33 typed notification types verified.
+- **Maven Test & JaCoCo Coverage Suite**:
+  - `Tests run: 1508, Failures: 0, Errors: 0, Skipped: 10` (`BUILD SUCCESS`).
+  - JaCoCo line coverage: **69.38%**, exceeding the 65.00% build threshold gate.
 - **Exhaustive Multi-Role Semantic Live Sweep** (`scripts/verify-live-semantic.py`):
   - 232 published OpenAPI operations tested against live Docker application (`http://127.0.0.1:8080`) across synthetic Admin, Client, Artisan, and second-owner accounts.
   - 1,987 test cases executed with 0 failures (`API_ROUTE_SWEEP operations=232 cases=1987 failures=0`).
@@ -28,13 +45,6 @@ Requirement-by-requirement coverage is summarized in
   - Covers client and artisan registration, pending-state/login boundaries, duplicate email conflict (`409`), OTP verification, refresh token rotation, password reset/change, profile lifecycle, and logout.
 - **WebSocket STOMP Relay Verification** (`scripts/verify-live-stomp.py`):
   - Native & SockJS STOMP verification passed with active RabbitMQ relay (`STOMP_VERIFY_RESULT=PASS`).
-- **Full Maven Test Suite**:
-  - `Tests run: 1481, Failures: 0, Errors: 0, Skipped: 10` (`BUILD SUCCESS`).
-  - Flyway migrations V0 through V21 validated cleanly in MariaDB 12.3 Testcontainers (`ClientFavoritesMigrationTest`).
-- **Source Hygiene & API Contract Checks**:
-  - `scripts/check-source-hygiene.sh` passed (56 typed audit actions, 33 typed notification types synchronized).
-  - `scripts/check-api-contract.sh` passed.
-  - `scripts/validate-api-docs.py` passed (232 operations synchronized with `docs/API_OPENAPI.md`).
 
 ## Previous verification — 2026-09-26
 

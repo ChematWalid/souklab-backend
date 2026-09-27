@@ -23,6 +23,7 @@ import com.project.souklab.dto.auth.TokenType;
 import com.project.souklab.dto.auth.UserRegistrationDTO;
 import com.project.souklab.dto.auth.VerifyEmailRequestDTO;
 import com.project.souklab.dto.profile.ProfileResponse;
+import com.project.souklab.exception.AppException;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
@@ -50,6 +51,7 @@ import com.project.souklab.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -160,6 +162,8 @@ public class AuthService {
      * @throws ConflictException         if the email is already registered
      * @throws BadRequestException       if the requested account type is invalid or ADMIN
      * @throws ResourceNotFoundException if a required permission does not exist in the database
+     * @throws AppException              with status 503 if the verification email cannot be delivered;
+     *                                   the registration transaction is rolled back in that case
      */
     @Transactional
     public ProfileResponse registerUser(UserRegistrationDTO dto) {
@@ -178,11 +182,12 @@ public class AuthService {
                     Map.of(AnalyticsMetadata.Account.TYPE, role));
         }
 
+        String rawCode = verificationTokenService.issueToken(savedUser, VerificationTokenType.EMAIL_VERIFICATION);
         try {
-            String rawCode = verificationTokenService.issueToken(savedUser, VerificationTokenType.EMAIL_VERIFICATION);
-            emailUtil.sendVerificationCode(savedUser.getEmail(), rawCode);
+            emailUtil.sendVerificationCodeSynchronous(savedUser.getEmail(), rawCode);
         } catch (Exception e) {
-            log.warn("Could not issue or send verification code to {}: {}", savedUser.getEmail(), e.getMessage());
+            throw new AppException("Registration could not be completed because the verification email could not be sent. Please try again.",
+                    HttpStatus.SERVICE_UNAVAILABLE, e);
         }
 
         if (role == AccountRole.ARTISAN) {
@@ -266,6 +271,9 @@ public class AuthService {
 
         RefreshToken newToken = refreshTokenService.rotateRefreshToken(oldToken);
         User user = newToken.getUser();
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new UnauthorizedException("Account has been deactivated.");
+        }
 
         String accessToken = jwtUtils.generateAccessToken(user.getEmail());
 
@@ -388,6 +396,9 @@ public class AuthService {
     public void forgotPassword(ForgotPasswordRequestDTO dto) {
         String email = dto.getEmail().trim().toLowerCase();
         userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+                return;
+            }
             if (user.getPassword() != null && !user.getPassword().isBlank()) {
                 try {
                     String rawCode = verificationTokenService.issueToken(user, VerificationTokenType.PASSWORD_RESET);
@@ -417,6 +428,10 @@ public class AuthService {
         String email = dto.getEmail().trim().toLowerCase();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("Invalid or expired code."));
+
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new BadRequestException("Invalid or expired code.");
+        }
 
         verificationTokenService.validateAndConsume(user, VerificationTokenType.PASSWORD_RESET, dto.getCode());
 
@@ -455,6 +470,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
+
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new UnauthorizedException("User is not authenticated.");
+        }
 
         if (user.getPassword() == null || user.getPassword().isBlank()) {
             throw new BadRequestException("This account was created via social login and does not have a password to change. Please continue signing in with Google.");
@@ -686,6 +705,10 @@ public class AuthService {
      * @throws ForbiddenException if the account is actively suspended or was rejected
      */
     private void ensureAccountCanAuthenticate(User user) {
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new UnauthorizedException("ACCOUNT_DELETED", "Account has been deactivated.");
+        }
+
         if (user.getStatus() == AccountStatus.SUSPENDED) {
             if (!user.isSuspensionActive(LocalDateTime.now(clock))) {
                 user.setStatus(AccountStatus.ACTIVE);

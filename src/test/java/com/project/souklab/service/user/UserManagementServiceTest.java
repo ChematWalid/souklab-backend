@@ -188,14 +188,14 @@ class UserManagementServiceTest {
         User user = createUser("u-pending", "pending@example.com", "Pending", "User", AccountStatus.PENDING);
         Page<User> page = new PageImpl<>(List.of(user), pageable, 1);
 
-        when(userRepository.findByStatus(AccountStatus.PENDING, pageable)).thenReturn(page);
+        when(userRepository.findByStatusAndDeletedAtIsNull(AccountStatus.PENDING, pageable)).thenReturn(page);
 
         PaginatedResponse<UserResponseDTO> response = userManagementService.getPendingUsers(pageable);
 
         assertThat(response).isNotNull();
         assertThat(response.getContent()).hasSize(1);
         assertThat(response.getContent().get(0).getStatus()).isEqualTo(AccountStatus.PENDING);
-        verify(userRepository).findByStatus(AccountStatus.PENDING, pageable);
+        verify(userRepository).findByStatusAndDeletedAtIsNull(AccountStatus.PENDING, pageable);
     }
 
     /**
