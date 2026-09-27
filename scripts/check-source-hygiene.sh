@@ -177,4 +177,21 @@ if git ls-files | grep -E '(^|/)(\.env$|.*\.(key|pem|p12|jks)$)' >/dev/null; the
   echo 'tracked secret material detected' >&2
   exit 1
 fi
+
+migration_pattern_baseline="scripts/migration-pattern-baseline.txt"
+test -f "$migration_pattern_baseline" || {
+  echo 'migration pattern baseline is missing' >&2
+  exit 1
+}
+migration_offenders="$({ rg -i -l --pcre2 'alter\s+table[^;]*\bmodify\b[^;]*\benum\b' src/main/resources/db/migration || true
+  rg -l 'UUID\(\)' src/main/resources/db/migration || true; } | sort -u)"
+while IFS= read -r migration_file; do
+  [ -n "$migration_file" ] || continue
+  if ! grep -qxF "$migration_file" "$migration_pattern_baseline"; then
+    echo "migration uses a guarded pattern (enum MODIFY rebuild or UUID() seed): $migration_file" >&2
+    echo 'extend scripts/migration-pattern-baseline.txt only after deliberate review' >&2
+    exit 1
+  fi
+done <<< "$migration_offenders"
+
 echo 'source hygiene and migration checks passed'

@@ -385,6 +385,13 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <!-- Mockito inline mocks are generated above the newest class-file
+                                 version JaCoCo can instrument; skip them to avoid agent errors. -->
+                            <excludes>
+                                <exclude>*MockitoMock*</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
