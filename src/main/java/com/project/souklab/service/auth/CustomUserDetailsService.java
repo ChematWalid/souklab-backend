@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         boolean isAccountLocked = user.isSuspensionActive(LocalDateTime.now(clock));
-        boolean isAccountDisabled = user.getStatus() != AccountStatus.ACTIVE;
+        boolean isAccountDisabled = user.getStatus() != AccountStatus.ACTIVE || user.getDeletedAt() != null;
 
         String password = user.getPassword() != null ? user.getPassword() : "";
 

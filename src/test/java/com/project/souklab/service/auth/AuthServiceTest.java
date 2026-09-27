@@ -1011,6 +1011,104 @@ class AuthServiceTest {
         verify(userRepository, never()).save(user);
     }
 
+    @Test
+    @DisplayName("login: rejects an account that is soft-deleted")
+    void login_whenUserSoftDeleted_throwsForbiddenException() {
+        LoginDTO dto = LoginDTO.builder()
+                .email("softdeleted@example.com")
+                .password("correctPassword")
+                .build();
+
+        User user = User.builder()
+                .email("softdeleted@example.com")
+                .password("hashedPassword")
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .permissions(new HashSet<>(Set.of(clientRole)))
+                .build();
+        user.setDeletedAt(fixedNow);
+
+        when(userRepository.findByEmail("softdeleted@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(dto, null))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("Account has been deactivated.");
+    }
+
+    @Test
+    @DisplayName("login: rejects an account whose status is DELETED")
+    void login_whenUserStatusDeleted_throwsForbiddenException() {
+        LoginDTO dto = LoginDTO.builder()
+                .email("deleted@example.com")
+                .password("correctPassword")
+                .build();
+
+        User user = User.builder()
+                .email("deleted@example.com")
+                .password("hashedPassword")
+                .status(AccountStatus.DELETED)
+                .emailVerified(true)
+                .permissions(new HashSet<>(Set.of(clientRole)))
+                .build();
+
+        when(userRepository.findByEmail("deleted@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(dto, null))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("Account has been deactivated.");
+    }
+
+    @Test
+    @DisplayName("refreshToken: rejects a soft-deleted user")
+    void refreshToken_whenUserSoftDeleted_throwsUnauthorizedException() {
+        TokenRefreshRequestDTO request = new TokenRefreshRequestDTO();
+        request.setRefreshToken("old-refresh-token");
+
+        User user = User.builder()
+                .email("softdeleted@example.com")
+                .build();
+        user.setDeletedAt(fixedNow);
+
+        RefreshToken oldToken = RefreshToken.builder()
+                .token("old-refresh-token")
+                .user(user)
+                .build();
+
+        RefreshToken newToken = RefreshToken.builder()
+                .token("new-refresh-token")
+                .user(user)
+                .build();
+
+        when(refreshTokenRepository.findByToken("old-refresh-token")).thenReturn(Optional.of(oldToken));
+        when(refreshTokenService.rotateRefreshToken(oldToken)).thenReturn(newToken);
+
+        assertThatThrownBy(() -> authService.refreshToken(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Account has been deactivated.");
+    }
+
+    @Test
+    @DisplayName("resetPassword: rejects soft-deleted user with BadRequestException")
+    void resetPassword_whenUserSoftDeleted_throwsBadRequestException() {
+        ResetPasswordRequestDTO dto = new ResetPasswordRequestDTO();
+        dto.setEmail("softdeleted@example.com");
+        dto.setCode("123456");
+        dto.setNewPassword("newPassword123!");
+
+        User user = User.builder()
+                .email("softdeleted@example.com")
+                .build();
+        user.setDeletedAt(fixedNow);
+
+        when(userRepository.findByEmail("softdeleted@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.resetPassword(dto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Invalid or expired code.");
+    }
+
     /**
      * Verifies login parses first client IP from X-Forwarded-For header.
      */

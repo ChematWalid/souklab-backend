@@ -266,6 +266,9 @@ public class AuthService {
 
         RefreshToken newToken = refreshTokenService.rotateRefreshToken(oldToken);
         User user = newToken.getUser();
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new UnauthorizedException("Account has been deactivated.");
+        }
 
         String accessToken = jwtUtils.generateAccessToken(user.getEmail());
 
@@ -388,6 +391,9 @@ public class AuthService {
     public void forgotPassword(ForgotPasswordRequestDTO dto) {
         String email = dto.getEmail().trim().toLowerCase();
         userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+                return;
+            }
             if (user.getPassword() != null && !user.getPassword().isBlank()) {
                 try {
                     String rawCode = verificationTokenService.issueToken(user, VerificationTokenType.PASSWORD_RESET);
@@ -417,6 +423,10 @@ public class AuthService {
         String email = dto.getEmail().trim().toLowerCase();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("Invalid or expired code."));
+
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new BadRequestException("Invalid or expired code.");
+        }
 
         verificationTokenService.validateAndConsume(user, VerificationTokenType.PASSWORD_RESET, dto.getCode());
 
@@ -455,6 +465,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
+
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new UnauthorizedException("User is not authenticated.");
+        }
 
         if (user.getPassword() == null || user.getPassword().isBlank()) {
             throw new BadRequestException("This account was created via social login and does not have a password to change. Please continue signing in with Google.");
@@ -686,6 +700,10 @@ public class AuthService {
      * @throws ForbiddenException if the account is actively suspended or was rejected
      */
     private void ensureAccountCanAuthenticate(User user) {
+        if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
+            throw new ForbiddenException("ACCOUNT_DELETED", "Account has been deactivated.");
+        }
+
         if (user.getStatus() == AccountStatus.SUSPENDED) {
             if (!user.isSuspensionActive(LocalDateTime.now(clock))) {
                 user.setStatus(AccountStatus.ACTIVE);

@@ -42,6 +42,8 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
 
     Page<User> findByStatus(AccountStatus status, Pageable pageable);
 
+    Page<User> findByStatusAndDeletedAtIsNull(AccountStatus status, Pageable pageable);
+
     long countByStatus(AccountStatus status);
 
     long countByDeletedAtIsNull();

@@ -109,6 +109,29 @@ class CustomUserDetailsServiceTest {
         assertThat(details.isAccountNonLocked()).isTrue();
     }
 
+    @Test
+    @DisplayName("loadUserByUsername: sets disabled=true when account has deletedAt set")
+    void loadUserByUsername_whenSoftDeleted_setsDisabledTrue() {
+        User user = buildUser("softdeleted@example.com", AccountStatus.ACTIVE, null);
+        user.setDeletedAt(LocalDateTime.now(clock));
+        when(userRepository.findByEmail("softdeleted@example.com")).thenReturn(Optional.of(user));
+
+        UserDetails details = userDetailsService.loadUserByUsername("softdeleted@example.com");
+
+        assertThat(details.isEnabled()).isFalse();
+    }
+
+    @Test
+    @DisplayName("loadUserByUsername: sets disabled=true when account status is DELETED")
+    void loadUserByUsername_whenStatusDeleted_setsDisabledTrue() {
+        User user = buildUser("deleted@example.com", AccountStatus.DELETED, null);
+        when(userRepository.findByEmail("deleted@example.com")).thenReturn(Optional.of(user));
+
+        UserDetails details = userDetailsService.loadUserByUsername("deleted@example.com");
+
+        assertThat(details.isEnabled()).isFalse();
+    }
+
     /**
      * Verifies that loadUserByUsername throws UsernameNotFoundException when user does not exist.
      */

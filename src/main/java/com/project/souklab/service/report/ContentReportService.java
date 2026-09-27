@@ -34,6 +34,8 @@ import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.security.AccessControlService;
 import com.project.souklab.model.NotificationType;
+import com.project.souklab.dao.OAuthIdentityRepository;
+import com.project.souklab.service.security.RefreshTokenService;
 import com.project.souklab.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -65,6 +67,8 @@ public class ContentReportService {
     private final Clock clock;
     private final AccessControlService accessControlService;
     private ActivityEventService activityEventService;
+    private RefreshTokenService refreshTokenService;
+    private OAuthIdentityRepository oauthIdentityRepository;
 
     public ContentReportService(ContentReportRepository reportRepository, FeedPostRepository postRepository,
                                 ArtisanReviewRepository reviewRepository, ArtisanRepository artisanRepository,
@@ -76,6 +80,16 @@ public class ContentReportService {
 
     @Autowired(required = false)
     void setActivityEventService(ActivityEventService value) { this.activityEventService = value; }
+
+    @Autowired(required = false)
+    public void setRefreshTokenService(RefreshTokenService refreshTokenService) {
+        this.refreshTokenService = refreshTokenService;
+    }
+
+    @Autowired(required = false)
+    public void setOAuthIdentityRepository(OAuthIdentityRepository oauthIdentityRepository) {
+        this.oauthIdentityRepository = oauthIdentityRepository;
+    }
 
     /**
      * Creates a report against a supported existing target.
@@ -210,7 +224,20 @@ public class ContentReportService {
                 if (action == ReportResolutionAction.HIDE) {
                     user.setStatus(AccountStatus.SUSPENDED);
                 } else {
+                    user.setStatus(AccountStatus.DELETED);
                     user.setDeletedAt(LocalDateTime.now(clock));
+                    if (refreshTokenService != null) {
+                        refreshTokenService.deleteByUser(user);
+                    }
+                    if (oauthIdentityRepository != null) {
+                        oauthIdentityRepository.findByUser(user).forEach(identity -> {
+                            identity.setProviderUserId("deleted-" + identity.getId());
+                            identity.setEmail(null);
+                            oauthIdentityRepository.save(identity);
+                        });
+                    }
+                    user.setEmail("deleted+" + user.getId() + "@deleted.souklab.invalid");
+                    user.setPassword(null);
                 }
                 userRepository.save(user);
             }
