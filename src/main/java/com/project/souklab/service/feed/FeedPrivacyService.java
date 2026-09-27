@@ -24,7 +24,10 @@ public class FeedPrivacyService {
                 || !viewerPremiumResolver.isContactInfoLockedFor(author)) {
             return response;
         }
-        return response.toBuilder().authorName(maskedName(author.getArtisan().getId())).build();
+        return response.toBuilder()
+                .authorId(null)
+                .authorName(maskedName(author.getArtisan().getId()))
+                .build();
     }
 
     public FeedPostCommentResponseDTO protectComment(FeedPostComment comment,
@@ -34,7 +37,11 @@ public class FeedPrivacyService {
                 || !viewerPremiumResolver.isContactInfoLockedFor(author)) {
             return response;
         }
-        return response.toBuilder().authorName(maskedName(author.getArtisan().getId())).build();
+        return response.toBuilder()
+                .authorId(null)
+                .authorName(maskedName(author.getArtisan().getId()))
+                .avatarUrl(null)
+                .build();
     }
 
     private String maskedName(String artisanId) {

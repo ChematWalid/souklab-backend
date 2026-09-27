@@ -19,6 +19,8 @@ import java.time.Clock;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.UUID;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,7 @@ public class ChatPresenceService {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (accessor == null || accessor.getUser() == null) return;
         String username = accessor.getUser().getName();
+        String stableHandle = "user-" + UUID.nameUUIDFromBytes(username.getBytes(StandardCharsets.UTF_8)).toString();
         AtomicInteger count = sessions.computeIfAbsent(username, ignored -> new AtomicInteger());
         int current = Math.max(0, count.addAndGet(delta));
         if (current == 0) sessions.remove(username, count);
@@ -46,7 +49,7 @@ public class ChatPresenceService {
         ChatEventType.Type eventType = online ? ChatEventType.Presence.ONLINE : ChatEventType.Presence.OFFLINE;
         messagingTemplate.convertAndSend(properties.getChat().getPresenceDestination(), ChatEvent.create(
                 properties.getChat().getWebsocketProtocolVersion(), eventType, null, null, null,
-                LocalDateTime.now(clock), Map.of(ChatMetadata.Presence.USERNAME, username,
+                LocalDateTime.now(clock), Map.of(ChatMetadata.Presence.USERNAME, stableHandle,
                         ChatMetadata.Presence.ONLINE, online)));
     }
 }
