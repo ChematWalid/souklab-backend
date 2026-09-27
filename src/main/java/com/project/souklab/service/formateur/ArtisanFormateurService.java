@@ -78,17 +78,17 @@ public class ArtisanFormateurService {
         }
 
         if (formateurRequestRepository.existsByArtisanAndStatusAndDeletedAtIsNull(profile, FormateurRequestStatus.PENDING)) {
-            throw new ConflictException("You already have a pending Formateur request.");
+            throw new ConflictException("FORMATEUR_REQUEST_PENDING", "You already have a pending Formateur request.");
         }
 
         Optional<ArtisanFormateurRequest> latestOpt = formateurRequestRepository.findFirstByArtisanAndDeletedAtIsNullOrderByCreatedAtDesc(profile);
         if (latestOpt.isPresent()) {
             ArtisanFormateurRequest latest = latestOpt.get();
             if (!latest.isCanReapply()) {
-                throw new ForbiddenException("You are permanently blocked from submitting new Formateur requests.");
+                throw new ForbiddenException("FORMATEUR_REQUEST_BLOCKED", "You are permanently blocked from submitting new Formateur requests.");
             }
             if (latest.getCooldownUntil() != null && latest.getCooldownUntil().isAfter(LocalDateTime.now(clock))) {
-                throw new ForbiddenException("You cannot submit a request during the cooldown period. Cooldown expires on: " + latest.getCooldownUntil());
+                throw new ForbiddenException("FORMATEUR_REQUEST_COOLDOWN", "You cannot submit a request during the cooldown period. Cooldown expires on: " + latest.getCooldownUntil());
             }
         }
 

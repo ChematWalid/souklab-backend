@@ -14,7 +14,7 @@ The schema is defined by the JPA mappings in `com.project.souklab.model`; this d
 | Messaging | `conversations`, `conversation_participants`, `messages`, `message_attachments` |
 | Subscriptions & Payments | `subscription_pricing`, `subscription_plan_entitlements`, `artisan_subscriptions`, `client_subscriptions`, `payments`, `payment_webhook_logs` |
 | Analytics | `activity_events`, `daily_kpi_rollups`, `analytics_jobs`, `analytics_job_artifacts`, `analytics_outbox_events`, `analytics_processed_events`, `analytics_maintenance_jobs` |
-| Operations | `notifications`, `audit_logs` |
+| Operations | `notifications`, `user_notification_preferences`, `audit_logs` |
 | Favorites | `client_favorite_artisans` |
 
 All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft-delete is represented by `deleted_at` only where the entity mapping includes that inherited field in persistence queries; join-table behavior and foreign-key actions are controlled by the annotations on each relationship.
@@ -31,7 +31,7 @@ All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft
 
 ## Database Migrations & Deployment
 
-Schema changes are versioned and managed using **Flyway**. The repository maintains 19 versioned migrations (`V0` through `V18`) located in `src/main/resources/db/migration/`:
+Schema changes are versioned and managed using **Flyway**. The repository maintains 22 versioned migrations (`V0` through `V21`) located in `src/main/resources/db/migration/`:
 - `V0`: Baseline schema (users, artisans, catalog, formations, enrollments)
 - `V1`: Social feed tables (posts, media, comments, likes)
 - `V2`: Authorization permissions (`permissions`, `user_permissions`)
@@ -43,5 +43,8 @@ Schema changes are versioned and managed using **Flyway**. The repository mainta
 - `V16`: Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`)
 - `V17`: Feed social enhancements: draft/rejected states, normalized tags, post/comment likes, bookmarks, comments/replies, atomic counters, and `COMMENT` content reports
 - `V18`: Feed notification types for submission, publication, rejection, hiding, likes, comments, and replies
+- `V19`: User notification channel preference overrides table (`user_notification_preferences`), unique constraint, and foreign keys
+- `V20`: User entity `last_oauth_login_at` timestamp for sensitive action confirmation
+- `V21`: Adds `DELETE_ACCOUNT` to the MariaDB audit-log action enum
 
 The `prod` Spring profile sets `spring.jpa.hibernate.ddl-auto=validate` and Hibernate Search schema management to `validate`. Production schema changes must be applied via Flyway (`FLYWAY_ENABLED=true`) prior to application startup. Applied migrations are immutable and must never be modified.

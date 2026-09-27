@@ -191,6 +191,7 @@ public class AppProperties {
             private String clientId;
             private String clientSecret;
             private String redirectUri;
+            private String authorizedRedirectUri;
         }
     }
 

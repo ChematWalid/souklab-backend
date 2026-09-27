@@ -36,6 +36,15 @@ import java.util.List;
 @AllArgsConstructor
 public class UserPatchDTO {
 
+    @Builder.Default
+    private PatchField<String> firstName = PatchField.undefined();
+
+    @Builder.Default
+    private PatchField<String> lastName = PatchField.undefined();
+
+    @Builder.Default
+    private PatchField<String> phone = PatchField.undefined();
+
     /**
      * Artisan or client biography text.
      * Max 5000 characters; enforced via {@code @Valid} at the controller boundary.
@@ -138,7 +147,10 @@ public class UserPatchDTO {
      * @return true if no fields were defined in the patch payload
      */
     public boolean isEmpty() {
-        return (bio == null || !bio.isDefined())
+        return (firstName == null || !firstName.isDefined())
+                && (lastName == null || !lastName.isDefined())
+                && (phone == null || !phone.isDefined())
+                && (bio == null || !bio.isDefined())
                 && (city == null || !city.isDefined())
                 && (address == null || !address.isDefined())
                 && (website == null || !website.isDefined())

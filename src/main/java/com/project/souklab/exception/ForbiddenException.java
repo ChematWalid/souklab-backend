@@ -12,4 +12,8 @@ public class ForbiddenException extends AppException {
     public ForbiddenException(String message, Throwable cause) {
         super(HttpStatus.FORBIDDEN, ApiErrorCode.FORBIDDEN, message, cause);
     }
+
+    public ForbiddenException(String errorCode, String message) {
+        super(HttpStatus.FORBIDDEN, errorCode, message);
+    }
 }

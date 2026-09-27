@@ -6,12 +6,14 @@ import com.project.souklab.model.AccountStatus;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Common response contract for user profiles (Client and Artisan).
  * Provides compile-time type safety across Auth and Profile endpoints while
  * allowing polymorphic responses without leaking account-type-specific fields.
  */
+@Schema(oneOf = {ClientProfileResponseDTO.class, ArtisanResponseDTO.class})
 public interface ProfileResponse {
 
     String getId();

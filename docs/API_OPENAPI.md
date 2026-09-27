@@ -1,12 +1,12 @@
 # Souklab OpenAPI contract
 
-Generated from the running application on 2026-09-25T23:06:40Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
+Generated from the running application on 2026-09-26T23:53:53Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
 
 - OpenAPI version: `3.1.0`
 - API title: `Souklab API`
 - API version: `1.0.0`
-- Paths: `167`
-- Schemas: `197`
+- Paths: `176`
+- Schemas: `207`
 
 ## Security
 
@@ -18,6 +18,32 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 
 ## Endpoints
+
+### `/api/v1/artisan/formations/{id}/attendance/{enrollmentId}`
+
+#### PUT — Record formation attendance
+
+- Operation ID: `markAttendance_1`
+- Tags: `Masterclass Catalog & Enrollment`
+- Parameters:
+  - `id` (`path`, required)
+  - `enrollmentId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/artisan/formations/{id}/attendance/{enrollmentId}`
+
+#### POST — Record formation attendance
+
+- Operation ID: `markAttendance`
+- Tags: `Masterclass Catalog & Enrollment`
+- Parameters:
+  - `id` (`path`, required)
+  - `enrollmentId` (`path`, required)
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
 
 ### `/api/v1/users/me/avatars/{id}/activate`
 
@@ -47,6 +73,25 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 - Operation ID: `markAllAsRead`
 - Tags: `Notifications`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/notifications/preferences`
+
+#### GET — Get notification preferences
+
+- Operation ID: `getPreferences`
+- Tags: `Notifications`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/notifications/preferences`
+
+#### PUT — Update notification preferences
+
+- Operation ID: `updatePreferences`
+- Tags: `Notifications`
+- Request body: `application/json`
 - Responses:
   - `200` — OK
 
@@ -81,6 +126,18 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 - Tags: `Community Feed`
 - Parameters:
   - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/feed/{id}/media/order`
+
+#### PUT — reorderMedia
+
+- Operation ID: `reorderMedia`
+- Tags: `Community Feed`
+- Parameters:
+  - `id` (`path`, required)
+- Request body: `application/json`
 - Responses:
   - `200` — OK
 
@@ -611,6 +668,15 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 - Responses:
   - `200` — OK
 
+### `/api/v1/notifications/preferences/reset`
+
+#### POST — Reset notification preferences
+
+- Operation ID: `resetPreferences`
+- Tags: `Notifications`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/integrations/chargily/webhook`
 
 #### POST — webhook
@@ -961,6 +1027,16 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 - Responses:
   - `200` — OK
 
+### `/api/v1/auth/oauth/exchange`
+
+#### POST — Exchange OAuth authorization code
+
+- Operation ID: `exchangeOAuthCode`
+- Tags: `Authentication & Profile`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/auth/logout`
 
 #### POST — Logout user
@@ -1084,6 +1160,17 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 - Operation ID: `enroll`
 - Tags: `Masterclass Catalog & Enrollment`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/artisan/formations/{id}/complete`
+
+#### POST — Complete masterclass
+
+- Operation ID: `completeFormation`
+- Tags: `Masterclass Authoring`
 - Parameters:
   - `id` (`path`, required)
 - Responses:
@@ -1695,6 +1782,16 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 ### `/api/v1/auth/me`
 
+#### DELETE — Delete current account
+
+- Operation ID: `deleteCurrentAccount`
+- Tags: `Authentication & Profile`
+- Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/auth/me`
+
 #### PATCH — Update current user profile (/me)
 
 - Operation ID: `patchCurrentUser`
@@ -1849,6 +1946,7 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 - Operation ID: `getNotifications`
 - Tags: `Notifications`
 - Parameters:
+  - `read` (`query`, optional)
   - `pageable` (`query`, required)
 - Responses:
   - `200` — OK
@@ -1892,6 +1990,30 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 - Tags: `file-serving-controller`
 - Parameters:
   - `key` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/feed/{id}/likes/users`
+
+#### GET — likerUsers
+
+- Operation ID: `likerUsers`
+- Tags: `Community Feed`
+- Parameters:
+  - `id` (`path`, required)
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/feed/{id}/likes/likers`
+
+#### GET — likers
+
+- Operation ID: `likers`
+- Tags: `Community Feed`
+- Parameters:
+  - `id` (`path`, required)
+  - `pageable` (`query`, required)
 - Responses:
   - `200` — OK
 
@@ -2057,6 +2179,17 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 - Parameters:
   - `id` (`path`, required)
   - `fileId` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/artisan/formations/{formationId}/reviews/me`
+
+#### GET — myReview
+
+- Operation ID: `myReview`
+- Tags: `Artisan Reviews`
+- Parameters:
+  - `formationId` (`path`, required)
 - Responses:
   - `200` — OK
 
@@ -2455,6 +2588,24 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 ## Schemas
 
+### `AttendanceRequest`
+
+```json
+{"type":"object","properties":{"status":{"type":"string","enum":["CONFIRMED","ATTENDED","ABSENT","CANCELLED"]}},"required":["status"]}
+```
+
+### `ApiResponseFormationEnrollmentResponseDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/FormationEnrollmentResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `FormationEnrollmentResponseDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"formationId":{"type":"string"},"formationTitle":{"type":"string"},"artisanId":{"type":"string"},"artisanName":{"type":"string"},"status":{"type":"string","enum":["CONFIRMED","ATTENDED","ABSENT","CANCELLED"]},"enrolledAt":{"type":"string","format":"date-time"},"cancelledAt":{"type":"string","format":"date-time"}}}
+```
+
 ### `ApiResponseAvatarResponseDTO`
 
 ```json
@@ -2485,6 +2636,18 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
+### `NotificationPreferencesRequest`
+
+```json
+{"type":"object","properties":{"preferences":{"type":"object","additionalProperties":{"type":"boolean"}}},"required":["preferences"]}
+```
+
+### `ApiResponseMapStringBoolean`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"object","additionalProperties":{"type":"boolean"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
 ### `FeedPostCreateDTO`
 
 ```json
@@ -2507,6 +2670,12 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 ```json
 {"type":"object","properties":{"id":{"type":"string"},"authorId":{"type":"string"},"authorName":{"type":"string"},"type":{"type":"string","enum":["ACTUALITE","FORMATION","ANNONCE"]},"title":{"type":"string"},"body":{"type":"string"},"status":{"type":"string","enum":["DRAFT","PENDING","PUBLISHED","HIDDEN","REJECTED","REMOVED"]},"formationId":{"type":"string"},"publishedAt":{"type":"string","format":"date-time"},"moderationNote":{"type":"string"},"media":{"type":"array","items":{"$ref":"#/components/schemas/FeedPostMediaResponseDTO"}},"tags":{"type":"array","items":{"type":"string"}},"likeCount":{"type":"integer","format":"int32"},"commentCount":{"type":"integer","format":"int32"},"bookmarkCount":{"type":"integer","format":"int32"},"shareCount":{"type":"integer","format":"int32"},"likedByCurrentUser":{"type":"boolean"},"bookmarkedByCurrentUser":{"type":"boolean"}}}
+```
+
+### `MediaOrderRequest`
+
+```json
+{"type":"object","properties":{"mediaIds":{"type":"array","items":{"type":"string"},"minItems":1}},"required":["mediaIds"]}
 ```
 
 ### `FeedPostCommentCreateDTO`
@@ -2842,7 +3011,7 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 ### `ConversationResponse`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"participantUserId":{"type":"string"},"participantName":{"type":"string"},"archived":{"type":"boolean"},"lastMessagePreview":{"type":"string"},"unreadCount":{"type":"integer","format":"int64"},"updatedAt":{"type":"string","format":"date-time"}}}
+{"type":"object","properties":{"id":{"type":"string"},"participantUserId":{"type":"string"},"participantName":{"type":"string"},"archived":{"type":"boolean"},"lastMessagePreview":{"type":"string"},"unreadCount":{"type":"integer","format":"int64"},"updatedAt":{"type":"string","format":"date-time"},"participantAvatarUrl":{"type":"string"},"participantRole":{"type":"string"},"lastReadMessageId":{"type":"string"}}}
 ```
 
 ### `ReadReceiptRequest`
@@ -2854,7 +3023,7 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 ### `SendMessageRequest`
 
 ```json
-{"type":"object","properties":{"idempotencyKey":{"type":"string","maxLength":128,"minLength":0},"content":{"type":"string","minLength":1},"attachmentKeys":{"type":"array","items":{"type":"string","minLength":1}}},"required":["content","idempotencyKey"]}
+{"type":"object","properties":{"idempotencyKey":{"type":"string","maxLength":128,"minLength":0},"content":{"type":"string","maxLength":4000,"minLength":0},"attachmentKeys":{"type":"array","items":{"type":"string","minLength":1}}},"required":["idempotencyKey"]}
 ```
 
 ### `ApiResponseMessageResponse`
@@ -2929,10 +3098,52 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/ProfileResponse"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
+### `ArtisanResponseDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"name":{"type":"string"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"accountStatus":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"emailVerified":{"type":"boolean"},"emailVerifiedAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"bio":{"type":"string"},"regionId":{"type":"string"},"region":{"$ref":"#/components/schemas/RegionSummaryDTO"},"city":{"type":"string"},"address":{"type":"string"},"website":{"type":"string"},"subCategoryId":{"type":"string"},"subCategory":{"$ref":"#/components/schemas/JobSubCategorySummaryDTO"},"materials":{"type":"array","items":{"$ref":"#/components/schemas/MaterialSummaryDTO"},"uniqueItems":true},"techniques":{"type":"array","items":{"$ref":"#/components/schemas/TechniqueSummaryDTO"},"uniqueItems":true},"epoques":{"type":"array","items":{"$ref":"#/components/schemas/EpoqueSummaryDTO"},"uniqueItems":true},"galleryImages":{"type":"array","items":{"$ref":"#/components/schemas/GalleryImageResponseDTO"}},"certifications":{"type":"array","items":{"$ref":"#/components/schemas/CertificationResponseDTO"}},"teacher":{"type":"boolean"},"verified":{"type":"boolean"},"premium":{"type":"boolean"},"rating":{"type":"number","format":"double"},"reviewsCount":{"type":"integer","format":"int32"}}}
+```
+
+### `ClientProfileResponseDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"name":{"type":"string"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"accountStatus":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"emailVerified":{"type":"boolean"},"emailVerifiedAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"clientType":{"type":"string","enum":["INDIVIDUAL","BUSINESS","ENTERPRISE"]},"companyName":{"type":"string"},"bio":{"type":"string"},"address":{"type":"string"},"regionId":{"type":"string"},"city":{"type":"string"}}}
+```
+
+### `EpoqueSummaryDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"periodEra":{"type":"string"}}}
+```
+
+### `JobSubCategorySummaryDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"categoryId":{"type":"string"},"categoryName":{"type":"string"}}}
+```
+
+### `MaterialSummaryDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"familyId":{"type":"string"},"familyName":{"type":"string"}}}
+```
+
 ### `ProfileResponse`
 
 ```json
-{"type":"object","properties":{"createdAt":{"type":"string","format":"date-time"},"accountStatus":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED"]},"emailVerifiedAt":{"type":"string","format":"date-time"},"emailVerified":{"type":"boolean"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"updatedAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"name":{"type":"string"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"id":{"type":"string"}}}
+{"type":"object","oneOf":[{"$ref":"#/components/schemas/ClientProfileResponseDTO"},{"$ref":"#/components/schemas/ArtisanResponseDTO"}],"properties":{"phone":{"type":"string"},"avatarUrl":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"updatedAt":{"type":"string","format":"date-time"},"emailVerified":{"type":"boolean"},"accountStatus":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"createdAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"emailVerifiedAt":{"type":"string","format":"date-time"},"name":{"type":"string"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"id":{"type":"string"}}}
+```
+
+### `RegionSummaryDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"code":{"type":"string"}}}
+```
+
+### `TechniqueSummaryDTO`
+
+```json
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"}}}
 ```
 
 ### `TokenRefreshRequestDTO`
@@ -2951,6 +3162,12 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 ```json
 {"type":"object","properties":{"accessToken":{"type":"string"},"refreshToken":{"type":"string"},"tokenType":{"type":"string","enum":["Bearer"]},"expiresIn":{"type":"integer","format":"int64"},"user":{"$ref":"#/components/schemas/ProfileResponse"},"permissions":{"type":"array","items":{"type":"string"}}}}
+```
+
+### `OAuthExchangeRequest`
+
+```json
+{"type":"object","properties":{"code":{"type":"string","minLength":1}},"required":["code"]}
 ```
 
 ### `LoginDTO`
@@ -2987,18 +3204,6 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 ```json
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/FormationFileResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
-```
-
-### `ApiResponseFormationEnrollmentResponseDTO`
-
-```json
-{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/FormationEnrollmentResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
-```
-
-### `FormationEnrollmentResponseDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"formationId":{"type":"string"},"formationTitle":{"type":"string"},"artisanId":{"type":"string"},"artisanName":{"type":"string"},"status":{"type":"string","enum":["CONFIRMED","ATTENDED","CANCELLED"]},"enrolledAt":{"type":"string","format":"date-time"},"cancelledAt":{"type":"string","format":"date-time"}}}
 ```
 
 ### `FormateurRequestDTO`
@@ -3196,7 +3401,7 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 ### `UserPatchDTO`
 
 ```json
-{"type":"object","properties":{"bio":{"$ref":"#/components/schemas/PatchFieldString"},"city":{"$ref":"#/components/schemas/PatchFieldString"},"address":{"$ref":"#/components/schemas/PatchFieldString"},"website":{"$ref":"#/components/schemas/PatchFieldString"},"regionId":{"$ref":"#/components/schemas/PatchFieldString"},"region":{"$ref":"#/components/schemas/PatchFieldString"},"subCategoryId":{"$ref":"#/components/schemas/PatchFieldString"},"materialIds":{"$ref":"#/components/schemas/PatchFieldListString"},"techniqueIds":{"$ref":"#/components/schemas/PatchFieldListString"},"epoqueIds":{"$ref":"#/components/schemas/PatchFieldListString"},"companyName":{"$ref":"#/components/schemas/PatchFieldString"},"clientType":{"$ref":"#/components/schemas/PatchFieldClientType"},"empty":{"type":"boolean"}}}
+{"type":"object","properties":{"firstName":{"$ref":"#/components/schemas/PatchFieldString"},"lastName":{"$ref":"#/components/schemas/PatchFieldString"},"phone":{"$ref":"#/components/schemas/PatchFieldString"},"bio":{"$ref":"#/components/schemas/PatchFieldString"},"city":{"$ref":"#/components/schemas/PatchFieldString"},"address":{"$ref":"#/components/schemas/PatchFieldString"},"website":{"$ref":"#/components/schemas/PatchFieldString"},"regionId":{"$ref":"#/components/schemas/PatchFieldString"},"region":{"$ref":"#/components/schemas/PatchFieldString"},"subCategoryId":{"$ref":"#/components/schemas/PatchFieldString"},"materialIds":{"$ref":"#/components/schemas/PatchFieldListString"},"techniqueIds":{"$ref":"#/components/schemas/PatchFieldListString"},"epoqueIds":{"$ref":"#/components/schemas/PatchFieldListString"},"companyName":{"$ref":"#/components/schemas/PatchFieldString"},"clientType":{"$ref":"#/components/schemas/PatchFieldClientType"},"empty":{"type":"boolean"}}}
 ```
 
 ### `Pageable`
@@ -3295,10 +3500,34 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 {}
 ```
 
-### `ApiResponseObject`
+### `ApiResponsePaginatedResponseFeedPostResponseDTO`
 
 ```json
-{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/PaginatedResponseFeedPostResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `PaginatedResponseFeedPostResponseDTO`
+
+```json
+{"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/FeedPostResponseDTO"}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
+```
+
+### `ApiResponsePaginatedResponseFeedPostLikerDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/PaginatedResponseFeedPostLikerDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `FeedPostLikerDTO`
+
+```json
+{"type":"object","properties":{"userId":{"type":"string"},"name":{"type":"string"},"avatarUrl":{"type":"string"},"likedAt":{"type":"string","format":"date-time"}}}
+```
+
+### `PaginatedResponseFeedPostLikerDTO`
+
+```json
+{"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/FeedPostLikerDTO"}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
 ```
 
 ### `ApiResponsePaginatedResponseFeedPostCommentResponseDTO`
@@ -3311,18 +3540,6 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 ```json
 {"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/FeedPostCommentResponseDTO"}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
-```
-
-### `ApiResponsePaginatedResponseFeedPostResponseDTO`
-
-```json
-{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/PaginatedResponseFeedPostResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
-```
-
-### `PaginatedResponseFeedPostResponseDTO`
-
-```json
-{"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/FeedPostResponseDTO"}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
 ```
 
 ### `ApiResponseListConversationResponse`
@@ -3439,36 +3656,6 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 {"type":"object","properties":{"id":{"type":"string"},"bio":{"type":"string"},"city":{"type":"string"},"regionId":{"type":"string"},"region":{"$ref":"#/components/schemas/RegionSummaryDTO"},"subCategoryId":{"type":"string"},"subCategory":{"$ref":"#/components/schemas/JobSubCategorySummaryDTO"},"materials":{"type":"array","items":{"$ref":"#/components/schemas/MaterialSummaryDTO"},"uniqueItems":true},"techniques":{"type":"array","items":{"$ref":"#/components/schemas/TechniqueSummaryDTO"},"uniqueItems":true},"epoques":{"type":"array","items":{"$ref":"#/components/schemas/EpoqueSummaryDTO"},"uniqueItems":true},"galleryImages":{"type":"array","items":{"$ref":"#/components/schemas/GalleryImageResponseDTO"}},"certifications":{"type":"array","items":{"$ref":"#/components/schemas/CertificationResponseDTO"}},"rating":{"type":"number","format":"double"},"reviewsCount":{"type":"integer","format":"int32"},"teacher":{"type":"boolean"},"verified":{"type":"boolean"},"avatarUrl":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"contactInfoLocked":{"type":"boolean"},"name":{"type":"string"},"phone":{"type":"string"},"email":{"type":"string"},"website":{"type":"string"},"address":{"type":"string"}}}
 ```
 
-### `EpoqueSummaryDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"periodEra":{"type":"string"}}}
-```
-
-### `JobSubCategorySummaryDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"categoryId":{"type":"string"},"categoryName":{"type":"string"}}}
-```
-
-### `MaterialSummaryDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"familyId":{"type":"string"},"familyName":{"type":"string"}}}
-```
-
-### `RegionSummaryDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"code":{"type":"string"}}}
-```
-
-### `TechniqueSummaryDTO`
-
-```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"}}}
-```
-
 ### `ApiResponseListGalleryImageResponseDTO`
 
 ```json
@@ -3562,7 +3749,7 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 ### `UserResponseDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"name":{"type":"string"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"status":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED"]},"emailVerified":{"type":"boolean"},"emailVerifiedAt":{"type":"string","format":"date-time"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"bannedUntil":{"type":"string","format":"date-time"},"banReason":{"type":"string"},"lastLoginAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"validated":{"type":"boolean"},"premium":{"type":"boolean"},"teacher":{"type":"boolean"}}}
+{"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"name":{"type":"string"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"status":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"emailVerified":{"type":"boolean"},"emailVerifiedAt":{"type":"string","format":"date-time"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"bannedUntil":{"type":"string","format":"date-time"},"banReason":{"type":"string"},"lastLoginAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"validated":{"type":"boolean"},"premium":{"type":"boolean"},"teacher":{"type":"boolean"}}}
 ```
 
 ### `ApiResponseUserResponseDTO`
@@ -3635,5 +3822,11 @@ Generated from the running application on 2026-09-25T23:06:40Z. This Markdown vi
 
 ```json
 {"type":"object","properties":{"content":{"type":"array","items":{"type":"object","additionalProperties":{}}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
+```
+
+### `DeleteAccountRequest`
+
+```json
+{"type":"object","properties":{"password":{"type":"string"},"oauthConfirmed":{"type":"boolean"}}}
 ```
 

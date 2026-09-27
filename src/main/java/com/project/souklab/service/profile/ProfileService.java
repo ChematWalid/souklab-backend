@@ -152,6 +152,11 @@ public class ProfileService {
             return profileResponseMapper.mapToProfileResponse(user);
         }
 
+        if (dto.getFirstName() != null && dto.getFirstName().isDefined()) user.setFirstName(dto.getFirstName().getValue());
+        if (dto.getLastName() != null && dto.getLastName().isDefined()) user.setLastName(dto.getLastName().getValue());
+        if (dto.getPhone() != null && dto.getPhone().isDefined()) user.setPhone(dto.getPhone().getValue());
+        userRepository.save(user);
+
         if (isArtisan) {
             patchArtisanProfile(user, dto);
         } else {

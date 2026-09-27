@@ -14,7 +14,7 @@ The JPA classes under `src/main/java/com/project/souklab/model` are the authorit
 | Artisan | `Artisan`, `ArtisanCertification`, `ArtisanGalleryImage`, `ArtisanProfileView`, `ArtisanFormateurRequest` |
 | Catalog | `Region`, `JobCategory`, `JobSubCategory`, `MaterialFamily`, `Material`, `Epoque`, `Technique` |
 | Formations | `Formation`, `FormationFile`, `FormationEnrollment`, `FormationReview` |
-| Operations | `Notification`, `AuditLog` |
+| Operations | `Notification`, `UserNotificationPreference`, `AuditLog` |
 | Messaging | `Conversation`, `ConversationParticipant`, `Message`, `MessageAttachment`, `MessageAttachmentUpload` |
 | Social | `FeedPost`, `FeedPostMedia`, `FeedTag`, `FeedPostLike`, `FeedPostBookmark`, `FeedPostComment`, `FeedPostCommentLike`, `ArtisanReview`, `ContentReport` |
 | Favorites | `ClientFavoriteArtisan` |

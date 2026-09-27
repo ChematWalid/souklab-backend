@@ -12,4 +12,8 @@ public class ConflictException extends AppException {
     public ConflictException(String message, Throwable cause) {
         super(HttpStatus.CONFLICT, ApiErrorCode.CONFLICT, message, cause);
     }
+
+    public ConflictException(String errorCode, String message) {
+        super(HttpStatus.CONFLICT, errorCode, message);
+    }
 }

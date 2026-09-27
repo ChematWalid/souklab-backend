@@ -86,6 +86,7 @@ else
 fi
 
 if [[ -n "${APP_BASE_URL:-}" && -n "${SOUKLAB_ACCESS_TOKEN:-}" ]]; then
+  sleep "${RATE_LIMIT_COOLDOWN_SECONDS:-60}"
   run_check "running application and access token" "admin/client synthetic accounts" "authenticated HTTP/OpenAPI sweep" "all operations, no 5xx/transport failures" "runtime state and route report" ./scripts/verify-live-http.sh || true
   sleep 3
   run_check "running application and access token" "authenticated synthetic user" "native/SockJS STOMP verification" "CONNECT/SUBSCRIBE boundary passes" "broker relay delivery" python3 scripts/verify-live-stomp.py || true

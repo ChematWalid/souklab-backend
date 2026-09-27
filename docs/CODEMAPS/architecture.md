@@ -24,7 +24,7 @@
        ▼               ▼              ▼               ▼
 ┌─────────────┐ ┌─────────────┐ ┌───────────┐ ┌───────────────┐
 │ Spring Data │ │ Hibernate   │ │ Storage   │ │ External APIs │
-│ JPA (52 Repo│ │ Search 8.2  │ │ Engine    │ │ - Chargily    │
+│ JPA (53 Repo│ │ Search 8.2  │ │ Engine    │ │ - Chargily    │
 │  MariaDB)   │ │ Elastic :920│ │ MinIO S3  │ │ - MailerSend  │
 └─────────────┘ └─────────────┘ └─────┬─────┘ └───────────────┘
                                       ▼

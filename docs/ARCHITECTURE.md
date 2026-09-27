@@ -26,11 +26,11 @@ Controllers translate transport contracts and delegate to services. Services enf
 | --- | --- |
 | `config` | Application properties, security, CORS, WebSocket relay, caching, async execution, and seed data. |
 | `controller` | REST endpoints and STOMP handlers for authentication, users, artisans, catalog, directory, formations, formateur governance, social feed, reviews, reports, messaging, notifications, subscriptions, payments, analytics, and client favorites. |
-| `dao` | 52 Spring Data JPA repositories across all platform domains. |
+| `dao` | 53 Spring Data JPA repositories across all platform domains. |
 | `dto` | Request and response contracts grouped by feature. |
 | `exception` | Application exception hierarchy and global HTTP error mapping. |
 | `filestorage` | Provider-neutral storage API, S3 adapter, in-memory stub, validation, ClamAV scanning, image variants, rate limiting, and post-commit cleanup. |
-| `model` | 53 JPA entities. IDs are UUID strings supplied by `BaseEntity`. |
+| `model` | 54 JPA entities. IDs are UUID strings supplied by `BaseEntity`. |
 | `security` | JWT parsing, user principal construction, request rate limiting, and STOMP authentication. |
 | `service` | Transactional business workflows across all domains, including application-specific `service.storage.FileAccessService`. |
 | `util` / `validation` | Stateless helpers and custom Bean Validation constraints. |
@@ -38,6 +38,10 @@ Controllers translate transport contracts and delegate to services. Services enf
 Subscriptions, payments, and analytics are implemented in their respective controller, service,
 entity, repository, outbox, and integration-test modules. Client favorites, social feed, direct messaging, and
 notifications are implemented in their respective controller, service, entity, and repository modules.
+
+The taxonomy intentionally has two domains: building-trade job categories/subcategories power quotes and job
+workflows, while materials, techniques, and epoque entries describe Algerian heritage crafts for artisan products,
+profiles, and formations. These catalogs are related reference data but are not interchangeable.
 
 ## Authentication and authorization
 

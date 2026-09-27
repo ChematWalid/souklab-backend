@@ -1324,6 +1324,9 @@ Flyway gère tous les changements de schéma. Les migrations sont **immuables** 
 | `V16` | `V16__client_favorites.sql` | Table des artisans favoris des clients (`client_favorite_artisans`), contrainte d'unicité, cascades FK, index et permission (`permission:client:favorites`) |
 | `V17` | `V17__feed_social_enhancements.sql` | Statuts de feed, tags normalisés, likes, favoris, commentaires/réponses, compteurs et signalements de commentaires |
 | `V18` | `V18__feed_notification_types.sql` | Valeurs d'énumération des notifications de cycle de vie et d'engagement du feed |
+| `V19` | `V19__notification_preferences.sql` | Table des préférences de notification utilisateur, contrainte d'unicité et clés étrangères |
+| `V20` | `V20__oauth_confirmation_timestamp.sql` | Horodatage `last_oauth_login_at` pour la confirmation d'actions sensibles |
+| `V21` | `V21__audit_log_delete_account.sql` | Ajoute `DELETE_ACCOUNT` à l'énumération des actions du journal d'audit |
 
 ---
 
@@ -1364,11 +1367,11 @@ Tests run: 1481, Failures: 0, Errors: 0, Skipped: 10
 BUILD SUCCESS
 ```
 
-### Vérification du conteneur et balayages cURL en direct — 2026-09-26
+### Vérification du conteneur et balayages cURL en direct — 2026-09-27
 
 L'image Docker multi-étapes a été construite avec succès (`souklab-app:latest`). Le conteneur est devenu sain et a été validé sur :
-- **Balayage sémantique multi-rôles en direct** : 220 opérations, 1 882 cas, 0 échec (`verify-live-semantic.py`).
-- **Balayage des routes HTTP du contrat** : 220 opérations, 782 routes de test en direct (`verify-live-http.sh`).
+- **Balayage sémantique multi-rôles en direct** : 232 opérations, 1 987 cas, 0 échec (`verify-live-semantic.py`).
+- **Balayage des routes HTTP du contrat** : 232 opérations, 827 routes de test en direct (`verify-live-http.sh`).
 - **Suite de résilience cURL CRUD et sécurité du chat** : 173 scénarios cURL en direct, 173 réussis, 0 échec (`test-crud-scenarios.py`).
 - **Rejeu du flux d'authentification sémantique** : 24 cas, 24 réussis (`verify-auth-workflow.py`).
 - **Suite locale Chargily Pay V2 E2E** : paiements, idempotence, signatures de webhook, transitions d'état vérifiées (`verify-chargily-local-e2e.sh`).

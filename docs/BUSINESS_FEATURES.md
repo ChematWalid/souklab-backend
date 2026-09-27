@@ -22,6 +22,12 @@ Souklab is an **online marketplace for Algerian artisans and their customers**. 
 
 ## Core Platform Features
 
+### Domain taxonomy note
+
+Souklab distinguishes construction/building-trade categories used by the devis/jobs domain from traditional
+handicraft techniques, materials, and historical periods used by artisan profiles, products, and masterclasses.
+The two catalogs are deliberately seeded and documented separately.
+
 ### 1. Artisan Profiles
 
 Every artisan on Souklab gets a rich, professional profile that acts as their digital storefront.

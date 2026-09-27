@@ -9,16 +9,17 @@
 - **Auditing**: `createdAt` (`datetime(6)`), `updatedAt` (`datetime(6)`), and nullable `deletedAt` for soft-deletable entities.
 - **ORM / DDL**: Spring Data JPA / Hibernate 6/7. Production enforces `spring.jpa.hibernate.ddl-auto=validate`.
 
-## 2. Entity Map by Domain (53 JPA Entities)
+## 2. Entity Map by Domain (54 JPA Entities)
 
 ### Identity & Access Control
-- `User` (`users`): Core credentials, status (`PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`), role seed (`ARTISAN`, `CLIENT`, `ADMIN`).
+- `User` (`users`): Core credentials, status (`PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`, `DELETED`), role seed (`ARTISAN`, `CLIENT`, `ADMIN`).
 - `Permission` (`permissions`) & `UserPermission` (`user_permissions`): Capability-based authorization catalog.
 - `RefreshToken` (`refresh_tokens`): Hashed refresh tokens with rotation and reuse revocation.
 - `VerificationToken` (`verification_tokens`): 6-digit email verification PINs.
 - `OAuthIdentity` (`oauth_identities`): External OAuth2 provider links (e.g. Google sub).
 - `Client` (`clients`): Consumer profile details.
 - `UserAvatar` (`user_avatars`): User avatar gallery records (max 10, active pointer).
+- `UserNotificationPreference` (`user_notification_preferences`): User notification channel opt-out and delivery preferences.
 
 ### Artisan & Craft Taxonomy
 - `Artisan` (`artisans`): Artisan public profile, bio, website, rating, `isTeacher`, `isVerified`, `isPremium`.
@@ -71,7 +72,7 @@
 - `ClientFavoriteArtisan` (`client_favorite_artisans`): Client artisan bookmarking records.
   - *Constraint: Unique `(client_id, artisan_id)`.*
 
-## 3. Flyway Migration History (V0–V18)
+## 3. Flyway Migration History (V0–V21)
 
 | Version | Script Name | Scope |
 |---|---|---|
@@ -87,3 +88,6 @@
 | `V16` | `V16__client_favorites.sql` | Client favorite artisans table, indexes, and client favorites permission (`permission:client:favorites`) |
 | `V17` | `V17__feed_social_enhancements.sql` | Feed lifecycle states, normalized tags, likes, bookmarks, comments/replies, counters, and comment reports |
 | `V18` | `V18__feed_notification_types.sql` | Feed lifecycle and engagement notification enum values |
+| `V19` | `V19__notification_preferences.sql` | User notification channel preference overrides table, unique constraint, and foreign keys |
+| `V20` | `V20__oauth_confirmation_timestamp.sql` | User entity `last_oauth_login_at` timestamp for sensitive action confirmation |
+| `V21` | `V21__audit_log_delete_account.sql` | Adds `DELETE_ACCOUNT` to the audit action enum |

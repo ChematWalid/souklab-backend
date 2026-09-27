@@ -1325,6 +1325,9 @@ Flyway manages all schema changes. Migrations are **immutable** — applied migr
 | `V16` | `V16__client_favorites.sql` | Client favorite artisans table (`client_favorite_artisans`), foreign key cascade constraints, unique pairing constraint, performance indexes, and client favorites permission (`permission:client:favorites`) |
 | `V17` | `V17__feed_social_enhancements.sql` | Feed draft/rejected states, normalized tags, likes, bookmarks, comments/replies, atomic counters, and comment reports |
 | `V18` | `V18__feed_notification_types.sql` | Feed lifecycle and engagement notification enum values |
+| `V19` | `V19__notification_preferences.sql` | User notification channel preferences override table, unique constraint, and foreign keys |
+| `V20` | `V20__oauth_confirmation_timestamp.sql` | User entity `last_oauth_login_at` timestamp for sensitive action confirmation |
+| `V21` | `V21__audit_log_delete_account.sql` | Adds `DELETE_ACCOUNT` to the MariaDB audit-log action enum |
 
 ---
 
@@ -1365,11 +1368,11 @@ Tests run: 1481, Failures: 0, Errors: 0, Skipped: 10
 BUILD SUCCESS
 ```
 
-### Container Verification & Live cURL Sweeps — 2026-09-26
+### Container Verification & Live cURL Sweeps — 2026-09-27
 
 The multi-stage Docker image built successfully (`souklab-app:latest`). The container became healthy and verified across:
-- **Exhaustive Multi-Role Semantic Live Sweep**: 220 operations, 1,882 cases, 0 failures (`verify-live-semantic.py`).
-- **Live HTTP Route Contract Sweep**: 220 operations, 782 live test routes (`verify-live-http.sh`).
+- **Exhaustive Multi-Role Semantic Live Sweep**: 232 operations, 1,987 cases, 0 failures (`verify-live-semantic.py`).
+- **Live HTTP Route Contract Sweep**: 232 operations, 827 live test routes (`verify-live-http.sh`).
 - **Live CRUD & Chat Security Resilience Suite**: 173 live curl scenarios, 173 passed, 0 failures (`test-crud-scenarios.py`).
 - **Semantic Authentication Workflow Replay**: 24 cases, 24 passed (`verify-auth-workflow.py`).
 - **Local Chargily Pay V2 E2E Suite**: checkout, idempotency, webhook signatures, paid/failed/canceled state transitions verified (`verify-chargily-local-e2e.sh`).

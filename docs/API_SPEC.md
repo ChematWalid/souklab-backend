@@ -263,6 +263,34 @@ Completes profile details for newly registered Artisans or Clients.
 }
 ```
 
+### `POST /api/v1/auth/oauth/exchange`
+Consumes a short-lived one-time OAuth authorization code within 60s, returning a standard JWT token pair.
+- **Access**: Public
+- **Request Body**:
+```json
+{
+  "code": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+- **Response**: `200 OK` with `JwtResponseDTO`.
+
+### `DELETE /api/v1/auth/me`
+Permanently disables and anonymises the authenticated user's account (GDPR Right to Erasure). Revokes refresh tokens and anonymises PII.
+- **Access**: Authenticated
+- **Request Body**:
+```json
+{
+  "password": "CurrentPassword123!"
+}
+```
+*Or for OAuth accounts:*
+```json
+{
+  "oauthConfirmed": true
+}
+```
+- **Response**: `204 No Content`
+
 ### `POST /api/v1/auth/logout`
 Revokes the authenticated user's refresh tokens.
 - **Access**: Authenticated
@@ -877,6 +905,11 @@ Submits a `DRAFT` or `REJECTED` masterclass for administrative moderation. Valid
 - **Access**: Authenticated Author (`permission:artisan:formations`)
 - **Response**: `200 OK` with `ApiResponse<FormationResponseDTO>`.
 
+#### `POST /api/v1/artisan/formations/{id}/complete`
+Manually marks an authored, published masterclass as completed.
+- **Access**: Authenticated Author (`permission:artisan:formations`)
+- **Response**: `200 OK` with `ApiResponse<FormationResponseDTO>`.
+
 #### `DELETE /api/v1/artisan/formations/{id}`
 Soft-deletes an authored masterclass. Blocked if active student enrollments exist.
 - **Access**: Authenticated Author (`permission:artisan:formations`)
@@ -909,6 +942,17 @@ Cancels an active masterclass enrollment reservation.
 - **Access**: Authenticated Artisan (`permission:artisan:formations`)
 - **Validation**: Enforces the configured cancellation cutoff deadline before workshop start.
 - **Response**: `200 OK` with `ApiResponse<Void>`.
+
+#### `POST/PUT /api/v1/artisan/formations/{id}/attendance/{enrollmentId}`
+Records attendance for a confirmed participant (`ATTENDED` or `ABSENT`).
+- **Access**: Authenticated Author (`permission:artisan:formations`)
+- **Request Body** (optional):
+```json
+{
+  "status": "ATTENDED"
+}
+```
+- **Response**: `200 OK` with `ApiResponse<FormationEnrollmentResponseDTO>`.
 
 #### `GET /api/v1/artisan/formations/my-enrollments`
 Retrieves paginated enrollment history and upcoming registered workshops for the authenticated artisan.
@@ -992,11 +1036,17 @@ Submits a new post. Active verified artisans require `permission:artisan:content
 Author or administrator updates or removes a post (`200 OK`).
 
 #### `POST /api/v1/feed/{id}/media` and `DELETE /api/v1/feed/{id}/media/{mediaId}`
-Attaches (`multipart/form-data`, max 10MB) or removes image attachments from an authored post (`200 OK`).
+Attaches (`multipart/form-data`, max 10MB) or removes image attachments from an authored post (`200 OK`). Media edits on a published post revert its status to `PENDING` review.
+
+#### `PUT /api/v1/feed/{id}/media/order`
+Reorders presentation order of attachments for an authored post (`MediaOrderRequest`). Reverts published posts to `PENDING` review.
+- **Access**: Authenticated Author
+- **Response**: `200 OK` with `ApiResponse<FeedPostResponseDTO>`.
 
 #### Feed Interactions & Engagement
 - `POST /api/v1/feed/{id}/likes` and `DELETE /api/v1/feed/{id}/likes`: Idempotently like or unlike a post (Authenticated).
 - `GET /api/v1/feed/{id}/likes`: Query current caller's like status on post (`FeedPostLikeStatusDTO`).
+- `GET /api/v1/feed/{id}/likes/users` (or `/likes/likers`): Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identity for non-premium clients.
 - `POST /api/v1/feed/{id}/bookmarks` and `DELETE /api/v1/feed/{id}/bookmarks`: Save or remove post from bookmarks (Authenticated).
 - `GET /api/v1/feed/saved`: Paginated list of caller's saved posts (Authenticated).
 - `POST /api/v1/feed/{id}/share`: Increments post share counter and returns share payload.
@@ -1057,6 +1107,11 @@ Submits a decimal rating (`0.00` to `5.00`) and feedback commentary after attend
   }
   ```
 - **Response**: `201 Created` with `ApiResponse<ArtisanReviewResponseDTO>`.
+
+#### `GET /api/v1/artisan/formations/{formationId}/reviews/me`
+Retrieves the caller's existing review for their confirmed enrollment in that formation, or `null` if not yet reviewed.
+- **Access**: Authenticated Artisan (`permission:artisan:reviews`)
+- **Response**: `200 OK` with `ApiResponse<ArtisanReviewResponseDTO>`.
 
 #### `PUT /api/v1/artisan/reviews/{reviewId}` and `DELETE /api/v1/artisan/reviews/{reviewId}`
 Edit or delete an owned review (`200 OK`).
@@ -1299,7 +1354,7 @@ Administrator endpoints provide comprehensive governance over users, content, re
 - `POST /api/v1/admin/users/{id}/ban`: Bans user account with mandatory reason (`BanRequestDTO`: `{ "reason": string }`) (`permission:admin:users`).
 - `POST /api/v1/admin/users/{id}/timeout`: Temporarily timeouts user account (`TimeoutRequestDTO`: `{ "durationMinutes": int, "reason": string }`) (`permission:admin:users`).
 - `POST /api/v1/admin/users/{id}/unban`: Reinstates a banned or timed-out user (`permission:admin:users`).
-- `GET /api/v1/admin/users/audit-logs`: Queries the typed administrative audit trail across 55 action types (`permission:admin:users`).
+- `GET /api/v1/admin/users/audit-logs`: Queries the typed administrative audit trail across 56 action types (`permission:admin:users`).
 - `GET /api/v1/admin/users/{userId}/permissions`: Lists granular permissions assigned to user.
 - `POST /api/v1/admin/users/{userId}/permissions`: Assigns specific capability (`PermissionAssignmentRequestDTO`).
 - `DELETE /api/v1/admin/users/{userId}/permissions`: Revokes capability from user.
@@ -1361,6 +1416,9 @@ The in-app notification system delivers transactional alerts for formation enrol
     }
   }
   ```
+- `GET /api/v1/notifications/preferences`: Retrieves current channel notification preferences (`200 OK`).
+- `PUT /api/v1/notifications/preferences`: Updates up to the supported notification-type count (33) in one map (`NotificationPreferencesRequest`: `{ "preferences": { "NEW_MESSAGE": true } }`). Unknown keys, null values, and oversized maps are rejected before persistence.
+- `POST /api/v1/notifications/preferences/reset`: Resets notification preferences to default state (`200 OK`).
 - `GET /api/v1/notifications/{id}`: Retrieves a specific notification by ID (`200 OK`).
 - `GET /api/v1/notifications/unread-count`: Returns integer badge count of unread, active notifications.
 - `PUT /api/v1/notifications/{id}/read`: Marks a specific notification as read (`200 OK`).
@@ -1549,4 +1607,3 @@ Removes an artisan from the authenticated client's favorites.
   - `401 Unauthorized`: Missing or invalid authentication token.
   - `403 Forbidden`: Missing `permission:client:favorites` (authorization guard access denied; artisans receive this), or permission held but caller has no client profile (administrators receive this with `"Only registered clients can manage favorites."`).
   - `404 Not Found`: Favorite record does not exist for this client and artisan (`"Favorite not found for artisan: <artisanId>"`).
-
