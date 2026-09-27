@@ -1,6 +1,7 @@
 package com.project.souklab.config;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -166,6 +167,35 @@ class ConfigurationPolicyValidatorTest {
 
         assertThatThrownBy(() -> fixture.validator.validate())
                 .hasMessageContaining("auto-create-bucket");
+    }
+
+    @Test
+    void rejectsAllZeroWebhookEncryptionKeyInProduction() {
+        Fixture fixture = new Fixture();
+        ChargilyProperties chargily = new ChargilyProperties();
+        chargily.setEnabled(true);
+        chargily.setApiKey("test_api_key");
+        chargily.setSecretKey("test_secret_key");
+        chargily.setBaseUrl("https://pay.chargily.net/api/v2");
+        chargily.setWebhookUrl("https://souklab.dz/api/v1/integrations/chargily/webhook");
+        chargily.setSuccessUrl("https://souklab.dz/subscription/success");
+        chargily.setFailureUrl("https://souklab.dz/subscription/failure");
+        chargily.setConnectTimeout(Duration.ofSeconds(5));
+        chargily.setReadTimeout(Duration.ofSeconds(10));
+        chargily.setResponseTimeout(Duration.ofSeconds(10));
+        chargily.setRetryBackoff(Duration.ofSeconds(1));
+        chargily.setRetryCount(3);
+        chargily.setRequestBodyLimit(65536);
+        chargily.setCurrency("DZD");
+        chargily.setWebhookEncryptionKey(Base64.getEncoder().encodeToString(new byte[32]));
+        fixture.app.setChargily(chargily);
+
+        when(fixture.environment.matchesProfiles("prod", "production")).thenReturn(false);
+        assertThatCode(() -> fixture.validator.validate()).doesNotThrowAnyException();
+
+        when(fixture.environment.matchesProfiles("prod", "production")).thenReturn(true);
+        assertThatThrownBy(() -> fixture.validator.validate())
+                .hasMessageContaining("app.chargily.webhook-encryption-key must not be all zeros in production");
     }
 
     private void assertInvalid(Consumer<Fixture> change, String message) {
