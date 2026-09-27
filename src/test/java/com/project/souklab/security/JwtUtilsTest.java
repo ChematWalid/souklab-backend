@@ -3,7 +3,6 @@ package com.project.souklab.security;
 import com.project.souklab.config.AppProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -71,8 +70,8 @@ class JwtUtilsTest {
         assertThat(jwtUtils.validateJwtToken(token)).isTrue();
         assertThat(jwtUtils.getUserNameFromJwtToken(token)).isEqualTo("artisan@example.com");
 
-        Key key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).setClock(() -> Date.from(fixedClock.instant())).build().parseClaimsJws(token).getBody();
+        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
+        Claims claims = Jwts.parser().verifyWith(key).clock(() -> Date.from(fixedClock.instant())).build().parseSignedClaims(token).getPayload();
         assertThat(claims.getSubject()).isEqualTo("artisan@example.com");
         assertThat(claims.getIssuedAt()).isEqualTo(Date.from(FIXED_INSTANT));
         assertThat(claims.getExpiration()).isEqualTo(Date.from(FIXED_INSTANT.plusMillis(ACCESS_TOKEN_EXPIRATION_MS)));
@@ -106,8 +105,8 @@ class JwtUtilsTest {
         assertThat(jwtUtils.validateJwtToken(token)).isTrue();
         assertThat(jwtUtils.getUserNameFromJwtToken(token)).isEqualTo(username);
 
-        Key key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).setClock(() -> Date.from(fixedClock.instant())).build().parseClaimsJws(token).getBody();
+        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
+        Claims claims = Jwts.parser().verifyWith(key).clock(() -> Date.from(fixedClock.instant())).build().parseSignedClaims(token).getPayload();
         assertThat(claims.getSubject()).isEqualTo(username);
         assertThat(claims.getIssuedAt()).isEqualTo(Date.from(FIXED_INSTANT));
         assertThat(claims.getExpiration()).isEqualTo(Date.from(FIXED_INSTANT.plusMillis(ACCESS_TOKEN_EXPIRATION_MS)));
@@ -131,8 +130,8 @@ class JwtUtilsTest {
         assertThat(jwtUtils.validateJwtToken(token)).isTrue();
         assertThat(jwtUtils.getUserNameFromJwtToken(token)).isEqualTo("refresh@example.com");
 
-        Key key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).setClock(() -> Date.from(fixedClock.instant())).build().parseClaimsJws(token).getBody();
+        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
+        Claims claims = Jwts.parser().verifyWith(key).clock(() -> Date.from(fixedClock.instant())).build().parseSignedClaims(token).getPayload();
         assertThat(claims.getSubject()).isEqualTo("refresh@example.com");
         assertThat(claims.getIssuedAt()).isEqualTo(Date.from(FIXED_INSTANT));
         assertThat(claims.getExpiration()).isEqualTo(Date.from(FIXED_INSTANT.plusMillis(REFRESH_TOKEN_EXPIRATION_MS)));
@@ -184,12 +183,12 @@ class JwtUtilsTest {
     @Test
     @DisplayName("validateJwtToken returns false when token was signed with different key")
     void validateJwtToken_withDifferentKeySignature_shouldReturnFalse() {
-        Key foreignKey = Keys.hmacShaKeyFor("differentSecretKeyAlsoAtLeastThirtyTwoBytesLength!".getBytes());
+        SecretKey foreignKey = Keys.hmacShaKeyFor("differentSecretKeyAlsoAtLeastThirtyTwoBytesLength!".getBytes());
         String forgedToken = Jwts.builder()
-                .setSubject("attacker@example.com")
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 60000L))
-                .signWith(foreignKey, SignatureAlgorithm.HS256)
+                .subject("attacker@example.com")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 60000L))
+                .signWith(foreignKey)
                 .compact();
 
         boolean isValid = jwtUtils.validateJwtToken(forgedToken);
@@ -212,8 +211,8 @@ class JwtUtilsTest {
     @DisplayName("validateJwtToken rejects tokens without the current authorization schema version")
     void validateJwtToken_withoutCurrentAuthorizationSchemaVersion_shouldReturnFalse() {
         String legacyToken = Jwts.builder()
-                .setSubject("legacy@example.com")
-                .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes()), SignatureAlgorithm.HS256)
+                .subject("legacy@example.com")
+                .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes()))
                 .compact();
 
         assertThat(jwtUtils.validateJwtToken(legacyToken)).isFalse();
@@ -225,12 +224,12 @@ class JwtUtilsTest {
     @Test
     @DisplayName("validateJwtToken returns false for expired token")
     void validateJwtToken_withExpiredToken_shouldReturnFalse() {
-        Key key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes());
         String expiredToken = Jwts.builder()
-                .setSubject("expired@example.com")
-                .setIssuedAt(Date.from(fixedClock.instant().minusSeconds(120)))
-                .setExpiration(Date.from(fixedClock.instant().minusSeconds(60)))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .subject("expired@example.com")
+                .issuedAt(Date.from(fixedClock.instant().minusSeconds(120)))
+                .expiration(Date.from(fixedClock.instant().minusSeconds(60)))
+                .signWith(key)
                 .compact();
 
         boolean isValid = jwtUtils.validateJwtToken(expiredToken);
@@ -245,7 +244,7 @@ class JwtUtilsTest {
     @DisplayName("validateJwtToken returns false for unsigned token with no signature")
     void validateJwtToken_withUnsignedToken_shouldReturnFalse() {
         String unsignedToken = Jwts.builder()
-                .setSubject("unsigned@example.com")
+                .subject("unsigned@example.com")
                 .compact();
 
         boolean isValid = jwtUtils.validateJwtToken(unsignedToken);
@@ -297,9 +296,9 @@ class JwtUtilsTest {
     @Test
     void rejectsTokenWithWrongAuthorizationSchemaNumber() {
         String token = Jwts.builder()
-                .setSubject("wrong-version@example.com")
+                .subject("wrong-version@example.com")
                 .claim(JwtClaim.Authorization.VERSION.value(), 1)
-                .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes()), SignatureAlgorithm.HS256)
+                .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes()))
                 .compact();
         assertThat(jwtUtils.validateJwtToken(token)).isFalse();
     }
