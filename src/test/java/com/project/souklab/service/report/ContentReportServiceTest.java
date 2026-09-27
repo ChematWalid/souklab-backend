@@ -7,7 +7,9 @@ import com.project.souklab.dao.ArtisanReviewRepository;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ContentReportRepository;
 import com.project.souklab.dao.FeedPostRepository;
+import com.project.souklab.dao.OAuthIdentityRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.service.security.RefreshTokenService;
 import com.project.souklab.dto.report.ContentReportRequestDTO;
 import com.project.souklab.dto.report.ReportResolutionRequestDTO;
 import com.project.souklab.exception.BadRequestException;
@@ -67,8 +69,8 @@ class ContentReportServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private NotificationService notificationService;
     @Mock private AccessControlService accessControlService;
-    @Mock private com.project.souklab.service.security.RefreshTokenService refreshTokenService;
-    @Mock private com.project.souklab.dao.OAuthIdentityRepository oauthIdentityRepository;
+    @Mock private RefreshTokenService refreshTokenService;
+    @Mock private OAuthIdentityRepository oauthIdentityRepository;
 
     private ContentReportService service;
     private User reporter;

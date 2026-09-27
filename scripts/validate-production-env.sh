@@ -46,4 +46,23 @@ grep -q '^APP_RATE_LIMIT_BACKEND=redis$' "$env_file" || {
   echo 'APP_RATE_LIMIT_BACKEND must be redis in production' >&2; exit 1;
 }
 
+if grep -q '^CHARGILY_WEBHOOK_SECRET=' "$env_file"; then
+  echo 'deprecated setting CHARGILY_WEBHOOK_SECRET found; use CHARGILY_WEBHOOK_ENCRYPTION_KEY instead' >&2
+  exit 1
+fi
+
+if grep -q '^CHARGILY_ENABLED=true$' "$env_file"; then
+  chargily_required=(CHARGILY_API_KEY CHARGILY_SECRET_KEY CHARGILY_BASE_URL CHARGILY_WEBHOOK_URL CHARGILY_SUCCESS_URL CHARGILY_FAILURE_URL CHARGILY_WEBHOOK_ENCRYPTION_KEY)
+  for name in "${chargily_required[@]}"; do
+    value="$(sed -n "s/^${name}=//p" "$env_file" | tail -n 1)"
+    test -n "$value" || { echo "missing required production setting: $name" >&2; exit 1; }
+    case "$value" in
+      *replace-with*|*your-org*|*example.com*)
+        echo "placeholder remains in production setting: $name" >&2
+        exit 1
+        ;;
+    esac
+  done
+fi
+
 echo "production environment validated: $env_file"
