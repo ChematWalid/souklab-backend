@@ -7,6 +7,7 @@ import com.project.souklab.dao.FeedPostLikeRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
+import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostStatus;
@@ -37,6 +38,7 @@ public class FeedDiscoveryService {
     private final AppProperties appProperties;
     private final EntityManager entityManager;
     private final FeedPrivacyService feedPrivacyService;
+    private final FileUrlResolver fileUrlResolver;
 
     @Transactional(readOnly = true)
     public PaginatedResponse<FeedPostResponseDTO> list(FeedPostType type, String authorId, String tag,
@@ -67,7 +69,7 @@ public class FeedDiscoveryService {
     }
 
     private FeedPostResponseDTO toResponse(FeedPost post) {
-        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, FeedPostResponseDTO.from(post));
+        FeedPostResponseDTO response = feedPrivacyService.protectPost(post, FeedPostResponseDTO.from(post, fileUrlResolver::toUrl));
         String email = SecurityUtils.getCurrentUsername();
         if (email == null) {
             return response;

@@ -7,10 +7,12 @@ REST controllers for community craft posts, updates, announcements, image attach
 ## Architecture & Moderation Workflow
 
 1. **Draft or submission**: Authenticated artisans create a post (`POST /api/v1/feed`) with `isDraft=true` for `DRAFT`, otherwise it starts in `PENDING`.
-2. **Media**: Post authors can attach images (`POST /api/v1/feed/{id}/media`, multipart `file`).
+2. **Media**: Post authors can attach images (`POST /api/v1/feed/{id}/media`, multipart `file`), remove attachments (`DELETE`), or reorder display order (`PUT /api/v1/feed/{id}/media/order`). Any media alteration on a `PUBLISHED` post resets status to `PENDING` review and alerts feed moderators.
 3. **Moderation Queue**: Administrators with feed moderation authority review pending posts (`GET /api/v1/admin/feed/pending`).
-4. **Moderation**: Administrators publish, reject, hide, or remove posts. Rejected authors can revise and resubmit with `POST /api/v1/feed/{id}/submit`.
+4. **Moderation**: Administrators publish, reject, hide, or remove posts. Rejected authors can revise and resubmit with `POST /api/v1/feed/{id}/submit`. Publication emits a typed `FEED_PUBLISHED` notification to the author.
 5. **Public Consumption**: Frontends query public posts (`GET /api/v1/feed`), which only returns `PUBLISHED` posts.
+6. **Privacy & Identity Policy**: Comment authors without configured names display as `Membre #xxxxx` and never leak email addresses. Likers lists (`GET /api/v1/feed/{id}/likes/users`) redact artisan identity details for non-premium client callers.
+7. **Thread Integrity**: Deleting a parent comment recursively soft-deletes its child replies and accurately decrements the post's aggregate `commentCount`.
 
 ---
 
@@ -32,18 +34,20 @@ Base Path: `/api/v1/feed`
 | `DELETE` | `/api/v1/feed/{id}` | Authenticated | Delete feed post | Soft-deletes or removes an owned post. |
 | `POST/DELETE` | `/api/v1/feed/{id}/likes` | Authenticated | Like/unlike post | One unique like per user, with conflict-safe insertion and atomic counters. |
 | `GET` | `/api/v1/feed/{id}/likes` | Public | Read like status | Returns the current caller's like state and the post like count. |
+| `GET` | `/api/v1/feed/{id}/likes/users` | Public | List likers | Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identities for non-premium clients. Alias: `/likes/likers`. |
 | `POST/DELETE` | `/api/v1/feed/{id}/bookmarks` | Authenticated | Bookmark/unbookmark post | One unique bookmark per user. |
-| `GET` | `/api/v1/feed/saved` | Authenticated | Saved posts | Lists the current user's bookmarked posts. |
-| `GET/POST` | `/api/v1/feed/{id}/comments` | Public/authenticated | Comments | Lists root comments publicly or creates an authenticated root comment. |
+| `GET` | `/api/v1/feed/saved` | Authenticated | Saved posts | Lists the current user's bookmarked posts ordered by bookmark date descending. |
+| `GET/POST` | `/api/v1/feed/{id}/comments` | Public/authenticated | Comments | Lists root comments publicly or creates an authenticated root comment. Author display names use `Membre #xxxxx` when names are blank. |
 | `GET` | `/api/v1/feed/comments/{commentId}` | Public | Get comment | Retrieves one visible comment or reply. |
 | `GET/POST` | `/api/v1/feed/comments/{commentId}/replies` | Public/authenticated | Replies | Lists or creates one-level replies. |
 | `PUT` | `/api/v1/feed/comments/{commentId}` | Authenticated | Update comment | Updates a comment or reply owned by the authenticated author. |
 | `POST/DELETE` | `/api/v1/feed/comments/{commentId}/likes` | Authenticated | Like/unlike comment | One unique comment like per user. |
 | `GET` | `/api/v1/feed/comments/{commentId}/likes` | Public | Read comment like status | Returns the current caller's comment-like state and count. |
-| `DELETE` | `/api/v1/feed/comments/{commentId}` | Authenticated | Remove comment | Allows the comment author, post author, or feed moderator to soft-delete. |
+| `DELETE` | `/api/v1/feed/comments/{commentId}` | Authenticated | Remove comment | Soft-deletes comment and all child replies recursively, decrementing post comment count accurately. |
 | `POST` | `/api/v1/feed/{id}/share` | Public | Share post | Atomically increments the share count and returns a relative share path. |
-| `POST` | `/api/v1/feed/{id}/media` | Authenticated | Upload post media | Uploads an image attachment (`multipart/form-data`, param `file`). |
-| `DELETE` | `/api/v1/feed/{id}/media/{mediaId}` | Authenticated | Delete post media | Deletes a specific media attachment from an owned post. |
+| `POST` | `/api/v1/feed/{id}/media` | Authenticated | Upload post media | Uploads an image attachment (`multipart/form-data`, param `file`). Reverts published posts to `PENDING` review. |
+| `DELETE` | `/api/v1/feed/{id}/media/{mediaId}` | Authenticated | Delete post media | Deletes a specific media attachment from an owned post. Reverts published posts to `PENDING` review. |
+| `PUT` | `/api/v1/feed/{id}/media/order` | Authenticated owner | Reorder post media | Reorders the presentation sequence of post attachments. Reverts published posts to `PENDING` review. |
 
 ---
 

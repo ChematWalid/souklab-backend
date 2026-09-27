@@ -184,7 +184,13 @@ public class FeedPostService {
         post.setBody(request.getBody().trim());
         post.setFormation(formation);
         if (!isAdmin()) {
-            post.setStatus(post.getStatus() == FeedPostStatus.DRAFT ? FeedPostStatus.DRAFT : FeedPostStatus.PENDING);
+            FeedPostStatus previous = post.getStatus();
+            post.setStatus(previous == FeedPostStatus.DRAFT || previous == FeedPostStatus.REJECTED ? previous : FeedPostStatus.PENDING);
+            if (previous != post.getStatus()) {
+                post.setModeratedBy(null);
+                notificationService.notifyPermissionHolders(Permission.Admin.FEED.value(),
+                        "Feed post resubmitted for moderation: " + post.getTitle(), NotificationType.Feed.SUBMITTED, post.getId());
+            }
             if (post.getStatus() != FeedPostStatus.PUBLISHED) {
                 post.setPublishedAt(null);
             }
@@ -282,6 +288,7 @@ public class FeedPostService {
                     .build();
             media.ensureId();
             post.addMedia(media);
+            remoderateAfterMutation(post);
             postRepository.save(post);
             return FeedPostMediaResponseDTO.builder()
                     .id(media.getId())
@@ -314,8 +321,37 @@ public class FeedPostService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Feed media not found."));
         post.removeMedia(media);
+        remoderateAfterMutation(post);
         postRepository.save(post);
         storageObjectLifecycle.deleteAfterCommit(media.getStorageKey());
+    }
+
+    private void remoderateAfterMutation(FeedPost post) {
+        if (post.getStatus() == FeedPostStatus.PUBLISHED) {
+            post.setStatus(FeedPostStatus.PENDING);
+            post.setPublishedAt(null);
+            post.setModeratedBy(null);
+            notificationService.notifyPermissionHolders(Permission.Admin.FEED.value(),
+                    "Published feed post media changed and requires moderation: " + post.getTitle(),
+                    NotificationType.Feed.SUBMITTED, post.getId());
+        }
+    }
+
+    @Transactional
+    public void reorderMedia(String id, List<String> mediaIds) {
+        FeedPost post = findPost(id);
+        requireAuthorOrAdmin(post);
+        if (mediaIds == null || mediaIds.size() != post.getMedia().size()
+                || mediaIds.stream().distinct().count() != mediaIds.size()
+                || post.getMedia().stream().map(FeedPostMedia::getId).anyMatch(mediaId -> !mediaIds.contains(mediaId))) {
+            throw new BadRequestException("Media order must contain each post attachment exactly once.");
+        }
+        for (int i = 0; i < mediaIds.size(); i++) {
+            final int order = i;
+            post.getMedia().stream().filter(media -> media.getId().equals(mediaIds.get(order))).findFirst().orElseThrow().setDisplayOrder(order);
+        }
+        remoderateAfterMutation(post);
+        postRepository.save(post);
     }
 
     /**
@@ -342,13 +378,10 @@ public class FeedPostService {
             activityEventService.record(AnalyticsEvent.Feed.Post.PUBLISHED, moderator.getId(), saved.getId(),
                     Map.of(AnalyticsMetadata.Content.Post.TYPE, saved.getType()));
         }
-        if (saved.getType() == FeedPostType.FORMATION) {
-            notificationService.createForUser(saved.getAuthor(), "Your formation post was published.",
-                    NotificationType.Formation.NEW, saved.getId());
-        } else {
-            notificationService.createForUser(saved.getAuthor(), "Your feed post was published.",
-                    NotificationType.Feed.PUBLISHED, saved.getId());
-        }
+        // A formation-shaped feed post is still a feed publication. NEW_FORMATION is
+        // reserved for the formation catalog lifecycle, not feed moderation.
+        notificationService.createForUser(saved.getAuthor(), "Your feed post was published.",
+                NotificationType.Feed.PUBLISHED, saved.getId());
         return toResponse(saved);
     }
 

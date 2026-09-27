@@ -11,12 +11,14 @@ import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.feed.FeedPostCommentCreateDTO;
 import com.project.souklab.dto.feed.FeedPostCommentResponseDTO;
 import com.project.souklab.dto.feed.FeedPostLikeStatusDTO;
+import com.project.souklab.dto.feed.FeedPostLikerDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.dto.feed.FeedShareResponseDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
 import com.project.souklab.exception.ResourceNotFoundException;
+import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostBookmark;
 import com.project.souklab.model.FeedPostComment;
@@ -26,11 +28,12 @@ import com.project.souklab.model.FeedPostStatus;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.security.AccessControlService;
+import com.project.souklab.security.ViewerPremiumResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.SecurityUtils;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +44,6 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class FeedEngagementService {
     private final FeedPostRepository postRepository;
     private final FeedPostLikeRepository postLikeRepository;
@@ -53,7 +55,49 @@ public class FeedEngagementService {
     private final AppProperties appProperties;
     private final AccessControlService accessControlService;
     private final FeedPrivacyService feedPrivacyService;
+    private final ViewerPremiumResolver viewerPremiumResolver;
     private final Clock clock;
+    private FileUrlResolver fileUrlResolver;
+
+    @Autowired
+    public FeedEngagementService(FeedPostRepository postRepository, FeedPostLikeRepository postLikeRepository,
+                                 FeedPostBookmarkRepository bookmarkRepository,
+                                 FeedPostCommentRepository commentRepository,
+                                 FeedPostCommentLikeRepository commentLikeRepository, UserRepository userRepository,
+                                 NotificationService notificationService, AppProperties appProperties,
+                                 AccessControlService accessControlService, FeedPrivacyService feedPrivacyService,
+                                 ViewerPremiumResolver viewerPremiumResolver, Clock clock) {
+        this.postRepository = postRepository;
+        this.postLikeRepository = postLikeRepository;
+        this.bookmarkRepository = bookmarkRepository;
+        this.commentRepository = commentRepository;
+        this.commentLikeRepository = commentLikeRepository;
+        this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.appProperties = appProperties;
+        this.accessControlService = accessControlService;
+        this.feedPrivacyService = feedPrivacyService;
+        this.viewerPremiumResolver = viewerPremiumResolver;
+        this.clock = clock;
+    }
+
+    /** Backward-compatible constructor for focused tests and external adapters. */
+    public FeedEngagementService(FeedPostRepository postRepository, FeedPostLikeRepository postLikeRepository,
+                                 FeedPostBookmarkRepository bookmarkRepository,
+                                 FeedPostCommentRepository commentRepository,
+                                 FeedPostCommentLikeRepository commentLikeRepository, UserRepository userRepository,
+                                 NotificationService notificationService, AppProperties appProperties,
+                                 AccessControlService accessControlService, FeedPrivacyService feedPrivacyService,
+                                 Clock clock) {
+        this(postRepository, postLikeRepository, bookmarkRepository, commentRepository, commentLikeRepository,
+                userRepository, notificationService, appProperties, accessControlService, feedPrivacyService,
+                null, clock);
+    }
+
+    @Autowired(required = false)
+    void setFileUrlResolver(FileUrlResolver fileUrlResolver) {
+        this.fileUrlResolver = fileUrlResolver;
+    }
 
     @Transactional
     public FeedPostLikeStatusDTO likePost(String postId) {
@@ -96,6 +140,23 @@ public class FeedEngagementService {
         return likeStatus(postId, user, post.getLikeCount());
     }
 
+    /** Returns only stable user identifiers; email and profile data are never exposed. */
+    @Transactional(readOnly = true)
+    public PaginatedResponse<FeedPostLikerDTO> likers(String postId, Pageable pageable) {
+        publishedPost(postId);
+        Page<FeedPostLike> likes = postLikeRepository.findByPostId(postId, pageable);
+        return PaginatedResponse.from(likes.map(like -> {
+            User liker = like.getUser();
+            boolean redact = liker.getArtisan() != null && viewerPremiumResolver.isContactInfoLockedFor(liker);
+            return FeedPostLikerDTO.builder()
+                    .userId(liker.getId())
+                    .name(redact ? null : liker.getPublicDisplayName())
+                    .avatarUrl(redact ? null : liker.getAvatarUrl())
+                    .likedAt(like.getCreatedAt())
+                    .build();
+        }));
+    }
+
     @Transactional
     public void bookmarkPost(String postId) {
         User user = currentUser();
@@ -128,8 +189,9 @@ public class FeedEngagementService {
     public PaginatedResponse<FeedPostResponseDTO> saved(Pageable pageable) {
         User user = currentUser();
         Page<FeedPost> page = bookmarkRepository.findSavedPosts(user.getId(), FeedPostStatus.PUBLISHED, pageable);
-        return PaginatedResponse.from(page.map(post -> FeedPostResponseDTO.from(post).toBuilder()
-                .bookmarkedByCurrentUser(true).build()));
+        return PaginatedResponse.from(page.map(post -> feedPrivacyService.protectPost(post,
+                FeedPostResponseDTO.from(post, mediaKey -> fileUrlResolver == null ? mediaKey : fileUrlResolver.toUrl(mediaKey)).toBuilder()
+                        .bookmarkedByCurrentUser(true).build())));
     }
 
     @Transactional
@@ -217,8 +279,14 @@ public class FeedEngagementService {
             throw new ForbiddenException("You may not delete this comment.");
         }
         comment.setDeletedAt(LocalDateTime.now(clock));
+        long removed = 1;
+        if (comment.getParent() == null) {
+            var children = commentRepository.findByParentIdAndDeletedAtIsNull(comment.getId(), Pageable.unpaged()).getContent();
+            children.forEach(child -> child.setDeletedAt(LocalDateTime.now(clock)));
+            if (!children.isEmpty()) { commentRepository.saveAll(children); removed += children.size(); }
+        }
         commentRepository.save(comment);
-        postRepository.decrementCommentCount(comment.getPost().getId());
+        postRepository.decrementCommentCount(comment.getPost().getId(), removed);
         if (comment.getParent() != null) {
             commentRepository.decrementReplyCount(comment.getParent().getId());
         }

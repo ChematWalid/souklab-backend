@@ -12,6 +12,7 @@ import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Comparator;
 import java.util.function.Function;
 
 /**
@@ -78,7 +79,7 @@ public class FeedPostResponseDTO {
                 .commentCount(post.getCommentCount())
                 .bookmarkCount(post.getBookmarkCount())
                 .shareCount(post.getShareCount())
-                .media(post.getMedia().stream().map(media -> FeedPostMediaResponseDTO.builder()
+                .media(post.getMedia().stream().sorted(Comparator.comparingInt(FeedPostMedia::getDisplayOrder).thenComparing(FeedPostMedia::getId)).map(media -> FeedPostMediaResponseDTO.builder()
                         .id(media.getId())
                         .url(urlResolver.apply(media.getStorageKey()))
                         .contentType(media.getContentType())

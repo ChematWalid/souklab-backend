@@ -7,6 +7,8 @@ import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.dto.feed.FeedPostCommentCreateDTO;
 import com.project.souklab.dto.feed.FeedPostCommentResponseDTO;
 import com.project.souklab.dto.feed.FeedPostLikeStatusDTO;
+import com.project.souklab.dto.feed.FeedPostLikerDTO;
+import com.project.souklab.dto.feed.MediaOrderRequest;
 import com.project.souklab.dto.feed.FeedShareResponseDTO;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.service.feed.FeedEngagementService;
@@ -58,7 +60,7 @@ public class FeedPostController {
      */
     @Operation(summary = "List public feed posts", description = "Browse paginated feed posts published across the platform with optional type filtering.")
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> list(
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostResponseDTO>>> list(
             @RequestParam(required = false) FeedPostType type,
             @RequestParam(required = false) String authorId,
             @RequestParam(required = false) String tag,
@@ -176,6 +178,13 @@ public class FeedPostController {
         return ResponseEntity.ok(ApiResponse.success(null, "Feed media removed successfully."));
     }
 
+    @PutMapping("/{id}/media/order")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> reorderMedia(@PathVariable String id, @Valid @RequestBody MediaOrderRequest request) {
+        feedPostService.reorderMedia(id, request.mediaIds());
+        return ResponseEntity.ok(ApiResponse.success(null, "Feed media reordered successfully."));
+    }
+
     @PostMapping("/{id}/likes")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<FeedPostLikeStatusDTO>> like(@PathVariable String id) {
@@ -193,6 +202,16 @@ public class FeedPostController {
     @GetMapping("/{id}/likes")
     public ResponseEntity<ApiResponse<FeedPostLikeStatusDTO>> likeStatus(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(feedEngagementService.likeStatus(id)));
+    }
+
+    @GetMapping("/{id}/likes/likers")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostLikerDTO>>> likers(@PathVariable String id, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.likers(id, pageable)));
+    }
+
+    @GetMapping("/{id}/likes/users")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostLikerDTO>>> likerUsers(@PathVariable String id, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.likers(id, pageable)));
     }
 
     @PostMapping("/{id}/bookmarks")

@@ -16,7 +16,8 @@ public interface FeedPostBookmarkRepository extends JpaRepository<FeedPostBookma
     Optional<FeedPostBookmark> findByPostIdAndUserId(String postId, String userId);
 
     @Query("select b.post from FeedPostBookmark b where b.user.id = :userId " +
-            "and b.post.status = :status and b.post.deletedAt is null and b.deletedAt is null")
+            "and b.post.status = :status and b.post.deletedAt is null and b.deletedAt is null " +
+            "order by b.createdAt desc")
     Page<FeedPost> findSavedPosts(@Param("userId") String userId,
                                   @Param("status") FeedPostStatus status,
                                   Pageable pageable);

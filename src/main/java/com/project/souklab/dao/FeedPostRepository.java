@@ -64,8 +64,8 @@ public interface FeedPostRepository extends JpaRepository<FeedPost, String> {
     int incrementCommentCount(@Param("id") String id);
 
     @Modifying
-    @Query("update FeedPost p set p.commentCount = case when p.commentCount > 0 then p.commentCount - 1 else 0 end where p.id = :id")
-    int decrementCommentCount(@Param("id") String id);
+    @Query("update FeedPost p set p.commentCount = case when p.commentCount > :removed then p.commentCount - :removed else 0 end where p.id = :id")
+    int decrementCommentCount(@Param("id") String id, @Param("removed") long removed);
     long countByStatusAndDeletedAtIsNull(FeedPostStatus status);
     long countByStatusAndCreatedAtBetweenAndDeletedAtIsNull(FeedPostStatus status,
                                                             LocalDateTime from, LocalDateTime to);

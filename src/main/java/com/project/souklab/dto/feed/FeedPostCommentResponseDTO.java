@@ -23,7 +23,7 @@ public class FeedPostCommentResponseDTO {
     LocalDateTime updatedAt;
 
     public static FeedPostCommentResponseDTO from(FeedPostComment comment, boolean liked) {
-        String name = comment.getUser().getName();
+        String name = comment.getUser().getPublicDisplayName();
         return FeedPostCommentResponseDTO.builder()
                 .id(comment.getId())
                 .postId(comment.getPost().getId())
