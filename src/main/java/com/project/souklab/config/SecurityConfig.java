@@ -10,6 +10,7 @@ import com.project.souklab.security.AvatarUploadRateLimitFilter;
 import com.project.souklab.security.AvatarUploadSizeFilter;
 import com.project.souklab.security.ChargilyWebhookSizeFilter;
 import com.project.souklab.security.JwtAuthenticationFilter;
+import com.project.souklab.security.OAuth2AuthenticationFailureHandler;
 import com.project.souklab.security.OAuth2AuthenticationSuccessHandler;
 import com.project.souklab.security.RateLimitFilter;
 import com.project.souklab.security.UserRateLimitFilter;
@@ -61,6 +62,7 @@ public class SecurityConfig {
     private UserRateLimitFilter userRateLimitFilter;
     private final FileRateLimitFilter fileRateLimitFilter;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final ServletResponseUtil servletResponseUtil;
     private RateLimitBucketStore rateLimitBucketStore = RateLimitBucketStore.inMemory();
 
@@ -196,6 +198,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) ->
