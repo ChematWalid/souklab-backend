@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
@@ -57,12 +58,15 @@ public class ArtisanFormationEnrollmentController {
      * @param pageable pagination and sorting parameters
      * @return 200 OK containing paginated formation summary cards
      */
-    @Operation(summary = "Browse masterclass catalog", description = "Browses published peer masterclasses, sorted by schedule date.")
+    @Operation(summary = "Browse masterclass catalog", description = "Browses published peer masterclasses, sorted by schedule date, with optional trade, region, and online filters.")
     @GetMapping("/catalog")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationSummaryDTO>>> getPublishedCatalog(
+            @RequestParam(required = false) String trade,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) Boolean online,
             @PageableDefault(sort = "scheduledAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<FormationSummaryDTO> page = formationEnrollmentService.getPublishedCatalog(pageable);
+        Page<FormationSummaryDTO> page = formationEnrollmentService.getPublishedCatalog(trade, region, online, pageable);
         return ResponseEntity.ok(ApiResponse.success(PaginatedResponse.from(page)));
     }
 

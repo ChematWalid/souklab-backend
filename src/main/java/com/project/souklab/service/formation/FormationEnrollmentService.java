@@ -73,25 +73,42 @@ public class FormationEnrollmentService {
 
 
     /**
-     * Retrieves paginated published masterclasses for peer artisan catalog discovery.
+     * Retrieves paginated published masterclasses for peer artisan catalog discovery with optional trade,
+     * region, and delivery mode filters.
      *
+     * @param trade trade or craft category filter
+     * @param region region or wilaya code/slug filter
+     * @param online delivery mode filter
      * @param pageable pagination and sorting parameters
      * @return page of formation summary cards
      */
     @Transactional(readOnly = true)
-    public Page<FormationSummaryDTO> getPublishedCatalog(Pageable pageable) {
+    public Page<FormationSummaryDTO> getPublishedCatalog(String trade, String region, Boolean online, Pageable pageable) {
         Pageable effectivePageable = (pageable != null && pageable.getSort().isSorted())
                 ? pageable
                 : (pageable != null)
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT))
                 : PageRequest.of(DEFAULT_PAGE_NUMBER, appProperties.getFormation().getPagination().getDefaultPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT));
 
-        Page<Formation> formations = formationRepository.findByStatusAndDeletedAtIsNull(FormationStatus.PUBLISHED, effectivePageable);
+        org.springframework.data.jpa.domain.Specification<Formation> spec =
+                com.project.souklab.dao.specification.FormationSpecifications.filterCatalog(trade, region, online);
+        Page<Formation> formations = formationRepository.findAll(spec, effectivePageable);
 
         return formations.map(formation -> {
             long activeEnrollments = formationEnrollmentRepository.countByFormationIdAndStatus(formation.getId(), EnrollmentStatus.CONFIRMED);
             return FormationSummaryDTO.from(formation, activeEnrollments);
         });
+    }
+
+    /**
+     * Retrieves paginated published masterclasses for peer artisan catalog discovery without filters.
+     *
+     * @param pageable pagination and sorting parameters
+     * @return page of formation summary cards
+     */
+    @Transactional(readOnly = true)
+    public Page<FormationSummaryDTO> getPublishedCatalog(Pageable pageable) {
+        return getPublishedCatalog(null, null, null, pageable);
     }
 
     /**
