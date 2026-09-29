@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Admin REST controller for write operations on the three static catalog taxonomies:
@@ -58,6 +61,14 @@ public class AdminCatalogController {
     private final AdminCatalogService adminCatalogService;
 
     // ─── Technique ────────────────────────────────────────────────────────────
+
+    /**
+     * Retrieves all craft techniques including inactive ones.
+     */
+    @GetMapping("/techniques")
+    public ResponseEntity<ApiResponse<List<TechniqueDTO>>> getTechniques() {
+        return ResponseEntity.ok(ApiResponse.success(adminCatalogService.getAllTechniques()));
+    }
 
     /**
      * Creates a new craft technique catalog entry.
@@ -120,6 +131,14 @@ public class AdminCatalogController {
     // ─── Epoque ───────────────────────────────────────────────────────────────
 
     /**
+     * Retrieves all historical epochs including inactive ones.
+     */
+    @GetMapping("/epoques")
+    public ResponseEntity<ApiResponse<List<EpoqueDTO>>> getEpoques() {
+        return ResponseEntity.ok(ApiResponse.success(adminCatalogService.getAllEpoques()));
+    }
+
+    /**
      * Creates a new historical epoch catalog entry.
      *
      * @param request validated epoque create request
@@ -177,6 +196,14 @@ public class AdminCatalogController {
     }
 
     // ─── Region ───────────────────────────────────────────────────────────────
+
+    /**
+     * Retrieves all administrative regions including inactive ones.
+     */
+    @GetMapping("/regions")
+    public ResponseEntity<ApiResponse<List<RegionDTO>>> getRegions() {
+        return ResponseEntity.ok(ApiResponse.success(adminCatalogService.getAllRegions()));
+    }
 
     /**
      * Creates a new administrative region (Wilaya or Commune).
@@ -241,6 +268,14 @@ public class AdminCatalogController {
     // ─── Category ─────────────────────────────────────────────────────────────
 
     /**
+     * Retrieves all craft categories including inactive ones.
+     */
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<JobCategoryDTO>>> getCategories() {
+        return ResponseEntity.ok(ApiResponse.success(adminCatalogService.getAllCategories()));
+    }
+
+    /**
      * Creates a new craft category catalog entry.
      *
      * @param request validated category create request
@@ -297,6 +332,14 @@ public class AdminCatalogController {
     }
 
     // ─── SubCategory ──────────────────────────────────────────────────────────
+
+    /**
+     * Retrieves all craft subcategories including inactive ones.
+     */
+    @GetMapping("/subcategories")
+    public ResponseEntity<ApiResponse<List<JobSubCategoryDTO>>> getSubCategories() {
+        return ResponseEntity.ok(ApiResponse.success(adminCatalogService.getAllSubCategories()));
+    }
 
     /**
      * Creates a new craft trade subcategory.
@@ -357,6 +400,14 @@ public class AdminCatalogController {
     // ─── MaterialFamily ───────────────────────────────────────────────────────
 
     /**
+     * Retrieves all material families including inactive ones.
+     */
+    @GetMapping("/material-families")
+    public ResponseEntity<ApiResponse<List<MaterialFamilyDTO>>> getMaterialFamilies() {
+        return ResponseEntity.ok(ApiResponse.success(adminCatalogService.getAllMaterialFamilies()));
+    }
+
+    /**
      * Creates a new material family catalog entry.
      *
      * @param request validated material family create request
@@ -413,6 +464,14 @@ public class AdminCatalogController {
     }
 
     // ─── Material ─────────────────────────────────────────────────────────────
+
+    /**
+     * Retrieves all crafting materials including inactive ones.
+     */
+    @GetMapping("/materials")
+    public ResponseEntity<ApiResponse<List<MaterialDTO>>> getMaterials() {
+        return ResponseEntity.ok(ApiResponse.success(adminCatalogService.getAllMaterials()));
+    }
 
     /**
      * Creates a new crafting material catalog entry.

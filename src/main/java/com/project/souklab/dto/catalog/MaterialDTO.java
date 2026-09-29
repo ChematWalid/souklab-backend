@@ -17,6 +17,7 @@ public class MaterialDTO {
     String description;
     int displayOrder;
     String familyId;
+    boolean isActive;
 
     /**
      * Converts a {@link Material} entity into a MaterialDTO.
@@ -35,6 +36,7 @@ public class MaterialDTO {
             .description(entity.getDescription())
             .displayOrder(entity.getDisplayOrder())
             .familyId(entity.getFamily() != null ? entity.getFamily().getId() : null)
+            .isActive(entity.isActive())
             .build();
     }
 }

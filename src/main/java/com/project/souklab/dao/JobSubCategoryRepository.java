@@ -23,6 +23,11 @@ public interface JobSubCategoryRepository extends JpaRepository<JobSubCategory, 
     List<JobSubCategory> findByCategoryIdAndIsActiveTrueOrderByDisplayOrderAsc(String categoryId);
 
     /**
+     * Retrieves all craft subcategories under a given parent category ID ordered by display weight, including inactive.
+     */
+    List<JobSubCategory> findByCategoryIdOrderByDisplayOrderAsc(String categoryId);
+
+    /**
      * Retrieves all active craft subcategories under a given parent category slug ordered by display weight.
      *
      * @param categorySlug Unique slug of the parent JobCategory (e.g., "metiers-du-bois")

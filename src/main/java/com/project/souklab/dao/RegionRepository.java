@@ -22,12 +22,22 @@ public interface RegionRepository extends JpaRepository<Region, String> {
     List<Region> findByParentIsNullAndIsActiveTrueOrderByDisplayOrderAsc();
 
     /**
+     * Retrieves all top-level administrative regions (Wilayas) ordered by display weight, including inactive.
+     */
+    List<Region> findByParentIsNullOrderByDisplayOrderAsc();
+
+    /**
      * Retrieves all active subordinate administrative regions (Communes/Daïras) belonging to a specified parent Wilaya.
      *
      * @param parentId Identifier of the parent Wilaya
      * @return List of active child Communes ordered by display weight
      */
     List<Region> findByParentIdAndIsActiveTrueOrderByDisplayOrderAsc(String parentId);
+
+    /**
+     * Retrieves all subordinate administrative regions belonging to a parent Wilaya, including inactive.
+     */
+    List<Region> findByParentIdOrderByDisplayOrderAsc(String parentId);
 
     /**
      * Finds a region by its unique URL-friendly slug.

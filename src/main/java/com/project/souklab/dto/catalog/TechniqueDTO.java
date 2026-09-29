@@ -16,6 +16,7 @@ public class TechniqueDTO {
     String slug;
     String description;
     int displayOrder;
+    boolean isActive;
 
     /**
      * Converts a {@link Technique} entity into a TechniqueDTO.
@@ -33,6 +34,7 @@ public class TechniqueDTO {
             .slug(entity.getSlug())
             .description(entity.getDescription())
             .displayOrder(entity.getDisplayOrder())
+            .isActive(entity.isActive())
             .build();
     }
 }

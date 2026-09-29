@@ -17,6 +17,7 @@ public class EpoqueDTO {
     String periodEra;
     String description;
     int displayOrder;
+    boolean isActive;
 
     /**
      * Converts an {@link Epoque} entity into an EpoqueDTO.
@@ -35,6 +36,7 @@ public class EpoqueDTO {
             .periodEra(entity.getPeriodEra())
             .description(entity.getDescription())
             .displayOrder(entity.getDisplayOrder())
+            .isActive(entity.isActive())
             .build();
     }
 }

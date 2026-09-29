@@ -17,6 +17,7 @@ public class JobSubCategoryDTO {
     String description;
     int displayOrder;
     String categoryId;
+    boolean isActive;
 
     /**
      * Converts a {@link JobSubCategory} entity into a JobSubCategoryDTO.
@@ -35,6 +36,7 @@ public class JobSubCategoryDTO {
             .description(entity.getDescription())
             .displayOrder(entity.getDisplayOrder())
             .categoryId(entity.getCategory() != null ? entity.getCategory().getId() : null)
+            .isActive(entity.isActive())
             .build();
     }
 }

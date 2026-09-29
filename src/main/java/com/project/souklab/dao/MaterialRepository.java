@@ -23,6 +23,11 @@ public interface MaterialRepository extends JpaRepository<Material, String> {
     List<Material> findByFamilyIdAndIsActiveTrueOrderByDisplayOrderAsc(String familyId);
 
     /**
+     * Retrieves all materials belonging to a specified material family ID ordered by display weight, including inactive.
+     */
+    List<Material> findByFamilyIdOrderByDisplayOrderAsc(String familyId);
+
+    /**
      * Retrieves all active materials belonging to a specified material family slug ordered by display weight.
      *
      * @param familySlug Unique slug of the parent MaterialFamily (e.g., "terres-et-argiles")
