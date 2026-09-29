@@ -18,4 +18,6 @@ public class PaymentResponse {
     String currency;
     String checkoutUrl;
     LocalDateTime createdAt;
+    String accountId;
+    String accountName;
 }

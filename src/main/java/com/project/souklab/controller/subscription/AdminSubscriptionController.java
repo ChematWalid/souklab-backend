@@ -57,7 +57,10 @@ public class AdminSubscriptionController {
                 ? paymentRepository.findAll(pageable)
                 : paymentRepository.findByIdContainingIgnoreCaseOrSubscriptionIdContainingIgnoreCaseOrProviderCheckoutIdContainingIgnoreCase(query, query, query, pageable)).spliterator(), false).map(value -> PaymentResponse.builder()
                 .id(value.getId()).subscriptionId(value.getSubscriptionId()).provider(value.getProvider()).status(value.getStatus())
-                .amount(value.getAmount()).currency(value.getCurrency()).checkoutUrl(value.getCheckoutUrl()).createdAt(value.getCreatedAt()).build()).toList();
+                .amount(value.getAmount()).currency(value.getCurrency()).checkoutUrl(value.getCheckoutUrl()).createdAt(value.getCreatedAt())
+                .accountId(value.getAccount() != null ? value.getAccount().getId() : null)
+                .accountName(value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null)
+                .build()).toList();
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 

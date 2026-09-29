@@ -289,8 +289,16 @@ public class AdminSubscriptionService {
         try { return objectMapper.writeValueAsString(SubscriptionPlanSnapshot.builder().planId(plan.getId()).name(plan.getName()).subscriberType(plan.getSubscriberType()).billingPeriod(plan.getBillingPeriod()).amount(plan.getAmount()).currency(plan.getCurrency()).entitlements(entitlements).build()); }
         catch (JsonProcessingException exception) { throw new IllegalStateException("Unable to snapshot plan", exception); }
     }
-    private SubscriptionResponse toResponse(ArtisanSubscription value, SubscriberType type) { return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).build(); }
-    private SubscriptionResponse toResponse(ClientSubscription value, SubscriberType type) { return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).build(); }
+    private SubscriptionResponse toResponse(ArtisanSubscription value, SubscriberType type) {
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+    }
+    private SubscriptionResponse toResponse(ClientSubscription value, SubscriberType type) {
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+    }
     public List<SubscriptionResponse> all(int limit, String query) {
         List<SubscriptionResponse> result = new ArrayList<>();
         artisanSubscriptions.findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))

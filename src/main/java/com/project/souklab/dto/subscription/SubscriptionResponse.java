@@ -20,4 +20,6 @@ public class SubscriptionResponse {
     String currency;
     LocalDateTime startsAt;
     LocalDateTime expiresAt;
+    String accountId;
+    String accountName;
 }
