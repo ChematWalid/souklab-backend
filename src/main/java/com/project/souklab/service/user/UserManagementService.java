@@ -272,6 +272,12 @@ public class UserManagementService {
         AccountStatus effectiveStatus = user.getEffectiveStatus(now);
         boolean isExpiredTimeout = user.getStatus() != effectiveStatus;
 
+        boolean isPremium = (user.getArtisan() != null && user.getArtisan().isPremium())
+                || (user.getClient() != null && user.getClient().isPremium());
+        boolean isTeacher = user.getArtisan() != null && user.getArtisan().isTeacher();
+        boolean isValidated = (user.getArtisan() != null && user.getArtisan().isVerified())
+                || (user.getClient() != null && user.getClient().isVerified());
+
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -284,6 +290,9 @@ public class UserManagementService {
                 .emailVerified(user.isEmailVerified())
                 .emailVerifiedAt(user.getEmailVerifiedAt())
                 .permissions(roleNames)
+                .isPremium(isPremium)
+                .isValidated(isValidated)
+                .isTeacher(isTeacher)
                 .bannedUntil(isExpiredTimeout ? null : user.getBannedUntil())
                 .banReason(isExpiredTimeout ? null : user.getBanReason())
                 .lastLoginAt(user.getLastLoginAt())

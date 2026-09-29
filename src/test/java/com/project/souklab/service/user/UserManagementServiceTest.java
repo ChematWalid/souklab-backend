@@ -811,6 +811,26 @@ class UserManagementServiceTest {
         verify(userRepository, never()).save(any());
     }
 
+    @Test
+    @DisplayName("getUserById: populates isPremium, isTeacher, and isValidated from artisan profile")
+    void getUserById_populatesArtisanProfileFlags() {
+        User user = createUser("u-artisan", "artisan@example.com", "Ahmed", "Benali", AccountStatus.ACTIVE);
+        Artisan artisan = Artisan.builder()
+                .isPremium(true)
+                .isTeacher(true)
+                .isVerified(true)
+                .build();
+        user.setArtisan(artisan);
+
+        when(userRepository.findById("u-artisan")).thenReturn(Optional.of(user));
+
+        UserResponseDTO dto = userManagementService.getUserById("u-artisan");
+
+        assertThat(dto.isPremium()).isTrue();
+        assertThat(dto.isTeacher()).isTrue();
+        assertThat(dto.isValidated()).isTrue();
+    }
+
     private User createUser(String id, String email, String firstName, String lastName, AccountStatus status) {
         User user = User.builder()
                 .email(email)
