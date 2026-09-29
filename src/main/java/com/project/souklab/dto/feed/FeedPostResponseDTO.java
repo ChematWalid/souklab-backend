@@ -1,7 +1,5 @@
 package com.project.souklab.dto.feed;
 
-import java.util.Objects;
-import java.util.stream.Stream;
 
 import com.project.souklab.model.FeedPost;
 import com.project.souklab.model.FeedPostMedia;
@@ -58,11 +56,7 @@ public class FeedPostResponseDTO {
      * @return response DTO
      */
     public static FeedPostResponseDTO from(FeedPost post, Function<String, String> urlResolver) {
-        String authorName = Stream.of(post.getAuthor().getFirstName(), post.getAuthor().getLastName())
-                .filter(Objects::nonNull)
-                .filter(value -> !value.isBlank())
-                .reduce((left, right) -> left + " " + right)
-                .orElse(post.getAuthor().getEmail());
+        String authorName = post.getAuthor().getPublicDisplayName();
         return FeedPostResponseDTO.builder()
                 .id(post.getId())
                 .authorId(post.getAuthor().getId())

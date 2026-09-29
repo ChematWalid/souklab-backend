@@ -136,16 +136,19 @@ public class User extends BaseEntity {
         return email;
     }
 
-    /** Public fallback that never exposes the account email address. */
+    /** Public fallback that never exposes the account email address.
+     * Returns {@code "firstName L."} (first character of last name, uppercased).
+     * Falls back to {@code "Member #XXXXX"} when name fields are empty. */
     @Transient
     public String getPublicDisplayName() {
-        if (firstName != null && !firstName.isBlank() && lastName != null && !lastName.isBlank()) {
-            return firstName.trim() + " " + lastName.trim();
+        String fn = firstName != null ? firstName.trim() : null;
+        String ln = lastName  != null ? lastName.trim()  : null;
+        if (fn != null && !fn.isBlank() && ln != null && !ln.isBlank()) {
+            return fn + " " + Character.toUpperCase(ln.charAt(0)) + ".";
         }
-        if (firstName != null && !firstName.isBlank()) return firstName.trim();
-        if (lastName != null && !lastName.isBlank()) return lastName.trim();
-        String value = getId() == null ? "member" : getId().replace("-", "");
-        return "Membre #" + value.substring(Math.max(0, value.length() - 5));
+        if (fn != null && !fn.isBlank()) return fn;
+        String id = getId() == null ? "00000" : getId().replace("-", "");
+        return "Member #" + id.substring(Math.max(0, id.length() - 5)).toUpperCase(java.util.Locale.ROOT);
     }
 
     /**
