@@ -67,4 +67,14 @@ public interface FormationEnrollmentRepository extends JpaRepository<FormationEn
      * @return page of artisan enrollments
      */
     Page<FormationEnrollment> findByArtisanIdAndDeletedAtIsNull(String artisanId, Pageable pageable);
+
+    /**
+     * Retrieves paginated enrollments for a given formation, excluding soft-deleted records.
+     * Used by the formation author to view the participant roster.
+     *
+     * @param formationId the unique identifier of the formation
+     * @param pageable pagination and sorting parameters
+     * @return page of enrollments for the formation
+     */
+    Page<FormationEnrollment> findByFormationIdAndDeletedAtIsNull(String formationId, Pageable pageable);
 }

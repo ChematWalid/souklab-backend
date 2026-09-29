@@ -5,6 +5,7 @@ import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
 import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
 import com.project.souklab.dto.formation.AttendanceRequest;
+import com.project.souklab.dto.formation.FormationEnrollmentSummaryDTO;
 import com.project.souklab.dto.formation.FormationPublicViewDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.filestorage.StorageResource;
@@ -119,6 +120,23 @@ public class ArtisanFormationEnrollmentController {
                 ? EnrollmentStatus.ATTENDED : request.status();
         return ResponseEntity.ok(ApiResponse.success(
                 formationEnrollmentService.markAttendance(id, enrollmentId, status), "Attendance recorded successfully."));
+    }
+
+    /**
+     * Retrieves paginated participant enrollment roster for the authenticated formation author.
+     *
+     * @param id formation unique identifier
+     * @param pageable pagination parameters
+     * @return 200 OK containing participant roster
+     */
+    @Operation(summary = "Get formation enrollments", description = "Retrieves participant roster for the authenticated formation author.")
+    @GetMapping("/{id}/enrollments")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FormationEnrollmentSummaryDTO>>> getEnrollments(
+            @PathVariable String id,
+            @PageableDefault(sort = "enrolledAt", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        Page<FormationEnrollmentSummaryDTO> page = formationEnrollmentService.getEnrollmentsForAuthor(id, pageable);
+        return ResponseEntity.ok(ApiResponse.success(PaginatedResponse.from(page)));
     }
 
     /**
