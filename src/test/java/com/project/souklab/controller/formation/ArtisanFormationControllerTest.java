@@ -290,5 +290,29 @@ class ArtisanFormationControllerTest {
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.content[0].id").value("formation-101"));
         }
+
+        /**
+         * Verifies cancelling a formation returns 200 OK.
+         */
+        @Test
+        @DisplayName("cancelFormation_whenArtisanRole_shouldReturn200Ok")
+        void cancelFormation_whenArtisanRole_shouldReturn200Ok() throws Exception {
+            FormationResponseDTO responseDTO = FormationResponseDTO.builder()
+                    .id("formation-101")
+                    .title("Wood Carving Workshop")
+                    .status(FormationStatus.CANCELLED)
+                    .build();
+
+            when(formationService.cancelFormation("formation-101")).thenReturn(responseDTO);
+
+            mockMvc.perform(post(BASE_URL + "/formation-101/cancel")
+                            .with(artisan()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data.id").value("formation-101"))
+                    .andExpect(jsonPath("$.data.status").value("CANCELLED"));
+
+            verify(formationService).cancelFormation("formation-101");
+        }
     }
 }
