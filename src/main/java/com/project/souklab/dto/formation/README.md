@@ -18,5 +18,7 @@ Contracts and data transfer schemas for masterclass authoring, curriculum update
 | [`FormationFileDescriptorDTO`](FormationFileDescriptorDTO.java) | Outbound | Public syllabus file descriptor exposing filename, MIME type, size, and download path. |
 | [`FormationEnrollmentResponseDTO`](FormationEnrollmentResponseDTO.java) | Outbound | Confirmation payload returned after workshop enrollment or cancellation. |
 | [`FormationEnrollmentDetailDTO`](FormationEnrollmentDetailDTO.java) | Outbound | Detailed enrollment history record for the authenticated artisan. |
+| [`FormationEnrollmentSummaryDTO`](FormationEnrollmentSummaryDTO.java) | Outbound | Participant roster summary representation for workshop instructor management views. |
+| [`AttendanceRequest`](AttendanceRequest.java) | Inbound | Request payload for marking participant workshop attendance (`ATTENDED` or `ABSENT`). |
 | [`FormationReviewRequestDTO`](FormationReviewRequestDTO.java) | Inbound | Administrative review payload containing moderation decision (`APPROVED`/`REJECTED`) and comment. |
 | [`FormationReviewResponseDTO`](FormationReviewResponseDTO.java) | Outbound | Historical audit representation of an administrative moderation review verdict. |

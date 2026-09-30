@@ -2,6 +2,10 @@
 
 REST controllers for authenticated client favorite operations on the Souklab marketplace platform.
 
+## Controller Reference
+
+- [`ClientFavoriteArtisanController`](ClientFavoriteArtisanController.java): REST controller handling client favorite artisan operations under `/api/v1/client/favorites/artisans`.
+
 ---
 
 ## Endpoints

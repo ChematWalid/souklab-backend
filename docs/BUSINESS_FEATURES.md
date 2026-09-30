@@ -86,7 +86,7 @@ Souklab maintains a rich reference catalogue that powers search and categorisati
 | **Regions** | All 58 Algerian wilayas and administrative communes |
 | **Craft Categories** | 8 building trade categories with 37 specialized subcategories (French craft taxonomy) |
 | **Materials** | 6 Mediterranean material families grouping 25 authentic building materials |
-| **Techniques** | 20 traditional and heritage craftsmanship production methods |
+| **Techniques** | 7 authentic Algerian building-trade techniques (Pisé, Enduit à la chaux, Taille de pierre, Maçonnerie en moellons, Zellij, Géjij, Charpente traditionnelle) |
 | **Eras / Epoques** | 14 historical eras and cultural style references |
 
 This taxonomy is curated by the Souklab team and publicly accessible — no account needed. Administrative staff can add, update, and manage taxonomy items with automated conflict prevention and audit tracking.
@@ -114,6 +114,8 @@ Artisans who earn **Formateur** (teacher) accreditation can create and run paid 
 | Approved | Admin approves — artisan publishes it |
 | Published | Visible in the catalogue; open for enrolment |
 | Rejected | Admin returns with feedback; artisan can revise and resubmit |
+| Cancelled | Instructor cancels the masterclass; confirmed participants are automatically notified |
+| Completed | Masterclass session has concluded; instructor marks attendance |
 
 #### For Artisans (Participants)
 

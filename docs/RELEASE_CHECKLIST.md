@@ -14,7 +14,7 @@ were verified for the latest reviewed commit.
 
 - [x] Hosted CI is green, including integration tests and dependency scan.
 - [x] Working tree is clean and image is built from the reviewed commit.
-- [x] Flyway migrations reviewed and upgrade path verified through V21.
+- [x] Flyway migrations reviewed and upgrade path verified through V23.
 - [ ] Opt-in `Phase10MariaDbMigrationTest` passes with `PHASE10_MARIADB_INTEGRATION=true`.
 - [ ] Fresh Elasticsearch bootstrap profile completed, then normal app schema validation verified.
 - [ ] No unresolved critical/high dependency vulnerability.
@@ -25,7 +25,7 @@ were verified for the latest reviewed commit.
 - [ ] Immutable image digest recorded.
 - [ ] Readiness returns HTTP 200 after deployment.
 - [ ] Prometheus scrape is up and critical flows pass.
-- [ ] V0-V21 Flyway migrations applied and analytics, feed, and catalog admin permissions assigned only to approved administrators.
+- [ ] V0-V23 Flyway migrations applied and analytics, feed, and catalog admin permissions assigned only to approved administrators.
 - [ ] Client favorite artisan endpoints, pessimistic locking, and directory card contact masking verified.
 - [ ] Analytics job owner isolation, financial permission split, CSV download, and `/admin/stats` alias verified.
 - [ ] Activity-event retention and bounded backfill/rollup evidence recorded before enabling historical exports.

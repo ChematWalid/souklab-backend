@@ -45,13 +45,18 @@ erDiagram
 | :--- | :---: | :--- |
 | [`BaseEntity`](BaseEntity.java) | `@MappedSuperclass` | Auto-generated UUID `id`, `createdAt`, `updatedAt`, and soft-delete `deletedAt` timestamps. |
 | [`User`](User.java) | `@Entity` | Central identity: email, password, `AccountStatus`, ban tracking, and direct permissions. |
-| [`Client`](Client.java) | `@Entity` | Client profile: client type, company name, premium membership status. |
+| [`Client`](Client.java) | `@Entity` | Client profile: client type (`ClientType`), company name, premium membership status. |
+| [`UserNotificationPreference`](UserNotificationPreference.java) | `@Entity` | User channel notification delivery preferences and opt-out overrides. |
 | [`AuthorizationPermission`](AuthorizationPermission.java) | `@Entity` | Persisted capability assigned directly to users and evaluated by the security layer. |
 | [`RefreshToken`](RefreshToken.java) | `@Entity` | Long-lived secure token for JWT rotation with expiry tracking. |
 | [`VerificationToken`](VerificationToken.java) | `@Entity` | Single-use 6-digit OTP codes for email activation and password resets. |
-| [`OAuthIdentity`](OAuthIdentity.java) | `@Entity` | Third-party OAuth provider binding (Google OAuth2 subject ID). |
+| [`OAuthIdentity`](OAuthIdentity.java) | `@Entity` | Third-party OAuth provider binding (Google OAuth2 subject ID via `OAuthProvider`). |
 | [`AuditLog`](AuditLog.java) | `@Entity` | Administrative audit trail capturing security events and moderation actions. |
-| [`AccountStatus`](AccountStatus.java) | `enum` | Account states: `PENDING`, `ACTIVE`, `SUSPENDED`. |
+| [`AccountStatus`](AccountStatus.java) | `enum` | Account states: `PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`, `DELETED`. |
+| [`AccountRole`](AccountRole.java) | `enum` | Primary account roles: `ARTISAN`, `CLIENT`, `ADMIN`. |
+| [`ClientType`](ClientType.java) | `enum` | Client category: `INDIVIDUAL`, `ENTERPRISE`. |
+| [`OAuthProvider`](OAuthProvider.java) | `enum` | Supported OAuth providers: `GOOGLE`. |
+| [`EnumValue`](EnumValue.java) | `interface` | Common interface for domain enums exposing stable wire and database values. |
 | [`AuditLogAction`](AuditLogAction.java) | grouped enum taxonomy | Audit codes grouped by domain (`AuditLogAction.User`, `AuditLogAction.Catalog`, `AuditLogAction.Authentication`, `AuditLogAction.Subscription`, `AuditLogAction.Formation`, `AuditLogAction.Analytics`). |
 | [`VerificationTokenType`](VerificationTokenType.java) | `enum` | Token categories: `EMAIL_VERIFICATION`, `PASSWORD_RESET`. |
 
@@ -86,7 +91,7 @@ erDiagram
 | [`FormationEnrollment`](FormationEnrollment.java) | `@Entity` | Artisan workshop reservation with participant reference and status. |
 | [`FormationFile`](FormationFile.java) | `@Entity` | Course document or syllabus attachment with storage key and MIME type. |
 | [`FormationReview`](FormationReview.java) | `@Entity` | Administrative moderation record with decision and reviewer comment. |
-| [`FormationStatus`](FormationStatus.java) | `enum` | Formation states: `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`. |
+| [`FormationStatus`](FormationStatus.java) | `enum` | Formation states: `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`, `CANCELLED`, `COMPLETED`. |
 | [`EnrollmentStatus`](EnrollmentStatus.java) | `enum` | Enrollment states: `CONFIRMED`, `ATTENDED`, `CANCELLED`. |
 | [`FormationReviewDecision`](FormationReviewDecision.java) | `enum` | Admin verdicts: `APPROVED`, `REJECTED`. |
 
@@ -121,7 +126,8 @@ erDiagram
 | [`ClientSubscription`](ClientSubscription.java) | `@Entity` | Client membership subscription granting premium perks. |
 | [`Payment`](Payment.java) | `@Entity` | Financial transaction record tracking Chargily checkout ID, amount, and status. |
 | [`PaymentWebhookLog`](PaymentWebhookLog.java) | `@Entity` | Immutable audit log of received webhook events for signature verification and idempotency. |
-| [`BillingPeriod`](BillingPeriod.java), [`PaymentProvider`](PaymentProvider.java), [`PaymentStatus`](PaymentStatus.java), [`SubscriptionStatus`](SubscriptionStatus.java), [`WebhookProcessingStatus`](WebhookProcessingStatus.java) | `enum` | Billing cycle, payment provider, transaction status, subscription lifecycle, and webhook states. |
+| [`BillingPeriod`](BillingPeriod.java), [`PaymentProvider`](PaymentProvider.java), [`PaymentStatus`](PaymentStatus.java), [`SubscriptionStatus`](SubscriptionStatus.java), [`WebhookProcessingStatus`](WebhookProcessingStatus.java), [`CurrencyCode`](CurrencyCode.java), [`SubscriberType`](SubscriberType.java) | `enum` | Billing cycle, payment provider, transaction status, subscription lifecycle, webhook states, currency (`DZD`), and subscriber type (`ARTISAN`, `CLIENT`). |
+| [`FinancialAuditState`](FinancialAuditState.java), [`FinancialAuditOperation`](FinancialAuditOperation.java) | `enum` | State and operation taxonomies for administrative financial audit records and ledger corrections. |
 
 ### Client Favorites
 | Class / Enum | Type | Description |
@@ -129,6 +135,16 @@ erDiagram
 | [`ClientFavorite`](ClientFavorite.java) | `@MappedSuperclass` | Base mapped superclass for client favorites with `client` association, timestamps, and UUID id. |
 | [`ClientFavoriteArtisan`](ClientFavoriteArtisan.java) | `@Entity` | Client favorite artisan bookmark linking a client to a favorited artisan. |
 | [`FavoriteType`](FavoriteType.java) | `enum` | Extensible favorite category discriminator (`ARTISAN`). |
+
+### Type Converters & Deserializers
+| Class | Type | Description |
+| :--- | :---: | :--- |
+| [`AuditLogActionConverter`](AuditLogActionConverter.java) | `@Converter` | JPA attribute converter for persisting `AuditLogAction` as wire strings. |
+| [`AuditLogActionDeserializer`](AuditLogActionDeserializer.java) | Deserializer | Jackson JSON deserializer for `AuditLogAction` enums. |
+| [`AuditLogActionValueDeserializer`](AuditLogActionValueDeserializer.java) | Deserializer | Value-level Jackson deserializer for `AuditLogAction` enums. |
+| [`NotificationTypeConverter`](NotificationTypeConverter.java) | `@Converter` | JPA attribute converter for persisting `NotificationType` wire values. |
+| [`NotificationTypeDeserializer`](NotificationTypeDeserializer.java) | Deserializer | Jackson JSON deserializer for `NotificationType` enums. |
+| [`NotificationTypeValueDeserializer`](NotificationTypeValueDeserializer.java) | Deserializer | Value-level Jackson deserializer for `NotificationType` enums. |
 
 ### Analytics & Outbox
 For raw activity events, outbox queues, and aggregated daily KPI rollups, see the dedicated models in [`com.project.souklab.model.analytics`](analytics/README.md) (`ActivityEvent`, `AnalyticsJob`, `AnalyticsOutboxEvent`, `DailyKpiRollup`, etc.).

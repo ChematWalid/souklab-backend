@@ -15,5 +15,8 @@ Data Transfer Objects representing subscription plans, checkout requests, paymen
 | [`SubscriptionResponse`](SubscriptionResponse.java) | Response | Details of an active user subscription (tier, period, auto-renewal flag). |
 | [`PaymentResponse`](PaymentResponse.java) | Response | Transaction receipt details (amount, currency DZD, method CIB/EDAHABIA, status). |
 | [`ManualSubscriptionGrantRequest`](ManualSubscriptionGrantRequest.java) | Request | Admin payload to grant a subscription plan directly without payment gateway. |
+| [`SubscriptionStateCorrectionRequest`](SubscriptionStateCorrectionRequest.java) | Request | Administrative request for manual subscription status transitions. |
+| [`PaymentStateCorrectionRequest`](PaymentStateCorrectionRequest.java) | Request | Administrative request for manual payment state correction with audit justification. |
+| [`SubscriptionPlanSnapshot`](SubscriptionPlanSnapshot.java) | Model | Immutable snapshot of plan details and entitlements at time of purchase. |
 | [`FinancialReasonRequest`](FinancialReasonRequest.java) | Request | Mandatory auditable explanation required for refunds and corrections. |
 | [`AdminWebhookLogResponse`](AdminWebhookLogResponse.java) | Response | Diagnostic view of incoming Chargily webhook payloads and processing results. |

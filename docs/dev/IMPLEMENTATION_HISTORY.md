@@ -637,6 +637,14 @@ V12__phase10_analytics_maintenance_jobs.sql
 V13__phase10_report_resolution_time.sql
 V14__phase10_financial_audits.sql
 V15__admin_catalog_permission.sql
+V16__client_favorites.sql
+V17__feed_social_enhancements.sql
+V18__feed_notification_types.sql
+V19__notification_preferences.sql
+V20__oauth_confirmation_timestamp.sql
+V21__audit_log_delete_account.sql
+V22__seed_authentic_algerian_techniques.sql
+V23__formation_cancelled_notification_type.sql
 ```
 
 The Phase 10 and 11 local harnesses have validated and applied the complete chain to a
@@ -663,7 +671,7 @@ fresh MariaDB schema.
   - 6 Mediterranean material families with 25 materials.
   - 58 Algerian wilayas and regional administrative tree.
   - 14 historical craftsmanship epoques.
-  - 20 traditional craftsmanship techniques.
+  - 7 authentic Algerian building-trade techniques (Pisé, Enduit à la chaux, Taille de pierre, Maçonnerie en moellons, Zellij, Géjij, Charpente traditionnelle).
 
 ## API and documentation artifacts
 
@@ -706,7 +714,7 @@ fresh MariaDB schema.
 
 The recorded local Docker-backed run has validated:
 
-- fresh MariaDB/Flyway migration application through V21;
+- fresh MariaDB/Flyway migration application through V23;
 - RabbitMQ durable topology, confirms, delivery, and idempotency;
 - Redis-backed rate-limit integration;
 - MinIO storage tests;

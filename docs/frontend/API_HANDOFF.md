@@ -172,10 +172,15 @@ Artisans with `isTeacher = true` author masterclasses, while artisans and client
 5. **Manage Own Formations**: `GET /api/v1/artisan/formations/me` (paginated list of authored masterclasses with status badges).
 
 #### Discovery, Enrollment & Attendance
-- `GET /api/v1/artisan/formations/catalog`: Browse published masterclasses (`status = PUBLISHED`).
+- `GET /api/v1/artisan/formations/catalog`: Browse published masterclasses (`status = PUBLISHED`), filterable by `trade`, `region`, and `online`.
 - `GET /api/v1/artisan/formations/catalog/{id}`: Detailed workshop syllabus, seats remaining, and schedule.
 - `POST /api/v1/artisan/formations/{id}/enroll`: Confirms enrollment reservation. Blocks author self-enrollment and prevents over-capacity bookings (`409 Conflict`).
-- `POST /api/v1/artisan/formations/{id}/cancel`: Cancels an enrollment. Enforces a **24-hour cutoff** before `scheduledAt`; cancellations within 24h are rejected (`400 Bad Request`).
+- `POST /api/v1/artisan/formations/{id}/cancel`: Cancels an authored masterclass (if caller is instructor) notifying enrollees with `FORMATION_CANCELLED`, or cancels an enrollment (if caller is participant, enforcing a **24-hour cutoff** before `scheduledAt`).
+- `POST /api/v1/artisan/formations/{id}/cancel-formation`: Dedicated instructor endpoint to cancel the masterclass.
+- `POST /api/v1/artisan/formations/{id}/cancel-enrollment`: Dedicated participant endpoint to cancel enrollment reservation.
+- `POST /api/v1/artisan/formations/{id}/complete`: Instructor marks masterclass as completed.
+- `GET /api/v1/artisan/formations/{id}/enrollments`: Paginated participant roster for the masterclass instructor.
+- `POST/PUT /api/v1/artisan/formations/{id}/attendance/{enrollmentId}`: Instructor records participant attendance (`status`: `ATTENDED` or `ABSENT`).
 - `GET /api/v1/artisan/formations/my-enrollments`: Paginated list of user enrollments (`CONFIRMED`, `ATTENDED`, `CANCELLED`).
 - `GET /api/v1/artisan/formations/{id}/files/{fileId}/download`: Secure binary stream download. Only authorized for confirmed enrolled attendees and the instructor.
 
@@ -299,7 +304,7 @@ Tiered subscription monetization powered by Chargily Pay V2 with HMAC-SHA256 sig
 #### Endpoints
 - `GET /api/v1/subscriptions/plans`: Lists all active public subscription plans with pricing in Algerian Dinars (DZD).
 - `GET /api/v1/subscriptions/plans/{id}`: Retrieves single active subscription plan details by ID.
-- `POST /api/v1/subscriptions/checkout`: Initiates checkout session (`{ "planId": string }`). Returns `{ "checkoutUrl": string, "invoiceId": string }`. Redirect the user's browser to `checkoutUrl` to complete payment.
+- `POST /api/v1/subscriptions/checkout`: Initiates checkout session (`{ "planId": string }`). Returns `{ "checkoutUrl": string, "paymentId": string, "subscriptionId": string, "providerCheckoutId": string }`. Redirect the user's browser to `checkoutUrl` to complete payment. Rejects with `409 Conflict` if the account already has an active subscription, or `400 Bad Request` if a pending checkout is already in progress.
 - `GET /api/v1/subscriptions/current`: Returns active subscription state (`status`, `tier`, `expiresAt`, `autoRenew`, `daysRemaining`).
 - `GET /api/v1/subscriptions`: Paginated subscription history for the authenticated user.
 - `POST /api/v1/subscriptions/{id}/cancel`: Cancels auto-renewal at period end.
@@ -324,7 +329,7 @@ Authenticated reporting for community safety.
       "details": "Repetitive promotional advertising."
     }
     ```
-  - `targetType` accepts `USER`, `POST`, or `REVIEW`.
+  - `targetType` accepts `USER`, `POST`, `COMMENT`, or `REVIEW`.
   - Returns `201 Created` with report reference ID.
 
 ---

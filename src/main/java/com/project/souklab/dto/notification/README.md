@@ -24,3 +24,4 @@ Contracts for in-app notification feeds and realtime dispatch envelopes.
 | Class | Description |
 | :--- | :--- |
 | [`NotificationResponseDTO`](NotificationResponseDTO.java) | Outbound representation of a user notification containing unique ID, localized message, `NotificationType`, read boolean, target entity reference ID, and timestamp. |
+| [`NotificationPreferencesRequest`](NotificationPreferencesRequest.java) | Inbound payload for configuring user notification channel delivery preferences and opt-outs. |

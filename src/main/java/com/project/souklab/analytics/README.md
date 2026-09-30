@@ -34,3 +34,18 @@ graph TD
 | [`AnalyticsRebuildService`](AnalyticsRebuildService.java) | Full rebuild of daily KPI rollups from raw activity events. |
 | [`AnalyticsRetentionCleanup`](AnalyticsRetentionCleanup.java) | Scheduled retention cleanup pruning raw activity events past their retention horizon. |
 | [`RollupService`](RollupService.java) | Core daily KPI calculation and rollup persistence engine. |
+
+---
+
+## Supporting Components & Serialization
+
+| Class | Responsibility |
+| :--- | :--- |
+| [`AnalyticsMetadata`](AnalyticsMetadata.java) | Typed key taxonomy and constants for activity event metadata payloads. |
+| [`AnalyticsEventRollupKey`](AnalyticsEventRollupKey.java) | Composite grouping key defining dimension buckets for daily KPI rollups. |
+| [`AnalyticsSeriesSorter`](AnalyticsSeriesSorter.java) | Sorter utility ordering multi-dimensional time series data points. |
+| [`AnalyticsJobCommitCallback`](AnalyticsJobCommitCallback.java) | Post-commit transaction callback for scheduling or updating async analytics jobs. |
+| [`AnalyticsFiltersTypeReference`](AnalyticsFiltersTypeReference.java) | Jackson `TypeReference` helper for strongly-typed filter map deserialization. |
+| [`AnalyticsMetricTableKeyDeserializer`](AnalyticsMetricTableKeyDeserializer.java) | Jackson key deserializer for metric table mappings. |
+| [`AnalyticsMetricSummaryKeyDeserializer`](AnalyticsMetricSummaryKeyDeserializer.java) | Jackson key deserializer for metric summary dictionaries. |
+| [`AnalyticsSeriesPageDeserializer`](AnalyticsSeriesPageDeserializer.java) | Jackson deserializer for paginated time-series query results. |

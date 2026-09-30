@@ -54,7 +54,7 @@ The reference catalog is seeded on startup when absent via `DataSeeder`:
   - *Chaux, plâtre & liants traditionnels* (4 materials)
   - *Fibres, végétaux & isolants naturels* (4 materials)
 - **Epoques**: 14 historical eras spanning Antiquity, Islamic periods, Ottoman, and Modern/Contemporary craft periods.
-- **Techniques**: 20 traditional craftsmanship techniques (carving, weaving, joinery, smithing, ceramics, etc.).
+- **Techniques**: 7 authentic Algerian building-trade techniques (Pisé, Enduit à la chaux, Taille de pierre, Maçonnerie en moellons, Zellij, Géjij (plâtre sculpté), Charpente traditionnelle).
 
 ## Enumerations
 

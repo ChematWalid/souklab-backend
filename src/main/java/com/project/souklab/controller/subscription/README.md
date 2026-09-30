@@ -32,16 +32,26 @@ REST controllers for subscription plans, Chargily Pay V2 (EDAHABIA / CIB) checko
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/integrations/chargily/webhook` | Public (HMAC-SHA256) | Chargily webhook | Processes asynchronous payment callbacks (`checkout.paid`, `checkout.failed`, etc.). |
 
-### 5. Administration
+### 5. Administration (`AdminSubscriptionController`, `AdminSubscriptionPlanController`, `AdminRefundController`)
+
+#### A. Administrative Subscriptions (`AdminSubscriptionController`)
 | Method | Endpoint | Access | Summary | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/admin/subscriptions` | `permission:financial:admin` | List subscriptions | Administrative search, state inspection, and filtering. |
 | `GET` | `/api/v1/admin/subscriptions/{id}` | `permission:financial:admin` | Get subscription | Retrieves full single subscription details by ID. |
 | `POST` | `/api/v1/admin/subscriptions/grant` | `permission:financial:admin` | Grant subscription | Manual administrative subscription grant. |
 | `POST` | `/api/v1/admin/subscriptions/{id}/revoke` | `permission:financial:admin` | Revoke subscription | Administrative subscription revocation. |
+
+#### B. Administrative Subscription Plans (`AdminSubscriptionPlanController`)
+| Method | Endpoint | Access | Summary | Description |
+| :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/admin/subscription-plans` | `permission:financial:admin` | List all plans | Administrative plan listing including inactive plans. |
 | `GET` | `/api/v1/admin/subscription-plans/{id}` | `permission:financial:admin` | Get plan | Retrieves single subscription plan details (including inactive) by ID. |
 | `POST` | `/api/v1/admin/subscription-plans` | `permission:financial:admin` | Create plan | Administrative plan creation and pricing setup. |
 | `PUT` | `/api/v1/admin/subscription-plans/{id}` | `permission:financial:admin` | Update plan | Administrative plan modification. |
 | `DELETE` | `/api/v1/admin/subscription-plans/{id}` | `permission:financial:admin` | Deactivate plan | Soft-deactivates or archives a plan. |
+
+#### C. Administrative Refunds (`AdminRefundController`)
+| Method | Endpoint | Access | Summary | Description |
+| :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/admin/payments/{id}/refund` | `permission:financial:admin` | Issue refund | Administrative refund execution and financial auditing. |

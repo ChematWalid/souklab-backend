@@ -382,7 +382,7 @@ The platform seeds a comprehensive Algerian and Mediterranean reference taxonomy
 - **Historical Eras (`epoques`)**:
   - 14 chronological periods (Antiquity, Islamic eras, Ottoman regency, Traditional, and Modern craft movements).
 - **Artisanal Techniques (`techniques`)**:
-  - 20 traditional and heritage crafting techniques.
+  - 7 authentic Algerian building-trade techniques (`Pisé`, `Enduit à la chaux`, `Taille de pierre`, `Maçonnerie en moellons`, `Zellij`, `Géjij (plâtre sculpté)`, `Charpente traditionnelle`).
 
 ---
 
@@ -438,6 +438,8 @@ Formations are in-person or hybrid masterclasses created exclusively by artisans
 | `APPROVED` | Admin approved; ready to be published |
 | `REJECTED` | Admin rejected with feedback; author can revise and resubmit |
 | `PUBLISHED` | Publicly visible; enrollment open |
+| `CANCELLED` | Cancelled by instructor or administrator prior to execution; notifies confirmed participants |
+| `COMPLETED` | Masterclass has taken place and completed its scheduled execution |
 
 ### Enrollment Statuses
 
@@ -459,6 +461,10 @@ Formations are in-person or hybrid masterclasses created exclusively by artisans
 | `POST /api/v1/artisan/formations/{id}/files` | POST (multipart) | `Artisan.FORMATIONS` + owner | Upload a protected course file (up to 10 files) |
 | `DELETE /api/v1/artisan/formations/{id}/files/{fileId}` | DELETE | `Artisan.FORMATIONS` + owner | Remove a course file |
 | `POST /api/v1/artisan/formations/{id}/submit` | POST | `Artisan.FORMATIONS` + owner | Submit for admin review |
+| `POST /api/v1/artisan/formations/{id}/complete` | POST | `Artisan.FORMATIONS` + owner | Manually mark an authored published masterclass as completed |
+| `POST /api/v1/artisan/formations/{id}/cancel-formation` | POST | `Artisan.FORMATIONS` + owner | Cancel authored masterclass and notify confirmed participants |
+| `POST/PUT /api/v1/artisan/formations/{id}/attendance/{enrollmentId}` | POST/PUT | `Artisan.FORMATIONS` + owner | Record participant attendance (`ATTENDED` or custom status) |
+| `GET /api/v1/artisan/formations/{id}/enrollments` | GET | `Artisan.FORMATIONS` + owner | Paginated participant enrollment roster for the formation author |
 | `DELETE /api/v1/artisan/formations/{id}` | DELETE | `Artisan.FORMATIONS` + owner | Soft-delete (DRAFT/REJECTED only) |
 | `GET /api/v1/artisan/formations/me` | GET | `Artisan.FORMATIONS` | List own formations with status filters |
 | `GET /api/v1/artisan/formations/{id}` | GET | `Artisan.FORMATIONS` | Get own formation detail |
@@ -467,10 +473,11 @@ Formations are in-person or hybrid masterclasses created exclusively by artisans
 
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
-| `GET /api/v1/artisan/formations/catalog` | GET | `Artisan.FORMATIONS` | Browse published formation catalog |
+| `GET /api/v1/artisan/formations/catalog` | GET | `Artisan.FORMATIONS` | Browse published formation catalog (supports `trade`, `region`, `online` filters) |
 | `GET /api/v1/artisan/formations/catalog/{id}` | GET | `Artisan.FORMATIONS` | View a published formation detail |
 | `POST /api/v1/artisan/formations/{id}/enroll` | POST | `Artisan.FORMATIONS` | Enroll in a formation |
-| `POST /api/v1/artisan/formations/{id}/cancel` | POST | `Artisan.FORMATIONS` | Cancel own enrollment |
+| `POST /api/v1/artisan/formations/{id}/cancel` | POST | `Artisan.FORMATIONS` | Cancel enrollment if participant, or cancel workshop if author |
+| `POST /api/v1/artisan/formations/{id}/cancel-enrollment` | POST | `Artisan.FORMATIONS` | Explicitly cancel own enrollment reservation |
 | `GET /api/v1/artisan/formations/my-enrollments` | GET | `Artisan.FORMATIONS` | List own enrollments |
 | `GET /api/v1/artisan/formations/{id}/files/{fileId}/download` | GET | `File.READ` + enrolled or owner | Download a protected course file |
 
@@ -760,24 +767,33 @@ Messaging operates on two complementary layers: REST for state retrieval and STO
 | Formation | `FORMATION_APPROVED` | Admin approves submitted formation |
 | Formation | `FORMATION_REJECTED` | Admin rejects submitted formation |
 | Formation | `NEW_FORMATION` | New formation matching artisan interests |
+| Formation | `FORMATION_CANCELLED` | Masterclass cancelled by instructor, notifying enrolled participants |
 | Message | `NEW_MESSAGE` | Incoming chat message |
 | Subscription | `SUBSCRIPTION_RENEWED` | Subscription auto-renewed |
 | Subscription | `SUBSCRIPTION_EXPIRED` | Subscription expired |
 | Subscription | `SUBSCRIPTION_REVOKED` | Admin revokes subscription |
 | Subscription | `SUBSCRIPTION_RENEWAL_REMINDER` | Pre-expiry reminder |
-| Subscription | `SUBSCRIPTION_GRANT_MANUAL` | Admin manually grants subscription |
+| Subscription | `SUBSCRIPTION_MANUALLY_GRANTED` | Admin manually grants subscription |
 | Payment | `PAYMENT_SUCCESS` | Payment successfully processed |
 | Payment | `PAYMENT_FAILED` | Payment processing failed |
 | Checkout | `CHECKOUT_CREATED` | Checkout session created |
 | Checkout | `CHECKOUT_CANCELED` | Checkout session cancelled |
 | Refund | `REFUND_REQUEST_UNAVAILABLE` | Refund not applicable |
-| Report | `REPORT_NEW` | New content report received (admin) |
-| Review | `REVIEW_NEW` | New review on own formation |
+| Report | `NEW_REPORT` | New content report received (admin) |
+| Review | `NEW_REVIEW` | New review on own formation |
 | Formateur | `FORMATEUR_REQUEST_SUBMITTED` | Accreditation request submitted |
 | Formateur | `FORMATEUR_APPROVED` | Accreditation approved |
 | Formateur | `FORMATEUR_GRANTED` | Direct teacher grant by admin |
 | Formateur | `FORMATEUR_REJECTED` | Accreditation rejected |
 | Formateur | `FORMATEUR_REVOKED` | Teacher status revoked |
+| Feed | `FEED_POST_SUBMITTED` | Author submitted post for review |
+| Feed | `FEED_POST_PUBLISHED` | Admin published post to feed |
+| Feed | `FEED_POST_REJECTED` | Admin rejected post with feedback |
+| Feed | `FEED_POST_HIDDEN` | Admin hid post from feed |
+| Feed | `FEED_POST_LIKED` | User liked author's post |
+| Feed | `FEED_POST_COMMENTED` | User commented on author's post |
+| Feed | `FEED_COMMENT_LIKED` | User liked author's comment |
+| Feed | `FEED_COMMENT_REPLIED` | User replied to author's comment |
 
 ### Ownership Convention
 
@@ -1328,6 +1344,8 @@ Flyway manages all schema changes. Migrations are **immutable** — applied migr
 | `V19` | `V19__notification_preferences.sql` | User notification channel preferences override table, unique constraint, and foreign keys |
 | `V20` | `V20__oauth_confirmation_timestamp.sql` | User entity `last_oauth_login_at` timestamp for sensitive action confirmation |
 | `V21` | `V21__audit_log_delete_account.sql` | Adds `DELETE_ACCOUNT` to the MariaDB audit-log action enum |
+| `V22` | `V22__replace_techniques_with_building_trades.sql` | Replaces legacy handicraft techniques with authentic Algerian building-trade techniques (`Pisé`, `Enduit à la chaux`, `Taille de pierre`, `Maçonnerie en moellons`, `Zellij`, `Géjij`, `Charpente traditionnelle`) with deterministic UUIDs and join-table relinking |
+| `V23` | `V23__formation_cancelled_notification_type.sql` | Extends notification taxonomy with `FORMATION_CANCELLED` for workshop cancellations |
 
 ---
 

@@ -54,7 +54,7 @@ graph TD
 - **Object Storage**: S3-compatible object store (MinIO for local development, AWS S3 / Cloudflare R2 for production)
 - **Security & Antivirus**: Spring Security, JJWT 0.12.6, Bucket4j 8.10.1, ClamAV 1.4 Daemon
 - **Realtime Broker**: Spring WebSocket STOMP relay (RabbitMQ 4.0)
-- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo (65% instruction coverage gate), Flyway (V0–V21 migrations), Postman / Newman, CodeQL SAST
+- **Build & Quality Tooling**: Maven Wrapper (`./mvnw`), Lombok, JaCoCo (65% instruction coverage gate), Flyway (V0–V23 migrations), Postman / Newman, CodeQL SAST
 
 ---
 
@@ -263,6 +263,7 @@ Each individual package across the application contains its own dedicated `READM
   - [`filestorage.validation`](src/main/java/com/project/souklab/filestorage/validation/README.md) — File validation
 - [`com.project.souklab.integration`](src/main/java/com/project/souklab/integration/README.md) — External third-party API integrations
   - [`integration.chargily`](src/main/java/com/project/souklab/integration/chargily/README.md) — Chargily Pay V2 client, webhook payloads, and mappers
+  - [`integration.payment`](src/main/java/com/project/souklab/integration/payment/README.md) — Payment provider integration abstraction
 - [`com.project.souklab.model`](src/main/java/com/project/souklab/model/README.md) — Domain entities and lifecycle enums
   - [`model.analytics`](src/main/java/com/project/souklab/model/analytics/README.md) — Analytics activity events, outbox records, jobs, and KPI rollups
 - [`com.project.souklab.security`](src/main/java/com/project/souklab/security/README.md) — Security filters and token parsing

@@ -30,5 +30,6 @@ classDiagram
 | [`ForbiddenException`](ForbiddenException.java) | `403 Forbidden` | `FORBIDDEN` | Access denied, unverified emails, inactive accounts. |
 | [`ResourceNotFoundException`](ResourceNotFoundException.java) | `404 Not Found` | `RESOURCE_NOT_FOUND` | Missing entity, foreign query-scoped items, soft-deleted rows. |
 | [`ConflictException`](ConflictException.java) | `409 Conflict` | `CONFLICT` | Duplicate email registrations, state transition conflicts. |
+| [`UnprocessableEntityException`](UnprocessableEntityException.java) | `422 Unprocessable Entity` | `UNPROCESSABLE_ENTITY` | Semantically invalid payload or unprocessable business entity state. |
 | [`AvatarLimitExceededException`](AvatarLimitExceededException.java) | `400 Bad Request` | `AVATAR_LIMIT_EXCEEDED` | User exceeds configured gallery avatar upload limit. |
 | [`GlobalExceptionHandler`](GlobalExceptionHandler.java) | `@RestControllerAdvice` | Unified | Intercepts all application exceptions, validation errors, and storage errors, formatting them into consistent `ApiResponse` error envelopes. |

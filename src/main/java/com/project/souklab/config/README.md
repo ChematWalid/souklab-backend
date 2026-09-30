@@ -35,6 +35,45 @@ Centralizes framework configurations, custom Spring Beans, security filter setup
 | [`WebSocketConfig`](WebSocketConfig.java) | `@Configuration`, `@EnableWebSocketMessageBroker` | Configures STOMP messaging, `/ws` endpoint, user destination prefixes, and external broker relays. |
 | [`WebSocketAuthInterceptor`](WebSocketAuthInterceptor.java) | `ChannelInterceptor` | Authenticates STOMP `CONNECT` frames by validating Bearer JWT tokens in connect headers. |
 | [`WebClientConfig`](WebClientConfig.java) | Class | Foundation configuration class for external HTTP client integrations. |
+| [`OpenApiConfiguration`](OpenApiConfiguration.java) | `@Configuration` | Configures Swagger/OpenAPI documentation definitions, security schemes, and server URLs. |
+| [`Phase9JacksonConfiguration`](Phase9JacksonConfiguration.java) | `@Configuration` | Custom Jackson serializers and deserializers for financial, audit, and pagination types. |
+| [`AnalyticsRabbitConfiguration`](AnalyticsRabbitConfiguration.java) | `@Configuration` | Configures RabbitMQ exchanges, queues, and bindings for analytics outbox events. |
+| [`MailerSendConfiguration`](MailerSendConfiguration.java) | `@Configuration` | Configures MailerSend API integration for transactional email delivery. |
+| [`SubscriptionSchedulingConfiguration`](SubscriptionSchedulingConfiguration.java) | `@Configuration`, `@EnableScheduling` | Enables background scheduled tasks for subscription renewals, grace periods, and expired checkouts. |
+| [`RateLimitRedisConfiguration`](RateLimitRedisConfiguration.java) | `@Configuration` | Configures Redis connection and proxy manager for Bucket4j rate-limiting. |
+
+---
+
+## Configuration Properties
+
+| Class | Prefix | Description |
+| :--- | :--- | :--- |
+| [`SubscriptionProperties`](SubscriptionProperties.java) | `app.subscription` | Configuration for subscription grace periods, trial lengths, and billing behavior. |
+| [`ChargilyProperties`](ChargilyProperties.java) | `chargily` | Chargily Pay V2 credentials, endpoints, webhook secrets, and callback URLs. |
+| [`AnalyticsProperties`](AnalyticsProperties.java) | `app.analytics` | Root analytics configuration for rollups, outbox relays, and event processing. |
+| [`AnalyticsJobProperties`](AnalyticsJobProperties.java) | `app.analytics.jobs` | Limits and thread pool settings for asynchronous analytics reporting jobs. |
+| [`AnalyticsExportProperties`](AnalyticsExportProperties.java) | `app.analytics.export` | Configuration for analytics CSV/JSON file generation and S3 storage artifact paths. |
+| [`AnalyticsRabbitProperties`](AnalyticsRabbitProperties.java) | `app.analytics.rabbitmq` | Exchange and routing key definitions for analytics event messaging. |
+| [`AnalyticsRetentionProperties`](AnalyticsRetentionProperties.java) | `app.analytics.retention` | Retention windows and purge thresholds for historical raw activity events. |
+| [`OpenApiProperties`](OpenApiProperties.java) | `app.openapi` | Metadata for OpenAPI API documentation generator (title, version, contacts). |
+| [`RateLimitEndpointProperties`](RateLimitEndpointProperties.java) | `app.rate-limit` | Endpoint-specific rate limiting configurations and capacity thresholds. |
+| [`HealthProperties`](HealthProperties.java) | `management.health` | Health indicator probe thresholds and timeout settings. |
+
+---
+
+## Health Indicators & Observability
+
+| Class | Type | Responsibility |
+| :--- | :--- | :--- |
+| [`RelayHealthIndicator`](RelayHealthIndicator.java) | `HealthIndicator` | Actuator probe monitoring external STOMP message broker relay connectivity. |
+| [`RedisHealthIndicator`](RedisHealthIndicator.java) | `HealthIndicator` | Actuator probe monitoring Redis server availability and ping responsiveness. |
+| [`ElasticsearchHealthIndicator`](ElasticsearchHealthIndicator.java) | `HealthIndicator` | Actuator probe verifying Elasticsearch cluster health and search index status. |
+| [`ChargilyHealthIndicator`](ChargilyHealthIndicator.java) | `HealthIndicator` | Actuator probe monitoring Chargily payment gateway connectivity and balance. |
+| [`OperationalMetrics`](OperationalMetrics.java) | Component | Central registry tracking Micrometer custom operational metrics and request timers. |
+| [`OperationalRequestMetricsFilter`](OperationalRequestMetricsFilter.java) | `OncePerRequestFilter` | Records HTTP request duration, status code counters, and endpoint latency metrics. |
+| [`CorrelationIdFilter`](CorrelationIdFilter.java) | `OncePerRequestFilter` | Stamps unique correlation IDs (`X-Correlation-ID`) across incoming requests and MDC context. |
+| [`RateLimitRule`](RateLimitRule.java) | Record | Encapsulates rate limit bucket limits, duration windows, and token refill rates. |
+| [`SubCategorySeed`](SubCategorySeed.java), [`MaterialSeed`](MaterialSeed.java) | Records | Internal seed data definition structures for reference taxonomy bootstrapping in `DataSeeder`. |
 
 ---
 

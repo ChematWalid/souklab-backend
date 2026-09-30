@@ -19,3 +19,14 @@ Transactional services managing subscription lifecycles, Chargily Pay V2 integra
 | [`AdminSubscriptionService`](AdminSubscriptionService.java) | Administrative subscription interventions, single subscription detail retrieval, manual grants, and dispute resolutions. |
 | [`AdminSubscriptionPlanService`](AdminSubscriptionPlanService.java) | Plan administration, single plan retrieval (active/inactive), price modifications, and archive workflows. |
 | [`AdminRefundService`](AdminRefundService.java) | Financial refund execution and mandatory audit reason logging. |
+
+---
+
+## Supporting Types & Exceptions
+
+| Class | Responsibility |
+| :--- | :--- |
+| [`ChargilyWebhookEvent`](ChargilyWebhookEvent.java) | Representation of a parsed Chargily Pay webhook callback event. |
+| [`WebhookJsonValue`](WebhookJsonValue.java) | Typed wrapper for audit logging raw webhook payload JSON structures. |
+| [`MalformedWebhookException`](MalformedWebhookException.java) | Thrown when an incoming webhook payload cannot be parsed or lacks required fields. |
+| [`InvalidWebhookSignatureException`](InvalidWebhookSignatureException.java) | Thrown when HMAC-SHA256 signature verification fails for an incoming webhook. |

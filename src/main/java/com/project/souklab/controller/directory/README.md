@@ -2,6 +2,10 @@
 
 REST controller for the artisan marketplace directory and faceted search engine. Backed by Elasticsearch / Hibernate Search with automatic relational database fallback.
 
+## Controller Reference
+
+- [`DirectoryController`](DirectoryController.java): REST controller implementing public directory search and faceted filtering under `/api/v1/public/directory`.
+
 ---
 
 ## Endpoints

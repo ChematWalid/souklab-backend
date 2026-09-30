@@ -9,3 +9,4 @@ In-memory storage mocks and test doubles for isolated unit testing.
 | Class | Responsibility |
 | :--- | :--- |
 | [`InMemoryStorageService`](InMemoryStorageService.java) | Stores byte arrays in a concurrent hash map to allow fast, external-dependency-free integration tests. |
+| [`StoredFile`](StoredFile.java) | Value record representing a stored byte payload, MIME type, and metadata held in the stub storage map. |

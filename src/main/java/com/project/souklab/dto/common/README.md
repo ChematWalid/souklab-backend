@@ -40,6 +40,7 @@ Standardized response envelope schemas used by all REST endpoints.
 | Class | Description |
 | :--- | :--- |
 | [`ApiResponse`](ApiResponse.java) | Generic wrapper providing boolean `success`, integer `code`, optional `errorCode`, descriptive `message`, and typed `data`. Includes static builder factories (`success()`, `error()`). |
+| [`ApiErrorCode`](ApiErrorCode.java) | Standardized machine-readable error codes (e.g. `ACCOUNT_LOCKED`, `ACCOUNT_SUSPENDED`, `EMAIL_NOT_VERIFIED`) returned in `ApiResponse.errorCode`. |
 | [`PaginatedResponse`](PaginatedResponse.java) | Generic container wrapping Spring Data `Page<T>`, exposing zero-based `pageNumber`, `pageSize`, `totalElements`, `totalPages`, and boolean `last`. |
 | [`PatchField`](PatchField.java) | Generic patch value | Distinguishes an omitted JSON field from an explicit `null` clear operation. |
 | [`PatchFieldDeserializer`](PatchFieldDeserializer.java) | Jackson deserializer | Preserves `PatchField` omission/null semantics during profile updates. |

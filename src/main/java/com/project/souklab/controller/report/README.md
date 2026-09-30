@@ -2,12 +2,16 @@
 
 REST controller for submitting user complaints/abuse reports against platform content and administrative resolution.
 
+## Controller Reference
+
+- [`ContentReportController`](ContentReportController.java): REST controller managing abuse report submissions and administrative report moderation under `/api/v1/reports` and `/api/v1/admin/reports`.
+
 ---
 
 ## Workflow Overview
 
 1. **User Submission**: Authenticated users flag inappropriate content (`POST /api/v1/reports`).
-   - Supported targets: `USER` (artisan or client profile), `POST` (community feed post), `REVIEW` (artisan review).
+   - Supported targets: `USER` (artisan or client profile), `POST` (community feed post), `COMMENT` (feed post comment), `REVIEW` (artisan review).
    - Reports enter the queue in `OPEN` status.
 2. **Admin Review**: Moderators review open reports (`GET /api/v1/admin/reports`).
 3. **Resolution**: Moderators take action (`POST /api/v1/admin/reports/{id}/resolve`):
@@ -76,7 +80,7 @@ REST controller for submitting user complaints/abuse reports against platform co
 ## TypeScript Contracts
 
 ```typescript
-export type ReportTargetType = 'USER' | 'POST' | 'REVIEW';
+export type ReportTargetType = 'USER' | 'POST' | 'COMMENT' | 'REVIEW';
 export type ReportStatus = 'OPEN' | 'DISMISSED' | 'RESOLVED';
 export type ReportResolutionAction = 'DISMISS' | 'HIDE' | 'REMOVE';
 

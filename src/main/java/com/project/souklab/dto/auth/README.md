@@ -18,6 +18,9 @@ Data transfer contracts for authentication, registration, password lifecycle, an
 | [`ResetPasswordRequestDTO`](ResetPasswordRequestDTO.java) | Inbound | Contains email, 6-digit verification code, and `newPassword` (8–128 chars). |
 | [`ChangePasswordRequestDTO`](ChangePasswordRequestDTO.java) | Inbound | Contains `oldPassword` (max 128 chars) and `newPassword` (8–128 chars). Validated with `@DifferentPasswords`. |
 | [`CompleteProfileRequestDTO`](CompleteProfileRequestDTO.java) | Inbound | Onboarding wizard payload containing address, bio, craft taxonomy IDs, and corporate details. |
+| [`OAuthExchangeRequest`](OAuthExchangeRequest.java) | Inbound | One-time OAuth authorization code exchange payload. |
+| [`DeleteAccountRequest`](DeleteAccountRequest.java) | Inbound | Self-service account deletion request payload containing password or OAuth confirmation. |
+| [`TokenType`](TokenType.java) | Contract | Token type enumeration (`BEARER`). |
 | [`UserResponseDTO`](UserResponseDTO.java) | Outbound | Full user representation for administrative and profile management views. |
 | [`UserSummaryDTO`](UserSummaryDTO.java) | Outbound | Lean representation of user identity (ID, email, name, avatar). |
 | [`UpdateProfileRequestDTO`](UpdateProfileRequestDTO.java) | Inbound | Payload for common user identity updates (first name, last name, phone). |

@@ -2,6 +2,10 @@
 
 HTTP adapter layer for user authentication, registration onboarding, token lifecycle, password management, and current authenticated user profile (`/me`).
 
+## Controller Reference
+
+- [`AuthController`](AuthController.java): Primary HTTP adapter implementing registration, authentication, token lifecycle, password management, and user profile endpoints under `/api/v1/auth`.
+
 ---
 
 ## Endpoint Overview

@@ -14,4 +14,5 @@ Request payloads, response representations, and internal events for administrati
 | [`AnalyticsRebuildRequest`](AnalyticsRebuildRequest.java) | Request | Maintenance request specifying rebuild scope or backfill parameters. |
 | [`AnalyticsRebuildResponse`](AnalyticsRebuildResponse.java) | Response | Acknowledgment response for accepted maintenance operations. |
 | [`AnalyticsJobEvent`](AnalyticsJobEvent.java) | Event | Internal event dispatched upon job completion or failure. |
+| [`AnalyticsMaintenanceJobEvent`](AnalyticsMaintenanceJobEvent.java) | Event | Internal event dispatched during lifecycle transitions of analytics maintenance tasks. |
 | [`AnalyticsMaintenanceJobResponse`](AnalyticsMaintenanceJobResponse.java) | Response | Detailed status and execution metadata for background maintenance jobs. |

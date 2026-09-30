@@ -910,6 +910,11 @@ Manually marks an authored, published masterclass as completed.
 - **Access**: Authenticated Author (`permission:artisan:formations`)
 - **Response**: `200 OK` with `ApiResponse<FormationResponseDTO>`.
 
+#### `POST /api/v1/artisan/formations/{id}/cancel-formation`
+Cancels an authored masterclass, marks status as `CANCELLED`, and emits `FORMATION_CANCELLED` notifications to all confirmed participants.
+- **Access**: Authenticated Author (`permission:artisan:formations`)
+- **Response**: `200 OK` with `ApiResponse<FormationResponseDTO>`.
+
 #### `DELETE /api/v1/artisan/formations/{id}`
 Soft-deletes an authored masterclass. Blocked if active student enrollments exist.
 - **Access**: Authenticated Author (`permission:artisan:formations`)
@@ -923,8 +928,9 @@ Soft-deletes an authored masterclass. Blocked if active student enrollments exis
 Browses published masterclasses in the public workshop catalog.
 - **Access**: Authenticated Artisan (`permission:artisan:formations`)
 - **Query Parameters**:
+  - `trade` (string, optional), `region` (string, optional), `online` (boolean, optional).
   - `page` (int, default: 0), `size` (int, default: 12), `sort` (default: `scheduledAt,asc`).
-- **Response**: `200 OK` with `ApiResponse<PaginatedResponse<FormationPublicViewDTO>>`.
+- **Response**: `200 OK` with `ApiResponse<PaginatedResponse<FormationSummaryDTO>>`.
 
 #### `GET /api/v1/artisan/formations/catalog/{id}`
 Retrieves detailed public masterclass curriculum, instructor bio, remaining seat capacity, and syllabus file list.
@@ -937,16 +943,23 @@ Enrolls the caller in a published masterclass.
 - **Validation**: Enforces seat capacity (`maxParticipants`). Self-enrollment by the authoring instructor is blocked (`400 Bad Request`). Duplicate enrollment returns `409 Conflict`.
 - **Response**: `201 Created` with `ApiResponse<FormationEnrollmentResponseDTO>`.
 
-#### `POST /api/v1/artisan/formations/{id}/cancel`
-Cancels an active masterclass enrollment reservation.
+#### `POST /api/v1/artisan/formations/{id}/cancel` & `POST /api/v1/artisan/formations/{id}/cancel-enrollment`
+Cancels an authored masterclass or an active enrollment reservation based on caller role:
+- **Authoring Instructor**: Cancels the entire masterclass (status becomes `CANCELLED`), emitting `FORMATION_CANCELLED` notifications to all confirmed participants. Returns `ApiResponse<FormationResponseDTO>`.
+- **Enrolled Participant**: Cancels the caller's enrollment reservation. Enforces the configured cancellation cutoff deadline (24 hours before scheduled start). Returns `ApiResponse<FormationEnrollmentResponseDTO>`.
 - **Access**: Authenticated Artisan (`permission:artisan:formations`)
-- **Validation**: Enforces the configured cancellation cutoff deadline before workshop start.
-- **Response**: `200 OK` with `ApiResponse<Void>`.
+- **Response**: `200 OK` with `ApiResponse<FormationResponseDTO>` or `ApiResponse<FormationEnrollmentResponseDTO>`.
+
+#### `GET /api/v1/artisan/formations/{id}/enrollments`
+Retrieves paginated participant enrollment roster for the authenticated formation author.
+- **Access**: Authenticated Author (`permission:artisan:formations`)
+- **Query Parameters**: `page` (int, default: 0), `size` (int, default: 20), `sort` (default: `enrolledAt,asc`).
+- **Response**: `200 OK` with `ApiResponse<PaginatedResponse<FormationEnrollmentSummaryDTO>>`.
 
 #### `POST/PUT /api/v1/artisan/formations/{id}/attendance/{enrollmentId}`
 Records attendance for a confirmed participant (`ATTENDED` or `ABSENT`).
 - **Access**: Authenticated Author (`permission:artisan:formations`)
-- **Request Body** (optional):
+- **Request Body** (`AttendanceRequest`, optional):
 ```json
 {
   "status": "ATTENDED"
@@ -1287,6 +1300,7 @@ Retrieves a single active public subscription plan by ID with pricing in Algeria
 
 - `POST /api/v1/subscriptions/checkout`: Initiates checkout session.
   - **Request Body**: `SubscriptionCheckoutRequest` (`{ "planId": string }`)
+  - **Validation**: Rejects initiation if caller's account already holds an `ACTIVE` subscription (`409 Conflict`, `SubscriptionConflictException`) or a `PENDING` checkout session (`400 Bad Request`).
   - **Response**: `201 Created` with `ApiResponse<SubscriptionCheckoutResponse>`
     ```json
     {
@@ -1318,7 +1332,7 @@ Retrieves a single active public subscription plan by ID with pricing in Algeria
 - **Security**: Validates HMAC-SHA256 signature in the `Signature` HTTP header against the configured webhook secret.
 - **Idempotency**: Webhook events are deduplicated via `WebhookEventClaimService`. Duplicate delivery attempts return `200 OK` without re-processing.
 - **Supported Events**:
-  - `checkout.paid`: Transitions payment to `PAID`, activates subscription to `ACTIVE`, and assigns premium capabilities.
+  - `checkout.paid`: Transitions payment to `PAID`, activates subscription to `ACTIVE`, assigns premium capabilities, and cancels any duplicate `PENDING` subscriptions.
   - `checkout.failed`: Transitions payment to `FAILED`, cancels pending subscription.
   - `checkout.expired`: Cleans up abandoned checkout sessions.
 

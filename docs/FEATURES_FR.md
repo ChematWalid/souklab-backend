@@ -382,7 +382,7 @@ La plateforme initialise une taxonomie de référence algérienne et méditerran
 - **Époques historiques (`epoques`)** :
   - 14 périodes chronologiques (Antiquité, ères islamiques, régence ottomane, artisanat traditionnel et mouvements contemporains).
 - **Techniques artisanales (`techniques`)** :
-  - 20 méthodes et techniques artisanales traditionnelles et patrimoniales.
+  - 7 techniques authentiques du bâtiment traditionnel algérien (`Pisé`, `Enduit à la chaux`, `Taille de pierre`, `Maçonnerie en moellons`, `Zellij`, `Géjij (plâtre sculpté)`, `Charpente traditionnelle`).
 
 ---
 
@@ -438,6 +438,8 @@ Les formations sont des masterclasses en présentiel ou hybrides, créées exclu
 | `APPROVED` | Approuvée par l'admin ; prête à être publiée |
 | `REJECTED` | Rejetée par l'admin avec retour ; l'auteur peut réviser et resoumettre |
 | `PUBLISHED` | Visible publiquement ; inscriptions ouvertes |
+| `CANCELLED` | Annulée par le formateur ou l'administrateur ; notifie les participants inscrits |
+| `COMPLETED` | Masterclass terminée ; l'artisan formateur enregistre les présences |
 
 ### Statuts d'inscription
 
@@ -459,6 +461,10 @@ Les formations sont des masterclasses en présentiel ou hybrides, créées exclu
 | `POST /api/v1/artisan/formations/{id}/files` | POST (multipart) | `Artisan.FORMATIONS` + propriétaire | Télécharger un fichier de cours protégé (jusqu'à 10 fichiers) |
 | `DELETE /api/v1/artisan/formations/{id}/files/{fileId}` | DELETE | `Artisan.FORMATIONS` + propriétaire | Supprimer un fichier de cours |
 | `POST /api/v1/artisan/formations/{id}/submit` | POST | `Artisan.FORMATIONS` + propriétaire | Soumettre pour révision admin |
+| `POST /api/v1/artisan/formations/{id}/complete` | POST | `Artisan.FORMATIONS` + propriétaire | Marquer manuellement une masterclass publiée comme terminée |
+| `POST /api/v1/artisan/formations/{id}/cancel-formation` | POST | `Artisan.FORMATIONS` + propriétaire | Annuler la masterclass et notifier les participants confirmés |
+| `POST/PUT /api/v1/artisan/formations/{id}/attendance/{enrollmentId}` | POST/PUT | `Artisan.FORMATIONS` + propriétaire | Enregistrer la présence d'un participant (`ATTENDED` ou statut personnalisé) |
+| `GET /api/v1/artisan/formations/{id}/enrollments` | GET | `Artisan.FORMATIONS` + propriétaire | Liste paginée des inscrits pour le formateur |
 | `DELETE /api/v1/artisan/formations/{id}` | DELETE | `Artisan.FORMATIONS` + propriétaire | Suppression logique (états DRAFT/REJECTED uniquement) |
 | `GET /api/v1/artisan/formations/me` | GET | `Artisan.FORMATIONS` | Lister ses propres formations avec filtres de statut |
 | `GET /api/v1/artisan/formations/{id}` | GET | `Artisan.FORMATIONS` | Détail de sa propre formation |
@@ -467,10 +473,11 @@ Les formations sont des masterclasses en présentiel ou hybrides, créées exclu
 
 | Endpoint | Méthode | Auth | Description |
 |---|---|---|---|
-| `GET /api/v1/artisan/formations/catalog` | GET | `Artisan.FORMATIONS` | Parcourir le catalogue des formations publiées |
+| `GET /api/v1/artisan/formations/catalog` | GET | `Artisan.FORMATIONS` | Parcourir le catalogue des formations publiées (filtres `trade`, `region`, `online`) |
 | `GET /api/v1/artisan/formations/catalog/{id}` | GET | `Artisan.FORMATIONS` | Voir le détail d'une formation publiée |
 | `POST /api/v1/artisan/formations/{id}/enroll` | POST | `Artisan.FORMATIONS` | S'inscrire à une formation |
-| `POST /api/v1/artisan/formations/{id}/cancel` | POST | `Artisan.FORMATIONS` | Annuler sa propre inscription |
+| `POST /api/v1/artisan/formations/{id}/cancel` | POST | `Artisan.FORMATIONS` | Annuler l'inscription (participant) ou la formation (formateur) |
+| `POST /api/v1/artisan/formations/{id}/cancel-enrollment` | POST | `Artisan.FORMATIONS` | Annuler explicitement sa propre réservation |
 | `GET /api/v1/artisan/formations/my-enrollments` | GET | `Artisan.FORMATIONS` | Lister ses propres inscriptions |
 | `GET /api/v1/artisan/formations/{id}/files/{fileId}/download` | GET | `File.READ` + inscrit ou propriétaire | Télécharger un fichier de cours protégé |
 
@@ -759,24 +766,33 @@ La messagerie fonctionne sur deux couches complémentaires : REST pour la récup
 | Formation | `FORMATION_APPROVED` | L'admin approuve une formation soumise |
 | Formation | `FORMATION_REJECTED` | L'admin rejette une formation soumise |
 | Formation | `NEW_FORMATION` | Nouvelle formation correspondant aux intérêts d'un artisan |
+| Formation | `FORMATION_CANCELLED` | Formation annulée par le formateur, participants inscrits notifiés |
 | Message | `NEW_MESSAGE` | Nouveau message de chat reçu |
 | Abonnement | `SUBSCRIPTION_RENEWED` | Abonnement renouvelé automatiquement |
 | Abonnement | `SUBSCRIPTION_EXPIRED` | Abonnement expiré |
 | Abonnement | `SUBSCRIPTION_REVOKED` | L'admin révoque l'abonnement |
 | Abonnement | `SUBSCRIPTION_RENEWAL_REMINDER` | Rappel avant expiration |
-| Abonnement | `SUBSCRIPTION_GRANT_MANUAL` | L'admin accorde manuellement un abonnement |
+| Abonnement | `SUBSCRIPTION_MANUALLY_GRANTED` | L'admin accorde manuellement un abonnement |
 | Paiement | `PAYMENT_SUCCESS` | Paiement traité avec succès |
 | Paiement | `PAYMENT_FAILED` | Échec du traitement du paiement |
 | Checkout | `CHECKOUT_CREATED` | Session de checkout créée |
 | Checkout | `CHECKOUT_CANCELED` | Session de checkout annulée |
 | Remboursement | `REFUND_REQUEST_UNAVAILABLE` | Remboursement non applicable |
-| Signalement | `REPORT_NEW` | Nouveau signalement de contenu reçu (admin) |
-| Avis | `REVIEW_NEW` | Nouvel avis sur sa propre formation |
+| Signalement | `NEW_REPORT` | Nouveau signalement de contenu reçu (admin) |
+| Avis | `NEW_REVIEW` | Nouvel avis sur sa propre formation |
 | Formateur | `FORMATEUR_REQUEST_SUBMITTED` | Demande d'accréditation soumise |
 | Formateur | `FORMATEUR_APPROVED` | Accréditation approuvée |
 | Formateur | `FORMATEUR_GRANTED` | Octroi direct de formateur par l'admin |
 | Formateur | `FORMATEUR_REJECTED` | Accréditation rejetée |
 | Formateur | `FORMATEUR_REVOKED` | Statut de formateur révoqué |
+| Feed | `FEED_POST_SUBMITTED` | L'auteur soumet une publication pour révision |
+| Feed | `FEED_POST_PUBLISHED` | L'admin publie la publication sur le fil |
+| Feed | `FEED_POST_REJECTED` | L'admin rejette la publication avec un motif |
+| Feed | `FEED_POST_HIDDEN` | L'admin masque la publication du fil |
+| Feed | `FEED_POST_LIKED` | Un utilisateur a aimé la publication de l'auteur |
+| Feed | `FEED_POST_COMMENTED` | Un utilisateur a commenté la publication de l'auteur |
+| Feed | `FEED_COMMENT_LIKED` | Un utilisateur a aimé le commentaire de l'auteur |
+| Feed | `FEED_COMMENT_REPLIED` | Un utilisateur a répondu au commentaire de l'auteur |
 
 ### Convention de propriété
 
@@ -1327,6 +1343,8 @@ Flyway gère tous les changements de schéma. Les migrations sont **immuables** 
 | `V19` | `V19__notification_preferences.sql` | Table des préférences de notification utilisateur, contrainte d'unicité et clés étrangères |
 | `V20` | `V20__oauth_confirmation_timestamp.sql` | Horodatage `last_oauth_login_at` pour la confirmation d'actions sensibles |
 | `V21` | `V21__audit_log_delete_account.sql` | Ajoute `DELETE_ACCOUNT` à l'énumération des actions du journal d'audit |
+| `V22` | `V22__replace_techniques_with_building_trades.sql` | Remplace les anciennes techniques artisanales par d'authentiques techniques du bâtiment traditionnel algérien (`Pisé`, `Enduit à la chaux`, `Taille de pierre`, `Maçonnerie en moellons`, `Zellij`, `Géjij`, `Charpente traditionnelle`) avec UUIDs déterministes et rétablissement des liens |
+| `V23` | `V23__formation_cancelled_notification_type.sql` | Étend la taxonomie des notifications avec `FORMATION_CANCELLED` pour les annulations de masterclasses |
 
 ---
 

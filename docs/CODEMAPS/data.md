@@ -30,7 +30,7 @@
 - Taxonomy: `Region` (`regions`), `JobCategory` (`job_categories`), `JobSubCategory` (`job_sub_categories`), `MaterialFamily` (`material_families`), `Material` (`materials`), `Epoque` (`epoques`), `Technique` (`techniques`).
 
 ### Formations & Masterclasses
-- `Formation` (`formations`): Masterclasses (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`).
+- `Formation` (`formations`): Masterclasses (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `PUBLISHED`, `CANCELLED`, `COMPLETED`).
 - `FormationFile` (`formation_files`): Syllabus & course materials (max 10 per formation, protected).
 - `FormationEnrollment` (`formation_enrollments`): Participant bookings (`CONFIRMED`, `ATTENDED`, `CANCELLED`).
   - *Constraint: Unique `(formation_id, artisan_id)`.*
@@ -72,7 +72,7 @@
 - `ClientFavoriteArtisan` (`client_favorite_artisans`): Client artisan bookmarking records.
   - *Constraint: Unique `(client_id, artisan_id)`.*
 
-## 3. Flyway Migration History (V0–V21)
+## 3. Flyway Migration History (V0–V23)
 
 | Version | Script Name | Scope |
 |---|---|---|
@@ -91,3 +91,5 @@
 | `V19` | `V19__notification_preferences.sql` | User notification channel preference overrides table, unique constraint, and foreign keys |
 | `V20` | `V20__oauth_confirmation_timestamp.sql` | User entity `last_oauth_login_at` timestamp for sensitive action confirmation |
 | `V21` | `V21__audit_log_delete_account.sql` | Adds `DELETE_ACCOUNT` to the audit action enum |
+| `V22` | `V22__seed_authentic_algerian_techniques.sql` | Authentic Algerian building-trade techniques (Pisé, Chaux, Taille de pierre, Moellons, Zellij, Géjij, Charpente) |
+| `V23` | `V23__formation_cancelled_notification_type.sql` | Adds `FORMATION_CANCELLED` to notification type enum |

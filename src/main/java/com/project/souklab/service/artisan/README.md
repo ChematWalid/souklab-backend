@@ -19,5 +19,6 @@ Business logic for artisan public profiles, contact details gating, deduplicated
 | Service Class | Responsibility |
 | :--- | :--- |
 | [`ArtisanProfileService`](ArtisanProfileService.java) | Manages public profile retrieval, contact masking, view metrics, and profile updates. |
+| [`ArtisanProfileViewRecorder`](ArtisanProfileViewRecorder.java) | Records unique profile visits and increments view counts in an isolated `REQUIRES_NEW` transaction. |
 | [`ArtisanCertificationService`](ArtisanCertificationService.java) | Handles official certification document uploads with ClamAV scanning, listing, and deletion. |
 | [`ArtisanGalleryService`](ArtisanGalleryService.java) | Handles showcase portfolio image uploads, configured 20-photo quota enforcement, ordering, and deletion. |

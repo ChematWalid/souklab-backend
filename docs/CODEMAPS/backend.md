@@ -40,9 +40,14 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `PUT|DELETE /artisan/formations/{id}`: Author edit/soft-delete (draft only)
 - `POST /artisan/formations/{id}/thumbnail` & `POST|DELETE /artisan/formations/{id}/files`: Course materials (max 10 files, 25MB)
 - `POST /artisan/formations/{id}/submit`: Submit to admin (`PENDING_REVIEW`)
-- `GET /artisan/formations/catalog[/{id}]`: Published formation discovery
+- `GET /artisan/formations/catalog[/{id}]`: Published formation discovery (trade, region, online filters)
 - `POST /artisan/formations/{id}/enroll`: Participant enrollment (capacity checked, self-enrollment blocked -> 400)
-- `POST /artisan/formations/{id}/cancel`: Cancel reservation (enforces 24h deadline cutoff)
+- `POST /artisan/formations/{id}/cancel`: Dual cancel route (participant cancels enrollment before 24h cutoff; author cancels workshop and notifies enrollees)
+- `POST /artisan/formations/{id}/cancel-formation`: Dedicated instructor cancel masterclass endpoint
+- `POST /artisan/formations/{id}/cancel-enrollment`: Dedicated participant cancel enrollment endpoint
+- `POST /artisan/formations/{id}/complete`: Instructor marks masterclass as completed
+- `GET /artisan/formations/{id}/enrollments`: Instructor inspects enrolled participants
+- `POST|PUT /artisan/formations/{id}/attendance/{enrollmentId}`: Instructor records participant attendance
 - `GET /artisan/formations/{id}/files/{fileId}/download`: Stream course file (owner/enrollee only -> 403)
 - `POST /artisan/formateur-request` & `GET /artisan/formateur-requests[/{id}]`: Accreditation application (14-day cooldown on rejection)
 - `GET /admin/formateur-requests[/{id}]` & `POST /admin/formateur-requests/**`: Admin approve, reject, grant, revoke, lift-cooldown
@@ -80,7 +85,7 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 ### Subscriptions, Payments & Admin (`/api/v1/`)
 - `GET /subscriptions/plans[/{id}]`: Public subscription plans
 - `GET|POST|PUT|DELETE /admin/subscription-plans[/{id}]` & `GET /admin/subscriptions[/{id}]`: Admin subscription and pricing management
-- `POST /subscriptions/checkout`: Initiate Chargily Pay V2 hosted checkout
+- `POST /subscriptions/checkout`: Initiate Chargily Pay V2 hosted checkout (safeguarded against duplicate active or pending subscriptions)
 - `POST /integrations/chargily/webhook`: Signature-verified, idempotent webhook processing
 - `GET /admin/users[/{id}]` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration (self-ban and self-timeout blocked -> 400)
 - `GET|POST|DELETE /admin/users/{userId}/permissions`: Granular permission assignments (self-revocation blocked -> 400)

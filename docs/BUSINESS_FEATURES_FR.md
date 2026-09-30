@@ -80,7 +80,7 @@ Souklab maintient un catalogue de référence riche qui alimente la recherche et
 | **Régions** | Les 58 wilayas et communes administratives algériennes |
 | **Catégories d'artisanat** | 8 catégories de métiers du bâtiment avec 37 sous-catégories spécialisées (taxonomie française) |
 | **Matières** | 6 familles de matériaux méditerranéens regroupant 25 matériaux de construction authentiques |
-| **Techniques** | 20 méthodes et techniques de production artisanale traditionnelles et patrimoniales |
+| **Techniques** | 7 techniques authentiques du bâtiment traditionnel algérien (Pisé, Enduit à la chaux, Taille de pierre, Maçonnerie en moellons, Zellij, Géjij, Charpente traditionnelle) |
 | **Époques** | 14 périodes historiques et références culturelles de style |
 
 Cette taxonomie est gérée par l'équipe Souklab et accessible publiquement — aucun compte requis. L'équipe d'administration peut créer, mettre à jour et administrer les éléments taxonomiques avec détection automatique des conflits et suivi d'audit.
@@ -108,6 +108,8 @@ Les artisans qui obtiennent l'accréditation **Formateur** peuvent créer et ani
 | Approuvée | L'administrateur approuve — l'artisan la publie |
 | Publiée | Visible dans le catalogue ; inscriptions ouvertes |
 | Rejetée | L'administrateur retourne la masterclass avec un retour ; l'artisan peut réviser et resoumettre |
+| Annulée | Le formateur annule la masterclass ; les participants confirmés sont automatiquement notifiés |
+| Terminée | La session de formation a eu lieu ; le formateur enregistre les présences |
 
 #### Pour les artisans (participants)
 

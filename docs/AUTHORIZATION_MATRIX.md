@@ -16,7 +16,7 @@ Authorization is capability-based. The `Permission` enum and the `permissions`/`
 | `permission:report:create` | Authenticated content-report submission, including posts and comments | `ContentReportController`, `ContentReportService` |
 | `permission:file:read` | Protected-file policy for authenticated file access | `FileAccessService` and `CustomUserDetailsService` |
 | `permission:message:send` | Send direct messages and upload message attachments (clients also require an active Premium subscription) | `ConversationService`, `ChatStompController`, `ConversationController` |
-| `permission:financial:admin` | Subscription management, manual grants/revocations, refunds, and payment state corrections | `AdminSubscriptionController`, `AdminPaymentController`, `AccessControlService` |
+| `permission:financial:admin` | Subscription management, manual grants/revocations, refunds, and payment state corrections | `AdminSubscriptionController`, `AdminSubscriptionPlanController`, `AdminRefundController`, `AccessControlService` |
 | `permission:analytics:admin` | Analytics query jobs, rollups rebuild/backfill, metrics exports, and stats access | `AnalyticsJobController`, `AccessControlService` |
 | `permission:admin:catalog` | Catalog taxonomy management (techniques, epoques, regions CRUD) | `AdminCatalogController`, `AccessControlService` |
 | `permission:client:favorites` | Client favorite artisan management (add, list, check status, remove) | `ClientFavoriteArtisanController`, `AccessControlService` |

@@ -14,5 +14,6 @@ Stateless helpers, security context extractors, and response serializers.
 | [`EmailUtil`](EmailUtil.java) | Asynchronous email dispatch helper for verification codes, password resets, and accreditation notices. |
 | [`FileStorageUtil`](FileStorageUtil.java) | File path utilities: sanitized filenames, extension extraction, and UUID-based object key formatting. |
 | [`MapperUtil`](MapperUtil.java) | Model-to-DTO conversion helpers. |
+| [`SlugUtils`](SlugUtils.java) | Converts taxonomy names into URL-friendly kebab-case slugs, stripping accents and special characters. |
 | [`ServletResponseUtil`](ServletResponseUtil.java) | Directly writes standardized `ApiResponse` JSON error payloads into `HttpServletResponse` streams from servlet filters. |
 

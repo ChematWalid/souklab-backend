@@ -5,7 +5,7 @@ secrets, signatures, and raw webhook bodies are excluded.
 
 | Plan requirement | Current evidence | Status |
 |---|---|---|
-| Fresh retained dependency environment and isolated compose project | Final integration run plus unique `COMPOSE_PROJECT_NAME` in `scripts/full-verification.sh`; 22 Flyway migrations through V21, MariaDB, RabbitMQ, Redis, MinIO, Elasticsearch, and ClamAV phases passed | Verified |
+| Fresh retained dependency environment and isolated compose project | Final integration run plus unique `COMPOSE_PROJECT_NAME` in `scripts/full-verification.sh`; 24 Flyway migrations through V23, MariaDB, RabbitMQ, Redis, MinIO, Elasticsearch, and ClamAV phases passed | Verified |
 | Synthetic accounts, verification-code recovery, status and ownership fixtures | `scripts/verify-live-semantic.py`; `.agent-output/live-status-fixtures.tsv`; 8 status assertions passed | Verified |
 | Registration, verification, login boundaries, lockout, refresh, logout, password and profile lifecycle | `.agent-output/auth-workflow-current.md`; 24 semantic authentication cases passed | Verified |
 | Administration, approvals, rejection, timeout, suspension, unban and permissions | `.agent-output/live-status-fixtures.tsv`; live semantic matrix; focused administration tests | Verified |

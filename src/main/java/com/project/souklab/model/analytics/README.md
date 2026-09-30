@@ -17,7 +17,7 @@ JPA entity models, enums, converters, and deserializers supporting platform anal
 | [`AnalyticsProcessedEvent`](AnalyticsProcessedEvent.java) | `@Entity` | Idempotency log recording already-processed event identifiers to prevent duplicates. |
 | [`DailyKpiRollup`](DailyKpiRollup.java) | `@Entity` | Pre-calculated daily KPI rollup storing aggregated metrics across dimensions. |
 
-### Enums & Deserializers
+### Enums & Taxonomies
 | Class / Enum | Responsibility |
 | :--- | :--- |
 | [`AnalyticsBucket`](AnalyticsBucket.java) | Aggregation time buckets: `DAY`, `WEEK`, `MONTH`, `QUARTER`. |
@@ -26,4 +26,17 @@ JPA entity models, enums, converters, and deserializers supporting platform anal
 | [`AnalyticsOutputFormat`](AnalyticsOutputFormat.java) | Supported export formats: `JSON`, `CSV`. |
 | [`AnalyticsReportType`](AnalyticsReportType.java) | Report classification (operational vs financial metric sets). |
 | [`AnalyticsSortField`](AnalyticsSortField.java) & [`AnalyticsSortDirection`](AnalyticsSortDirection.java) | Sorting criteria for analytics time-series queries. |
+| [`AnalyticsAuditOutcome`](AnalyticsAuditOutcome.java) | Outcome status enum for analytics audit and maintenance operations. |
+| [`AnalyticsFilterKey`](AnalyticsFilterKey.java) | Supported filter dimension keys for querying analytics events and rollups. |
 | [`OutboxStatus`](OutboxStatus.java) | Outbox event delivery states: `PENDING`, `PROCESSING`, `PUBLISHED`, `FAILED`, `DEAD_LETTER`. |
+
+### Converters & Deserializers
+| Class | Responsibility |
+| :--- | :--- |
+| [`AnalyticsEventTypeConverter`](AnalyticsEventTypeConverter.java) | JPA attribute converter for persisting analytics event types as wire strings. |
+| [`AnalyticsReportTypeConverter`](AnalyticsReportTypeConverter.java) | JPA attribute converter for persisting report types. |
+| [`AnalyticsReportTypeDeserializer`](AnalyticsReportTypeDeserializer.java) | Jackson deserializer for `AnalyticsReportType`. |
+| [`AnalyticsReportTypeValueDeserializer`](AnalyticsReportTypeValueDeserializer.java) | Value-level Jackson deserializer for `AnalyticsReportType`. |
+| [`AnalyticsSortFieldConverter`](AnalyticsSortFieldConverter.java) | JPA attribute converter for query sort fields. |
+| [`AnalyticsSortFieldDeserializer`](AnalyticsSortFieldDeserializer.java) | Jackson deserializer for `AnalyticsSortField`. |
+| [`AnalyticsSortFieldValueDeserializer`](AnalyticsSortFieldValueDeserializer.java) | Value-level Jackson deserializer for `AnalyticsSortField`. |

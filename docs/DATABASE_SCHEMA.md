@@ -31,7 +31,7 @@ All entities inherit the UUID and audit timestamp fields from `BaseEntity`. Soft
 
 ## Database Migrations & Deployment
 
-Schema changes are versioned and managed using **Flyway**. The repository maintains 22 versioned migrations (`V0` through `V21`) located in `src/main/resources/db/migration/`:
+Schema changes are versioned and managed using **Flyway**. The repository maintains 24 versioned migrations (`V0` through `V23`) located in `src/main/resources/db/migration/`:
 - `V0`: Baseline schema (users, artisans, catalog, formations, enrollments)
 - `V1`: Social feed tables (posts, media, comments, likes)
 - `V2`: Authorization permissions (`permissions`, `user_permissions`)
@@ -46,5 +46,7 @@ Schema changes are versioned and managed using **Flyway**. The repository mainta
 - `V19`: User notification channel preference overrides table (`user_notification_preferences`), unique constraint, and foreign keys
 - `V20`: User entity `last_oauth_login_at` timestamp for sensitive action confirmation
 - `V21`: Adds `DELETE_ACCOUNT` to the MariaDB audit-log action enum
+- `V22`: Replaces legacy handicraft techniques with authentic Algerian building-trade techniques (`Pisé`, `Enduit à la chaux`, `Taille de pierre`, `Maçonnerie en moellons`, `Zellij`, `Géjij (plâtre sculpté)`, `Charpente traditionnelle`) with deterministic UUIDs and join-table relinking
+- `V23`: Extends the notification taxonomy with `FORMATION_CANCELLED` for workshop cancellations
 
 The `prod` Spring profile sets `spring.jpa.hibernate.ddl-auto=validate` and Hibernate Search schema management to `validate`. Production schema changes must be applied via Flyway (`FLYWAY_ENABLED=true`) prior to application startup. Applied migrations are immutable and must never be modified.
