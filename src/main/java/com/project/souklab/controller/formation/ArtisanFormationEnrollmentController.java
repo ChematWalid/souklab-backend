@@ -7,10 +7,12 @@ import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
 import com.project.souklab.dto.formation.AttendanceRequest;
 import com.project.souklab.dto.formation.FormationEnrollmentSummaryDTO;
 import com.project.souklab.dto.formation.FormationPublicViewDTO;
+import com.project.souklab.dto.formation.FormationResponseDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.service.formation.FormationEnrollmentService;
+import com.project.souklab.service.formation.FormationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 public class ArtisanFormationEnrollmentController {
 
     private final FormationEnrollmentService formationEnrollmentService;
+    private final FormationService formationService;
 
     /**
      * Browses the public catalog of published masterclass formations.
@@ -101,16 +104,23 @@ public class ArtisanFormationEnrollmentController {
     }
 
     /**
-     * Cancels an active enrollment reservation for the authenticated artisan.
+     * Cancels an active enrollment reservation or the authored masterclass itself.
+     * If the authenticated caller is the instructor/author of the masterclass, the masterclass
+     * is cancelled and confirmed participants are notified.
+     * If the caller is an enrolled participant, their enrollment reservation is cancelled.
      *
      * @param id formation unique identifier
-     * @return 200 OK with updated cancelled enrollment response DTO
+     * @return 200 OK with cancellation response DTO
      */
-    @Operation(summary = "Cancel masterclass enrollment", description = "Cancels a confirmed reservation before the workshop cancellation cutoff deadline.")
-    @PostMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<FormationEnrollmentResponseDTO>> cancel(
+    @Operation(summary = "Cancel masterclass or enrollment", description = "Cancels authored masterclass if called by instructor, or cancels enrollment if called by participant.")
+    @PostMapping(value = {"/{id}/cancel", "/{id}/cancel-enrollment"})
+    public ResponseEntity<ApiResponse<?>> cancel(
             @PathVariable String id
     ) {
+        if (formationEnrollmentService.isAuthor(id)) {
+            FormationResponseDTO cancelled = formationService.cancelFormation(id);
+            return ResponseEntity.ok(ApiResponse.success(cancelled, "Formation cancelled successfully."));
+        }
         FormationEnrollmentResponseDTO cancelled = formationEnrollmentService.cancelEnrollment(id);
         return ResponseEntity.ok(ApiResponse.success(cancelled, "Formation enrollment cancelled successfully."));
     }

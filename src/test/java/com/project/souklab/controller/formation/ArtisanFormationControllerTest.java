@@ -305,7 +305,7 @@ class ArtisanFormationControllerTest {
 
             when(formationService.cancelFormation("formation-101")).thenReturn(responseDTO);
 
-            mockMvc.perform(post(BASE_URL + "/formation-101/cancel")
+            mockMvc.perform(post(BASE_URL + "/formation-101/cancel-formation")
                             .with(artisan()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))

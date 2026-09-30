@@ -354,6 +354,18 @@ public class FormationEnrollmentService {
     }
 
     /**
+     * Checks if the authenticated artisan is the author of the specified formation.
+     *
+     * @param formationId formation unique identifier
+     * @return true if the current authenticated artisan authored the formation, false otherwise
+     */
+    @Transactional(readOnly = true)
+    public boolean isAuthor(String formationId) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        return formationRepository.findByIdAndAuthorIdAndDeletedAtIsNull(formationId, artisan.getId()).isPresent();
+    }
+
+    /**
      * Delegates artisan identity resolution to the shared {@link ArtisanSecurityUtils} component.
      *
      * @return resolved Artisan entity for the current authenticated principal

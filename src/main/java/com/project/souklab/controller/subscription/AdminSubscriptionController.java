@@ -52,16 +52,7 @@ public class AdminSubscriptionController {
     @GetMapping("/payments")
     public ResponseEntity<ApiResponse<List<PaymentResponse>>> payments(
             @RequestParam(defaultValue = "50") int limit, @RequestParam(required = false) String query) {
-        Pageable pageable = PageRequest.of(0, Math.min(Math.max(limit, 1), 200), Sort.by(Sort.Direction.DESC, "createdAt"));
-        List<PaymentResponse> result = StreamSupport.stream((query == null || query.isBlank()
-                ? paymentRepository.findAll(pageable)
-                : paymentRepository.findByIdContainingIgnoreCaseOrSubscriptionIdContainingIgnoreCaseOrProviderCheckoutIdContainingIgnoreCase(query, query, query, pageable)).spliterator(), false).map(value -> PaymentResponse.builder()
-                .id(value.getId()).subscriptionId(value.getSubscriptionId()).provider(value.getProvider()).status(value.getStatus())
-                .amount(value.getAmount()).currency(value.getCurrency()).checkoutUrl(value.getCheckoutUrl()).createdAt(value.getCreatedAt())
-                .accountId(value.getAccount() != null ? value.getAccount().getId() : null)
-                .accountName(value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null)
-                .build()).toList();
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return ResponseEntity.ok(ApiResponse.success(subscriptionService.getPayments(limit, query)));
     }
 
     @GetMapping("/webhooks")
