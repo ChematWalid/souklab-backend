@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -66,7 +67,7 @@ public interface FormationEnrollmentRepository extends JpaRepository<FormationEn
      * @param status the enrollment status to filter by
      * @return list of matching enrollments
      */
-    java.util.List<FormationEnrollment> findByFormationIdAndStatus(String formationId, EnrollmentStatus status);
+    List<FormationEnrollment> findByFormationIdAndStatus(String formationId, EnrollmentStatus status);
 
     /**
      * Retrieves paginated active enrollments for a given artisan, excluding soft-deleted records.

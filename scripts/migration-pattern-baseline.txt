@@ -16,3 +16,4 @@ src/main/resources/db/migration/V15__admin_catalog_permission.sql
 src/main/resources/db/migration/V16__client_favorites.sql
 src/main/resources/db/migration/V18__feed_notification_types.sql
 src/main/resources/db/migration/V21__audit_log_delete_account.sql
+src/main/resources/db/migration/V23__formation_cancelled_notification_type.sql

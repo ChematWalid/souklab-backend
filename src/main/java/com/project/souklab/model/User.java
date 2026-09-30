@@ -27,6 +27,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyVa
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Entity
@@ -148,7 +149,7 @@ public class User extends BaseEntity {
         }
         if (fn != null && !fn.isBlank()) return fn;
         String id = getId() == null ? "00000" : getId().replace("-", "");
-        return "Member #" + id.substring(Math.max(0, id.length() - 5)).toUpperCase(java.util.Locale.ROOT);
+        return "Member #" + id.substring(Math.max(0, id.length() - 5)).toUpperCase(Locale.ROOT);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.project.souklab.security;
 
 import com.project.souklab.dto.auth.JwtResponseDTO;
 import com.project.souklab.dto.common.ApiResponse;
+import com.project.souklab.exception.AppException;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.service.auth.AuthService;
 import com.project.souklab.util.ServletResponseUtil;
@@ -64,7 +65,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         JwtResponseDTO jwtResponse;
         try {
             jwtResponse = authService.processOAuth2Success(oAuth2User, intentRole, request);
-        } catch (com.project.souklab.exception.AppException exception) {
+        } catch (AppException exception) {
             log.warn("OAuth2 process refused/failed: {}", exception.getMessage());
             clearIntentCookie(request, response);
             String errorCode = exception.getErrorCode() != null ? exception.getErrorCode() : "AUTH_FAILED";

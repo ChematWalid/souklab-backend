@@ -12,6 +12,9 @@ import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.FormationEnrollmentRepository;
 import com.project.souklab.dao.FormationFileRepository;
 import com.project.souklab.dao.FormationRepository;
+import com.project.souklab.dao.specification.FormationSpecifications;
+import com.project.souklab.model.User;
+import org.springframework.data.jpa.domain.Specification;
 import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
 import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
 import com.project.souklab.dto.formation.FormationPublicViewDTO;
@@ -90,8 +93,8 @@ public class FormationEnrollmentService {
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT))
                 : PageRequest.of(DEFAULT_PAGE_NUMBER, appProperties.getFormation().getPagination().getDefaultPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT));
 
-        org.springframework.data.jpa.domain.Specification<Formation> spec =
-                com.project.souklab.dao.specification.FormationSpecifications.filterCatalog(trade, region, online);
+        Specification<Formation> spec =
+                FormationSpecifications.filterCatalog(trade, region, online);
         Page<Formation> formations = formationRepository.findAll(spec, effectivePageable);
 
         return formations.map(formation -> {
@@ -264,7 +267,7 @@ public class FormationEnrollmentService {
 
     /**
      * Returns a paginated participant roster for the authenticated formation author.
-     * Participant names use {@link com.project.souklab.model.User#getPublicDisplayName()} to avoid PII exposure.
+     * Participant names use {@link User#getPublicDisplayName()} to avoid PII exposure.
      *
      * @param formationId unique identifier of the formation
      * @param pageable pagination parameters
