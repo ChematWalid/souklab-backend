@@ -114,6 +114,14 @@ public class SubscriptionCheckoutService {
                 || (plan.getSubscriberType() == SubscriberType.CLIENT && user.getClient() == null)) {
             throw new BadRequestException("The authenticated account does not have the selected subscriber profile");
         }
+        boolean hasBlockingSubscription = plan.getSubscriberType() == SubscriberType.ARTISAN
+                ? artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
+                        || artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.PENDING) > 0
+                : clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
+                        || clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.PENDING) > 0;
+        if (hasBlockingSubscription) {
+            throw new BadRequestException("A subscription is already active or a payment is already pending");
+        }
         String snapshot = snapshot(plan);
         String subscriptionId = createSubscription(user, plan, snapshot);
         Payment payment = new Payment();

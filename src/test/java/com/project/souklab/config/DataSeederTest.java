@@ -34,6 +34,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.InOrder;
+import static org.mockito.Mockito.inOrder;
 
 @ExtendWith(MockitoExtension.class)
 class DataSeederTest {
@@ -123,5 +125,18 @@ class DataSeederTest {
         dataSeeder.run();
 
         verify(userRepository).save(any());
+    }
+
+    @Test
+    void clearsArtisanTechniqueLinksBeforeDeletingStaleTeqniques() {
+        lenient().when(techniqueRepository.existsBySlug("pise")).thenReturn(false);
+        lenient().when(techniqueRepository.count()).thenReturn(3L);
+        when(userRepository.existsByEmail("admin@example.com")).thenReturn(true);
+
+        dataSeeder.run();
+
+        InOrder order = inOrder(techniqueRepository);
+        order.verify(techniqueRepository).deleteAllArtisanLinks();
+        order.verify(techniqueRepository).deleteAll();
     }
 }

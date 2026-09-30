@@ -2,6 +2,7 @@ package com.project.souklab.dao;
 
 import com.project.souklab.model.Technique;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -63,4 +64,13 @@ public interface TechniqueRepository extends JpaRepository<Technique, String> {
      */
     @Query(value = "SELECT COUNT(*) FROM artisan_techniques WHERE technique_id = :techniqueId", nativeQuery = true)
     int countArtisanReferences(@Param("techniqueId") String techniqueId);
+
+    /**
+     * Deletes all rows from the {@code artisan_techniques} join table.
+     * Must be called before {@link #deleteAll()} to avoid a foreign-key violation
+     * when an artisan still references a stale technique (e.g. during DataSeeder re-seed).
+     */
+    @Modifying
+    @Query(value = "DELETE FROM artisan_techniques", nativeQuery = true)
+    void deleteAllArtisanLinks();
 }

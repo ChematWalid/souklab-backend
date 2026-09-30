@@ -10,6 +10,7 @@ import com.project.souklab.model.PaymentWebhookLog;
 import com.project.souklab.model.Payment;
 import com.project.souklab.model.PaymentStatus;
 import com.project.souklab.model.SubscriptionStatus;
+import com.project.souklab.model.ArtisanSubscription;
 import com.project.souklab.model.ClientSubscription;
 import com.project.souklab.model.WebhookProcessingStatus;
 import com.project.souklab.model.User;
@@ -145,6 +146,53 @@ class ChargilyWebhookServiceTest {
 
         verify(claimService, never()).acquireProcessing(any(), any());
         verifyNoInteractions(paymentRepository);
+    }
+
+    @Test
+    void skipsActivationAndCancelsDuplicateWhenActiveSubscriptionAlreadyExists() throws Exception {
+        ArtisanSubscriptionRepository artisanRepo = mock(ArtisanSubscriptionRepository.class);
+
+        AppProperties properties = new AppProperties();
+        properties.getChargily().setSecretKey(new String(secret, StandardCharsets.UTF_8));
+        properties.getChargily().setWebhookEncryptionKey(Base64.getEncoder().encodeToString(new byte[32]));
+        properties.getSubscription().setWebhookRetention(Duration.ofDays(90));
+        properties.getSubscription().setLifecycleInterval(Duration.ofHours(1));
+        Clock clock = Clock.fixed(Instant.parse("2026-09-18T00:00:00Z"), ZoneOffset.UTC);
+
+        SubscriptionPlanRules rules = mock(SubscriptionPlanRules.class);
+        ChargilyWebhookService svc = new ChargilyWebhookService(
+                new ObjectMapper(), new WebhookSecurityService(properties), logRepository,
+                paymentRepository, artisanRepo, mock(ClientSubscriptionRepository.class),
+                rules, mock(NotificationService.class), claimService, properties, clock,
+                auditLogService);
+
+        byte[] body = ("{\"id\":\"evt-6\",\"type\":\"checkout.paid\",\"created_at\":"
+                + Instant.parse("2026-09-17T23:00:00Z").getEpochSecond()
+                + ",\"data\":{\"id\":\"checkout-6\"}}").getBytes(StandardCharsets.UTF_8);
+        PaymentWebhookLog webhookLog = new PaymentWebhookLog();
+        webhookLog.setStatus(WebhookProcessingStatus.RECEIVED);
+
+        Payment payment = new Payment();
+        payment.setSubscriptionId("sub-6");
+        User account = new User();
+        account.setId("account-6");
+        payment.setAccount(account);
+
+        ArtisanSubscription subscription = new ArtisanSubscription();
+        subscription.setStatus(SubscriptionStatus.PENDING);
+        subscription.setAccount(account);
+
+        when(claimService.claim("evt-6", ChargilyWebhookEvent.Checkout.PAID, "checkout-6", body)).thenReturn(true);
+        when(claimService.acquireProcessing(any(), any())).thenReturn(true);
+        when(logRepository.findByProviderEventId("evt-6")).thenReturn(Optional.of(webhookLog));
+        when(paymentRepository.findByProviderCheckoutId("checkout-6")).thenReturn(Optional.of(payment));
+        when(artisanRepo.findWithLockById("sub-6")).thenReturn(Optional.of(subscription));
+        when(artisanRepo.countByAccountIdAndStatus("account-6", SubscriptionStatus.ACTIVE)).thenReturn(1L);
+
+        svc.process(body, signature(body));
+
+        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELED);
+        verify(rules).requireTransition(SubscriptionStatus.PENDING, SubscriptionStatus.CANCELED);
     }
 
     private String signature(byte[] body) throws Exception {

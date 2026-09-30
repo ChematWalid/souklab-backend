@@ -10,13 +10,18 @@ import com.project.souklab.dao.UserRepository;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.dto.subscription.SubscriptionCheckoutRequest;
 import com.project.souklab.integration.chargily.ChargilyCheckoutClient;
+import com.project.souklab.model.Artisan;
 import com.project.souklab.model.Payment;
+import com.project.souklab.model.SubscriberType;
+import com.project.souklab.model.SubscriptionPlan;
+import com.project.souklab.model.SubscriptionStatus;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.user.CurrentUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -75,5 +80,52 @@ class SubscriptionCheckoutServiceTest {
         assertThatThrownBy(() -> service.checkout(request, "key-1"))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("another plan");
+    }
+
+    @Test
+    void refusesCheckoutWhenActivePendingOrActiveSubscriptionExists() {
+        ArtisanSubscriptionRepository artisanRepo = mock(ArtisanSubscriptionRepository.class);
+        ClientSubscriptionRepository clientRepo = mock(ClientSubscriptionRepository.class);
+        SubscriptionPlanRepository planRepo = mock(SubscriptionPlanRepository.class);
+        AppProperties props = new AppProperties();
+        props.getChargily().setEnabled(true);
+
+        SubscriptionCheckoutService svc = new SubscriptionCheckoutService(
+                currentUserProvider, planRepo, artisanRepo, clientRepo,
+                paymentRepository, mock(ChargilyCheckoutClient.class),
+                mock(SubscriptionPlanRules.class), props, new ObjectMapper(),
+                mock(NotificationService.class), userRepository);
+
+        User user = new User();
+        user.setId("account-2");
+        Artisan artisan = new Artisan();
+        user.setArtisan(artisan);
+
+        SubscriptionPlan plan = new SubscriptionPlan();
+        plan.setId("plan-artisan");
+        plan.setSubscriberType(SubscriberType.ARTISAN);
+        plan.setActive(true);
+        plan.setAmount(1000L);
+        plan.setCurrency("DZD");
+        plan.setEntitlements(List.of());
+
+        when(currentUserProvider.requireCurrentUser()).thenReturn(user);
+        when(userRepository.findWithLockById("account-2")).thenReturn(Optional.of(user));
+        when(paymentRepository.findByAccountIdAndIdempotencyKey("account-2", "key-2")).thenReturn(Optional.empty());
+        when(planRepo.findById("plan-artisan")).thenReturn(Optional.of(plan));
+
+        when(artisanRepo.countByAccountIdAndStatus("account-2", SubscriptionStatus.ACTIVE)).thenReturn(1L);
+        when(artisanRepo.countByAccountIdAndStatus("account-2", SubscriptionStatus.PENDING)).thenReturn(0L);
+        SubscriptionCheckoutRequest req = new SubscriptionCheckoutRequest();
+        req.setPlanId("plan-artisan");
+        assertThatThrownBy(() -> svc.checkout(req, "key-2"))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("already active or a payment is already pending");
+
+        when(artisanRepo.countByAccountIdAndStatus("account-2", SubscriptionStatus.ACTIVE)).thenReturn(0L);
+        when(artisanRepo.countByAccountIdAndStatus("account-2", SubscriptionStatus.PENDING)).thenReturn(1L);
+        assertThatThrownBy(() -> svc.checkout(req, "key-2"))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("already active or a payment is already pending");
     }
 }

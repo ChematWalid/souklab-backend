@@ -203,12 +203,30 @@ public class ChargilyWebhookService {
     private void activateSubscription(Payment payment) {
         LocalDateTime startsAt = LocalDateTime.now(clock);
         artisanSubscriptionRepository.findWithLockById(payment.getSubscriptionId()).ifPresent(subscription -> {
+            long activeCount = artisanSubscriptionRepository.countByAccountIdAndStatus(
+                    subscription.getAccount().getId(), SubscriptionStatus.ACTIVE);
+            if (activeCount > 0) {
+                log.warn("Skipping artisan subscription activation: account {} already has an active subscription; "
+                        + "cancelling duplicate pending subscription={}", subscription.getAccount().getId(), subscription.getId());
+                rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
+                subscription.setStatus(SubscriptionStatus.CANCELED);
+                return;
+            }
             activate(subscription, startsAt);
             if (subscription.getAccount().getArtisan() != null) {
                 subscription.getAccount().getArtisan().setPremium(true);
             }
         });
         clientSubscriptionRepository.findWithLockById(payment.getSubscriptionId()).ifPresent(subscription -> {
+            long activeCount = clientSubscriptionRepository.countByAccountIdAndStatus(
+                    subscription.getAccount().getId(), SubscriptionStatus.ACTIVE);
+            if (activeCount > 0) {
+                log.warn("Skipping client subscription activation: account {} already has an active subscription; "
+                        + "cancelling duplicate pending subscription={}", subscription.getAccount().getId(), subscription.getId());
+                rules.requireTransition(subscription.getStatus(), SubscriptionStatus.CANCELED);
+                subscription.setStatus(SubscriptionStatus.CANCELED);
+                return;
+            }
             activate(subscription, startsAt);
             if (subscription.getAccount().getClient() != null) {
                 subscription.getAccount().getClient().setPremium(true);

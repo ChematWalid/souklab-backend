@@ -641,6 +641,7 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         if (techniqueRepository.count() > 0) {
+            techniqueRepository.deleteAllArtisanLinks();
             techniqueRepository.deleteAll();
         }
 
