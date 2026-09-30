@@ -39,6 +39,7 @@ import com.project.souklab.util.SlugUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -941,5 +942,108 @@ public class AdminCatalogService {
             m.setDisplayOrder(materialRepository.findMaxDisplayOrderByFamilyId(family.getId()) + 1);
         }
         m.setActive(req.getIsActive() != null ? req.getIsActive() : (!isPatch || m.isActive()));
+    }
+
+    // ─── Admin GET Taxonomies (including inactive) ──────────────────────────
+
+    /**
+     * Retrieves all craft techniques ordered by display weight, including inactive ones.
+     */
+    @Transactional(readOnly = true)
+    public List<TechniqueDTO> getAllTechniques() {
+        return techniqueRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"))
+                .stream()
+                .map(TechniqueDTO::from)
+                .toList();
+    }
+
+    /**
+     * Retrieves all historical epochs ordered by display weight, including inactive ones.
+     */
+    @Transactional(readOnly = true)
+    public List<EpoqueDTO> getAllEpoques() {
+        return epoqueRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"))
+                .stream()
+                .map(EpoqueDTO::from)
+                .toList();
+    }
+
+    /**
+     * Retrieves all administrative regions ordered by display weight, including inactive ones.
+     * Wilayas contain all child Communes (active and inactive).
+     */
+    @Transactional(readOnly = true)
+    public List<RegionDTO> getAllRegions() {
+        return regionRepository.findByParentIsNullOrderByDisplayOrderAsc()
+                .stream()
+                .map(wilaya -> {
+                    List<RegionDTO> childCommunes = regionRepository
+                            .findByParentIdOrderByDisplayOrderAsc(wilaya.getId())
+                            .stream()
+                            .map(RegionDTO::from)
+                            .toList();
+                    return RegionDTO.from(wilaya, childCommunes);
+                })
+                .toList();
+    }
+
+    /**
+     * Retrieves all craft categories ordered by display weight, including inactive ones.
+     * Categories contain all child subcategories (active and inactive).
+     */
+    @Transactional(readOnly = true)
+    public List<JobCategoryDTO> getAllCategories() {
+        return jobCategoryRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"))
+                .stream()
+                .map(category -> {
+                    List<JobSubCategoryDTO> subCategories = jobSubCategoryRepository
+                            .findByCategoryIdOrderByDisplayOrderAsc(category.getId())
+                            .stream()
+                            .map(JobSubCategoryDTO::from)
+                            .toList();
+                    return JobCategoryDTO.from(category, subCategories);
+                })
+                .toList();
+    }
+
+    /**
+     * Retrieves all craft subcategories ordered by display weight, including inactive ones.
+     */
+    @Transactional(readOnly = true)
+    public List<JobSubCategoryDTO> getAllSubCategories() {
+        return jobSubCategoryRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"))
+                .stream()
+                .map(JobSubCategoryDTO::from)
+                .toList();
+    }
+
+    /**
+     * Retrieves all material families ordered by display weight, including inactive ones.
+     * Families contain all child materials (active and inactive).
+     */
+    @Transactional(readOnly = true)
+    public List<MaterialFamilyDTO> getAllMaterialFamilies() {
+        return materialFamilyRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"))
+                .stream()
+                .map(family -> {
+                    List<MaterialDTO> materials = materialRepository
+                            .findByFamilyIdOrderByDisplayOrderAsc(family.getId())
+                            .stream()
+                            .map(MaterialDTO::from)
+                            .toList();
+                    return MaterialFamilyDTO.from(family, materials);
+                })
+                .toList();
+    }
+
+    /**
+     * Retrieves all crafting materials ordered by display weight, including inactive ones.
+     */
+    @Transactional(readOnly = true)
+    public List<MaterialDTO> getAllMaterials() {
+        return materialRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"))
+                .stream()
+                .map(MaterialDTO::from)
+                .toList();
     }
 }

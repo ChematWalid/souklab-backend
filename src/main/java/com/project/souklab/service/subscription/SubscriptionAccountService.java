@@ -116,12 +116,18 @@ public class SubscriptionAccountService {
     }
 
     private SubscriptionResponse toResponse(ArtisanSubscription value) {
-        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.ARTISAN).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).build();
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.ARTISAN).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
     }
     private SubscriptionResponse toResponse(ClientSubscription value) {
-        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.CLIENT).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).build();
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.CLIENT).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
     }
     private PaymentResponse toResponse(Payment value) {
-        return PaymentResponse.builder().id(value.getId()).subscriptionId(value.getSubscriptionId()).provider(value.getProvider()).status(value.getStatus()).amount(value.getAmount()).currency(value.getCurrency()).checkoutUrl(value.getCheckoutUrl()).createdAt(value.getCreatedAt()).build();
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return PaymentResponse.builder().id(value.getId()).subscriptionId(value.getSubscriptionId()).provider(value.getProvider()).status(value.getStatus()).amount(value.getAmount()).currency(value.getCurrency()).checkoutUrl(value.getCheckoutUrl()).createdAt(value.getCreatedAt()).accountId(accountId).accountName(accountName).build();
     }
 }

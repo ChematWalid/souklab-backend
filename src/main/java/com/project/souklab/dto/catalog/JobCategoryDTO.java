@@ -21,6 +21,7 @@ public class JobCategoryDTO {
     String description;
     String iconUrl;
     int displayOrder;
+    boolean isActive;
     List<JobSubCategoryDTO> subCategories;
 
     /**
@@ -41,6 +42,7 @@ public class JobCategoryDTO {
             .description(entity.getDescription())
             .iconUrl(entity.getIconUrl())
             .displayOrder(entity.getDisplayOrder())
+            .isActive(entity.isActive())
             .subCategories(subCategories != null ? subCategories : Collections.emptyList())
             .build();
     }

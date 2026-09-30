@@ -72,6 +72,7 @@ class DataSeederTest {
         lenient().when(materialFamilyRepository.count()).thenReturn(1L);
         lenient().when(epoqueRepository.count()).thenReturn(1L);
         lenient().when(techniqueRepository.count()).thenReturn(1L);
+        lenient().when(techniqueRepository.existsBySlug("pise")).thenReturn(true);
     }
 
     @Test

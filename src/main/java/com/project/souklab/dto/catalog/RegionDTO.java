@@ -20,6 +20,7 @@ public class RegionDTO {
     String slug;
     String code;
     int displayOrder;
+    boolean isActive;
     List<RegionDTO> children;
 
     /**
@@ -39,6 +40,7 @@ public class RegionDTO {
             .slug(entity.getSlug())
             .code(entity.getCode())
             .displayOrder(entity.getDisplayOrder())
+            .isActive(entity.isActive())
             .children(children != null ? children : Collections.emptyList())
             .build();
     }

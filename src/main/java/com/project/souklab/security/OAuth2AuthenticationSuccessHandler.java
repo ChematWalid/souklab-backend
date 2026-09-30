@@ -61,7 +61,25 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String intentRole = extractIntentRole(request);
 
-        JwtResponseDTO jwtResponse = authService.processOAuth2Success(oAuth2User, intentRole, request);
+        JwtResponseDTO jwtResponse;
+        try {
+            jwtResponse = authService.processOAuth2Success(oAuth2User, intentRole, request);
+        } catch (com.project.souklab.exception.AppException exception) {
+            log.warn("OAuth2 process refused/failed: {}", exception.getMessage());
+            clearIntentCookie(request, response);
+            String errorCode = exception.getErrorCode() != null ? exception.getErrorCode() : "AUTH_FAILED";
+            String callback = appProperties.getOauth().getGoogle().getAuthorizedRedirectUri();
+            response.sendRedirect(UriComponentsBuilder.fromUriString(callback)
+                    .queryParam("error", errorCode).build().toUriString());
+            return;
+        } catch (Exception exception) {
+            log.error("OAuth2 authentication unexpected error", exception);
+            clearIntentCookie(request, response);
+            String callback = appProperties.getOauth().getGoogle().getAuthorizedRedirectUri();
+            response.sendRedirect(UriComponentsBuilder.fromUriString(callback)
+                    .queryParam("error", "AUTH_FAILED").build().toUriString());
+            return;
+        }
 
         clearIntentCookie(request, response);
 

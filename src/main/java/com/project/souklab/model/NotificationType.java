@@ -14,7 +14,7 @@ public final class NotificationType {
     public static List<Key> all() {
         return List.of(
                 Account.VALIDATED, Account.REJECTED, Account.SUSPENDED, Account.REINSTATED,
-                Formation.APPROVED, Formation.REJECTED, Formation.NEW,
+                Formation.APPROVED, Formation.REJECTED, Formation.NEW, Formation.CANCELLED,
                 Message.NEW, Subscription.RENEWED, Subscription.EXPIRED,
                 Subscription.Renewal.REMINDER, Subscription.Grant.MANUAL, Subscription.REVOKED,
                 Payment.SUCCESS, Payment.FAILED, Checkout.CREATED, Checkout.CANCELED,
@@ -41,7 +41,8 @@ public final class NotificationType {
     }
 
     public enum Formation implements Key {
-        APPROVED("FORMATION_APPROVED"), REJECTED("FORMATION_REJECTED"), NEW("NEW_FORMATION");
+        APPROVED("FORMATION_APPROVED"), REJECTED("FORMATION_REJECTED"), NEW("NEW_FORMATION"),
+        CANCELLED("FORMATION_CANCELLED");
         private final String value;
         Formation(String value) { this.value = value; }
         public String value() { return value; }

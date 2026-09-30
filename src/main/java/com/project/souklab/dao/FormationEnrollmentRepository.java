@@ -60,6 +60,15 @@ public interface FormationEnrollmentRepository extends JpaRepository<FormationEn
     long countByFormationIdAndStatus(String formationId, EnrollmentStatus status);
 
     /**
+     * Retrieves all enrollments for a formation matching a specific status.
+     *
+     * @param formationId the unique identifier of the formation
+     * @param status the enrollment status to filter by
+     * @return list of matching enrollments
+     */
+    java.util.List<FormationEnrollment> findByFormationIdAndStatus(String formationId, EnrollmentStatus status);
+
+    /**
      * Retrieves paginated active enrollments for a given artisan, excluding soft-deleted records.
      *
      * @param artisanId the unique identifier of the artisan
@@ -67,4 +76,14 @@ public interface FormationEnrollmentRepository extends JpaRepository<FormationEn
      * @return page of artisan enrollments
      */
     Page<FormationEnrollment> findByArtisanIdAndDeletedAtIsNull(String artisanId, Pageable pageable);
+
+    /**
+     * Retrieves paginated enrollments for a given formation, excluding soft-deleted records.
+     * Used by the formation author to view the participant roster.
+     *
+     * @param formationId the unique identifier of the formation
+     * @param pageable pagination and sorting parameters
+     * @return page of enrollments for the formation
+     */
+    Page<FormationEnrollment> findByFormationIdAndDeletedAtIsNull(String formationId, Pageable pageable);
 }

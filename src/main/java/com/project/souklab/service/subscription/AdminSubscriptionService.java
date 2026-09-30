@@ -19,6 +19,7 @@ import com.project.souklab.dto.subscription.SubscriptionStateCorrectionRequest;
 import com.project.souklab.dto.subscription.ManualSubscriptionGrantRequest;
 import com.project.souklab.dto.subscription.SubscriptionPlanSnapshot;
 import com.project.souklab.dto.subscription.SubscriptionResponse;
+import com.project.souklab.dto.subscription.PaymentResponse;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.ArtisanSubscription;
@@ -39,6 +40,7 @@ import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.user.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +52,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -289,8 +292,18 @@ public class AdminSubscriptionService {
         try { return objectMapper.writeValueAsString(SubscriptionPlanSnapshot.builder().planId(plan.getId()).name(plan.getName()).subscriberType(plan.getSubscriberType()).billingPeriod(plan.getBillingPeriod()).amount(plan.getAmount()).currency(plan.getCurrency()).entitlements(entitlements).build()); }
         catch (JsonProcessingException exception) { throw new IllegalStateException("Unable to snapshot plan", exception); }
     }
-    private SubscriptionResponse toResponse(ArtisanSubscription value, SubscriberType type) { return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).build(); }
-    private SubscriptionResponse toResponse(ClientSubscription value, SubscriberType type) { return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).build(); }
+    private SubscriptionResponse toResponse(ArtisanSubscription value, SubscriberType type) {
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+    }
+    private SubscriptionResponse toResponse(ClientSubscription value, SubscriberType type) {
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+    }
+
+    @Transactional(readOnly = true)
     public List<SubscriptionResponse> all(int limit, String query) {
         List<SubscriptionResponse> result = new ArrayList<>();
         artisanSubscriptions.findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
@@ -303,6 +316,34 @@ public class AdminSubscriptionService {
                         || value.getPlanName().toLowerCase().contains(normalized)
                         || value.getStatus().value().toLowerCase().contains(normalized))
                 .sorted(Comparator.comparing(SubscriptionResponse::getStartsAt, Comparator.nullsLast(Comparator.reverseOrder()))).limit(limit).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getPayments(int limit, String query) {
+        Pageable pageable = PageRequest.of(0, Math.min(Math.max(limit, 1), 200), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Iterable<Payment> iterable = (query == null || query.isBlank())
+                ? payments.findAll(pageable)
+                : payments.findByIdContainingIgnoreCaseOrSubscriptionIdContainingIgnoreCaseOrProviderCheckoutIdContainingIgnoreCase(query, query, query, pageable);
+        return StreamSupport.stream(iterable.spliterator(), false)
+                .map(this::toPaymentResponse)
+                .toList();
+    }
+
+    private PaymentResponse toPaymentResponse(Payment value) {
+        String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
+        String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
+        return PaymentResponse.builder()
+                .id(value.getId())
+                .subscriptionId(value.getSubscriptionId())
+                .provider(value.getProvider())
+                .status(value.getStatus())
+                .amount(value.getAmount())
+                .currency(value.getCurrency())
+                .checkoutUrl(value.getCheckoutUrl())
+                .createdAt(value.getCreatedAt())
+                .accountId(accountId)
+                .accountName(accountName)
+                .build();
     }
 
     @Transactional(readOnly = true)

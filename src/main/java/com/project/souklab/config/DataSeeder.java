@@ -636,57 +636,61 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedTechniques() {
-        if (techniqueRepository.count() > 0) {
+        if (techniqueRepository.existsBySlug("pise")) {
             return;
+        }
+
+        if (techniqueRepository.count() > 0) {
+            techniqueRepository.deleteAll();
         }
 
         List<Technique> techniques = List.of(
             Technique.builder()
-                .name("Filigrane d'argent")
-                .slug("filigrane-d-argent")
-                .description("Assemblage méticuleux de fils d'argent torsadés et soudés formant des arabesques aériennes et des bijoux d'orfèvrerie.")
+                .name("Pisé")
+                .slug("pise")
+                .description("Technique de construction traditionnelle en terre crue compactée dans des coffrages, offrant une forte inertie thermique.")
                 .displayOrder(1)
                 .isActive(true)
                 .build(),
             Technique.builder()
-                .name("Ciselure au repoussé")
-                .slug("ciselure-au-repousse")
-                .description("Travail du cuivre et de l'argent par martelage et frappe sur envers et endroit pour créer des motifs en relief saisissants.")
+                .name("Enduit à la chaux")
+                .slug("enduit-a-la-chaux")
+                .description("Application d'enduits respirants à base de chaux aérienne ou hydraulique pour la protection et la finition des maçonneries anciennes.")
                 .displayOrder(2)
                 .isActive(true)
                 .build(),
             Technique.builder()
-                .name("Émaillage cloisonné")
-                .slug("emaillage-cloisonne")
-                .description("Incrustation de poudres d'émaux minéraux vitrifiés au four dans de fines loges métalliques d'argent.")
+                .name("Taille de pierre")
+                .slug("taille-de-pierre")
+                .description("Façonnage et appareillage de blocs de pierre naturelle pour la construction d'ouvrages porteurs ou la restauration de modénatures.")
                 .displayOrder(3)
                 .isActive(true)
                 .build(),
             Technique.builder()
-                .name("Tissage de haute lisse")
-                .slug("tissage-de-haute-lisse")
-                .description("Nouage et tissage manuel sur métier vertical traditionnel pour la confection de tapis d'apparat en pure laine.")
+                .name("Maçonnerie en moellons")
+                .slug("maconnerie-en-moellons")
+                .description("Montage de murs en pierres brutes ou équarries liées au mortier traditionnel, assurant solidité et intégration paysagère.")
                 .displayOrder(4)
                 .isActive(true)
                 .build(),
             Technique.builder()
-                .name("Broderie au Majboud & Fetla")
-                .slug("broderie-au-majboud-fetla")
-                .description("Broderie précieuse au fil d'or et d'argent couché sur velours de soie pour costumes de fête et harnachements.")
+                .name("Zellij")
+                .slug("zellij")
+                .description("Art décoratif de mosaïque géométrique en terre cuite émaillée, découpée et assemblée manuellement selon des motifs traditionnels.")
                 .displayOrder(5)
                 .isActive(true)
                 .build(),
             Technique.builder()
-                .name("Tournage sur bois")
-                .slug("tournage-sur-bois")
-                .description("Façonnage mécanique et manuel du bois en rotation pour concevoir des pièces rondes, balustres et claustras moucharabieh.")
+                .name("Géjij (plâtre sculpté)")
+                .slug("gejij-platre-sculpte")
+                .description("Sculpture ornementale et ciselure manuelle sur plâtre traditionnel frais pour les frises, arcs, coupoles et plafonds décorés.")
                 .displayOrder(6)
                 .isActive(true)
                 .build(),
             Technique.builder()
-                .name("Tannage végétal")
-                .slug("tannage-vegetal")
-                .description("Procédé écologique de traitement des peaux brutes au moyen d'écorces et de tanins végétaux préservant la souplesse du cuir.")
+                .name("Charpente traditionnelle")
+                .slug("charpente-traditionnelle")
+                .description("Conception, assemblage à tenons et mortaises et pose de structures porteuses en bois massif pour toitures et planchers.")
                 .displayOrder(7)
                 .isActive(true)
                 .build()

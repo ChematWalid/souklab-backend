@@ -15,6 +15,7 @@ import com.project.souklab.dao.FormationRepository;
 import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
 import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
 import com.project.souklab.dto.formation.FormationPublicViewDTO;
+import com.project.souklab.dto.formation.FormationEnrollmentSummaryDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
@@ -72,25 +73,42 @@ public class FormationEnrollmentService {
 
 
     /**
-     * Retrieves paginated published masterclasses for peer artisan catalog discovery.
+     * Retrieves paginated published masterclasses for peer artisan catalog discovery with optional trade,
+     * region, and delivery mode filters.
      *
+     * @param trade trade or craft category filter
+     * @param region region or wilaya code/slug filter
+     * @param online delivery mode filter
      * @param pageable pagination and sorting parameters
      * @return page of formation summary cards
      */
     @Transactional(readOnly = true)
-    public Page<FormationSummaryDTO> getPublishedCatalog(Pageable pageable) {
+    public Page<FormationSummaryDTO> getPublishedCatalog(String trade, String region, Boolean online, Pageable pageable) {
         Pageable effectivePageable = (pageable != null && pageable.getSort().isSorted())
                 ? pageable
                 : (pageable != null)
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT))
                 : PageRequest.of(DEFAULT_PAGE_NUMBER, appProperties.getFormation().getPagination().getDefaultPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT));
 
-        Page<Formation> formations = formationRepository.findByStatusAndDeletedAtIsNull(FormationStatus.PUBLISHED, effectivePageable);
+        org.springframework.data.jpa.domain.Specification<Formation> spec =
+                com.project.souklab.dao.specification.FormationSpecifications.filterCatalog(trade, region, online);
+        Page<Formation> formations = formationRepository.findAll(spec, effectivePageable);
 
         return formations.map(formation -> {
             long activeEnrollments = formationEnrollmentRepository.countByFormationIdAndStatus(formation.getId(), EnrollmentStatus.CONFIRMED);
             return FormationSummaryDTO.from(formation, activeEnrollments);
         });
+    }
+
+    /**
+     * Retrieves paginated published masterclasses for peer artisan catalog discovery without filters.
+     *
+     * @param pageable pagination and sorting parameters
+     * @return page of formation summary cards
+     */
+    @Transactional(readOnly = true)
+    public Page<FormationSummaryDTO> getPublishedCatalog(Pageable pageable) {
+        return getPublishedCatalog(null, null, null, pageable);
     }
 
     /**
@@ -217,7 +235,8 @@ public class FormationEnrollmentService {
         return FormationEnrollmentResponseDTO.from(saved);
     }
 
-    /** Records attendance for one confirmed participant; only the formation author may do so. */
+    /** Records attendance for one participant; only the formation author may do so.
+     * Allowed transitions: CONFIRMED → ATTENDED, CONFIRMED → ABSENT, ATTENDED → ABSENT, ABSENT → ATTENDED. */
     @Transactional
     public FormationEnrollmentResponseDTO markAttendance(String formationId, String enrollmentId, EnrollmentStatus attendanceStatus) {
         Artisan author = resolveAuthenticatedArtisan();
@@ -231,13 +250,48 @@ public class FormationEnrollmentService {
                         && formationId.equals(candidate.getFormation().getId())
                         && candidate.getDeletedAt() == null)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found for formation."));
+        if (attendanceStatus != EnrollmentStatus.ATTENDED && attendanceStatus != EnrollmentStatus.ABSENT) {
+            throw new ConflictException("Attendance status must be ATTENDED or ABSENT.");
+        }
         if (enrollment.getStatus() != EnrollmentStatus.CONFIRMED
-                || (attendanceStatus != EnrollmentStatus.ATTENDED && attendanceStatus != EnrollmentStatus.ABSENT)) {
-            throw new ConflictException("Only confirmed enrollments can be marked ATTENDED or ABSENT.");
+                && enrollment.getStatus() != EnrollmentStatus.ATTENDED
+                && enrollment.getStatus() != EnrollmentStatus.ABSENT) {
+            throw new ConflictException("Only confirmed or already-marked enrollments can have attendance updated.");
         }
         enrollment.setStatus(attendanceStatus);
         return FormationEnrollmentResponseDTO.from(formationEnrollmentRepository.save(enrollment));
     }
+
+    /**
+     * Returns a paginated participant roster for the authenticated formation author.
+     * Participant names use {@link com.project.souklab.model.User#getPublicDisplayName()} to avoid PII exposure.
+     *
+     * @param formationId unique identifier of the formation
+     * @param pageable pagination parameters
+     * @return paginated list of enrollment summaries
+     */
+    @Transactional(readOnly = true)
+    public Page<FormationEnrollmentSummaryDTO> getEnrollmentsForAuthor(String formationId, Pageable pageable) {
+        Artisan author = resolveAuthenticatedArtisan();
+        Formation formation = formationRepository.findByIdAndDeletedAtIsNull(formationId)
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_FORMATION_NOT_FOUND_PREFIX + formationId));
+        if (formation.getAuthor() == null || !formation.getAuthor().getId().equals(author.getId())) {
+            throw new ForbiddenException("Only the formation author can view the participant roster.");
+        }
+        Pageable effectivePageable = (pageable != null && pageable.getSort().isSorted())
+                ? pageable
+                : (pageable != null)
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_ENROLLED_AT))
+                : PageRequest.of(DEFAULT_PAGE_NUMBER, appProperties.getFormation().getPagination().getDefaultPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_ENROLLED_AT));
+        return formationEnrollmentRepository.findByFormationIdAndDeletedAtIsNull(formationId, effectivePageable)
+                .map(enrollment -> new FormationEnrollmentSummaryDTO(
+                        enrollment.getId(),
+                        enrollment.getArtisan().getUser().getPublicDisplayName(),
+                        enrollment.getStatus(),
+                        enrollment.getEnrolledAt()
+                ));
+    }
+
 
     /**
      * Retrieves paginated active and past enrollment history for the authenticated artisan.
@@ -297,6 +351,18 @@ public class FormationEnrollmentService {
         }
 
         return storageService.load(file.getStorageKey());
+    }
+
+    /**
+     * Checks if the authenticated artisan is the author of the specified formation.
+     *
+     * @param formationId formation unique identifier
+     * @return true if the current authenticated artisan authored the formation, false otherwise
+     */
+    @Transactional(readOnly = true)
+    public boolean isAuthor(String formationId) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        return formationRepository.findByIdAndAuthorIdAndDeletedAtIsNull(formationId, artisan.getId()).isPresent();
     }
 
     /**

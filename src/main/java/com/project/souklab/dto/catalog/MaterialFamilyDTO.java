@@ -20,6 +20,7 @@ public class MaterialFamilyDTO {
     String slug;
     String description;
     int displayOrder;
+    boolean isActive;
     List<MaterialDTO> materials;
 
     /**
@@ -39,6 +40,7 @@ public class MaterialFamilyDTO {
             .slug(entity.getSlug())
             .description(entity.getDescription())
             .displayOrder(entity.getDisplayOrder())
+            .isActive(entity.isActive())
             .materials(materials != null ? materials : Collections.emptyList())
             .build();
     }

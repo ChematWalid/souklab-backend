@@ -29,8 +29,10 @@ import com.project.souklab.filestorage.lifecycle.StorageObjectLifecycle;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.Formation;
+import com.project.souklab.model.FormationEnrollment;
 import com.project.souklab.model.FormationFile;
 import com.project.souklab.model.FormationStatus;
+import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.service.notification.NotificationService;
 import org.junit.jupiter.api.AfterEach;
@@ -72,6 +74,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -954,6 +957,63 @@ import static org.mockito.Mockito.when;
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("db failure");
             verify(storageService).delete("compensate-key");
+        }
+
+        @Test
+        void cancelFormation_whenPublishedWithConfirmedEnrollments_cancelsAndNotifies() {
+            authenticateArtisan(teacherArtisan);
+            testFormation.setStatus(FormationStatus.PUBLISHED);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+            when(formationRepository.save(any(Formation.class)))
+                    .thenAnswer(inv -> inv.getArgument(0));
+
+            User participantUser = User.builder().email("participant@souklab.com").firstName("Karim").lastName("Artisan").build();
+            participantUser.setId("user-part-1");
+            Artisan participantArtisan = Artisan.builder().id("artisan-part-1").user(participantUser).build();
+            FormationEnrollment enrollment = FormationEnrollment.builder()
+                    .formation(testFormation)
+                    .artisan(participantArtisan)
+                    .status(EnrollmentStatus.CONFIRMED)
+                    .build();
+
+            when(formationEnrollmentRepository.findByFormationIdAndStatus(testFormation.getId(), EnrollmentStatus.CONFIRMED))
+                    .thenReturn(List.of(enrollment));
+
+            FormationResponseDTO result = formationService.cancelFormation(testFormation.getId());
+
+            assertThat(result.getStatus()).isEqualTo(FormationStatus.CANCELLED);
+            assertThat(enrollment.getStatus()).isEqualTo(EnrollmentStatus.CANCELLED);
+            verify(formationEnrollmentRepository).save(enrollment);
+            verify(notificationService).createForUser(
+                    eq(participantUser),
+                    anyString(),
+                    eq(NotificationType.Formation.CANCELLED),
+                    eq(testFormation.getId())
+            );
+        }
+
+        @Test
+        void cancelFormation_whenNotInCancellableState_throwsConflictException() {
+            authenticateArtisan(teacherArtisan);
+            testFormation.setStatus(FormationStatus.COMPLETED);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+
+            assertThatThrownBy(() -> formationService.cancelFormation(testFormation.getId()))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("Formation cannot be cancelled in its current status");
+        }
+
+        @Test
+        void cancelFormation_whenNotOwner_throwsForbiddenException() {
+            Artisan otherArtisan = Artisan.builder().id(OTHER_ARTISAN_ID).isTeacher(true).build();
+            authenticateArtisan(otherArtisan);
+            when(formationRepository.findByIdAndDeletedAtIsNull(testFormation.getId()))
+                    .thenReturn(Optional.of(testFormation));
+
+            assertThatThrownBy(() -> formationService.cancelFormation(testFormation.getId()))
+                    .isInstanceOf(ForbiddenException.class);
         }
     }
 }

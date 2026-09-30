@@ -35,9 +35,11 @@ import com.project.souklab.filestorage.validation.ValidatedFile;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.Formation;
+import com.project.souklab.model.FormationEnrollment;
 import com.project.souklab.model.FormationFile;
 import com.project.souklab.model.FormationReview;
 import com.project.souklab.model.FormationStatus;
+import com.project.souklab.model.NotificationType;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.util.ArtisanSecurityUtils;
 import com.project.souklab.security.Permission;
@@ -354,6 +356,51 @@ public class FormationService {
         }
         formation.setStatus(FormationStatus.COMPLETED);
         return mapToResponseDTO(formationRepository.save(formation));
+    }
+
+    /**
+     * Cancels an authored formation and bulk-cancels all confirmed enrollments with notification.
+     * Allowed when formation is in DRAFT, PENDING_REVIEW, APPROVED, or PUBLISHED state.
+     *
+     * @param id formation unique identifier
+     * @return updated formation response DTO
+     */
+    @Transactional
+    public FormationResponseDTO cancelFormation(String id) {
+        Artisan artisan = resolveAuthenticatedArtisan();
+        Formation formation = findFormationAndVerifyOwnership(id, artisan);
+
+        if (formation.getStatus() != FormationStatus.DRAFT
+                && formation.getStatus() != FormationStatus.PENDING_REVIEW
+                && formation.getStatus() != FormationStatus.APPROVED
+                && formation.getStatus() != FormationStatus.PUBLISHED) {
+            throw new ConflictException("Formation cannot be cancelled in its current status: " + formation.getStatus());
+        }
+
+        formation.setStatus(FormationStatus.CANCELLED);
+        Formation saved = formationRepository.save(formation);
+
+        List<FormationEnrollment> confirmedEnrollments = formationEnrollmentRepository
+                .findByFormationIdAndStatus(formation.getId(), EnrollmentStatus.CONFIRMED);
+
+        for (FormationEnrollment enrollment : confirmedEnrollments) {
+            enrollment.setStatus(EnrollmentStatus.CANCELLED);
+            formationEnrollmentRepository.save(enrollment);
+
+            if (enrollment.getArtisan() != null && enrollment.getArtisan().getUser() != null) {
+                String message = "The masterclass '" + formation.getTitle() + "' has been cancelled by the instructor.";
+                notificationService.createForUser(
+                        enrollment.getArtisan().getUser(),
+                        message,
+                        NotificationType.Formation.CANCELLED,
+                        formation.getId()
+                );
+            }
+        }
+
+        log.info("Formation '{}' cancelled by author '{}'. '{}' confirmed enrollments cancelled.",
+                formation.getId(), artisan.getId(), confirmedEnrollments.size());
+        return mapToResponseDTO(saved);
     }
 
     /** Completes published sessions whose scheduled end has elapsed. */

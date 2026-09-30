@@ -8,11 +8,13 @@ import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
 import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
 import com.project.souklab.dto.formation.FormationFileDescriptorDTO;
 import com.project.souklab.dto.formation.FormationPublicViewDTO;
+import com.project.souklab.dto.formation.FormationResponseDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.model.FormationStatus;
 import com.project.souklab.service.formation.FormationEnrollmentService;
+import com.project.souklab.service.formation.FormationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,6 +56,9 @@ class ArtisanFormationEnrollmentControllerTest {
     @MockitoBean
     private FormationEnrollmentService formationEnrollmentService;
 
+    @MockitoBean
+    private FormationService formationService;
+
     @Nested
     @DisplayName("Catalog Endpoints")
     class CatalogEndpointTests {
@@ -73,7 +78,7 @@ class ArtisanFormationEnrollmentControllerTest {
                     .activeEnrollmentsCount(3L)
                     .build();
 
-            when(formationEnrollmentService.getPublishedCatalog(any(Pageable.class)))
+            when(formationEnrollmentService.getPublishedCatalog(any(), any(), any(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(List.of(summary)));
 
             mockMvc.perform(get(BASE_URL + "/catalog")
@@ -206,6 +211,29 @@ class ArtisanFormationEnrollmentControllerTest {
                             .with(artisan()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data.status").value("CANCELLED"));
+        }
+
+        /**
+         * Verifies that cancelling as formation author cancels the formation and returns 200 OK.
+         */
+        @Test
+        @DisplayName("cancel_whenAuthorArtisanRole_cancelsFormationAndReturns200Ok")
+        void cancel_whenAuthorArtisanRole_cancelsFormationAndReturns200Ok() throws Exception {
+            FormationResponseDTO responseDTO = FormationResponseDTO.builder()
+                    .id("formation-101")
+                    .title("Wood Carving Workshop")
+                    .status(FormationStatus.CANCELLED)
+                    .build();
+
+            when(formationEnrollmentService.isAuthor("formation-101")).thenReturn(true);
+            when(formationService.cancelFormation("formation-101")).thenReturn(responseDTO);
+
+            mockMvc.perform(post(BASE_URL + "/formation-101/cancel")
+                            .with(artisan()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data.id").value("formation-101"))
                     .andExpect(jsonPath("$.data.status").value("CANCELLED"));
         }
 

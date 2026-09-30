@@ -105,10 +105,10 @@ class DirectoryIntegrationTest {
         Material argentMassif = materialRepository.findBySlug("acier")
                 .orElseThrow(() -> new IllegalStateException("Seeded material 'acier' not found"));
 
-        Technique ciselure = techniqueRepository.findBySlug("ciselure-au-repousse")
-                .orElseThrow(() -> new IllegalStateException("Seeded technique 'ciselure-au-repousse' not found"));
-        Technique filigrane = techniqueRepository.findBySlug("filigrane-d-argent")
-                .orElseThrow(() -> new IllegalStateException("Seeded technique 'filigrane-d-argent' not found"));
+        Technique enduit = techniqueRepository.findBySlug("enduit-a-la-chaux")
+                .orElseThrow(() -> new IllegalStateException("Seeded technique 'enduit-a-la-chaux' not found"));
+        Technique pise = techniqueRepository.findBySlug("pise")
+                .orElseThrow(() -> new IllegalStateException("Seeded technique 'pise' not found"));
 
         Epoque numide = epoqueRepository.findBySlug("periode-numide")
                 .orElseThrow(() -> new IllegalStateException("Seeded epoque 'periode-numide' not found"));
@@ -130,7 +130,7 @@ class DirectoryIntegrationTest {
                 .region(beniYenni)
                 .subCategory(poterieKabylie)
                 .materials(new HashSet<>(Set.of(argileRouge)))
-                .techniques(new HashSet<>(Set.of(ciselure)))
+                .techniques(new HashSet<>(Set.of(enduit)))
                 .epoques(new HashSet<>(Set.of(numide)))
                 .rating(4.90)
                 .reviewsCount(50)
@@ -158,7 +158,7 @@ class DirectoryIntegrationTest {
                 .region(beniIsguen)
                 .subCategory(bijouxKabyles)
                 .materials(new HashSet<>(Set.of(argentMassif)))
-                .techniques(new HashSet<>(Set.of(filigrane)))
+                .techniques(new HashSet<>(Set.of(pise)))
                 .epoques(new HashSet<>(Set.of(ottomane)))
                 .rating(4.20)
                 .reviewsCount(10)
@@ -280,7 +280,7 @@ class DirectoryIntegrationTest {
                         .param("categorySlug", "gros-oeuvre-structure")
                         .param("subCategorySlug", "macon")
                         .param("materials", "pierre-calcaire")
-                        .param("techniques", "ciselure-au-repousse")
+                        .param("techniques", "enduit-a-la-chaux")
                         .param("epoques", "periode-numide"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[*].id").value(hasItem(premierArtisan.getId())))

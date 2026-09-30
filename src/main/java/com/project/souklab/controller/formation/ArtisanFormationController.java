@@ -166,6 +166,18 @@ public class ArtisanFormationController {
     }
 
     /**
+     * Cancels an authored masterclass and notifies confirmed participants.
+     *
+     * @param id formation unique identifier
+     * @return 200 OK with the updated formation response
+     */
+    @PostMapping(value = {"/{id}/cancel-formation"})
+    @Operation(summary = "Cancel masterclass", description = "Cancels an authored masterclass and notifies confirmed participants.")
+    public ResponseEntity<ApiResponse<FormationResponseDTO>> cancelFormation(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(formationService.cancelFormation(id), "Formation cancelled successfully."));
+    }
+
+    /**
      * Retrieves all formations authored by the authenticated artisan.
      *
      * @param pageable pagination parameters

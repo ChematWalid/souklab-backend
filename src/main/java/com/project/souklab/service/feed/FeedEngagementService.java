@@ -115,7 +115,7 @@ public class FeedEngagementService {
         int likeCount = Math.toIntExact(postLikeRepository.countByPostId(postId));
         if (!post.getAuthor().getId().equals(user.getId())) {
             notificationService.createOrUpdateAggregatedNotification(post.getAuthor(), NotificationType.Feed.POST_LIKED,
-                    postId, "liked your post", likeCount, user.getName());
+                    postId, "liked your post", likeCount, user.getPublicDisplayName());
         }
         return likeStatus(postId, user, likeCount);
     }
@@ -224,7 +224,7 @@ public class FeedEngagementService {
                 .post(post).user(user).content(validateContent(request.getContent())).build());
         postRepository.incrementCommentCount(postId);
         if (!post.getAuthor().getId().equals(user.getId())) {
-            notificationService.createForUser(post.getAuthor(), user.getName() + " commented on your post.",
+            notificationService.createForUser(post.getAuthor(), user.getPublicDisplayName() + " commented on your post.",
                     NotificationType.Feed.POST_COMMENTED, postId);
         }
         return toComment(comment, user);
@@ -251,7 +251,7 @@ public class FeedEngagementService {
         commentRepository.incrementReplyCount(parent.getId());
         postRepository.incrementCommentCount(post.getId());
         if (!parent.getUser().getId().equals(user.getId())) {
-            notificationService.createForUser(parent.getUser(), user.getName() + " replied to your comment.",
+            notificationService.createForUser(parent.getUser(), user.getPublicDisplayName() + " replied to your comment.",
                     NotificationType.Feed.COMMENT_REPLIED, parent.getId());
         }
         return toComment(reply, user);
@@ -308,7 +308,7 @@ public class FeedEngagementService {
         int likeCount = Math.toIntExact(commentLikeRepository.countByCommentId(commentId));
         if (!comment.getUser().getId().equals(user.getId())) {
             notificationService.createOrUpdateAggregatedNotification(comment.getUser(), NotificationType.Feed.COMMENT_LIKED,
-                    commentId, "liked your comment", likeCount, user.getName());
+                    commentId, "liked your comment", likeCount, user.getPublicDisplayName());
         }
     }
 

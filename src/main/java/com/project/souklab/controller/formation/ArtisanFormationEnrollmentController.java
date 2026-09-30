@@ -5,11 +5,14 @@ import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.formation.FormationEnrollmentDetailDTO;
 import com.project.souklab.dto.formation.FormationEnrollmentResponseDTO;
 import com.project.souklab.dto.formation.AttendanceRequest;
+import com.project.souklab.dto.formation.FormationEnrollmentSummaryDTO;
 import com.project.souklab.dto.formation.FormationPublicViewDTO;
+import com.project.souklab.dto.formation.FormationResponseDTO;
 import com.project.souklab.dto.formation.FormationSummaryDTO;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.model.EnrollmentStatus;
 import com.project.souklab.service.formation.FormationEnrollmentService;
+import com.project.souklab.service.formation.FormationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
@@ -49,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 public class ArtisanFormationEnrollmentController {
 
     private final FormationEnrollmentService formationEnrollmentService;
+    private final FormationService formationService;
 
     /**
      * Browses the public catalog of published masterclass formations.
@@ -56,12 +61,15 @@ public class ArtisanFormationEnrollmentController {
      * @param pageable pagination and sorting parameters
      * @return 200 OK containing paginated formation summary cards
      */
-    @Operation(summary = "Browse masterclass catalog", description = "Browses published peer masterclasses, sorted by schedule date.")
+    @Operation(summary = "Browse masterclass catalog", description = "Browses published peer masterclasses, sorted by schedule date, with optional trade, region, and online filters.")
     @GetMapping("/catalog")
     public ResponseEntity<ApiResponse<PaginatedResponse<FormationSummaryDTO>>> getPublishedCatalog(
+            @RequestParam(required = false) String trade,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) Boolean online,
             @PageableDefault(sort = "scheduledAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<FormationSummaryDTO> page = formationEnrollmentService.getPublishedCatalog(pageable);
+        Page<FormationSummaryDTO> page = formationEnrollmentService.getPublishedCatalog(trade, region, online, pageable);
         return ResponseEntity.ok(ApiResponse.success(PaginatedResponse.from(page)));
     }
 
@@ -96,16 +104,23 @@ public class ArtisanFormationEnrollmentController {
     }
 
     /**
-     * Cancels an active enrollment reservation for the authenticated artisan.
+     * Cancels an active enrollment reservation or the authored masterclass itself.
+     * If the authenticated caller is the instructor/author of the masterclass, the masterclass
+     * is cancelled and confirmed participants are notified.
+     * If the caller is an enrolled participant, their enrollment reservation is cancelled.
      *
      * @param id formation unique identifier
-     * @return 200 OK with updated cancelled enrollment response DTO
+     * @return 200 OK with cancellation response DTO
      */
-    @Operation(summary = "Cancel masterclass enrollment", description = "Cancels a confirmed reservation before the workshop cancellation cutoff deadline.")
-    @PostMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<FormationEnrollmentResponseDTO>> cancel(
+    @Operation(summary = "Cancel masterclass or enrollment", description = "Cancels authored masterclass if called by instructor, or cancels enrollment if called by participant.")
+    @PostMapping(value = {"/{id}/cancel", "/{id}/cancel-enrollment"})
+    public ResponseEntity<ApiResponse<?>> cancel(
             @PathVariable String id
     ) {
+        if (formationEnrollmentService.isAuthor(id)) {
+            FormationResponseDTO cancelled = formationService.cancelFormation(id);
+            return ResponseEntity.ok(ApiResponse.success(cancelled, "Formation cancelled successfully."));
+        }
         FormationEnrollmentResponseDTO cancelled = formationEnrollmentService.cancelEnrollment(id);
         return ResponseEntity.ok(ApiResponse.success(cancelled, "Formation enrollment cancelled successfully."));
     }
@@ -119,6 +134,23 @@ public class ArtisanFormationEnrollmentController {
                 ? EnrollmentStatus.ATTENDED : request.status();
         return ResponseEntity.ok(ApiResponse.success(
                 formationEnrollmentService.markAttendance(id, enrollmentId, status), "Attendance recorded successfully."));
+    }
+
+    /**
+     * Retrieves paginated participant enrollment roster for the authenticated formation author.
+     *
+     * @param id formation unique identifier
+     * @param pageable pagination parameters
+     * @return 200 OK containing participant roster
+     */
+    @Operation(summary = "Get formation enrollments", description = "Retrieves participant roster for the authenticated formation author.")
+    @GetMapping("/{id}/enrollments")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FormationEnrollmentSummaryDTO>>> getEnrollments(
+            @PathVariable String id,
+            @PageableDefault(sort = "enrolledAt", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        Page<FormationEnrollmentSummaryDTO> page = formationEnrollmentService.getEnrollmentsForAuthor(id, pageable);
+        return ResponseEntity.ok(ApiResponse.success(PaginatedResponse.from(page)));
     }
 
     /**
