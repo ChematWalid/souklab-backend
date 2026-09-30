@@ -93,9 +93,13 @@ public class FormationEnrollmentService {
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT))
                 : PageRequest.of(DEFAULT_PAGE_NUMBER, appProperties.getFormation().getPagination().getDefaultPageSize(), Sort.by(Sort.Direction.ASC, SORT_PROPERTY_SCHEDULED_AT));
 
-        Specification<Formation> spec =
-                FormationSpecifications.filterCatalog(trade, region, online);
-        Page<Formation> formations = formationRepository.findAll(spec, effectivePageable);
+        Page<Formation> formations;
+        if (trade == null && region == null && online == null) {
+            formations = formationRepository.findByStatusAndDeletedAtIsNull(FormationStatus.PUBLISHED, effectivePageable);
+        } else {
+            Specification<Formation> spec = FormationSpecifications.filterCatalog(trade, region, online);
+            formations = formationRepository.findAll(spec, effectivePageable);
+        }
 
         return formations.map(formation -> {
             long activeEnrollments = formationEnrollmentRepository.countByFormationIdAndStatus(formation.getId(), EnrollmentStatus.CONFIRMED);

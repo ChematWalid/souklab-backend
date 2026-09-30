@@ -60,7 +60,7 @@ class ClientFavoritesMigrationTest {
             try (Connection connection = database.createConnection("");
                  Statement statement = connection.createStatement()) {
 
-                assertThat(migrationVersion(statement)).isEqualTo("21");
+                assertThat(migrationVersion(statement)).isEqualTo("23");
                 assertThat(tableExists(statement, "client_favorite_artisans")).isTrue();
                 assertThat(columnExists(statement, "client_favorite_artisans", "id")).isTrue();
                 assertThat(columnExists(statement, "client_favorite_artisans", "client_id")).isTrue();

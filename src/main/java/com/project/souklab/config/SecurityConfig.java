@@ -62,9 +62,14 @@ public class SecurityConfig {
     private UserRateLimitFilter userRateLimitFilter;
     private final FileRateLimitFilter fileRateLimitFilter;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final ServletResponseUtil servletResponseUtil;
     private RateLimitBucketStore rateLimitBucketStore = RateLimitBucketStore.inMemory();
+
+    @Autowired(required = false)
+    void setOAuth2AuthenticationFailureHandler(OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler) {
+        this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
+    }
 
     @Autowired(required = false)
     void setRateLimitBucketStore(RateLimitBucketStore rateLimitBucketStore) {
@@ -196,10 +201,12 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                        .failureHandler(oAuth2AuthenticationFailureHandler)
-                )
+                .oauth2Login(oauth2 -> {
+                    oauth2.successHandler(oAuth2AuthenticationSuccessHandler);
+                    if (oAuth2AuthenticationFailureHandler != null) {
+                        oauth2.failureHandler(oAuth2AuthenticationFailureHandler);
+                    }
+                })
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) ->
                                 servletResponseUtil.writeResponse(

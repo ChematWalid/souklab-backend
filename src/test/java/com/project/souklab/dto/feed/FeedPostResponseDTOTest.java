@@ -28,7 +28,7 @@ class FeedPostResponseDTOTest {
 
         FeedPostResponseDTO response = FeedPostResponseDTO.from(post, key -> "/files/" + key);
         assertThat(response.getId()).isEqualTo("post-1");
-        assertThat(response.getAuthorName()).isEqualTo("Amina Craft");
+        assertThat(response.getAuthorName()).isEqualTo(author.getPublicDisplayName());
         assertThat(response.getFormationId()).isEqualTo("formation-1");
         assertThat(response.getMedia()).singleElement().satisfies(item -> {
             assertThat(item.getId()).isEqualTo("media-1");
@@ -45,7 +45,7 @@ class FeedPostResponseDTOTest {
                 .title("Title").body("Body").status(FeedPostStatus.PENDING).build();
 
         FeedPostResponseDTO response = FeedPostResponseDTO.from(post);
-        assertThat(response.getAuthorName()).isEqualTo("author@example.com");
+        assertThat(response.getAuthorName()).isEqualTo(author.getPublicDisplayName());
         assertThat(response.getFormationId()).isNull();
         assertThat(response.getMedia()).isEmpty();
     }
