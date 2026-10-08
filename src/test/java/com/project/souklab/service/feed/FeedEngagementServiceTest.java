@@ -7,7 +7,9 @@ import com.project.souklab.dao.FeedPostCommentRepository;
 import com.project.souklab.dao.FeedPostLikeRepository;
 import com.project.souklab.dao.FeedPostRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.feed.FeedPostCommentCreateDTO;
+import com.project.souklab.dto.feed.FeedPostResponseDTO;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.exception.ConflictException;
 import com.project.souklab.exception.ForbiddenException;
@@ -26,11 +28,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.Set;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -38,6 +43,7 @@ import java.time.ZoneOffset;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.lenient;
@@ -140,6 +146,23 @@ class FeedEngagementServiceTest {
 
         assertThatThrownBy(() -> service.updateComment("comment-2", new FeedPostCommentCreateDTO("new")))
                 .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void savedPopulatesLikedAndBookmarkedByCurrentUser() {
+        authenticate();
+        when(bookmarkRepository.findSavedPosts(eq("user-1"), eq(FeedPostStatus.PUBLISHED), any()))
+                .thenReturn(new PageImpl<>(List.of(post)));
+        when(postLikeRepository.findLikedPostIdsByUserIdAndPostIdIn("user-1", List.of("post-1")))
+                .thenReturn(Set.of("post-1"));
+        when(feedPrivacyService.protectPost(eq(post), any())).thenAnswer(invocation -> invocation.getArgument(1));
+
+        PaginatedResponse<FeedPostResponseDTO> result = service.saved(PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(1);
+        FeedPostResponseDTO item = result.getContent().get(0);
+        assertThat(item.isBookmarkedByCurrentUser()).isTrue();
+        assertThat(item.isLikedByCurrentUser()).isTrue();
     }
 
     private void authenticate() {

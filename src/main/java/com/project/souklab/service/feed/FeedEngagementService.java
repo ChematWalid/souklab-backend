@@ -42,6 +42,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class FeedEngagementService {
@@ -189,9 +192,15 @@ public class FeedEngagementService {
     public PaginatedResponse<FeedPostResponseDTO> saved(Pageable pageable) {
         User user = currentUser();
         Page<FeedPost> page = bookmarkRepository.findSavedPosts(user.getId(), FeedPostStatus.PUBLISHED, pageable);
+        List<String> postIds = page.getContent().stream().map(FeedPost::getId).toList();
+        Set<String> likedPostIds = postIds.isEmpty() ? Collections.emptySet()
+                : postLikeRepository.findLikedPostIdsByUserIdAndPostIdIn(user.getId(), postIds);
+
         return PaginatedResponse.from(page.map(post -> feedPrivacyService.protectPost(post,
                 FeedPostResponseDTO.from(post, mediaKey -> fileUrlResolver == null ? mediaKey : fileUrlResolver.toUrl(mediaKey)).toBuilder()
-                        .bookmarkedByCurrentUser(true).build())));
+                        .bookmarkedByCurrentUser(true)
+                        .likedByCurrentUser(likedPostIds.contains(post.getId()))
+                        .build())));
     }
 
     @Transactional
