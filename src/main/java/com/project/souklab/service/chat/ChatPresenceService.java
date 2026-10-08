@@ -7,7 +7,6 @@ import com.project.souklab.dao.ConversationParticipantRepository;
 import com.project.souklab.dto.chat.ChatEvent;
 import com.project.souklab.dto.chat.ChatEventType;
 import com.project.souklab.dto.chat.ChatMetadata;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,6 +15,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDateTime;
 import java.time.Clock;
 import java.util.List;
@@ -26,7 +26,6 @@ import java.util.UUID;
 import java.nio.charset.StandardCharsets;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class ChatPresenceService {
     private final SimpMessagingTemplate messagingTemplate;
@@ -34,6 +33,17 @@ public class ChatPresenceService {
     private final Clock clock;
     private final ConversationParticipantRepository participantRepository;
     private final Map<String, AtomicInteger> sessions = new ConcurrentHashMap<>();
+
+    @Autowired
+    public ChatPresenceService(SimpMessagingTemplate messagingTemplate,
+                               AppProperties properties,
+                               Clock clock,
+                               ConversationParticipantRepository participantRepository) {
+        this.messagingTemplate = messagingTemplate;
+        this.properties = properties;
+        this.clock = clock;
+        this.participantRepository = participantRepository;
+    }
 
     public ChatPresenceService(SimpMessagingTemplate messagingTemplate, AppProperties properties, Clock clock) {
         this(messagingTemplate, properties, clock, null);
