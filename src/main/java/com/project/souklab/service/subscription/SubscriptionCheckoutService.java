@@ -90,9 +90,7 @@ public class SubscriptionCheckoutService {
         if (requestedPlan.getSubscriberType() != targetType) {
             throw new BadRequestException("Renewal plan does not match the subscription type");
         }
-        boolean active = targetType == SubscriberType.ARTISAN
-                ? artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
-                : clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0;
+        boolean active = hasActiveSubscription(user, targetType);
         if (active) {
             throw new BadRequestException("An active subscription must be canceled or expire before renewal");
         }
@@ -115,28 +113,44 @@ public class SubscriptionCheckoutService {
                 || (plan.getSubscriberType() == SubscriberType.CLIENT && user.getClient() == null)) {
             throw new BadRequestException("The authenticated account does not have the selected subscriber profile");
         }
-        boolean hasBlockingSubscription = plan.getSubscriberType() == SubscriberType.ARTISAN
-                ? artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
-                        || artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.PENDING) > 0
-                : clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
-                        || clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.PENDING) > 0;
-        if (hasBlockingSubscription) {
+        boolean hasBlocking = hasBlockingSubscription(user, plan.getSubscriberType());
+        if (hasBlocking) {
             throw new BadRequestException(ApiErrorCode.SUBSCRIPTION_ALREADY_PENDING,
                     "A subscription is already active or a payment is already pending");
         }
         String snapshot = snapshot(plan);
         String subscriptionId = createSubscription(user, plan, snapshot);
+
         Payment payment = new Payment();
-        payment.setAccount(user); payment.setSubscriptionId(subscriptionId); payment.setProvider(PaymentProvider.CHARGILY);
-        payment.setStatus(PaymentStatus.PENDING); payment.setAmount(plan.getAmount()); payment.setCurrency(plan.getCurrency());
-        payment.setPlanSnapshot(snapshot); payment.setIdempotencyKey(key); paymentRepository.saveAndFlush(payment);
+        payment.setAccount(user);
+        payment.setSubscriptionId(subscriptionId);
+        payment.setProvider(PaymentProvider.CHARGILY);
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setAmount(plan.getAmount());
+        payment.setCurrency(plan.getCurrency());
+        payment.setPlanSnapshot(snapshot);
+        payment.setIdempotencyKey(key);
+        paymentRepository.saveAndFlush(payment);
+
         ChargilyProperties config = appProperties.getChargily();
         ChargilyCheckoutResponse provider = chargilyCheckoutClient.createCheckout(ChargilyCheckoutRequest.builder()
-                .amount(plan.getAmount()).currency(plan.getCurrency()).successUrl(resolve(request.getSuccessUrl(), config.getSuccessUrl()))
-                .failureUrl(resolve(request.getFailureUrl(), config.getFailureUrl())).webhookUrl(config.getWebhookUrl()).locale(config.getLocale())
-                .feeAllocation(config.getFeeAllocation()).metadata(Map.of(AnalyticsMetadata.Payment.Identifier.ID.value(), payment.getId(), AnalyticsMetadata.Provider.Subscription.ID.value(), subscriptionId)).build());
-        payment.setStatus(PaymentStatus.PENDING); payment.setProviderCheckoutId(provider.getId()); payment.setCheckoutUrl(provider.getCheckoutUrl());
-        payment.setProviderCustomerId(provider.getCustomerId()); payment.setProviderInvoiceId(provider.getInvoiceId());
+                .amount(plan.getAmount())
+                .currency(plan.getCurrency())
+                .successUrl(resolve(request.getSuccessUrl(), config.getSuccessUrl()))
+                .failureUrl(resolve(request.getFailureUrl(), config.getFailureUrl()))
+                .webhookUrl(config.getWebhookUrl())
+                .locale(config.getLocale())
+                .feeAllocation(config.getFeeAllocation())
+                .metadata(Map.of(
+                        AnalyticsMetadata.Payment.Identifier.ID.value(), payment.getId(),
+                        AnalyticsMetadata.Provider.Subscription.ID.value(), subscriptionId))
+                .build());
+
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setProviderCheckoutId(provider.getId());
+        payment.setCheckoutUrl(provider.getCheckoutUrl());
+        payment.setProviderCustomerId(provider.getCustomerId());
+        payment.setProviderInvoiceId(provider.getInvoiceId());
         try {
             payment.setProviderSnapshot(objectMapper.writeValueAsString(provider));
         } catch (JsonProcessingException exception) {
@@ -151,23 +165,53 @@ public class SubscriptionCheckoutService {
         return toResponse(saved);
     }
 
+    private boolean hasActiveSubscription(User user, SubscriberType targetType) {
+        if (targetType == SubscriberType.ARTISAN) {
+            return artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0;
+        }
+        return clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0;
+    }
+
+    private boolean hasBlockingSubscription(User user, SubscriberType subscriberType) {
+        if (subscriberType == SubscriberType.ARTISAN) {
+            return artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
+                    || artisanSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.PENDING) > 0;
+        }
+        return clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
+                || clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.PENDING) > 0;
+    }
+
     private String createSubscription(User user, SubscriptionPlan plan, String snapshot) {
         if (plan.getSubscriberType() == SubscriberType.ARTISAN) {
-            ArtisanSubscription entity = new ArtisanSubscription(); populate(entity, user, plan, snapshot);
+            ArtisanSubscription entity = new ArtisanSubscription();
+            populate(entity, user, plan, snapshot);
             return artisanSubscriptionRepository.save(entity).getId();
         }
-        ClientSubscription entity = new ClientSubscription(); populate(entity, user, plan, snapshot);
+        ClientSubscription entity = new ClientSubscription();
+        populate(entity, user, plan, snapshot);
         return clientSubscriptionRepository.save(entity).getId();
     }
 
     private void populate(ArtisanSubscription entity, User user, SubscriptionPlan plan, String snapshot) {
-        entity.setAccount(user); entity.setStatus(SubscriptionStatus.PENDING); entity.setPlanId(plan.getId()); entity.setPlanName(plan.getName());
-        entity.setBillingPeriod(plan.getBillingPeriod()); entity.setAmount(plan.getAmount()); entity.setCurrency(plan.getCurrency()); entity.setEntitlementsSnapshot(snapshot);
+        entity.setAccount(user);
+        entity.setStatus(SubscriptionStatus.PENDING);
+        entity.setPlanId(plan.getId());
+        entity.setPlanName(plan.getName());
+        entity.setBillingPeriod(plan.getBillingPeriod());
+        entity.setAmount(plan.getAmount());
+        entity.setCurrency(plan.getCurrency());
+        entity.setEntitlementsSnapshot(snapshot);
     }
 
     private void populate(ClientSubscription entity, User user, SubscriptionPlan plan, String snapshot) {
-        entity.setAccount(user); entity.setStatus(SubscriptionStatus.PENDING); entity.setPlanId(plan.getId()); entity.setPlanName(plan.getName());
-        entity.setBillingPeriod(plan.getBillingPeriod()); entity.setAmount(plan.getAmount()); entity.setCurrency(plan.getCurrency()); entity.setEntitlementsSnapshot(snapshot);
+        entity.setAccount(user);
+        entity.setStatus(SubscriptionStatus.PENDING);
+        entity.setPlanId(plan.getId());
+        entity.setPlanName(plan.getName());
+        entity.setBillingPeriod(plan.getBillingPeriod());
+        entity.setAmount(plan.getAmount());
+        entity.setCurrency(plan.getCurrency());
+        entity.setEntitlementsSnapshot(snapshot);
     }
 
     private String snapshot(SubscriptionPlan plan) {
@@ -181,18 +225,28 @@ public class SubscriptionCheckoutService {
         }
     }
 
-    private String resolve(String requested, String configured) { return requested == null || requested.isBlank() ? configured : requested; }
+    private String resolve(String requested, String configured) {
+        return requested == null || requested.isBlank() ? configured : requested;
+    }
+
     private void ensureSamePlan(Payment payment, String planId) {
         try {
             String existingPlan = objectMapper.readTree(payment.getPlanSnapshot())
                     .path(AnalyticsMetadata.Subscription.Plan.ID.value()).asText();
-            if (!planId.equals(existingPlan)) throw new BadRequestException("Idempotency-Key was already used for another plan");
+            if (!planId.equals(existingPlan)) {
+                throw new BadRequestException("Idempotency-Key was already used for another plan");
+            }
         } catch (JsonProcessingException exception) {
             throw new BadRequestException("Existing idempotent payment snapshot is invalid", exception);
         }
     }
+
     private SubscriptionCheckoutResponse toResponse(Payment payment) {
-        return SubscriptionCheckoutResponse.builder().paymentId(payment.getId()).subscriptionId(payment.getSubscriptionId())
-                .providerCheckoutId(payment.getProviderCheckoutId()).checkoutUrl(payment.getCheckoutUrl()).build();
+        return SubscriptionCheckoutResponse.builder()
+                .paymentId(payment.getId())
+                .subscriptionId(payment.getSubscriptionId())
+                .providerCheckoutId(payment.getProviderCheckoutId())
+                .checkoutUrl(payment.getCheckoutUrl())
+                .build();
     }
 }

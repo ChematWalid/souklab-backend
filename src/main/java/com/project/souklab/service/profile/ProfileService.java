@@ -99,19 +99,11 @@ public class ProfileService {
         User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
-        boolean isAdmin = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.Admin.USERS.matches(permission.getPermissionKey()));
-        if (isAdmin) {
-            throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");
-        }
+        validateEditableProfile(user);
 
-        boolean isArtisan = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.Artisan.CONTENT.matches(permission.getPermissionKey()));
-        boolean isClient = !isArtisan;
-
-        if (isArtisan) {
+        if (isArtisan(user)) {
             completeArtisanProfile(user, dto);
-        } else if (isClient) {
+        } else {
             completeClientProfile(user, dto);
         }
 
@@ -139,31 +131,46 @@ public class ProfileService {
         User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + email));
 
-        boolean isAdmin = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.Admin.USERS.matches(permission.getPermissionKey()));
-        if (isAdmin) {
-            throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");
-        }
-
-        boolean isArtisan = user.getPermissions().stream()
-                .anyMatch(permission -> Permission.Artisan.CONTENT.matches(permission.getPermissionKey()));
+        validateEditableProfile(user);
 
         if (dto == null || dto.isEmpty()) {
             return profileResponseMapper.mapToProfileResponse(user);
         }
 
-        if (dto.getFirstName() != null && dto.getFirstName().isDefined()) user.setFirstName(dto.getFirstName().getValue());
-        if (dto.getLastName() != null && dto.getLastName().isDefined()) user.setLastName(dto.getLastName().getValue());
-        if (dto.getPhone() != null && dto.getPhone().isDefined()) user.setPhone(dto.getPhone().getValue());
+        if (dto.getFirstName() != null && dto.getFirstName().isDefined()) {
+            user.setFirstName(dto.getFirstName().getValue());
+        }
+        if (dto.getLastName() != null && dto.getLastName().isDefined()) {
+            user.setLastName(dto.getLastName().getValue());
+        }
+        if (dto.getPhone() != null && dto.getPhone().isDefined()) {
+            user.setPhone(dto.getPhone().getValue());
+        }
         userRepository.save(user);
 
-        if (isArtisan) {
+        if (isArtisan(user)) {
             patchArtisanProfile(user, dto);
         } else {
             patchClientProfile(user, dto);
         }
 
         return profileResponseMapper.mapToProfileResponse(user);
+    }
+
+    private void validateEditableProfile(User user) {
+        if (isAdmin(user)) {
+            throw new ForbiddenException("Administrators do not possess an editable artisan or client profile.");
+        }
+    }
+
+    private boolean isAdmin(User user) {
+        return user != null && user.getPermissions() != null && user.getPermissions().stream()
+                .anyMatch(permission -> Permission.Admin.USERS.matches(permission.getPermissionKey()));
+    }
+
+    private boolean isArtisan(User user) {
+        return user != null && user.getPermissions() != null && user.getPermissions().stream()
+                .anyMatch(permission -> Permission.Artisan.CONTENT.matches(permission.getPermissionKey()));
     }
 
     /**

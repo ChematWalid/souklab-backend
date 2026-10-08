@@ -370,10 +370,11 @@ public class FormationService {
         Artisan artisan = resolveAuthenticatedArtisan();
         Formation formation = findFormationAndVerifyOwnership(id, artisan);
 
-        if (formation.getStatus() != FormationStatus.DRAFT
-                && formation.getStatus() != FormationStatus.PENDING_REVIEW
-                && formation.getStatus() != FormationStatus.APPROVED
-                && formation.getStatus() != FormationStatus.PUBLISHED) {
+        boolean isCancellable = switch (formation.getStatus()) {
+            case DRAFT, PENDING_REVIEW, APPROVED, PUBLISHED -> true;
+            default -> false;
+        };
+        if (!isCancellable) {
             throw new ConflictException("Formation cannot be cancelled in its current status: " + formation.getStatus());
         }
 
