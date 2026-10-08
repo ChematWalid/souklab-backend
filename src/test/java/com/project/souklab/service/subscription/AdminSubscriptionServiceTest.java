@@ -143,6 +143,7 @@ class AdminSubscriptionServiceTest {
         when(artisanSubscriptions.save(any(ArtisanSubscription.class))).thenAnswer(inv -> {
             ArtisanSubscription s = inv.getArgument(0);
             s.setId("sub-artisan-1");
+            s.setCreatedAt(LocalDateTime.of(2026, 9, 18, 0, 0));
             return s;
         });
 
@@ -156,6 +157,7 @@ class AdminSubscriptionServiceTest {
         assertThat(response.getId()).isEqualTo("sub-artisan-1");
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
         assertThat(response.getSubscriberType()).isEqualTo(SubscriberType.ARTISAN);
+        assertThat(response.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 9, 18, 0, 0));
         assertThat(artisan.isPremium()).isTrue();
 
         verify(payments).save(any(Payment.class));
@@ -188,6 +190,7 @@ class AdminSubscriptionServiceTest {
         when(clientSubscriptions.save(any(ClientSubscription.class))).thenAnswer(inv -> {
             ClientSubscription s = inv.getArgument(0);
             s.setId("sub-client-1");
+            s.setCreatedAt(LocalDateTime.of(2026, 9, 18, 0, 0));
             return s;
         });
 
@@ -201,6 +204,7 @@ class AdminSubscriptionServiceTest {
         assertThat(response.getId()).isEqualTo("sub-client-1");
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
         assertThat(response.getSubscriberType()).isEqualTo(SubscriberType.CLIENT);
+        assertThat(response.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 9, 18, 0, 0));
         assertThat(client.isPremium()).isTrue();
     }
 

@@ -295,12 +295,12 @@ public class AdminSubscriptionService {
     private SubscriptionResponse toResponse(ArtisanSubscription value, SubscriberType type) {
         String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
         String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
-        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).createdAt(value.getCreatedAt()).accountId(accountId).accountName(accountName).build();
     }
     private SubscriptionResponse toResponse(ClientSubscription value, SubscriberType type) {
         String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
         String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
-        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(type).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).createdAt(value.getCreatedAt()).accountId(accountId).accountName(accountName).build();
     }
 
     @Transactional(readOnly = true)

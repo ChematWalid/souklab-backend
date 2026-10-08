@@ -60,7 +60,7 @@ public class SubscriptionAccountService {
         List<SubscriptionResponse> result = new ArrayList<>();
         artisanSubscriptions.findByAccountIdOrderByCreatedAtDesc(user.getId()).forEach(value -> result.add(toResponse(value)));
         clientSubscriptions.findByAccountIdOrderByCreatedAtDesc(user.getId()).forEach(value -> result.add(toResponse(value)));
-        result.sort(Comparator.comparing(SubscriptionResponse::getId, Comparator.nullsLast(String::compareTo)).reversed());
+        result.sort(Comparator.comparing(SubscriptionResponse::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())));
         return result;
     }
 
@@ -118,12 +118,12 @@ public class SubscriptionAccountService {
     private SubscriptionResponse toResponse(ArtisanSubscription value) {
         String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
         String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
-        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.ARTISAN).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.ARTISAN).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).createdAt(value.getCreatedAt()).accountId(accountId).accountName(accountName).build();
     }
     private SubscriptionResponse toResponse(ClientSubscription value) {
         String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
         String accountName = value.getAccount() != null ? value.getAccount().getPublicDisplayName() : null;
-        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.CLIENT).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).accountId(accountId).accountName(accountName).build();
+        return SubscriptionResponse.builder().id(value.getId()).subscriberType(SubscriberType.CLIENT).status(value.getStatus()).planName(value.getPlanName()).billingPeriod(value.getBillingPeriod()).amount(value.getAmount()).currency(value.getCurrency()).startsAt(value.getStartsAt()).expiresAt(value.getExpiresAt()).createdAt(value.getCreatedAt()).accountId(accountId).accountName(accountName).build();
     }
     private PaymentResponse toResponse(Payment value) {
         String accountId = value.getAccount() != null ? value.getAccount().getId() : null;
