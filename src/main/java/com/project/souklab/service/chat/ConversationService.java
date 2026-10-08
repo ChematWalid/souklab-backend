@@ -260,7 +260,7 @@ public class ConversationService {
         String participantAvatarUrl = isParticipantIdentityMasked(p.getUser(), current)
                 ? null : p.getUser().getAvatarUrl();
         return new ConversationResponse(c.getId(), p.getUser().getId(), participantName, self.isArchived(), preview, unread,
-                c.getUpdatedAt(), participantAvatarUrl, role, self.getLastReadMessageId());
+                c.getUpdatedAt(), participantAvatarUrl, role, self.getLastReadMessageId(), p.getLastReadMessageId());
     }
     private boolean isParticipantIdentityMasked(User participant, User viewer) {
         if (participant == null || participant.getArtisan() == null) return false;

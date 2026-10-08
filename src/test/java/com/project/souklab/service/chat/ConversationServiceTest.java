@@ -786,6 +786,27 @@ class ConversationServiceTest {
         assertThat(response.participantName()).isEqualTo("Mohamed Artisan");
     }
 
+    @Test
+    void toConversation_includesSelfAndParticipantLastReadMessagePositions() {
+        ConversationParticipant self = conversation.getParticipants().stream()
+                .filter(p -> p.getUser() == sender).findFirst().orElseThrow();
+        ConversationParticipant partner = conversation.getParticipants().stream()
+                .filter(p -> p.getUser() == recipient).findFirst().orElseThrow();
+        self.setLastReadMessageId("msg-self-100");
+        partner.setLastReadMessageId("msg-partner-200");
+
+        when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
+        when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
+        when(participantRepository.findByConversationAndUser(conversation, sender)).thenReturn(Optional.of(self));
+        when(messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(eq(conversation), any())).thenReturn(Page.empty());
+        when(messageRepository.findById("msg-self-100")).thenReturn(Optional.empty());
+        when(messageRepository.countUnread(conversation, sender, null)).thenReturn(0L);
+
+        ConversationResponse response = service.get("conversation");
+        assertThat(response.lastReadMessageId()).isEqualTo("msg-self-100");
+        assertThat(response.participantLastReadMessageId()).isEqualTo("msg-partner-200");
+    }
+
     private User user(String id, String email, AccountStatus status, boolean verified) { User user = new User(); user.setId(id); user.setEmail(email); user.setStatus(status); user.setEmailVerified(verified); AuthorizationPermission permission = new AuthorizationPermission(); permission.setPermissionKey(Permission.Message.SEND.value()); permission.setEnabled(true); user.setPermissions(new HashSet<>(List.of(permission))); return user; }
     private ConversationParticipant participant(User user) { ConversationParticipant p = new ConversationParticipant(); p.setUser(user); return p; }
     private Message message(String id, User author, String content) { Message m = new Message(); m.setId(id); m.setConversation(conversation); m.setAuthor(author); m.setContent(content); m.setCreatedAt(LocalDateTime.now(clock)); return m; }

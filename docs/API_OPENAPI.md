@@ -3011,7 +3011,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `ConversationResponse`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"participantUserId":{"type":"string"},"participantName":{"type":"string"},"archived":{"type":"boolean"},"lastMessagePreview":{"type":"string"},"unreadCount":{"type":"integer","format":"int64"},"updatedAt":{"type":"string","format":"date-time"},"participantAvatarUrl":{"type":"string"},"participantRole":{"type":"string"},"lastReadMessageId":{"type":"string"}}}
+{"type":"object","properties":{"id":{"type":"string"},"participantUserId":{"type":"string"},"participantName":{"type":"string"},"archived":{"type":"boolean"},"lastMessagePreview":{"type":"string"},"unreadCount":{"type":"integer","format":"int64"},"updatedAt":{"type":"string","format":"date-time"},"participantAvatarUrl":{"type":"string"},"participantRole":{"type":"string"},"lastReadMessageId":{"type":"string"},"participantLastReadMessageId":{"type":"string"}}}
 ```
 
 ### `ReadReceiptRequest`
