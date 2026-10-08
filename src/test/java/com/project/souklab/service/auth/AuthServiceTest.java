@@ -3,6 +3,7 @@ package com.project.souklab.service.auth;
 import java.util.Collection;
 
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.dao.ClientRepository;
 import com.project.souklab.dao.OAuthIdentityRepository;
 import com.project.souklab.dao.RefreshTokenRepository;
 import com.project.souklab.dao.AuthorizationPermissionRepository;
@@ -29,6 +30,8 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.Client;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.model.OAuthIdentity;
 import com.project.souklab.model.OAuthProvider;
 import com.project.souklab.model.RefreshToken;
@@ -93,6 +96,9 @@ class AuthServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ClientRepository clientRepository;
 
     @Mock
     private AuthorizationPermissionRepository permissionRepository;
@@ -168,6 +174,7 @@ class AuthServiceTest {
 
         authService = new AuthService(
                 userRepository,
+                clientRepository,
                 permissionRepository,
                 refreshTokenRepository,
                 oauthIdentityRepository,
@@ -330,6 +337,10 @@ class AuthServiceTest {
         assertThat(savedUser.getStatus()).isEqualTo(AccountStatus.ACTIVE);
 
         verify(emailUtil).sendVerificationCodeSynchronous("client@example.com", "123456");
+        ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
+        verify(clientRepository).save(clientCaptor.capture());
+        assertThat(clientCaptor.getValue().getUser().getId()).isEqualTo("client-user-id");
+        assertThat(clientCaptor.getValue().getClientType()).isEqualTo(ClientType.INDIVIDUAL.value());
         verifyNoInteractions(notificationService);
     }
 

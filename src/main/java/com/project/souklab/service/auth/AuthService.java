@@ -7,6 +7,7 @@ import com.project.souklab.analytics.AnalyticsEvent;
 import com.project.souklab.analytics.AnalyticsMetadata;
 
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.dao.ClientRepository;
 import com.project.souklab.dao.OAuthIdentityRepository;
 import com.project.souklab.dao.RefreshTokenRepository;
 import com.project.souklab.dao.AuthorizationPermissionRepository;
@@ -32,6 +33,8 @@ import com.project.souklab.exception.UnauthorizedException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.AccountRole;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.Client;
+import com.project.souklab.model.ClientType;
 import com.project.souklab.model.OAuthIdentity;
 import com.project.souklab.model.OAuthProvider;
 import com.project.souklab.model.RefreshToken;
@@ -96,10 +99,12 @@ public class AuthService {
     private final AuditLogService auditLogService;
     private final Clock clock;
     private final ProfileResponseMapper profileResponseMapper;
+    private final ClientRepository clientRepository;
     private final ActivityEventService activityEventService;
 
     @Autowired
     public AuthService(UserRepository userRepository,
+                       ClientRepository clientRepository,
                        AuthorizationPermissionRepository permissionRepository,
                        RefreshTokenRepository refreshTokenRepository,
                        OAuthIdentityRepository oauthIdentityRepository,
@@ -115,6 +120,7 @@ public class AuthService {
                        ProfileResponseMapper profileResponseMapper,
                        ActivityEventService activityEventService) {
         this.userRepository = userRepository;
+        this.clientRepository = clientRepository;
         this.permissionRepository = permissionRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.oauthIdentityRepository = oauthIdentityRepository;
@@ -133,6 +139,7 @@ public class AuthService {
 
     /** Backward-compatible constructor retained for focused service tests and external adapters. */
     public AuthService(UserRepository userRepository,
+                       ClientRepository clientRepository,
                        AuthorizationPermissionRepository permissionRepository,
                        RefreshTokenRepository refreshTokenRepository,
                        OAuthIdentityRepository oauthIdentityRepository,
@@ -146,7 +153,27 @@ public class AuthService {
                        AuditLogService auditLogService,
                        Clock clock,
                        ProfileResponseMapper profileResponseMapper) {
-        this(userRepository, permissionRepository, refreshTokenRepository, oauthIdentityRepository,
+        this(userRepository, clientRepository, permissionRepository, refreshTokenRepository, oauthIdentityRepository,
+                passwordEncoder, notificationService, jwtUtils, refreshTokenService, appProperties,
+                verificationTokenService, emailUtil, auditLogService, clock, profileResponseMapper, null);
+    }
+
+    /** Legacy constructor without clientRepository retained for backwards compatibility. */
+    public AuthService(UserRepository userRepository,
+                       AuthorizationPermissionRepository permissionRepository,
+                       RefreshTokenRepository refreshTokenRepository,
+                       OAuthIdentityRepository oauthIdentityRepository,
+                       PasswordEncoder passwordEncoder,
+                       NotificationService notificationService,
+                       JwtUtils jwtUtils,
+                       RefreshTokenService refreshTokenService,
+                       AppProperties appProperties,
+                       VerificationTokenService verificationTokenService,
+                       EmailUtil emailUtil,
+                       AuditLogService auditLogService,
+                       Clock clock,
+                       ProfileResponseMapper profileResponseMapper) {
+        this(userRepository, null, permissionRepository, refreshTokenRepository, oauthIdentityRepository,
                 passwordEncoder, notificationService, jwtUtils, refreshTokenService, appProperties,
                 verificationTokenService, emailUtil, auditLogService, clock, profileResponseMapper, null);
     }
@@ -177,6 +204,14 @@ public class AuthService {
         AccountStatus initialStatus = role == AccountRole.ARTISAN ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
         User savedUser = userRepository.save(buildNewUser(dto, email, permissions, initialStatus));
+        if (role == AccountRole.CLIENT && clientRepository != null) {
+            Client client = Client.builder()
+                    .user(savedUser)
+                    .clientType(ClientType.INDIVIDUAL.value())
+                    .build();
+            clientRepository.save(client);
+            savedUser.setClient(client);
+        }
         if (activityEventService != null) {
             activityEventService.record(AnalyticsEvent.Registration.CREATED, savedUser.getId(), savedUser.getId(),
                     Map.of(AnalyticsMetadata.Account.TYPE, role));
@@ -807,6 +842,15 @@ public class AuthService {
                 .build();
 
         user = userRepository.save(user);
+
+        if (role == AccountRole.CLIENT && clientRepository != null) {
+            Client client = Client.builder()
+                    .user(user)
+                    .clientType(ClientType.INDIVIDUAL.value())
+                    .build();
+            clientRepository.save(client);
+            user.setClient(client);
+        }
 
         OAuthIdentity identity = OAuthIdentity.builder()
                 .user(user)
