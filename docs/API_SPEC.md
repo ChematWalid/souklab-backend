@@ -1058,7 +1058,8 @@ Reorders presentation order of attachments for an authored post (`MediaOrderRequ
 
 #### Feed Interactions & Engagement
 - `POST /api/v1/feed/{id}/likes` and `DELETE /api/v1/feed/{id}/likes`: Idempotently like or unlike a post (Authenticated).
-- `GET /api/v1/feed/{id}/likes`: Query current caller's like status on post (`FeedPostLikeStatusDTO`).
+- `GET /api/v1/feed/{id}/likes`: Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identity for non-premium clients.
+- `GET /api/v1/feed/{id}/likes/status`: Query current caller's like status on post (`FeedPostLikeStatusDTO`).
 - `GET /api/v1/feed/{id}/likes/users` (or `/likes/likers`): Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identity for non-premium clients.
 - `POST /api/v1/feed/{id}/bookmarks` and `DELETE /api/v1/feed/{id}/bookmarks`: Save or remove post from bookmarks (Authenticated).
 - `GET /api/v1/feed/saved`: Paginated list of caller's saved posts (Authenticated).

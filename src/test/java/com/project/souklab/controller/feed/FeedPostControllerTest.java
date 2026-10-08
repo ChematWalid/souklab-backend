@@ -2,10 +2,13 @@ package com.project.souklab.controller.feed;
 import com.project.souklab.controller.support.SecurityTestUtils;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
+import com.project.souklab.dto.common.PaginatedResponse;
+import com.project.souklab.dto.feed.FeedPostCommentResponseDTO;
+import com.project.souklab.dto.feed.FeedPostCreateDTO;
+import com.project.souklab.dto.feed.FeedPostLikeStatusDTO;
+import com.project.souklab.dto.feed.FeedPostLikerDTO;
 import com.project.souklab.dto.feed.FeedPostMediaResponseDTO;
 import com.project.souklab.dto.feed.FeedPostResponseDTO;
-import com.project.souklab.dto.feed.FeedPostCreateDTO;
-import com.project.souklab.dto.feed.FeedPostCommentResponseDTO;
 import com.project.souklab.model.FeedPostType;
 import com.project.souklab.service.feed.FeedPostService;
 import com.project.souklab.service.feed.FeedEngagementService;
@@ -21,6 +24,7 @@ import java.util.List;
 import static com.project.souklab.controller.support.SecurityTestUtils.admin;
 import static com.project.souklab.controller.support.SecurityTestUtils.artisan;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.when;
@@ -151,5 +155,35 @@ class FeedPostControllerTest {
                 .andExpect(status().isOk());
         mockMvc.perform(post("/api/v1/admin/feed/post-1/remove").with(admin()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getLikesReturnsPaginatedLikers() throws Exception {
+        FeedPostLikerDTO liker = FeedPostLikerDTO.builder().userId("user-1").name("User One").build();
+        PaginatedResponse<FeedPostLikerDTO> response = PaginatedResponse.<FeedPostLikerDTO>builder()
+                .content(List.of(liker))
+                .pageNumber(0)
+                .pageSize(20)
+                .totalElements(1)
+                .totalPages(1)
+                .last(true)
+                .build();
+        when(feedEngagementService.likers(eq("post-1"), any())).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/feed/post-1/likes").with(artisan()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].userId").value("user-1"))
+                .andExpect(jsonPath("$.data.content[0].name").value("User One"));
+    }
+
+    @Test
+    void getLikeStatusReturnsLikeStatus() throws Exception {
+        FeedPostLikeStatusDTO statusDto = new FeedPostLikeStatusDTO(5, true);
+        when(feedEngagementService.likeStatus("post-1")).thenReturn(statusDto);
+
+        mockMvc.perform(get("/api/v1/feed/post-1/likes/status").with(artisan()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.likeCount").value(5))
+                .andExpect(jsonPath("$.data.likedByCurrentUser").value(true));
     }
 }

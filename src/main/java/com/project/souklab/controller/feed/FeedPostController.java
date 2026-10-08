@@ -200,12 +200,17 @@ public class FeedPostController {
     }
 
     @GetMapping("/{id}/likes")
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostLikerDTO>>> likers(@PathVariable String id, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(feedEngagementService.likers(id, pageable)));
+    }
+
+    @GetMapping("/{id}/likes/status")
     public ResponseEntity<ApiResponse<FeedPostLikeStatusDTO>> likeStatus(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(feedEngagementService.likeStatus(id)));
     }
 
     @GetMapping("/{id}/likes/likers")
-    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostLikerDTO>>> likers(@PathVariable String id, Pageable pageable) {
+    public ResponseEntity<ApiResponse<PaginatedResponse<FeedPostLikerDTO>>> likersAlias(@PathVariable String id, Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(feedEngagementService.likers(id, pageable)));
     }
 
