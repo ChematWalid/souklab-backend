@@ -2,6 +2,7 @@ package com.project.souklab.controller.favorite;
 
 import com.project.souklab.controller.support.ControllerSliceTest;
 import com.project.souklab.controller.support.SecurityTestUtils;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.directory.ArtisanDirectoryCardDTO;
 import com.project.souklab.dto.favorite.ClientFavoriteArtisanItemDTO;
@@ -308,12 +309,12 @@ class ClientFavoriteArtisanControllerTest {
         @DisplayName("returns 409 Conflict when client favorites cap is reached")
         void addFavorite_capReached_returns409() throws Exception {
             when(artisanFavoriteService.addFavorite(ARTISAN_ID))
-                    .thenThrow(new ConflictException("Client favorite limit reached."));
+                    .thenThrow(new ConflictException(ApiErrorCode.FAVORITES_LIMIT_REACHED, "Client favorite limit reached."));
 
             mockMvc.perform(post(BASE_URL + "/" + ARTISAN_ID).with(SecurityTestUtils.client()))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.success").value(false))
-                    .andExpect(jsonPath("$.errorCode").value("CONFLICT"))
+                    .andExpect(jsonPath("$.errorCode").value("FAVORITES_LIMIT_REACHED"))
                     .andExpect(jsonPath("$.message").value("Client favorite limit reached."));
         }
     }

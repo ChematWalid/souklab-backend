@@ -4,6 +4,7 @@ import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ClientFavoriteArtisanRepository;
 import com.project.souklab.dao.ClientRepository;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.favorite.ClientFavoriteArtisanItemDTO;
 import com.project.souklab.dto.favorite.ClientFavoriteArtisanResponseDTO;
@@ -255,6 +256,7 @@ class ArtisanFavoriteServiceTest {
 
         assertThatThrownBy(() -> service.addFavorite(ARTISAN_ID))
                 .isInstanceOf(ConflictException.class)
+                .satisfies(ex -> assertThat(((ConflictException) ex).getErrorCode()).isEqualTo(ApiErrorCode.FAVORITES_LIMIT_REACHED.value()))
                 .hasMessage("Client favorite limit reached.");
 
         verify(favoriteRepository, never()).saveAndFlush(any());

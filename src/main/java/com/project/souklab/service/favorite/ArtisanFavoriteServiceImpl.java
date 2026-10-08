@@ -4,6 +4,7 @@ import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ClientFavoriteArtisanRepository;
 import com.project.souklab.dao.ClientRepository;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.dto.common.PaginatedResponse;
 import com.project.souklab.dto.directory.ArtisanDirectoryCardDTO;
 import com.project.souklab.dto.favorite.ClientFavoriteArtisanItemDTO;
@@ -99,7 +100,7 @@ public class ArtisanFavoriteServiceImpl implements ArtisanFavoriteService {
             throw new ConflictException(ERROR_ALREADY_FAVORITED);
         }
         if (existingFavorites.size() >= appProperties.getFavorites().getMaxPerClient()) {
-            throw new ConflictException(ERROR_CAP_REACHED);
+            throw new ConflictException(ApiErrorCode.FAVORITES_LIMIT_REACHED, ERROR_CAP_REACHED);
         }
 
         ClientFavoriteArtisan favorite = ClientFavoriteArtisan.builder()

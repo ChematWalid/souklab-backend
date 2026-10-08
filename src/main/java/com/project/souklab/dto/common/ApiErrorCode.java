@@ -7,6 +7,7 @@ public enum ApiErrorCode implements EnumValue {
     BAD_REQUEST,
     CONFLICT,
     SUBSCRIPTION_ALREADY_PENDING,
+    FAVORITES_LIMIT_REACHED,
     FORBIDDEN,
     RESOURCE_NOT_FOUND,
     UNAUTHORIZED,
