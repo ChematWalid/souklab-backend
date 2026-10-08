@@ -3,10 +3,12 @@ package com.project.souklab.service.chat;
 import org.springframework.messaging.Message;
 
 import com.project.souklab.config.AppProperties;
+import com.project.souklab.dao.ConversationParticipantRepository;
 import com.project.souklab.dto.chat.ChatEvent;
 import com.project.souklab.dto.chat.ChatEventType;
 import com.project.souklab.dto.chat.ChatMetadata;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -16,6 +18,7 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import java.time.LocalDateTime;
 import java.time.Clock;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,11 +27,17 @@ import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatPresenceService {
     private final SimpMessagingTemplate messagingTemplate;
     private final AppProperties properties;
     private final Clock clock;
+    private final ConversationParticipantRepository participantRepository;
     private final Map<String, AtomicInteger> sessions = new ConcurrentHashMap<>();
+
+    public ChatPresenceService(SimpMessagingTemplate messagingTemplate, AppProperties properties, Clock clock) {
+        this(messagingTemplate, properties, clock, null);
+    }
 
     @EventListener
     public void connected(SessionConnectedEvent event) { update(event.getMessage(), 1); }
@@ -47,9 +56,25 @@ public class ChatPresenceService {
         if (current == 0) sessions.remove(username, count);
         boolean online = current > 0;
         ChatEventType.Type eventType = online ? ChatEventType.Presence.ONLINE : ChatEventType.Presence.OFFLINE;
-        messagingTemplate.convertAndSend(properties.getChat().getPresenceDestination(), ChatEvent.create(
+
+        List<String> partnerEmails = participantRepository != null
+                ? participantRepository.findPartnerEmailsByUserEmail(username)
+                : List.of();
+        if (partnerEmails.isEmpty()) {
+            return;
+        }
+
+        ChatEvent event = ChatEvent.create(
                 properties.getChat().getWebsocketProtocolVersion(), eventType, null, null, null,
                 LocalDateTime.now(clock), Map.of(ChatMetadata.Presence.USERNAME, stableHandle,
-                        ChatMetadata.Presence.ONLINE, online)));
+                        ChatMetadata.Presence.ONLINE, online));
+
+        for (String partnerEmail : partnerEmails) {
+            try {
+                messagingTemplate.convertAndSendToUser(partnerEmail, properties.getChat().getPresenceDestination(), event);
+            } catch (Exception e) {
+                log.warn("Presence event delivery failed for partner: {}", partnerEmail, e);
+            }
+        }
     }
 }

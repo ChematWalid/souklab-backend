@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,6 +106,26 @@ class MessagingRepositoryTest {
         assertThat(conversationParticipantRepository.findByConversationAndUser(reloaded, reloadedUser)).isEmpty();
         assertThat(conversationParticipantRepository.existsByConversationAndUser(reloaded, reloadedUser)).isFalse();
         assertThat(messageAttachmentRepository.findAccessibleByStorageKey("removed-member-key", reloadedUser)).isEmpty();
+    }
+
+    @Test
+    void findPartnerEmailsByUserEmailReturnsDistinctActivePartners() {
+        User user = persistUser("me@chat.test");
+        User friend1 = persistUser("friend1@chat.test");
+        User friend2 = persistUser("friend2@chat.test");
+        User deletedFriend = persistUser("deleted-partner@chat.test");
+
+        persistConversation(user, friend1);
+        persistConversation(user, friend2);
+        Conversation deletedConv = persistConversation(user, deletedFriend);
+        deletedConv.setDeletedAt(MESSAGE_TIME);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<String> partnerEmails = conversationParticipantRepository.findPartnerEmailsByUserEmail("me@chat.test");
+        assertThat(partnerEmails).containsExactlyInAnyOrder("friend1@chat.test", "friend2@chat.test");
+        assertThat(conversationParticipantRepository.findPartnerEmailsByUserEmail("unknown@chat.test")).isEmpty();
     }
 
     private User persistUser(String email) {
