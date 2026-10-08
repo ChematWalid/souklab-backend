@@ -8,6 +8,7 @@ import com.project.souklab.dao.PaymentRepository;
 import com.project.souklab.dao.SubscriptionPlanRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.exception.BadRequestException;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.dto.subscription.SubscriptionCheckoutRequest;
 import com.project.souklab.integration.chargily.ChargilyCheckoutClient;
 import com.project.souklab.model.Artisan;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -120,12 +122,14 @@ class SubscriptionCheckoutServiceTest {
         req.setPlanId("plan-artisan");
         assertThatThrownBy(() -> svc.checkout(req, "key-2"))
                 .isInstanceOf(BadRequestException.class)
+                .satisfies(ex -> assertThat(((BadRequestException) ex).getErrorCode()).isEqualTo(ApiErrorCode.SUBSCRIPTION_ALREADY_PENDING.value()))
                 .hasMessageContaining("already active or a payment is already pending");
 
         when(artisanRepo.countByAccountIdAndStatus("account-2", SubscriptionStatus.ACTIVE)).thenReturn(0L);
         when(artisanRepo.countByAccountIdAndStatus("account-2", SubscriptionStatus.PENDING)).thenReturn(1L);
         assertThatThrownBy(() -> svc.checkout(req, "key-2"))
                 .isInstanceOf(BadRequestException.class)
+                .satisfies(ex -> assertThat(((BadRequestException) ex).getErrorCode()).isEqualTo(ApiErrorCode.SUBSCRIPTION_ALREADY_PENDING.value()))
                 .hasMessageContaining("already active or a payment is already pending");
     }
 }

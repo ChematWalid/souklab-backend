@@ -12,4 +12,12 @@ public class BadRequestException extends AppException {
     public BadRequestException(String message, Throwable cause) {
         super(HttpStatus.BAD_REQUEST, ApiErrorCode.BAD_REQUEST, message, cause);
     }
+
+    public BadRequestException(ApiErrorCode errorCode, String message) {
+        super(HttpStatus.BAD_REQUEST, errorCode, message);
+    }
+
+    public BadRequestException(String errorCode, String message) {
+        super(HttpStatus.BAD_REQUEST, errorCode, message);
+    }
 }

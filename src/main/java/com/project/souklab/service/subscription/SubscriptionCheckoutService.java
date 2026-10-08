@@ -15,6 +15,7 @@ import com.project.souklab.dao.ClientSubscriptionRepository;
 import com.project.souklab.dao.PaymentRepository;
 import com.project.souklab.dao.SubscriptionPlanRepository;
 import com.project.souklab.dao.UserRepository;
+import com.project.souklab.dto.common.ApiErrorCode;
 import com.project.souklab.dto.subscription.SubscriptionCheckoutRequest;
 import com.project.souklab.dto.subscription.SubscriptionCheckoutResponse;
 import com.project.souklab.dto.subscription.SubscriptionPlanSnapshot;
@@ -120,7 +121,8 @@ public class SubscriptionCheckoutService {
                 : clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.ACTIVE) > 0
                         || clientSubscriptionRepository.countByAccountIdAndStatus(user.getId(), SubscriptionStatus.PENDING) > 0;
         if (hasBlockingSubscription) {
-            throw new BadRequestException("A subscription is already active or a payment is already pending");
+            throw new BadRequestException(ApiErrorCode.SUBSCRIPTION_ALREADY_PENDING,
+                    "A subscription is already active or a payment is already pending");
         }
         String snapshot = snapshot(plan);
         String subscriptionId = createSubscription(user, plan, snapshot);

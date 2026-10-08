@@ -6,6 +6,7 @@ import com.project.souklab.model.EnumValue;
 public enum ApiErrorCode implements EnumValue {
     BAD_REQUEST,
     CONFLICT,
+    SUBSCRIPTION_ALREADY_PENDING,
     FORBIDDEN,
     RESOURCE_NOT_FOUND,
     UNAUTHORIZED,
