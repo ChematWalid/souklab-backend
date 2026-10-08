@@ -455,7 +455,7 @@ public class FeedPostService {
         User viewer = resolveCurrentViewer();
         if (viewer == null) {
             return posts.map(post -> {
-                FeedPostResponseDTO mapped = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+                FeedPostResponseDTO mapped = FeedPostResponseDTO.from(post, this::resolveMediaUrl);
                 return feedPrivacyService.protectPost(post, mapped);
             });
         }
@@ -466,7 +466,7 @@ public class FeedPostService {
     }
 
     private FeedPostResponseDTO toResponse(FeedPost post) {
-        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, this::resolveMediaUrl);
         FeedPostResponseDTO response = feedPrivacyService.protectPost(post, mappedResponse);
         User viewer = resolveCurrentViewer();
         if (viewer == null) {
@@ -479,7 +479,7 @@ public class FeedPostService {
     }
 
     private FeedPostResponseDTO toResponseWithViewer(FeedPost post, User viewer, Set<String> likedPostIds, Set<String> bookmarkedPostIds) {
-        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, fileUrlResolver::toUrl);
+        FeedPostResponseDTO mappedResponse = FeedPostResponseDTO.from(post, this::resolveMediaUrl);
         FeedPostResponseDTO response = feedPrivacyService.protectPost(post, mappedResponse);
         if (viewer == null) {
             return response;
@@ -488,6 +488,10 @@ public class FeedPostService {
                 .likedByCurrentUser(likedPostIds != null && likedPostIds.contains(post.getId()))
                 .bookmarkedByCurrentUser(bookmarkedPostIds != null && bookmarkedPostIds.contains(post.getId()))
                 .build();
+    }
+
+    private String resolveMediaUrl(String key) {
+        return fileUrlResolver == null ? key : fileUrlResolver.toUrl(key);
     }
 
     private User resolveCurrentViewer() {
@@ -541,8 +545,10 @@ public class FeedPostService {
     }
 
     private void validateAuthor(User user) {
-        if (user.getStatus() != AccountStatus.ACTIVE
-                || (!isAdmin() && (!hasArtisanContentPermission() || !isVerifiedArtisan(user)))) {
+        boolean isActive = user.getStatus() == AccountStatus.ACTIVE;
+        boolean isEligibleArtisan = hasArtisanContentPermission() && isVerifiedArtisan(user);
+        boolean isPermitted = isActive && (isAdmin() || isEligibleArtisan);
+        if (!isPermitted) {
             throw new ForbiddenException("Only active verified artisans or administrators may publish feed posts.");
         }
     }

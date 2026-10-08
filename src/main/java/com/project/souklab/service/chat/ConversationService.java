@@ -25,6 +25,7 @@ import com.project.souklab.filestorage.StorageService;
 import com.project.souklab.filestorage.validation.FileValidator;
 import org.springframework.web.multipart.MultipartFile;
 import com.project.souklab.security.Permission;
+import com.project.souklab.security.ViewerPremiumResolver;
 import com.project.souklab.service.notification.NotificationService;
 import com.project.souklab.service.notification.AfterCommitAction;
 import com.project.souklab.service.user.CurrentUserProvider;
@@ -90,8 +91,12 @@ public class ConversationService {
     public List<ConversationResponse> list(boolean archived) {
         User current = requireCurrentUser(false);
         return conversationRepository.findAllForUser(current).stream()
-                .map(c -> participantRepository.findByConversationAndUser(c, current).filter(p -> p.isArchived() == archived).map(p -> toConversation(c, current)).orElse(null))
-                .filter(Objects::nonNull).toList();
+                .map(c -> participantRepository.findByConversationAndUser(c, current)
+                        .filter(p -> p.isArchived() == archived)
+                        .map(p -> toConversation(c, current, p))
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -251,9 +256,15 @@ public class ConversationService {
     }
     private ConversationResponse toConversation(Conversation c, User current) {
         ConversationParticipant self = participantRepository.findByConversationAndUser(c, current).orElseThrow();
+        return toConversation(c, current, self);
+    }
+
+    private ConversationResponse toConversation(Conversation c, User current, ConversationParticipant self) {
         ConversationParticipant p = otherParticipant(c, current);
-        String preview = messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(c, PageRequest.of(0, 1)).stream().findFirst().map(Message::getContent).orElse(null);
-        LocalDateTime after = self.getLastReadMessageId() == null ? null : messageRepository.findById(self.getLastReadMessageId()).map(Message::getCreatedAt).orElse(null);
+        String preview = messageRepository.findByConversationAndDeletedAtIsNullOrderByCreatedAtDesc(c, PageRequest.of(0, 1))
+                .stream().findFirst().map(Message::getContent).orElse(null);
+        LocalDateTime after = self.getLastReadMessageId() == null ? null
+                : messageRepository.findById(self.getLastReadMessageId()).map(Message::getCreatedAt).orElse(null);
         long unread = messageRepository.countUnread(c, current, after);
         String participantName = resolveParticipantName(p.getUser(), current);
         String role = p.getUser().getArtisan() != null ? "ARTISAN" : p.getUser().getClient() != null ? "CLIENT" : "USER";
@@ -262,6 +273,7 @@ public class ConversationService {
         return new ConversationResponse(c.getId(), p.getUser().getId(), participantName, self.isArchived(), preview, unread,
                 c.getUpdatedAt(), participantAvatarUrl, role, self.getLastReadMessageId(), p.getLastReadMessageId());
     }
+
     private boolean isParticipantIdentityMasked(User participant, User viewer) {
         if (participant == null || participant.getArtisan() == null) return false;
         boolean isAdmin = viewer != null && viewer.getPermissions() != null && viewer.getPermissions().stream()
@@ -270,22 +282,15 @@ public class ConversationService {
         return !isAdmin && !isSelf && isClient(viewer)
                 && (viewer.getClient() == null || !viewer.getClient().isPremium());
     }
+
     private String resolveParticipantName(User participant, User viewer) {
         if (participant == null) return "Unknown";
-        if (participant.getArtisan() != null) {
-            if (isParticipantIdentityMasked(participant, viewer)) {
-                    String artisanId = participant.getArtisan().getId();
-                    if (artisanId == null || artisanId.isBlank()) {
-                        return "Artisan #?????";
-                    }
-                    String suffix = artisanId.length() >= 5
-                            ? artisanId.substring(artisanId.length() - 5)
-                            : artisanId;
-                    return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
-            }
+        if (participant.getArtisan() != null && isParticipantIdentityMasked(participant, viewer)) {
+            return ViewerPremiumResolver.maskArtisanName(participant.getArtisan().getId());
         }
         return participant.getName();
     }
+
     private boolean isClient(User user) {
         if (user == null) return false;
         if (user.getArtisan() != null) return false;
@@ -296,10 +301,72 @@ public class ConversationService {
         }
         return false;
     }
-    private MessageResponse toMessage(Message m) { return new MessageResponse(m.getId(), m.getConversation().getId(), m.getAuthor().getId(), m.getDeletedAt() == null ? m.getContent() : "", m.getDeletedAt() != null, m.getCreatedAt(), m.getEditedAt(), m.getAttachments().stream().map(a -> new MessageAttachmentResponse(a.getId(), a.getOriginalFilename(), a.getContentType(), a.getSize(), properties.getStorage().toUrl(a.getStorageKey()))).toList()); }
-    private String encodeCursor(Message message) { LocalDateTime expiry = LocalDateTime.now(clock).plus(properties.getChat().getCursorLifetime()); String value = message.getCreatedAt() + "|" + message.getId() + "|" + expiry; return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8)); }
-    private MessageCursor decodeCursor(String cursor) { if (cursor == null || cursor.isBlank()) return null; try { String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3); LocalDateTime expiry = LocalDateTime.parse(values[2]); if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired"); return new MessageCursor(LocalDateTime.parse(values[0]), values[1]); } catch (BadRequestException e) { throw e; } catch (Exception e) { throw new BadRequestException("Invalid message cursor"); } }
-    private void dispatch(Conversation c, ChatEventType.Type type, Message m, String correlationId) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), type, c.getId(), m.getId(), correlationId, LocalDateTime.now(clock), toMessage(m)); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
-    private void send(Conversation c, ChatEvent event) { for (ConversationParticipant p : c.getParticipants()) try { messagingTemplate.convertAndSendToUser(p.getUser().getEmail(), properties.getChat().getEventDestination(), event); } catch (Exception e) { log.warn("Chat event delivery failed", e); } }
-        private void dispatchRead(Conversation c, Message message, User reader) { ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UpTo.EVENT, c.getId(), message.getId(), null, LocalDateTime.now(clock), Map.of(ChatMetadata.Read.READER, reader.getId(), ChatMetadata.Read.MESSAGE_ID, message.getId())); if (TransactionSynchronizationManager.isActualTransactionActive()) TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event))); else send(c, event); }
+
+    private MessageResponse toMessage(Message m) {
+        return new MessageResponse(
+                m.getId(),
+                m.getConversation().getId(),
+                m.getAuthor().getId(),
+                m.getDeletedAt() == null ? m.getContent() : "",
+                m.getDeletedAt() != null,
+                m.getCreatedAt(),
+                m.getEditedAt(),
+                m.getAttachments().stream().map(a -> new MessageAttachmentResponse(
+                        a.getId(),
+                        a.getOriginalFilename(),
+                        a.getContentType(),
+                        a.getSize(),
+                        properties.getStorage().toUrl(a.getStorageKey()))).toList());
+    }
+
+    private String encodeCursor(Message message) {
+        LocalDateTime expiry = LocalDateTime.now(clock).plus(properties.getChat().getCursorLifetime());
+        String value = message.getCreatedAt() + "|" + message.getId() + "|" + expiry;
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private MessageCursor decodeCursor(String cursor) {
+        if (cursor == null || cursor.isBlank()) return null;
+        try {
+            String[] values = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8).split("\\|", 3);
+            LocalDateTime expiry = LocalDateTime.parse(values[2]);
+            if (LocalDateTime.now(clock).isAfter(expiry)) throw new BadRequestException("Message cursor has expired");
+            return new MessageCursor(LocalDateTime.parse(values[0]), values[1]);
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid message cursor");
+        }
+    }
+
+    private void dispatch(Conversation c, ChatEventType.Type type, Message m, String correlationId) {
+        ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), type,
+                c.getId(), m.getId(), correlationId, LocalDateTime.now(clock), toMessage(m));
+        dispatchAfterCommit(c, event);
+    }
+
+    private void dispatchRead(Conversation c, Message message, User reader) {
+        ChatEvent event = ChatEvent.create(properties.getChat().getWebsocketProtocolVersion(), ChatEventType.Read.UpTo.EVENT,
+                c.getId(), message.getId(), null, LocalDateTime.now(clock),
+                Map.of(ChatMetadata.Read.READER, reader.getId(), ChatMetadata.Read.MESSAGE_ID, message.getId()));
+        dispatchAfterCommit(c, event);
+    }
+
+    private void dispatchAfterCommit(Conversation c, ChatEvent event) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new AfterCommitAction(() -> send(c, event)));
+        } else {
+            send(c, event);
+        }
+    }
+
+    private void send(Conversation c, ChatEvent event) {
+        for (ConversationParticipant p : c.getParticipants()) {
+            try {
+                messagingTemplate.convertAndSendToUser(p.getUser().getEmail(), properties.getChat().getEventDestination(), event);
+            } catch (Exception e) {
+                log.warn("Chat event delivery failed", e);
+            }
+        }
+    }
 }

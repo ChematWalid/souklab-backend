@@ -150,7 +150,9 @@ public class FeedEngagementService {
         Page<FeedPostLike> likes = postLikeRepository.findByPostId(postId, pageable);
         return PaginatedResponse.from(likes.map(like -> {
             User liker = like.getUser();
-            boolean redact = liker.getArtisan() != null && viewerPremiumResolver.isContactInfoLockedFor(liker);
+            boolean redact = liker.getArtisan() != null
+                    && viewerPremiumResolver != null
+                    && viewerPremiumResolver.isContactInfoLockedFor(liker);
             return FeedPostLikerDTO.builder()
                     .userId(liker.getId())
                     .name(redact ? null : liker.getPublicDisplayName())

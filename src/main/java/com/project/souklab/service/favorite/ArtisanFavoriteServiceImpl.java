@@ -127,9 +127,7 @@ public class ArtisanFavoriteServiceImpl implements ArtisanFavoriteService {
      */
     @Override
     public PaginatedResponse<ClientFavoriteArtisanItemDTO> listFavorites(Pageable pageable) {
-        User user = currentUserProvider.requireCurrentUser();
-        Client client = clientRepository.findById(user.getId())
-                .orElseThrow(() -> new ForbiddenException(ERROR_CLIENT_PROFILE_REQUIRED));
+        Client client = requireCurrentClient();
 
         LocalDateTime now = LocalDateTime.now(clock);
         Page<ClientFavoriteArtisan> page = favoriteRepository.findVisibleByClientId(
@@ -154,9 +152,7 @@ public class ArtisanFavoriteServiceImpl implements ArtisanFavoriteService {
      */
     @Override
     public FavoriteStatusResponseDTO isFavorited(String artisanId) {
-        User user = currentUserProvider.requireCurrentUser();
-        Client client = clientRepository.findById(user.getId())
-                .orElseThrow(() -> new ForbiddenException(ERROR_CLIENT_PROFILE_REQUIRED));
+        Client client = requireCurrentClient();
 
         Artisan artisan = artisanRepository.findById(artisanId)
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_ARTISAN_NOT_FOUND_PREFIX + artisanId));
@@ -176,13 +172,17 @@ public class ArtisanFavoriteServiceImpl implements ArtisanFavoriteService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void removeFavorite(String artisanId) {
-        User user = currentUserProvider.requireCurrentUser();
-        Client client = clientRepository.findById(user.getId())
-                .orElseThrow(() -> new ForbiddenException(ERROR_CLIENT_PROFILE_REQUIRED));
+        Client client = requireCurrentClient();
 
         ClientFavoriteArtisan favorite = favoriteRepository.findByClientIdAndArtisanId(client.getId(), artisanId)
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_FAVORITE_NOT_FOUND_PREFIX + artisanId));
 
         favoriteRepository.delete(favorite);
+    }
+
+    private Client requireCurrentClient() {
+        User user = currentUserProvider.requireCurrentUser();
+        return clientRepository.findById(user.getId())
+                .orElseThrow(() -> new ForbiddenException(ERROR_CLIENT_PROFILE_REQUIRED));
     }
 }

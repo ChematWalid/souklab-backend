@@ -50,20 +50,30 @@ public class ChatPresenceService {
     }
 
     @EventListener
-    public void connected(SessionConnectedEvent event) { update(event.getMessage(), 1); }
+    public void connected(SessionConnectedEvent event) {
+        update(event.getMessage(), 1);
+    }
 
     @EventListener
-    public void disconnected(SessionDisconnectEvent event) { update(event.getMessage(), -1); }
+    public void disconnected(SessionDisconnectEvent event) {
+        update(event.getMessage(), -1);
+    }
 
     private void update(Message<?> message, int delta) {
-        if (message == null) return;
+        if (message == null) {
+            return;
+        }
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        if (accessor == null || accessor.getUser() == null) return;
+        if (accessor == null || accessor.getUser() == null) {
+            return;
+        }
         String username = accessor.getUser().getName();
         String stableHandle = "user-" + UUID.nameUUIDFromBytes(username.getBytes(StandardCharsets.UTF_8)).toString();
         AtomicInteger count = sessions.computeIfAbsent(username, ignored -> new AtomicInteger());
         int current = Math.max(0, count.addAndGet(delta));
-        if (current == 0) sessions.remove(username, count);
+        if (current == 0) {
+            sessions.remove(username, count);
+        }
         boolean online = current > 0;
         ChatEventType.Type eventType = online ? ChatEventType.Presence.ONLINE : ChatEventType.Presence.OFFLINE;
 

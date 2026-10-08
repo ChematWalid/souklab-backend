@@ -8,6 +8,7 @@ import com.project.souklab.model.Material;
 import com.project.souklab.model.Region;
 import com.project.souklab.model.Technique;
 import com.project.souklab.model.User;
+import com.project.souklab.security.ViewerPremiumResolver;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -136,12 +137,7 @@ public class ArtisanDirectoryCardDTO {
      */
     private static String resolveArtisanName(Artisan artisan, User user, boolean contactInfoLocked) {
         if (contactInfoLocked) {
-            String id = artisan.getId();
-            if (id == null || id.isBlank()) {
-                return "Artisan #?????";
-            }
-            String suffix = id.length() >= 5 ? id.substring(id.length() - 5) : id;
-            return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
+            return ViewerPremiumResolver.maskArtisanName(artisan != null ? artisan.getId() : null);
         }
         return user != null ? user.getName() : null;
     }

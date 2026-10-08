@@ -96,8 +96,10 @@ public class ArtisanReviewService {
         Artisan reviewer = currentArtisan();
         var enrollment = enrollmentRepository.findByFormationIdAndArtisanId(formationId, reviewer.getId())
                 .orElseThrow(() -> new ForbiddenException("Only enrolled artisans may submit a review."));
-        if (enrollment.getStatus() != EnrollmentStatus.ATTENDED
-                || enrollment.getFormation().getStatus() != FormationStatus.COMPLETED) {
+        boolean isAttended = enrollment.getStatus() == EnrollmentStatus.ATTENDED;
+        boolean isCompleted = enrollment.getFormation() != null
+                && enrollment.getFormation().getStatus() == FormationStatus.COMPLETED;
+        if (!isAttended || !isCompleted) {
             throw new ForbiddenException("Reviews require an attended completed formation.");
         }
         Artisan subject = enrollment.getFormation().getAuthor();

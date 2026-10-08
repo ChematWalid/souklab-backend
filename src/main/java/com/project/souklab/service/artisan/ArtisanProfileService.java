@@ -198,8 +198,7 @@ public class ArtisanProfileService {
      */
     private String resolveName(Artisan artisan, User targetUser, boolean contactInfoLocked) {
         if (contactInfoLocked) {
-            String id = artisan.getId();
-            return "Artisan #" + (id.length() >= 5 ? id.substring(id.length() - 5).toUpperCase(Locale.ROOT) : id.toUpperCase(Locale.ROOT));
+            return ViewerPremiumResolver.maskArtisanName(artisan != null ? artisan.getId() : null);
         }
         if (targetUser == null) {
             return null;

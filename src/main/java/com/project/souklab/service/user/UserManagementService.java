@@ -17,6 +17,7 @@ import com.project.souklab.exception.ResourceNotFoundException;
 import com.project.souklab.model.AccountStatus;
 import com.project.souklab.model.Artisan;
 import com.project.souklab.model.AuditLogAction;
+import com.project.souklab.model.Client;
 import com.project.souklab.model.NotificationType;
 import com.project.souklab.model.User;
 import com.project.souklab.model.AuthorizationPermission;
@@ -161,10 +162,7 @@ public class UserManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
 
-        String currentAdminEmail = SecurityUtils.getCurrentUsername();
-        if (currentAdminEmail != null && currentAdminEmail.equalsIgnoreCase(user.getEmail())) {
-            throw new BadRequestException("Administrators cannot ban or timeout their own account.");
-        }
+        validateNotSelfTargeting(user);
 
         user.setStatus(AccountStatus.SUSPENDED);
         user.setBanReason(reason != null ? reason : appProperties.getAdmin().getDefaultBanReason());
@@ -201,10 +199,7 @@ public class UserManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(ERROR_USER_NOT_FOUND_PREFIX + userId));
 
-        String currentAdminEmail = SecurityUtils.getCurrentUsername();
-        if (currentAdminEmail != null && currentAdminEmail.equalsIgnoreCase(user.getEmail())) {
-            throw new BadRequestException("Administrators cannot ban or timeout their own account.");
-        }
+        validateNotSelfTargeting(user);
 
         user.setStatus(AccountStatus.SUSPENDED);
         user.setBanReason(reason != null ? reason : appProperties.getAdmin().getDefaultTimeoutReason());
@@ -250,6 +245,13 @@ public class UserManagementService {
         }
     }
 
+    private void validateNotSelfTargeting(User targetUser) {
+        String currentAdminEmail = SecurityUtils.getCurrentUsername();
+        if (currentAdminEmail != null && currentAdminEmail.equalsIgnoreCase(targetUser.getEmail())) {
+            throw new BadRequestException("Administrators cannot ban or timeout their own account.");
+        }
+    }
+
     private void recordModeration(AnalyticsEvent.Type type, User user,
                                   Map<? extends AnalyticsMetadata.Key, ?> metadata) {
         if (activityEventService != null) activityEventService.record(type, user.getId(), user.getId(), metadata);
@@ -272,11 +274,14 @@ public class UserManagementService {
         AccountStatus effectiveStatus = user.getEffectiveStatus(now);
         boolean isExpiredTimeout = user.getStatus() != effectiveStatus;
 
-        boolean isPremium = (user.getArtisan() != null && user.getArtisan().isPremium())
-                || (user.getClient() != null && user.getClient().isPremium());
-        boolean isTeacher = user.getArtisan() != null && user.getArtisan().isTeacher();
-        boolean isValidated = (user.getArtisan() != null && user.getArtisan().isVerified())
-                || (user.getClient() != null && user.getClient().isVerified());
+        Artisan artisan = user.getArtisan();
+        Client client = user.getClient();
+
+        boolean isPremium = (artisan != null && artisan.isPremium())
+                || (client != null && client.isPremium());
+        boolean isTeacher = artisan != null && artisan.isTeacher();
+        boolean isValidated = (artisan != null && artisan.isVerified())
+                || (client != null && client.isVerified());
 
         return UserResponseDTO.builder()
                 .id(user.getId())

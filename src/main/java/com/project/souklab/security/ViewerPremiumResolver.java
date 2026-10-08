@@ -113,4 +113,21 @@ public class ViewerPremiumResolver {
         }
         return true;
     }
+
+    /**
+     * Standardizes the anonymised display name for an artisan whose contact or identity is masked.
+     * Produces {@code "Artisan #XXXXX"} (the last 5 characters of the artisan ID, uppercased).
+     *
+     * @param artisanId unique identifier of the artisan
+     * @return anonymised artisan display label
+     */
+    public static String maskArtisanName(String artisanId) {
+        if (artisanId == null || artisanId.isBlank()) {
+            return "Artisan #?????";
+        }
+        String suffix = artisanId.length() >= 5
+                ? artisanId.substring(artisanId.length() - 5)
+                : artisanId;
+        return "Artisan #" + suffix.toUpperCase(Locale.ROOT);
+    }
 }
