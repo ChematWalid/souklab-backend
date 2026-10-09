@@ -8,7 +8,7 @@ Data Transfer Objects and WebSocket event contracts for realtime 1-on-1 messagin
 
 | Class | Type | Responsibility |
 | :--- | :--- | :--- |
-| [`ConversationResponse`](ConversationResponse.java) | Response | Conversation summary including participants, active status, unread count, and last message. |
+| [`ConversationResponse`](ConversationResponse.java) | Response | Conversation summary including participants, active status, unread count, last message, `lastReadMessageId` (caller's read position), and `participantLastReadMessageId` (partner's read position). |
 | [`CreateConversationRequest`](CreateConversationRequest.java) | Request | Initiates a conversation between a client and an artisan (self-conversations rejected). |
 | [`ArchiveConversationRequest`](ArchiveConversationRequest.java) | Request | Payload for archiving or unarchiving a conversation. |
 | [`ChatMetadata`](ChatMetadata.java) | Model | Conversation metadata attributes and settings. |
@@ -20,5 +20,5 @@ Data Transfer Objects and WebSocket event contracts for realtime 1-on-1 messagin
 | [`ReadReceiptRequest`](ReadReceiptRequest.java) | Request | Marks conversation messages up to a specific message ID as read. |
 | [`TypingCommand`](TypingCommand.java) | Command | Ephemeral typing indicator payload sent over WebSocket. |
 | [`ChatEvent`](ChatEvent.java) | Event | Structured envelope broadcast to user queues over STOMP/RabbitMQ. |
-| [`ChatEventType`](ChatEventType.java) | Enum | Event taxonomy: `MESSAGE_SENT`, `MESSAGE_EDITED`, `MESSAGE_DELETED`, `MESSAGE_READ`, `TYPING_STARTED`, `TYPING_STOPPED`. |
+| [`ChatEventType`](ChatEventType.java) | Enum | Grouped event taxonomy: `Message` (`CREATED`, `UPDATED`, `DELETED`), `Presence` (`ONLINE`, `OFFLINE`), `Typing` (`STARTED`, `STOPPED`), `Read.UpTo`, and `Command` (`ACKNOWLEDGED`, `ERROR`). |
 | [`AttachmentUploadResponse`](AttachmentUploadResponse.java) | Response | Details of uploaded chat attachment (key, MIME type, size). |

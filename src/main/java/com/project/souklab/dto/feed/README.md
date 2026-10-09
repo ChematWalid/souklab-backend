@@ -5,7 +5,7 @@ Request and response contracts for moderated feed posts, normalized tags, engage
 | Class | Responsibility |
 | --- | --- |
 | [`FeedPostCreateDTO`](FeedPostCreateDTO.java) | Validated post creation input. |
-| [`FeedPostResponseDTO`](FeedPostResponseDTO.java) | Public and authenticated post representation. |
+| [`FeedPostResponseDTO`](FeedPostResponseDTO.java) | Public and authenticated post representation (including counters, `likedByCurrentUser`, and `bookmarkedByCurrentUser`). |
 | [`FeedPostMediaResponseDTO`](FeedPostMediaResponseDTO.java) | Ordered media attachment representation. |
 | [`MediaOrderRequest`](MediaOrderRequest.java) | Media reordering payload containing updated attachment display order. |
 | [`FeedPostModerationDTO`](FeedPostModerationDTO.java) | Administrator moderation decision input. |

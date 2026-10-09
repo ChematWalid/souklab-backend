@@ -8,12 +8,12 @@ Transactional services managing subscription lifecycles, Chargily Pay V2 integra
 
 | Service | Responsibility |
 | :--- | :--- |
-| [`SubscriptionCheckoutService`](SubscriptionCheckoutService.java) | Creates pending payment records and initiates hosted checkout sessions with Chargily. |
+| [`SubscriptionCheckoutService`](SubscriptionCheckoutService.java) | Creates pending payment records and initiates hosted checkout sessions with Chargily. Enforces concurrency protection against duplicate active subscriptions (`409 Conflict`) and pending sessions (`400 Bad Request` with `errorCode: "SUBSCRIPTION_ALREADY_PENDING"`). |
 | [`ChargilyWebhookService`](ChargilyWebhookService.java) | Processes incoming webhooks, validates signatures, claims event IDs for idempotency, and updates payments/subscriptions. |
 | [`WebhookSecurityService`](WebhookSecurityService.java) | Cryptographic HMAC-SHA256 signature validation against the configured Chargily webhook secret. |
 | [`WebhookEventClaimService`](WebhookEventClaimService.java) | Database-backed event deduplication preventing double-crediting or duplicate processing. |
 | [`SubscriptionLifecycleService`](SubscriptionLifecycleService.java) | Manages subscription activations, renewals, grace periods, and expiration transitions. |
-| [`SubscriptionAccountService`](SubscriptionAccountService.java) | Evaluates user entitlements, active plans, and billing history. |
+| [`SubscriptionAccountService`](SubscriptionAccountService.java) | Evaluates user entitlements, active plans, and billing history (`SubscriptionResponse` and `PaymentResponse` enriched with `createdAt`, `accountId`, and `accountName`). |
 | [`SubscriptionPlanService`](SubscriptionPlanService.java) | Cached retrieval of publicly active subscription plans and single plan lookups. |
 | [`SubscriptionPlanRules`](SubscriptionPlanRules.java) | Domain entitlement rules defining limits (portfolio size, formation count) per tier. |
 | [`AdminSubscriptionService`](AdminSubscriptionService.java) | Administrative subscription interventions, single subscription detail retrieval, manual grants, and dispute resolutions. |

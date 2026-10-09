@@ -30,6 +30,7 @@ All four endpoints enforce method security via:
 1. **Permission Check:** The caller must hold the granted authority `permission:client:favorites` (`Permission.Client.FAVORITES`).
 2. **Client Profile Check:** In addition to holding the permission, the service layer requires the authenticated user to possess an active `Client` profile record in the database. Principals without a client profile (e.g. Administrators) receive `403 Forbidden` (`Only registered clients can manage favorites.`).
 3. **Anonymous Requests:** Requests lacking bearer tokens receive `401 Unauthorized` with standard `ApiResponse` error envelopes.
+4. **Capacity Limits & Error Code:** Client favorites are capped by `app.favorites.max-per-client` (`FAVORITES_MAX_PER_CLIENT`, default: 500) guarded by a pessimistic write lock on the `Client` entity. If the limit is reached, addition fails with `409 Conflict` and `errorCode: "FAVORITES_LIMIT_REACHED"` (`"Client favorite limit reached."`). Duplicate favorites are rejected with `409 Conflict`.
 
 ---
 

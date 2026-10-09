@@ -13,9 +13,9 @@ All endpoints require authentication (`Authorization: Bearer <accessToken>`).
 
 | Method | Endpoint | Summary | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/conversations` | Create/get conversation | Creates a private conversation with `recipientUserId` or returns existing. |
+| `POST` | `/api/v1/conversations` | Create/get conversation | Creates a private conversation with `recipientUserId` or returns existing (`ConversationResponse` with `lastReadMessageId` and `participantLastReadMessageId`). |
 | `GET` | `/api/v1/conversations` | List conversations | Lists all user conversations, optionally filtered by `?archived=true/false`. |
-| `GET` | `/api/v1/conversations/{id}` | Get conversation | Retrieves one conversation summary for a participant. |
+| `GET` | `/api/v1/conversations/{id}` | Get conversation | Retrieves one conversation summary for a participant (`ConversationResponse`). |
 | `PATCH`| `/api/v1/conversations/{id}/archive` | Archive conversation | Toggles archive state for a conversation (`{ "archived": true/false }`). |
 | `GET` | `/api/v1/conversations/{id}/messages` | Get messages | Retrieves cursor-paginated message history (`?cursor=<id>&size=20`). |
 | `POST` | `/api/v1/conversations/{id}/messages` | Send message | Sends a text message in the conversation. |
@@ -46,5 +46,14 @@ Incoming messages do not implicitly unarchive a participant's conversation. Pres
 ### Subscriptions (Server -> Client)
 - `/user/queue/chat`: Message deliveries, command acknowledgments, errors
 - `/user/queue/chat-events`: Real-time typing indicators, read receipts, message updates
-- `/topic/presence`: Real-time user online/offline presence broadcasts
+- `/user/queue/presence` (or user destination prefix + configured presence destination): Real-time user online/offline presence notifications delivered strictly to active conversation partners (`ChatPresenceService`)
 - `/user/queue/notifications`: In-app notifications
+
+---
+
+## Classes Reference
+
+| Class | Type | Description |
+|---|---|---|
+| [`ConversationController`](ConversationController.java) | REST Controller (`/api/v1/conversations`) | 1-on-1 conversations, cursor-paginated messages, attachment upload, archive toggling, and read receipts. |
+| [`ChatStompController`](ChatStompController.java) | STOMP Controller (`/app/v1/conversations`) | Inbound WebSocket STOMP handlers for sending, editing, deleting messages, typing indicators, and read receipts. |

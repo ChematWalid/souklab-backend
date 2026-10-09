@@ -32,11 +32,11 @@ Base Path: `/api/v1/feed`
 | `POST` | `/api/v1/feed/{id}/submit` | Authenticated owner | Resubmit post | Submits a `DRAFT` or `REJECTED` post for moderation. |
 | `PUT` | `/api/v1/feed/{id}` | Authenticated | Update feed post | Updates content, normalized tags, or title of an owned post. Non-draft edits return to `PENDING`. |
 | `DELETE` | `/api/v1/feed/{id}` | Authenticated | Delete feed post | Soft-deletes or removes an owned post. |
-| `POST/DELETE` | `/api/v1/feed/{id}/likes` | Authenticated | Like/unlike post | One unique like per user, with conflict-safe insertion and atomic counters. |
-| `GET` | `/api/v1/feed/{id}/likes` | Public | Read like status | Returns the current caller's like state and the post like count. |
-| `GET` | `/api/v1/feed/{id}/likes/users` | Public | List likers | Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identities for non-premium clients. Alias: `/likes/likers`. |
+| `POST/DELETE` | `/api/v1/feed/{id}/likes` | Authenticated | Like/unlike post | One unique like per user, with conflict-safe insertion and atomic counters. Returns `FeedPostLikeStatusDTO` on like. |
+| `GET` | `/api/v1/feed/{id}/likes` | Public | List likers | Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identities for non-premium clients. Aliases: `/likes/users`, `/likes/likers`. |
+| `GET` | `/api/v1/feed/{id}/likes/status` | Public | Read like status | Returns the current caller's like state and the post like count (`FeedPostLikeStatusDTO`). |
 | `POST/DELETE` | `/api/v1/feed/{id}/bookmarks` | Authenticated | Bookmark/unbookmark post | One unique bookmark per user. |
-| `GET` | `/api/v1/feed/saved` | Authenticated | Saved posts | Lists the current user's bookmarked posts ordered by bookmark date descending. |
+| `GET` | `/api/v1/feed/saved` | Authenticated | Saved posts | Lists the current user's bookmarked posts ordered by bookmark date descending (populates `likedByCurrentUser` and `bookmarkedByCurrentUser`). |
 | `GET/POST` | `/api/v1/feed/{id}/comments` | Public/authenticated | Comments | Lists root comments publicly or creates an authenticated root comment. Author display names use `Membre #xxxxx` when names are blank. |
 | `GET` | `/api/v1/feed/comments/{commentId}` | Public | Get comment | Retrieves one visible comment or reply. |
 | `GET/POST` | `/api/v1/feed/comments/{commentId}/replies` | Public/authenticated | Replies | Lists or creates one-level replies. |
@@ -164,3 +164,12 @@ export interface FeedPostResponse {
   bookmarkedByCurrentUser: boolean;
 }
 ```
+
+---
+
+## Classes Reference
+
+| Class | Type | Description |
+|---|---|---|
+| [`FeedPostController`](FeedPostController.java) | REST Controller (`/api/v1/feed`) | Public feed browsing, author post management, media upload/ordering, like/likers queries, bookmarks, comments, and replies. |
+| [`AdminFeedController`](AdminFeedController.java) | REST Controller (`/api/v1/admin/feed`) | Administrative feed moderation: pending queue review, post inspection, publication, rejection, hiding, and removal. |

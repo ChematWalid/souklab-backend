@@ -15,7 +15,7 @@ REST controllers for subscription plans, Chargily Pay V2 (EDAHABIA / CIB) checko
 ### 2. Checkout & Renewals (`SubscriptionCheckoutController`)
 | Method | Endpoint | Access | Summary | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/subscriptions/checkout` | Authenticated | Checkout subscription | Creates Chargily Pay V2 session returning checkout URL. Supports `Idempotency-Key`. |
+| `POST` | `/api/v1/subscriptions/checkout` | Authenticated | Checkout subscription | Creates Chargily Pay V2 session returning checkout URL. Rejects active subscription with `409 Conflict` and pending session with `400 Bad Request` (`SUBSCRIPTION_ALREADY_PENDING`). Supports `Idempotency-Key`. |
 | `POST` | `/api/v1/subscriptions/{id}/renew` | Authenticated | Renew subscription | Generates renewal checkout session. Supports `Idempotency-Key`. |
 
 ### 3. User Billing Account (`SubscriptionAccountController`)
@@ -55,3 +55,17 @@ REST controllers for subscription plans, Chargily Pay V2 (EDAHABIA / CIB) checko
 | Method | Endpoint | Access | Summary | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/admin/payments/{id}/refund` | `permission:financial:admin` | Issue refund | Administrative refund execution and financial auditing. |
+
+---
+
+## Classes Reference
+
+| Class | Type | Description |
+|---|---|---|
+| [`SubscriptionPlanController`](SubscriptionPlanController.java) | REST Controller (`/api/v1/subscriptions/plans`) | Public subscription plan and pricing discovery. |
+| [`SubscriptionCheckoutController`](SubscriptionCheckoutController.java) | REST Controller (`/api/v1/subscriptions`) | Initiates Chargily Pay V2 checkout sessions and subscription renewals with idempotency and race guard (`SUBSCRIPTION_ALREADY_PENDING`). |
+| [`SubscriptionAccountController`](SubscriptionAccountController.java) | REST Controller (`/api/v1/subscriptions`, `/api/v1/payments`) | Current user subscription state, history, renewal cancellation, and payment receipts (`SubscriptionResponse`, `PaymentResponse`). |
+| [`ChargilyWebhookController`](ChargilyWebhookController.java) | REST Controller (`/api/v1/integrations/chargily`) | Signature-verified asynchronous webhook callback receiver (`checkout.paid`, `checkout.failed`, etc.). |
+| [`AdminSubscriptionController`](AdminSubscriptionController.java) | REST Controller (`/api/v1/admin/subscriptions`) | Administrative subscription inspection, manual grants, and revocations. |
+| [`AdminSubscriptionPlanController`](AdminSubscriptionPlanController.java) | REST Controller (`/api/v1/admin/subscription-plans`) | Administrative subscription plan lifecycle (create, update, soft-deactivate). |
+| [`AdminRefundController`](AdminRefundController.java) | REST Controller (`/api/v1/admin/payments`) | Administrative payment refund processing and financial audit logging. |

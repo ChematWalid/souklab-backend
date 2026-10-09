@@ -1,6 +1,6 @@
 # Favorite services
 
-`ArtisanFavoriteService` manages client artisan favorites with visibility filtering, cap enforcement (default 500 per client), deduplication under pessimistic concurrency lock, and directory card mapping.
+`ArtisanFavoriteService` manages client artisan favorites with visibility filtering, cap enforcement (default 500 per client via `app.favorites.max-per-client`, throwing `ConflictException` with `errorCode: "FAVORITES_LIMIT_REACHED"`), deduplication under pessimistic concurrency lock, and directory card mapping.
 
 | Service | Responsibility |
 | --- | --- |

@@ -7,7 +7,7 @@ Core authentication workflows, credential hashing, registration state machines, 
 ## Key Workflows
 
 ### 1. Registration & Initial Capability Assignment
-- New client registrations are saved with `AccountStatus.ACTIVE` and require email verification.
+- New client registrations are saved with `AccountStatus.ACTIVE` and require email verification. A corresponding `Client` entity row is provisioned synchronously in the same transaction, ensuring immediate database profile integrity for subsequent client actions.
 - New artisan registrations are saved with `AccountStatus.PENDING`, requiring administrative vetting and approval before activation.
 - Password inputs across registration, login, and reset/change flows enforce bounds up to 128 characters to mitigate password hashing denial-of-service.
 - Email verification codes are dispatched synchronously (`sendVerificationCodeSynchronous`). If email delivery fails, the transaction is rolled back and returns `503 Service Unavailable`, preventing unverified orphan accounts.
