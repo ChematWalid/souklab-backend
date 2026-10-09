@@ -332,7 +332,7 @@ Les endpoints de profil appliquent une visibilité graduée des coordonnées sel
 
 - **Parité de confidentialité** : Les favoris sont strictement privés. Les artisans ne reçoivent aucune notification et ne voient pas qui les a ajoutés en favori. Les objets `ArtisanDirectoryCardDTO` retournés appliquent la confidentialité des contacts : les clients non-premium reçoivent un nom anonymisé (`"Artisan #XXXXX"`), identique à l'annuaire public, tandis que les clients premium reçoivent le nom complet démasqué.
 - **Exigence d'un profil client** : En plus de détenir `permission:client:favorites`, l'appelant doit posséder un profil `Client` actif en base. Les appelants non-clients (ex. administrateurs) reçoivent `403 Forbidden` (`"Only registered clients can manage favorites."`).
-- **Plafond configurable** : Le nombre maximal de favoris par client est contrôlé par `app.favorites.max-per-client` (variable `FAVORITES_MAX_PER_CLIENT`, défaut : `500`). Si la limite est atteinte, l'ajout échoue avec `409 Conflict` (`"Client favorite limit reached."`).
+- **Plafond configurable** : Le nombre maximal de favoris par client est contrôlé par `app.favorites.max-per-client` (variable `FAVORITES_MAX_PER_CLIENT`, défaut : `500`). Si la limite est atteinte, l'ajout échoue avec `409 Conflict` (`"Client favorite limit reached."` avec `errorCode: "FAVORITES_LIMIT_REACHED"`).
 - **Verrouillage pessimiste de concurrence** : La vérification de capacité et l'insertion sont sérialisées avec un verrou pessimiste en écriture sur la ligne `Client`, évitant toute situation de concurrence. La contrainte d'unicité `(client_id, artisan_id)` intercepte les doublons et les traduit en `409 Conflict`.
 - **Filtrage de visibilité** : La liste et le statut excluent automatiquement les comptes suspendus ou non visibles (`deletedAt IS NULL`, `accountStatus = ACTIVE`).
 - **Architecture extensible** : Le modèle repose sur la classe abstraite `@MappedSuperclass` `ClientFavorite` avec le discriminateur `FavoriteType.ARTISAN`, permettant d'ajouter de futurs types de favoris sans impacter le code existant.
@@ -571,8 +571,10 @@ Admin blocage permanent (canReapply=false) : futures demandes → 403 Forbidden 
 | `PUT /api/v1/feed/{id}` | PUT | `Artisan.CONTENT` + propriétaire | Mettre à jour le texte/les tags d'un post |
 | `DELETE /api/v1/feed/{id}` | DELETE | `Artisan.CONTENT` + propriétaire | Suppression logique de son propre post |
 | `POST/DELETE /api/v1/feed/{id}/likes` | POST/DELETE | Authentifiée | Aimer/retirer son like, une seule fois par personne |
+| `GET /api/v1/feed/{id}/likes` | GET | Public | Liste paginée des utilisateurs ayant aimé le post (`FeedPostLikerDTO` ; alias : `/likes/users`, `/likes/likers`) |
+| `GET /api/v1/feed/{id}/likes/status` | GET | Public | État du like et compteur pour l'utilisateur connecté (`FeedPostLikeStatusDTO`) |
 | `POST/DELETE /api/v1/feed/{id}/bookmarks` | POST/DELETE | Authentifiée | Ajouter/retirer un post des favoris |
-| `GET /api/v1/feed/saved` | GET | Authentifiée | Lister ses posts enregistrés |
+| `GET /api/v1/feed/saved` | GET | Authentifiée | Lister ses posts enregistrés (inclut `likedByCurrentUser` et `bookmarkedByCurrentUser`) |
 | `GET/POST /api/v1/feed/{id}/comments` | GET/POST | Public/authentifiée | Lire des commentaires racine publiquement ou en ajouter avec authentification |
 | `GET /api/v1/feed/comments/{commentId}` | GET | Public | Lire un commentaire ou une réponse visible |
 | `GET/POST /api/v1/feed/comments/{commentId}/replies` | GET/POST | Public/authentifiée | Lire ou ajouter une réponse de niveau 1 |
@@ -733,6 +735,8 @@ La messagerie fonctionne sur deux couches complémentaires : REST pour la récup
 - Les messages supprimés logiquement sont exclus des réponses `GET /messages` ultérieures.
 - La reconnexion après déconnexion restaure l'historique complet des messages sans livraison en double.
 - Isolation des trames STOMP : l'utilisateur A ne reçoit jamais les trames de file privée de l'utilisateur B.
+- **Suivi des lectures** : `ConversationResponse` expose `lastReadMessageId` (position de lecture de l'appelant) et `participantLastReadMessageId` (position de lecture du correspondant).
+- **Diffusion de présence ciblée** : Les notifications de présence (en ligne/hors ligne) sont transmises uniquement aux interlocuteurs d'une conversation active via file privée utilisateur (`/queue/presence`), jamais diffusées globalement.
 
 ---
 
@@ -824,7 +828,7 @@ L'accès à la notification d'un autre utilisateur retourne **`404 Not Found`** 
 | `GET /api/v1/subscriptions/plans/{id}` | GET | Aucune | Récupérer un plan d'abonnement actif par ID |
 | `GET /api/v1/subscriptions/current` | GET | Bearer | Récupérer son abonnement actuel |
 | `GET /api/v1/subscriptions` | GET | Bearer | Lister l'historique de ses abonnements |
-| `POST /api/v1/subscriptions/checkout` | POST | Bearer | Initier un checkout Chargily pour un plan |
+| `POST /api/v1/subscriptions/checkout` | POST | Bearer | Initier un checkout Chargily pour un plan (refuse abonnement actif avec `409 Conflict`, ou déjà en attente avec `400 Bad Request` `SUBSCRIPTION_ALREADY_PENDING`) |
 | `POST /api/v1/subscriptions/{id}/renew` | POST | Bearer | Renouveler un abonnement existant |
 | `POST /api/v1/subscriptions/{id}/cancel` | POST | Bearer | Annuler un abonnement |
 | `GET /api/v1/payments` | GET | Bearer | Lister ses propres paiements |

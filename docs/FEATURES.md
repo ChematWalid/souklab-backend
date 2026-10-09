@@ -332,7 +332,7 @@ Profile endpoints apply graduated contact visibility based on the viewer's relat
 
 - **Privacy Parity**: Favorites are completely private. Artisans receive no notifications and cannot see who bookmarked them. Returned `ArtisanDirectoryCardDTO` objects enforce contact privacy: non-premium clients receive masked artisan names (`"Artisan #XXXXX"`), matching directory masking, while premium clients receive the unmasked name.
 - **Client Profile Requirement**: In addition to holding `permission:client:favorites`, callers must possess a registered `Client` database profile. Non-client principals (such as administrators) receive `403 Forbidden` (`"Only registered clients can manage favorites."`).
-- **Configurable Capacity Cap**: The maximum number of favorites per client is controlled by `app.favorites.max-per-client` (env `FAVORITES_MAX_PER_CLIENT`, default: `500`). When the cap is reached, add requests fail with `409 Conflict` (`"Client favorite limit reached."`).
+- **Configurable Capacity Cap**: The maximum number of favorites per client is controlled by `app.favorites.max-per-client` (env `FAVORITES_MAX_PER_CLIENT`, default: `500`). When the cap is reached, add requests fail with `409 Conflict` (`"Client favorite limit reached."` with `errorCode: "FAVORITES_LIMIT_REACHED"`).
 - **Pessimistic Concurrency Locking**: Capacity checks and additions are serialized using a pessimistic write lock on the `Client` row, preventing concurrent race conditions. Database unique pairing constraints `(client_id, artisan_id)` catch duplicate additions and translate them to `409 Conflict`.
 - **Visibility Filtering**: The list and status check automatically filter out suspended accounts or non-visible artisan profiles (`deletedAt IS NULL`, `accountStatus = ACTIVE`).
 - **Extensible Architecture**: The persistence model uses an abstract mapped superclass `ClientFavorite` with `FavoriteType.ARTISAN`, allowing future favorite types (formations, products) to be added without modifying existing favorite code.
@@ -571,8 +571,10 @@ Admin permanent block (canReapply=false): future requests → 403 Forbidden unti
 | `PUT /api/v1/feed/{id}` | PUT | `Artisan.CONTENT` + owner | Update post text/tags |
 | `DELETE /api/v1/feed/{id}` | DELETE | `Artisan.CONTENT` + owner | Soft-delete own post |
 | `POST /api/v1/feed/{id}/likes` / `DELETE .../likes` | POST/DELETE | Authenticated | Idempotent per-user post like and unlike |
+| `GET /api/v1/feed/{id}/likes` | GET | Public | Paginated list of users who liked post (`FeedPostLikerDTO`; aliases: `/likes/users`, `/likes/likers`) |
+| `GET /api/v1/feed/{id}/likes/status` | GET | Public | Query caller's like status and count (`FeedPostLikeStatusDTO`) |
 | `POST /api/v1/feed/{id}/bookmarks` / `DELETE .../bookmarks` | POST/DELETE | Authenticated | Save or remove a post bookmark |
-| `GET /api/v1/feed/saved` | GET | Authenticated | List saved posts |
+| `GET /api/v1/feed/saved` | GET | Authenticated | List saved posts (populates `likedByCurrentUser` and `bookmarkedByCurrentUser`) |
 | `GET /api/v1/feed/{id}/comments` | GET | Public | List root comments and replies |
 | `POST /api/v1/feed/{id}/comments` | POST | Authenticated | Add a root comment |
 | `GET /api/v1/feed/comments/{commentId}` | GET | Public | Get one visible comment or reply |
@@ -734,6 +736,8 @@ Messaging operates on two complementary layers: REST for state retrieval and STO
 - Soft-deleted messages are excluded from subsequent `GET /messages` history responses.
 - Reconnecting after disconnect restores full message history without duplicate delivery.
 - STOMP frame isolation: User A never receives User B's private queue frames.
+- **Read Position Tracking**: `ConversationResponse` returns `lastReadMessageId` (caller's read position) and `participantLastReadMessageId` (counterparty participant's last read position).
+- **Partner-Scoped Presence Delivery**: Online/offline presence notifications are dispatched strictly to users who share an active conversation (`findPartnerEmailsByUserEmail`) via private user queue (`/queue/presence`), never broadcast globally.
 
 ---
 
@@ -825,7 +829,7 @@ Cross-user access to another user's notification returns **`404 Not Found`** (qu
 | `GET /api/v1/subscriptions/plans/{id}` | GET | None | Get single active subscription plan |
 | `GET /api/v1/subscriptions/current` | GET | Bearer | Get own current subscription |
 | `GET /api/v1/subscriptions` | GET | Bearer | List own subscription history |
-| `POST /api/v1/subscriptions/checkout` | POST | Bearer | Initiate Chargily checkout for a plan |
+| `POST /api/v1/subscriptions/checkout` | POST | Bearer | Initiate Chargily checkout for a plan (rejects active with `409 Conflict`, pending with `400 Bad Request` `SUBSCRIPTION_ALREADY_PENDING`) |
 | `POST /api/v1/subscriptions/{id}/renew` | POST | Bearer | Renew an existing subscription |
 | `POST /api/v1/subscriptions/{id}/cancel` | POST | Bearer | Cancel a subscription |
 | `GET /api/v1/payments` | GET | Bearer | List own payment records |

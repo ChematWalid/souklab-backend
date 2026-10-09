@@ -52,9 +52,10 @@ Every artisan on Souklab gets a rich, professional profile that acts as their di
 Clients can save the artisans they love and keep their own curated list.
 
 **What clients can do:**
-- Add any artisan to a personal **favourites list** with one tap
+- Add any artisan to a personal **favourites list** with one tap (up to 500 favourites per client, protected against duplicates and capacity overages)
 - Remove artisans from their favourites at any time
 - Return to their list whenever they want to re-visit a favourite artisan's profile
+- **Complete Privacy**: Favourites are strictly private; artisans are never notified and cannot see who bookmarked them
 
 ---
 
@@ -212,8 +213,9 @@ Clients and artisans can communicate directly through Souklab's built-in messagi
 - **Client Premium Gating**: Clients require an active Premium subscription to start conversations, send messages, edit messages, upload attachments, or broadcast typing events. Non-premium clients attempting to message are prompted to upgrade to Premium.
 - **Artisan Privacy & Identity Masking**: When a non-premium client views a conversation, the artisan's display name appears anonymized as `"Artisan #XXXXX"` (e.g., `Artisan #3BD3F`) and contact details remain hidden. Upgrading to Premium reveals the artisan's true name and unlocks messaging.
 - Send text messages and attach files in the same conversation
-- See when messages have been **read** by the other person
+- See when messages have been **read** by the other person (including real-time peer read markers)
 - See live **typing indicators** ("is typing…") so you know the other person is responding
+- **Private presence indicators**: See whether your active conversation partner is online or offline, delivered privately without global broadcast
 - **Edit or delete** messages after sending
 - Full **message history** is preserved and accessible at any time
 - Conversations persist across devices — reconnecting resumes exactly where you left off

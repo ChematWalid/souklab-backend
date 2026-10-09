@@ -46,9 +46,10 @@ Chaque artisan sur Souklab bénéficie d'un profil riche et professionnel qui co
 Les clients peuvent sauvegarder les artisans qu'ils apprécient et constituer leur propre liste personnalisée.
 
 **Ce que les clients peuvent faire :**
-- Ajouter n'importe quel artisan à une **liste de favoris** personnelle en un seul geste
+- Ajouter n'importe quel artisan à une **liste de favoris** personnelle en un seul clic (jusqu'à 500 favoris par client, protégé contre les doublons et dépassements de quota)
 - Retirer des artisans de leurs favoris à tout moment
 - Revenir à leur liste à n'importe quel moment pour revisiter le profil d'un artisan favori
+- **Confidentialité totale** : Les favoris sont strictement privés ; les artisans ne sont jamais notifiés et ne peuvent pas voir qui les a ajoutés en favori
 
 ---
 
@@ -202,8 +203,9 @@ Les clients et les artisans peuvent communiquer directement via le système de m
 - **Accès Premium requis pour les clients** : Les clients doivent détenir un abonnement Premium actif pour démarrer des conversations, envoyer des messages, modifier des messages, joindre des fichiers ou émettre des indicateurs de frappe. Les clients non-premium sont invités à passer à Premium.
 - **Confidentialité et masquage de l'artisan** : Lorsqu'un client non-premium consulte une conversation, le nom d'affichage de l'artisan apparaît anonymisé sous la forme `"Artisan #XXXXX"` (ex. `Artisan #3BD3F`) et ses coordonnées restent cachées. Passer à Premium révèle le véritable nom de l'artisan et débloque la messagerie.
 - Envoyer des messages texte et joindre des fichiers dans la même conversation
-- Voir quand les messages ont été **lus** par l'autre personne
+- Voir quand les messages ont été **lus** par l'autre personne (incluant les marqueurs de lecture réciproques en temps réel)
 - Voir les **indicateurs de frappe** en direct (« est en train d'écrire… ») pour savoir que l'autre personne répond
+- **Indicateurs de présence privés** : Voir si votre interlocuteur actif est en ligne ou hors ligne, transmis de manière confidentielle sans diffusion publique globale
 - **Modifier ou supprimer** des messages après envoi
 - L'**historique complet des messages** est conservé et accessible à tout moment
 - Les conversations persistent sur tous les appareils — se reconnecter reprend exactement là où on s'était arrêté
