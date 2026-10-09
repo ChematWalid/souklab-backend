@@ -38,3 +38,4 @@ were verified for the latest reviewed commit.
 - [x] JaCoCo minimum 65% instruction coverage gate enforced and verified via `./mvnw verify`.
 - [x] CodeQL SAST automated scanning configured in `.github/workflows/codeql.yml`.
 - [x] Dedicated live end-to-end curl suite (34 assertions) verified against running stack (`scripts/thorough-curl-test.py`).
+- [x] Dedicated 9-issue live verification suite verified against running stack (`scripts/verify-9-issues-curl.py`).

@@ -28,18 +28,18 @@ graph TD
 
 | Module | Core Responsibility | Key Technologies |
 | :--- | :--- | :--- |
-| **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security, JJWT 0.12.6 (HMAC-SHA), BCrypt |
+| **Authentication & Authorization** | Stateless JWT authentication, database-backed granular permissions and centralized domain policies, instant client row provisioning at sign-up, email verification codes, password reset lifecycle, OAuth2 Google login. | Spring Security, JJWT 0.12.6 (HMAC-SHA), BCrypt |
 | **User & Profile Management** | Artisan public profiles, profile completion wizard, permission-aware contact gating, profile view metrics deduplication with atomic increments. | Spring Data JPA, Jakarta Validation |
 | **Public Directory & Search** | Full-text scored search, faceted discovery (Wilayas, categories, materials, epoques, techniques), accent folding, edge n-grams, and JPA criteria fallback. | Hibernate Search 8.2.2.Final, Elasticsearch 8.x |
 | **Catalog & Craft Taxonomy** | Hierarchical reference data (Wilayas/Communes, Categories/Subcategories, Material Families/Materials, Epochs, Craftsmanship Techniques) and administrative CRUD management with cache eviction and audit trails. | Caffeine Cache, Spring Data JPA |
 | **Formations & Peer Workshops** | Peer masterclass authoring (`isTeacher`), syllabus ClamAV scanning, administrative review lifecycle, capacity limits, cancellation deadlines, conflict-free review reactivation, and client 403 boundary. | Spring Security, ClamAV, Spring Data JPA |
 | **Formateur Accreditation** | Artisan teacher certification lifecycle (submission, admin review, cooldown enforcement, direct admin grants/revocations). | Multi-state state machine, Spring Events |
-| **Real-Time Messaging** | 1-on-1 private conversations, client premium subscription gating, artisan identity privacy masking (`Artisan #XXXXX`), file attachments, read receipts, typing indicators, and message history via STOMP / WebSocket. | Spring WebSocket, STOMP Relay (RabbitMQ), AMQP |
+| **Real-Time Messaging** | 1-on-1 private conversations, client premium subscription gating, artisan identity privacy masking (`Artisan #XXXXX`), file attachments, read receipts, peer last read marker, partner-scoped presence delivery, and message history via STOMP / WebSocket. | Spring WebSocket, STOMP Relay (RabbitMQ), AMQP |
 | **In-App Notifications** | User-scoped notification feeds, unread badge counters, instant WebSocket broadcast, query-scoped soft deletions. | Spring WebSocket, STOMP Relay, JPA Soft Delete |
-| **Subscriptions & Payments** | Tiered subscription plans (Free/Pro/Premium), Chargily Pay V2 hosted checkout, signed idempotent webhook processing, renewal reminders. | Chargily Pay V2, Spring Task Scheduling |
+| **Subscriptions & Payments** | Tiered subscription plans (Free/Pro/Premium), Chargily Pay V2 hosted checkout (`https://pay.chargily.net/api/v2`), duplicate pending checkout refusal (`SUBSCRIPTION_ALREADY_PENDING`), signed idempotent webhook processing, renewal reminders. | Chargily Pay V2, Spring Task Scheduling |
 | **Platform Analytics & KPI** | Async query jobs, multi-granularity rollups (day/week/month/quarter), CSV data export, outbox pattern event processing. | Spring Batch/Async, S3 Export Storage |
 | **File Storage & Avatars** | Multi-tier avatar processing (thumbnail, medium, full), magic number verification, ClamAV streaming antivirus, S3/MinIO bucket storage. | MinIO S3 SDK, Thumbnailator, Clamd instream |
-| **Client Favorites** | Private artisan favorites for clients with cap enforcement, pessimistic concurrency lock, and zero N+1 directory card projection. | Spring Data JPA, Pessimistic Locking |
+| **Client Favorites** | Private artisan favorites for clients with cap enforcement (`FAVORITES_LIMIT_REACHED`), pessimistic concurrency lock, and zero N+1 directory card projection. | Spring Data JPA, Pessimistic Locking |
 | **Rate Limiting & Security** | Token-bucket sliding window rate limiting on authentication and avatar uploads, Redis-backed or Caffeine-backed with Retry-After headers. | Bucket4j, Redis / Caffeine Cache, OncePerRequestFilter |
 
 ---
