@@ -1062,7 +1062,7 @@ Reorders presentation order of attachments for an authored post (`MediaOrderRequ
 - `GET /api/v1/feed/{id}/likes/status`: Query current caller's like status on post (`FeedPostLikeStatusDTO`).
 - `GET /api/v1/feed/{id}/likes/users` (or `/likes/likers`): Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identity for non-premium clients.
 - `POST /api/v1/feed/{id}/bookmarks` and `DELETE /api/v1/feed/{id}/bookmarks`: Save or remove post from bookmarks (Authenticated).
-- `GET /api/v1/feed/saved`: Paginated list of caller's saved posts (Authenticated).
+- `GET /api/v1/feed/saved`: Paginated list of caller's saved posts (Authenticated; populates `likedByCurrentUser` and `bookmarkedByCurrentUser` for each post).
 - `POST /api/v1/feed/{id}/share`: Increments post share counter and returns share payload.
 
 #### Feed Comments & Replies
@@ -1162,7 +1162,7 @@ The real-time messaging subsystem provides end-to-end, private one-to-one commun
 
 ### REST Conversations API
 
-- `POST /api/v1/conversations`: Initiates a new conversation or retrieves existing (`CreateConversationRequest`: `{ "recipientUserId": string }`). Returns `201 Created` with `ApiResponse<ConversationResponse>`. (Requires Premium for clients; self-messaging returns `400 Bad Request`).
+- `POST /api/v1/conversations`: Initiates a new conversation or retrieves existing (`CreateConversationRequest`: `{ "recipientUserId": string }`). Returns `201 Created` with `ApiResponse<ConversationResponse>` (includes `lastReadMessageId` and `participantLastReadMessageId`). (Requires Premium for clients; self-messaging returns `400 Bad Request`).
 - `GET /api/v1/conversations`: Lists active conversations for the authenticated user, optionally filtered by archive status (`?archived=false`). Returns `200 OK` with `ApiResponse<List<ConversationResponse>>`.
 - `GET /api/v1/conversations/{id}`: Retrieves single conversation summary for one of its participants (`200 OK` with `ApiResponse<ConversationResponse>`).
 - `PATCH /api/v1/conversations/{id}/archive`: Toggles archive status for the conversation (`ArchiveConversationRequest`: `{ "archived": boolean }`). Returns `200 OK`.
@@ -1234,7 +1234,7 @@ The real-time messaging subsystem provides end-to-end, private one-to-one commun
 #### Subscriptions (Server -> Client)
 - `/user/queue/chat`: Direct message deliveries, command acknowledgments, error events.
 - `/user/queue/chat-events`: Real-time chat events (typing indicators, read receipts, message edits/deletions).
-- `/topic/presence`: Real-time user online/offline status broadcast.
+- Presence: Delivered via user queue (`/queue/presence` destination delivered to `/user/queue/presence`), scoped strictly to active conversation partners.
 - `/user/queue/notifications`: In-app transactional notifications.
 
 ---
@@ -1301,7 +1301,7 @@ Retrieves a single active public subscription plan by ID with pricing in Algeria
 
 - `POST /api/v1/subscriptions/checkout`: Initiates checkout session.
   - **Request Body**: `SubscriptionCheckoutRequest` (`{ "planId": string }`)
-  - **Validation**: Rejects initiation if caller's account already holds an `ACTIVE` subscription (`409 Conflict`, `SubscriptionConflictException`) or a `PENDING` checkout session (`400 Bad Request`).
+  - **Validation**: Rejects initiation if caller's account already holds an `ACTIVE` subscription (`409 Conflict`, `SubscriptionConflictException`) or a `PENDING` checkout session (`400 Bad Request` with `errorCode: "SUBSCRIPTION_ALREADY_PENDING"`, `BadRequestException`). `SubscriptionResponse` and `PaymentResponse` include `createdAt`, `accountId`, and `accountName`.
   - **Response**: `201 Created` with `ApiResponse<SubscriptionCheckoutResponse>`
     ```json
     {
@@ -1517,7 +1517,7 @@ Adds an artisan to the authenticated client's favorites.
   - `401 Unauthorized`: Missing or invalid authentication token.
   - `403 Forbidden`: Missing `permission:client:favorites` (authorization guard access denied; artisans receive this), or permission held but caller has no client profile (administrators receive this with `"Only registered clients can manage favorites."`).
   - `404 Not Found`: Target artisan does not exist or is not effectively visible (`"Artisan not found with id: <artisanId>"`).
-  - `409 Conflict`: Artisan is already favorited (`"Artisan is already favorited."`), or the client's favorite capacity is exceeded (`"Client favorite limit reached."`). Configured via `app.favorites.max-per-client` (`FAVORITES_MAX_PER_CLIENT`, default 500).
+  - `409 Conflict`: Artisan is already favorited (`"Artisan is already favorited."` with `errorCode: "CONFLICT"`), or the client's favorite capacity is exceeded (`"Client favorite limit reached."` with `errorCode: "FAVORITES_LIMIT_REACHED"`). Configured via `app.favorites.max-per-client` (`FAVORITES_MAX_PER_CLIENT`, default 500).
 
 ### `GET /api/v1/client/favorites/artisans`
 Retrieves a paginated list of visible favorite artisans for the authenticated client.

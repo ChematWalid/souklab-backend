@@ -751,6 +751,20 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ### `/api/v1/feed/{id}/likes`
 
+#### GET — getPostLikers
+
+- Operation ID: `getPostLikers`
+- Tags: `Community Feed`
+- Parameters:
+  - `id` (`path`, required)
+  - `page` (`query`)
+  - `size` (`query`)
+  - `sort` (`query`)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/feed/{id}/likes/status`
+
 #### GET — likeStatus
 
 - Operation ID: `likeStatus`
@@ -3281,7 +3295,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `SubscriptionResponse`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"subscriberType":{"type":"string","enum":["ARTISAN","CLIENT"]},"status":{"type":"string","enum":["PENDING","ACTIVE","CANCELED","EXPIRED","REVOKED"]},"planName":{"type":"string"},"billingPeriod":{"type":"string","enum":["MONTHLY","YEARLY"]},"amount":{"type":"integer","format":"int64"},"currency":{"type":"string"},"startsAt":{"type":"string","format":"date-time"},"expiresAt":{"type":"string","format":"date-time"}}}
+{"type":"object","properties":{"id":{"type":"string"},"subscriberType":{"type":"string","enum":["ARTISAN","CLIENT"]},"status":{"type":"string","enum":["PENDING","ACTIVE","CANCELED","EXPIRED","REVOKED"]},"planName":{"type":"string"},"billingPeriod":{"type":"string","enum":["MONTHLY","YEARLY"]},"amount":{"type":"integer","format":"int64"},"currency":{"type":"string"},"startsAt":{"type":"string","format":"date-time"},"expiresAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"accountId":{"type":"string"},"accountName":{"type":"string"}}}
 ```
 
 ### `ReportResolutionRequestDTO`
@@ -3467,7 +3481,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `PaymentResponse`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"subscriptionId":{"type":"string"},"provider":{"type":"string","enum":["CHARGILY"]},"status":{"type":"string","enum":["CREATED","PENDING","PAID","FAILED","CANCELED","EXPIRED","MANUALLY_GRANTED"]},"amount":{"type":"integer","format":"int64"},"currency":{"type":"string"},"checkoutUrl":{"type":"string"},"createdAt":{"type":"string","format":"date-time"}}}
+{"type":"object","properties":{"id":{"type":"string"},"subscriptionId":{"type":"string"},"provider":{"type":"string","enum":["CHARGILY"]},"status":{"type":"string","enum":["CREATED","PENDING","PAID","FAILED","CANCELED","EXPIRED","MANUALLY_GRANTED"]},"amount":{"type":"integer","format":"int64"},"currency":{"type":"string"},"checkoutUrl":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"accountId":{"type":"string"},"accountName":{"type":"string"}}}
 ```
 
 ### `ApiResponsePaymentResponse`

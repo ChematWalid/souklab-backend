@@ -48,6 +48,8 @@ When request field validation fails, field-level errors are included in the `err
 | `FORBIDDEN` | `403` | Caller lacks required capability or profile row (e.g. non-client accessing favorites). | Display contextual message or redirect to an upgrade / verification view. |
 | `RESOURCE_NOT_FOUND` | `404` | Artisan, post, conversation, or formation ID not found in database. | Render a 404 Empty State / Not Found component with a back button. |
 | `CONFLICT` | `409` | Duplicate unique record (email, duplicate favorite, duplicate catalog slug) or capacity limit reached. | Highlight the conflicting form field or display a capacity limit modal. |
+| `FAVORITES_LIMIT_REACHED` | `409` | Client exceeded maximum allowed favorited artisans quota (default 500). | Display modal: *"Favorites limit reached. Please remove an artisan from your favorites before adding a new one."* |
+| `SUBSCRIPTION_ALREADY_PENDING` | `400` | A checkout session is already pending for this subscriber account. | Display banner/modal: *"A checkout session is already in progress. Please complete or wait for the existing session to expire."* |
 | `BAD_REQUEST` | `400` | Generic malformed request or failed business precondition. | Display backend error message or highlight form validation issues. |
 | `MALFORMED_REQUEST` | `400` | Unparseable JSON body, malformed syntax, or Jackson deserialization error. | Inspect client payload serialization; ensure valid JSON types. |
 | `MISSING_PARAMETER` | `400` | Required query parameter or form field is absent. | Highlight the missing parameter/field in the UI before form submission. |

@@ -32,7 +32,7 @@ To fast-track frontend development, the following battle-tested templates and re
 Use `Authorization: Bearer <accessToken>` for all protected REST calls. Login and refresh return access/refresh tokens and expiry metadata. Keep tokens in secure storage (e.g. secure memory or HttpOnly cookies) and never log them.
 
 ### Primary Auth & Profile Endpoints
-- `POST /api/v1/auth/register`: Starts onboarding (Artisan: `PENDING` validation, Client: `ACTIVE`). Payload: `email`, `password` (8–128 chars), `firstName`, `lastName`, `accountType` (`'ARTISAN' | 'CLIENT'`).
+- `POST /api/v1/auth/register`: Starts onboarding (Artisan: `PENDING` validation, Client: `ACTIVE`). Automatically initializes the `clients` table row at sign-up rather than deferring to first profile save. Payload: `email`, `password` (8–128 chars), `firstName`, `lastName`, `accountType` (`'ARTISAN' | 'CLIENT'`).
 - `POST /api/v1/auth/login`: Authenticates credentials (`email` or `username`, `password` max 128 chars), returns `accessToken` (1h), `refreshToken` (24h), and user profile summary.
 - `POST /api/v1/auth/refresh`: Rotates the refresh token and returns a new token pair.
 - `POST /api/v1/auth/logout`: Revokes active refresh session.
@@ -65,7 +65,7 @@ Use `Authorization: Bearer <accessToken>` for all protected REST calls. Login an
 The `data` payload returned by `GET /api/v1/auth/me` is account-type-specific:
 - **Artisan**: Returns `ArtisanResponseDTO` with bio, city, address, website, rating, reviewsCount, `region`, `craftCategory`, `subCategory`, `primaryMaterials`, `primaryTechniques`, `epoques`, `certifications`, `galleryImages`.
 - **Client**: Returns `ClientProfileResponseDTO` with companyName, clientType (`INDIVIDUAL` or `ENTERPRISE`), city, address, and client subscription tier.
-- Both share common base fields: `id`, `email`, `firstName`, `lastName`, `name`, `phone`, `avatarUrl`, `accountStatus`, `permissions`, `emailVerified`, `createdAt`, `updatedAt`, `premium`.
+- Both share common base fields: `id`, `email`, `firstName`, `lastName`, `name`, `phone`, `avatarUrl`, `accountStatus`, `permissions`, `emailVerified`, `createdAt`, `updatedAt`, `premium` (`isPremium`), `validated` (`isValidated`), `teacher` (`isTeacher`).
 
 ### `PATCH /api/v1/auth/me` JSON Merge Patch Semantics
 - **Omitted key**: Field is untouched.
@@ -207,10 +207,11 @@ Community engagement platform for artisans and clients.
 - `GET /api/v1/feed/me`: Author's draft, pending, rejected, published, hidden, and removed posts.
 - `GET /api/v1/feed/following`: Authenticated client feed based on favorited artisans.
 - `POST /api/v1/feed`: Create a draft or submit a new feed post (`permission:artisan:content` for verified artisans or `permission:admin:feed`).
-- `POST /api/v1/feed/{id}/submit`: Submit a draft or rejected post for moderation.
 - `POST/DELETE /api/v1/feed/{id}/likes`: Idempotent per-user post like/unlike.
-- `POST/DELETE /api/v1/feed/{id}/bookmarks`: Save/remove a post; `GET /api/v1/feed/saved` lists saved posts.
-- `GET/POST /api/v1/feed/{id}/comments`: Read root comments or add one.
+- `GET /api/v1/feed/{id}/likes`: Paginated list of users who liked the post (`FeedPostLikerDTO`). Redacts artisan identities for non-premium clients. (Aliases: `/likes/users`, `/likes/likers`).
+- `GET /api/v1/feed/{id}/likes/status`: Query current caller's like status and count on post (`FeedPostLikeStatusDTO`).
+- `POST/DELETE /api/v1/feed/{id}/bookmarks`: Save/remove a post.
+- `GET /api/v1/feed/saved`: Lists caller's saved posts (`FeedPostResponseDTO` with `likedByCurrentUser` and `bookmarkedByCurrentUser` populated).
 - `GET /api/v1/feed/comments/{commentId}`: Read one visible comment or reply.
 - `GET/POST /api/v1/feed/comments/{commentId}/replies`: Read or add one-level replies.
 - `PUT /api/v1/feed/comments/{commentId}`: Update an owned comment or reply.
@@ -240,7 +241,7 @@ Private 1-on-1 messaging between platform users backed by WebSocket and Spring M
 > - **Artisan Privacy Masking**: When a non-premium client lists or views conversations, the artisan counterparty's `participantName` is anonymized as `"Artisan #XXXXX"` (e.g., `Artisan #3BD3F`) to prevent off-platform bypass. Premium clients, artisans, and administrators see the unmasked artisan name.
 
 #### REST Endpoints
-- `POST /api/v1/conversations`: Initiate or open conversation (`{ "recipientUserId": string }`). Returns `ApiResponse<ConversationResponse>`. (Requires Premium for clients).
+- `POST /api/v1/conversations`: Initiate or open conversation (`{ "recipientUserId": string }`). Returns `ApiResponse<ConversationResponse>` with `lastReadMessageId` and `participantLastReadMessageId`. (Requires Premium for clients).
 - `GET /api/v1/conversations`: List user conversations (`?archived=false`). Returns `ApiResponse<List<ConversationResponse>>`.
 - `GET /api/v1/conversations/{id}`: Single conversation summary (`ApiResponse<ConversationResponse>`).
 - `PATCH /api/v1/conversations/{id}/archive`: Toggles archive state (`{ "archived": boolean }`).
@@ -268,7 +269,7 @@ Private 1-on-1 messaging between platform users backed by WebSocket and Spring M
   - Chat Queue: `/user/queue/chat` (message deliveries, acknowledgments, errors)
   - Events Queue: `/user/queue/chat-events` (typing indicators, read receipts, message updates)
   - Notifications: `/user/queue/notifications`
-  - Presence: `/topic/presence`
+  - Presence: User-scoped presence events delivered to active conversation partners via `/queue/presence` (received at `/user/queue/presence`).
 
 ---
 
@@ -304,7 +305,7 @@ Tiered subscription monetization powered by Chargily Pay V2 with HMAC-SHA256 sig
 #### Endpoints
 - `GET /api/v1/subscriptions/plans`: Lists all active public subscription plans with pricing in Algerian Dinars (DZD).
 - `GET /api/v1/subscriptions/plans/{id}`: Retrieves single active subscription plan details by ID.
-- `POST /api/v1/subscriptions/checkout`: Initiates checkout session (`{ "planId": string }`). Returns `{ "checkoutUrl": string, "paymentId": string, "subscriptionId": string, "providerCheckoutId": string }`. Redirect the user's browser to `checkoutUrl` to complete payment. Rejects with `409 Conflict` if the account already has an active subscription, or `400 Bad Request` if a pending checkout is already in progress.
+- `POST /api/v1/subscriptions/checkout`: Initiates checkout session (`{ "planId": string }`). Returns `{ "checkoutUrl": string, "paymentId": string, "subscriptionId": string, "providerCheckoutId": string }`. Redirect the user's browser to `checkoutUrl` to complete payment. Rejects with `409 Conflict` if the account already has an active subscription, or `400 Bad Request` with `errorCode: "SUBSCRIPTION_ALREADY_PENDING"` if a pending checkout is already in progress. `SubscriptionResponse` and `PaymentResponse` include `createdAt`, `accountId`, and `accountName`.
 - `GET /api/v1/subscriptions/current`: Returns active subscription state (`status`, `tier`, `expiresAt`, `autoRenew`, `daysRemaining`).
 - `GET /api/v1/subscriptions`: Paginated subscription history for the authenticated user.
 - `POST /api/v1/subscriptions/{id}/cancel`: Cancels auto-renewal at period end.
@@ -356,7 +357,7 @@ Multipart file handling with ClamAV antivirus scanning, magic-byte format valida
 Client favorites allow authenticated clients with `permission:client:favorites` to bookmark artisans, list them with pagination, check favorite status, and remove favorites.
 
 #### Endpoints
-- `POST /api/v1/client/favorites/artisans/{artisanId}` (HTTP 201): Adds an artisan to favorites. Returns `ApiResponse<ClientFavoriteArtisanResponseDTO>`. Fails with 409 if already favorited (`"Artisan is already favorited."`) or if the per-client cap is reached (`"Client favorite limit reached."`).
+- `POST /api/v1/client/favorites/artisans/{artisanId}` (HTTP 201): Adds an artisan to favorites. Returns `ApiResponse<ClientFavoriteArtisanResponseDTO>`. Fails with 409 Conflict if already favorited (`"Artisan is already favorited."`, `errorCode: "CONFLICT"`) or if the per-client cap is reached (`"Client favorite limit reached."`, `errorCode: "FAVORITES_LIMIT_REACHED"`).
 - `GET /api/v1/client/favorites/artisans` (HTTP 200): Paginated list of visible favorite artisans (`ApiResponse<PaginatedResponse<ClientFavoriteArtisanItemDTO>>`). Supports `page` (default 0), `size` (default 20, max 100), and `sort` (default `createdAt,desc`; invalid sort properties return HTTP 400 `INVALID_PARAMETER`). Automatically filters out suspended or non-visible artisan profiles.
 - `GET /api/v1/client/favorites/artisans/{artisanId}/status` (HTTP 200): Checks whether an artisan is favorited (`ApiResponse<FavoriteStatusResponseDTO>`). Returns `{ "favorited": boolean }`. Returns `{ "favorited": false }` if the artisan exists but is suspended or non-visible; returns 404 only if the artisan does not exist in the database.
 - `DELETE /api/v1/client/favorites/artisans/{artisanId}` (HTTP 200): Removes an artisan from favorites. Returns `ApiResponse<Void>` with `data: null` (never HTTP 204). Returns 404 if the favorite does not exist.

@@ -9712,8 +9712,10 @@ authenticated owners can inspect their managed posts through `/feed/me`.
 | `PUT` | `{{baseUrl}}/feed/{{postId}}` | Post owner | Update content or normalized tags |
 | `DELETE` | `{{baseUrl}}/feed/{{postId}}` | Post owner | Remove the caller's post |
 | `POST/DELETE` | `{{baseUrl}}/feed/{{postId}}/likes` | Authenticated | Idempotent like/unlike per user |
+| `GET` | `{{baseUrl}}/feed/{{postId}}/likes` | Public | Paginated list of users who liked post (`FeedPostLikerDTO`) |
+| `GET` | `{{baseUrl}}/feed/{{postId}}/likes/status` | Public | Caller's like status and count (`FeedPostLikeStatusDTO`) |
 | `POST/DELETE` | `{{baseUrl}}/feed/{{postId}}/bookmarks` | Authenticated | Save/remove a post |
-| `GET` | `{{baseUrl}}/feed/saved` | Authenticated | List saved posts |
+| `GET` | `{{baseUrl}}/feed/saved` | Authenticated | List saved posts (populates `likedByCurrentUser`) |
 | `GET/POST` | `{{baseUrl}}/feed/{{postId}}/comments` | Read public / write authenticated | List or add root comments |
 | `GET/POST` | `{{baseUrl}}/feed/comments/{{commentId}}/replies` | Read public / write authenticated | List or add one-level replies |
 | `POST/DELETE` | `{{baseUrl}}/feed/comments/{{commentId}}/likes` | Authenticated | Idempotent comment like/unlike |
