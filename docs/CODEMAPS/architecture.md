@@ -59,6 +59,6 @@
   - `souklab-workflow-`: Core 8, Max 32, Queue 500 (Batch analytics rollups, export jobs)
 - **STOMP Destination Topology**:
   - App prefix: `/app` (Client sends commands to `/app/v1/conversations/{id}/*`)
-  - User queues: `/user/queue/chat` (delivery + ACK), `/user/queue/chat-events` (mutations/presence), `/user/queue/notifications` (system push)
+  - User queues: `/user/queue/chat` (delivery + ACK), `/user/queue/chat-events` (mutations), `/user/queue/presence` (partner-scoped presence), `/user/queue/notifications` (system push)
 - **Analytics Outbox Pattern**:
   `analytics_outbox_events` guarantees at-least-once KPI delivery decoupled from user transaction.

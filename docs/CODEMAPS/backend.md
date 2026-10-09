@@ -33,7 +33,7 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 - `GET /artisan/{id}`: Public artisan profile (phone/email masked for non-premium clients)
 - `POST|GET|PUT|DELETE /artisan/gallery`: Artisan portfolio images (max 20, 10MB each)
 - `POST|GET|PUT|DELETE /artisan/certifications`: Professional documents (max 10, PDF/img up to 15MB)
-- `GET|PATCH /client/profile` & `POST|GET|DELETE /client/favorites/artisans[/{artisanId}]`: Client favorites
+- `GET|PATCH /client/profile` & `POST|GET|DELETE /client/favorites/artisans[/{artisanId}]`: Client favorites (capped by `FAVORITES_MAX_PER_CLIENT`, returns 409 `FAVORITES_LIMIT_REACHED` on limit)
 
 ### Formations & Formateur (`/api/v1/`)
 - `POST /artisan/formations`: Create masterclass (`isTeacher=true` required, starts in `DRAFT`)
@@ -56,22 +56,25 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 ### Social Feed, Reviews & Reports (`/api/v1/`)
 - `GET /feed`: Browse published posts with author/tag/text filters and latest/popular sorting
 - `GET /feed/me`, `GET /feed/following`, `POST /feed/{id}/submit`: Author lifecycle and favorites-based following
+- `GET /feed/saved`: Saved posts list (populates `likedByCurrentUser` and `bookmarkedByCurrentUser`)
 - `GET|POST /feed`, `PUT|DELETE /feed/{id}` & `POST|DELETE /feed/{id}/media`: Draft, moderation, and author mutations
 - `POST|DELETE /feed/{id}/likes|bookmarks`, `/feed/{id}/comments`, and `/feed/comments/{id}/replies|likes`: Idempotent engagement and one-level replies
+- `GET /feed/{id}/likes`: Paginated feed post likers (`FeedPostLikerDTO`; aliases: `/likes/users`, `/likes/likers`)
+- `GET /feed/{id}/likes/status`: Current user like status and count (`FeedPostLikeStatusDTO`)
 - `GET /admin/feed/{id}`, `GET|POST /admin/feed/pending`, `publish`, `reject`, `hide`, `DELETE /admin/feed/{id}`: Feed moderation
 - `POST /artisan/formations/{formationId}/reviews`: **Single review path** (requires `ATTENDED` enrollment; soft-deleted review is cleanly reactivated on re-submission)
 - `GET /artisans/{artisanId}/reviews` & `GET /artisan/reviews/{id}`: Public reviews
 - `POST /reports` & `GET|POST /admin/reports[/{id}[/resolve]]`: Content abuse moderation (resolving user with `REMOVE` soft-deletes account, blocks auth, and releases original email)
 
 ### Real-Time Messaging (`/api/v1/conversations` & `/ws`)
-- `POST|GET /conversations[/{id}]`: 1-on-1 conversations (clients require Premium; artisan name masked for non-premium viewers; self-conversation blocked -> 400)
+- `POST|GET /conversations[/{id}]`: 1-on-1 conversations (clients require Premium; artisan name masked for non-premium viewers; self-conversation blocked -> 400; returns caller and participant read positions via `lastReadMessageId` and `participantLastReadMessageId`)
 - `GET|POST /conversations/{id}/messages`: Paginated cursor history & REST fallback
 - `PATCH|DELETE /conversations/{id}/messages/{messageId}`: Message edit / soft-delete
 - `POST /conversations/{id}/read`: Mark read receipt
 - `POST /conversations/{id}/attachments`: Upload chat attachment (max 10MB)
 - `STOMP /app/v1/conversations/{id}/messages.send`: Send message via RabbitMQ relay
 - `STOMP /app/v1/conversations/{id}/typing.{start|stop}`: Ephemeral typing broadcast
-- `User Subscriptions`: `/user/queue/chat`, `/user/queue/chat-events`, `/user/queue/notifications`
+- `User Subscriptions`: `/user/queue/chat`, `/user/queue/chat-events`, `/user/queue/presence` (scoped to active conversation partners), `/user/queue/notifications`
 
 ### Notifications & File Storage (`/api/v1/`)
 - `GET /notifications`: Paginated feed (newest first)
@@ -85,7 +88,7 @@ HTTP Request ──► CORS Filter ──► RateLimitFilter (IP: 5/min)
 ### Subscriptions, Payments & Admin (`/api/v1/`)
 - `GET /subscriptions/plans[/{id}]`: Public subscription plans
 - `GET|POST|PUT|DELETE /admin/subscription-plans[/{id}]` & `GET /admin/subscriptions[/{id}]`: Admin subscription and pricing management
-- `POST /subscriptions/checkout`: Initiate Chargily Pay V2 hosted checkout (safeguarded against duplicate active or pending subscriptions)
+- `POST /subscriptions/checkout`: Initiate Chargily Pay V2 hosted checkout (safeguarded against duplicate active subscriptions with 409 or pending checkout with 400 `SUBSCRIPTION_ALREADY_PENDING`)
 - `POST /integrations/chargily/webhook`: Signature-verified, idempotent webhook processing
 - `GET /admin/users[/{id}]` & `POST /admin/users/{id}/{approve|ban|timeout|unban}`: User administration (self-ban and self-timeout blocked -> 400)
 - `GET|POST|DELETE /admin/users/{userId}/permissions`: Granular permission assignments (self-revocation blocked -> 400)

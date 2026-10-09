@@ -635,7 +635,7 @@ V10__phase10_payment_origin.sql
 V11__phase10_outbox_retry_schedule.sql
 V12__phase10_analytics_maintenance_jobs.sql
 V13__phase10_report_resolution_time.sql
-V14__phase10_financial_audits.sql
+V14__phase10_financial_audit_actions.sql
 V15__admin_catalog_permission.sql
 V16__client_favorites.sql
 V17__feed_social_enhancements.sql
@@ -643,7 +643,7 @@ V18__feed_notification_types.sql
 V19__notification_preferences.sql
 V20__oauth_confirmation_timestamp.sql
 V21__audit_log_delete_account.sql
-V22__seed_authentic_algerian_techniques.sql
+V22__replace_techniques_with_building_trades.sql
 V23__formation_cancelled_notification_type.sql
 ```
 
@@ -709,6 +709,21 @@ fresh MariaDB schema.
 - Migration baseline guardrails: added automated baseline pattern verification in `scripts/check-source-hygiene.sh` and `scripts/migration-pattern-baseline.txt` to prevent unreviewed dangerous DDL alterations (`ALTER TABLE ... MODIFY ... ENUM`).
 - Modernized JJWT to 0.12.6: migrated from deprecated `parserBuilder()` to `Jwts.parser().verifyWith(key).build()` and enforced HMAC-SHA algorithms (HS512 / HS256) based on key byte-length.
 - Quality gates: configured JaCoCo Maven plugin enforcing 65% line coverage minimum gate and integrated GitHub Actions CodeQL SAST workflow.
+
+## Phase 14 — Domain service refactoring, contract precision & race safety (Issues #23–#31)
+
+### Delivered capabilities
+
+- **Client Registration Synchronization (Issue #23)**: `AuthService.registerUser` provisions a corresponding `Client` entity row synchronously upon client registration, ensuring non-null client foreign keys and preventing missing-profile edge cases on immediate post-signup actions.
+- **Auditing & Identity Context in Monetization Responses (Issue #24)**: Enriched `SubscriptionResponse` and `PaymentResponse` with `createdAt`, `accountId`, and `accountName` across artisan and client billing lifecycles, enabling unambiguous identification and auditability.
+- **Standardized Payment Gateway Integration (Issue #25)**: Standardized Chargily Pay V2 client configuration (`https://pay.chargily.net/api/v2`) and frontend redirect URI ports (default port 3000), preventing webhook and redirect mismatches.
+- **Subscription Checkout Race Guard (Issue #26)**: Safeguarded checkout initiation against duplicate pending checkouts. Throws `BadRequestException` with typed `errorCode: "SUBSCRIPTION_ALREADY_PENDING"` (HTTP 400) when an active pending checkout session exists for the user.
+- **Client Favorites Ceiling & Pessimistic Concurrency (Issue #27)**: Enforced configurable per-client favorites cap (`app.favorites.max-per-client`, default 500) guarded by a pessimistic write lock on the `Client` entity. Excess additions throw `ConflictException` with `errorCode: "FAVORITES_LIMIT_REACHED"` (HTTP 409).
+- **Feed Saved Posts Engagement Parity (Issue #28)**: Updated `GET /api/v1/feed/saved` to populate `likedByCurrentUser` alongside `bookmarkedByCurrentUser` and author details, ensuring consistent engagement state on saved post collections.
+- **Feed Likers Pagination & Caller Status Separation (Issue #29)**: Partitioned feed likes querying into `GET /api/v1/feed/{id}/likes` (returning `PaginatedResponse<FeedPostLikerDTO>` with aliases `/likes/users` and `/likes/likers`) and `GET /api/v1/feed/{id}/likes/status` (returning caller-specific `FeedPostLikeStatusDTO`).
+- **Bidirectional Read Position Tracking (Issue #30)**: Extended `ConversationResponse` with `lastReadMessageId` (caller's read position) and `participantLastReadMessageId` (counterparty's read position), allowing chat clients to accurately render read receipts without polling message history.
+- **Partner-Scoped Real-Time Presence Delivery (Issue #31)**: Hardened `ChatPresenceService` to deliver STOMP presence notifications exclusively to users sharing an active conversation (`findPartnerEmailsByUserEmail`) via private user queues (`/queue/presence`), completely eliminating presence information leakage to unrelated users.
+- **Domain Service Modularization**: Split monolithic controllers and services into cohesive, single-responsibility components (`SubscriptionCheckoutService`, `FeedInteractionService`, `ConversationService`, `ChatDeliveryService`, `ChatPresenceService`) while preserving strict transactional isolation.
 
 ## Verification evidence currently available
 

@@ -91,5 +91,5 @@
 | `V19` | `V19__notification_preferences.sql` | User notification channel preference overrides table, unique constraint, and foreign keys |
 | `V20` | `V20__oauth_confirmation_timestamp.sql` | User entity `last_oauth_login_at` timestamp for sensitive action confirmation |
 | `V21` | `V21__audit_log_delete_account.sql` | Adds `DELETE_ACCOUNT` to the audit action enum |
-| `V22` | `V22__seed_authentic_algerian_techniques.sql` | Authentic Algerian building-trade techniques (Pisé, Chaux, Taille de pierre, Moellons, Zellij, Géjij, Charpente) |
+| `V22` | `V22__replace_techniques_with_building_trades.sql` | Authentic Algerian building-trade techniques (Pisé, Chaux, Taille de pierre, Moellons, Zellij, Géjij, Charpente) |
 | `V23` | `V23__formation_cancelled_notification_type.sql` | Adds `FORMATION_CANCELLED` to notification type enum |
