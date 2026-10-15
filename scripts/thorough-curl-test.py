@@ -290,8 +290,14 @@ def test_phase2_review_recreation():
     """)
     artisan_token, _ = login(artisan_email, password)
 
-    # Completed formation from fixture
+    # Ensure formation exists in database with a distinct author
     formation_id = "64500837-dedc-4125-97f2-26b69aa7c3b1"
+    author_artisan_id = db_query(f"SELECT id FROM artisans WHERE id != '{artisan_id}' LIMIT 1;")[0]
+    db_exec(f"""
+        INSERT INTO formations (id, created_at, updated_at, currency, description, duration_hours, is_online, max_participants, price, status, title, author_id)
+        VALUES ('{formation_id}', NOW(), NOW(), 'DZD', 'Test Formation for Reviews', 4, 1, 20, 5000, 'COMPLETED', 'Test Crafting Course', '{author_artisan_id}')
+        ON DUPLICATE KEY UPDATE status='COMPLETED', updated_at=NOW();
+    """)
 
     # Insert attended enrollment in database
     enrollment_id = str(uuid4())
