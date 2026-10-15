@@ -40,4 +40,9 @@ public abstract class BaseEntity {
             this.id = UUID.randomUUID().toString();
         }
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[id=" + id + "]";
+    }
 }
