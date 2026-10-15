@@ -29,25 +29,34 @@ DB_NAME = os.getenv("DB_NAME", "souklab_test")
 
 HASH_CLIENT_PASSWORD = "$2a$10$4fgP5S6b2ZRbizu9uRV9OO22PvMOE5NcXUhK2mM/85xSQD55rtBCu"  # ClientPassword123!
 
-CLIENT_PERMS = [
-    "180e4376-624d-4489-9bbf-121eeb5194b9",  # permission:client:favorites
-    "1c75609d-0f7c-49bc-86ea-dcfadf15d54b",  # permission:profile:read
-    "fabf9f96-7c04-43ac-81a0-4cc87b1df685",  # permission:profile:write
-    "77eaec3c-d4b5-4972-b141-de95abd8f0c1",  # permission:report:create
-    "d2d12af7-cedd-429d-87d2-c840b90a20b6",  # permission:file:read
-    "93a0672e-424f-4520-8437-e332a4b890e2",  # permission:message:send
-]
+CLIENT_PERMS = []
+ARTISAN_PERMS = []
 
-ARTISAN_PERMS = [
-    "e47949e8-160e-4004-8276-ae5d401ecd92",  # permission:artisan:content
-    "242835a3-6724-4fc0-872e-b37bac569192",  # permission:artisan:formations
-    "ba17fd3c-c5ad-46b0-a3d7-bc0aa41875df",  # permission:artisan:reviews
-    "1c75609d-0f7c-49bc-86ea-dcfadf15d54b",  # permission:profile:read
-    "fabf9f96-7c04-43ac-81a0-4cc87b1df685",  # permission:profile:write
-    "77eaec3c-d4b5-4972-b141-de95abd8f0c1",  # permission:report:create
-    "d2d12af7-cedd-429d-87d2-c840b90a20b6",  # permission:file:read
-    "93a0672e-424f-4520-8437-e332a4b890e2",  # permission:message:send
-]
+def init_permissions():
+    global CLIENT_PERMS, ARTISAN_PERMS
+    rows = db_query("SELECT id, permission_key FROM permissions;")
+    perm_map = {key: pid for pid, key in rows}
+    client_keys = [
+        "permission:client:favorites",
+        "permission:profile:read",
+        "permission:profile:write",
+        "permission:report:create",
+        "permission:file:read",
+        "permission:message:send",
+    ]
+    artisan_keys = [
+        "permission:artisan:content",
+        "permission:artisan:formations",
+        "permission:artisan:reviews",
+        "permission:profile:read",
+        "permission:profile:write",
+        "permission:report:create",
+        "permission:file:read",
+        "permission:message:send",
+    ]
+    CLIENT_PERMS = [perm_map[k] for k in client_keys if k in perm_map]
+    ARTISAN_PERMS = [perm_map[k] for k in artisan_keys if k in perm_map]
+
 
 results = []
 
@@ -233,6 +242,11 @@ def test_item_4():
 
     sub_id = str(uuid4())
     db_exec(f"""
+        INSERT INTO subscription_pricing (id, subscriber_type, name, description, billing_period, amount, currency, active, version_number, created_at, updated_at)
+        VALUES ('262daef6-7ded-42d7-9a84-cdf979b0bb3c', 'CLIENT', 'Premium Client Plan', 'Client Plan', 'MONTHLY', 1500, 'DZD', 1, 1, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE active = 1;
+    """)
+    db_exec(f"""
         INSERT INTO client_subscriptions (id, account_id, plan_id, plan_name, amount, currency, billing_period, entitlements_snapshot, status, version_number, created_at, updated_at)
         VALUES ('{sub_id}', '{user_id}', '262daef6-7ded-42d7-9a84-cdf979b0bb3c', 'Premium Client Plan', 1500, 'DZD', 'MONTHLY', '{{"chat":"true"}}', 'PENDING', 1, NOW(), NOW());
     """)
@@ -296,6 +310,18 @@ def test_item_5():
            passed,
            f"HTTP status={status}, errorCode='{error_code}', message='{body.get('message')}'")
 
+def get_or_create_published_post() -> str:
+    post_rows = db_query("SELECT id FROM feed_posts WHERE status='PUBLISHED' LIMIT 1;")
+    if post_rows:
+        return post_rows[0][0]
+    author_id, _ = create_active_user(f"post-artisan-{uuid4().hex[:8]}@souklab.test", account_type="ARTISAN")
+    post_id = str(uuid4())
+    db_exec(f"""
+        INSERT INTO feed_posts (id, author_id, title, body, status, type, bookmark_count, comment_count, like_count, share_count, published_at, created_at, updated_at)
+        VALUES ('{post_id}', '{author_id}', 'Test Published Post', 'This is a test post body', 'PUBLISHED', 'ACTUALITE', 0, 0, 0, 0, NOW(), NOW(), NOW());
+    """)
+    return post_id
+
 # ----------------------------------------------------------------------------------
 # Test Item 6: Set likedByCurrentUser in /feed/saved (Issue #28)
 # ----------------------------------------------------------------------------------
@@ -304,10 +330,7 @@ def test_item_6():
     user_id, _ = create_active_user(email, account_type="CLIENT")
     token = login_curl(email)
 
-    post_rows = db_query("SELECT id FROM feed_posts WHERE status='PUBLISHED' LIMIT 1;")
-    if not post_rows:
-        raise RuntimeError("No published feed post found")
-    post_id = post_rows[0][0]
+    post_id = get_or_create_published_post()
 
     # Bookmark post
     run_curl("POST", f"/api/v1/feed/{post_id}/bookmarks", headers={"Authorization": f"Bearer {token}"})
@@ -342,8 +365,7 @@ def test_item_7():
     user_id, _ = create_active_user(email, account_type="CLIENT")
     token = login_curl(email)
 
-    post_rows = db_query("SELECT id FROM feed_posts WHERE status='PUBLISHED' LIMIT 1;")
-    post_id = post_rows[0][0]
+    post_id = get_or_create_published_post()
 
     # Like the post
     run_curl("POST", f"/api/v1/feed/{post_id}/likes", headers={"Authorization": f"Bearer {token}"})
@@ -458,6 +480,8 @@ def main():
     print("LIVE TESTING OF ALL 9 RESOLVED ISSUES WITH CURL & MARIADB")
     print(f"Target URL: {BASE_URL}")
     print("=" * 80)
+
+    init_permissions()
 
     test_item_1()
     test_item_2()
