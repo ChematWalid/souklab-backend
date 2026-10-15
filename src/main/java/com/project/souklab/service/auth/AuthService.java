@@ -349,7 +349,11 @@ public class AuthService {
         }
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new UnauthorizedException("User is not authenticated."));
-        validateDeletionCredentials(user, request);
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            validatePasswordReauthentication(user, request);
+        } else {
+            validateOAuthReauthentication(user, request);
+        }
 
         refreshTokenService.deleteByUser(user);
         oauthIdentityRepository.findByUser(user).forEach(identity -> {
@@ -705,17 +709,16 @@ public class AuthService {
         }
     }
 
-    private void validateDeletionCredentials(User user, DeleteAccountRequest request) {
-        if (user.getPassword() != null && !user.getPassword().isBlank()) {
-            if (request == null || request.password() == null || request.password().isBlank()) {
-                throw new UnauthorizedException("Valid password is required.");
-            }
-            if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-                throw new UnauthorizedException("Valid password is required.");
-            }
-            return;
+    private void validatePasswordReauthentication(User user, DeleteAccountRequest request) {
+        if (request == null || request.password() == null || request.password().isBlank()) {
+            throw new UnauthorizedException("Valid password is required.");
         }
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new UnauthorizedException("Valid password is required.");
+        }
+    }
 
+    private void validateOAuthReauthentication(User user, DeleteAccountRequest request) {
         if (request == null || !Boolean.TRUE.equals(request.oauthConfirmed())) {
             throw new UnauthorizedException("Recent OAuth confirmation is required.");
         }
