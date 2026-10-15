@@ -2,6 +2,7 @@ package com.project.souklab.service.auth;
 
 import java.util.Collection;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ClientRepository;
 import com.project.souklab.dao.OAuthIdentityRepository;
@@ -9,6 +10,7 @@ import com.project.souklab.dao.RefreshTokenRepository;
 import com.project.souklab.dao.AuthorizationPermissionRepository;
 import com.project.souklab.dao.UserRepository;
 import com.project.souklab.dto.auth.ChangePasswordRequestDTO;
+import com.project.souklab.dto.auth.DeleteAccountRequest;
 import com.project.souklab.dto.auth.ForgotPasswordRequestDTO;
 import com.project.souklab.dto.auth.JwtResponseDTO;
 import com.project.souklab.dto.auth.LoginDTO;
@@ -2464,4 +2466,162 @@ class AuthServiceTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageStartingWith("OAuth registration intent not found or expired.");
     }
+
+    @Test
+    @DisplayName("deleteCurrentAccount: throws UnauthorizedException when unauthenticated")
+    void deleteCurrentAccount_whenUnauthenticated_throwsUnauthorizedException() {
+        SecurityContextHolder.clearContext();
+
+        assertThatThrownBy(() -> authService.deleteCurrentAccount(new DeleteAccountRequest("any", null)))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("User is not authenticated.");
+    }
+
+    @Test
+    @DisplayName("deleteCurrentAccount: throws UnauthorizedException when user not found in DB")
+    void deleteCurrentAccount_whenUserNotFound_throwsUnauthorizedException() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("ghost@example.com", "cred", List.of())
+        );
+        when(userRepository.findByEmail("ghost@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.deleteCurrentAccount(new DeleteAccountRequest("any", null)))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("User is not authenticated.");
+    }
+
+    @Test
+    @DisplayName("deleteCurrentAccount: password user fails when password is invalid or missing")
+    void deleteCurrentAccount_passwordUser_whenPasswordInvalid_throwsUnauthorizedException() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("pwduser@example.com", "cred", List.of())
+        );
+        User user = User.builder()
+                .email("pwduser@example.com")
+                .password("$2a$10$hashedPassword")
+                .build();
+        user.setId("99");
+        when(userRepository.findByEmail("pwduser@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongpass", "$2a$10$hashedPassword")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.deleteCurrentAccount(new DeleteAccountRequest("wrongpass", null)))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Valid password is required.");
+
+        assertThatThrownBy(() -> authService.deleteCurrentAccount(new DeleteAccountRequest(null, null)))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Valid password is required.");
+    }
+
+    @Test
+    @DisplayName("deleteCurrentAccount: password user succeeds when password matches")
+    void deleteCurrentAccount_passwordUser_whenPasswordMatches_anonymizesAndSavesUser() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("pwduser@example.com", "cred", List.of())
+        );
+        User user = User.builder()
+                .email("pwduser@example.com")
+                .password("$2a$10$hashedPassword")
+                .firstName("John")
+                .lastName("Doe")
+                .status(AccountStatus.ACTIVE)
+                .build();
+        user.setId("42");
+        when(userRepository.findByEmail("pwduser@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("correctPass", "$2a$10$hashedPassword")).thenReturn(true);
+        when(oauthIdentityRepository.findByUser(user)).thenReturn(List.of());
+
+        authService.deleteCurrentAccount(new DeleteAccountRequest("correctPass", null));
+
+        verify(refreshTokenService).deleteByUser(user);
+        verify(userRepository).save(user);
+        assertThat(user.getStatus()).isEqualTo(AccountStatus.DELETED);
+        assertThat(user.getEmail()).isEqualTo("deleted+42@deleted.souklab.invalid");
+        assertThat(user.getPassword()).isNull();
+        assertThat(user.getFirstName()).isEqualTo("Deleted");
+        assertThat(user.getLastName()).isEqualTo("User");
+        assertThat(user.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("deleteCurrentAccount: oauth user fails when OAuth login is stale or confirmation is missing")
+    void deleteCurrentAccount_oauthUser_whenStaleOrUnconfirmed_throwsUnauthorizedException() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("oauthuser@example.com", "cred", List.of())
+        );
+        User user = User.builder()
+                .email("oauthuser@example.com")
+                .password(null)
+                .lastOAuthLoginAt(LocalDateTime.now(fixedClock).minusMinutes(20))
+                .build();
+        user.setId("101");
+        when(userRepository.findByEmail("oauthuser@example.com")).thenReturn(Optional.of(user));
+
+        // Case 1: Stale OAuth login (older than 10 minutes)
+        assertThatThrownBy(() -> authService.deleteCurrentAccount(new DeleteAccountRequest(null, true)))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Recent OAuth confirmation is required.");
+
+        // Case 2: Recent OAuth login but oauthConfirmed is false / null
+        user.setLastOAuthLoginAt(LocalDateTime.now(fixedClock).minusMinutes(2));
+        assertThatThrownBy(() -> authService.deleteCurrentAccount(new DeleteAccountRequest(null, false)))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Recent OAuth confirmation is required.");
+
+        assertThatThrownBy(() -> authService.deleteCurrentAccount(new DeleteAccountRequest(null, null)))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Recent OAuth confirmation is required.");
+    }
+
+    @Test
+    @DisplayName("deleteCurrentAccount: oauth user succeeds when recent login and confirmed")
+    void deleteCurrentAccount_oauthUser_whenRecentAndConfirmed_anonymizesAndSavesUser() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("oauthuser@example.com", "cred", List.of())
+        );
+        User user = User.builder()
+                .email("oauthuser@example.com")
+                .password(null)
+                .lastOAuthLoginAt(LocalDateTime.now(fixedClock).minusMinutes(3))
+                .status(AccountStatus.ACTIVE)
+                .build();
+        user.setId("102");
+        OAuthIdentity identity = OAuthIdentity.builder()
+                .user(user)
+                .provider(OAuthProvider.GOOGLE)
+                .providerUserId("google-sub-55")
+                .email("oauthuser@example.com")
+                .build();
+        identity.setId("55");
+
+        when(userRepository.findByEmail("oauthuser@example.com")).thenReturn(Optional.of(user));
+        when(oauthIdentityRepository.findByUser(user)).thenReturn(List.of(identity));
+
+        authService.deleteCurrentAccount(new DeleteAccountRequest(null, true));
+
+        verify(refreshTokenService).deleteByUser(user);
+        verify(oauthIdentityRepository).save(identity);
+        assertThat(identity.getProviderUserId()).isEqualTo("deleted-55");
+        assertThat(identity.getEmail()).isNull();
+
+        verify(userRepository).save(user);
+        assertThat(user.getStatus()).isEqualTo(AccountStatus.DELETED);
+        assertThat(user.getEmail()).isEqualTo("deleted+102@deleted.souklab.invalid");
+        assertThat(user.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("DeleteAccountRequest: Jackson deserializes oauthConfirmed correctly into providerConfirmed")
+    void deleteAccountRequest_jacksonDeserialization_mapsOauthConfirmed() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = "{\"oauthConfirmed\": true, \"password\": \"mySecret\"}";
+
+        DeleteAccountRequest request = mapper.readValue(json, DeleteAccountRequest.class);
+
+        assertThat(request).isNotNull();
+        assertThat(request.password()).isEqualTo("mySecret");
+        assertThat(request.getOauthConfirmed()).isTrue();
+        assertThat(request.providerConfirmed()).isTrue();
+    }
 }
+
