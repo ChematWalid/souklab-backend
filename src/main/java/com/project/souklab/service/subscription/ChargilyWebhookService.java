@@ -257,11 +257,12 @@ public class ChargilyWebhookService {
                     .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
                     .readValue(rawBody, ChargilyWebhookPayload.class);
         } catch (JsonProcessingException exception) {
-            log.warn("Rejecting malformed Chargily webhook JSON: bodyBytes={}, reason={}", rawBody.length,
-                    exception.getOriginalMessage());
+            log.warn("Rejecting malformed Chargily webhook JSON: bodyBytes={}, reason={}",
+                    rawBody != null ? rawBody.length : 0, exception.getOriginalMessage());
             throw new MalformedWebhookException("Webhook body is malformed");
         } catch (IOException exception) {
-            log.warn("Rejecting unreadable Chargily webhook body: bodyBytes={}", rawBody.length);
+            log.warn("Rejecting unreadable Chargily webhook body: bodyBytes={}",
+                    rawBody != null ? rawBody.length : 0);
             throw new MalformedWebhookException("Webhook body could not be read");
         }
     }

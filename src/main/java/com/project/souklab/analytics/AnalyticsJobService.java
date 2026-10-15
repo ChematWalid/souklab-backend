@@ -779,9 +779,7 @@ public class AnalyticsJobService {
     }
 
     private String keyValue(Object key) {
-        if (key instanceof AnalyticsEvent.Type eventType) return eventType.value();
         if (key instanceof EnumValue enumValue) return enumValue.value();
-        if (key instanceof AnalyticsMetric.Key metricKey) return metricKey.value();
         return String.valueOf(key);
     }
 
