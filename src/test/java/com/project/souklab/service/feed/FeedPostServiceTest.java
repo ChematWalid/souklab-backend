@@ -299,11 +299,11 @@ class FeedPostServiceTest {
         for (int i = 0; i < 10; i++) {
             FeedPostMedia media = FeedPostMedia.builder().storageKey("key-" + i).build();
             media.setId("media-" + i);
-            post.getMedia().add(media);
+            post.addMedia(media);
         }
         assertThatThrownBy(() -> service.addMedia("p1", new MockMultipartFile("file", "a.jpg", "image/jpeg", new byte[]{1})))
                 .isInstanceOf(BadRequestException.class);
-        post.getMedia().clear();
+        when(postRepository.findByIdAndDeletedAtIsNull("p1")).thenReturn(Optional.of(post(FeedPostStatus.PENDING)));
         assertThatThrownBy(() -> service.removeMedia("p1", "missing"))
                 .isInstanceOf(ResourceNotFoundException.class);
     }

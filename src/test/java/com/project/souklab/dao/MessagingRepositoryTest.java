@@ -55,7 +55,7 @@ class MessagingRepositoryTest {
         User other = persistUser("other@chat.test");
         User outsider = persistUser("outsider@chat.test");
         Conversation conversation = persistConversation(owner, other);
-        Message older = persistMessage(conversation, owner, "m1", "older");
+        persistMessage(conversation, owner, "m1", "older");
         Message newer = persistMessage(conversation, other, "m2", "newer");
         Message deleted = persistMessage(conversation, other, "m3", "deleted");
         deleted.setDeletedAt(MESSAGE_TIME);

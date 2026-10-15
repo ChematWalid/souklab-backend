@@ -82,7 +82,7 @@ class NotificationRepositoryTest {
                 targetUser, NotificationType.Account.VALIDATED, "val-1", "Deleted notification", false);
         deletedNotification.setDeletedAt(FIXED_NOW.minusHours(1));
 
-        Notification otherUserNotification = persistNotification(
+        persistNotification(
                 otherUser, NotificationType.Payment.SUCCESS, "tx-other", "Other user notification", false);
 
         entityManager.flush();

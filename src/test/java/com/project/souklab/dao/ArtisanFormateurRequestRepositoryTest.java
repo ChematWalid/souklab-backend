@@ -95,7 +95,7 @@ class ArtisanFormateurRequestRepositoryTest {
 
         ArtisanFormateurRequest olderPending = persistRequest(artisan1, FormateurRequestStatus.PENDING, "Older pending motivation");
         ArtisanFormateurRequest newerPending = persistRequest(artisan2, FormateurRequestStatus.PENDING, "Newer pending motivation");
-        ArtisanFormateurRequest approvedReq = persistRequest(artisan3, FormateurRequestStatus.APPROVED, "Approved motivation");
+        persistRequest(artisan3, FormateurRequestStatus.APPROVED, "Approved motivation");
         ArtisanFormateurRequest deletedPending = persistRequest(artisan4, FormateurRequestStatus.PENDING, "Deleted pending motivation");
         deletedPending.setDeletedAt(FIXED_NOW.minusHours(1));
 
