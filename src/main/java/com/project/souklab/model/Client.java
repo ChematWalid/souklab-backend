@@ -73,4 +73,9 @@ public class Client {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[id=" + id + "]";
+    }
 }

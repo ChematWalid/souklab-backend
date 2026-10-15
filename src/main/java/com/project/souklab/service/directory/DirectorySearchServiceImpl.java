@@ -152,7 +152,7 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
                 .toList();
 
         long totalElements = result.total().hitCount();
-        int totalPages = size == 0 ? 0 : (int) Math.ceil((double) totalElements / size);
+        int totalPages = (int) Math.ceil((double) totalElements / size);
         boolean isLast = totalElements == 0 || page >= totalPages - 1;
 
         return PaginatedResponse.<ArtisanDirectoryCardDTO>builder()

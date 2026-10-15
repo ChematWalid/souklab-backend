@@ -403,4 +403,9 @@ public class Artisan {
             return this;
         }
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[id=" + id + "]";
+    }
 }
