@@ -37,6 +37,7 @@ public final class NotificationType {
         SUSPENDED("ACCOUNT_SUSPENDED"), REINSTATED("ACCOUNT_REINSTATED");
         private final String value;
         Account(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -45,6 +46,7 @@ public final class NotificationType {
         CANCELLED("FORMATION_CANCELLED");
         private final String value;
         Formation(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -52,6 +54,7 @@ public final class NotificationType {
         NEW("NEW_MESSAGE");
         private final String value;
         Message(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -60,12 +63,14 @@ public final class NotificationType {
         REVOKED("SUBSCRIPTION_REVOKED");
         private final String value;
         Subscription(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum Renewal implements Key {
             REMINDER("SUBSCRIPTION_RENEWAL_REMINDER");
             private final String value;
             Renewal(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -73,6 +78,7 @@ public final class NotificationType {
             MANUAL("SUBSCRIPTION_MANUALLY_GRANTED");
             private final String value;
             Grant(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -81,6 +87,7 @@ public final class NotificationType {
         SUCCESS("PAYMENT_SUCCESS"), FAILED("PAYMENT_FAILED");
         private final String value;
         Payment(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -88,6 +95,7 @@ public final class NotificationType {
         CREATED("CHECKOUT_CREATED"), CANCELED("CHECKOUT_CANCELED");
         private final String value;
         Checkout(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -99,6 +107,7 @@ public final class NotificationType {
             UNAVAILABLE("REFUND_REQUEST_UNAVAILABLE");
             private final String value;
             Request(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -107,6 +116,7 @@ public final class NotificationType {
         NEW("NEW_REPORT");
         private final String value;
         Report(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -114,6 +124,7 @@ public final class NotificationType {
         NEW("NEW_REVIEW");
         private final String value;
         Review(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -122,12 +133,14 @@ public final class NotificationType {
         GRANTED("FORMATEUR_GRANTED"), REJECTED("FORMATEUR_REJECTED"), REVOKED("FORMATEUR_REVOKED");
         private final String value;
         Formateur(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum Request implements Key {
             SUBMITTED("FORMATEUR_REQUEST_SUBMITTED");
             private final String value;
             Request(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -148,6 +161,7 @@ public final class NotificationType {
             this.value = value;
         }
 
+        @Override
         public String value() {
             return value;
         }

@@ -22,6 +22,7 @@ public final class ChargilyWebhookEvent {
         Checkout(String value) { this.value = value; }
 
         @JsonValue
+        @Override
         public String value() { return value; }
 
         public static Optional<Checkout> fromValue(String value) {
