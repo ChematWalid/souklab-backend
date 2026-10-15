@@ -24,7 +24,12 @@ class DistributedRateLimitIntegrationTest {
     @Test
     void independentManagersShareOneBucket() {
         String host = System.getenv().getOrDefault("REDIS_HOST", "localhost");
-        int port = Integer.parseInt(System.getenv().getOrDefault("REDIS_PORT", "6379"));
+        int port;
+        try {
+            port = Integer.parseInt(System.getenv().getOrDefault("REDIS_PORT", "6379"));
+        } catch (NumberFormatException e) {
+            port = 6379;
+        }
         String password = System.getenv().getOrDefault("REDIS_PASSWORD", "");
         RedisURI.Builder uri = RedisURI.builder().withHost(host).withPort(port);
         if (!password.isBlank()) {

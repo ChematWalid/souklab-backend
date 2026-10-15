@@ -17,7 +17,6 @@ import json
 import os
 import subprocess
 import sys
-import time
 from uuid import uuid4
 
 def load_dotenv(path=".env"):

@@ -16,8 +16,7 @@ import json
 import os
 import subprocess
 import sys
-import time
-import urllib.parse
+from pathlib import Path
 from uuid import uuid4
 
 BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8080").rstrip("/")
@@ -538,12 +537,9 @@ def main():
             print(f)
     print("======================================================================")
 
-    # Cleanup temp files
-    try:
-        os.remove(tmp_pdf)
-        os.remove(tmp_png)
-    except Exception:
-        pass
+    # Cleanup temp files safely if present
+    Path(tmp_pdf).unlink(missing_ok=True)
+    Path(tmp_png).unlink(missing_ok=True)
 
     return 1 if failed_count > 0 else 0
 

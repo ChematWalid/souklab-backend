@@ -14,10 +14,23 @@ public final class LogSanitizer {
      * @param value untrusted input value
      * @return sanitized string safe for logging
      */
+    public static String sanitize(String value) {
+        if (value == null) {
+            return "null";
+        }
+        return value.replaceAll("[\r\n]", "_");
+    }
+
+    /**
+     * Sanitizes arbitrary object representations by converting through String.valueOf.
+     *
+     * @param value untrusted object
+     * @return sanitized string safe for logging
+     */
     public static String sanitize(Object value) {
         if (value == null) {
             return "null";
         }
-        return value.toString().replaceAll("[\r\n]", "_");
+        return sanitize(String.valueOf(value));
     }
 }

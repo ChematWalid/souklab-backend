@@ -178,7 +178,7 @@ class ClientFavoriteClockIntegrationTest {
     @DisplayName("Clock-driven visibility: suspended artisan rejected before ban expires, accepted after clock advances")
     void clockDrivesSuspendedArtisanVisibilityAndTimestampsMatchAcrossLayers() {
         User clientUser = createTestUser("client-clock", AccountStatus.ACTIVE);
-        Client client = createTestClient(clientUser);
+        createTestClient(clientUser);
 
         LocalDateTime banUntil = LocalDateTime.of(2026, 6, 1, 12, 0, 0);
         User artisanUser = createTestUser("artisan-clock", AccountStatus.SUSPENDED);

@@ -29,7 +29,11 @@ class SizeLimitingInputStreamTest {
     void rejectsPayloadAfterConfiguredLimit() {
         SizeLimitingInputStream stream = new SizeLimitingInputStream(
                 new ByteArrayInputStream(new byte[]{1, 2, 3}), 2);
-        assertThatThrownBy(() -> stream.read(new byte[3], 0, 3))
-                .isInstanceOf(FileTooLargeException.class);
+        assertThatThrownBy(() -> {
+            int bytesRead = stream.read(new byte[3], 0, 3);
+            if (bytesRead < 0) {
+                throw new IllegalStateException("Unexpected EOF");
+            }
+        }).isInstanceOf(FileTooLargeException.class);
     }
 }

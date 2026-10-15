@@ -261,7 +261,7 @@ class UserAvatarRepositoryTest {
         User user2 = persistUser("user2@souklab.dz");
 
         LocalDateTime baseTime = LocalDateTime.of(2026, 9, 5, 10, 0, 0);
-        UserAvatar avatar1 = persistAvatar(user1, "first.jpg", false, baseTime.minusDays(2));
+        persistAvatar(user1, "first.jpg", false, baseTime.minusDays(2));
         UserAvatar avatar2 = persistAvatar(user1, "second.jpg", true, baseTime);
         UserAvatar avatar3 = persistAvatar(user1, "third.jpg", false, baseTime.minusDays(1));
         persistAvatar(user2, "user2.jpg", true, baseTime);

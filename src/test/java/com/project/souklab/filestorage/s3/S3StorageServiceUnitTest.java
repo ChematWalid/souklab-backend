@@ -101,15 +101,15 @@ class S3StorageServiceUnitTest {
         GetObjectResponse response = GetObjectResponse.builder()
                 .contentType("image/jpeg").contentLength(null)
                 .metadata(Map.of("original-filename", "photo.jpg")).build();
-        ResponseInputStream<GetObjectResponse> stream = new ResponseInputStream<>(response,
-                AbortableInputStream.create(new ByteArrayInputStream(new byte[]{1})));
-        when(client.getObject(any(GetObjectRequest.class))).thenReturn(stream);
+        try (ResponseInputStream<GetObjectResponse> stream = new ResponseInputStream<>(response,
+                AbortableInputStream.create(new ByteArrayInputStream(new byte[]{1})))) {
+            when(client.getObject(any(GetObjectRequest.class))).thenReturn(stream);
 
-        var resource = service.retrieve("key");
-        assertThat(resource.contentType()).isEqualTo("image/jpeg");
-        assertThat(resource.size()).isZero();
-        assertThat(resource.originalFilename()).isEqualTo("photo.jpg");
-        resource.content().close();
+            var resource = service.retrieve("key");
+            assertThat(resource.contentType()).isEqualTo("image/jpeg");
+            assertThat(resource.size()).isZero();
+            assertThat(resource.originalFilename()).isEqualTo("photo.jpg");
+        }
 
         reset(client);
         doThrow(AwsServiceException.builder().statusCode(500).message("down").build())

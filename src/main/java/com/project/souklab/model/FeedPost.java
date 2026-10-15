@@ -27,6 +27,7 @@ import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -112,6 +113,14 @@ public class FeedPost extends BaseEntity {
     @Builder.Default
     @BatchSize(size = 50)
     private List<FeedPostMedia> media = new ArrayList<>();
+
+    public List<FeedPostMedia> getMedia() {
+        return media == null ? Collections.emptyList() : Collections.unmodifiableList(media);
+    }
+
+    public void setMedia(List<FeedPostMedia> media) {
+        this.media = media == null ? new ArrayList<>() : new ArrayList<>(media);
+    }
 
     /**
      * Adds media while maintaining both sides of the relationship.
