@@ -1,6 +1,7 @@
 package com.project.souklab.service.formation;
 
 import java.util.Map;
+import com.project.souklab.util.LogSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.analytics.AnalyticsEvent;
@@ -117,7 +118,7 @@ public class FormationService {
                 .build();
 
         Formation saved = formationRepository.save(formation);
-        log.info("Artisan '{}' created formation draft '{}' [{}]", artisan.getId(), saved.getTitle(), saved.getId());
+        log.info("Artisan '{}' created formation draft '{}' [{}]", artisan.getId(), LogSanitizer.sanitize(saved.getTitle()), saved.getId());
         return mapToResponseDTO(saved);
     }
 
@@ -487,7 +488,7 @@ public class FormationService {
                     allowedMimes
             );
         } catch (IOException e) {
-            log.error("Failed to read upload stream for file '{}'", file.getOriginalFilename(), e);
+            log.error("Failed to read upload stream for file '{}'", LogSanitizer.sanitize(file.getOriginalFilename()), e);
             throw new StorageException("Failed to read upload stream: " + e.getMessage(), e);
         }
     }

@@ -1,5 +1,6 @@
 package com.project.souklab.service.favorite;
 
+import com.project.souklab.util.LogSanitizer;
 import com.project.souklab.config.AppProperties;
 import com.project.souklab.dao.ArtisanRepository;
 import com.project.souklab.dao.ClientFavoriteArtisanRepository;
@@ -111,7 +112,7 @@ public class ArtisanFavoriteServiceImpl implements ArtisanFavoriteService {
         try {
             favorite = favoriteRepository.saveAndFlush(favorite);
         } catch (DataIntegrityViolationException dive) {
-            log.warn("Concurrent duplicate favorite insertion for client {} and artisan {}", client.getId(), artisanId, dive);
+            log.warn("Concurrent duplicate favorite insertion for client {} and artisan {}", client.getId(), LogSanitizer.sanitize(artisanId), dive);
             throw new ConflictException(ERROR_ALREADY_FAVORITED, dive);
         }
 

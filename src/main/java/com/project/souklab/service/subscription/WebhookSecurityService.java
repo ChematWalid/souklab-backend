@@ -50,7 +50,8 @@ public class WebhookSecurityService {
             Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, encryptionKey(), new GCMParameterSpec(GCM_TAG_BITS, iv));
             byte[] ciphertext = cipher.doFinal(rawPayload.getBytes(StandardCharsets.UTF_8));
-            byte[] result = Arrays.copyOf(iv, iv.length + ciphertext.length);
+            int totalLength = Math.addExact(iv.length, ciphertext.length);
+            byte[] result = Arrays.copyOf(iv, totalLength);
             System.arraycopy(ciphertext, 0, result, iv.length, ciphertext.length);
             return Base64.getEncoder().encodeToString(result);
         } catch (GeneralSecurityException exception) {

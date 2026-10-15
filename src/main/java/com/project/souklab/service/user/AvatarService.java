@@ -1,6 +1,7 @@
 package com.project.souklab.service.user;
 
 import com.project.souklab.analytics.AnalyticsMetric;
+import com.project.souklab.util.LogSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.project.souklab.config.AvatarProperties;
@@ -345,9 +346,9 @@ public class AvatarService {
         for (String key : keysToDelete) {
             try {
                 storageService.delete(key);
-                log.debug("Deleted storage key '{}' for avatar '{}'", key, avatarId);
+                log.debug("Deleted storage key '{}' for avatar '{}'", LogSanitizer.sanitize(key), LogSanitizer.sanitize(avatarId));
             } catch (Exception e) {
-                log.error("Failed to delete storage key '{}' for avatar '{}'", key, avatarId, e);
+                log.error("Failed to delete storage key '{}' for avatar '{}'", LogSanitizer.sanitize(key), LogSanitizer.sanitize(avatarId), e);
             }
         }
     }

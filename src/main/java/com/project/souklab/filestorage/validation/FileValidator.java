@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.validation;
 
+import com.project.souklab.util.LogSanitizer;
 import com.project.souklab.filestorage.config.StorageProperties;
 import com.project.souklab.filestorage.exception.FileTooLargeException;
 import com.project.souklab.filestorage.exception.InvalidFilenameException;
@@ -172,7 +173,7 @@ public class FileValidator {
         if (declaredContentType != null && !declaredContentType.isBlank()) {
             String cleanDeclared = declaredContentType.split(";")[0].trim().toLowerCase();
             if (!isMatchingMimeType(cleanDeclared, detectedMimeType)) {
-                log.warn("MIME spoofing detected! Sniffed magic bytes: '{}', Declared header: '{}'", detectedMimeType, declaredContentType);
+                log.warn("MIME spoofing detected! Sniffed magic bytes: '{}', Declared header: '{}'", detectedMimeType, LogSanitizer.sanitize(declaredContentType));
                 throw new UnsupportedFileTypeException(detectedMimeType, declaredContentType);
             }
         }
