@@ -25,7 +25,7 @@ class SearchIndexingService {
                 .threadsToLoadObjects(options.threadsToLoadObjects())
                 .batchSizeToLoadObjects(options.batchSizeToLoadObjects())
                 .idFetchSize(options.idFetchSize());
-        return massIndexer.start().thenApply(ignored -> null);
+        return massIndexer.start().thenRun(() -> {});
     }
 
     record AppIndexingOptions(int threadsToLoadObjects, int batchSizeToLoadObjects, int idFetchSize) {

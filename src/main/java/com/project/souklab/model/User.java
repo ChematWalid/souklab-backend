@@ -26,6 +26,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -178,5 +179,29 @@ public class User extends BaseEntity {
             return AccountStatus.ACTIVE;
         }
         return status;
+    }
+
+    public Set<AuthorizationPermission> getPermissions() {
+        return permissions == null ? Collections.emptySet() : Collections.unmodifiableSet(permissions);
+    }
+
+    public boolean addPermission(AuthorizationPermission permission) {
+        if (permissions == null) {
+            permissions = new HashSet<>();
+        }
+        return permissions.add(permission);
+    }
+
+    public boolean removePermission(AuthorizationPermission permission) {
+        if (permissions == null) {
+            return false;
+        }
+        return permissions.remove(permission);
+    }
+
+    public void clearPermissions() {
+        if (permissions != null) {
+            permissions.clear();
+        }
     }
 }

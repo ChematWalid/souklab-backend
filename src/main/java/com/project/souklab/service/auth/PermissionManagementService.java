@@ -46,7 +46,7 @@ public class PermissionManagementService {
         requireAdmin();
         User user = findUser(userId);
         AuthorizationPermission permission = findPermission(request.getPermission());
-        if (!user.getPermissions().add(permission)) {
+        if (!user.addPermission(permission)) {
             throw new ConflictException("Permission is already assigned.");
         }
         userRepository.save(user);
@@ -64,7 +64,7 @@ public class PermissionManagementService {
                 && Permission.Admin.USERS.value().equals(permission.getPermissionKey())) {
             throw new BadRequestException("Administrators cannot revoke their own administrator privileges.");
         }
-        if (!user.getPermissions().remove(permission)) {
+        if (!user.removePermission(permission)) {
             throw new ConflictException("Permission is not assigned.");
         }
         userRepository.save(user);

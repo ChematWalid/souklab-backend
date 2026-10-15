@@ -449,7 +449,7 @@ class ConversationServiceTest {
         attachment.setContentType("image/jpeg");
         attachment.setSize(42L);
         attachment.setMessage(saved);
-        saved.getAttachments().add(attachment);
+        saved.addAttachment(attachment);
         when(conversationRepository.findById("conversation")).thenReturn(Optional.of(conversation));
         when(participantRepository.existsByConversationAndUser(conversation, sender)).thenReturn(true);
         when(messageRepository.findByConversationAndAuthorAndIdempotencyKeyAndDeletedAtIsNull(conversation, sender, "attachment-key"))
@@ -767,7 +767,7 @@ class ConversationServiceTest {
         AuthorizationPermission adminPerm = new AuthorizationPermission();
         adminPerm.setPermissionKey(Permission.Admin.USERS.value());
         adminPerm.setEnabled(true);
-        sender.getPermissions().add(adminPerm);
+        sender.addPermission(adminPerm);
 
         recipient.setFirstName("Mohamed");
         recipient.setLastName("Artisan");

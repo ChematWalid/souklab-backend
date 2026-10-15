@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -50,4 +51,21 @@ public class SubscriptionPlan extends BaseEntity {
 
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubscriptionPlanEntitlement> entitlements = new ArrayList<>();
+
+    public List<SubscriptionPlanEntitlement> getEntitlements() {
+        return entitlements == null ? Collections.emptyList() : Collections.unmodifiableList(entitlements);
+    }
+
+    public void clearEntitlements() {
+        if (entitlements != null) {
+            entitlements.clear();
+        }
+    }
+
+    public void addEntitlement(SubscriptionPlanEntitlement entitlement) {
+        if (entitlements == null) {
+            entitlements = new ArrayList<>();
+        }
+        entitlements.add(entitlement);
+    }
 }

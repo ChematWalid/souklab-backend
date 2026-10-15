@@ -119,8 +119,7 @@ public class AuthController {
     @PostMapping("/logout")
     @Operation(summary = "Logout user", description = "Revokes refresh tokens for the current user and terminates the active session.")
     public ResponseEntity<ApiResponse<Void>> logout(
-            @RequestBody(required = false) TokenRefreshRequestDTO tokenRequest,
-            HttpServletRequest request) {
+            @RequestBody(required = false) TokenRefreshRequestDTO tokenRequest) {
         authService.logout(tokenRequest);
         return ResponseEntity.ok(ApiResponse.success(null, "Logout successful."));
     }

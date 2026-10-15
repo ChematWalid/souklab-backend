@@ -147,7 +147,7 @@ public class ConversationService {
         if (request.attachmentKeys() != null) {
             for (String key : request.attachmentKeys()) {
                 MessageAttachmentUpload upload = attachmentUploadRepository.findByStorageKeyAndOwnerAndConversationAndUsedAtIsNull(key, current, c).orElseThrow(() -> new BadRequestException("Attachment is not owned by the sender for this conversation"));
-                MessageAttachment attachment = new MessageAttachment(); attachment.setMessage(message); attachment.setStorageKey(upload.getStorageKey()); attachment.setOriginalFilename(upload.getOriginalFilename()); attachment.setContentType(upload.getContentType()); attachment.setSize(upload.getSize()); message.getAttachments().add(attachment); upload.setUsedAt(LocalDateTime.now(clock));
+                MessageAttachment attachment = new MessageAttachment(); attachment.setMessage(message); attachment.setStorageKey(upload.getStorageKey()); attachment.setOriginalFilename(upload.getOriginalFilename()); attachment.setContentType(upload.getContentType()); attachment.setSize(upload.getSize()); message.addAttachment(attachment); upload.setUsedAt(LocalDateTime.now(clock));
             }
         }
         try {
