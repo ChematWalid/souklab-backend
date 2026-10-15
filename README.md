@@ -184,6 +184,9 @@ The server listens on `http://localhost:8080/api/v1`.
 
 # Live end-to-end curl verification against running Docker stack (34 scenarios)
 python3 scripts/thorough-curl-test.py
+
+# Exhaustive CRUD, IDOR, input fuzzing, and privacy curl scenario matrix (173 scenarios)
+python3 scripts/test-crud-scenarios.py
 ```
 
 Authorization capabilities and their endpoint/service boundaries are documented in [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). Local development keeps Flyway disabled by default; production enables the versioned migrations and uses Hibernate schema validation.
@@ -198,7 +201,7 @@ Authorization capabilities and their endpoint/service boundaries are documented 
 - **Architecture Codemaps**: [`docs/CODEMAPS/`](docs/CODEMAPS/) — Token-lean system diagrams, route maps, data models, and dependency topologies.
 - **API Specification**: See [`docs/API_SPEC.md`](docs/API_SPEC.md) for endpoint references and [`docs/frontend/API_HANDOFF.md`](docs/frontend/API_HANDOFF.md) for frontend integration.
 - **Production Audit**: See [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md) for current readiness findings, evidence, and release gates.
-- **Live Curl Suite**: See [`scripts/thorough-curl-test.py`](scripts/thorough-curl-test.py) for the live end-to-end curl verification test harness.
+- **Live Curl Suites**: See [`scripts/thorough-curl-test.py`](scripts/thorough-curl-test.py) and [`scripts/test-crud-scenarios.py`](scripts/test-crud-scenarios.py) for the live end-to-end curl verification and CRUD resilience test harnesses.
 - **Postman API Reference**: The current permission-based contract is documented in [`docs/API_SPEC.md`](docs/API_SPEC.md) and [`docs/AUTHORIZATION_MATRIX.md`](docs/AUTHORIZATION_MATRIX.md). The older generated reference is retained in `docs/dev/` as an archival migration artifact.
 - **Postman Test Suite**: The checked-in collection is retained for historical scenarios and must be regenerated before running Newman against the current permission-based API.
 

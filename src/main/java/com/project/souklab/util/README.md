@@ -16,4 +16,5 @@ Stateless helpers, security context extractors, and response serializers.
 | [`MapperUtil`](MapperUtil.java) | Model-to-DTO conversion helpers. |
 | [`SlugUtils`](SlugUtils.java) | Converts taxonomy names into URL-friendly kebab-case slugs, stripping accents and special characters. |
 | [`ServletResponseUtil`](ServletResponseUtil.java) | Directly writes standardized `ApiResponse` JSON error payloads into `HttpServletResponse` streams from servlet filters. |
+| [`LogSanitizer`](LogSanitizer.java) | Sanitizes untrusted user inputs before writing to log streams to prevent Log Injection / Log Forging (CWE-117). |
 

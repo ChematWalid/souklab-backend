@@ -7,11 +7,11 @@ The schema is defined by the JPA mappings in `com.project.souklab.model`; this d
 | Area | Tables / mappings |
 | --- | --- |
 | Identity | `users`, `permissions`, `user_permissions`, `refresh_tokens`, `verification_tokens`, `oauth_identities`, `clients`, `user_avatars` |
-| Artisan | `artisans`, `artisan_gallery_images`, `artisan_certifications`, `artisan_profile_views`, `artisan_formateur_requests`, and artisan taxonomy join tables |
+| Artisan | `artisans`, `artisan_gallery_images`, `artisan_certifications`, `artisan_profile_views`, `artisan_formateur_requests`, `artisan_epoques`, `artisan_materials`, `artisan_techniques` |
 | Catalog | `regions`, `job_categories`, `job_sub_categories`, `material_families`, `materials`, `epoques`, `techniques` |
 | Formations | `formations`, `formation_files`, `formation_enrollments`, `formation_reviews` |
 | Social | `feed_posts`, `feed_post_media`, `feed_tags`, `feed_post_tags`, `feed_post_likes`, `feed_post_bookmarks`, `feed_post_comments`, `feed_post_comment_likes`, `artisan_reviews`, `content_reports` |
-| Messaging | `conversations`, `conversation_participants`, `messages`, `message_attachments` |
+| Messaging | `conversations`, `conversation_participants`, `messages`, `message_attachments`, `message_attachment_uploads` |
 | Subscriptions & Payments | `subscription_pricing`, `subscription_plan_entitlements`, `artisan_subscriptions`, `client_subscriptions`, `payments`, `payment_webhook_logs` |
 | Analytics | `activity_events`, `daily_kpi_rollups`, `analytics_jobs`, `analytics_job_artifacts`, `analytics_outbox_events`, `analytics_processed_events`, `analytics_maintenance_jobs` |
 | Operations | `notifications`, `user_notification_preferences`, `audit_logs` |

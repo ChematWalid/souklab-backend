@@ -1,4 +1,4 @@
-<!-- Generated: 2026-09-25 | Files scanned: 510 | Token estimate: ~850 -->
+<!-- Generated: 2026-10-16 | Files scanned: 545 | Token estimate: ~850 -->
 
 # Data Architecture & Schema Codemap
 
@@ -50,6 +50,7 @@
 - `ConversationParticipant` (`conversation_participants`): Member join table with archived/read state.
 - `Message` (`messages`): Text payload, sender, read status, edit flag, soft-delete timestamp.
 - `MessageAttachment` (`message_attachments`): Attached files (max 5 per message).
+- `MessageAttachmentUpload` (`message_attachment_uploads`): Staging and upload verification records for message file attachments.
 
 ### Subscriptions & Payments
 - `SubscriptionPlan` (`subscription_pricing`): Pricing tier definitions and billing periods in DZD.

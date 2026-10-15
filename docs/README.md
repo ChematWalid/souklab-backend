@@ -47,3 +47,5 @@ changes.
   authenticated STOMP/WebSocket behavior.
 - `scripts/verify-chargily-local-e2e.sh` covers local provider payment paths.
 - `scripts/verify-chargily-callback.sh` reconciles hosted Test Mode callbacks.
+- `scripts/thorough-curl-test.py` exercises live end-to-end curl test suite (34 assertions).
+- `scripts/test-crud-scenarios.py` exercises exhaustive CRUD, IDOR, input fuzzing, and privacy curl scenarios (173 assertions).

@@ -1,12 +1,12 @@
 # Souklab OpenAPI contract
 
-Generated from the running application on 2026-09-26T23:53:53Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
+Generated from the running application on 2026-10-15T23:07:39Z. This Markdown view is a human-readable companion to the machine-readable `/v3/api-docs` document.
 
 - OpenAPI version: `3.1.0`
 - API title: `Souklab API`
 - API version: `1.0.0`
-- Paths: `176`
-- Schemas: `207`
+- Paths: `180`
+- Schemas: `213`
 
 ## Security
 
@@ -751,26 +751,13 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ### `/api/v1/feed/{id}/likes`
 
-#### GET — getPostLikers
+#### GET — likers
 
-- Operation ID: `getPostLikers`
+- Operation ID: `likers`
 - Tags: `Community Feed`
 - Parameters:
   - `id` (`path`, required)
-  - `page` (`query`)
-  - `size` (`query`)
-  - `sort` (`query`)
-- Responses:
-  - `200` — OK
-
-### `/api/v1/feed/{id}/likes/status`
-
-#### GET — likeStatus
-
-- Operation ID: `likeStatus`
-- Tags: `Community Feed`
-- Parameters:
-  - `id` (`path`, required)
+  - `pageable` (`query`, required)
 - Responses:
   - `200` — OK
 
@@ -1190,11 +1177,33 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 - Responses:
   - `200` — OK
 
+### `/api/v1/artisan/formations/{id}/cancel-formation`
+
+#### POST — Cancel masterclass
+
+- Operation ID: `cancelFormation`
+- Tags: `Masterclass Authoring`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{id}/cancel`
 
-#### POST — Cancel masterclass enrollment
+#### POST — Cancel masterclass or enrollment
 
 - Operation ID: `cancel_1`
+- Tags: `Masterclass Catalog & Enrollment`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
+### `/api/v1/artisan/formations/{id}/cancel-enrollment`
+
+#### POST — Cancel masterclass or enrollment
+
+- Operation ID: `cancel_2`
 - Tags: `Masterclass Catalog & Enrollment`
 - Parameters:
   - `id` (`path`, required)
@@ -1373,9 +1382,9 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ### `/api/v1/admin/subscriptions/{id}/cancel`
 
-#### POST — cancel_2
+#### POST — cancel_3
 
-- Operation ID: `cancel_2`
+- Operation ID: `cancel_3`
 - Tags: `admin-subscription-controller`
 - Parameters:
   - `id` (`path`, required)
@@ -1556,11 +1565,29 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ### `/api/v1/admin/catalog/techniques`
 
+#### GET — getTechniques
+
+- Operation ID: `getTechniques`
+- Tags: `admin-catalog-controller`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/techniques`
+
 #### POST — createTechnique
 
 - Operation ID: `createTechnique`
 - Tags: `admin-catalog-controller`
 - Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/subcategories`
+
+#### GET — getSubCategories
+
+- Operation ID: `getSubCategories`
+- Tags: `admin-catalog-controller`
 - Responses:
   - `200` — OK
 
@@ -1576,11 +1603,29 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ### `/api/v1/admin/catalog/regions`
 
+#### GET — getRegions
+
+- Operation ID: `getRegions`
+- Tags: `admin-catalog-controller`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/regions`
+
 #### POST — createRegion
 
 - Operation ID: `createRegion`
 - Tags: `admin-catalog-controller`
 - Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/materials`
+
+#### GET — getMaterials
+
+- Operation ID: `getMaterials`
+- Tags: `admin-catalog-controller`
 - Responses:
   - `200` — OK
 
@@ -1596,6 +1641,15 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ### `/api/v1/admin/catalog/material-families`
 
+#### GET — getMaterialFamilies
+
+- Operation ID: `getMaterialFamilies`
+- Tags: `admin-catalog-controller`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/material-families`
+
 #### POST — createMaterialFamily
 
 - Operation ID: `createMaterialFamily`
@@ -1606,11 +1660,29 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ### `/api/v1/admin/catalog/epoques`
 
+#### GET — getEpoques
+
+- Operation ID: `getEpoques`
+- Tags: `admin-catalog-controller`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/epoques`
+
 #### POST — createEpoque
 
 - Operation ID: `createEpoque`
 - Tags: `admin-catalog-controller`
 - Request body: `application/json`
+- Responses:
+  - `200` — OK
+
+### `/api/v1/admin/catalog/categories`
+
+#### GET — getCategories
+
+- Operation ID: `getCategories`
+- Tags: `admin-catalog-controller`
 - Responses:
   - `200` — OK
 
@@ -2019,11 +2091,22 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 - Responses:
   - `200` — OK
 
+### `/api/v1/feed/{id}/likes/status`
+
+#### GET — likeStatus
+
+- Operation ID: `likeStatus`
+- Tags: `Community Feed`
+- Parameters:
+  - `id` (`path`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/feed/{id}/likes/likers`
 
-#### GET — likers
+#### GET — likersAlias
 
-- Operation ID: `likers`
+- Operation ID: `likersAlias`
 - Tags: `Community Feed`
 - Parameters:
   - `id` (`path`, required)
@@ -2102,7 +2185,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 #### GET — Get techniques taxonomy
 
-- Operation ID: `getTechniques`
+- Operation ID: `getTechniques_1`
 - Tags: `Catalog Taxonomy`
 - Responses:
   - `200` — OK
@@ -2111,7 +2194,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 #### GET — Get regions taxonomy
 
-- Operation ID: `getRegions`
+- Operation ID: `getRegions_1`
 - Tags: `Catalog Taxonomy`
 - Responses:
   - `200` — OK
@@ -2120,7 +2203,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 #### GET — Get materials taxonomy
 
-- Operation ID: `getMaterials`
+- Operation ID: `getMaterials_1`
 - Tags: `Catalog Taxonomy`
 - Responses:
   - `200` — OK
@@ -2129,7 +2212,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 #### GET — Get epochs taxonomy
 
-- Operation ID: `getEpoques`
+- Operation ID: `getEpoques_1`
 - Tags: `Catalog Taxonomy`
 - Responses:
   - `200` — OK
@@ -2138,7 +2221,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 #### GET — Get craft categories
 
-- Operation ID: `getCategories`
+- Operation ID: `getCategories_1`
 - Tags: `Catalog Taxonomy`
 - Responses:
   - `200` — OK
@@ -2196,6 +2279,18 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 - Responses:
   - `200` — OK
 
+### `/api/v1/artisan/formations/{id}/enrollments`
+
+#### GET — Get formation enrollments
+
+- Operation ID: `getEnrollments`
+- Tags: `Masterclass Catalog & Enrollment`
+- Parameters:
+  - `id` (`path`, required)
+  - `pageable` (`query`, required)
+- Responses:
+  - `200` — OK
+
 ### `/api/v1/artisan/formations/{formationId}/reviews/me`
 
 #### GET — myReview
@@ -2236,6 +2331,9 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 - Operation ID: `getPublishedCatalog`
 - Tags: `Masterclass Catalog & Enrollment`
 - Parameters:
+  - `trade` (`query`, optional)
+  - `region` (`query`, optional)
+  - `online` (`query`, optional)
   - `pageable` (`query`, required)
 - Responses:
   - `200` — OK
@@ -2833,13 +2931,13 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `TechniqueDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"}}}
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"active":{"type":"boolean"}}}
 ```
 
 ### `JobSubCategoryRequest`
 
 ```json
-{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"categoryId":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"active":{"type":"boolean","writeOnly":true},"status":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"categoryId":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
 ```
 
 ### `ApiResponseJobSubCategoryDTO`
@@ -2851,7 +2949,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `JobSubCategoryDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"categoryId":{"type":"string"}}}
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"categoryId":{"type":"string"},"active":{"type":"boolean"}}}
 ```
 
 ### `RegionRequest`
@@ -2869,13 +2967,13 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `RegionDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"code":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"children":{"type":"array","items":{"$ref":"#/components/schemas/RegionDTO"}}}}
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"code":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"children":{"type":"array","items":{"$ref":"#/components/schemas/RegionDTO"}},"active":{"type":"boolean"}}}
 ```
 
 ### `MaterialRequest`
 
 ```json
-{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"familyId":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"active":{"type":"boolean","writeOnly":true},"status":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"familyId":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
 ```
 
 ### `ApiResponseMaterialDTO`
@@ -2887,13 +2985,13 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `MaterialDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"familyId":{"type":"string"}}}
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"familyId":{"type":"string"},"active":{"type":"boolean"}}}
 ```
 
 ### `MaterialFamilyRequest`
 
 ```json
-{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"active":{"type":"boolean","writeOnly":true},"status":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
 ```
 
 ### `ApiResponseMaterialFamilyDTO`
@@ -2905,7 +3003,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `MaterialFamilyDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"materials":{"type":"array","items":{"$ref":"#/components/schemas/MaterialDTO"}}}}
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"materials":{"type":"array","items":{"$ref":"#/components/schemas/MaterialDTO"}},"active":{"type":"boolean"}}}
 ```
 
 ### `EpoqueRequest`
@@ -2923,13 +3021,13 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `EpoqueDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"periodEra":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"}}}
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"periodEra":{"type":"string"},"description":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"active":{"type":"boolean"}}}
 ```
 
 ### `JobCategoryRequest`
 
 ```json
-{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"iconUrl":{"type":"string","maxLength":500,"minLength":0},"displayOrder":{"type":"integer","format":"int32"},"active":{"type":"boolean","writeOnly":true},"status":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
+{"type":"object","properties":{"name":{"type":"string","maxLength":100,"minLength":0},"slug":{"type":"string","maxLength":120,"minLength":0},"description":{"type":"string"},"iconUrl":{"type":"string","maxLength":500,"minLength":0},"displayOrder":{"type":"integer","format":"int32"},"status":{"type":"boolean","writeOnly":true},"active":{"type":"boolean","writeOnly":true},"isActive":{"type":"boolean"}},"required":["name"]}
 ```
 
 ### `ApiResponseJobCategoryDTO`
@@ -2941,7 +3039,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `JobCategoryDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"iconUrl":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"subCategories":{"type":"array","items":{"$ref":"#/components/schemas/JobSubCategoryDTO"}}}}
+{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"slug":{"type":"string"},"description":{"type":"string"},"iconUrl":{"type":"string"},"displayOrder":{"type":"integer","format":"int32"},"subCategories":{"type":"array","items":{"$ref":"#/components/schemas/JobSubCategoryDTO"}},"active":{"type":"boolean"}}}
 ```
 
 ### `SubscriptionCheckoutRequest`
@@ -3145,7 +3243,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `ProfileResponse`
 
 ```json
-{"type":"object","oneOf":[{"$ref":"#/components/schemas/ClientProfileResponseDTO"},{"$ref":"#/components/schemas/ArtisanResponseDTO"}],"properties":{"phone":{"type":"string"},"avatarUrl":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"updatedAt":{"type":"string","format":"date-time"},"emailVerified":{"type":"boolean"},"accountStatus":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"createdAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"emailVerifiedAt":{"type":"string","format":"date-time"},"name":{"type":"string"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"id":{"type":"string"}}}
+{"type":"object","oneOf":[{"$ref":"#/components/schemas/ClientProfileResponseDTO"},{"$ref":"#/components/schemas/ArtisanResponseDTO"}],"properties":{"name":{"type":"string"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"id":{"type":"string"},"email":{"type":"string"},"accountStatus":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"createdAt":{"type":"string","format":"date-time"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"emailVerified":{"type":"boolean"},"firstName":{"type":"string"},"lastName":{"type":"string"},"updatedAt":{"type":"string","format":"date-time"},"emailVerifiedAt":{"type":"string","format":"date-time"}}}
 ```
 
 ### `RegionSummaryDTO`
@@ -3218,6 +3316,12 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ```json
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/FormationFileResponseDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `ApiResponseObject`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
 ### `FormateurRequestDTO`
@@ -3676,6 +3780,24 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 {"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/GalleryImageResponseDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
+### `ApiResponsePaginatedResponseFormationEnrollmentSummaryDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"$ref":"#/components/schemas/PaginatedResponseFormationEnrollmentSummaryDTO"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `FormationEnrollmentSummaryDTO`
+
+```json
+{"type":"object","properties":{"enrollmentId":{"type":"string"},"participantName":{"type":"string"},"status":{"type":"string","enum":["CONFIRMED","ATTENDED","ABSENT","CANCELLED"]},"enrolledAt":{"type":"string","format":"date-time"}}}
+```
+
+### `PaginatedResponseFormationEnrollmentSummaryDTO`
+
+```json
+{"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/FormationEnrollmentSummaryDTO"}},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"last":{"type":"boolean"}}}
+```
+
 ### `ApiResponsePaginatedResponseFormationEnrollmentDetailDTO`
 
 ```json
@@ -3763,7 +3885,7 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 ### `UserResponseDTO`
 
 ```json
-{"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"name":{"type":"string"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"status":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"emailVerified":{"type":"boolean"},"emailVerifiedAt":{"type":"string","format":"date-time"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"bannedUntil":{"type":"string","format":"date-time"},"banReason":{"type":"string"},"lastLoginAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"validated":{"type":"boolean"},"premium":{"type":"boolean"},"teacher":{"type":"boolean"}}}
+{"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"name":{"type":"string"},"phone":{"type":"string"},"avatarUrl":{"type":"string"},"status":{"type":"string","enum":["PENDING","ACTIVE","SUSPENDED","REJECTED","DELETED"]},"emailVerified":{"type":"boolean"},"emailVerifiedAt":{"type":"string","format":"date-time"},"permissions":{"type":"array","items":{"type":"string"},"uniqueItems":true},"bannedUntil":{"type":"string","format":"date-time"},"banReason":{"type":"string"},"lastLoginAt":{"type":"string","format":"date-time"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"premium":{"type":"boolean"},"teacher":{"type":"boolean"},"validated":{"type":"boolean"}}}
 ```
 
 ### `ApiResponseUserResponseDTO`
@@ -3812,6 +3934,18 @@ Generated from the running application on 2026-09-26T23:53:53Z. This Markdown vi
 
 ```json
 {"type":"object","properties":{"totalPages":{"type":"integer","format":"int32"},"totalElements":{"type":"integer","format":"int64"},"size":{"type":"integer","format":"int32"},"content":{"type":"array","items":{"$ref":"#/components/schemas/ContentReportResponseDTO"}},"number":{"type":"integer","format":"int32"},"sort":{"$ref":"#/components/schemas/SortObject"},"pageable":{"$ref":"#/components/schemas/PageableObject"},"numberOfElements":{"type":"integer","format":"int32"},"first":{"type":"boolean"},"last":{"type":"boolean"},"empty":{"type":"boolean"}}}
+```
+
+### `ApiResponseListJobSubCategoryDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/JobSubCategoryDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
+```
+
+### `ApiResponseListMaterialDTO`
+
+```json
+{"type":"object","properties":{"success":{"type":"boolean"},"code":{"type":"integer","format":"int32"},"errorCode":{"type":"string"},"message":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/MaterialDTO"}},"errors":{"type":"object","additionalProperties":{"type":"string"}},"traceId":{"type":"string"}}}
 ```
 
 ### `AnalyticsResult`

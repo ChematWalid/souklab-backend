@@ -1,4 +1,4 @@
-<!-- Generated: 2026-09-25 | Files scanned: 510 | Token estimate: ~750 -->
+<!-- Generated: 2026-10-16 | Files scanned: 545 | Token estimate: ~750 -->
 
 # External Dependencies & Infrastructure Codemap
 
@@ -43,3 +43,5 @@
 | `pdfbox` | `3.0.8` | PDF document validation and metadata extraction |
 | `caffeine` | — | High-performance in-memory caching for taxonomy trees |
 | `springdoc-openapi-starter-webmvc-ui` | `3.1.1` | Code-first OpenAPI 3 spec generation at `/v3/api-docs` |
+| `amqp-client` | `5.37.0` | RabbitMQ AMQP client with patched DoS/OOM allocation defenses |
+| `jackson-bom` / `jackson-2-bom` | `3.1.7` / `2.21.7` | Robust JSON serialization and deserialization with DoS parse guards |

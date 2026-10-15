@@ -725,6 +725,25 @@ fresh MariaDB schema.
 - **Partner-Scoped Real-Time Presence Delivery (Issue #31)**: Hardened `ChatPresenceService` to deliver STOMP presence notifications exclusively to users sharing an active conversation (`findPartnerEmailsByUserEmail`) via private user queues (`/queue/presence`), completely eliminating presence information leakage to unrelated users.
 - **Domain Service Modularization**: Split monolithic controllers and services into cohesive, single-responsibility components (`SubscriptionCheckoutService`, `FeedInteractionService`, `ConversationService`, `ChatDeliveryService`, `ChatPresenceService`) while preserving strict transactional isolation.
 
+## Phase 15 — Complete CodeQL, Dependabot & Code Quality Remediation (Issues #32–#57)
+
+### Delivered capabilities
+
+- **100% CodeQL SAST Remediation (365/365 Alerts Resolved)**:
+  - Eliminated open redirect vulnerabilities by strictly validating URLs against trusted application domains.
+  - Resolved user-controlled bypass of sensitive methods (`AuthService` re-authentication): hardened password change and sensitive credential updates to require verified current password verification without bypass vectors.
+  - Closed unhandled input stream resource leaks across tests and production adapters with explicit try-with-resources blocks.
+  - Prevented Log Injection / Log Forging (CWE-117) by consolidating user input sanitization into `LogSanitizer.java`.
+- **100% Dependabot Supply-Chain Remediation (24/24 Vulnerabilities Patched)**:
+  - Upgraded transitive dependency trees to secure releases, notably RabbitMQ `amqp-client` to `5.37.0` (resolving CVE-2024-8184 and unchecked LongString allocation OOM DoS vectors) and `jackson-bom` / `jackson-2-bom` to `3.1.7` / `2.21.7`.
+- **100% CodeQL Standard Code Quality Remediation (16/16 Findings Resolved)**:
+  - Cleaned up unread local variables across repository tests and eliminated unused Python imports and bare `except` blocks in verification scripts.
+  - Prevented internal representation exposure in `FeedPost` via defensive copying and `Collections.unmodifiableList`.
+  - Added robust number formatting try-catch fallbacks and Lombok `@ToString` across transfer representations.
+- **Live Verification Parity**:
+  - Validated live curl suites: `thorough-curl-test.py` (34/34 passing) and `test-crud-scenarios.py` (173/173 passing covering IDOR, fuzzing, SQLi, XSS, method tampering, and privacy gating).
+  - All GitHub Actions CI/CD workflows (`Production verification`, `CodeQL`, `Code Quality`, `Automatic Dependency Submission`) passing green on `main`.
+
 ## Verification evidence currently available
 
 The recorded local Docker-backed run has validated:

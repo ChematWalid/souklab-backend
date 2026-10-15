@@ -98,9 +98,25 @@ A follow-up hardening pass resolved 7 high-impact correctness, reliability, and 
 | **Reviews & Soft-Delete** | Re-submitting a review for an attended formation after soft-deletion caused a 500 error due to `uk_artisan_review_enrollment` constraint violation. | `ArtisanReviewService` now checks for existing reviews (including soft-deleted) by `artisanId` and `enrollmentId`. If an existing soft-deleted review exists, it reactivates the review (`deletedAt = null`), updates rating/comment, and recalculates aggregates without triggering database constraint errors. |
 | **Feed Performance** | `FeedPostMapper` executed N+1 queries fetching media attachments and authors; view counter write locks created a database bottleneck on high-traffic posts. | `FeedPostMapper` now batch-fetches media attachments and author details. Post view count increments were converted from pessimistic locking to direct atomic database operations (`incrementViewCountNative`). |
 | **Registration Reliability** | Asynchronous email dispatch during registration resulted in orphaned unverified accounts when mail delivery failed. | `AuthService.registerUser` now invokes synchronous email verification code delivery (`sendVerificationCodeSynchronous`). If email delivery fails, the transaction rolls back cleanly and returns `503 Service Unavailable`, preventing orphaned account states. |
-| **Configuration Hygiene** | Environment sample files had naming drift (`CHARGILY_SECRET` vs `CHARGILY_API_KEY`) and variable count mismatch across deployments. | Unified environment variables across `.env.example`, `.env.docker.example`, and `deploy/.env.production.example` (strictly 195 variables verified with `check-env-drift.sh`). |
+| **Configuration Hygiene** | Environment sample files had naming drift (`CHARGILY_SECRET` vs `CHARGILY_API_KEY`) and variable count mismatch across deployments. | Unified environment variables across `.env.example`, `.env.docker.example`, and `deploy/.env.production.example` (strictly 278 variables verified with `check-env-drift.sh`). |
 | **Migration Guardrails** | Risk of dangerous DDL pattern regressions (`MODIFY ... ENUM` without strict baseline tracking). | Added migration pattern baseline verification in `scripts/check-source-hygiene.sh` and `scripts/migration-pattern-baseline.txt`. |
 | **Security & Quality Gates** | Outdated JJWT API usage and lack of automated code coverage quality gates in build pipeline. | Modernized JJWT to 0.12.6 using `Jwts.parser().verifyWith(key).build()` and HS512/HS256 key enforcement. Configured JaCoCo coverage gate enforcing 65% minimum line coverage and CodeQL static analysis in CI. |
+
+## October 2026 CodeQL, Vulnerability & Code Quality Remediation Audit
+
+Audit date: 2026-10-15
+
+A comprehensive security and code quality campaign completely resolved all outstanding CodeQL SAST alerts, Dependabot supply-chain vulnerabilities, and standard Code Quality findings across the entire repository.
+
+### Findings & Resolutions
+
+| Area | Issues Remediated | Resolution Implemented |
+| --- | --- | --- |
+| **Code Scanning (CodeQL SAST)** | 365 open security alerts (High, Medium, Low) | Remediated 100% of alerts (0 open): validated remote source redirects against domain allowlists; eliminated user-controlled bypass of sensitive methods (`AuthService` re-authentication); closed resource leaks and input streams via try-with-resources; consolidated log sanitization in `LogSanitizer.java` to prevent CWE-117 log forging. |
+| **Dependabot Supply-Chain** | 24 open dependency alerts | Remediated 100% of alerts (0 open): upgraded vulnerable transitive dependencies including `amqp-client` (to `5.37.0` resolving DoS and unchecked allocation OOM vulnerabilities), `jackson-databind` (via BOM), `commons-io`, and `okhttp`. |
+| **Code Quality Findings** | 16 standard code quality findings | Remediated 100% of findings (0 open): purged unread local variables from tests; removed unused Python imports and bare except blocks; enclosed S3 response input streams in try-with-resources; defended `FeedPost` media against mutable internal representation exposure via `Collections.unmodifiableList`; guarded number parsing with try-catch fallbacks; added `@ToString` on DTOs. |
+| **Live Curl Verification Suites** | End-to-end operational and resilience validation | Executed 34 tests in `thorough-curl-test.py` (100% pass) and 173 tests in `test-crud-scenarios.py` (100% pass covering IDOR, fuzzing, SQLi, XSS, role escalation, and privacy masking) against the live containerized stack. |
+| **CI/CD Quality Gates** | GitHub Actions workflows | All CI/CD workflows (`Production verification`, `CodeQL`, `Code Quality`, `Automatic Dependency Submission`) passing green on `main`. |
 
 ## Next release gate
 
