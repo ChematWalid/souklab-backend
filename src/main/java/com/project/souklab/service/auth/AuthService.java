@@ -641,7 +641,7 @@ public class AuthService {
      * Validates the registration account type and resolves its default permissions.
      * ADMIN registration via the public endpoint is always rejected.
      *
-     * @param roleInput the raw role string from the registration request, may be {@code null}
+     * @param accountTypeInput the raw role from the registration request, may be {@code null}
      * @return the permissions assigned to the new account
      * @throws BadRequestException       if the role is ADMIN or not one of ARTISAN / CLIENT
      * @throws ResourceNotFoundException if the role does not exist in the database
@@ -681,7 +681,7 @@ public class AuthService {
      *
      * @param dto           the registration payload
      * @param email         the normalised (lowercase, trimmed) email address
-     * @param assignedRole  the role entity to assign to the new user
+     * @param permissions   the permissions to assign to the new user
      * @param initialStatus the initial {@link AccountStatus} derived from the role
      * @return a fully constructed but not yet persisted {@link User} entity
      */
@@ -775,25 +775,6 @@ public class AuthService {
     }
 
     /**
-     * Resolves or creates the {@link User} entity for a Google OAuth2 flow
-     * where no existing {@link OAuthIdentity} was found for the provider user ID.
-     * <ol>
-     *   <li>If a user with the same email already exists, auto-links a new {@link OAuthIdentity} to them.</li>
-     *   <li>Otherwise, creates a new user and identity using the registration intent role.</li>
-     * </ol>
-     *
-     * @param email           the normalised OAuth2 email address
-     * @param provider        the OAuth2 provider name (e.g., "GOOGLE")
-     * @param providerUserId  the provider-specific user identifier
-     * @param firstName       the given name returned by the provider
-     * @param lastName        the family name returned by the provider
-     * @param picture         the avatar URL returned by the provider
-     * @param intentRole      the role intent string set at the start of the OAuth2 flow (e.g., "ARTISAN")
-     * @return the resolved or newly created {@link User} entity
-     * @throws BadRequestException       if the intent role is missing or invalid
-     * @throws ResourceNotFoundException if the resolved role does not exist in the database
-     */
-    /**
      * Links a new {@link OAuthIdentity} to an existing {@link User} found by verified email.
      * This covers the case where the user previously registered with a password and is now
      * signing in with Google for the first time.
@@ -825,7 +806,7 @@ public class AuthService {
      * @param firstName      the given name returned by the provider
      * @param lastName       the family name returned by the provider
      * @param picture        the avatar URL returned by the provider
-     * @param intentRole     the role intent string (e.g., "ARTISAN" or "CLIENT")
+     * @param role           the account role (ARTISAN or CLIENT)
      * @return the persisted {@link User} entity
      * @throws BadRequestException       if the intent role is blank or does not match ARTISAN or CLIENT
      * @throws ResourceNotFoundException if the resolved role does not exist in the database

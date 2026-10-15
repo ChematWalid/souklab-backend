@@ -531,24 +531,24 @@ public class AnalyticsJobService {
             var summary = root.path(AnalyticsMetric.Result.Content.SUMMARY.value());
             var series = root.path(AnalyticsMetric.Result.Content.SERIES.value()).path(AnalyticsMetric.Result.Content.CONTENT.value());
             StringBuilder csv = new StringBuilder("section,key,value\n");
-            summary.fields().forEachRemaining(e -> csv.append(csvCell(AnalyticsMetric.Result.Content.SUMMARY.value())).append(',')
+            summary.properties().forEach(e -> csv.append(csvCell(AnalyticsMetric.Result.Content.SUMMARY.value())).append(',')
                     .append(csvCell(e.getKey())).append(',')
                     .append(csvCell(e.getValue().isContainerNode() ? e.getValue().toString() : e.getValue().asText()))
                     .append('\n'));
             for (int index = 0; index < series.size(); index++) {
                 final int pointIndex = index;
                 var point = series.get(index);
-                point.fields().forEachRemaining(e -> csv.append(csvCell(AnalyticsMetric.Csv.SERIES_PREFIX.value() + pointIndex + "]")).append(',')
+                point.properties().forEach(e -> csv.append(csvCell(AnalyticsMetric.Csv.SERIES_PREFIX.value() + pointIndex + "]")).append(',')
                         .append(csvCell(e.getKey())).append(',')
                         .append(csvCell(e.getValue().isContainerNode() ? e.getValue().toString() : e.getValue().asText()))
                         .append('\n'));
             }
             var tables = root.path(AnalyticsMetric.Result.Content.TABLES.value());
-            tables.fields().forEachRemaining(table -> {
+            tables.properties().forEach(table -> {
                 var content = table.getValue().path(AnalyticsMetric.Result.Content.CONTENT.value());
                 for (int index = 0; index < content.size(); index++) {
                     var row = content.get(index);
-                    row.fields().forEachRemaining(entry -> csv.append(csvCell(AnalyticsMetric.Csv.TABLE_PREFIX.value() + table.getKey()))
+                    row.properties().forEach(entry -> csv.append(csvCell(AnalyticsMetric.Csv.TABLE_PREFIX.value() + table.getKey()))
                             .append(',').append(csvCell(entry.getKey())).append(',')
                             .append(csvCell(entry.getValue().isContainerNode()
                                     ? entry.getValue().toString() : entry.getValue().asText()))

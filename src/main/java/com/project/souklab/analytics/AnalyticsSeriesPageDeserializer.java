@@ -26,9 +26,7 @@ public class AnalyticsSeriesPageDeserializer
         List<Map<AnalyticsMetric.Series.Key, Object>> content = new ArrayList<>();
         for (JsonNode row : root.path("content")) {
             Map<AnalyticsMetric.Series.Key, Object> typedRow = new LinkedHashMap<>();
-            Iterator<Map.Entry<String, JsonNode>> fields = row.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> field = fields.next();
+            for (Map.Entry<String, JsonNode> field : row.properties()) {
                 typedRow.put(AnalyticsMetric.Series.fromValue(field.getKey()),
                         mapper.convertValue(field.getValue(), Object.class));
             }
