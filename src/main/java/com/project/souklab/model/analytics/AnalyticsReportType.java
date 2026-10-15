@@ -40,7 +40,9 @@ public final class AnalyticsReportType {
 
         Overview(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -52,7 +54,9 @@ public final class AnalyticsReportType {
 
         Growth(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -64,7 +68,9 @@ public final class AnalyticsReportType {
 
         Engagement(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -76,7 +82,9 @@ public final class AnalyticsReportType {
 
         Moderation(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -88,7 +96,9 @@ public final class AnalyticsReportType {
 
         Content(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -100,7 +110,9 @@ public final class AnalyticsReportType {
 
         Subscriptions(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -112,7 +124,9 @@ public final class AnalyticsReportType {
 
         Operational(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -124,7 +138,9 @@ public final class AnalyticsReportType {
 
         TimeSeries(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 
@@ -136,7 +152,9 @@ public final class AnalyticsReportType {
 
         Csv(String value, Family family) { this.value = value; this.family = family; }
 
+        @Override
         public Family family() { return family; }
+        @Override
         public String value() { return value; }
     }
 }

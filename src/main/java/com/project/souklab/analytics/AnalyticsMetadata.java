@@ -12,12 +12,14 @@ public final class AnalyticsMetadata {
         TYPE("accountType");
         private final String value;
         Account(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum Subscriber implements Key {
             TYPE("subscriberType");
             private final String value;
             Subscriber(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -30,6 +32,7 @@ public final class AnalyticsMetadata {
             PRESENT("reasonPresent");
             private final String value;
             Reason(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -37,6 +40,7 @@ public final class AnalyticsMetadata {
             MINUTES("minutes");
             private final String value;
             Duration(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -44,6 +48,7 @@ public final class AnalyticsMetadata {
             VALUE("decision");
             private final String value;
             Decision(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -56,6 +61,7 @@ public final class AnalyticsMetadata {
             TYPE("postType");
             private final String value;
             Post(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -63,6 +69,7 @@ public final class AnalyticsMetadata {
             ID("formationId");
             private final String value;
             Formation(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -70,6 +77,7 @@ public final class AnalyticsMetadata {
             TYPE("targetType");
             private final String value;
             Target(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -77,6 +85,7 @@ public final class AnalyticsMetadata {
             VALUE("action");
             private final String value;
             Action(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -84,6 +93,7 @@ public final class AnalyticsMetadata {
             VALUE("rating");
             private final String value;
             Rating(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -96,6 +106,7 @@ public final class AnalyticsMetadata {
             ID("conversationId");
             private final String value;
             Conversation(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -104,6 +115,7 @@ public final class AnalyticsMetadata {
         STATUS("status");
         private final String value;
         State(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -115,6 +127,7 @@ public final class AnalyticsMetadata {
             ID("planId");
             private final String value;
             Plan(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -122,6 +135,7 @@ public final class AnalyticsMetadata {
             PREVIOUS("previousStatus");
             private final String value;
             State(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -129,6 +143,7 @@ public final class AnalyticsMetadata {
             VALUE("source");
             private final String value;
             Source(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -141,6 +156,7 @@ public final class AnalyticsMetadata {
             STATUS("paymentStatus");
             private final String value;
             State(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -148,6 +164,7 @@ public final class AnalyticsMetadata {
             EVENT("providerEvent");
             private final String value;
             Provider(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -155,6 +172,7 @@ public final class AnalyticsMetadata {
             ID("payment_id");
             private final String value;
             Identifier(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -167,6 +185,7 @@ public final class AnalyticsMetadata {
             ID("subscription_id");
             private final String value;
             Subscription(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -179,6 +198,7 @@ public final class AnalyticsMetadata {
             ID("jobId");
             private final String value;
             Job(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -186,6 +206,7 @@ public final class AnalyticsMetadata {
             ID("maintenanceJobId");
             private final String value;
             MaintenanceJob(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -193,6 +214,7 @@ public final class AnalyticsMetadata {
             TYPE("reportType");
             private final String value;
             Report(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -200,6 +222,7 @@ public final class AnalyticsMetadata {
             VALUE("operation");
             private final String value;
             Operation(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -207,6 +230,7 @@ public final class AnalyticsMetadata {
             VALUE("range");
             private final String value;
             Range(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -214,6 +238,7 @@ public final class AnalyticsMetadata {
             VALUE("filters");
             private final String value;
             Filter(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -221,6 +246,7 @@ public final class AnalyticsMetadata {
             SCOPE("permissionScope");
             private final String value;
             Permission(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -228,6 +254,7 @@ public final class AnalyticsMetadata {
             VALUE("outcome");
             private final String value;
             Outcome(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }

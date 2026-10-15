@@ -47,6 +47,7 @@ public final class AuditLogAction {
             VERIFIED("EMAIL_VERIFIED");
             private final String value;
             Email(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -57,6 +58,7 @@ public final class AuditLogAction {
                 COMPLETED("PASSWORD_RESET_COMPLETED");
                 private final String value;
                 Reset(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -64,6 +66,7 @@ public final class AuditLogAction {
                 VALUE("PASSWORD_CHANGED");
                 private final String value;
                 Changed(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
         }
@@ -76,6 +79,7 @@ public final class AuditLogAction {
             ROLE("ASSIGN_ROLE"), BULK("ASSIGN_PERMISSION_BULK");
             private final String value;
             Assignment(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -83,6 +87,7 @@ public final class AuditLogAction {
             VALUE("PERMISSION_GRANTED");
             private final String value;
             Grant(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -90,6 +95,7 @@ public final class AuditLogAction {
             VALUE("PERMISSION_REVOKED");
             private final String value;
             Revoke(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -98,12 +104,14 @@ public final class AuditLogAction {
         APPROVED("APPROVE_USER"), BANNED("BAN_USER"), UNBANNED("UNBAN_USER"), DELETED("DELETE_ACCOUNT");
         private final String value;
         User(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum Timeout implements Key {
             VALUE("TIMEOUT_USER");
             private final String value;
             Timeout(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -113,6 +121,7 @@ public final class AuditLogAction {
         APPROVED("APPROVE_ARTISAN"), REJECTED("REJECT_ARTISAN");
         private final String value;
         Artisan(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -120,6 +129,7 @@ public final class AuditLogAction {
         APPROVED("APPROVE_FORMATION"), REJECTED("REJECT_FORMATION");
         private final String value;
         Formation(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -127,6 +137,7 @@ public final class AuditLogAction {
         RESOLVED("RESOLVE_REPORT"), DISMISSED("DISMISS_REPORT");
         private final String value;
         Report(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -135,12 +146,14 @@ public final class AuditLogAction {
         CANCELED("SUBSCRIPTION_CANCELED"), REVOKED("SUBSCRIPTION_REVOKED");
         private final String value;
         Subscription(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum State implements Key {
             CORRECTED("SUBSCRIPTION_STATE_CORRECTED");
             private final String value;
             State(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -149,6 +162,7 @@ public final class AuditLogAction {
             DEACTIVATED("SUBSCRIPTION_PLAN_DEACTIVATED");
             private final String value;
             Plan(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -161,6 +175,7 @@ public final class AuditLogAction {
             CORRECTED("PAYMENT_STATE_CORRECTED");
             private final String value;
             State(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -172,6 +187,7 @@ public final class AuditLogAction {
             REJECTED("REFUND_REQUEST_REJECTED");
             private final String value;
             Request(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -180,12 +196,14 @@ public final class AuditLogAction {
         REBUILD("ANALYTICS_REBUILD"), EXPORT("ANALYTICS_EXPORT");
         private final String value;
         Analytics(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum Job implements Key {
             SUBMITTED("ANALYTICS_JOB_SUBMITTED");
             private final String value;
             Job(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -193,6 +211,7 @@ public final class AuditLogAction {
             READ("ANALYTICS_RESULT_READ");
             private final String value;
             Result(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -224,6 +243,7 @@ public final class AuditLogAction {
         MATERIAL_DELETED("CATALOG_MATERIAL_DELETED");
         private final String value;
         Catalog(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 }

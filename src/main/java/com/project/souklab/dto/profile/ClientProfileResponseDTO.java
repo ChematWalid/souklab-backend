@@ -43,4 +43,43 @@ public class ClientProfileResponseDTO implements ProfileResponse {
     private String address;
     private String regionId;
     private String city;
+
+    @Override
+    public String getId() { return id; }
+
+    @Override
+    public String getEmail() { return email; }
+
+    @Override
+    public String getFirstName() { return firstName; }
+
+    @Override
+    public String getLastName() { return lastName; }
+
+    @Override
+    public String getName() { return name; }
+
+    @Override
+    public String getPhone() { return phone; }
+
+    @Override
+    public String getAvatarUrl() { return avatarUrl; }
+
+    @Override
+    public AccountStatus getAccountStatus() { return accountStatus; }
+
+    @Override
+    public Set<Permission> getPermissions() { return permissions; }
+
+    @Override
+    public boolean isEmailVerified() { return emailVerified; }
+
+    @Override
+    public LocalDateTime getEmailVerifiedAt() { return emailVerifiedAt; }
+
+    @Override
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
+    @Override
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

@@ -54,6 +54,7 @@ public final class AnalyticsMetric {
                 TOTAL("totalUsers");
                 private final String value;
                 Count(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -61,6 +62,7 @@ public final class AnalyticsMetric {
                 NEW("newRegistrations"), VERIFIED("verifiedRegistrations");
                 private final String value;
                 Registration(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -68,6 +70,7 @@ public final class AnalyticsMetric {
                 RATE("activationRate");
                 private final String value;
                 Activation(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -75,6 +78,7 @@ public final class AnalyticsMetric {
                 USERS("verifiedUsers");
                 private final String value;
                 Verification(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -82,12 +86,14 @@ public final class AnalyticsMetric {
                 ARTISAN("artisanProfiles"), CLIENT("clientProfiles");
                 private final String value;
                 Profile(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
 
                 public enum Active implements Key {
                     ARTISAN("activeArtisanProfiles"), CLIENT("activeClientProfiles");
                     private final String value;
                     Active(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -97,6 +103,7 @@ public final class AnalyticsMetric {
                 ALL("userStatuses");
                 private final String value;
                 Status(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -104,6 +111,7 @@ public final class AnalyticsMetric {
                 PENDING("pendingUserApprovals");
                 private final String value;
                 Approval(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
         }
@@ -126,6 +134,7 @@ public final class AnalyticsMetric {
                 EVENTS("activityEvents");
                 private final String value;
                 Activity(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -133,6 +142,7 @@ public final class AnalyticsMetric {
                 SUCCESSFUL("successfulLogins");
                 private final String value;
                 Login(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -140,6 +150,7 @@ public final class AnalyticsMetric {
                 PUBLISHED("publishedPosts");
                 private final String value;
                 Post(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -147,6 +158,7 @@ public final class AnalyticsMetric {
                 SENT("messagesSent");
                 private final String value;
                 Message(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -154,6 +166,7 @@ public final class AnalyticsMetric {
                 VIEWS("profileViews");
                 private final String value;
                 Profile(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -161,6 +174,7 @@ public final class AnalyticsMetric {
                 RESOLUTIONS("reportResolutions");
                 private final String value;
                 Report(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -168,6 +182,7 @@ public final class AnalyticsMetric {
                 DAU("dau"), WAU("wau"), MAU("mau");
                 private final String value;
                 Audience(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -178,6 +193,7 @@ public final class AnalyticsMetric {
                     TYPE("engagementByAccountType");
                     private final String value;
                     Account(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -185,6 +201,7 @@ public final class AnalyticsMetric {
                     VALUE("engagementByRegion");
                     private final String value;
                     Region(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -192,6 +209,7 @@ public final class AnalyticsMetric {
                     CATEGORY("engagementByCraftCategory");
                     private final String value;
                     Craft(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -205,6 +223,7 @@ public final class AnalyticsMetric {
                     COHORTS("loginRetentionCohorts");
                     private final String value;
                     Login(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -224,6 +243,7 @@ public final class AnalyticsMetric {
                 CREATED("feedPostsCreated"), BY_STATUS("feedPostsByStatus");
                 private final String value;
                 Feed(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -231,6 +251,7 @@ public final class AnalyticsMetric {
                 SUBMITTED("reviewsSubmitted"), PUBLISHED("publishedReviews"), AVERAGE_RATING("averagePublishedRating");
                 private final String value;
                 Review(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
         }
@@ -249,6 +270,7 @@ public final class AnalyticsMetric {
                 CREATED("formationsCreated"), ENROLLMENTS("formationEnrollments"), COMPLETIONS("formationCompletions");
                 private final String value;
                 Count(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -256,6 +278,7 @@ public final class AnalyticsMetric {
                 ACTIVE("activeInstructors");
                 private final String value;
                 Instructor(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -263,6 +286,7 @@ public final class AnalyticsMetric {
                 RATE("formationUtilizationRate");
                 private final String value;
                 Utilization(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -273,6 +297,7 @@ public final class AnalyticsMetric {
                     STATUS("formationsByStatus");
                     private final String value;
                     By(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -284,6 +309,7 @@ public final class AnalyticsMetric {
                     RATE("enrollmentCancellationRate");
                     private final String value;
                     Cancellation(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -291,6 +317,7 @@ public final class AnalyticsMetric {
                     STATUS("enrollmentsByStatus");
                     private final String value;
                     By(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -311,6 +338,7 @@ public final class AnalyticsMetric {
                 SUMMARY("moderationActivity");
                 private final String value;
                 Activity(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -318,6 +346,7 @@ public final class AnalyticsMetric {
                 PENDING("formateurPending");
                 private final String value;
                 Formateur(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
 
                 public enum Approved implements Key {
@@ -327,6 +356,7 @@ public final class AnalyticsMetric {
                         VALUE("formateurApprovedInRange");
                         private final String value;
                         InRange(String value) { this.value = value; }
+                        @Override
                         public String value() { return value; }
                     }
                 }
@@ -338,6 +368,7 @@ public final class AnalyticsMetric {
                         VALUE("formateurRejectedInRange");
                         private final String value;
                         InRange(String value) { this.value = value; }
+                        @Override
                         public String value() { return value; }
                     }
                 }
@@ -346,6 +377,7 @@ public final class AnalyticsMetric {
                     VALUE("formateurStatuses");
                     private final String value;
                     Statuses(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -365,6 +397,7 @@ public final class AnalyticsMetric {
                 COUNT("reportsSubmitted");
                 private final String value;
                 Submission(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -375,6 +408,7 @@ public final class AnalyticsMetric {
                     SECONDS("averageReportResolutionSeconds");
                     private final String value;
                     Average(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -386,6 +420,7 @@ public final class AnalyticsMetric {
                     STATUS("reportsByStatus");
                     private final String value;
                     By(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -406,6 +441,7 @@ public final class AnalyticsMetric {
                 CREATED("paymentsCreated");
                 private final String value;
                 Count(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -416,6 +452,7 @@ public final class AnalyticsMetric {
                     STATUS("paymentsByStatus");
                     private final String value;
                     By(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -424,6 +461,7 @@ public final class AnalyticsMetric {
                 CREATED("checkoutCreated");
                 private final String value;
                 Checkout(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -431,6 +469,7 @@ public final class AnalyticsMetric {
                 TRANSITIONS("paymentStateTransitions");
                 private final String value;
                 State(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -444,6 +483,7 @@ public final class AnalyticsMetric {
                         DZD("grossCollectedDzd");
                         private final String value;
                         Collected(String value) { this.value = value; }
+                        @Override
                         public String value() { return value; }
                     }
                 }
@@ -452,6 +492,7 @@ public final class AnalyticsMetric {
                     DZD("providerFeesDzd");
                     private final String value;
                     ProviderFees(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -462,6 +503,7 @@ public final class AnalyticsMetric {
                         DZD("netCollectedDzd");
                         private final String value;
                         Collected(String value) { this.value = value; }
+                        @Override
                         public String value() { return value; }
                     }
                 }
@@ -471,6 +513,7 @@ public final class AnalyticsMetric {
                 RATE("paymentConversionRate");
                 private final String value;
                 Conversion(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -478,6 +521,7 @@ public final class AnalyticsMetric {
                 MANUAL("manualGrants");
                 private final String value;
                 Grant(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
         }
@@ -499,6 +543,7 @@ public final class AnalyticsMetric {
                     STATUS("subscriptionsByStatus");
                     private final String value;
                     By(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -507,6 +552,7 @@ public final class AnalyticsMetric {
                 TYPE("subscriptionsBySubscriberType");
                 private final String value;
                 Subscriber(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -514,6 +560,7 @@ public final class AnalyticsMetric {
                 EVENTS("subscriptionLifecycleEvents");
                 private final String value;
                 Lifecycle(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
         }
@@ -532,6 +579,7 @@ public final class AnalyticsMetric {
                 REPORT("operational");
                 private final String value;
                 Operational(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -539,6 +587,7 @@ public final class AnalyticsMetric {
                 COMPARISON("periodComparison");
                 private final String value;
                 Period(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
         }
@@ -567,6 +616,7 @@ public final class AnalyticsMetric {
             TYPE("reportType");
             private final String value;
             Report(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -574,6 +624,7 @@ public final class AnalyticsMetric {
             FROM("fromDate"), TO("toDate");
             private final String value;
             Date(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -581,6 +632,7 @@ public final class AnalyticsMetric {
             BUCKET("bucket");
             private final String value;
             Request(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -588,6 +640,7 @@ public final class AnalyticsMetric {
             SUMMARY("summary"), TABLES("tables"), SERIES("series"), CONTENT("content");
             private final String value;
             Content(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -615,6 +668,7 @@ public final class AnalyticsMetric {
             START("startDate"), END("endDate");
             private final String value;
             Date(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -622,6 +676,7 @@ public final class AnalyticsMetric {
             EVENTS("activityEvents");
             private final String value;
             Activity(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -629,6 +684,7 @@ public final class AnalyticsMetric {
             UNIQUE("uniqueActors");
             private final String value;
             Actor(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -636,6 +692,7 @@ public final class AnalyticsMetric {
             NEW("newRegistrations");
             private final String value;
             Registration(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -647,6 +704,7 @@ public final class AnalyticsMetric {
 
         Comparison(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -657,6 +715,7 @@ public final class AnalyticsMetric {
 
         AccountType(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -682,6 +741,7 @@ public final class AnalyticsMetric {
             USERS("users");
             private final String value;
             User(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -689,6 +749,7 @@ public final class AnalyticsMetric {
             REQUESTS("formateurRequests");
             private final String value;
             Formateur(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -696,6 +757,7 @@ public final class AnalyticsMetric {
             REPORTS("reports");
             private final String value;
             Report(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -703,6 +765,7 @@ public final class AnalyticsMetric {
             POSTS("feedPosts");
             private final String value;
             Feed(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -710,6 +773,7 @@ public final class AnalyticsMetric {
             FORMATIONS("formations");
             private final String value;
             Formation(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -717,6 +781,7 @@ public final class AnalyticsMetric {
             ENROLLMENTS("enrollments");
             private final String value;
             Enrollment(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -724,6 +789,7 @@ public final class AnalyticsMetric {
             PAYMENTS("payments");
             private final String value;
             Payment(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -731,6 +797,7 @@ public final class AnalyticsMetric {
             ALL("subscriptions"), ARTISAN("subscriptionsArtisan"), CLIENT("subscriptionsClient");
             private final String value;
             Subscription(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -738,6 +805,7 @@ public final class AnalyticsMetric {
             EVENTS("activity");
             private final String value;
             Activity(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -756,6 +824,7 @@ public final class AnalyticsMetric {
 
                 Analytics(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
 
@@ -767,6 +836,7 @@ public final class AnalyticsMetric {
 
                 Maintenance(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
         }
@@ -778,6 +848,7 @@ public final class AnalyticsMetric {
 
             Outbox(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -788,6 +859,7 @@ public final class AnalyticsMetric {
 
             Health(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -798,6 +870,7 @@ public final class AnalyticsMetric {
 
             Request(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -811,6 +884,7 @@ public final class AnalyticsMetric {
 
                 Upload(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
 
@@ -821,6 +895,7 @@ public final class AnalyticsMetric {
 
                 Virus(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
 
@@ -831,6 +906,7 @@ public final class AnalyticsMetric {
 
                 Search(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
 
@@ -841,6 +917,7 @@ public final class AnalyticsMetric {
 
                 WebSocket(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
 
@@ -851,6 +928,7 @@ public final class AnalyticsMetric {
 
                 Request(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
 
@@ -861,6 +939,7 @@ public final class AnalyticsMetric {
 
                 RateLimit(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
         }
@@ -872,6 +951,7 @@ public final class AnalyticsMetric {
                 VALUE("elasticsearch");
                 private final String value;
                 Elasticsearch(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -879,6 +959,7 @@ public final class AnalyticsMetric {
                 VALUE("redis");
                 private final String value;
                 Redis(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -886,6 +967,7 @@ public final class AnalyticsMetric {
                 VALUE("rabbitmq");
                 private final String value;
                 RabbitMq(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -893,6 +975,7 @@ public final class AnalyticsMetric {
                 VALUE("s3");
                 private final String value;
                 ObjectStorage(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -900,6 +983,7 @@ public final class AnalyticsMetric {
                 VALUE("clamav");
                 private final String value;
                 Clamav(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
         }
@@ -911,6 +995,7 @@ public final class AnalyticsMetric {
 
             Component(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -921,6 +1006,7 @@ public final class AnalyticsMetric {
 
             Operation(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -931,6 +1017,7 @@ public final class AnalyticsMetric {
 
             Scope(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -941,6 +1028,7 @@ public final class AnalyticsMetric {
 
             Backend(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -953,6 +1041,7 @@ public final class AnalyticsMetric {
 
             Outcome(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
 
             public enum Error implements Key {
@@ -962,6 +1051,7 @@ public final class AnalyticsMetric {
 
                 Error(String value) { this.value = value; }
 
+                @Override
                 public String value() { return value; }
             }
         }
@@ -975,6 +1065,7 @@ public final class AnalyticsMetric {
 
             HttpMethod(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
 
             public static HttpMethod fromValue(String value) {
@@ -997,6 +1088,7 @@ public final class AnalyticsMetric {
                     VALUE("2xx");
                     private final String value;
                     Success(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -1004,6 +1096,7 @@ public final class AnalyticsMetric {
                     VALUE("3xx");
                     private final String value;
                     Redirect(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -1011,6 +1104,7 @@ public final class AnalyticsMetric {
                     VALUE("4xx");
                     private final String value;
                     ClientError(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -1018,6 +1112,7 @@ public final class AnalyticsMetric {
                     VALUE("5xx");
                     private final String value;
                     ServerError(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -1025,6 +1120,7 @@ public final class AnalyticsMetric {
                     VALUE("error");
                     private final String value;
                     Error(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -1048,6 +1144,7 @@ public final class AnalyticsMetric {
 
             Day(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
 
             public Key retainedRow() {
@@ -1074,6 +1171,7 @@ public final class AnalyticsMetric {
                 DATE("cohortDate"), SIZE("cohortSize");
                 private final String value;
                 Cohort(String value) { this.value = value; }
+                @Override
                 public String value() { return value; }
             }
 
@@ -1085,6 +1183,7 @@ public final class AnalyticsMetric {
                     ONE("day1Retained"), SEVEN("day7Retained"), THIRTY("day30Retained");
                     private final String value;
                     Retained(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
 
@@ -1092,6 +1191,7 @@ public final class AnalyticsMetric {
                     ONE("day1Rate"), SEVEN("day7Rate"), THIRTY("day30Rate");
                     private final String value;
                     Rate(String value) { this.value = value; }
+                    @Override
                     public String value() { return value; }
                 }
             }
@@ -1105,6 +1205,7 @@ public final class AnalyticsMetric {
 
         Csv(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
 
         @JsonCreator
@@ -1121,6 +1222,7 @@ public final class AnalyticsMetric {
             COUNT("historical.registrations");
             private final String value;
             Registration(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1128,6 +1230,7 @@ public final class AnalyticsMetric {
             POSTS("historical.feed_posts");
             private final String value;
             Feed(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1135,6 +1238,7 @@ public final class AnalyticsMetric {
             COUNT("historical.formations");
             private final String value;
             Formation(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1142,6 +1246,7 @@ public final class AnalyticsMetric {
             COUNT("historical.enrollments");
             private final String value;
             Enrollment(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1149,6 +1254,7 @@ public final class AnalyticsMetric {
             COUNT("historical.reviews");
             private final String value;
             Review(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1156,6 +1262,7 @@ public final class AnalyticsMetric {
             COUNT("historical.reports");
             private final String value;
             Report(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1163,6 +1270,7 @@ public final class AnalyticsMetric {
             COUNT("historical.payments");
             private final String value;
             Payment(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -1174,6 +1282,7 @@ public final class AnalyticsMetric {
 
         EventRollup(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -1184,6 +1293,7 @@ public final class AnalyticsMetric {
             ID("eventId"), TYPE("eventType"), TIME("eventTime");
             private final String value;
             Event(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1191,6 +1301,7 @@ public final class AnalyticsMetric {
             ID("actorId");
             private final String value;
             Actor(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1198,6 +1309,7 @@ public final class AnalyticsMetric {
             ID("subjectId");
             private final String value;
             Subject(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -1205,6 +1317,7 @@ public final class AnalyticsMetric {
             VALUE("metadata");
             private final String value;
             Metadata(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }

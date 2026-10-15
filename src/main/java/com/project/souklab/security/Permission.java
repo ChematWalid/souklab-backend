@@ -16,6 +16,7 @@ import java.util.Optional;
 @JsonDeserialize(using = PermissionDeserializer.class)
 public interface Permission extends EnumValue, GrantedAuthority {
     @JsonValue
+    @Override
     String value();
 
     @Override
@@ -60,6 +61,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         CATALOG("permission:admin:catalog");
         private final String value;
         Admin(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -67,6 +69,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         FAVORITES("permission:client:favorites");
         private final String value;
         Client(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -75,6 +78,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         REVIEWS("permission:artisan:reviews");
         private final String value;
         Artisan(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -82,6 +86,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         READ("permission:profile:read"), WRITE("permission:profile:write");
         private final String value;
         Profile(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -89,6 +94,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         CREATE("permission:report:create");
         private final String value;
         Report(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -96,6 +102,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         READ("permission:file:read");
         private final String value;
         File(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -103,6 +110,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         SEND("permission:message:send");
         private final String value;
         Message(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -110,6 +118,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         ADMIN("permission:analytics:admin");
         private final String value;
         Analytics(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -117,6 +126,7 @@ public interface Permission extends EnumValue, GrantedAuthority {
         ADMIN("permission:financial:admin");
         private final String value;
         Financial(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 }

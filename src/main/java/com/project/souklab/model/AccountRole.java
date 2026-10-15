@@ -13,6 +13,7 @@ public enum AccountRole implements EnumValue {
 
     AccountRole(String value) { this.value = value; }
 
+    @Override
     public String value() { return value; }
 
     public static Optional<AccountRole> fromInput(String input) {

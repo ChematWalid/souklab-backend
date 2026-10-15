@@ -12,6 +12,7 @@ public final class FinancialAuditOperation {
 
         Manual(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -24,6 +25,7 @@ public final class FinancialAuditOperation {
 
         Plan(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -34,6 +36,7 @@ public final class FinancialAuditOperation {
 
         Refund(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -44,6 +47,7 @@ public final class FinancialAuditOperation {
 
         State(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -54,6 +58,7 @@ public final class FinancialAuditOperation {
 
         Payment(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 
@@ -64,6 +69,7 @@ public final class FinancialAuditOperation {
 
         Subscription(String value) { this.value = value; }
 
+        @Override
         public String value() { return value; }
     }
 }

@@ -27,6 +27,7 @@ public final class DirectorySortOrder {
         DEFAULT("RELEVANCE");
         private final String value;
         Relevance(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -34,6 +35,7 @@ public final class DirectorySortOrder {
         DESC("RATING_DESC");
         private final String value;
         Rating(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -41,6 +43,7 @@ public final class DirectorySortOrder {
         DESC("REVIEWS_DESC");
         private final String value;
         Reviews(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -48,6 +51,7 @@ public final class DirectorySortOrder {
         DESC("VIEWS_DESC");
         private final String value;
         Views(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -55,6 +59,7 @@ public final class DirectorySortOrder {
         FIRST("NEWEST");
         private final String value;
         Newest(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 }

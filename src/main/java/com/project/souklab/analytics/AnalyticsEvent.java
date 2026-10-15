@@ -20,6 +20,7 @@ public final class AnalyticsEvent {
             WEBHOOK("PAYMENT_WEBHOOK");
             private final String value;
             Payment(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -27,6 +28,7 @@ public final class AnalyticsEvent {
             ACTION("ACCOUNT_ACTION");
             private final String value;
             Account(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
 
@@ -34,6 +36,7 @@ public final class AnalyticsEvent {
             ACTION("ADMIN_ACTION"), CORRECTION("ADMIN_CORRECTION");
             private final String value;
             Admin(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -61,6 +64,7 @@ public final class AnalyticsEvent {
         CREATED("REGISTRATION_CREATED");
         private final String value;
         Registration(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -71,6 +75,7 @@ public final class AnalyticsEvent {
             SUCCEEDED("LOGIN_SUCCEEDED");
             private final String value;
             Login(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -79,12 +84,14 @@ public final class AnalyticsEvent {
         APPROVED("USER_APPROVED"), SUSPENDED("USER_SUSPENDED"), REINSTATED("USER_REINSTATED");
         private final String value;
         User(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum Timeout implements Type {
             EVENT("USER_TIMED_OUT");
             private final String value;
             Timeout(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -93,6 +100,7 @@ public final class AnalyticsEvent {
         VIEW("PROFILE_VIEW");
         private final String value;
         Profile(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -100,6 +108,7 @@ public final class AnalyticsEvent {
         SENT("MESSAGE_SENT");
         private final String value;
         Message(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -108,6 +117,7 @@ public final class AnalyticsEvent {
         PUBLISHED("FORMATION_PUBLISHED"), ENROLLMENT("FORMATION_ENROLLMENT");
         private final String value;
         Formation(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
 
         public enum Moderation implements Type {
@@ -115,6 +125,7 @@ public final class AnalyticsEvent {
             REJECTED("FORMATION_MODERATION_REJECTED");
             private final String value;
             Moderation(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -123,6 +134,7 @@ public final class AnalyticsEvent {
         SUBMITTED("REVIEW_SUBMITTED");
         private final String value;
         Review(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -130,6 +142,7 @@ public final class AnalyticsEvent {
         SUBMITTED("REPORT_SUBMITTED"), RESOLVED("REPORT_RESOLVED");
         private final String value;
         Report(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -140,6 +153,7 @@ public final class AnalyticsEvent {
             PUBLISHED("FEED_POST_PUBLISHED");
             private final String value;
             Post(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -148,6 +162,7 @@ public final class AnalyticsEvent {
         CREATED("CHECKOUT_CREATED");
         private final String value;
         Checkout(String value) { this.value = value; }
+        @Override
         public String value() { return value; }
     }
 
@@ -158,6 +173,7 @@ public final class AnalyticsEvent {
             TRANSITION("PAYMENT_STATE_TRANSITION");
             private final String value;
             State(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }
@@ -169,6 +185,7 @@ public final class AnalyticsEvent {
         private final String value;
         private final Status status;
         Subscription(String value, Status status) { this.value = value; this.status = status; }
+        @Override
         public String value() { return value; }
 
         public Status status() { return status; }
@@ -178,6 +195,7 @@ public final class AnalyticsEvent {
             REVOKED("REVOKED"), RENEWAL("RENEWAL");
             private final String value;
             Status(String value) { this.value = value; }
+            @Override
             public String value() { return value; }
         }
     }

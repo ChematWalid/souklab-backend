@@ -18,6 +18,7 @@ public final class RateLimitScope {
 
             Csv(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -28,6 +29,7 @@ public final class RateLimitScope {
 
             Analytics(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -38,6 +40,7 @@ public final class RateLimitScope {
 
             Authentication(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -48,6 +51,7 @@ public final class RateLimitScope {
 
             Administration(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
 
@@ -58,6 +62,7 @@ public final class RateLimitScope {
 
             Public(String value) { this.value = value; }
 
+            @Override
             public String value() { return value; }
         }
     }
