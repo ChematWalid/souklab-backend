@@ -79,7 +79,7 @@ class PermissionManagementServiceTest {
 
         assertThatThrownBy(() -> service().grant("u1", new PermissionAssignmentRequestDTO(Permission.Profile.READ)))
                 .isInstanceOf(ConflictException.class);
-        user.getPermissions().clear();
+        user.clearPermissions();
         assertThatThrownBy(() -> service().revoke("u1", new PermissionAssignmentRequestDTO(Permission.Profile.READ)))
                 .isInstanceOf(ConflictException.class);
     }

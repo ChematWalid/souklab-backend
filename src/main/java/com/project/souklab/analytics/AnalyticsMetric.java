@@ -596,7 +596,7 @@ public final class AnalyticsMetric {
     public static final class Result {
         private Result() { }
 
-        public interface Key extends AnalyticsMetric.Key { }
+        public interface Key extends EnumValue { }
 
         public static Key fromValue(String value) {
             for (Key key : all()) {
@@ -648,7 +648,7 @@ public final class AnalyticsMetric {
     public static final class Series {
         private Series() { }
 
-        public interface Key extends AnalyticsMetric.Key { }
+        public interface Key extends EnumValue { }
 
         public static Key fromValue(String value) {
             for (Key key : all()) {
@@ -1082,7 +1082,7 @@ public final class AnalyticsMetric {
             public static final class Status {
                 private Status() { }
 
-                public interface Key extends AnalyticsMetric.Key { }
+                public interface Key extends EnumValue { }
 
                 public enum Success implements Key {
                     VALUE("2xx");

@@ -79,14 +79,14 @@ public class AdminSubscriptionPlanService {
         plan.setAmount(request.getAmount());
         plan.setCurrency(appProperties.getSubscription().getCurrency());
         plan.setActive(request.isActive());
-        plan.getEntitlements().clear();
+        plan.clearEntitlements();
         if (request.getEntitlements() != null) {
             request.getEntitlements().forEach((key, value) -> {
                 SubscriptionPlanEntitlement entitlement = new SubscriptionPlanEntitlement();
                 entitlement.setPlan(plan);
                 entitlement.setKey(key);
                 entitlement.setValue(value);
-                plan.getEntitlements().add(entitlement);
+                plan.addEntitlement(entitlement);
             });
         }
     }

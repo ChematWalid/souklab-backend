@@ -15,6 +15,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -41,4 +42,15 @@ public class Message extends BaseEntity {
 
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MessageAttachment> attachments = new ArrayList<>();
+
+    public List<MessageAttachment> getAttachments() {
+        return attachments == null ? Collections.emptyList() : Collections.unmodifiableList(attachments);
+    }
+
+    public void addAttachment(MessageAttachment attachment) {
+        if (attachments == null) {
+            attachments = new ArrayList<>();
+        }
+        attachments.add(attachment);
+    }
 }

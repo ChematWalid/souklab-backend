@@ -61,7 +61,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
     void setOperationalMetrics(OperationalMetrics metrics) { this.metrics = metrics; }
 
     Bucket resolveBucket(HttpServletRequest request) {
-        AppProperties.RateLimit global = appProperties.getRateLimit();
         RateLimitRule rule = selectRule(request);
         if (rule == null || !rule.isEnabled()) return resolveBucket(request.getRemoteAddr());
         return bucketStore.resolve("api:" + ruleName(request).value() + ":" + request.getRemoteAddr(),
@@ -105,7 +104,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        String ip = request.getRemoteAddr();
         ConsumptionProbe probe;
         try {
             Bucket bucket = resolveBucket(request);

@@ -1,6 +1,7 @@
 package com.project.souklab.config;
 
 import com.project.souklab.analytics.AnalyticsMetric;
+import com.project.souklab.model.EnumValue;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -97,8 +98,8 @@ public class OperationalMetrics {
         state.set(available ? 1 : 0);
     }
 
-    private void increment(AnalyticsMetric.Key metric, AnalyticsMetric.Key operation,
-                           AnalyticsMetric.Key outcome) {
+    private void increment(EnumValue metric, EnumValue operation,
+                           EnumValue outcome) {
         increment(metric.value(), operation.value(), outcome.value());
     }
 

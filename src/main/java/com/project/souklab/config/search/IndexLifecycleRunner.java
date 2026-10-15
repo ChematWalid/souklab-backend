@@ -6,6 +6,7 @@ import com.project.souklab.config.AppProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -23,11 +24,12 @@ import org.springframework.context.event.EventListener;
 @Order(100)
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "app.search.sync-on-startup", havingValue = "true", matchIfMissing = true)
-public class IndexLifecycleRunner {
+public class IndexLifecycleRunner implements ApplicationRunner {
 
     private final AppProperties appProperties;
     private final SearchIndexingService searchIndexingService;
 
+    @Override
     public void run(ApplicationArguments args) {
         if (!appProperties.getSearch().isSyncOnStartup()) {
             log.info("Hibernate Search startup mass indexing disabled via configuration.");

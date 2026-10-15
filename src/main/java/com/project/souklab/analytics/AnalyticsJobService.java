@@ -411,7 +411,7 @@ public class AnalyticsJobService {
                 result.put(AnalyticsMetric.Result.Request.BUCKET, job.getBucket());
                 result.put(AnalyticsMetric.Result.Content.SUMMARY, summary);
                 result.put(AnalyticsMetric.Result.Content.TABLES, buildTables(job, summary));
-                List<Map<AnalyticsMetric.Series.Key, Object>> allSeries = buildSeries(job, from, to);
+                List<Map<AnalyticsMetric.Series.Key, Object>> allSeries = buildSeries(job);
                 sortSeries(allSeries, job);
                 if (allSeries.size() > jobProperties.getMaximumResultRows()) {
                     throw new BadRequestException("Analytics result exceeds configured row limit");
@@ -640,7 +640,7 @@ public class AnalyticsJobService {
         }
     }
 
-    private List<Map<AnalyticsMetric.Series.Key, Object>> buildSeries(AnalyticsJob job, LocalDateTime from, LocalDateTime to) {
+    private List<Map<AnalyticsMetric.Series.Key, Object>> buildSeries(AnalyticsJob job) {
         List<Map<AnalyticsMetric.Series.Key, Object>> series = new ArrayList<>();
         Map<AnalyticsFilterKey.Event, String> filters = readFilters(job);
         LocalDate cursor = firstBucketDate(job.getFromDate(), job.getBucket());
