@@ -29,8 +29,16 @@ public class FileStorageUtil {
         if (file == null || file.isEmpty()) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Uploaded file is required");
         }
-        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-        Path target = uploadDir.resolve(fileName);
+        String rawName = file.getOriginalFilename();
+        String safeName = "file.pdf";
+        if (rawName != null && !rawName.isBlank()) {
+            safeName = Path.of(rawName).getFileName().toString().replaceAll("[^a-zA-Z0-9._-]", "_");
+        }
+        String fileName = UUID.randomUUID() + "-" + safeName;
+        Path target = uploadDir.resolve(fileName).normalize();
+        if (!target.startsWith(uploadDir)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid file path");
+        }
         try {
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
             return target.toString();
@@ -40,7 +48,14 @@ public class FileStorageUtil {
     }
 
     public Path resolve(String filePath) {
-        return Path.of(filePath).toAbsolutePath().normalize();
+        if (filePath == null || filePath.isBlank()) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "File path is required");
+        }
+        Path target = Path.of(filePath).toAbsolutePath().normalize();
+        if (!target.startsWith(uploadDir)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid file path");
+        }
+        return target;
     }
 
     public boolean exists(String filePath) {

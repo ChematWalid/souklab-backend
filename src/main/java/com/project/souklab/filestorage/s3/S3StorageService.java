@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.s3;
 
+import com.project.souklab.util.LogSanitizer;
 import com.project.souklab.filestorage.StorageResource;
 import com.project.souklab.filestorage.StorageResult;
 import com.project.souklab.filestorage.StorageService;
@@ -162,10 +163,10 @@ public class S3StorageService implements StorageService {
             if (e.statusCode() == 404) {
                 throw new FileNotFoundStorageException(key);
             }
-            log.error("Failed to retrieve file from S3 [bucket={}, key={}]: {}", bucket, key, e.getMessage());
+            log.error("Failed to retrieve file from S3 [bucket={}, key={}]: {}", bucket, LogSanitizer.sanitize(key), e.getMessage());
             throw new StorageException("Failed to retrieve file from S3: " + e.getMessage(), e);
         } catch (SdkClientException e) {
-            log.error("S3 client error during retrieval [bucket={}, key={}]: {}", bucket, key, e.getMessage());
+            log.error("S3 client error during retrieval [bucket={}, key={}]: {}", bucket, LogSanitizer.sanitize(key), e.getMessage());
             throw new StorageException("Failed to retrieve file from S3: " + e.getMessage(), e);
         }
     }

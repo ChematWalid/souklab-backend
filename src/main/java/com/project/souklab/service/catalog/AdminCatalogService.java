@@ -1,6 +1,7 @@
 package com.project.souklab.service.catalog;
 
 import com.project.souklab.config.CacheConfig;
+import com.project.souklab.util.LogSanitizer;
 import com.project.souklab.dao.EpoqueRepository;
 import com.project.souklab.dao.JobCategoryRepository;
 import com.project.souklab.dao.JobSubCategoryRepository;
@@ -140,8 +141,8 @@ public class AdminCatalogService {
         applyTechniqueFields(technique, request, slug, isPatch);
 
         auditLogService.logAction(AuditLogAction.Catalog.TECHNIQUE_UPDATED,
-                "Updated technique id=" + id + " previous=[" + previous + "] new=[name=" + technique.getName() + " slug=" + technique.getSlug() + "]");
-        log.info("catalog.technique.updated id={}", id);
+                LogSanitizer.sanitize("Updated technique id=" + id + " previous=[" + previous + "] new=[name=" + technique.getName() + " slug=" + technique.getSlug() + "]"));
+        log.info("catalog.technique.updated id={}", LogSanitizer.sanitize(id));
         return TechniqueDTO.from(technique);
     }
 
@@ -167,8 +168,8 @@ public class AdminCatalogService {
 
         techniqueRepository.delete(technique);
         auditLogService.logAction(AuditLogAction.Catalog.TECHNIQUE_DELETED,
-                "Deleted technique id=" + id + " name=" + technique.getName());
-        log.info("catalog.technique.deleted id={}", id);
+                LogSanitizer.sanitize("Deleted technique id=" + id + " name=" + technique.getName()));
+        log.info("catalog.technique.deleted id={}", LogSanitizer.sanitize(id));
     }
 
     // ─── Epoque ───────────────────────────────────────────────────────────────
@@ -230,8 +231,8 @@ public class AdminCatalogService {
         applyEpoqueFields(epoque, request, slug, isPatch);
 
         auditLogService.logAction(AuditLogAction.Catalog.EPOQUE_UPDATED,
-                "Updated epoque id=" + id + " previous=[" + previous + "] new=[name=" + epoque.getName() + " slug=" + epoque.getSlug() + "]");
-        log.info("catalog.epoque.updated id={}", id);
+                LogSanitizer.sanitize("Updated epoque id=" + id + " previous=[" + previous + "] new=[name=" + epoque.getName() + " slug=" + epoque.getSlug() + "]"));
+        log.info("catalog.epoque.updated id={}", LogSanitizer.sanitize(id));
         return EpoqueDTO.from(epoque);
     }
 
@@ -257,8 +258,8 @@ public class AdminCatalogService {
 
         epoqueRepository.delete(epoque);
         auditLogService.logAction(AuditLogAction.Catalog.EPOQUE_DELETED,
-                "Deleted epoque id=" + id + " name=" + epoque.getName());
-        log.info("catalog.epoque.deleted id={}", id);
+                LogSanitizer.sanitize("Deleted epoque id=" + id + " name=" + epoque.getName()));
+        log.info("catalog.epoque.deleted id={}", LogSanitizer.sanitize(id));
     }
 
     // ─── Region ───────────────────────────────────────────────────────────────
@@ -335,8 +336,8 @@ public class AdminCatalogService {
         applyRegionFields(region, request, slug, parent, isPatch);
 
         auditLogService.logAction(AuditLogAction.Catalog.REGION_UPDATED,
-                "Updated region id=" + id + " previous=[" + previous + "] new=[name=" + region.getName() + " slug=" + region.getSlug() + "]");
-        log.info("catalog.region.updated id={}", id);
+                LogSanitizer.sanitize("Updated region id=" + id + " previous=[" + previous + "] new=[name=" + region.getName() + " slug=" + region.getSlug() + "]"));
+        log.info("catalog.region.updated id={}", LogSanitizer.sanitize(id));
         return RegionDTO.from(region);
     }
 
@@ -361,8 +362,8 @@ public class AdminCatalogService {
 
         regionRepository.delete(region);
         auditLogService.logAction(AuditLogAction.Catalog.REGION_DELETED,
-                "Deleted region id=" + id + " name=" + region.getName());
-        log.info("catalog.region.deleted id={}", id);
+                LogSanitizer.sanitize("Deleted region id=" + id + " name=" + region.getName()));
+        log.info("catalog.region.deleted id={}", LogSanitizer.sanitize(id));
     }
 
     // ─── JobCategory ──────────────────────────────────────────────────────────
@@ -422,8 +423,8 @@ public class AdminCatalogService {
         applyCategoryFields(category, request, slug, isPatch);
 
         auditLogService.logAction(AuditLogAction.Catalog.CATEGORY_UPDATED,
-                "Updated category id=" + id + " previous=[" + previous + "] new=[name=" + category.getName() + " slug=" + category.getSlug() + "]");
-        log.info("catalog.category.updated id={}", id);
+                LogSanitizer.sanitize("Updated category id=" + id + " previous=[" + previous + "] new=[name=" + category.getName() + " slug=" + category.getSlug() + "]"));
+        log.info("catalog.category.updated id={}", LogSanitizer.sanitize(id));
 
         List<JobSubCategoryDTO> subs = jobSubCategoryRepository
                 .findByCategoryIdAndIsActiveTrueOrderByDisplayOrderAsc(id)
@@ -452,8 +453,8 @@ public class AdminCatalogService {
 
         jobCategoryRepository.delete(category);
         auditLogService.logAction(AuditLogAction.Catalog.CATEGORY_DELETED,
-                "Deleted category id=" + id + " name=" + category.getName());
-        log.info("catalog.category.deleted id={}", id);
+                LogSanitizer.sanitize("Deleted category id=" + id + " name=" + category.getName()));
+        log.info("catalog.category.deleted id={}", LogSanitizer.sanitize(id));
     }
 
     // ─── JobSubCategory ───────────────────────────────────────────────────────
@@ -526,8 +527,8 @@ public class AdminCatalogService {
         applySubCategoryFields(subCategory, request, slug, parent, isPatch);
 
         auditLogService.logAction(AuditLogAction.Catalog.SUBCATEGORY_UPDATED,
-                "Updated subcategory id=" + id + " previous=[" + previous + "] new=[name=" + subCategory.getName() + " slug=" + subCategory.getSlug() + "]");
-        log.info("catalog.subcategory.updated id={}", id);
+                LogSanitizer.sanitize("Updated subcategory id=" + id + " previous=[" + previous + "] new=[name=" + subCategory.getName() + " slug=" + subCategory.getSlug() + "]"));
+        log.info("catalog.subcategory.updated id={}", LogSanitizer.sanitize(id));
         return JobSubCategoryDTO.from(subCategory);
     }
 
@@ -552,8 +553,8 @@ public class AdminCatalogService {
 
         jobSubCategoryRepository.delete(subCategory);
         auditLogService.logAction(AuditLogAction.Catalog.SUBCATEGORY_DELETED,
-                "Deleted subcategory id=" + id + " name=" + subCategory.getName());
-        log.info("catalog.subcategory.deleted id={}", id);
+                LogSanitizer.sanitize("Deleted subcategory id=" + id + " name=" + subCategory.getName()));
+        log.info("catalog.subcategory.deleted id={}", LogSanitizer.sanitize(id));
     }
 
     // ─── MaterialFamily ───────────────────────────────────────────────────────
@@ -612,8 +613,8 @@ public class AdminCatalogService {
         applyMaterialFamilyFields(family, request, slug, isPatch);
 
         auditLogService.logAction(AuditLogAction.Catalog.MATERIAL_FAMILY_UPDATED,
-                "Updated material family id=" + id + " previous=[" + previous + "] new=[name=" + family.getName() + " slug=" + family.getSlug() + "]");
-        log.info("catalog.material-family.updated id={}", id);
+                LogSanitizer.sanitize("Updated material family id=" + id + " previous=[" + previous + "] new=[name=" + family.getName() + " slug=" + family.getSlug() + "]"));
+        log.info("catalog.material-family.updated id={}", LogSanitizer.sanitize(id));
 
         List<MaterialDTO> mats = materialRepository
                 .findByFamilyIdAndIsActiveTrueOrderByDisplayOrderAsc(id)
@@ -642,8 +643,8 @@ public class AdminCatalogService {
 
         materialFamilyRepository.delete(family);
         auditLogService.logAction(AuditLogAction.Catalog.MATERIAL_FAMILY_DELETED,
-                "Deleted material family id=" + id + " name=" + family.getName());
-        log.info("catalog.material-family.deleted id={}", id);
+                LogSanitizer.sanitize("Deleted material family id=" + id + " name=" + family.getName()));
+        log.info("catalog.material-family.deleted id={}", LogSanitizer.sanitize(id));
     }
 
     // ─── Material ─────────────────────────────────────────────────────────────
@@ -716,8 +717,8 @@ public class AdminCatalogService {
         applyMaterialFields(material, request, slug, family, isPatch);
 
         auditLogService.logAction(AuditLogAction.Catalog.MATERIAL_UPDATED,
-                "Updated material id=" + id + " previous=[" + previous + "] new=[name=" + material.getName() + " slug=" + material.getSlug() + "]");
-        log.info("catalog.material.updated id={}", id);
+                LogSanitizer.sanitize("Updated material id=" + id + " previous=[" + previous + "] new=[name=" + material.getName() + " slug=" + material.getSlug() + "]"));
+        log.info("catalog.material.updated id={}", LogSanitizer.sanitize(id));
         return MaterialDTO.from(material);
     }
 
@@ -742,8 +743,8 @@ public class AdminCatalogService {
 
         materialRepository.delete(material);
         auditLogService.logAction(AuditLogAction.Catalog.MATERIAL_DELETED,
-                "Deleted material id=" + id + " name=" + material.getName());
-        log.info("catalog.material.deleted id={}", id);
+                LogSanitizer.sanitize("Deleted material id=" + id + " name=" + material.getName()));
+        log.info("catalog.material.deleted id={}", LogSanitizer.sanitize(id));
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────────

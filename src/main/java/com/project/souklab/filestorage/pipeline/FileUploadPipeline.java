@@ -1,5 +1,6 @@
 package com.project.souklab.filestorage.pipeline;
 
+import com.project.souklab.util.LogSanitizer;
 import com.project.souklab.exception.BadRequestException;
 import com.project.souklab.filestorage.FileUrlResolver;
 import com.project.souklab.filestorage.StorageResult;
@@ -69,7 +70,7 @@ public class FileUploadPipeline {
                     policy != null ? policy.allowedMimeTypes() : null
             );
         } catch (IOException e) {
-            log.error("Failed to read file upload stream for '{}'", file.getOriginalFilename(), e);
+            log.error("Failed to read file upload stream for '{}'", LogSanitizer.sanitize(file.getOriginalFilename()), e);
             throw new StorageException("Failed to read uploaded stream: " + e.getMessage(), e);
         }
 

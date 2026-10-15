@@ -1,5 +1,6 @@
 package com.project.souklab.service.auth;
 import java.util.Map;
+import com.project.souklab.util.LogSanitizer;
 
 import com.project.souklab.service.profile.ProfileService;
 
@@ -273,7 +274,7 @@ public class AuthService {
         verifyAccountNotLocked(user);
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            handleFailedLogin(user);
+            throw handleFailedLogin(user);
         }
 
         ensureAccountCanAuthenticate(user);
@@ -348,13 +349,19 @@ public class AuthService {
         }
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new UnauthorizedException("User is not authenticated."));
-        boolean passwordConfirmed = request != null && request.password() != null
-                && user.getPassword() != null && passwordEncoder.matches(request.password(), user.getPassword());
-        boolean oauthConfirmed = request != null && Boolean.TRUE.equals(request.oauthConfirmed())
-                && user.getLastOAuthLoginAt() != null
-                && user.getLastOAuthLoginAt().isAfter(LocalDateTime.now(clock).minusMinutes(10));
-        if (!passwordConfirmed && !oauthConfirmed) {
-            throw new UnauthorizedException("Valid password or recent OAuth confirmation is required.");
+        boolean hasPassword = user.getPassword() != null && !user.getPassword().isBlank();
+        if (hasPassword) {
+            if (request == null || request.password() == null
+                    || !passwordEncoder.matches(request.password(), user.getPassword())) {
+                throw new UnauthorizedException("Valid password is required.");
+            }
+        } else {
+            boolean oauthConfirmed = request != null && Boolean.TRUE.equals(request.oauthConfirmed())
+                    && user.getLastOAuthLoginAt() != null
+                    && user.getLastOAuthLoginAt().isAfter(LocalDateTime.now(clock).minusMinutes(10));
+            if (!oauthConfirmed) {
+                throw new UnauthorizedException("Recent OAuth confirmation is required.");
+            }
         }
 
         refreshTokenService.deleteByUser(user);
@@ -413,7 +420,7 @@ public class AuthService {
                     String rawCode = verificationTokenService.issueToken(user, VerificationTokenType.EMAIL_VERIFICATION);
                     emailUtil.sendVerificationCode(user.getEmail(), rawCode);
                 } catch (Exception e) {
-                    log.warn("Failed to issue or send resend verification email for {}: {}", email, e.getMessage());
+                    log.warn("Failed to issue or send resend verification email for {}: {}", LogSanitizer.sanitize(email), e.getMessage());
                 }
             }
         });
@@ -439,13 +446,13 @@ public class AuthService {
                     String rawCode = verificationTokenService.issueToken(user, VerificationTokenType.PASSWORD_RESET);
                     emailUtil.sendPasswordResetCode(user.getEmail(), rawCode);
                 } catch (Exception e) {
-                    log.warn("Failed to issue or send password reset code for {}: {}", email, e.getMessage());
+                    log.warn("Failed to issue or send password reset code for {}: {}", LogSanitizer.sanitize(email), e.getMessage());
                 }
             } else {
                 try {
                     emailUtil.sendOAuthOnlyPasswordResetNotice(user.getEmail());
                 } catch (Exception e) {
-                    log.warn("Failed to send OAuth password reset notice for {}: {}", email, e.getMessage());
+                    log.warn("Failed to send OAuth password reset notice for {}: {}", LogSanitizer.sanitize(email), e.getMessage());
                 }
             }
         });
@@ -719,7 +726,7 @@ public class AuthService {
      * @param user the user entity whose counter should be incremented
      * @throws UnauthorizedException always, to signal the password mismatch to the caller
      */
-    private void handleFailedLogin(User user) {
+    private UnauthorizedException handleFailedLogin(User user) {
         int attempts = user.getFailedLoginAttempts() + 1;
         user.setFailedLoginAttempts(attempts);
         int maxAttempts = appProperties.getAuth().getLockout().getMaxAttempts();
@@ -728,7 +735,7 @@ public class AuthService {
             user.setLockedUntil(LocalDateTime.now(clock).plusMinutes(lockoutMinutes));
         }
         userRepository.save(user);
-        throw new UnauthorizedException(ERROR_INVALID_CREDENTIALS);
+        return new UnauthorizedException(ERROR_INVALID_CREDENTIALS);
     }
 
     /**

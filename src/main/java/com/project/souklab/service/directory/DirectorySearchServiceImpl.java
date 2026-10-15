@@ -129,12 +129,12 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
     private PaginatedResponse<ArtisanDirectoryCardDTO> searchHibernateSearch(
             DirectorySearchFilterDTO filter, boolean contactInfoLocked) {
         SearchSession searchSession = Search.session(entityManager);
-        int page = filter.resolvePage(appProperties.getDirectory().getDefaultPageIndex());
-        int size = filter.resolveSize(
+        int page = Math.max(0, filter.resolvePage(appProperties.getDirectory().getDefaultPageIndex()));
+        int size = Math.max(1, filter.resolveSize(
                 appProperties.getDirectory().getDefaultPageSize(),
                 appProperties.getDirectory().getMinPageSize(),
-                appProperties.getDirectory().getMaxPageSize());
-        int offset = page * size;
+                appProperties.getDirectory().getMaxPageSize()));
+        int offset = (int) Math.min((long) Integer.MAX_VALUE, (long) page * (long) size);
 
         SearchResult<Artisan> result = searchSession.search(Artisan.class)
                 .where(f -> f.bool().with(b -> {
@@ -152,8 +152,8 @@ public class DirectorySearchServiceImpl implements DirectorySearchService {
                 .toList();
 
         long totalElements = result.total().hitCount();
-        int totalPages = (int) Math.ceil((double) totalElements / size);
-        boolean isLast = (long) (page + 1) * size >= totalElements;
+        int totalPages = size == 0 ? 0 : (int) Math.ceil((double) totalElements / size);
+        boolean isLast = totalElements == 0 || page >= totalPages - 1;
 
         return PaginatedResponse.<ArtisanDirectoryCardDTO>builder()
                 .content(content)
