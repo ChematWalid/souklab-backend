@@ -135,12 +135,12 @@ public class FeedDiscoveryService {
         SearchSession session = Search.session(entityManager);
         int offset = pageable.getPageNumber() * pageable.getPageSize();
         SearchResult<FeedPost> result = session.search(FeedPost.class)
-                .where(f -> f.bool(b -> b
+                .where(f -> f.bool()
                         .should(f.match().field("title").matching(query))
                         .should(f.match().field("body").matching(query))
                         .should(f.match().field("tags.name").matching(query))
                         .filter(f.match().field("status").matching(FeedPostStatus.PUBLISHED.value()))
-                        .filter(f.not(f.exists().field("deletedAt")))))
+                        .filter(f.not(f.exists().field("deletedAt"))))
                 .sort(f -> pageable.getSort().getOrderFor("likeCount") != null
                         ? f.field("likeCount").desc()
                         : f.field("publishedAt").desc())

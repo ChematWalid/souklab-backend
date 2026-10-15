@@ -54,10 +54,7 @@ public class ClientFavoriteArtisan extends ClientFavorite {
     private Artisan artisan;
 
     /**
-     * Explicit builder constructor allowing client and artisan initialization.
-     *
-     * @param client the owning client
-     * @param artisan the favorited artisan
+     * Explicit constructor allowing client and artisan initialization.
      */
     @Builder
     public ClientFavoriteArtisan(Client client, Artisan artisan) {

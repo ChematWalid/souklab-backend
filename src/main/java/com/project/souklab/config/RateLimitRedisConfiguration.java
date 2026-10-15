@@ -76,7 +76,7 @@ public class RateLimitRedisConfiguration {
         public Bucket resolve(String key, long capacity,
                                                   Duration refillDuration) {
             return manager.builder().build(keyPrefix + ":" + key,
-                    RateLimitBucketStore.configuration(capacity, refillDuration));
+                    () -> RateLimitBucketStore.configuration(capacity, refillDuration));
         }
 
         @Override
