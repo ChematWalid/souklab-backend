@@ -350,9 +350,9 @@ public class AuthService {
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new UnauthorizedException("User is not authenticated."));
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
-            validatePasswordReauthentication(user, request);
+            verifyPasswordCredentials(user, request);
         } else {
-            validateOAuthReauthentication(user, request);
+            verifyOAuthSession(user, request);
         }
 
         refreshTokenService.deleteByUser(user);
@@ -709,7 +709,7 @@ public class AuthService {
         }
     }
 
-    private void validatePasswordReauthentication(User user, DeleteAccountRequest request) {
+    private void verifyPasswordCredentials(User user, DeleteAccountRequest request) {
         if (request == null || request.password() == null || request.password().isBlank()) {
             throw new UnauthorizedException("Valid password is required.");
         }
@@ -718,12 +718,12 @@ public class AuthService {
         }
     }
 
-    private void validateOAuthReauthentication(User user, DeleteAccountRequest request) {
-        if (request == null || !Boolean.TRUE.equals(request.oauthConfirmed())) {
-            throw new UnauthorizedException("Recent OAuth confirmation is required.");
-        }
+    private void verifyOAuthSession(User user, DeleteAccountRequest request) {
         LocalDateTime lastOAuth = user.getLastOAuthLoginAt();
         if (lastOAuth == null || !lastOAuth.isAfter(LocalDateTime.now(clock).minusMinutes(10))) {
+            throw new UnauthorizedException("Recent OAuth confirmation is required.");
+        }
+        if (request == null || !Boolean.TRUE.equals(request.getOauthConfirmed())) {
             throw new UnauthorizedException("Recent OAuth confirmation is required.");
         }
     }
