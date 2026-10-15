@@ -271,13 +271,13 @@ public class AuthService {
             throw new UnauthorizedException(ERROR_INVALID_CREDENTIALS);
         }
 
-        verifyAccountNotLocked(user);
+        assertAccountNotLocked(user);
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw handleFailedLogin(user);
+            throw recordFailedAttempt(user);
         }
 
-        ensureAccountCanAuthenticate(user);
+        validateAccountStatus(user);
 
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
@@ -349,20 +349,7 @@ public class AuthService {
         }
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new UnauthorizedException("User is not authenticated."));
-        boolean hasPassword = user.getPassword() != null && !user.getPassword().isBlank();
-        if (hasPassword) {
-            if (request == null || request.password() == null
-                    || !passwordEncoder.matches(request.password(), user.getPassword())) {
-                throw new UnauthorizedException("Valid password is required.");
-            }
-        } else {
-            boolean oauthConfirmed = request != null && Boolean.TRUE.equals(request.oauthConfirmed())
-                    && user.getLastOAuthLoginAt() != null
-                    && user.getLastOAuthLoginAt().isAfter(LocalDateTime.now(clock).minusMinutes(10));
-            if (!oauthConfirmed) {
-                throw new UnauthorizedException("Recent OAuth confirmation is required.");
-            }
-        }
+        validateDeletionCredentials(user, request);
 
         refreshTokenService.deleteByUser(user);
         oauthIdentityRepository.findByUser(user).forEach(identity -> {
@@ -595,7 +582,7 @@ public class AuthService {
             }
         }
 
-        ensureAccountCanAuthenticate(user);
+        validateAccountStatus(user);
 
         user.setLastLoginAt(LocalDateTime.now(clock));
         user.setLastOAuthLoginAt(LocalDateTime.now(clock));
@@ -712,21 +699,41 @@ public class AuthService {
      * @param user the user entity to check
      * @throws ForbiddenException if the account is locked and the lockout period has not elapsed
      */
-    private void verifyAccountNotLocked(User user) {
+    private void assertAccountNotLocked(User user) {
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now(clock))) {
             throw new ForbiddenException("ACCOUNT_LOCKED", "Too many failed login attempts. Account is temporarily locked. Please try again later.");
         }
     }
 
+    private void validateDeletionCredentials(User user, DeleteAccountRequest request) {
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            if (request == null || request.password() == null || request.password().isBlank()) {
+                throw new UnauthorizedException("Valid password is required.");
+            }
+            if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+                throw new UnauthorizedException("Valid password is required.");
+            }
+            return;
+        }
+
+        if (request == null || !Boolean.TRUE.equals(request.oauthConfirmed())) {
+            throw new UnauthorizedException("Recent OAuth confirmation is required.");
+        }
+        LocalDateTime lastOAuth = user.getLastOAuthLoginAt();
+        if (lastOAuth == null || !lastOAuth.isAfter(LocalDateTime.now(clock).minusMinutes(10))) {
+            throw new UnauthorizedException("Recent OAuth confirmation is required.");
+        }
+    }
+
     /**
-     * Increments the user's failed login attempt counter, applies an account lockout
-     * when the threshold reaches the configured maximum attempts, persists the updated state, and throws
+     * Increments the user's failed attempt counter, applies an account lockout
+     * when the threshold reaches the configured maximum attempts, persists the updated state, and returns
      * {@link UnauthorizedException} to terminate the login flow.
      *
      * @param user the user entity whose counter should be incremented
-     * @throws UnauthorizedException always, to signal the password mismatch to the caller
+     * @return UnauthorizedException to signal the password mismatch to the caller
      */
-    private UnauthorizedException handleFailedLogin(User user) {
+    private UnauthorizedException recordFailedAttempt(User user) {
         int attempts = user.getFailedLoginAttempts() + 1;
         user.setFailedLoginAttempts(attempts);
         int maxAttempts = appProperties.getAuth().getLockout().getMaxAttempts();
@@ -746,7 +753,7 @@ public class AuthService {
      * @param user the user entity to evaluate
      * @throws ForbiddenException if the account is actively suspended or was rejected
      */
-    private void ensureAccountCanAuthenticate(User user) {
+    private void validateAccountStatus(User user) {
         if (user.getDeletedAt() != null || user.getStatus() == AccountStatus.DELETED) {
             throw new UnauthorizedException("ACCOUNT_DELETED", "Account has been deactivated.");
         }

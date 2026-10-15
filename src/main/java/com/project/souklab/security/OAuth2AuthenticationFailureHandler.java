@@ -14,7 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.project.souklab.util.LogSanitizer;
 import java.io.IOException;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 /**
  * Handles OAuth2 authentication failures (such as user cancelling consent or account refusal)
@@ -26,7 +26,22 @@ import java.util.regex.Pattern;
 @Slf4j
 public class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private static final Pattern SAFE_ERROR_CODE_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{1,64}$");
+    private static final String DEFAULT_ERROR_CODE = "access_denied";
+
+    private static final Map<String, String> KNOWN_ERROR_CODES = Map.ofEntries(
+            Map.entry("access_denied", "access_denied"),
+            Map.entry("invalid_request", "invalid_request"),
+            Map.entry("unauthorized_client", "unauthorized_client"),
+            Map.entry("unsupported_response_type", "unsupported_response_type"),
+            Map.entry("invalid_scope", "invalid_scope"),
+            Map.entry("server_error", "server_error"),
+            Map.entry("temporarily_unavailable", "temporarily_unavailable"),
+            Map.entry("login_required", "login_required"),
+            Map.entry("consent_required", "consent_required"),
+            Map.entry("interaction_required", "interaction_required"),
+            Map.entry("account_selection_required", "account_selection_required"),
+            Map.entry("oauth2_error", "oauth2_error")
+    );
 
     private final AppProperties appProperties;
 
@@ -38,6 +53,11 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
                 LogSanitizer.sanitize(exception != null ? exception.getMessage() : null));
 
         String callback = appProperties.getOauth().getGoogle().getAuthorizedRedirectUri();
+        if (callback == null || callback.isBlank()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid redirect configuration");
+            return;
+        }
+
         String targetUrl = UriComponentsBuilder.fromUriString(callback)
                 .queryParam("error", errorCode)
                 .build()
@@ -48,16 +68,21 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
 
     private String resolveErrorCode(HttpServletRequest request, AuthenticationException exception) {
         String requestError = request.getParameter("error");
-        if (requestError != null && SAFE_ERROR_CODE_PATTERN.matcher(requestError.trim()).matches()) {
-            return requestError.trim();
+        if (requestError != null) {
+            String resolved = KNOWN_ERROR_CODES.get(requestError.trim().toLowerCase());
+            if (resolved != null) {
+                return resolved;
+            }
         }
         if (exception instanceof OAuth2AuthenticationException oauthException) {
             OAuth2Error error = oauthException.getError();
-            if (error != null && error.getErrorCode() != null
-                    && SAFE_ERROR_CODE_PATTERN.matcher(error.getErrorCode().trim()).matches()) {
-                return error.getErrorCode().trim();
+            if (error != null && error.getErrorCode() != null) {
+                String resolved = KNOWN_ERROR_CODES.get(error.getErrorCode().trim().toLowerCase());
+                if (resolved != null) {
+                    return resolved;
+                }
             }
         }
-        return "ACCESS_DENIED";
+        return DEFAULT_ERROR_CODE;
     }
 }

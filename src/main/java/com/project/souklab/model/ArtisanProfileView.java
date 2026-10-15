@@ -46,4 +46,9 @@ public class ArtisanProfileView {
     @CreationTimestamp
     @Column(name = "viewed_at", nullable = false, updatable = false)
     private LocalDateTime viewedAt;
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[id=" + id + "]";
+    }
 }
